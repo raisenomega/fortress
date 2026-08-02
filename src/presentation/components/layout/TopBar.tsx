@@ -1,7 +1,11 @@
 import { useActiveProject } from '../../stores/project-store'
 import { ModeSelector } from '../settings/ModeSelector'
 
-export function TopBar(): React.JSX.Element {
+interface TopBarProps {
+  readonly onOpenSettings: () => void
+}
+
+export function TopBar({ onOpenSettings }: TopBarProps): React.JSX.Element {
   const project = useActiveProject()
 
   return (
@@ -19,6 +23,15 @@ export function TopBar(): React.JSX.Element {
       </div>
 
       <ModeSelector />
+
+      <button
+        type="button"
+        onClick={onOpenSettings}
+        title="API key de Claude"
+        className="tap shrink-0 rounded-md border border-border px-2 py-1 text-sm hover:border-primary/40"
+      >
+        ⚙
+      </button>
     </header>
   )
 }

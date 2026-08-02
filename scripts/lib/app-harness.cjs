@@ -15,6 +15,9 @@ let dataDir = null
 function useTemporaryUserData() {
   dataDir = mkdtempSync(join(tmpdir(), 'fortress-check-'))
   app.setPath('userData', dataDir)
+  // Sin esto, una ANTHROPIC_API_KEY del entorno haria que los tests intentaran
+  // una llamada real a la API y el resultado dependeria de la maquina.
+  delete process.env.ANTHROPIC_API_KEY
 }
 
 /** Ejecuta el composition root real: registra los handlers IPC y abre la base. */

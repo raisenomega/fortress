@@ -1,6 +1,8 @@
+import type { SendMessageInput } from '@application/chat/send-message'
 import type { NewChatMessage } from '@domain/chat/chat-message'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
+import { draftAssistantMessage, draftUserMessage } from './streaming-message'
 
 /** Carga el historial persistido de un proyecto en el store. */
 export async function loadHistory(projectId: string): Promise<void> {
@@ -8,16 +10,44 @@ export async function loadHistory(projectId: string): Promise<void> {
   useChatStore.getState().setMessages(projectId, messages)
 }
 
-/**
- * Persiste un mensaje y lo agrega al store solo si SQLite lo acepto: asi la
- * UI nunca muestra algo que no quedo guardado.
- */
+/** Persiste un mensaje suelto y lo agrega solo si SQLite lo acepto. */
 export async function persistMessage(message: NewChatMessage): Promise<string | null> {
   const result = await api().chat.append(message)
   if (!result.ok) return result.error
 
   useChatStore.getState().appendMessage(result.value)
   return null
+}
+
+/**
+ * Envia la peticion a Claude pintando la respuesta segun llega. Al terminar
+ * recarga el historial: la UI acaba mostrando exactamente lo persistido, tanto
+ * si la respuesta se completo como si fallo a medias.
+ */
+export async function sendMessage(input: SendMessageInput): Promise<void> {
+  const store = useChatStore.getState()
+  const draft = draftAssistantMessage(input.projectId, input.mode)
+
+  store.setError(null)
+  store.setStreaming(true)
+  store.appendMessage(draftUserMessage(input.projectId, input.prompt, input.mode))
+  store.appendMessage(draft)
+
+  let buffer = ''
+  const unsubscribe = api().chat.onChunk((chunk) => {
+    if (chunk.projectId !== input.projectId) return
+    buffer += chunk.delta
+    useChatStore.getState().replaceMessage(draft.id, { ...draft, content: buffer })
+  })
+
+  try {
+    const result = await api().chat.send(input)
+    if (!result.ok) useChatStore.getState().setError(result.error)
+  } finally {
+    unsubscribe()
+    useChatStore.getState().setStreaming(false)
+    await loadHistory(input.projectId)
+  }
 }
 
 export async function clearHistory(projectId: string): Promise<void> {

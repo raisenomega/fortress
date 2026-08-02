@@ -15,12 +15,12 @@
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
     "smoke": "npm run build && electron --no-sandbox scripts/render-smoke.cjs",
-    "test:persistence": "npm run build && electron --no-sandbox scripts/persistence-test.cjs",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "test": "npm run build && electron --no-sandbox scripts/integration-test.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

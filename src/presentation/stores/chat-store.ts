@@ -5,10 +5,13 @@ interface ChatState {
   /** Historial por proyecto: cada proyecto tiene su propia conversacion. */
   readonly byProject: Readonly<Record<string, readonly ChatMessage[]>>
   readonly streaming: boolean
+  /** Ultimo fallo al hablar con Claude, para mostrarlo sin bloquear la UI. */
+  readonly error: string | null
   setMessages: (projectId: string, messages: readonly ChatMessage[]) => void
   appendMessage: (message: ChatMessage) => void
   replaceMessage: (id: string, message: ChatMessage) => void
   setStreaming: (streaming: boolean) => void
+  setError: (error: string | null) => void
 }
 
 function upsert(
@@ -24,6 +27,7 @@ function upsert(
 export const useChatStore = create<ChatState>((set) => ({
   byProject: {},
   streaming: false,
+  error: null,
 
   setMessages: (projectId, messages) =>
     set((state) => ({ byProject: { ...state.byProject, [projectId]: messages } })),
@@ -44,7 +48,8 @@ export const useChatStore = create<ChatState>((set) => ({
       }
     })),
 
-  setStreaming: (streaming) => set({ streaming })
+  setStreaming: (streaming) => set({ streaming }),
+  setError: (error) => set({ error })
 }))
 
 /**

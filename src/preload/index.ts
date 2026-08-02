@@ -1,12 +1,13 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import type { ChatChunk } from '@domain/chat/chat-stream'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
 
 /**
  * Superficie minima expuesta al renderer: solo estas operaciones, nada de
  * `ipcRenderer` en crudo ni acceso a Node. La API key de Claude jamas cruza
- * este puente — vive y se usa en el proceso principal.
+ * este puente — se cifra, se guarda y se usa en el proceso principal.
  */
 const api: FortressApi = {
   projects: {
@@ -17,11 +18,22 @@ const api: FortressApi = {
   chat: {
     history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),
     append: (message) => ipcRenderer.invoke(IPC.chatAppend, message),
-    clear: (projectId) => ipcRenderer.invoke(IPC.chatClear, projectId)
+    clear: (projectId) => ipcRenderer.invoke(IPC.chatClear, projectId),
+    send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
+    onChunk: (listener) => {
+      const handler = (_event: IpcRendererEvent, chunk: ChatChunk): void => listener(chunk)
+      ipcRenderer.on(IPC.chatChunk, handler)
+      return () => {
+        ipcRenderer.off(IPC.chatChunk, handler)
+      }
+    }
   },
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),
-    set: (key, value) => ipcRenderer.invoke(IPC.settingsSet, key, value)
+    set: (key, value) => ipcRenderer.invoke(IPC.settingsSet, key, value),
+    saveApiKey: (plainKey) => ipcRenderer.invoke(IPC.settingsSaveApiKey, plainKey),
+    hasApiKey: () => ipcRenderer.invoke(IPC.settingsHasApiKey),
+    clearApiKey: () => ipcRenderer.invoke(IPC.settingsClearApiKey)
   }
 }
 

@@ -1,6 +1,7 @@
 import { useChatStore, useProjectMessages } from '../../stores/chat-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
+import { ChatErrorBanner } from './ChatErrorBanner'
 import { ChatInput } from './ChatInput'
 import { ChatMessageList } from './ChatMessageList'
 
@@ -12,6 +13,8 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
   const project = useActiveProject()
   const messages = useProjectMessages(project?.id ?? null)
   const streaming = useChatStore((state) => state.streaming)
+  const error = useChatStore((state) => state.error)
+  const setError = useChatStore((state) => state.setError)
 
   if (!project) {
     return (
@@ -25,6 +28,8 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
+      {error ? <ChatErrorBanner message={error} onDismiss={() => setError(null)} /> : null}
+
       {messages.length === 0 ? (
         <div className="flex-1">
           <EmptyState
