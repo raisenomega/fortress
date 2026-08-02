@@ -6,9 +6,10 @@ import type { ScanChunk } from '@domain/scan/scan-chunk'
 import { err, type Result } from '@domain/shared/result'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { usesApiKey } from '@application/settings/read-auth-source'
-import { readBudget, spentToday } from '@application/settings/read-budget'
-import { dayLimitReached } from '@domain/settings/run-budget'
+import { readBudget } from '@application/settings/read-budget'
 import { getAppContext } from '../persistence/app-context'
+import { guardRun } from '../run-guard'
+import { endRun } from '../run-control'
 import { createClaudeScanner } from '../scan/claude-scanner'
 import { IPC } from './channels'
 
@@ -26,11 +27,10 @@ async function handleRun(
   projectId: string
 ): Promise<Result<ScanSummary>> {
   const context = getAppContext()
+  const denegado = guardRun(context, projectId)
+  if (denegado !== null) return err(denegado)
+
   const budget = readBudget(context)
-
-  const limite = dayLimitReached(budget, spentToday(context, new Date()))
-  if (limite !== null) return err(limite)
-
   const scanner = createClaudeScanner(
     createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
   )
@@ -39,6 +39,8 @@ async function handleRun(
     return await runScan(context, scanner, projectId, progressSender(event, projectId))
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
+  } finally {
+    endRun(projectId)
   }
 }
 

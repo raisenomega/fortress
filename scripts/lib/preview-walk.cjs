@@ -3,6 +3,7 @@ const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('../checks/
 const { walkPerformance } = require('./preview-performance.cjs')
 const { walkCognition } = require('./preview-cognition.cjs')
 const { walkDialog } = require('./preview-dialog.cjs')
+const { walkPlan } = require('./preview-plan.cjs')
 const { walkHandoff } = require('./preview-handoff.cjs')
 const { walkShell } = require('./preview-shell.cjs')
 const { walkTimeline } = require('./preview-timeline.cjs')
@@ -16,19 +17,7 @@ async function walkScreens(helpers) {
   await expect('panel', 'Security Reviewer', 'Nucleo', '99', 'Push bloqueado')
   await expect('barra de estado', 'tokens', '$0.20')
 
-  // El plan del workflow tiene que salir ANTES de ejecutar, en supervisado.
-  await run(clickByText('Revisa la seguridad'))
-  await pause(600)
-  await shoot('-plan')
-  await expect(
-    'plan de workflow',
-    'Revision de seguridad',
-    'Security Reviewer',
-    'agentes',
-    'Ejecutar'
-  )
-  await run(clickByText('Cancelar'))
-  await pause(300)
+  await walkPlan(helpers)
 
   // Los switches de agentes: el circulo debe caer dentro de la pista.
   missing.push(...(await run(TOGGLES_INSIDE_TRACK)))
@@ -64,7 +53,13 @@ async function walkScreens(helpers) {
   await run(clickSelector('[data-nav="Configuracion"]'))
   await pause(400)
   await shoot('-settings')
-  await expect('configuracion', 'Cuenta de Claude', 'Mi cuenta de Claude', 'API key de Claude', 'Topes de gasto')
+  await expect(
+    'configuracion',
+    'Cuenta de Claude',
+    'Mi cuenta de Claude',
+    'API key de Claude',
+    'Topes de gasto'
+  )
 
   await run(clickSelector('footer button[title="Ver el diagnostico del sistema"]'))
   await pause(400)

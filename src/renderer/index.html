@@ -5,10 +5,13 @@
     <title>FORTRESS. by Raisen</title>
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
          Las llamadas a la API de Claude salen del proceso main (Node), nunca
-         del renderer: por eso no hace falta abrir connect-src a api.anthropic.com -->
+         del renderer: por eso no hace falta abrir connect-src a api.anthropic.com.
+         base-uri y form-action NO heredan de default-src y hay que declararlas
+         aparte: sin ellas, un HTML inyectado podria reescribir de donde cuelgan
+         las rutas relativas o enviar un formulario fuera de la app. -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"
     />
   </head>
 

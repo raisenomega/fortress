@@ -7,10 +7,10 @@ import { resolveAssistant } from '../ai/assistant-factory'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { describeAssistantError } from '../ai/describe-error'
 import { usesApiKey } from '@application/settings/read-auth-source'
-import { readBudget, spentToday } from '@application/settings/read-budget'
-import { dayLimitReached } from '@domain/settings/run-budget'
+import { readBudget } from '@application/settings/read-budget'
 import { getAppContext } from '../persistence/app-context'
-import { beginRun, cancelRun, endRun, isCancelled } from '../run-control'
+import { cancelRun, endRun, isCancelled } from '../run-control'
+import { guardRun } from '../run-guard'
 import { IPC } from './channels'
 
 /** Emite fragmentos solo si la ventana sigue viva (el usuario pudo cerrarla). */
@@ -27,17 +27,15 @@ export function registerChatSendHandler(): void {
 
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()
+
+    // Tope diario y concurrencia, comprobados ANTES de gastar.
+    const denegado = guardRun(context, input.projectId)
+    if (denegado !== null) return err(denegado)
+
     const budget = readBudget(context)
-
-    // El tope diario se comprueba ANTES de gastar: avisar despues no sirve.
-    const limite = dayLimitReached(budget, spentToday(context, new Date()))
-    if (limite !== null) return err(limite)
-
     const codeAgent = createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
     // Con el CLI instalado no hace falta API key: claude usa sus credenciales.
     const assistant = resolveAssistant(context.apiKeys)
-
-    beginRun(input.projectId)
 
     try {
       return await sendMessage(

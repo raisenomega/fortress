@@ -1,15 +1,26 @@
 import { BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
+import { isSafeExternalUrl } from '@domain/shared/safe-url'
 import icon from '../../../resources/icon.png?asset'
 
 const RENDERER_URL_ENV = 'ELECTRON_RENDERER_URL'
 
-/** Abre enlaces externos en el navegador del sistema, nunca dentro de la app. */
+/**
+ * Abre enlaces externos en el navegador del sistema, nunca dentro de la app, y
+ * solo si son web: openExternal acepta cualquier esquema, incluido file://.
+ */
 function denyInAppNavigation(window: BrowserWindow): void {
   window.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url)
+    if (isSafeExternalUrl(url)) void shell.openExternal(url)
     return { action: 'deny' }
+  })
+
+  // Segunda valla: nada puede sacar a la ventana de su propia interfaz.
+  window.webContents.on('will-navigate', (event, url) => {
+    if (url === window.webContents.getURL()) return
+    event.preventDefault()
+    if (isSafeExternalUrl(url)) void shell.openExternal(url)
   })
 }
 
