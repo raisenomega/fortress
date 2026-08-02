@@ -1,5 +1,6 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { ChatMessage, ChatRole } from '@domain/chat/chat-message'
+import type { ChatEngine } from '@domain/chat/code-agent'
 import type { OperationMode } from '@domain/settings/operation-mode'
 
 export interface ChatRow {
@@ -9,6 +10,7 @@ export interface ChatRow {
   readonly content: string
   readonly agent_id: string | null
   readonly mode: string
+  readonly engine: string
   readonly created_at: string
 }
 
@@ -21,6 +23,7 @@ export function toChatMessage(row: ChatRow): ChatMessage {
     content: row.content,
     agentId: row.agent_id as AgentId | null,
     mode: row.mode as OperationMode,
+    engine: row.engine as ChatEngine,
     createdAt: row.created_at,
     pending: false
   }

@@ -27,6 +27,7 @@ export const ICON_NAMES = [
   'file-text',
   'settings',
   'message-square',
+  'terminal',
   'castle'
 ] as const
 

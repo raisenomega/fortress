@@ -1,4 +1,4 @@
-import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message'
+import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk } from '@domain/chat/chat-stream'
 import type { HealthReport } from '@domain/health/health-check'

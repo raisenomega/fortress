@@ -17,12 +17,12 @@ module.exports = `(async () => {
   const target = created[0]
   if (target) {
     await window.api.chat.append({
-      projectId: target.id, role: 'user', agentId: null, mode: 'supervisado',
+      projectId: target.id, role: 'user', agentId: null, mode: 'supervisado', engine: 'api',
       content: 'revisa la seguridad de este proyecto'
     })
     await window.api.chat.append({
       projectId: target.id, role: 'assistant', agentId: 'security-reviewer',
-      mode: 'supervisado',
+      mode: 'supervisado', engine: 'claude-code',
       content: 'Encontre 2 CRITICAL:\\n1. SQL injection en api/routes.py:42\\n' +
                '2. Secret hardcodeado en config.py:18'
     })

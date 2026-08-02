@@ -19,12 +19,17 @@ module.exports = `(async () => {
 
   check('arranca sin API key', (await window.api.settings.hasApiKey()) === false)
 
-  const noKey = await window.api.chat.send({
+  // La ruta del proyecto no existe: el envio debe rechazarse antes de lanzar
+  // nada y con un motivo claro, no con un críptico "spawn claude ENOENT".
+  const sinCarpeta = await window.api.chat.send({
     projectId, prompt: 'revisa la seguridad',
     mode: 'supervisado', enabledAgents: ['security-reviewer']
   })
-  check('chat.send sin key falla limpio, no crashea',
-        !noKey.ok && noKey.error.includes('API key'), JSON.stringify(noKey))
+  check('rechaza ejecutar si la carpeta del proyecto no existe',
+        !sinCarpeta.ok && /carpeta|API key|Claude Code/i.test(sinCarpeta.error),
+        JSON.stringify(sinCarpeta))
+  check('no menciona ENOENT: el motivo tiene que ser legible',
+        !sinCarpeta.ok && !sinCarpeta.error.includes('ENOENT'), sinCarpeta.error || '')
   check('un envio fallido no ensucia el historial',
         (await window.api.chat.history(projectId)).length === 0)
 

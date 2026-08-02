@@ -9,6 +9,19 @@ const MODE_ICON: Record<ChatMessage['mode'], IconName> = {
   autonomo: 'zap'
 }
 
+const ENGINE: Record<ChatMessage['engine'], { icon: IconName; label: string; hint: string }> = {
+  'claude-code': {
+    icon: 'terminal',
+    label: 'Claude Code',
+    hint: 'Ejecutado dentro del proyecto, con acceso a archivos, bash y git'
+  },
+  api: {
+    icon: 'message-square',
+    label: 'solo texto',
+    hint: 'Respondio la API sin acceso al proyecto: no leyo ni modifico archivos'
+  }
+}
+
 interface MessageChipsProps {
   readonly message: ChatMessage
 }
@@ -40,6 +53,15 @@ export function MessageChips({ message }: MessageChipsProps): React.JSX.Element 
         label={message.mode}
         title={`Generado en modo ${message.mode}`}
       />
+
+      {message.role === 'assistant' ? (
+        <Chip
+          tone="mode"
+          iconName={ENGINE[message.engine].icon}
+          label={ENGINE[message.engine].label}
+          title={ENGINE[message.engine].hint}
+        />
+      ) : null}
     </div>
   )
 }

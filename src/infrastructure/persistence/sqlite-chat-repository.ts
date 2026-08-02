@@ -4,7 +4,7 @@ import { newId, nowIso } from '@domain/shared/id'
 import { toChatMessage, type ChatRow } from './chat-row'
 import type { Db } from './database'
 
-const COLUMNS = 'id, project_id, role, content, agent_id, mode, created_at'
+const COLUMNS = 'id, project_id, role, content, agent_id, mode, engine, created_at'
 
 export function createSqliteChatRepository(db: Db): ChatRepository {
   const selectByProject = db.prepare(
@@ -13,8 +13,8 @@ export function createSqliteChatRepository(db: Db): ChatRepository {
   const selectById = db.prepare(`SELECT ${COLUMNS} FROM chat_messages WHERE id = ?`)
   const deleteByProject = db.prepare('DELETE FROM chat_messages WHERE project_id = ?')
   const insert = db.prepare(
-    `INSERT INTO chat_messages (id, project_id, role, content, agent_id, mode, created_at)
-     VALUES (@id, @projectId, @role, @content, @agentId, @mode, @createdAt)`
+    `INSERT INTO chat_messages (id, project_id, role, content, agent_id, mode, engine, created_at)
+     VALUES (@id, @projectId, @role, @content, @agentId, @mode, @engine, @createdAt)`
   )
 
   return {
@@ -29,6 +29,7 @@ export function createSqliteChatRepository(db: Db): ChatRepository {
         content: message.content,
         agentId: message.agentId,
         mode: message.mode,
+        engine: message.engine,
         createdAt: nowIso()
       })
       return toChatMessage(selectById.get(id) as ChatRow)

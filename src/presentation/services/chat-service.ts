@@ -1,4 +1,4 @@
-import type { SendMessageInput } from '@application/chat/send-message'
+import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { NewChatMessage } from '@domain/chat/chat-message'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'

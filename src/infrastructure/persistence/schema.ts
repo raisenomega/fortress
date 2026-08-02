@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   content    TEXT NOT NULL,
   agent_id   TEXT,
   mode       TEXT NOT NULL,
+  engine     TEXT NOT NULL DEFAULT 'api',
   created_at TEXT NOT NULL
 );
 

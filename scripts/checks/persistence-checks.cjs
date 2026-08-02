@@ -24,7 +24,7 @@ module.exports = `(async () => {
   check('persiste el proyecto', (await window.api.projects.list()).length === 1)
 
   const message = { projectId, role: 'user', content: 'hola',
-                    agentId: null, mode: 'supervisado' }
+                    agentId: null, mode: 'supervisado', engine: 'api' }
   const saved = await window.api.chat.append(message)
   check('guarda un mensaje', saved.ok, JSON.stringify(saved))
 

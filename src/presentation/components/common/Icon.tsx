@@ -19,6 +19,7 @@ import {
   Shield,
   ShieldOff,
   Sparkles,
+  Terminal,
   TestTube,
   Wrench,
   XCircle,
@@ -51,6 +52,7 @@ const REGISTRY: Record<IconName, LucideIcon> = {
   'file-text': FileText,
   settings: Settings,
   'message-square': MessageSquare,
+  terminal: Terminal,
   castle: Castle
 }
 

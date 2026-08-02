@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
 import { app } from 'electron'
 import { join } from 'path'
+import { runMigrations } from './migrations'
 import { SCHEMA } from './schema'
 
 export type Db = Database.Database
@@ -26,6 +27,7 @@ export function getDatabase(): Db {
   const db = new Database(databasePath())
   configure(db)
   db.exec(SCHEMA)
+  runMigrations(db)
   instance = db
   return db
 }

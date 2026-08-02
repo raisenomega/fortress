@@ -1,35 +1,18 @@
-import type { AgentId } from '@domain/agent/agent'
 import { routeToAgent } from '@domain/agent/agent-router'
-import type { Assistant, AssistantTurn } from '@domain/chat/assistant'
-import type { ChatMessage } from '@domain/chat/chat-message'
-import { effectiveMode, type OperationMode } from '@domain/settings/operation-mode'
+import type { Assistant } from '@domain/chat/assistant'
+import type { CodeAgent } from '@domain/chat/code-agent'
+import { effectiveMode } from '@domain/settings/operation-mode'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { appendMessage } from './chat-history'
-import { buildSystemPrompt } from './system-prompt'
-
-export interface SendMessageInput {
-  readonly projectId: string
-  readonly prompt: string
-  readonly mode: OperationMode
-  readonly enabledAgents: readonly AgentId[]
-}
-
-export interface SendMessageOutput {
-  readonly user: ChatMessage
-  readonly assistant: ChatMessage
-}
-
-/** El asistente solo ve texto: los roles `system` guardados no se reenvian. */
-function toTurns(history: readonly ChatMessage[]): AssistantTurn[] {
-  return history
-    .filter((message) => message.role !== 'system')
-    .map((message) => ({ role: message.role as AssistantTurn['role'], content: message.content }))
-}
+import { chooseEngine } from './choose-engine'
+import { produceReply } from './produce-reply'
+import type { SendMessageInput, SendMessageOutput } from './send-message-types'
 
 export async function sendMessage(
   context: AppContext,
-  assistant: Assistant,
+  assistant: Assistant | null,
+  codeAgent: CodeAgent,
   input: SendMessageInput,
   onChunk: (delta: string) => void
 ): Promise<Result<SendMessageOutput>> {
@@ -38,37 +21,26 @@ export async function sendMessage(
 
   // El modo degrada a supervisado si la peticion toca un area protegida.
   const mode = effectiveMode(input.mode, input.prompt)
-  const agentId = routeToAgent(input.prompt, input.enabledAgents)
 
-  const saved = appendMessage(context, {
-    projectId: input.projectId,
-    role: 'user',
-    content: input.prompt,
-    agentId: null,
-    mode
-  })
-  if (!saved.ok) return err(saved.error)
+  const chosen = chooseEngine(codeAgent, assistant, project)
+  if (!chosen.ok) return err(chosen.error)
+  const engine = chosen.value
 
-  const reply = await assistant.stream(
-    {
-      system: buildSystemPrompt(project, input.enabledAgents, mode),
-      turns: toTurns(context.chat.listByProject(input.projectId))
-    },
-    onChunk
-  )
+  const persist = (
+    role: 'user' | 'assistant',
+    content: string,
+    agentId: SendMessageOutput['assistant']['agentId']
+  ): ReturnType<typeof appendMessage> =>
+    appendMessage(context, { projectId: project.id, role, content, agentId, mode, engine })
 
-  const text = reply.refused
-    ? 'La peticion fue declinada por los clasificadores de seguridad del modelo.'
-    : reply.text
+  const user = persist('user', input.prompt, null)
+  if (!user.ok) return err(user.error)
 
-  const stored = appendMessage(context, {
-    projectId: input.projectId,
-    role: 'assistant',
-    content: text,
-    agentId,
-    mode
-  })
+  const options = { context, assistant, codeAgent, project, input, mode, engine, onChunk }
+  const text = await produceReply(options)
+
+  const stored = persist('assistant', text, routeToAgent(input.prompt, input.enabledAgents))
   if (!stored.ok) return err(stored.error)
 
-  return ok({ user: saved.value, assistant: stored.value })
+  return ok({ user: user.value, assistant: stored.value, engine })
 }
