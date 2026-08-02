@@ -3,8 +3,9 @@ import { pushState } from '@domain/project/push-readiness'
 import { pushProject } from '../../services/push-service'
 import { runScan } from '../../services/scan-service'
 import { usePushStore } from '../../stores/push-store'
-import { useProjectCounts } from '../../stores/scan-selectors'
+import { useProjectCounts, useProjectFindings } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
+import { AskChatButton } from './AskChatButton'
 import { PushButton } from './PushButton'
 import { ScanButton } from './ScanButton'
 
@@ -16,6 +17,7 @@ export function ScanActions({ project }: ScanActionsProps): React.JSX.Element {
   const runningProjectId = useScanStore((state) => state.runningProjectId)
   const pushingProjectId = usePushStore((state) => state.pushingProjectId)
   const counts = useProjectCounts(project.id)
+  const findings = useProjectFindings(project.id)
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -24,6 +26,7 @@ export function ScanActions({ project }: ScanActionsProps): React.JSX.Element {
         busyElsewhere={runningProjectId !== null && runningProjectId !== project.id}
         onScan={() => void runScan(project.id)}
       />
+      <AskChatButton projectName={project.name} findings={findings} />
       <PushButton
         state={pushState(project, counts)}
         pushing={pushingProjectId === project.id}

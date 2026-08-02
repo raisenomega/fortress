@@ -37,6 +37,8 @@ export interface FortressApi {
     append(message: NewChatMessage): Promise<Result<ChatMessage>>
     clear(projectId: string): Promise<void>
     send(input: SendMessageInput): Promise<Result<SendMessageOutput>>
+    /** Detiene el workflow en marcha. Devuelve procesos terminados. */
+    stop(projectId: string): Promise<number>
     onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
   }
   readonly health: {

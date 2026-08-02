@@ -7,6 +7,7 @@ import { resolveAssistant } from '../ai/assistant-factory'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
+import { beginRun, cancelRun, endRun, isCancelled } from '../run-control'
 import { IPC } from './channels'
 
 /** Emite fragmentos solo si la ventana sigue viva (el usuario pudo cerrarla). */
@@ -19,11 +20,15 @@ function chunkSender(event: IpcMainInvokeEvent, projectId: string) {
 }
 
 export function registerChatSendHandler(): void {
+  ipcMain.handle(IPC.chatStop, (_event, projectId: string) => cancelRun(projectId))
+
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()
     const codeAgent = createClaudeCodeAgent(context.apiKeys)
     // Con el CLI instalado no hace falta API key: claude usa sus credenciales.
     const assistant = resolveAssistant(context.apiKeys)
+
+    beginRun(input.projectId)
 
     try {
       return await sendMessage(
@@ -32,10 +37,13 @@ export function registerChatSendHandler(): void {
         codeAgent,
         input,
         chunkSender(event, input.projectId),
-        (index, total) => chunkSender(event, input.projectId)(`\n· paso ${index + 1}/${total}\n`)
+        (index, total) => chunkSender(event, input.projectId)(`\n· paso ${index + 1}/${total}\n`),
+        () => isCancelled(input.projectId)
       )
     } catch (error) {
       return err(describeAssistantError(error))
+    } finally {
+      endRun(input.projectId)
     }
   })
 }

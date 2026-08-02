@@ -2,6 +2,7 @@ import { useChatStore, useProjectMessages } from '../../stores/chat-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
 import { ChatErrorBanner } from './ChatErrorBanner'
+import { stopWorkflow } from '../../services/chat-service'
 import { ChatInput } from './ChatInput'
 import { ChatMessageList } from './ChatMessageList'
 
@@ -42,7 +43,12 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
         <ChatMessageList messages={messages} />
       )}
 
-      <ChatInput disabled={streaming} onSend={onSend} />
+      <ChatInput
+        disabled={streaming}
+        running={streaming}
+        onStop={() => project && void stopWorkflow(project.id)}
+        onSend={onSend}
+      />
     </div>
   )
 }

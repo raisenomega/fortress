@@ -17,6 +17,8 @@ export interface WorkflowReplyOptions {
   readonly excludedAgents: readonly AgentId[]
   readonly onStep: (index: number, total: number) => void
   readonly onChunk: (delta: string) => void
+  readonly known: readonly string[]
+  readonly isCancelled: () => boolean
 }
 
 /**
@@ -34,7 +36,9 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
       project: options.project,
       mode: options.mode,
       onStep: options.onStep,
-      onChunk: options.onChunk
+      onChunk: options.onChunk,
+      known: options.known,
+      isCancelled: options.isCancelled
     },
     plan
   )

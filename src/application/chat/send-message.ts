@@ -15,7 +15,8 @@ export async function sendMessage(
   codeAgent: CodeAgent,
   input: SendMessageInput,
   onChunk: (delta: string) => void,
-  onStep: (index: number, total: number) => void
+  onStep: (index: number, total: number) => void,
+  isCancelled: () => boolean
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
@@ -42,6 +43,7 @@ export async function sendMessage(
     ...{ context, assistant, codeAgent, project, input, mode, engine },
     excludedAgents: input.excludedAgents,
     onStep,
+    isCancelled,
     onChunk
   })
 

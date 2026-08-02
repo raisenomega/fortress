@@ -4,6 +4,7 @@ import type { ChatEngine, CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AppContext } from '../context'
+import { knownFindings } from './known-findings'
 import type { ReplyOutcome } from './reply-outcome'
 import { replyFromApi } from './reply-from-api'
 import { replyFromWorkflow } from './reply-from-workflow'
@@ -22,6 +23,7 @@ export interface ReplyOptions {
   readonly excludedAgents: readonly AgentId[]
   /** Progreso del workflow, paso a paso. */
   readonly onStep: (index: number, total: number) => void
+  readonly isCancelled: () => boolean
   readonly onChunk: (delta: string) => void
 }
 
@@ -37,6 +39,8 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
       mode,
       excludedAgents: options.excludedAgents,
       onStep: options.onStep,
+      isCancelled: options.isCancelled,
+      known: knownFindings(options.context, project),
       onChunk
     })
   }

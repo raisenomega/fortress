@@ -34,6 +34,7 @@ export const IPC = {
   chatAppend: 'chat:append',
   chatClear: 'chat:clear',
   chatSend: 'chat:send',
+  chatStop: 'chat:stop',
   /** Evento main -> renderer con cada fragmento del streaming. */
   chatChunk: 'chat:chunk',
   settingsGet: 'settings:get',

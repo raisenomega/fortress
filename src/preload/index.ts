@@ -27,6 +27,7 @@ const api: FortressApi = {
     append: (message) => ipcRenderer.invoke(IPC.chatAppend, message),
     clear: (projectId) => ipcRenderer.invoke(IPC.chatClear, projectId),
     send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
+    stop: (projectId) => ipcRenderer.invoke(IPC.chatStop, projectId),
     onChunk: (listener) => subscribe(IPC.chatChunk, listener)
   },
   settings: {

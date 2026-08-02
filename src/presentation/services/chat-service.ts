@@ -55,3 +55,11 @@ export async function clearHistory(projectId: string): Promise<void> {
   await api().chat.clear(projectId)
   useChatStore.getState().setMessages(projectId, [])
 }
+
+/**
+ * Detiene el workflow en marcha. Mata el paso actual y evita que arranquen los
+ * siguientes; lo ya guardado se queda guardado.
+ */
+export async function stopWorkflow(projectId: string): Promise<void> {
+  await api().chat.stop(projectId)
+}

@@ -15,6 +15,10 @@ export interface WorkflowDeps {
   /** Avisa del paso que arranca, para que la UI lo pinte en vivo. */
   readonly onStep: (index: number, total: number) => void
   readonly onChunk: (delta: string) => void
+  /** Hallazgos ya guardados, para que el agente no reescanee lo medido. */
+  readonly known: readonly string[]
+  /** Verdadero si el operador pulso detener. Se mira entre pasos. */
+  readonly isCancelled: () => boolean
 }
 
 /** Resumen de un paso para el siguiente: evita que se repitan hallazgos. */
@@ -36,11 +40,15 @@ export async function runWorkflow(
   const permissionMode = permissionModeFor(deps.mode)
 
   for (const [index, step] of plan.active.entries()) {
+    // Se mira antes de arrancar cada paso: detener no puede significar
+    // "termina los seis que quedan y luego para".
+    if (deps.isCancelled()) return { results, stoppedBy: null }
     deps.onStep(index, plan.active.length)
 
     const prompt = buildStepPrompt(step, {
       projectName: deps.project.name,
-      previous
+      previous,
+      known: deps.known
     })
 
     const result = await runStep(deps, step.agentId, prompt, permissionMode, parseScanOutput)

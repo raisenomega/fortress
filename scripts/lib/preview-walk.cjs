@@ -3,6 +3,7 @@ const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('../checks/
 const { walkPerformance } = require('./preview-performance.cjs')
 const { walkCognition } = require('./preview-cognition.cjs')
 const { walkDialog } = require('./preview-dialog.cjs')
+const { walkHandoff } = require('./preview-handoff.cjs')
 const { walkShell } = require('./preview-shell.cjs')
 const { walkTimeline } = require('./preview-timeline.cjs')
 
@@ -46,6 +47,8 @@ async function walkScreens(helpers) {
   await expect('detalle del agente', 'EJECUCIONES', 'HALLAZGOS', 'EFECTIVIDAD', 'Omega')
   await run(clickSelector('button[aria-label="Cerrar"]'))
   await pause(300)
+
+  await walkHandoff(helpers)
 
   await walkTimeline(helpers)
 

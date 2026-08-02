@@ -4,8 +4,14 @@ import type { WorkflowStep } from './workflow'
 
 export interface StepContext {
   readonly projectName: string
-  /** Lo que ya han encontrado los pasos anteriores, resumido. */
+  /** Lo que ya han encontrado los pasos anteriores de ESTA revision. */
   readonly previous: readonly string[]
+  /**
+   * Hallazgos que FORTRESS ya tiene guardados de escaneos anteriores. Sin
+   * esto el agente empieza de cero cada vez: preguntarle "que viste en el
+   * ultimo escaneo" le hacia volver a escanear el proyecto entero.
+   */
+  readonly known: readonly string[]
 }
 
 /**
@@ -23,9 +29,22 @@ function describePrevious(previous: readonly string[]): string {
   ].join('\n')
 }
 
+function describeKnown(known: readonly string[]): string {
+  if (known.length === 0) return 'FORTRESS no tiene ningun escaneo previo de este proyecto.'
+
+  return [
+    'FORTRESS ya tiene registrados estos hallazgos de un escaneo anterior:',
+    ...known.map((line) => `- ${line}`),
+    'Si el operador pregunta por el ultimo escaneo, responde con ESTO: ya esta medido,',
+    'no hace falta volver a escanear. Vuelve a mirar el codigo solo si te lo piden.'
+  ].join('\n')
+}
+
 export function buildStepPrompt(step: WorkflowStep, context: StepContext): string {
   return [
     `Proyecto "${context.projectName}", que es el directorio de trabajo actual.`,
+    '',
+    describeKnown(context.known),
     '',
     `Tu encargo: ${step.task}`,
     '',
