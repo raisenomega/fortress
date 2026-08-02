@@ -1,6 +1,8 @@
 /** Recorrido por las pantallas de la app, capturando y verificando cada una. */
 const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('../checks/ui-scripts.cjs')
 const { walkPerformance } = require('./preview-performance.cjs')
+const { walkCognition } = require('./preview-cognition.cjs')
+const { walkDialog } = require('./preview-dialog.cjs')
 const { walkShell } = require('./preview-shell.cjs')
 const { walkTimeline } = require('./preview-timeline.cjs')
 
@@ -17,7 +19,13 @@ async function walkScreens(helpers) {
   await run(clickByText('Revisa la seguridad'))
   await pause(600)
   await shoot('-plan')
-  await expect('plan de workflow', 'Revision de seguridad', 'Security Reviewer', 'agentes', 'Ejecutar')
+  await expect(
+    'plan de workflow',
+    'Revision de seguridad',
+    'Security Reviewer',
+    'agentes',
+    'Ejecutar'
+  )
   await run(clickByText('Cancelar'))
   await pause(300)
 
@@ -41,26 +49,15 @@ async function walkScreens(helpers) {
 
   await walkTimeline(helpers)
 
-  await run(clickByText('Nucleo'))
-  await run(clickSelector('[data-nav="Cognition"]'))
-  await pause(500)
-  await shoot('-cognition')
-  await expect('cognition', 'PTN-2026-001', 'EXTINTO', 'src/auth/', 'GENERACION', 'KNOWLEDGE GRAPH')
-  // El bloque EJEMPLO del log no puede acabar en pantalla.
-  const texto = await run('document.body.innerText')
-  if (texto.includes('inventado/')) missing.push('cognition: zona de EJEMPLO filtrada')
+  await walkCognition(helpers)
 
-  await run(clickSelector('aside button[title="Agregar proyecto"]'))
-  await pause(400)
-  await shoot('-dialog')
-  await expect('dialogo', 'Agregar proyecto a FORTRESS')
-  await run(clickSelector('button[aria-label="Cerrar"]'))
+  await walkDialog(helpers)
 
-  // clickByText mira textContent (crudo); el boton dice 'autonomo' en minusculas
   await walkShell(helpers)
 
   await walkPerformance(helpers)
 
+  // Configuracion vive solo en el pie del sidebar; el header ya no la repite.
   await run(clickSelector('[data-nav="Configuracion"]'))
   await pause(400)
   await shoot('-settings')

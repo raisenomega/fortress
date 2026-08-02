@@ -1,4 +1,4 @@
-import { BarChart3, Settings } from 'lucide-react'
+import { BarChart3 } from 'lucide-react'
 import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { APP_NAME } from '../common/Logo'
@@ -43,15 +43,6 @@ export function TopBar(): React.JSX.Element {
       <ModeSelector />
 
       <RefreshButton />
-
-      <button
-        type="button"
-        onClick={() => setView('settings')}
-        title="Configuracion"
-        className="tap shrink-0 rounded-md border border-border p-1.5 hover:border-primary/40"
-      >
-        <Settings size={15} aria-hidden />
-      </button>
     </header>
   )
 }
