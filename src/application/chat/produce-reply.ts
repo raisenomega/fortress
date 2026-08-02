@@ -1,3 +1,4 @@
+import type { AgentId } from '@domain/agent/agent'
 import type { Assistant } from '@domain/chat/assistant'
 import type { ChatEngine, CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
@@ -16,15 +17,17 @@ export interface ReplyOptions {
   readonly input: SendMessageInput
   readonly mode: OperationMode
   readonly engine: ChatEngine
+  /** Agente que se hace cargo, ya enrutado. */
+  readonly agentId: AgentId | null
   readonly onChunk: (delta: string) => void
 }
 
 /** Produce el texto con el motor elegido: CLI real o API de solo texto. */
 export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
-  const { context, assistant, codeAgent, project, input, mode, engine, onChunk } = options
+  const { context, assistant, codeAgent, project, input, mode, engine, agentId, onChunk } = options
 
   if (engine === 'claude-code') {
-    return runCodeAgent(codeAgent, project, input.prompt, mode, onChunk)
+    return runCodeAgent(codeAgent, project, input.prompt, agentId, mode, onChunk)
   }
 
   return replyFromApi({

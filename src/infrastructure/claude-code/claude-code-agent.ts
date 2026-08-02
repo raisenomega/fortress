@@ -2,6 +2,7 @@ import { spawn } from 'child_process'
 import { existsSync, statSync } from 'fs'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
+import { agentsForProject } from './agents-for-project'
 import { buildArgs, buildEnv, CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { collectRun } from './run-claude-process'
 
@@ -27,7 +28,10 @@ export function createClaudeCodeAgent(apiKeys: ApiKeyStore): CodeAgent {
     },
 
     run: (request, onChunk) => {
-      const child = spawn(CLAUDE_BIN, buildArgs(request.prompt, request.permissionMode), {
+      const agents = agentsForProject(request.projectPath)
+      const args = buildArgs(request.prompt, request.permissionMode, agents, request.agentId)
+
+      const child = spawn(CLAUDE_BIN, args, {
         cwd: request.projectPath,
         env: buildEnv(apiKeys.read())
       })

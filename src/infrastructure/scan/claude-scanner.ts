@@ -24,7 +24,9 @@ export function createClaudeScanner(codeAgent: CodeAgent): Scanner {
         {
           projectPath: request.projectPath,
           prompt: buildScanPrompt(request.projectName),
-          permissionMode: 'plan'
+          permissionMode: 'plan',
+          // La FASE 1 es cosa del Security Reviewer, siempre el mismo agente.
+          agentId: 'security-reviewer'
         },
         onProgress
       )

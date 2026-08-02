@@ -37,10 +37,13 @@ export async function sendMessage(
   const user = persist('user', input.prompt, null)
   if (!user.ok) return err(user.error)
 
-  const options = { context, assistant, codeAgent, project, input, mode, engine, onChunk }
+  // El agente se decide ANTES de responder: es quien va a ejecutar, no una
+  // etiqueta que se le pone despues al mensaje.
+  const agentId = routeToAgent(input.prompt, input.enabledAgents)
+  const options = { context, assistant, codeAgent, project, input, mode, engine, agentId, onChunk }
+
   const startedAt = Date.now()
   const outcome = await produceReply(options)
-  const agentId = routeToAgent(input.prompt, input.enabledAgents)
 
   const stored = persist('assistant', outcome.text, agentId)
   if (!stored.ok) return err(stored.error)

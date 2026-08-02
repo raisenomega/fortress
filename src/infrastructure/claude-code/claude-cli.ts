@@ -1,4 +1,6 @@
 import { spawnSync } from 'child_process'
+import type { AgentId } from '@domain/agent/agent'
+import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 
 export const CLAUDE_BIN = 'claude'
@@ -8,8 +10,13 @@ export const CLAUDE_BIN = 'claude'
  * el flag no interactivo es `-p`, no `--headless`, y no existe `--project`
  * (el proyecto se fija con el cwd del proceso).
  */
-export function buildArgs(prompt: string, permissionMode: ClaudePermissionMode): string[] {
-  return [
+export function buildArgs(
+  prompt: string,
+  permissionMode: ClaudePermissionMode,
+  agents: Readonly<Record<string, AgentDefinition>>,
+  agentId: AgentId | null
+): string[] {
+  const args = [
     '-p',
     prompt,
     '--output-format',
@@ -19,6 +26,13 @@ export function buildArgs(prompt: string, permissionMode: ClaudePermissionMode):
     '--permission-mode',
     permissionMode
   ]
+
+  // Los diez agentes viajan como JSON en cada llamada: asi FORTRESS no escribe
+  // nada dentro del repositorio del operador para que existan.
+  if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
+  if (agentId) args.push('--agent', agentId)
+
+  return args
 }
 
 /** Comprueba que el CLI responde. El PATH ya viene completado por augmentPath. */

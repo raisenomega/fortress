@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { buildArgs, buildEnv } from './claude-cli'
+import { buildArgs } from './claude-cli'
+
+const NO_AGENTS = {}
+const AGENTS = { 'security-reviewer': { description: 'Audita', prompt: 'Eres el auditor' } }
+
+/** Sin agentes ni despacho: la forma minima. */
+const args = (prompt = 'hola', mode: 'plan' | 'acceptEdits' = 'plan'): string[] =>
+  buildArgs(prompt, mode, NO_AGENTS, null)
 
 /**
  * Estos argumentos se verificaron contra `claude --help` de la version 2.1.220.
@@ -8,47 +15,53 @@ import { buildArgs, buildEnv } from './claude-cli'
  */
 describe('buildArgs', () => {
   it('usa -p, que es el flag no interactivo real', () => {
-    expect(buildArgs('hola', 'plan')).toContain('-p')
+    expect(args()).toContain('-p')
   })
 
-  it('no usa --headless: no existe en el CLI', () => {
-    expect(buildArgs('hola', 'plan')).not.toContain('--headless')
-  })
-
-  it('no usa --project: el proyecto se fija con el cwd', () => {
-    expect(buildArgs('hola', 'plan').join(' ')).not.toContain('--project')
+  it('no usa --headless ni --project: no existen', () => {
+    expect(args()).not.toContain('--headless')
+    expect(args().join(' ')).not.toContain('--project')
   })
 
   it('pasa el prompt justo despues de -p', () => {
-    const args = buildArgs('revisa la seguridad', 'plan')
-    expect(args[args.indexOf('-p') + 1]).toBe('revisa la seguridad')
+    const built = args('revisa la seguridad')
+    expect(built[built.indexOf('-p') + 1]).toBe('revisa la seguridad')
   })
 
   it('pide stream-json con verbose, que es lo que emite los eventos', () => {
-    const args = buildArgs('hola', 'plan')
-    expect(args[args.indexOf('--output-format') + 1]).toBe('stream-json')
-    expect(args).toContain('--verbose')
+    expect(args()[args().indexOf('--output-format') + 1]).toBe('stream-json')
+    expect(args()).toContain('--verbose')
   })
 
   it('traslada el modo de permisos al CLI', () => {
-    const plan = buildArgs('hola', 'plan')
-    const edits = buildArgs('hola', 'acceptEdits')
+    const plan = args('hola', 'plan')
+    const edits = args('hola', 'acceptEdits')
     expect(plan[plan.indexOf('--permission-mode') + 1]).toBe('plan')
     expect(edits[edits.indexOf('--permission-mode') + 1]).toBe('acceptEdits')
   })
 
   it('nunca salta las comprobaciones de permisos', () => {
-    const args = buildArgs('hola', 'acceptEdits').join(' ')
-    expect(args).not.toContain('dangerously-skip-permissions')
+    expect(args('hola', 'acceptEdits').join(' ')).not.toContain('dangerously-skip-permissions')
   })
 })
 
-describe('buildEnv', () => {
-  it('pasa la key configurada en FORTRESS', () => {
-    expect(buildEnv('sk-ant-xyz').ANTHROPIC_API_KEY).toBe('sk-ant-xyz')
+describe('buildArgs con agentes', () => {
+  it('inyecta las definiciones como JSON', () => {
+    const built = buildArgs('hola', 'plan', AGENTS, null)
+    const json = built[built.indexOf('--agents') + 1]
+    expect(JSON.parse(json)['security-reviewer'].prompt).toBe('Eres el auditor')
   })
 
-  it('sin key, deja que claude use sus propias credenciales', () => {
-    expect(buildEnv(null)).toBe(process.env)
+  it('despacha en el agente elegido', () => {
+    const built = buildArgs('hola', 'plan', AGENTS, 'security-reviewer')
+    expect(built[built.indexOf('--agent') + 1]).toBe('security-reviewer')
+  })
+
+  it('omite --agents si el proyecto ya define los suyos', () => {
+    expect(buildArgs('hola', 'plan', NO_AGENTS, null)).not.toContain('--agents')
+  })
+
+  it('sin agente enrutado no fuerza ninguno', () => {
+    expect(buildArgs('hola', 'plan', AGENTS, null)).not.toContain('--agent')
   })
 })

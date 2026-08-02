@@ -1,3 +1,4 @@
+import type { AgentId } from '../agent/agent'
 import type { ClaudePermissionMode } from '../settings/permission-mode'
 import type { TokenUsage } from '../telemetry/token-usage'
 
@@ -9,6 +10,8 @@ export interface CodeAgentRequest {
   readonly projectPath: string
   readonly prompt: string
   readonly permissionMode: ClaudePermissionMode
+  /** Agente que se hace cargo. Null deja que Claude Code decida por su cuenta. */
+  readonly agentId: AgentId | null
 }
 
 export interface CodeAgentReply {

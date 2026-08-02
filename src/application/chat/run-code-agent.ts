@@ -1,3 +1,4 @@
+import type { AgentId } from '@domain/agent/agent'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
@@ -15,11 +16,12 @@ export async function runCodeAgent(
   agent: CodeAgent,
   project: Project,
   prompt: string,
+  agentId: AgentId | null,
   mode: OperationMode,
   onChunk: (delta: string) => void
 ): Promise<ReplyOutcome> {
   const reply = await agent.run(
-    { projectPath: project.path, prompt, permissionMode: permissionModeFor(mode) },
+    { projectPath: project.path, prompt, permissionMode: permissionModeFor(mode), agentId },
     onChunk
   )
 
