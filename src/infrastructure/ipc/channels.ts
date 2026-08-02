@@ -17,6 +17,8 @@ export const IPC = {
   scanProgress: 'scan:progress',
   pushRun: 'push:run',
   telemetrySession: 'telemetry:session',
+  telemetryBilling: 'telemetry:billing',
+  telemetryAverage: 'telemetry:average',
   telemetrySince: 'telemetry:since',
   telemetryByProject: 'telemetry:by-project',
   telemetryRanking: 'telemetry:ranking',

@@ -1,3 +1,4 @@
+import { costHint } from '@domain/telemetry/billing-mode'
 import { formatCost, formatTokens } from '@domain/telemetry/format-usage'
 import { totalTokens } from '@domain/telemetry/token-usage'
 import { useTelemetryStore } from '../../stores/telemetry-store'
@@ -10,6 +11,7 @@ import { useUiStore } from '../../stores/ui-store'
  */
 export function UsageIndicator(): React.JSX.Element | null {
   const session = useTelemetryStore((state) => state.session)
+  const billing = useTelemetryStore((state) => state.billing)
   const setView = useUiStore((state) => state.setView)
   const tokens = totalTokens(session)
 
@@ -17,7 +19,7 @@ export function UsageIndicator(): React.JSX.Element | null {
 
   const cost = formatCost(session.costUsd)
   const title = cost
-    ? 'Consumo de esta sesion, con el coste que reporta Claude Code'
+    ? `Consumo de esta sesion · ${costHint(billing)}`
     : 'Consumo de esta sesion. El motor de solo texto no reporta coste'
 
   return (
@@ -27,7 +29,8 @@ export function UsageIndicator(): React.JSX.Element | null {
       title={`${title}. Pulsa para ver el detalle`}
       className="tap rounded px-1 font-mono hover:text-foreground"
     >
-      {formatTokens(tokens)} tokens{cost ? ` · ${cost}` : ''}
+      {formatTokens(tokens)} tokens
+      {cost ? ` · ${billing.mode === 'suscripcion' ? '~' : ''}${cost}` : ''}
     </button>
   )
 }

@@ -8,3 +8,8 @@ import { useTelemetryStore } from '../stores/telemetry-store'
 export async function refreshSessionUsage(): Promise<void> {
   useTelemetryStore.getState().setSession(await api().telemetry.session())
 }
+
+/** Se pregunta una vez al arrancar: no cambia a mitad de sesion. */
+export async function loadBilling(): Promise<void> {
+  useTelemetryStore.getState().setBilling(await api().telemetry.billing())
+}

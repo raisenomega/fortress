@@ -1,26 +1,43 @@
 /**
- * Coste y duracion aproximados de un workflow. Las constantes salen de medir
- * escaneos reales de este proyecto con Claude Code (~50s y ~$0.07 por agente),
- * no de una tarifa teorica.
- *
- * Es una estimacion y se etiqueta como tal: un proyecto grande tarda mas y un
- * paso que no encuentra nada tarda menos. Sirve para que nadie lance un
- * workflow de siete agentes creyendo que es gratis e instantaneo.
+ * Valores de arranque, medidos sobre un proyecto minusculo de tres archivos.
+ * Se quedan MUY cortos en un repositorio real: el mismo escaneo sobre este
+ * proyecto costo unos $1 y no $0.07. Por eso solo se usan cuando todavia no
+ * hay historial propio del que tirar.
  */
 const SECONDS_PER_STEP = 50
 const USD_PER_STEP = 0.07
+
+/** Lo que este proyecto ha costado de verdad, por ejecucion. */
+export interface MeasuredRun {
+  readonly seconds: number
+  readonly usd: number
+}
 
 export interface WorkflowEstimate {
   readonly steps: number
   readonly seconds: number
   readonly usd: number
+  /** Falso si no hay historial y se esta usando el valor de arranque. */
+  readonly measured: boolean
 }
 
-export function estimateWorkflow(activeSteps: number): WorkflowEstimate {
+/**
+ * Estimacion a partir de lo que este proyecto ya costo. Un repositorio grande
+ * cuesta quince veces mas que uno pequeno, asi que una constante global
+ * enganaria justo donde mas importa: antes de lanzar siete agentes.
+ */
+export function estimateWorkflow(
+  activeSteps: number,
+  measured: MeasuredRun | null = null
+): WorkflowEstimate {
+  const seconds = measured?.seconds ?? SECONDS_PER_STEP
+  const usd = measured?.usd ?? USD_PER_STEP
+
   return {
     steps: activeSteps,
-    seconds: activeSteps * SECONDS_PER_STEP,
-    usd: activeSteps * USD_PER_STEP
+    seconds: Math.round(activeSteps * seconds),
+    usd: activeSteps * usd,
+    measured: measured !== null
   }
 }
 

@@ -1,6 +1,7 @@
 import { spawnSync } from 'child_process'
 import type { AgentId } from '@domain/agent/agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
+import { BUDGET_FLAG, MAX_USD_PER_RUN } from '@domain/settings/run-budget'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 
 export const CLAUDE_BIN = 'claude'
@@ -24,7 +25,11 @@ export function buildArgs(
     // stream-json solo emite el flujo completo de eventos con --verbose.
     '--verbose',
     '--permission-mode',
-    permissionMode
+    permissionMode,
+    // Red de seguridad: sin tope, un agente sobre un repo enorme sigue
+    // leyendo hasta agotar la cuota del operador.
+    BUDGET_FLAG,
+    String(MAX_USD_PER_RUN)
   ]
 
   // Los diez agentes viajan como JSON en cada llamada: asi FORTRESS no escribe

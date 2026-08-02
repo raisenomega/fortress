@@ -10,7 +10,19 @@ describe('estimateWorkflow', () => {
   })
 
   it('un workflow vacio no cuesta nada', () => {
-    expect(estimateWorkflow(0)).toEqual({ steps: 0, seconds: 0, usd: 0 })
+    expect(estimateWorkflow(0)).toMatchObject({ steps: 0, seconds: 0, usd: 0 })
+  })
+
+  it('usa lo medido en el proyecto por encima del valor de arranque', () => {
+    // El valor de fabrica salio de un proyecto de tres archivos: en un repo
+    // real se queda quince veces corto, que es peor que no estimar.
+    const real = estimateWorkflow(7, { seconds: 300, usd: 1.05 })
+    expect(real.usd).toBeCloseTo(7.35, 2)
+    expect(real.measured).toBe(true)
+  })
+
+  it('avisa de que no esta medido cuando no hay historial', () => {
+    expect(estimateWorkflow(3).measured).toBe(false)
   })
 })
 

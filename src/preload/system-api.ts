@@ -4,10 +4,16 @@ import type { GraphStatus } from '@domain/graph/graph-status'
 import type { NewProjectDraft } from '@domain/newproject/new-project-draft'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
+import type { Billing } from '@domain/telemetry/billing-mode'
+import type { MeasuredRun } from '@domain/workflow/workflow-estimate'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 
 /** Contratos que no cuelgan de un escaneo: telemetria, cerebro y sistema. */
 export interface TelemetryApi {
+  /** Suscripcion o API key: decide si el coste es real o equivalente. */
+  billing(): Promise<Billing>
+  /** Media real por ejecucion en un proyecto. Null si no hay historial. */
+  averageRun(projectId: string): Promise<MeasuredRun | null>
   /** Consumo desde que arranco la app. */
   session(): Promise<TokenUsage>
   since(iso: string): Promise<TokenUsage>

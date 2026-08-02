@@ -40,6 +40,11 @@ describe('buildArgs', () => {
     expect(edits[edits.indexOf('--permission-mode') + 1]).toBe('acceptEdits')
   })
 
+  it('siempre pone un tope de gasto: sin el, un repo enorme no se detiene', () => {
+    const built = args()
+    expect(built[built.indexOf('--max-budget-usd') + 1]).toBe('3')
+  })
+
   it('nunca salta las comprobaciones de permisos', () => {
     expect(args('hola', 'acceptEdits').join(' ')).not.toContain('dangerously-skip-permissions')
   })

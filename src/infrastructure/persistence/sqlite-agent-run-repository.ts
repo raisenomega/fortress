@@ -1,9 +1,9 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { AgentRanking, AgentRunTotals } from '@domain/telemetry/agent-run'
 import type { AgentRunRepository } from '@domain/telemetry/agent-run-repository'
-import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { newId, nowIso } from '@domain/shared/id'
 import { toAgentRun, toRunInsert, type AgentRunRow } from './agent-run-row'
+import { createRunAggregates } from './agent-run-aggregates'
 import * as SQL from './agent-run-sql'
 import type { Db } from './database'
 import { usageFromRow, type UsageColumns } from './usage-row'
@@ -21,8 +21,6 @@ export function createSqliteAgentRunRepository(db: Db): AgentRunRepository {
   const byProject = db.prepare(SQL.SELECT_BY_PROJECT)
   const totals = db.prepare(SQL.TOTALS_FOR_AGENT)
   const lastProject = db.prepare(SQL.LAST_PROJECT_FOR_AGENT)
-  const usageSince = db.prepare(SQL.USAGE_SINCE)
-  const usageByProject = db.prepare(SQL.USAGE_BY_PROJECT_SINCE)
   const ranking = db.prepare(SQL.RANKING_SINCE)
 
   return {
@@ -50,14 +48,7 @@ export function createSqliteAgentRunRepository(db: Db): AgentRunRepository {
       }
     },
 
-    usageSince: (since) => usageFromRow(usageSince.get(since) as TotalsRow),
-
-    usageByProjectSince: (since) => {
-      const rows = usageByProject.all(since) as Array<TotalsRow & { project_id: string }>
-      const byId: Record<string, TokenUsage> = {}
-      for (const row of rows) byId[row.project_id] = usageFromRow(row)
-      return byId
-    },
+    ...createRunAggregates(db),
 
     rankingSince: (since, limit) =>
       (ranking.all(since, limit) as Array<{ agent_id: AgentId; runs: number; edits: number }>).map(

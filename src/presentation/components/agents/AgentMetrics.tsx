@@ -1,6 +1,8 @@
 import type { AgentStats } from '@application/telemetry/build-agent-stats'
 import { effectiveness } from '@domain/telemetry/agent-stats'
+import { costLabel } from '@domain/telemetry/billing-mode'
 import { formatCost, formatTokens } from '@domain/telemetry/format-usage'
+import { useTelemetryStore } from '../../stores/telemetry-store'
 import { totalTokens } from '@domain/telemetry/token-usage'
 
 interface AgentMetricsProps {
@@ -19,6 +21,7 @@ function Cell({ label, value }: { label: string; value: string }): React.JSX.Ele
 export function AgentMetrics({ stats }: AgentMetricsProps): React.JSX.Element {
   const { totals, outcome } = stats
   const rate = effectiveness(outcome)
+  const billing = useTelemetryStore((state) => state.billing)
   const cost = formatCost(totals.usage.costUsd)
 
   return (
@@ -32,7 +35,10 @@ export function AgentMetrics({ stats }: AgentMetricsProps): React.JSX.Element {
       {/* Sin hallazgos no hay porcentaje: un 0% acusaria de no servir. */}
       <Cell label="Efectividad" value={rate === null ? '—' : `${Math.round(rate * 100)}%`} />
       <Cell label="Tokens" value={formatTokens(totalTokens(totals.usage))} />
-      <Cell label="Coste" value={cost ?? '—'} />
+      <Cell
+        label={costLabel(billing)}
+        value={cost === null ? '—' : `${billing.mode === 'suscripcion' ? '~' : ''}${cost}`}
+      />
     </div>
   )
 }

@@ -1,7 +1,10 @@
 import { findAgent } from '@domain/agent/agent-catalog'
 import { planWorkflow } from '@domain/workflow/plan-workflow'
 import { routeWorkflow } from '@domain/workflow/route-workflow'
-import { estimateWorkflow } from '@domain/workflow/workflow-estimate'
+import { useEffect, useState } from 'react'
+import { estimateWorkflow, type MeasuredRun } from '@domain/workflow/workflow-estimate'
+import { api } from '../../adapters/fortress-api'
+import { useActiveProject } from '../../stores/project-store'
 import { useExcludedAgents } from '../../stores/agent-store'
 import { Notice } from '../common/Notice'
 import { PlanActions } from './PlanActions'
@@ -25,8 +28,17 @@ export function WorkflowPlanCard({
   onCancel
 }: WorkflowPlanCardProps): React.JSX.Element {
   const excluded = useExcludedAgents()
+  const project = useActiveProject()
+  const [measured, setMeasured] = useState<MeasuredRun | null>(null)
+
+  // La media de ESTE proyecto: el valor de fabrica se midio en un repo de tres
+  // archivos y en uno real se queda quince veces corto.
+  useEffect(() => {
+    if (project) void api().telemetry.averageRun(project.id).then(setMeasured)
+  }, [project?.id])
+
   const plan = planWorkflow(routeWorkflow(prompt), excluded)
-  const estimate = estimateWorkflow(plan.active.length)
+  const estimate = estimateWorkflow(plan.active.length, measured)
 
   return (
     <section className="mx-4 mb-3 rounded-lg border border-primary/40 bg-card p-4">

@@ -19,4 +19,7 @@ export interface AgentRunRepository {
 
   /** Agentes mas activos desde una fecha. */
   rankingSince(since: string, limit: number): readonly AgentRanking[]
+
+  /** Coste y duracion medios por ejecucion en un proyecto, o null sin datos. */
+  averageRun(projectId: string): { readonly seconds: number; readonly usd: number } | null
 }

@@ -1,4 +1,6 @@
+import { costHint, costLabel } from '@domain/telemetry/billing-mode'
 import { formatCost, formatTokens } from '@domain/telemetry/format-usage'
+import { useTelemetryStore } from '../../stores/telemetry-store'
 import { totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 
 interface UsageCardsProps {
@@ -22,6 +24,7 @@ function Card({ label, value, hint }: CardProps): React.JSX.Element {
 }
 
 export function UsageCards({ usage }: UsageCardsProps): React.JSX.Element {
+  const billing = useTelemetryStore((state) => state.billing)
   const cost = formatCost(usage.costUsd)
 
   return (
@@ -31,9 +34,9 @@ export function UsageCards({ usage }: UsageCardsProps): React.JSX.Element {
       <Card label="Cache leido" value={formatTokens(usage.cacheReadTokens)} hint="mas barato" />
       {/* Sin coste reportado no se ensena "$0.00": seria afirmar que fue gratis. */}
       <Card
-        label="Coste"
-        value={cost ?? '—'}
-        hint={cost ? 'segun Claude Code' : 'el motor de texto no lo reporta'}
+        label={costLabel(billing)}
+        value={cost === null ? '—' : `${billing.mode === 'suscripcion' ? '~' : ''}${cost}`}
+        hint={cost === null ? 'el motor de texto no lo reporta' : costHint(billing)}
       />
     </div>
   )

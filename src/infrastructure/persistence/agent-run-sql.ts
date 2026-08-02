@@ -42,3 +42,8 @@ export const RANKING_SINCE = `SELECT agent_id, COUNT(*) AS runs,
   COALESCE(SUM(edits), 0) AS edits
   FROM agent_runs WHERE at >= ? AND agent_id IS NOT NULL
   GROUP BY agent_id ORDER BY runs DESC, edits DESC LIMIT ?`
+
+/** Media por ejecucion correcta: la base de la estimacion de un workflow. */
+export const AVERAGE_RUN = `SELECT COUNT(*) AS runs,
+  COALESCE(AVG(cost_usd), 0) AS avg_cost, COALESCE(AVG(duration_ms), 0) AS avg_ms
+  FROM agent_runs WHERE project_id = ? AND failed = 0`

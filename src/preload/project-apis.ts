@@ -25,6 +25,8 @@ export const projectApis: Pick<
     run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
   },
   telemetry: {
+    billing: () => ipcRenderer.invoke(IPC.telemetryBilling),
+    averageRun: (projectId) => ipcRenderer.invoke(IPC.telemetryAverage, projectId),
     session: () => ipcRenderer.invoke(IPC.telemetrySession),
     since: (iso) => ipcRenderer.invoke(IPC.telemetrySince, iso),
     byProject: (iso) => ipcRenderer.invoke(IPC.telemetryByProject, iso),
