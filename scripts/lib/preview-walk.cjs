@@ -1,5 +1,6 @@
 /** Recorrido por las pantallas de la app, capturando y verificando cada una. */
 const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('../checks/ui-scripts.cjs')
+const { walkTimeline } = require('./preview-timeline.cjs')
 
 const SKIP_ONBOARDING = clickByText('Entrar sin configurar')
 
@@ -27,6 +28,8 @@ async function walkScreens(helpers) {
   await expect('detalle del agente', 'EJECUCIONES', 'HALLAZGOS', 'EFECTIVIDAD', 'Omega')
   await run(clickSelector('button[aria-label="Cerrar"]'))
   await pause(300)
+
+  await walkTimeline(helpers)
 
   await run(clickByText('Nucleo'))
   await run(clickSelector('[data-nav="Cognition"]'))

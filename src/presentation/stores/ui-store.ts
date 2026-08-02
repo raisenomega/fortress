@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import type { AgentId } from '@domain/agent/agent'
 
-export type MainView = 'chat' | 'scan' | 'cognition' | 'settings'
+export type MainView = 'chat' | 'scan' | 'actividad' | 'cognition' | 'settings'
 
 interface UiState {
   readonly view: MainView

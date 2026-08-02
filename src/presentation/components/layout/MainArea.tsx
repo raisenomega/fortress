@@ -3,6 +3,7 @@ import { ChatWindow } from '../chat/ChatWindow'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
 import { CognitionView } from '../cognition/CognitionView'
 import { ScanView } from '../scan/ScanView'
+import { TimelineView } from '../timeline/TimelineView'
 import { SettingsView } from '../settings/SettingsView'
 
 interface MainAreaProps {
@@ -24,6 +25,14 @@ export function MainArea({ onSend }: MainAreaProps): React.JSX.Element {
     return (
       <main className="min-h-0 overflow-hidden">
         <ScanView />
+      </main>
+    )
+  }
+
+  if (view === 'actividad') {
+    return (
+      <main className="min-h-0 overflow-hidden">
+        <TimelineView />
       </main>
     )
   }

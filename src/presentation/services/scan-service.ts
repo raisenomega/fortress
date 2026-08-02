@@ -1,6 +1,7 @@
 import { api } from '../adapters/fortress-api'
 import { loadProjects } from './project-service'
 import { refreshSessionUsage } from './telemetry-service'
+import { loadTimeline } from './timeline-service'
 import { useScanStore } from '../stores/scan-store'
 
 /** Conteos de todos los proyectos: los pide el tablero al arrancar. */
@@ -53,7 +54,8 @@ export async function reloadAfterScan(projectId: string): Promise<void> {
       loadFindings(projectId),
       loadCounts(),
       loadProjects(),
-      refreshSessionUsage()
+      refreshSessionUsage(),
+      loadTimeline(projectId)
     ])
   } catch {
     // Silencio deliberado: el escaneo si termino.
