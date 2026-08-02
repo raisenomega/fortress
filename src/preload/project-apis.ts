@@ -18,6 +18,7 @@ export const projectApis: Pick<
   | 'activity'
   | 'newProject'
   | 'account'
+  | 'posture'
 > = {
   scan: {
     run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
@@ -31,6 +32,9 @@ export const projectApis: Pick<
   },
   push: {
     run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
+  },
+  posture: {
+    run: (request) => ipcRenderer.invoke(IPC.postureRun, request)
   },
   account: {
     status: () => ipcRenderer.invoke(IPC.accountStatus),

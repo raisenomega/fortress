@@ -12,6 +12,18 @@ async function walkCognition(helpers) {
   // El bloque EJEMPLO del log no puede acabar en pantalla.
   const texto = await run('document.body.innerText')
   if (texto.includes('inventado/')) missing.push('cognition: zona de EJEMPLO filtrada')
+
+  // Superficie externa: metes la URL, confirmas que es tuya, sin ataques.
+  await run(clickSelector('[data-nav="Superficie externa"]'))
+  await pause(500)
+  await shoot('-exposicion')
+  await expect(
+    'exposicion',
+    'Superficie externa',
+    'sitio es mio',
+    'Auditar exposicion',
+    'ningun ataque de volumen'
+  )
 }
 
 module.exports = { walkCognition }

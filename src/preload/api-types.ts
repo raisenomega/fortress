@@ -8,6 +8,7 @@ import type { Result } from '@domain/shared/result'
 import type { ActivityApi, PushApi, ScanApi } from './scan-api'
 import type {
   AccountApi,
+  PostureApi,
   CognitionApi,
   GraphApi,
   MaintenanceApi,
@@ -50,6 +51,7 @@ export interface FortressApi {
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi
   readonly account: AccountApi
+  readonly posture: PostureApi
   readonly cognition: CognitionApi
   readonly graph: GraphApi
   readonly maintenance: MaintenanceApi

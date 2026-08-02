@@ -9,6 +9,7 @@ const RAIL: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }>
   { view: 'scan', iconName: 'shield', label: 'Escaneo' },
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
   { view: 'cognition', iconName: 'brain', label: 'Cognition' },
+  { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' },
   { view: 'settings', iconName: 'settings', label: 'Configuracion' }
 ]
 

@@ -17,6 +17,7 @@ export const IPC = {
   scanProgress: 'scan:progress',
   pushRun: 'push:run',
   telemetrySession: 'telemetry:session',
+  postureRun: 'posture:run',
   accountStatus: 'account:status',
   accountLogin: 'account:login',
   accountLoginOutput: 'account:login-output',

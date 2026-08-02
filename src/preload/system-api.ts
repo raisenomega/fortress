@@ -4,6 +4,7 @@ import type { GraphStatus } from '@domain/graph/graph-status'
 import type { NewProjectDraft } from '@domain/newproject/new-project-draft'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
+import type { PostureRequest, PostureResult } from '@domain/posture/posture-scan'
 import type { Account } from '@domain/settings/account'
 import type { Billing } from '@domain/telemetry/billing-mode'
 import type { Unsubscribe } from './api-types'
@@ -59,4 +60,9 @@ export interface AccountApi {
   /** Abre el inicio de sesion con la suscripcion. */
   login(): Promise<void>
   onOutput(listener: (text: string) => void): Unsubscribe
+}
+
+export interface PostureApi {
+  /** Audita la exposicion externa de un sitio propio. Solo lectura. */
+  run(request: PostureRequest): Promise<Result<PostureResult>>
 }

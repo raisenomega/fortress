@@ -10,7 +10,8 @@ import { SidebarNavButton } from './SidebarNavButton'
 const VIEWS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }> = [
   { view: 'scan', iconName: 'shield', label: 'Escaneo' },
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
-  { view: 'cognition', iconName: 'brain', label: 'Cognition' }
+  { view: 'cognition', iconName: 'brain', label: 'Cognition' },
+  { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' }
 ]
 
 export function SidebarViewLinks(): React.JSX.Element {

@@ -3,6 +3,7 @@ import { ChatWindow } from '../chat/ChatWindow'
 import { CognitionView } from '../cognition/CognitionView'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
 import { PerformanceView } from '../performance/PerformanceView'
+import { PostureView } from '../posture/PostureView'
 import { ScanView } from '../scan/ScanView'
 import { SettingsView } from '../settings/SettingsView'
 import { TimelineView } from '../timeline/TimelineView'
@@ -15,6 +16,7 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   scan: () => <ScanView />,
   actividad: () => <TimelineView />,
   cognition: () => <CognitionView />,
+  exposicion: () => <PostureView />,
   rendimiento: () => <PerformanceView />,
   settings: () => <SettingsView />
 }

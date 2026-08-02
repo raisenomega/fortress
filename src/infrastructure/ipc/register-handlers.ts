@@ -1,4 +1,5 @@
 import { registerAccountHandlers } from './account-handlers'
+import { registerPostureHandlers } from './posture-handlers'
 import { registerActivityHandlers } from './activity-handlers'
 import { registerChatHandlers } from './chat-handlers'
 import { registerCognitionHandlers } from './cognition-handlers'
@@ -29,4 +30,5 @@ export function registerIpcHandlers(): void {
   registerMaintenanceHandlers()
   registerNewProjectHandlers()
   registerAccountHandlers()
+  registerPostureHandlers()
 }
