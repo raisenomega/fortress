@@ -5,6 +5,8 @@ const TRIGGERS: ReadonlyArray<readonly [AgentId, readonly string[]]> = [
   ['security-reviewer', ['seguridad', 'security', 'vulnerab', 'secret', 'auth', 'inyec']],
   ['refactor-cleaner', ['limpia', 'limpieza', 'muerto', 'duplicad', 'refactor']],
   ['code-reviewer', ['bug', 'error', 'falla', 'revisa el codigo', 'revisa codigo']],
+  // Antes que tdd-guide: "tests e2e" es suyo, "tests" a secas no.
+  ['e2e-runner', ['e2e', 'end-to-end', 'end to end', 'flujo completo', 'flujos completos']],
   ['tdd-guide', ['test', 'prueba', 'cobertura']],
   ['planner', ['planifica', 'plan ', 'feature', 'diseña', 'arquitectura']],
   ['build-error-resolver', ['build', 'compila', 'no compila']],

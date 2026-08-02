@@ -17,6 +17,17 @@ describe('routeToAgent', () => {
     expect(routeToAgent('escribe tests para el carrito', ALL)).toBe('tdd-guide')
   })
 
+  it('enruta los end-to-end al e2e-runner, no al tdd-guide', () => {
+    expect(routeToAgent('corre los tests e2e', ALL)).toBe('e2e-runner')
+    expect(routeToAgent('verifica el flujo completo de compra', ALL)).toBe('e2e-runner')
+    expect(routeToAgent('pruebas end-to-end del checkout', ALL)).toBe('e2e-runner')
+  })
+
+  it('sin e2e habilitado, un end-to-end no se pierde: cae en tdd-guide', () => {
+    const enabled: readonly AgentId[] = ['tdd-guide', 'planner']
+    expect(routeToAgent('corre los tests e2e', enabled)).toBe('tdd-guide')
+  })
+
   it('ignora mayusculas', () => {
     expect(routeToAgent('REVISA LA SEGURIDAD', ALL)).toBe('security-reviewer')
   })

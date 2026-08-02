@@ -7,6 +7,7 @@ export const AGENT_IDS = [
   'planner',
   'cognition',
   'build-error-resolver',
+  'e2e-runner',
   'code-simplifier',
   'opensource-sanitizer'
 ] as const

@@ -15,6 +15,7 @@ export const ICON_NAMES = [
   'sparkles',
   'package',
   'rocket',
+  'play',
   'check-circle',
   'alert-triangle',
   'x-circle',
