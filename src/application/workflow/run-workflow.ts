@@ -48,7 +48,8 @@ export async function runWorkflow(
     const prompt = buildStepPrompt(step, {
       projectName: deps.project.name,
       previous,
-      known: deps.known
+      known: deps.known,
+      mode: deps.mode
     })
 
     const result = await runStep(deps, step.agentId, prompt, permissionMode, parseScanOutput)

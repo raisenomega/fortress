@@ -18,7 +18,7 @@ interface PostureState {
 
 export const usePostureStore = create<PostureState>((set) => ({
   url: '',
-  depth: 'media',
+  depth: 'ultra',
   owned: false,
   running: false,
   error: null,

@@ -32,3 +32,20 @@ export function effectiveMode(mode: OperationMode, request: string): OperationMo
   if (mode === 'autonomo' && isProtectedArea(request)) return 'supervisado'
   return mode
 }
+
+/**
+ * Lo que se le dice al agente sobre su modo. Vive en el dominio para que lo
+ * usen las dos rutas: el system prompt de la API y el prompt de cada paso del
+ * workflow. Antes solo lo tenia la API, asi que en un workflow el agente no
+ * sabia en que modo estaba y respondia "supervisado por defecto" aunque el
+ * operador lo hubiera puesto en autonomo.
+ */
+export const MODE_INSTRUCTION: Record<OperationMode, string> = {
+  supervisado:
+    'MODO SUPERVISADO: propon los cambios y espera aprobacion. No apliques nada ' +
+    'sin confirmacion. Muestra el impacto antes de cada cambio.',
+  autonomo:
+    'MODO AUTONOMO: aplica los cambios y reporta resultados. Corre los tests antes ' +
+    'y despues. Si algo falla, revierte. NUNCA toques auth, payments, RLS ni ' +
+    'seguridad sin volver a supervisado.'
+}

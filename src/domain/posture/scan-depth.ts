@@ -26,5 +26,5 @@ export const DEPTH_LABEL: Record<ScanDepth, string> = {
   baja: 'Baja · cabeceras y TLS',
   media: 'Media · + cookies y CORS',
   alta: 'Alta · + rutas expuestas',
-  ultra: 'Ultra · + subdominios y reflexion'
+  ultra: 'Todas · todo de una vez (recomendado)'
 }

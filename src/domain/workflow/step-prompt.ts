@@ -1,5 +1,6 @@
 import { REPORT_CONTRACT } from '../scan/report-contract'
 import { SCAN_RULES } from '../scan/scan-checklist'
+import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import type { WorkflowStep } from './workflow'
 
 export interface StepContext {
@@ -12,6 +13,8 @@ export interface StepContext {
    * ultimo escaneo" le hacia volver a escanear el proyecto entero.
    */
   readonly known: readonly string[]
+  /** El modo en el que trabaja. Sin esto el agente decia "supervisado" siempre. */
+  readonly mode: OperationMode
 }
 
 /**
@@ -43,6 +46,8 @@ function describeKnown(known: readonly string[]): string {
 export function buildStepPrompt(step: WorkflowStep, context: StepContext): string {
   return [
     `Proyecto "${context.projectName}", que es el directorio de trabajo actual.`,
+    '',
+    MODE_INSTRUCTION[context.mode],
     '',
     describeKnown(context.known),
     '',

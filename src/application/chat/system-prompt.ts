@@ -1,17 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import { findAgent } from '@domain/agent/agent-catalog'
 import type { Project } from '@domain/project/project'
-import type { OperationMode } from '@domain/settings/operation-mode'
-
-const MODE_RULES: Record<OperationMode, string> = {
-  supervisado:
-    'MODO SUPERVISADO: propon los cambios y espera aprobacion. No apliques nada ' +
-    'sin confirmacion. Muestra el impacto antes de cada cambio.',
-  autonomo:
-    'MODO AUTONOMO: aplica los cambios y reporta resultados. Corre los tests antes ' +
-    'y despues. Si algo falla, revierte. NUNCA toques auth, payments, RLS ni ' +
-    'seguridad sin volver a modo supervisado.'
-}
+import { MODE_INSTRUCTION, type OperationMode } from '@domain/settings/operation-mode'
 
 function describeAgents(enabled: readonly AgentId[]): string {
   const lines = enabled
@@ -60,6 +50,6 @@ export function buildSystemPrompt(
     'AGENTES ACTIVOS:',
     describeAgents(enabledAgents),
     '',
-    MODE_RULES[mode]
+    MODE_INSTRUCTION[mode]
   ].join('\n')
 }
