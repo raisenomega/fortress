@@ -5,6 +5,7 @@ import type { SeverityCounts } from '@domain/project/severity-counts'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ScanRecord } from '@domain/scan/scan-record'
 import type { Result } from '@domain/shared/result'
+import type { AgentStats } from '@application/telemetry/build-agent-stats'
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
 import type { Activity } from '@domain/telemetry/activity'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
@@ -30,6 +31,8 @@ export interface ActivityApi {
   byProject(projectId: string, limit: number): Promise<readonly Activity[]>
   /** Historial de un agente; projectId en null son todos los proyectos. */
   byAgent(agentId: AgentId, projectId: string | null, limit: number): Promise<readonly Activity[]>
+  /** Todo lo que el panel de un agente necesita, en una llamada. */
+  stats(agentId: AgentId, projectId: string): Promise<AgentStats>
 }
 
 export interface PushApi {

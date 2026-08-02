@@ -1,4 +1,5 @@
 import type { AgentId } from '../agent/agent'
+import type { DetectedFinding } from '../scan/detected-finding'
 import type { Severity } from '../shared/severity'
 
 export const ACTIVITY_KINDS = ['scan', 'chat', 'finding', 'edit', 'push', 'dismiss'] as const
@@ -31,4 +32,6 @@ export interface ActivityRepository {
   listByProject(projectId: string, limit: number): readonly Activity[]
   /** Historial de un agente; con projectId en null, en todos los proyectos. */
   listByAgent(agentId: AgentId, projectId: string | null, limit: number): readonly Activity[]
+  /** Hallazgos distintos que el agente reporto alguna vez en el proyecto. */
+  reportedFindings(agentId: AgentId, projectId: string): readonly DetectedFinding[]
 }

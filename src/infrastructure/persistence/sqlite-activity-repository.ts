@@ -1,10 +1,9 @@
 import type { AgentId } from '@domain/agent/agent'
 import { isActivityKind, type Activity, type ActivityRepository } from '@domain/telemetry/activity'
 import { newId, nowIso } from '@domain/shared/id'
-import { isSeverity } from '@domain/shared/severity'
+import { isSeverity, type Severity } from '@domain/shared/severity'
+import * as SQL from './activity-sql'
 import type { Db } from './database'
-
-const COLUMNS = 'id, project_id, agent_id, kind, summary, severity, file, line, at'
 
 interface ActivityRow {
   readonly id: string
@@ -16,6 +15,13 @@ interface ActivityRow {
   readonly file: string
   readonly line: number | null
   readonly at: string
+}
+
+interface ReportedRow {
+  readonly severity: string
+  readonly title: string
+  readonly file: string
+  readonly line: number | null
 }
 
 function toActivity(row: ActivityRow): Activity {
@@ -33,25 +39,28 @@ function toActivity(row: ActivityRow): Activity {
 }
 
 export function createSqliteActivityRepository(db: Db): ActivityRepository {
-  const insert = db.prepare(
-    `INSERT INTO activity (${COLUMNS}) VALUES (@id, @projectId, @agentId, @kind,
-     @summary, @severity, @file, @line, @at)`
-  )
-  const byProject = db.prepare(
-    `SELECT ${COLUMNS} FROM activity WHERE project_id = ? ORDER BY at DESC, rowid DESC LIMIT ?`
-  )
-  const byAgent = db.prepare(
-    `SELECT ${COLUMNS} FROM activity
-     WHERE agent_id = @agentId AND (@projectId IS NULL OR project_id = @projectId)
-     ORDER BY at DESC, rowid DESC LIMIT @limit`
-  )
+  const insert = db.prepare(SQL.INSERT)
+  const byProject = db.prepare(SQL.BY_PROJECT)
+  const byAgent = db.prepare(SQL.BY_AGENT)
 
   // Un escaneo genera muchas entradas de golpe: o entran todas o ninguna.
   const insertMany = db.transaction((entries: readonly Activity[]) => {
     entries.forEach((entry) => insert.run(entry))
   })
 
+  const reported = db.prepare(SQL.REPORTED_FINDINGS)
+
   return {
+    reportedFindings: (agentId, projectId) =>
+      (reported.all(agentId, projectId) as ReportedRow[])
+        .filter((row) => isSeverity(row.severity))
+        .map((row) => ({
+          severity: row.severity as Severity,
+          title: row.title,
+          file: row.file,
+          line: row.line
+        })),
+
     recordMany: (entries) => {
       const at = nowIso()
       insertMany(entries.map((entry) => ({ ...entry, id: newId(), at })) as readonly Activity[])

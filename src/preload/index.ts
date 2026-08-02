@@ -41,7 +41,8 @@ const api: FortressApi = {
   activity: {
     byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),
     byAgent: (agentId, projectId, limit) =>
-      ipcRenderer.invoke(IPC.activityAgent, agentId, projectId, limit)
+      ipcRenderer.invoke(IPC.activityAgent, agentId, projectId, limit),
+    stats: (agentId, projectId) => ipcRenderer.invoke(IPC.agentStats, agentId, projectId)
   },
   push: {
     run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)

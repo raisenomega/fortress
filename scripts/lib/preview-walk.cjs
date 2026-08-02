@@ -15,13 +15,21 @@ async function walkScreens(helpers) {
 
   // Omega es el que tiene CRITICALs: es donde se ve el bloqueo de verdad.
   await run(clickByText('Omega'))
-  await run(clickByText('Escaneo'))
+  await run(clickSelector('[data-nav="Escaneo"]'))
   await pause(500)
   await shoot('-scan')
   await expect('escaneo', 'SQL injection', 'CRITICAL', 'Escanear seguridad', 'Push bloqueado')
 
+  // El nombre del agente abre su detalle; el interruptor no debe activarse.
+  await run(clickByText('Security Reviewer'))
+  await pause(600)
+  await shoot('-agente')
+  await expect('detalle del agente', 'EJECUCIONES', 'HALLAZGOS', 'EFECTIVIDAD', 'Omega')
+  await run(clickSelector('button[aria-label="Cerrar"]'))
+  await pause(300)
+
   await run(clickByText('Nucleo'))
-  await run(clickByText('Cognition'))
+  await run(clickSelector('[data-nav="Cognition"]'))
   await pause(500)
   await shoot('-cognition')
   await expect('cognition', 'PTN-2026-001', 'EXTINTO', 'src/auth/', 'GENERACION')
@@ -40,7 +48,7 @@ async function walkScreens(helpers) {
   await shoot('-autonomo')
   await expect('modo autonomo', 'sin confirmacion')
 
-  await run(clickByText('Configuracion'))
+  await run(clickSelector('[data-nav="Configuracion"]'))
   await pause(400)
   await shoot('-settings')
   await expect('configuracion', 'API key de Claude', 'Modo de operacion')

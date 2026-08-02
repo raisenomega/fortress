@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { buildAgentStats } from '@application/telemetry/build-agent-stats'
 import type { AgentId } from '@domain/agent/agent'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
@@ -12,5 +13,9 @@ export function registerActivityHandlers(): void {
     IPC.activityAgent,
     (_event, agentId: AgentId, projectId: string | null, limit: number) =>
       getAppContext().activity.listByAgent(agentId, projectId, limit)
+  )
+
+  ipcMain.handle(IPC.agentStats, (_event, agentId: AgentId, projectId: string) =>
+    buildAgentStats(getAppContext(), agentId, projectId)
   )
 }

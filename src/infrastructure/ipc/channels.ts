@@ -22,6 +22,7 @@ export const IPC = {
   cognitionRead: 'cognition:read',
   activityProject: 'activity:project',
   activityAgent: 'activity:agent',
+  agentStats: 'agent:stats',
   chatHistory: 'chat:history',
   chatAppend: 'chat:append',
   chatClear: 'chat:clear',

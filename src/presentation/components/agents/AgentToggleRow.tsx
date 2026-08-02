@@ -6,12 +6,14 @@ interface AgentToggleRowProps {
   readonly agent: Agent
   readonly enabled: boolean
   readonly onToggle: (id: Agent['id']) => void
+  readonly onOpen: (id: Agent['id']) => void
 }
 
 export function AgentToggleRow({
   agent,
   enabled,
-  onToggle
+  onToggle,
+  onOpen
 }: AgentToggleRowProps): React.JSX.Element {
   return (
     <div
@@ -23,13 +25,16 @@ export function AgentToggleRow({
         size={15}
         className={enabled ? 'text-primary' : 'text-muted-foreground'}
       />
-      <span
-        className={`min-w-0 flex-1 truncate text-sm ${
+      <button
+        type="button"
+        onClick={() => onOpen(agent.id)}
+        title={`Ver que ha hecho ${agent.name} en este proyecto`}
+        className={`tap min-w-0 flex-1 truncate text-left text-sm hover:text-primary ${
           enabled ? 'text-foreground' : 'text-muted-foreground'
         }`}
       >
         {agent.name}
-      </span>
+      </button>
       <Toggle
         checked={enabled}
         onChange={() => onToggle(agent.id)}

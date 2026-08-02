@@ -1,3 +1,4 @@
+import { AgentDetailModal } from './components/agents/AgentDetailModal'
 import { HealthPanel } from './components/health/HealthPanel'
 import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
@@ -21,6 +22,8 @@ export function App(): React.JSX.Element {
   const onboardingDismissed = useUiStore((state) => state.onboardingDismissed)
   const dismissOnboarding = useUiStore((state) => state.dismissOnboarding)
   const healthPanelOpen = useHealthStore((state) => state.panelOpen)
+  const openAgentId = useUiStore((state) => state.openAgentId)
+  const setOpenAgent = useUiStore((state) => state.setOpenAgent)
 
   useBootstrap()
 
@@ -39,6 +42,9 @@ export function App(): React.JSX.Element {
       <AppShell onSend={handleSend} />
       {addProjectOpen ? <AddProjectDialog onClose={() => setAddProjectOpen(false)} /> : null}
       {healthPanelOpen ? <HealthPanel /> : null}
+      {openAgentId ? (
+        <AgentDetailModal agentId={openAgentId} onClose={() => setOpenAgent(null)} />
+      ) : null}
     </>
   )
 }
