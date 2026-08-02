@@ -12,6 +12,8 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+  # Modulo nativo: el .node debe quedar fuera del asar para poder cargarse
+  - '**/node_modules/better-sqlite3/**'
 mac:
   category: public.app-category.developer-tools
   target:
