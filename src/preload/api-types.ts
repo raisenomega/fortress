@@ -1,8 +1,11 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk } from '@domain/chat/chat-stream'
+import type { ScanSummary } from '@application/scan/scan-types'
 import type { HealthReport } from '@domain/health/health-check'
-import type { NewProject, Project } from '@domain/project/project'
+import type { Finding, NewProject, Project } from '@domain/project/project'
+import type { SeverityCounts } from '@domain/project/severity-counts'
+import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 
@@ -34,6 +37,18 @@ export interface FortressApi {
   readonly health: {
     /** Diagnostico completo del sistema. */
     run(): Promise<HealthReport>
+  }
+  readonly scan: {
+    /** Audita la seguridad del proyecto en disco. Puede tardar minutos. */
+    run(projectId: string): Promise<Result<ScanSummary>>
+    findings(projectId: string): Promise<readonly Finding[]>
+    /** Conteos de todos los proyectos a la vez, para las tarjetas. */
+    counts(): Promise<Readonly<Record<string, SeverityCounts>>>
+    onProgress(listener: (chunk: ScanChunk) => void): Unsubscribe
+  }
+  readonly push: {
+    /** Rechazado si el proyecto tiene CRITICAL o no se ha escaneado. */
+    run(projectId: string): Promise<Result<string>>
   }
   readonly settings: {
     get(key: string): Promise<string | null>

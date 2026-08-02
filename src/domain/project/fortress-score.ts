@@ -1,18 +1,4 @@
-import type { Finding } from './project'
-
 export type ScoreBand = 'solido' | 'aceptable' | 'riesgo'
-
-/** Un proyecto con CRITICALs nunca esta listo para push. Regla no negociable. */
-export function isPushReady(findings: readonly Finding[]): boolean {
-  return !findings.some((finding) => finding.severity === 'CRITICAL')
-}
-
-export function countBySeverity(findings: readonly Finding[]): Record<string, number> {
-  return findings.reduce<Record<string, number>>((counts, finding) => {
-    counts[finding.severity] = (counts[finding.severity] ?? 0) + 1
-    return counts
-  }, {})
-}
 
 export function scoreBand(score: number): ScoreBand {
   if (score >= 85) return 'solido'

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type MainView = 'chat' | 'settings'
+export type MainView = 'chat' | 'scan' | 'settings'
 
 interface UiState {
   readonly view: MainView

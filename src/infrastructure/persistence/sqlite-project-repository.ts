@@ -1,3 +1,4 @@
+import { normalizeScore } from '@domain/project/fortress-score'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import { newId, nowIso } from '@domain/shared/id'
@@ -13,6 +14,9 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
   const selectById = db.prepare(`SELECT ${COLUMNS} FROM projects WHERE id = ?`)
   const selectByPath = db.prepare(`SELECT ${COLUMNS} FROM projects WHERE path = ?`)
   const deleteById = db.prepare('DELETE FROM projects WHERE id = ?')
+  const updateScan = db.prepare(
+    'UPDATE projects SET fortress_score = ?, last_scan = ? WHERE id = ?'
+  )
   const insert = db.prepare(
     `INSERT INTO projects (id, name, path, stack, git_remote, git_branch, has_claude, created_at)
      VALUES (@id, @name, @path, @stack, @gitRemote, @gitBranch, @hasClaude, @createdAt)`
@@ -48,6 +52,10 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
 
     remove: (id) => {
       deleteById.run(id)
+    },
+
+    updateScan: (id, score, scannedAt) => {
+      updateScan.run(normalizeScore(score), scannedAt, id)
     }
   }
 }

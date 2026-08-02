@@ -6,14 +6,12 @@ import { useUiStore } from '../../stores/ui-store'
 import { AgentPanel } from '../agents/AgentPanel'
 import { Logo } from '../common/Logo'
 import { ProjectList } from '../projects/ProjectList'
-import { SidebarNavButton } from './SidebarNavButton'
+import { SidebarNav } from './SidebarNav'
 import { SidebarSection } from './SidebarSection'
 
 export function Sidebar(): React.JSX.Element {
   const projectCount = useProjectStore((state) => state.projects.length)
   const enabledCount = useAgentStore((state) => state.enabled.length)
-  const view = useUiStore((state) => state.view)
-  const setView = useUiStore((state) => state.setView)
   const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
 
   return (
@@ -42,20 +40,7 @@ export function Sidebar(): React.JSX.Element {
         <AgentPanel />
       </SidebarSection>
 
-      <div className="mt-auto border-t border-sidebar-border p-3">
-        <SidebarNavButton
-          iconName="message-square"
-          label="Chat"
-          active={view === 'chat'}
-          onClick={() => setView('chat')}
-        />
-        <SidebarNavButton
-          iconName="settings"
-          label="Configuracion"
-          active={view === 'settings'}
-          onClick={() => setView('settings')}
-        />
-      </div>
+      <SidebarNav />
     </aside>
   )
 }

@@ -1,8 +1,8 @@
-import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import type { ChatChunk } from '@domain/chat/chat-stream'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
+import { subscribe } from './subscribe'
 
 /**
  * Superficie minima expuesta al renderer: solo estas operaciones, nada de
@@ -20,18 +20,21 @@ const api: FortressApi = {
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
+  scan: {
+    run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
+    findings: (projectId) => ipcRenderer.invoke(IPC.scanFindings, projectId),
+    counts: () => ipcRenderer.invoke(IPC.scanCounts),
+    onProgress: (listener) => subscribe(IPC.scanProgress, listener)
+  },
+  push: {
+    run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
+  },
   chat: {
     history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),
     append: (message) => ipcRenderer.invoke(IPC.chatAppend, message),
     clear: (projectId) => ipcRenderer.invoke(IPC.chatClear, projectId),
     send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
-    onChunk: (listener) => {
-      const handler = (_event: IpcRendererEvent, chunk: ChatChunk): void => listener(chunk)
-      ipcRenderer.on(IPC.chatChunk, handler)
-      return () => {
-        ipcRenderer.off(IPC.chatChunk, handler)
-      }
-    }
+    onChunk: (listener) => subscribe(IPC.chatChunk, listener)
   },
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),

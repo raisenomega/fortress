@@ -1,6 +1,7 @@
 import { useUiStore } from '../../stores/ui-store'
 import { ChatWindow } from '../chat/ChatWindow'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
+import { ScanView } from '../scan/ScanView'
 import { SettingsView } from '../settings/SettingsView'
 
 interface MainAreaProps {
@@ -14,6 +15,14 @@ export function MainArea({ onSend }: MainAreaProps): React.JSX.Element {
     return (
       <main className="min-h-0 overflow-hidden">
         <SettingsView />
+      </main>
+    )
+  }
+
+  if (view === 'scan') {
+    return (
+      <main className="min-h-0 overflow-hidden">
+        <ScanView />
       </main>
     )
   }

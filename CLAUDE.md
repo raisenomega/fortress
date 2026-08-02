@@ -63,7 +63,12 @@ npm run test:unit        # vitest sobre el dominio puro (sin Electron ni SQLite)
 npm test                 # unit + integracion (renderer -> preload -> IPC -> SQLite)
 npm run smoke            # monta la UI real y falla si no pinta o hay errores
 npm run preview          # siembra datos y captura la UI con contenido
+npm run verify:scan      # escaneo REAL contra un proyecto vulnerable (minutos)
 ```
+
+`verify:scan` queda fuera de `npm test` porque lanza Claude Code de verdad y
+tarda minutos. Ejecutalo siempre que toques el escaner: es lo unico que prueba
+que los hallazgos salen del codigo y no de una plantilla.
 
 Los que levantan Electron usan un `userData` temporal y abortan si la app lo
 reasigna: escribir en la base real del operador ya paso una vez, en silencio.

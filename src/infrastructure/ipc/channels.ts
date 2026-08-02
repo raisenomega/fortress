@@ -6,6 +6,12 @@ export const IPC = {
   projectsPickFolder: 'projects:pick-folder',
   projectsSelf: 'projects:self',
   healthRun: 'health:run',
+  scanRun: 'scan:run',
+  scanFindings: 'scan:findings',
+  scanCounts: 'scan:counts',
+  /** Evento main -> renderer con el avance del escaneo. */
+  scanProgress: 'scan:progress',
+  pushRun: 'push:run',
   chatHistory: 'chat:history',
   chatAppend: 'chat:append',
   chatClear: 'chat:clear',

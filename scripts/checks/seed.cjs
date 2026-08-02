@@ -9,7 +9,10 @@ module.exports = `(async () => {
   const created = []
   for (const project of projects) {
     const result = await window.api.projects.add({
-      ...project, gitRemote: null, gitBranch: 'main', hasClaude: true
+      // Con remoto: sin el, el estado de push seria siempre "sin remoto" y la
+      // captura no ensenaria ni el bloqueo por CRITICAL ni el push permitido.
+      ...project, gitRemote: 'git@github.com:raisen/' + project.name.toLowerCase() + '.git',
+      gitBranch: 'main', hasClaude: true
     })
     if (result.ok) created.push(result.value)
   }

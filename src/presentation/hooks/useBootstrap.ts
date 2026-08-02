@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
 import { runHealthCheck } from '../services/health-service'
 import { loadProjects } from '../services/project-service'
+import { loadCounts, loadFindings } from '../services/scan-service'
 import { loadOperationMode, refreshApiKeyStatus } from '../services/settings-service'
 import { useProjectStore } from '../stores/project-store'
 
@@ -14,6 +15,8 @@ export function useBootstrap(): void {
 
   useEffect(() => {
     void loadProjects()
+    // Los conteos alimentan el estado de push de todas las tarjetas.
+    void loadCounts()
     void refreshApiKeyStatus()
     void loadOperationMode()
     // Diagnostico automatico al abrir la app.
@@ -23,5 +26,6 @@ export function useBootstrap(): void {
   useEffect(() => {
     if (!activeProjectId) return
     void loadHistory(activeProjectId)
+    void loadFindings(activeProjectId)
   }, [activeProjectId])
 }

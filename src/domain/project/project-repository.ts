@@ -7,4 +7,6 @@ export interface ProjectRepository {
   findByPath(path: string): Project | null
   add(project: NewProject): Project
   remove(id: string): void
+  /** Deja constancia del ultimo escaneo. Es lo unico que escribe el score. */
+  updateScan(id: string, score: number, scannedAt: string): void
 }

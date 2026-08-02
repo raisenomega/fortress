@@ -3,6 +3,16 @@ export const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] as const
 
 export type Severity = (typeof SEVERITIES)[number]
 
+/** Lo minimo que necesita saberse de un hallazgo para pesarlo o contarlo. */
+export interface HasSeverity {
+  readonly severity: Severity
+}
+
+/** Guardia para datos que vienen de fuera: informes del agente, filas viejas. */
+export function isSeverity(value: unknown): value is Severity {
+  return typeof value === 'string' && (SEVERITIES as readonly string[]).includes(value)
+}
+
 /** Peso para ordenar hallazgos: mayor numero = mas urgente. */
 const WEIGHT: Record<Severity, number> = {
   CRITICAL: 4,

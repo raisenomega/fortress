@@ -24,7 +24,8 @@
     "preview": "npm run build && electron --no-sandbox scripts/ui-preview.cjs",
     "test:unit": "vitest run",
     "install:desktop": "./install.sh",
-    "icons": "electron --no-sandbox scripts/make-icons.cjs"
+    "icons": "electron --no-sandbox scripts/make-icons.cjs",
+    "verify:scan": "npm run build && electron --no-sandbox scripts/scan-verification.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

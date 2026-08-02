@@ -18,12 +18,3 @@ export const SCAN_LABEL: Record<ScanStatus, string> = {
   aceptable: 'Aceptable',
   riesgo: 'En riesgo'
 }
-
-/**
- * Solo se puede afirmar que un repo esta listo para push cuando hay un escaneo
- * que lo respalde. Sin datos, la respuesta es "no lo se", nunca "si".
- */
-export function pushVerdict(project: Project): 'listo' | 'bloqueado' | 'desconocido' {
-  if (project.lastScan === null) return 'desconocido'
-  return scoreBand(project.fortressScore) === 'riesgo' ? 'bloqueado' : 'listo'
-}
