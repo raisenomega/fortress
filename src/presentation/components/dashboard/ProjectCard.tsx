@@ -2,7 +2,7 @@ import type { Project } from '@domain/project/project'
 import { PUSH_REASON, pushState, type PushState } from '@domain/project/push-readiness'
 import { SCAN_LABEL, scanStatus } from '@domain/project/scan-status'
 import type { IconName } from '@domain/shared/icon-name'
-import { useProjectCounts } from '../../stores/scan-store'
+import { useProjectCounts } from '../../stores/scan-selectors'
 import { Icon } from '../common/Icon'
 import { ScoreGauge } from './ScoreGauge'
 

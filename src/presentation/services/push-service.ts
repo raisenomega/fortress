@@ -13,10 +13,12 @@ export async function pushProject(projectId: string): Promise<void> {
 
   try {
     const result = await api().push.run(projectId)
-    usePushStore.getState().finishPush(result.ok ? result.value : result.error, !result.ok)
+    usePushStore
+      .getState()
+      .finishPush(projectId, result.ok ? result.value : result.error, !result.ok)
   } catch (error) {
     // Igual que en el escaneo: si el canal falla, el boton tiene que volver.
     const detail = error instanceof Error ? error.message : 'El push se interrumpio'
-    usePushStore.getState().finishPush(detail, true)
+    usePushStore.getState().finishPush(projectId, detail, true)
   }
 }

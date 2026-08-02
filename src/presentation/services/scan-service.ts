@@ -29,12 +29,12 @@ export async function runScan(projectId: string): Promise<void> {
     const result = await api().scan.run(projectId)
     useScanStore
       .getState()
-      .finishScan(result.ok ? result.value : null, result.ok ? null : result.error)
+      .finishScan(projectId, result.ok ? result.value : null, result.ok ? null : result.error)
   } catch (error) {
     // Sin esto un fallo del canal IPC dejaria el escaneo "en curso" para
     // siempre y el boton no se volveria a poder pulsar.
     const detail = error instanceof Error ? error.message : 'El escaneo se interrumpio'
-    useScanStore.getState().finishScan(null, detail)
+    useScanStore.getState().finishScan(projectId, null, detail)
   } finally {
     unsubscribe()
     await Promise.all([loadFindings(projectId), loadCounts(), loadProjects()])
