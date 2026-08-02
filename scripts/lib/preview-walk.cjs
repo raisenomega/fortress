@@ -20,6 +20,15 @@ async function walkScreens(helpers) {
   await shoot('-scan')
   await expect('escaneo', 'SQL injection', 'CRITICAL', 'Escanear seguridad', 'Push bloqueado')
 
+  await run(clickByText('Nucleo'))
+  await run(clickByText('Cognition'))
+  await pause(500)
+  await shoot('-cognition')
+  await expect('cognition', 'PTN-2026-001', 'EXTINTO', 'src/auth/', 'GENERACION')
+  // El bloque EJEMPLO del log no puede acabar en pantalla.
+  const texto = await run('document.body.innerText')
+  if (texto.includes('inventado/')) missing.push('cognition: zona de EJEMPLO filtrada')
+
   await run(clickSelector('aside button[title="Agregar proyecto"]'))
   await pause(400)
   await shoot('-dialog')

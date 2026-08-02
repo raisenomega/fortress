@@ -9,6 +9,7 @@ const { app } = require('electron')
 const harness = require('./lib/app-harness.cjs')
 const { createHelpers } = require('./lib/preview-helpers.cjs')
 const { simulateScan } = require('./lib/simulate-scan.cjs')
+const { writeCognitionLog } = require('./lib/cognition-fixture.cjs')
 const { SKIP_ONBOARDING, walkScreens } = require('./lib/preview-walk.cjs')
 const SEED = require('./checks/seed.cjs')
 
@@ -26,6 +27,8 @@ app.whenReady().then(async () => {
   await expect('onboarding', 'Pega tu API key para empezar', 'nunca sale de tu maquina')
 
   await run(SKIP_ONBOARDING)
+  // Nucleo tiene cerebro; los otros dos no, para ver los dos estados.
+  writeCognitionLog('/tmp/nucleo')
   const seeded = await run(SEED)
   simulateScan()
 

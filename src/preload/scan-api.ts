@@ -5,6 +5,7 @@ import type { SeverityCounts } from '@domain/project/severity-counts'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ScanRecord } from '@domain/scan/scan-record'
 import type { Result } from '@domain/shared/result'
+import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
 import type { Activity } from '@domain/telemetry/activity'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
@@ -42,4 +43,9 @@ export interface TelemetryApi {
   since(iso: string): Promise<TokenUsage>
   byProject(iso: string): Promise<Readonly<Record<string, TokenUsage>>>
   ranking(iso: string, limit: number): Promise<readonly AgentRanking[]>
+}
+
+export interface CognitionApi {
+  /** COGNITION-LOG.md del proyecto, ya parseado. Vacio si no existe. */
+  read(projectId: string): Promise<CognitionSnapshot>
 }

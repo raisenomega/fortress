@@ -1,5 +1,6 @@
 import { registerActivityHandlers } from './activity-handlers'
 import { registerChatHandlers } from './chat-handlers'
+import { registerCognitionHandlers } from './cognition-handlers'
 import { registerChatSendHandler } from './chat-send-handler'
 import { registerHealthHandlers } from './health-handlers'
 import { registerProjectHandlers } from './project-handlers'
@@ -19,4 +20,5 @@ export function registerIpcHandlers(): void {
   registerPushHandlers()
   registerActivityHandlers()
   registerTelemetryHandlers()
+  registerCognitionHandlers()
 }

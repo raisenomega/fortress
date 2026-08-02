@@ -5,6 +5,7 @@ import { SidebarNavButton } from './SidebarNavButton'
 const ITEMS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }> = [
   { view: 'chat', iconName: 'message-square', label: 'Chat' },
   { view: 'scan', iconName: 'shield', label: 'Escaneo' },
+  { view: 'cognition', iconName: 'brain', label: 'Cognition' },
   { view: 'settings', iconName: 'settings', label: 'Configuracion' }
 ]
 

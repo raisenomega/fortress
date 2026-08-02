@@ -19,6 +19,7 @@ export const IPC = {
   telemetrySince: 'telemetry:since',
   telemetryByProject: 'telemetry:by-project',
   telemetryRanking: 'telemetry:ranking',
+  cognitionRead: 'cognition:read',
   activityProject: 'activity:project',
   activityAgent: 'activity:agent',
   chatHistory: 'chat:history',

@@ -35,6 +35,9 @@ const api: FortressApi = {
     byProject: (iso) => ipcRenderer.invoke(IPC.telemetryByProject, iso),
     ranking: (iso, limit) => ipcRenderer.invoke(IPC.telemetryRanking, iso, limit)
   },
+  cognition: {
+    read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId)
+  },
   activity: {
     byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),
     byAgent: (agentId, projectId, limit) =>

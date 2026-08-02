@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
+import { loadCognition } from '../services/cognition-service'
 import { runHealthCheck } from '../services/health-service'
 import { loadProjects } from '../services/project-service'
 import { loadCounts, loadFindings } from '../services/scan-service'
@@ -29,5 +30,6 @@ export function useBootstrap(): void {
     if (!activeProjectId) return
     void loadHistory(activeProjectId)
     void loadFindings(activeProjectId)
+    void loadCognition(activeProjectId)
   }, [activeProjectId])
 }
