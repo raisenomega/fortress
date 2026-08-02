@@ -6,6 +6,7 @@ import type { HealthReport } from '@domain/health/health-check'
 import type { Finding, NewProject, Project } from '@domain/project/project'
 import type { SeverityCounts } from '@domain/project/severity-counts'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
+import type { ScanRecord } from '@domain/scan/scan-record'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 
@@ -45,6 +46,11 @@ export interface FortressApi {
     /** Conteos de todos los proyectos a la vez, para las tarjetas. */
     counts(): Promise<Readonly<Record<string, SeverityCounts>>>
     onProgress(listener: (chunk: ScanChunk) => void): Unsubscribe
+    /** Escaneos anteriores, del mas reciente al mas antiguo. */
+    history(projectId: string, limit: number): Promise<readonly ScanRecord[]>
+    /** Marca un hallazgo como falso positivo; deja de contar y de bloquear. */
+    dismiss(findingId: string): Promise<Result<null>>
+    reopen(findingId: string): Promise<Result<null>>
   }
   readonly push: {
     /** Rechazado si el proyecto tiene CRITICAL o no se ha escaneado. */

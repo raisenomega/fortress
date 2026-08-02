@@ -6,11 +6,18 @@ import { FindingRow } from './FindingRow'
 interface FindingsTableProps {
   readonly project: Project
   readonly findings: readonly Finding[]
+  readonly onDismiss: (id: string) => void
+  readonly onReopen: (id: string) => void
 }
 
 const HEAD_CLASS = 'pb-2 text-left text-[11px] font-semibold tracking-widest uppercase'
 
-export function FindingsTable({ project, findings }: FindingsTableProps): React.JSX.Element {
+export function FindingsTable({
+  project,
+  findings,
+  onDismiss,
+  onReopen
+}: FindingsTableProps): React.JSX.Element {
   if (findings.length === 0) {
     // Un proyecto sin escanear y uno limpio se ven igual en la tabla vacia; el
     // texto es lo unico que los distingue, asi que tiene que ser exacto.
@@ -36,11 +43,17 @@ export function FindingsTable({ project, findings }: FindingsTableProps): React.
           <th className={HEAD_CLASS}>Sev</th>
           <th className={HEAD_CLASS}>Hallazgo</th>
           <th className={HEAD_CLASS}>Ubicacion</th>
+          <th className={HEAD_CLASS} />
         </tr>
       </thead>
       <tbody>
         {findings.map((finding) => (
-          <FindingRow key={finding.id} finding={finding} />
+          <FindingRow
+            key={finding.id}
+            finding={finding}
+            onDismiss={onDismiss}
+            onReopen={onReopen}
+          />
         ))}
       </tbody>
     </table>

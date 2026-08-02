@@ -1,4 +1,5 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
+import { dismissFinding, reopenFinding } from '@application/scan/dismiss-finding'
 import { runScan } from '@application/scan/run-scan'
 import type { ScanSummary } from '@application/scan/scan-types'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
@@ -39,4 +40,16 @@ export function registerScanHandlers(): void {
   )
 
   ipcMain.handle(IPC.scanCounts, () => getAppContext().findings.countsByProject())
+
+  ipcMain.handle(IPC.scanHistory, (_event, projectId: string, limit: number) =>
+    getAppContext().scans.listByProject(projectId, limit)
+  )
+
+  ipcMain.handle(IPC.scanDismiss, (_event, findingId: string) =>
+    dismissFinding(getAppContext(), findingId)
+  )
+
+  ipcMain.handle(IPC.scanReopen, (_event, findingId: string) =>
+    reopenFinding(getAppContext(), findingId)
+  )
 }

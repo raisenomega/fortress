@@ -9,6 +9,9 @@ export const IPC = {
   scanRun: 'scan:run',
   scanFindings: 'scan:findings',
   scanCounts: 'scan:counts',
+  scanHistory: 'scan:history',
+  scanDismiss: 'scan:dismiss',
+  scanReopen: 'scan:reopen',
   /** Evento main -> renderer con el avance del escaneo. */
   scanProgress: 'scan:progress',
   pushRun: 'push:run',

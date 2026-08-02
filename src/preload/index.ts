@@ -24,7 +24,10 @@ const api: FortressApi = {
     run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
     findings: (projectId) => ipcRenderer.invoke(IPC.scanFindings, projectId),
     counts: () => ipcRenderer.invoke(IPC.scanCounts),
-    onProgress: (listener) => subscribe(IPC.scanProgress, listener)
+    onProgress: (listener) => subscribe(IPC.scanProgress, listener),
+    history: (projectId, limit) => ipcRenderer.invoke(IPC.scanHistory, projectId, limit),
+    dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
+    reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId)
   },
   push: {
     run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)

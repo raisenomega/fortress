@@ -2,6 +2,7 @@ import { useActiveProject } from '../../stores/project-store'
 import { usePushResult } from '../../stores/push-store'
 import { useProjectFindings, useScanError } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
+import { dismissFinding, reopenFinding } from '../../services/scan-service'
 import { EmptyState } from '../common/EmptyState'
 import { Notice } from '../common/Notice'
 import { FindingsTable } from './FindingsTable'
@@ -36,7 +37,12 @@ export function ScanView(): React.JSX.Element {
         {push ? <Notice tone={push.failed ? 'error' : 'ok'}>{push.output}</Notice> : null}
         {running ? <ScanProgress text={progress} /> : null}
 
-        <FindingsTable project={project} findings={findings} />
+        <FindingsTable
+          project={project}
+          findings={findings}
+          onDismiss={(id) => void dismissFinding(project.id, id)}
+          onReopen={(id) => void reopenFinding(project.id, id)}
+        />
       </div>
     </div>
   )

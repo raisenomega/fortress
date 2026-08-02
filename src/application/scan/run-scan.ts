@@ -33,19 +33,23 @@ export async function runScan(
 
   const { findings, durationMs } = outcome.value
   const score = scoreFromFindings(findings)
+  const counts = countFindings(findings)
   const scannedAt = nowIso()
 
-  // Hallazgos y score describen el mismo escaneo: entran los dos o ninguno.
+  // Historico, hallazgos y score describen el mismo escaneo: entran los tres
+  // o ninguno. Un score sin sus hallazgos es un numero sin respaldo.
   context.transaction(() => {
-    context.findings.replaceForProject(project.id, findings)
+    const scan = context.scans.record({
+      projectId: project.id,
+      score,
+      findingCount: findings.length,
+      criticalCount: counts.CRITICAL,
+      durationMs,
+      at: scannedAt
+    })
+    context.findings.replaceForProject(project.id, scan.id, findings)
     context.projects.updateScan(project.id, score, scannedAt)
   })
 
-  return ok({
-    projectId: project.id,
-    score,
-    scannedAt,
-    durationMs,
-    counts: countFindings(findings)
-  })
+  return ok({ projectId: project.id, score, scannedAt, durationMs, counts })
 }

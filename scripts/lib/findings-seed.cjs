@@ -40,4 +40,24 @@ function markScanned(projectId, score) {
   )
 }
 
-module.exports = { withDb, insertFinding, markScanned }
+/** Escaneo historico, para comprobar la lectura del historial. */
+function recordScan(projectId, score, criticalCount) {
+  return withDb((db) =>
+    db
+      .prepare(
+        `INSERT INTO scans (id, project_id, score, finding_count, critical_count,
+         duration_ms, at) VALUES (?, ?, ?, ?, ?, ?, ?)`
+      )
+      .run(
+        `scan-${(sequence += 1)}`,
+        projectId,
+        score,
+        criticalCount,
+        criticalCount,
+        1000,
+        new Date().toISOString()
+      )
+  )
+}
+
+module.exports = { withDb, insertFinding, markScanned, recordScan }

@@ -27,6 +27,17 @@ module.exports = async function pushChecks(window) {
   const r3 = await run(`window.api.push.run('${conCritical}')`)
   check('bloquea el push con un CRITICAL', !r3.ok && /CRITICAL/.test(r3.error), JSON.stringify(r3))
 
+  // Descartar el CRITICAL como falso positivo tiene que desbloquear: si no,
+  // el descarte seria un adorno sin consecuencias.
+  const hallazgos = await run(`window.api.scan.findings('${conCritical}')`)
+  await run(`window.api.scan.dismiss('${hallazgos[0].id}')`)
+  const r3b = await run(`window.api.push.run('${conCritical}')`)
+  check(
+    'descartar el CRITICAL desbloquea el push',
+    !/CRITICAL/.test(r3b.error ?? ''),
+    JSON.stringify(r3b)
+  )
+
   // Un repo de verdad: si el bloqueo no aplica, el push tiene que ocurrir.
   const repo = createTempRepo()
   try {

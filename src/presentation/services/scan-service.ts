@@ -40,3 +40,21 @@ export async function runScan(projectId: string): Promise<void> {
     await Promise.all([loadFindings(projectId), loadCounts(), loadProjects()])
   }
 }
+
+/**
+ * Descartar cambia el score y puede desbloquear un push, asi que despues hay
+ * que releerlo todo: hallazgos, conteos y la fila del proyecto.
+ */
+async function setDismissed(projectId: string, findingId: string, off: boolean): Promise<void> {
+  const call = off ? api().scan.dismiss : api().scan.reopen
+  await call(findingId)
+  await Promise.all([loadFindings(projectId), loadCounts(), loadProjects()])
+}
+
+export function dismissFinding(projectId: string, findingId: string): Promise<void> {
+  return setDismissed(projectId, findingId, true)
+}
+
+export function reopenFinding(projectId: string, findingId: string): Promise<void> {
+  return setDismissed(projectId, findingId, false)
+}

@@ -42,9 +42,12 @@ CREATE TABLE IF NOT EXISTS findings (
   project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   severity   TEXT NOT NULL CHECK (severity IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')),
   title      TEXT NOT NULL,
-  file       TEXT NOT NULL DEFAULT '',
-  line       INTEGER,
-  created_at TEXT NOT NULL
+  file        TEXT NOT NULL DEFAULT '',
+  line        INTEGER,
+  fingerprint TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'open',
+  scan_id     TEXT,
+  created_at  TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_findings_project

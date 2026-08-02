@@ -26,4 +26,26 @@ CREATE TABLE IF NOT EXISTS agent_runs (
 
 CREATE INDEX IF NOT EXISTS idx_runs_project ON agent_runs (project_id, at);
 CREATE INDEX IF NOT EXISTS idx_runs_agent   ON agent_runs (agent_id, at);
+
+CREATE TABLE IF NOT EXISTS scans (
+  id             TEXT PRIMARY KEY,
+  project_id     TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  score          INTEGER NOT NULL,
+  finding_count  INTEGER NOT NULL DEFAULT 0,
+  critical_count INTEGER NOT NULL DEFAULT 0,
+  duration_ms    INTEGER NOT NULL DEFAULT 0,
+  at             TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_scans_project ON scans (project_id, at);
+
+-- El descarte sobrevive al escaneo que lo origino: las filas de findings se
+-- sustituyen enteras en cada escaneo, asi que la decision del operador tiene
+-- que vivir aparte o duraria hasta el siguiente scan.
+CREATE TABLE IF NOT EXISTS dismissals (
+  project_id  TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  fingerprint TEXT NOT NULL,
+  at          TEXT NOT NULL,
+  PRIMARY KEY (project_id, fingerprint)
+);
 `

@@ -16,6 +16,7 @@ const SUITES = [
   ['Modo de operacion', require('./checks/mode-checks.cjs')],
   ['Self-diagnostics', require('./checks/health-checks.cjs')],
   ['Hallazgos', require('./checks/scan-checks.cjs')],
+  ['Descartes e historico', require('./checks/dismissal-checks.cjs')],
   ['Push bloqueado por CRITICAL', require('./checks/push-checks.cjs')]
 ]
 
