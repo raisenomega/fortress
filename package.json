@@ -20,7 +20,8 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "test": "npm run build && electron --no-sandbox scripts/integration-test.cjs"
+    "test": "npm run build && electron --no-sandbox scripts/integration-test.cjs",
+    "preview": "npm run build && electron --no-sandbox scripts/ui-preview.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
