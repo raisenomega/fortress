@@ -66,3 +66,9 @@ npm run preview          # siembra datos y captura la UI con contenido
 Los dos ultimos levantan la app compilada contra un `userData` temporal: nunca
 tocan la base de datos real. Cazan lo que typecheck y lint no ven (bucles de
 render, estilos que no se generan, reglas de integridad de la base).
+
+## Distribucion
+
+Pasos en el README. Al tocarla, recuerda: `StartupWMClass` debe seguir
+coincidiendo con `productName`, o el escritorio no asociara la ventana abierta
+con su icono en la barra de aplicaciones.

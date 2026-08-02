@@ -1,12 +1,15 @@
 appId: com.fortress.command-center
 productName: FORTRESS Command Center
 directories:
-  output: dist
+  # Fuera del proyecto: el build queda en ~/Escritorio/Raisen_FCC/dist/
+  output: ../dist
   buildResources: build
 files:
   - '!**/.vscode/*'
   - '!src/*'
+  - '!scripts/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!vitest.config.{js,ts,mjs,cjs}'
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
@@ -22,23 +25,32 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
   notarize: false
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: FORTRESS-${version}.${ext}
 linux:
   target:
     - AppImage
-    - deb
   category: Development
   maintainer: raisenomega
+  synopsis: Centro de mando para auditar proyectos con agentes de IA
+  # Toma desktopName de package.json. Sin esto el escritorio no asocia la
+  # ventana con el .desktop y la barra de aplicaciones da un icono generico.
+  syncDesktopName: true
+  desktop:
+    entry:
+      Name: FORTRESS
+      Comment: Centro de mando FORTRESS
+      Categories: Development;Utility;
+      StartupWMClass: FORTRESS Command Center
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: FORTRESS-${version}.${ext}
 win:
   target:
     - nsis
     - portable
   executableName: fortress-command-center
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
+  artifactName: FORTRESS-${version}-setup.${ext}
+  shortcutName: FORTRESS
+  uninstallDisplayName: FORTRESS Command Center
   createDesktopShortcut: always
 npmRebuild: false
