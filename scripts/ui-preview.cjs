@@ -9,7 +9,7 @@ const { app } = require('electron')
 const harness = require('./lib/app-harness.cjs')
 const { createHelpers } = require('./lib/preview-helpers.cjs')
 const { simulateScan } = require('./lib/simulate-scan.cjs')
-const { clickByText, clickSelector } = require('./checks/ui-scripts.cjs')
+const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('./checks/ui-scripts.cjs')
 const SEED = require('./checks/seed.cjs')
 
 const SKIP_ONBOARDING = clickByText('Entrar sin configurar')
@@ -35,6 +35,9 @@ app.whenReady().then(async () => {
   await pause(300)
   await shoot('')
   await expect('panel', 'Security Reviewer', 'Nucleo', '92', 'Push bloqueado')
+
+  // Los switches de agentes: el circulo debe caer dentro de la pista.
+  missing.push(...(await run(TOGGLES_INSIDE_TRACK)))
 
   await run(clickSelector('aside button[title="Agregar proyecto"]'))
   await pause(400)
