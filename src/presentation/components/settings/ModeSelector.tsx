@@ -1,10 +1,12 @@
 import { OPERATION_MODES, type OperationMode } from '@domain/settings/operation-mode'
+import type { IconName } from '@domain/shared/icon-name'
 import { changeOperationMode } from '../../services/settings-service'
 import { useSettingsStore } from '../../stores/settings-store'
+import { Icon } from '../common/Icon'
 
-const MODE_ICON: Record<OperationMode, string> = {
-  supervisado: '👁',
-  autonomo: '⚡'
+const MODE_ICON: Record<OperationMode, IconName> = {
+  supervisado: 'eye',
+  autonomo: 'zap'
 }
 
 const MODE_HINT: Record<OperationMode, string> = {
@@ -26,13 +28,14 @@ export function ModeSelector(): React.JSX.Element {
           title={MODE_HINT[option]}
           onClick={() => void changeOperationMode(option)}
           aria-pressed={mode === option}
-          className={`tap rounded px-2 py-1 text-xs capitalize ${
+          className={`tap flex items-center gap-1.5 rounded px-2 py-1 text-xs capitalize ${
             mode === option
               ? 'bg-primary font-semibold text-primary-foreground'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          {MODE_ICON[option]} {option}
+          <Icon name={MODE_ICON[option]} size={12} />
+          {option}
         </button>
       ))}
     </div>

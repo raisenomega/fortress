@@ -1,5 +1,5 @@
 appId: com.fortress.command-center
-productName: FORTRESS Command Center
+productName: 'FORTRESS. by Raisen'
 directories:
   # Fuera del proyecto: el build queda en ~/Escritorio/Raisen_FCC/dist/
   output: ../dist
@@ -19,6 +19,7 @@ asarUnpack:
   - '**/node_modules/better-sqlite3/**'
 mac:
   category: public.app-category.developer-tools
+  icon: build/icon.icns
   target:
     - dmg
     - zip
@@ -29,6 +30,8 @@ dmg:
 linux:
   target:
     - AppImage
+  icon: build/icon.png
+  executableName: fortress
   category: Development
   maintainer: raisenomega
   synopsis: Centro de mando para auditar proyectos con agentes de IA
@@ -37,20 +40,21 @@ linux:
   syncDesktopName: true
   desktop:
     entry:
-      Name: FORTRESS
+      Name: 'FORTRESS. by Raisen'
       Comment: Centro de mando FORTRESS
-      Categories: Development;Utility;
-      StartupWMClass: FORTRESS Command Center
+      Categories: Development;
+      StartupWMClass: fortress-command-center
 appImage:
   artifactName: FORTRESS-${version}.${ext}
 win:
   target:
     - nsis
     - portable
-  executableName: fortress-command-center
+  executableName: fortress
+  icon: build/icon.ico
 nsis:
   artifactName: FORTRESS-${version}-setup.${ext}
   shortcutName: FORTRESS
-  uninstallDisplayName: FORTRESS Command Center
+  uninstallDisplayName: 'FORTRESS. by Raisen'
   createDesktopShortcut: always
 npmRebuild: false

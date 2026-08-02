@@ -1,3 +1,5 @@
+import { X } from 'lucide-react'
+
 interface ModalProps {
   readonly title: string
   readonly onClose: () => void
@@ -24,9 +26,9 @@ export function Modal({ title, onClose, children }: ModalProps): React.JSX.Eleme
             type="button"
             onClick={onClose}
             aria-label="Cerrar"
-            className="tap rounded px-2 text-muted-foreground hover:text-foreground"
+            className="tap rounded p-1 text-muted-foreground hover:text-foreground"
           >
-            ✕
+            <X size={15} aria-hidden />
           </button>
         </header>
         {children}

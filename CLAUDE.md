@@ -30,18 +30,20 @@ Regla de dependencias: **hacia adentro**.
 `presentation -> application -> domain` y `infrastructure -> domain`.
 El dominio no importa de ninguna otra capa.
 
-## Alias
+Alias `@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*` y
+`@renderer/*`, definidos en `electron.vite.config.ts` y los dos `tsconfig`.
 
-`@domain/*`, `@application/*`, `@infrastructure/*`, `@presentation/*`, `@renderer/*`
-Definidos en `electron.vite.config.ts` + `tsconfig.node.json` + `tsconfig.web.json`.
-
-## Estilos
+## Estilos e identidad
 
 - Tema OMEGA de Raisen: fondo negro-navy, primary DORADO `38 85% 55%`.
 - **Nunca colores hardcodeados.** Siempre tokens: `bg-primary`, `text-critical`,
   `border-border`, o `hsl(var(--primary) / 0.5)` para opacidad.
 - Fuentes: Syne (display, h1-h4) + DM Sans (body). Bundleadas, sin CDN.
-- Los modulos de `src/presentation/styles/` tambien respetan el limite de 75 lineas.
+- **Cero emojis.** Los iconos salen de Lucide via `<Icon name="..." />`; el dominio
+  guarda un nombre semantico (`iconName`), nunca un componente ni un glifo.
+- **Una sola imagen oficial:** `resources/fortress-logo.jpeg`. Ningun logo se
+  genera ni se dibuja; todo icono deriva de ella con `npm run icons`.
+- Nombre oficial exacto: **FORTRESS. by Raisen**.
 
 ## Seguridad
 
@@ -63,12 +65,11 @@ npm run smoke            # monta la UI real y falla si no pinta o hay errores
 npm run preview          # siembra datos y captura la UI con contenido
 ```
 
-Los dos ultimos levantan la app compilada contra un `userData` temporal: nunca
-tocan la base de datos real. Cazan lo que typecheck y lint no ven (bucles de
-render, estilos que no se generan, reglas de integridad de la base).
+Los que levantan Electron usan un `userData` temporal y abortan si la app lo
+reasigna: escribir en la base real del operador ya paso una vez, en silencio.
 
 ## Distribucion
 
-Pasos en el README. Al tocarla, recuerda: `StartupWMClass` debe seguir
-coincidiendo con `productName`, o el escritorio no asociara la ventana abierta
-con su icono en la barra de aplicaciones.
+Pasos en el README. `StartupWMClass` debe coincidir con el WM_CLASS real que
+reporta Electron (verificalo con `xprop`, no lo supongas), o el escritorio no
+asociara la ventana con su icono en la barra de aplicaciones.

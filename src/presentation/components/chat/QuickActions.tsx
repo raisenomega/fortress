@@ -1,4 +1,5 @@
 import { QUICK_ACTIONS } from '@domain/chat/quick-actions'
+import { Icon } from '../common/Icon'
 
 interface QuickActionsProps {
   readonly disabled: boolean
@@ -14,9 +15,10 @@ export function QuickActions({ disabled, onPick }: QuickActionsProps): React.JSX
           type="button"
           disabled={disabled}
           onClick={() => onPick(action.prompt)}
-          className="tap rounded-full border border-border bg-secondary px-3 py-1 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground disabled:opacity-40"
+          className="tap flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground disabled:opacity-40"
         >
-          {action.icon} {action.label}
+          <Icon name={action.iconName} size={12} />
+          {action.label}
         </button>
       ))}
     </div>

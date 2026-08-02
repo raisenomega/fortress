@@ -1,6 +1,7 @@
-import { LEVEL_ICON, LEVEL_LABEL, problemsOf } from '@domain/health/health-check'
+import { LEVEL_COLOR, LEVEL_ICON, LEVEL_LABEL, problemsOf } from '@domain/health/health-check'
 import { runHealthCheck } from '../../services/health-service'
 import { useHealthStore } from '../../stores/health-store'
+import { Icon } from '../common/Icon'
 import { Modal } from '../common/Modal'
 import { HealthCheckRow } from './HealthCheckRow'
 
@@ -15,10 +16,11 @@ export function HealthPanel(): React.JSX.Element {
     <Modal title="Diagnostico del sistema" onClose={() => setPanelOpen(false)}>
       {report ? (
         <>
-          <p className="mb-3 text-sm">
-            <span aria-hidden>{LEVEL_ICON[report.level]}</span> {LEVEL_LABEL[report.level]}
+          <p className="mb-3 flex items-center gap-2 text-sm">
+            <Icon name={LEVEL_ICON[report.level]} size={15} className={LEVEL_COLOR[report.level]} />
+            {LEVEL_LABEL[report.level]}
             <span className="text-muted-foreground">
-              {problems === 0 ? ' · nada que arreglar' : ` · ${problems} a revisar`}
+              {problems === 0 ? '· nada que arreglar' : `· ${problems} a revisar`}
             </span>
           </p>
 

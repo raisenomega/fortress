@@ -23,14 +23,15 @@
     "test": "npm run test:unit && npm run build && electron --no-sandbox scripts/integration-test.cjs",
     "preview": "npm run build && electron --no-sandbox scripts/ui-preview.cjs",
     "test:unit": "vitest run",
-    "icon": "electron --no-sandbox scripts/make-icon.cjs",
-    "install:desktop": "./install.sh"
+    "install:desktop": "./install.sh",
+    "icons": "electron --no-sandbox scripts/make-icons.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "better-sqlite3": "^13.0.2"
+    "better-sqlite3": "^13.0.2",
+    "lucide-react": "^1.28.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",

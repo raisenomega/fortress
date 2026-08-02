@@ -13,10 +13,12 @@ export const AGENT_IDS = [
 
 export type AgentId = (typeof AGENT_IDS)[number]
 
+import type { IconName } from '../shared/icon-name'
+
 export interface Agent {
   readonly id: AgentId
-  /** Emoji que identifica al agente en la UI. */
-  readonly icon: string
+  /** Nombre semantico del icono; presentacion decide con que se dibuja. */
+  readonly iconName: IconName
   readonly name: string
   /** Que hace el agente, en una linea. */
   readonly purpose: string

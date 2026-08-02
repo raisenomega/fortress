@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Icon } from '../common/Icon'
 import { api } from '../../adapters/fortress-api'
 import { addSelfProject } from '../../services/project-service'
 
@@ -34,9 +35,10 @@ export function AddSelfButton({ onAdded, onError }: AddSelfButtonProps): React.J
       type="button"
       onClick={() => void add()}
       title="Agrega FORTRESS como proyecto para revisarla con sus propios agentes"
-      className="tap mt-3 w-full rounded-md border border-primary/40 bg-accent/20 px-3 py-2 text-xs text-primary hover:bg-accent/30"
+      className="tap mt-3 flex w-full items-center justify-center gap-1.5 rounded-md border border-primary/40 bg-accent/20 px-3 py-2 text-xs text-primary hover:bg-accent/30"
     >
-      🏰 Agregar FORTRESS a si misma
+      <Icon name="castle" size={13} />
+      Agregar FORTRESS a si misma
     </button>
   )
 }

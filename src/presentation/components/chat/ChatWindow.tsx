@@ -19,7 +19,7 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
   if (!project) {
     return (
       <EmptyState
-        icon="🏰"
+        iconName="castle"
         title="Ningun proyecto seleccionado"
         hint="Agrega un proyecto desde la barra lateral para abrir su chat. Cada proyecto guarda su propio historial."
       />
@@ -33,7 +33,7 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
       {messages.length === 0 ? (
         <div className="flex-1">
           <EmptyState
-            icon="💬"
+            iconName="message-square"
             title={`Chat de ${project.name}`}
             hint="Este historial es exclusivo de este proyecto. Empieza con una accion rapida o escribe tu peticion."
           />

@@ -1,9 +1,13 @@
 import { findAgent } from '@domain/agent/agent-catalog'
 import type { ChatMessage } from '@domain/chat/chat-message'
+import type { IconName } from '@domain/shared/icon-name'
 import { useProjectStore } from '../../stores/project-store'
 import { Chip } from '../common/Chip'
 
-const MODE_ICON = { supervisado: '👁', autonomo: '⚡' } as const
+const MODE_ICON: Record<ChatMessage['mode'], IconName> = {
+  supervisado: 'eye',
+  autonomo: 'zap'
+}
 
 interface MessageChipsProps {
   readonly message: ChatMessage
@@ -23,14 +27,16 @@ export function MessageChips({ message }: MessageChipsProps): React.JSX.Element 
   return (
     <div className="mb-2 flex flex-wrap items-center gap-1.5">
       {agent ? (
-        <Chip tone="agent" icon={agent.icon} label={agent.name} title={agent.purpose} />
+        <Chip tone="agent" iconName={agent.iconName} label={agent.name} title={agent.purpose} />
       ) : null}
 
-      {project ? <Chip tone="project" icon="📁" label={project.name} title={project.path} /> : null}
+      {project ? (
+        <Chip tone="project" iconName="folder-open" label={project.name} title={project.path} />
+      ) : null}
 
       <Chip
         tone="mode"
-        icon={MODE_ICON[message.mode]}
+        iconName={MODE_ICON[message.mode]}
         label={message.mode}
         title={`Generado en modo ${message.mode}`}
       />

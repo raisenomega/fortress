@@ -1,4 +1,5 @@
 import type { Agent } from '@domain/agent/agent'
+import { Icon } from '../common/Icon'
 import { Toggle } from '../common/Toggle'
 
 interface AgentToggleRowProps {
@@ -17,7 +18,11 @@ export function AgentToggleRow({
       title={agent.purpose}
       className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-secondary"
     >
-      <span className="text-sm">{agent.icon}</span>
+      <Icon
+        name={agent.iconName}
+        size={15}
+        className={enabled ? 'text-primary' : 'text-muted-foreground'}
+      />
       <span
         className={`min-w-0 flex-1 truncate text-sm ${
           enabled ? 'text-foreground' : 'text-muted-foreground'

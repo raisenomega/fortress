@@ -1,4 +1,6 @@
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
+import type { IconName } from '@domain/shared/icon-name'
+import { Icon } from '../common/Icon'
 
 const TONE: Record<ApiKeyVerdict['status'], string> = {
   valida: 'border-success/40 bg-success/10 text-success',
@@ -6,10 +8,10 @@ const TONE: Record<ApiKeyVerdict['status'], string> = {
   'sin-verificar': 'border-medium/40 bg-medium/10 text-medium'
 }
 
-const ICON: Record<ApiKeyVerdict['status'], string> = {
-  valida: '🟢',
-  invalida: '🔴',
-  'sin-verificar': '🟡'
+const ICON: Record<ApiKeyVerdict['status'], IconName> = {
+  valida: 'check-circle',
+  invalida: 'x-circle',
+  'sin-verificar': 'alert-triangle'
 }
 
 interface ApiKeyVerdictNoteProps {
@@ -23,8 +25,11 @@ export function ApiKeyVerdictNote({ verdict }: ApiKeyVerdictNoteProps): React.JS
       : verdict.reason
 
   return (
-    <p className={`mt-3 rounded-md border px-3 py-2 text-xs ${TONE[verdict.status]}`}>
-      {ICON[verdict.status]} {message}
+    <p
+      className={`mt-3 flex items-start gap-2 rounded-md border px-3 py-2 text-xs ${TONE[verdict.status]}`}
+    >
+      <Icon name={ICON[verdict.status]} size={13} className="mt-px shrink-0" />
+      {message}
     </p>
   )
 }

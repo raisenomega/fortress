@@ -11,7 +11,7 @@ source "$HERE/scripts/install-lib.sh"
 
 APPIMAGE="$(find_appimage "$HERE" || true)"
 if [ -z "$APPIMAGE" ]; then
-  echo "✗ No encuentro ningun FORTRESS-*.AppImage." >&2
+  echo "[error] No encuentro ningun FORTRESS-*.AppImage." >&2
   echo "  Generalo primero:  npm run build:linux" >&2
   exit 1
 fi
@@ -35,7 +35,7 @@ fi
 update-desktop-database "$MENU_DIR" 2>/dev/null || true
 gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
 
-echo "✓ FORTRESS instalado"
+echo "[ok] FORTRESS instalado"
 echo "  Ejecutable:      $BIN_PATH"
 echo "  Origen:          $APPIMAGE"
 echo "  Entrada de menu: $MENU_FILE"

@@ -13,13 +13,13 @@ export function ProjectDetected({ draft }: ProjectDetectedProps): React.JSX.Elem
     <div className="mt-3 flex flex-wrap gap-1.5">
       <Chip
         tone={draft.gitBranch ? 'agent' : 'mode'}
-        icon="🌿"
+        iconName="git-branch"
         label={draft.gitBranch ?? 'sin git'}
         title={draft.gitRemote ?? 'Sin remoto configurado'}
       />
       <Chip
         tone={draft.hasClaude ? 'agent' : 'mode'}
-        icon="📄"
+        iconName="file-text"
         label={draft.hasClaude ? 'CLAUDE.md' : 'sin CLAUDE.md'}
         title={
           draft.hasClaude

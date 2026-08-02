@@ -1,3 +1,4 @@
+import { FolderOpen } from 'lucide-react'
 import type { NewProject } from '@domain/project/project'
 import { FIELD_CLASS, LabeledField } from '../common/LabeledField'
 
@@ -35,9 +36,9 @@ export function ProjectFormFields({
             type="button"
             onClick={onPickFolder}
             title="Abrir el selector de carpetas del sistema"
-            className="tap shrink-0 rounded-md border border-border px-3 text-sm hover:border-primary/40"
+            className="tap shrink-0 rounded-md border border-border px-3 hover:border-primary/40"
           >
-            📁
+            <FolderOpen size={15} aria-hidden />
           </button>
         </div>
       </LabeledField>

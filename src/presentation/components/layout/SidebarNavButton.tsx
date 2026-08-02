@@ -1,12 +1,15 @@
+import type { IconName } from '@domain/shared/icon-name'
+import { Icon } from '../common/Icon'
+
 interface SidebarNavButtonProps {
-  readonly icon: string
+  readonly iconName: IconName
   readonly label: string
   readonly active: boolean
   readonly onClick: () => void
 }
 
 export function SidebarNavButton({
-  icon,
+  iconName,
   label,
   active,
   onClick
@@ -20,7 +23,7 @@ export function SidebarNavButton({
         active ? 'bg-accent/40 text-foreground' : 'text-muted-foreground hover:bg-secondary'
       }`}
     >
-      <span aria-hidden>{icon}</span>
+      <Icon name={iconName} size={15} />
       <span className="truncate">{label}</span>
     </button>
   )

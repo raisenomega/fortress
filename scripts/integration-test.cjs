@@ -21,7 +21,7 @@ function report(title, results) {
   console.log(`\n${title}`)
   let failed = 0
   for (const { name, pass, detail } of results) {
-    console.log(`  ${pass ? '✓' : '✗'} ${name}${pass ? '' : ` — ${detail}`}`)
+    console.log(`  ${pass ? 'PASS' : 'FAIL'} ${name}${pass ? '' : ` — ${detail}`}`)
     if (!pass) failed += 1
   }
   return failed

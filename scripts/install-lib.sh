@@ -13,18 +13,18 @@ find_appimage() {
 
 warn_missing_fuse() {
   ldconfig -p 2>/dev/null | grep -q libfuse.so.2 && return 0
-  echo "⚠ Falta libfuse2: los AppImage no arrancaran sin ella."
+  echo "[aviso] Falta libfuse2: los AppImage no arrancaran sin ella."
   echo "  Instalala con:  sudo apt install libfuse2"
 }
 
-# StartupWMClass debe coincidir con el productName para que el escritorio
-# asocie la ventana abierta con este icono en la barra de aplicaciones.
+# StartupWMClass debe coincidir con el WM_CLASS real que reporta Electron
+# (verificado con xprop), o la barra de aplicaciones no asocia la ventana.
 write_desktop_entry() {
   cat > "$1" <<EOF
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=FORTRESS
+Name=FORTRESS. by Raisen
 GenericName=Centro de mando FORTRESS
 Comment=Audita tus proyectos con agentes de IA
 Exec=$BIN_PATH
@@ -33,7 +33,7 @@ Terminal=false
 Categories=Development;
 Keywords=fortress;claude;seguridad;auditoria;
 StartupNotify=true
-StartupWMClass=FORTRESS Command Center
+StartupWMClass=fortress-command-center
 EOF
   chmod +x "$1"
 }
@@ -51,6 +51,6 @@ warn_path_missing() {
     *":$HOME/.local/bin:"*) return 0 ;;
   esac
   echo
-  echo "⚠ ~/.local/bin no esta en tu PATH; el comando 'fortress' no funcionara."
+  echo "[aviso] ~/.local/bin no esta en tu PATH; el comando 'fortress' no funcionara."
   echo "  Anade a ~/.bashrc:  export PATH=\"\$HOME/.local/bin:\$PATH\""
 }

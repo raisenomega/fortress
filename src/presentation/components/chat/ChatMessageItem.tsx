@@ -29,7 +29,10 @@ export function ChatMessageItem({ message }: ChatMessageItemProps): React.JSX.El
       </p>
       <p className="text-sm whitespace-pre-wrap text-foreground">
         {message.content}
-        {message.pending ? <span className="ml-1 animate-pulse text-primary">▍</span> : null}
+        {/* Cursor de streaming dibujado con CSS: no depende de ninguna fuente. */}
+        {message.pending ? (
+          <span className="ml-0.5 inline-block h-3.5 w-0.5 animate-pulse bg-primary align-text-bottom" />
+        ) : null}
       </p>
     </article>
   )

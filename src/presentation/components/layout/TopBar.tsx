@@ -1,5 +1,7 @@
+import { Settings } from 'lucide-react'
 import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
+import { APP_NAME } from '../common/Logo'
 import { ModeSelector } from '../settings/ModeSelector'
 
 export function TopBar(): React.JSX.Element {
@@ -8,7 +10,7 @@ export function TopBar(): React.JSX.Element {
 
   return (
     <header className="glass flex h-12 shrink-0 items-center gap-4 border-b border-border px-4">
-      <h1 className="shrink-0 text-sm tracking-wide text-primary">🏰 FORTRESS COMMAND CENTER</h1>
+      <h1 className="shrink-0 text-sm tracking-wide text-primary">{APP_NAME}</h1>
 
       <div className="min-w-0 flex-1">
         {project ? (
@@ -26,9 +28,9 @@ export function TopBar(): React.JSX.Element {
         type="button"
         onClick={() => setView('settings')}
         title="Configuracion"
-        className="tap shrink-0 rounded-md border border-border px-2 py-1 text-sm hover:border-primary/40"
+        className="tap shrink-0 rounded-md border border-border p-1.5 hover:border-primary/40"
       >
-        ⚙
+        <Settings size={15} aria-hidden />
       </button>
     </header>
   )

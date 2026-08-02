@@ -1,3 +1,5 @@
+import type { IconName } from '../shared/icon-name'
+
 export type HealthLevel = 'ok' | 'warning' | 'error'
 
 export interface HealthCheck {
@@ -25,10 +27,16 @@ export function overallLevel(checks: readonly HealthCheck[]): HealthLevel {
   )
 }
 
-export const LEVEL_ICON: Record<HealthLevel, string> = {
-  ok: '🟢',
-  warning: '🟡',
-  error: '🔴'
+export const LEVEL_ICON: Record<HealthLevel, IconName> = {
+  ok: 'check-circle',
+  warning: 'alert-triangle',
+  error: 'x-circle'
+}
+
+export const LEVEL_COLOR: Record<HealthLevel, string> = {
+  ok: 'text-success',
+  warning: 'text-medium',
+  error: 'text-critical'
 }
 
 export const LEVEL_LABEL: Record<HealthLevel, string> = {

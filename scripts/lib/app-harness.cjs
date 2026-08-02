@@ -20,9 +20,20 @@ function useTemporaryUserData() {
   delete process.env.ANTHROPIC_API_KEY
 }
 
-/** Ejecuta el composition root real: registra los handlers IPC y abre la base. */
+/**
+ * Ejecuta el composition root real y comprueba que sigue apuntando al userData
+ * temporal. Si el main lo reasigna (app.setPath), los tests escribirian en la
+ * base real del operador: ya paso una vez, y en silencio.
+ */
 function bootMainProcess() {
   require(join(OUT, 'main', 'index.js'))
+
+  const actual = app.getPath('userData')
+  if (actual === dataDir) return
+
+  console.error(`HARNESS FAIL: la app uso ${actual} en vez del temporal ${dataDir}.`)
+  console.error('Los tests escribirian en la base real; revisa main/index.ts.')
+  app.exit(1)
 }
 
 /**

@@ -1,4 +1,5 @@
-import { LEVEL_ICON, type HealthCheck } from '@domain/health/health-check'
+import { LEVEL_COLOR, LEVEL_ICON, type HealthCheck } from '@domain/health/health-check'
+import { Icon } from '../common/Icon'
 
 const BORDER: Record<HealthCheck['level'], string> = {
   ok: 'border-border',
@@ -14,7 +15,7 @@ export function HealthCheckRow({ check }: HealthCheckRowProps): React.JSX.Elemen
   return (
     <li className={`rounded-md border px-3 py-2 ${BORDER[check.level]}`}>
       <p className="flex items-center gap-2 text-sm text-foreground">
-        <span aria-hidden>{LEVEL_ICON[check.level]}</span>
+        <Icon name={LEVEL_ICON[check.level]} size={14} className={LEVEL_COLOR[check.level]} />
         {check.label}
       </p>
       <p className="mt-0.5 pl-6 text-xs text-muted-foreground">{check.detail}</p>

@@ -17,7 +17,7 @@ function describeAgents(enabled: readonly AgentId[]): string {
   const lines = enabled
     .map((id) => findAgent(id))
     .filter((agent) => agent !== undefined)
-    .map((agent) => `- ${agent.icon} ${agent.name}: ${agent.purpose}`)
+    .map((agent) => `- ${agent.name}: ${agent.purpose}`)
 
   return lines.length > 0 ? lines.join('\n') : '- (ninguno activo)'
 }
