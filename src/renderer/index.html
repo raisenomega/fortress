@@ -2,11 +2,13 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Electron</title>
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <title>FORTRESS Command Center</title>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+         Las llamadas a la API de Claude salen del proceso main (Node), nunca
+         del renderer: por eso no hace falta abrir connect-src a api.anthropic.com -->
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:"
     />
   </head>
 
