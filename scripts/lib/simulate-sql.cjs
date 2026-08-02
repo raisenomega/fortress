@@ -8,4 +8,7 @@ const INSERT_ACTIVITY = `INSERT INTO activity (id, project_id, agent_id, kind, s
 const INSERT = `INSERT INTO findings (id, project_id, severity, title, file, line, created_at)
   VALUES (?, ?, ?, ?, ?, ?, ?)`
 
-module.exports = { INSERT, INSERT_ACTIVITY, INSERT_RUN }
+const INSERT_SCAN = `INSERT INTO scans (id, project_id, score, finding_count,
+  critical_count, duration_ms, at) VALUES (?, ?, ?, ?, ?, 54000, ?)`
+
+module.exports = { INSERT, INSERT_ACTIVITY, INSERT_RUN, INSERT_SCAN }

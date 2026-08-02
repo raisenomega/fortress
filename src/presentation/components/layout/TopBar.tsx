@@ -1,4 +1,4 @@
-import { Settings } from 'lucide-react'
+import { BarChart3, Settings } from 'lucide-react'
 import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { APP_NAME } from '../common/Logo'
@@ -7,6 +7,7 @@ import { ModeSelector } from '../settings/ModeSelector'
 export function TopBar(): React.JSX.Element {
   const project = useActiveProject()
   const setView = useUiStore((state) => state.setView)
+  const view = useUiStore((state) => state.view)
 
   return (
     <header className="glass flex h-12 shrink-0 items-center gap-4 border-b border-border px-4">
@@ -21,6 +22,22 @@ export function TopBar(): React.JSX.Element {
           </p>
         ) : null}
       </div>
+
+      <button
+        type="button"
+        onClick={() => setView('rendimiento')}
+        aria-pressed={view === 'rendimiento'}
+        data-nav="Rendimiento"
+        title="Tokens, coste, tendencia del score y agentes mas activos"
+        className={`tap flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs ${
+          view === 'rendimiento'
+            ? 'border-primary/50 bg-accent/30 text-foreground'
+            : 'border-border text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        <BarChart3 size={13} aria-hidden />
+        Rendimiento
+      </button>
 
       <ModeSelector />
 

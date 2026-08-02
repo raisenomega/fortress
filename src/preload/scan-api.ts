@@ -21,6 +21,8 @@ export interface ScanApi {
   onProgress(listener: (chunk: ScanChunk) => void): Unsubscribe
   /** Escaneos anteriores, del mas reciente al mas antiguo. */
   history(projectId: string, limit: number): Promise<readonly ScanRecord[]>
+  /** Escaneos de todos los proyectos desde una fecha, para la tendencia. */
+  historySince(iso: string): Promise<readonly ScanRecord[]>
   /** Marca un hallazgo como falso positivo: deja de contar y de bloquear. */
   dismiss(findingId: string): Promise<Result<null>>
   reopen(findingId: string): Promise<Result<null>>

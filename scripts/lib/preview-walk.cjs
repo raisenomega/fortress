@@ -1,5 +1,6 @@
 /** Recorrido por las pantallas de la app, capturando y verificando cada una. */
 const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('../checks/ui-scripts.cjs')
+const { walkPerformance } = require('./preview-performance.cjs')
 const { walkTimeline } = require('./preview-timeline.cjs')
 
 const SKIP_ONBOARDING = clickByText('Entrar sin configurar')
@@ -46,10 +47,13 @@ async function walkScreens(helpers) {
   await expect('dialogo', 'Agregar proyecto a FORTRESS')
   await run(clickSelector('button[aria-label="Cerrar"]'))
 
-  await run(clickSelector('header button[aria-pressed="false"]'))
+  // clickByText mira textContent (crudo); el boton dice 'autonomo' en minusculas
+  await run(clickByText('autonomo'))
   await pause(400)
   await shoot('-autonomo')
   await expect('modo autonomo', 'sin confirmacion')
+
+  await walkPerformance(helpers)
 
   await run(clickSelector('[data-nav="Configuracion"]'))
   await pause(400)

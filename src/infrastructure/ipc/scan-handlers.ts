@@ -45,6 +45,10 @@ export function registerScanHandlers(): void {
     getAppContext().scans.listByProject(projectId, limit)
   )
 
+  ipcMain.handle(IPC.scanHistorySince, (_event, since: string) =>
+    getAppContext().scans.listSince(since)
+  )
+
   ipcMain.handle(IPC.scanDismiss, (_event, findingId: string) =>
     dismissFinding(getAppContext(), findingId)
   )
