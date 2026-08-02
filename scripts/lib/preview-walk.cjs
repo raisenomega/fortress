@@ -13,6 +13,14 @@ async function walkScreens(helpers) {
   await expect('panel', 'Security Reviewer', 'Nucleo', '99', 'Push bloqueado')
   await expect('barra de estado', 'tokens', '$0.20')
 
+  // El plan del workflow tiene que salir ANTES de ejecutar, en supervisado.
+  await run(clickByText('Revisa la seguridad'))
+  await pause(600)
+  await shoot('-plan')
+  await expect('plan de workflow', 'Revision de seguridad', 'Security Reviewer', 'agentes', 'Ejecutar')
+  await run(clickByText('Cancelar'))
+  await pause(300)
+
   // Los switches de agentes: el circulo debe caer dentro de la pista.
   missing.push(...(await run(TOGGLES_INSIDE_TRACK)))
 

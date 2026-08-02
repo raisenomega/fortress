@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react'
 import { AGENT_CATALOG } from '@domain/agent/agent-catalog'
-import { useAgentStore } from '../../stores/agent-store'
+import { useActiveAgentCount } from '../../stores/agent-store'
 import { useProjectStore } from '../../stores/project-store'
 import { useSidebarStore } from '../../stores/sidebar-store'
 import { useUiStore } from '../../stores/ui-store'
@@ -15,7 +15,7 @@ import { SidebarViewLinks } from './SidebarViewLinks'
 
 export function Sidebar(): React.JSX.Element {
   const projectCount = useProjectStore((state) => state.projects.length)
-  const enabledCount = useAgentStore((state) => state.enabled.length)
+  const activeCount = useActiveAgentCount()
   const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
   const collapsed = useSidebarStore((state) => state.collapsed)
 
@@ -47,7 +47,7 @@ export function Sidebar(): React.JSX.Element {
             <ProjectList />
           </SidebarSection>
 
-          <SidebarSection id="agentes" title={`Agentes (${enabledCount}/${AGENT_CATALOG.length})`}>
+          <SidebarSection id="agentes" title={`Agentes (${activeCount}/${AGENT_CATALOG.length})`}>
             <AgentPanel />
           </SidebarSection>
 

@@ -7,9 +7,11 @@ import { TopBar } from './TopBar'
 
 interface AppShellProps {
   readonly onSend: (text: string) => void
+  /** Plan pendiente de aprobacion, encima del chat. */
+  readonly plan: React.ReactNode
 }
 
-export function AppShell({ onSend }: AppShellProps): React.JSX.Element {
+export function AppShell({ onSend, plan }: AppShellProps): React.JSX.Element {
   const collapsed = useSidebarStore((state) => state.collapsed)
 
   return (
@@ -21,7 +23,7 @@ export function AppShell({ onSend }: AppShellProps): React.JSX.Element {
         className={`grid min-h-0 flex-1 ${collapsed ? 'grid-cols-[52px_1fr]' : 'grid-cols-[248px_1fr]'}`}
       >
         <Sidebar />
-        <MainArea onSend={onSend} />
+        <MainArea onSend={onSend} plan={plan} />
       </div>
 
       <StatusBar />

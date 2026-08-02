@@ -31,7 +31,8 @@ export function registerChatSendHandler(): void {
         assistant.ok ? assistant.value : null,
         codeAgent,
         input,
-        chunkSender(event, input.projectId)
+        chunkSender(event, input.projectId),
+        (index, total) => chunkSender(event, input.projectId)(`\n· paso ${index + 1}/${total}\n`)
       )
     } catch (error) {
       return err(describeAssistantError(error))

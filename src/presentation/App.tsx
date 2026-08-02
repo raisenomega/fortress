@@ -1,21 +1,22 @@
 import { AgentDetailModal } from './components/agents/AgentDetailModal'
+import { WorkflowPlanCard } from './components/workflow/WorkflowPlanCard'
 import { HealthPanel } from './components/health/HealthPanel'
 import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
 import { AddProjectDialog } from './components/projects/AddProjectDialog'
 import { useBootstrap } from './hooks/useBootstrap'
-import { sendMessage } from './services/chat-service'
-import { useAgentStore } from './stores/agent-store'
+import { useExcludedAgents } from './stores/agent-store'
 import { useHealthStore } from './stores/health-store'
 import { useProjectStore } from './stores/project-store'
 import { useSettingsStore } from './stores/settings-store'
 import { useUiStore } from './stores/ui-store'
+import { useWorkflowGate } from './hooks/useWorkflowGate'
 
 export function App(): React.JSX.Element {
   const mode = useSettingsStore((state) => state.mode)
   const hasApiKey = useSettingsStore((state) => state.hasApiKey)
   const apiKeyChecked = useSettingsStore((state) => state.apiKeyChecked)
-  const enabledAgents = useAgentStore((state) => state.enabled)
+  const excludedAgents = useExcludedAgents()
   const activeProjectId = useProjectStore((state) => state.activeProjectId)
   const addProjectOpen = useUiStore((state) => state.addProjectOpen)
   const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
@@ -25,12 +26,9 @@ export function App(): React.JSX.Element {
   const openAgentId = useUiStore((state) => state.openAgentId)
   const setOpenAgent = useUiStore((state) => state.setOpenAgent)
 
-  useBootstrap()
+  const gate = useWorkflowGate(activeProjectId, mode, excludedAgents)
 
-  function handleSend(prompt: string): void {
-    if (!activeProjectId) return
-    void sendMessage({ projectId: activeProjectId, prompt, mode, enabledAgents })
-  }
+  useBootstrap()
 
   // Se espera a saber si hay key para no parpadear el onboarding al arrancar.
   if (apiKeyChecked && !hasApiKey && !onboardingDismissed) {
@@ -39,7 +37,18 @@ export function App(): React.JSX.Element {
 
   return (
     <>
-      <AppShell onSend={handleSend} />
+      <AppShell
+        onSend={gate.send}
+        plan={
+          gate.pendingPrompt === null ? null : (
+            <WorkflowPlanCard
+              prompt={gate.pendingPrompt}
+              onCancel={gate.cancel}
+              onApprove={gate.approve}
+            />
+          )
+        }
+      />
       {addProjectOpen ? <AddProjectDialog onClose={() => setAddProjectOpen(false)} /> : null}
       {healthPanelOpen ? <HealthPanel /> : null}
       {openAgentId ? (

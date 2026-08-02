@@ -1,4 +1,3 @@
-import { routeToAgent } from '@domain/agent/agent-router'
 import type { Assistant } from '@domain/chat/assistant'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { effectiveMode } from '@domain/settings/operation-mode'
@@ -15,7 +14,8 @@ export async function sendMessage(
   assistant: Assistant | null,
   codeAgent: CodeAgent,
   input: SendMessageInput,
-  onChunk: (delta: string) => void
+  onChunk: (delta: string) => void,
+  onStep: (index: number, total: number) => void
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
@@ -37,14 +37,16 @@ export async function sendMessage(
   const user = persist('user', input.prompt, null)
   if (!user.ok) return err(user.error)
 
-  // El agente se decide ANTES de responder: es quien va a ejecutar, no una
-  // etiqueta que se le pone despues al mensaje.
-  const agentId = routeToAgent(input.prompt, input.enabledAgents)
-  const options = { context, assistant, codeAgent, project, input, mode, engine, agentId, onChunk }
-
   const startedAt = Date.now()
-  const outcome = await produceReply(options)
+  const outcome = await produceReply({
+    ...{ context, assistant, codeAgent, project, input, mode, engine },
+    excludedAgents: input.excludedAgents,
+    onStep,
+    onChunk
+  })
 
+  // El chip del mensaje es el primer agente que participo de verdad.
+  const agentId = outcome.agents[0] ?? null
   const stored = persist('assistant', outcome.text, agentId)
   if (!stored.ok) return err(stored.error)
 

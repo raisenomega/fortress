@@ -4,7 +4,7 @@ import { useUiStore } from '../../stores/ui-store'
 import { AgentToggleRow } from './AgentToggleRow'
 
 export function AgentPanel(): React.JSX.Element {
-  const enabled = useAgentStore((state) => state.enabled)
+  const excluded = useAgentStore((state) => state.excluded)
   const toggle = useAgentStore((state) => state.toggle)
   const setOpenAgent = useUiStore((state) => state.setOpenAgent)
 
@@ -14,7 +14,7 @@ export function AgentPanel(): React.JSX.Element {
         <AgentToggleRow
           key={agent.id}
           agent={agent}
-          enabled={enabled.includes(agent.id)}
+          enabled={!excluded.includes(agent.id)}
           onToggle={toggle}
           onOpen={setOpenAgent}
         />

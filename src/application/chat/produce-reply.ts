@@ -6,7 +6,7 @@ import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AppContext } from '../context'
 import type { ReplyOutcome } from './reply-outcome'
 import { replyFromApi } from './reply-from-api'
-import { runCodeAgent } from './run-code-agent'
+import { replyFromWorkflow } from './reply-from-workflow'
 import type { SendMessageInput } from './send-message-types'
 
 export interface ReplyOptions {
@@ -18,23 +18,34 @@ export interface ReplyOptions {
   readonly mode: OperationMode
   readonly engine: ChatEngine
   /** Agente que se hace cargo, ya enrutado. */
-  readonly agentId: AgentId | null
+  /** Agentes excluidos por el operador desde el sidebar. */
+  readonly excludedAgents: readonly AgentId[]
+  /** Progreso del workflow, paso a paso. */
+  readonly onStep: (index: number, total: number) => void
   readonly onChunk: (delta: string) => void
 }
 
 /** Produce el texto con el motor elegido: CLI real o API de solo texto. */
 export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
-  const { context, assistant, codeAgent, project, input, mode, engine, agentId, onChunk } = options
+  const { assistant, codeAgent, project, input, mode, engine, onChunk } = options
 
   if (engine === 'claude-code') {
-    return runCodeAgent(codeAgent, project, input.prompt, agentId, mode, onChunk)
+    return replyFromWorkflow({
+      codeAgent,
+      project,
+      prompt: input.prompt,
+      mode,
+      excludedAgents: options.excludedAgents,
+      onStep: options.onStep,
+      onChunk
+    })
   }
 
   return replyFromApi({
-    context,
+    context: options.context,
     assistant: assistant as Assistant,
     project,
-    enabledAgents: input.enabledAgents,
+    enabledAgents: [],
     mode,
     onChunk
   })

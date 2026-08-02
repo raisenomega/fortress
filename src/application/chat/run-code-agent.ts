@@ -25,7 +25,13 @@ export async function runCodeAgent(
     onChunk
   )
 
-  const traza = { usage: reply.usage, tools: reply.tools, edits: reply.edits }
+  const traza = {
+    usage: reply.usage,
+    tools: reply.tools,
+    edits: reply.edits,
+    agents: agentId === null ? [] : [agentId],
+    findings: []
+  }
   if (reply.denials.length === 0) {
     return { text: reply.text, failed: reply.failed, ...traza }
   }

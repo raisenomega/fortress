@@ -7,7 +7,8 @@ export interface SendMessageInput {
   readonly projectId: string
   readonly prompt: string
   readonly mode: OperationMode
-  readonly enabledAgents: readonly AgentId[]
+  /** Agentes que el operador dejo fuera desde el sidebar. */
+  readonly excludedAgents: readonly AgentId[]
 }
 
 export interface SendMessageOutput {

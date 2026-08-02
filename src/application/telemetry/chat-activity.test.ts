@@ -8,7 +8,9 @@ const outcome = (edits: string[] = []): ReplyOutcome => ({
   failed: false,
   usage: EMPTY_USAGE,
   tools: [],
-  edits
+  edits,
+  agents: [],
+  findings: []
 })
 
 describe('chatActivity', () => {

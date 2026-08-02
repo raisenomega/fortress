@@ -38,7 +38,7 @@ export function AgentToggleRow({
       <Toggle
         checked={enabled}
         onChange={() => onToggle(agent.id)}
-        label={`Activar ${agent.name}`}
+        label={`${enabled ? 'Excluir' : 'Incluir'} ${agent.name} de los workflows`}
       />
     </div>
   )

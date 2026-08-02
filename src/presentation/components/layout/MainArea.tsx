@@ -21,9 +21,10 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
 
 interface MainAreaProps {
   readonly onSend: (text: string) => void
+  readonly plan: React.ReactNode
 }
 
-export function MainArea({ onSend }: MainAreaProps): React.JSX.Element {
+export function MainArea({ onSend, plan }: MainAreaProps): React.JSX.Element {
   const view = useUiStore((state) => state.view)
   const panel = PANELS[view]
 
@@ -32,6 +33,7 @@ export function MainArea({ onSend }: MainAreaProps): React.JSX.Element {
   return (
     <main className="flex min-h-0 flex-col overflow-hidden">
       <MultiProjectView />
+      {plan}
       <div className="min-h-0 flex-1">
         <ChatWindow onSend={onSend} />
       </div>
