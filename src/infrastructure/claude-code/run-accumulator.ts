@@ -1,4 +1,5 @@
 import type { CodeAgentReply } from '@domain/chat/code-agent'
+import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
 import { parseStreamLine } from './stream-events'
 
 export interface RunAccumulator {
@@ -9,11 +10,14 @@ export interface RunAccumulator {
 
 /**
  * Va juntando la salida del CLI. El texto se emite segun llega para que el
- * chat lo pinte en vivo; al cerrarse el proceso se compone la respuesta final.
+ * chat lo pinte en vivo; al cerrarse el proceso se compone la respuesta final
+ * con lo que costo y con las herramientas que se usaron por el camino.
  */
 export function createRunAccumulator(onChunk: (delta: string) => void): RunAccumulator {
   const collected: string[] = []
+  const tools: string[] = []
   let denials: readonly string[] = []
+  let usage: TokenUsage = EMPTY_USAGE
   let finalText = ''
   let failed = false
   let stderr = ''
@@ -23,7 +27,10 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
       const event = parseStreamLine(line)
       if (!event) return
 
-      if (event.tool) onChunk(`\n· ${event.tool}\n`)
+      if (event.tool) {
+        tools.push(event.tool)
+        onChunk(`\n· ${event.tool}\n`)
+      }
       if (event.text) {
         collected.push(event.text)
         onChunk(event.text)
@@ -32,6 +39,7 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
         finalText = event.finalText
         failed = event.failed === true
         denials = event.denials ?? []
+        usage = event.usage ?? EMPTY_USAGE
       }
     },
 
@@ -41,10 +49,10 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
 
     toReply(exitCode) {
       const text = collected.join('') || finalText
-      if (exitCode === 0 && !failed) return { text, failed: false, denials }
+      if (exitCode === 0 && !failed) return { text, failed: false, denials, usage, tools }
 
       const detail = stderr.trim() || finalText || `el proceso termino con codigo ${exitCode}`
-      return { text: text || detail, failed: true, denials }
+      return { text: text || detail, failed: true, denials, usage, tools }
     }
   }
 }

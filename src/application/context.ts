@@ -3,6 +3,7 @@ import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
 import type { SettingsRepository } from '@domain/settings/settings-repository'
+import type { AgentRunRepository } from '@domain/telemetry/agent-run-repository'
 import type { RunInTransaction } from '@domain/shared/transaction'
 
 /**
@@ -14,6 +15,7 @@ export interface AppContext {
   readonly projects: ProjectRepository
   readonly findings: FindingRepository
   readonly chat: ChatRepository
+  readonly runs: AgentRunRepository
   readonly transaction: RunInTransaction
   readonly settings: SettingsRepository
   readonly apiKeys: ApiKeyStore

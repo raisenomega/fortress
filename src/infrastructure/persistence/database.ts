@@ -3,6 +3,7 @@ import { app } from 'electron'
 import { join } from 'path'
 import { runMigrations } from './migrations'
 import { SCHEMA } from './schema'
+import { TELEMETRY_SCHEMA } from './schema-telemetry'
 
 export type Db = Database.Database
 
@@ -27,6 +28,7 @@ export function getDatabase(): Db {
   const db = new Database(databasePath())
   configure(db)
   db.exec(SCHEMA)
+  db.exec(TELEMETRY_SCHEMA)
   runMigrations(db)
   instance = db
   return db

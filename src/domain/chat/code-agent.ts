@@ -1,4 +1,5 @@
 import type { ClaudePermissionMode } from '../settings/permission-mode'
+import type { TokenUsage } from '../telemetry/token-usage'
 
 /** Quien contesto: el CLI con herramientas reales, o solo la API de texto. */
 export type ChatEngine = 'claude-code' | 'api'
@@ -15,6 +16,10 @@ export interface CodeAgentReply {
   readonly failed: boolean
   /** Operaciones que el agente quiso hacer y el modo de permisos bloqueo. */
   readonly denials: readonly string[]
+  /** Lo que costo la ejecucion, segun el propio CLI. */
+  readonly usage: TokenUsage
+  /** Herramientas usadas, en orden. De aqui salen los "fixes aplicados". */
+  readonly tools: readonly string[]
 }
 
 /**

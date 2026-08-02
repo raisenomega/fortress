@@ -2,6 +2,7 @@ import type { AppContext } from '@application/context'
 import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
 import { createSafeStorageApiKeyStore } from '../security/api-key-store'
 import { getDatabase } from './database'
+import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
 import { createSqliteChatRepository } from './sqlite-chat-repository'
 import { createSqliteFindingRepository } from './sqlite-finding-repository'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
@@ -20,6 +21,7 @@ export function getAppContext(): AppContext {
     projects: createSqliteProjectRepository(db),
     findings: createSqliteFindingRepository(db),
     chat: createSqliteChatRepository(db),
+    runs: createSqliteAgentRunRepository(db),
     transaction: (work) => db.transaction(work)(),
     settings,
     apiKeys: createSafeStorageApiKeyStore(settings),

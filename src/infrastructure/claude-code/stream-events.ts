@@ -3,6 +3,9 @@
  * con lo que la UI necesita. La forma esta tomada de la salida real del CLI
  * 2.1.220, no de la documentacion.
  */
+import type { TokenUsage } from '@domain/telemetry/token-usage'
+import { parseUsage } from './parse-usage'
+
 export interface ParsedEvent {
   readonly text?: string
   /** Nombre de la herramienta que el agente acaba de usar (Read, Bash...). */
@@ -10,6 +13,8 @@ export interface ParsedEvent {
   readonly finalText?: string
   readonly failed?: boolean
   readonly denials?: readonly string[]
+  /** Solo lo trae el evento final: tokens y coste de toda la ejecucion. */
+  readonly usage?: TokenUsage
 }
 
 interface ContentBlock {
@@ -59,7 +64,8 @@ function fromResult(event: Record<string, unknown>): ParsedEvent {
   return {
     finalText: typeof event.result === 'string' ? event.result : '',
     failed: event.is_error === true || event.subtype !== 'success',
-    denials
+    denials,
+    usage: parseUsage(event)
   }
 }
 
