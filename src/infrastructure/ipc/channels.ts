@@ -15,6 +15,8 @@ export const IPC = {
   /** Evento main -> renderer con el avance del escaneo. */
   scanProgress: 'scan:progress',
   pushRun: 'push:run',
+  activityProject: 'activity:project',
+  activityAgent: 'activity:agent',
   chatHistory: 'chat:history',
   chatAppend: 'chat:append',
   chatClear: 'chat:clear',

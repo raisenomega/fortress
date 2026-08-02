@@ -1,3 +1,4 @@
+import { registerActivityHandlers } from './activity-handlers'
 import { registerChatHandlers } from './chat-handlers'
 import { registerChatSendHandler } from './chat-send-handler'
 import { registerHealthHandlers } from './health-handlers'
@@ -15,4 +16,5 @@ export function registerIpcHandlers(): void {
   registerHealthHandlers()
   registerScanHandlers()
   registerPushHandlers()
+  registerActivityHandlers()
 }

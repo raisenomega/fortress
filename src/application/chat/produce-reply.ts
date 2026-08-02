@@ -3,6 +3,7 @@ import type { ChatEngine, CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AppContext } from '../context'
+import type { ReplyOutcome } from './reply-outcome'
 import { replyFromApi } from './reply-from-api'
 import { runCodeAgent } from './run-code-agent'
 import type { SendMessageInput } from './send-message-types'
@@ -19,13 +20,11 @@ export interface ReplyOptions {
 }
 
 /** Produce el texto con el motor elegido: CLI real o API de solo texto. */
-export function produceReply(options: ReplyOptions): Promise<string> {
+export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
   const { context, assistant, codeAgent, project, input, mode, engine, onChunk } = options
 
   if (engine === 'claude-code') {
-    return runCodeAgent(codeAgent, project, input.prompt, mode, onChunk).then(
-      (outcome) => outcome.text
-    )
+    return runCodeAgent(codeAgent, project, input.prompt, mode, onChunk)
   }
 
   return replyFromApi({

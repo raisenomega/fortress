@@ -1,9 +1,7 @@
-import { countFindings } from '@domain/project/severity-counts'
 import type { Scanner } from '@domain/scan/scanner'
-import { scoreFromFindings } from '@domain/scan/score-from-findings'
-import { nowIso } from '@domain/shared/id'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { persistScan } from './persist-scan'
 import type { ScanSummary } from './scan-types'
 
 const NO_SCANNER =
@@ -31,25 +29,5 @@ export async function runScan(
   )
   if (!outcome.ok) return err(outcome.error)
 
-  const { findings, durationMs } = outcome.value
-  const score = scoreFromFindings(findings)
-  const counts = countFindings(findings)
-  const scannedAt = nowIso()
-
-  // Historico, hallazgos y score describen el mismo escaneo: entran los tres
-  // o ninguno. Un score sin sus hallazgos es un numero sin respaldo.
-  context.transaction(() => {
-    const scan = context.scans.record({
-      projectId: project.id,
-      score,
-      findingCount: findings.length,
-      criticalCount: counts.CRITICAL,
-      durationMs,
-      at: scannedAt
-    })
-    context.findings.replaceForProject(project.id, scan.id, findings)
-    context.projects.updateScan(project.id, score, scannedAt)
-  })
-
-  return ok({ projectId: project.id, score, scannedAt, durationMs, counts })
+  return ok(persistScan(context, project, outcome.value))
 }

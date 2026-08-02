@@ -34,7 +34,13 @@ export function createClaudeScanner(codeAgent: CodeAgent): Scanner {
       const parsed = parseScanOutput(reply.text)
       if (!parsed.ok) return err(parsed.error)
 
-      return ok({ findings: parsed.value, durationMs: Date.now() - startedAt })
+      return ok({
+        findings: parsed.value,
+        durationMs: Date.now() - startedAt,
+        usage: reply.usage,
+        tools: reply.tools,
+        edits: reply.edits
+      })
     }
   }
 }

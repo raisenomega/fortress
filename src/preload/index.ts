@@ -29,6 +29,11 @@ const api: FortressApi = {
     dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
     reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId)
   },
+  activity: {
+    byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),
+    byAgent: (agentId, projectId, limit) =>
+      ipcRenderer.invoke(IPC.activityAgent, agentId, projectId, limit)
+  },
   push: {
     run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
   },

@@ -1,4 +1,5 @@
 import type { Result } from '../shared/result'
+import type { TokenUsage } from '../telemetry/token-usage'
 import type { DetectedFinding } from './detected-finding'
 
 export interface ScanRequest {
@@ -10,6 +11,10 @@ export interface ScanRequest {
 export interface ScanOutcome {
   readonly findings: readonly DetectedFinding[]
   readonly durationMs: number
+  readonly usage: TokenUsage
+  readonly tools: readonly string[]
+  /** Rutas escritas. Un escaneo en modo plan no deberia traer ninguna. */
+  readonly edits: readonly string[]
 }
 
 /**

@@ -1,3 +1,5 @@
+import type { TokenUsage } from '../telemetry/token-usage'
+
 export interface AssistantTurn {
   readonly role: 'user' | 'assistant'
   readonly content: string
@@ -13,6 +15,12 @@ export interface AssistantReply {
   readonly text: string
   /** El modelo declino la peticion (stop_reason "refusal"). */
   readonly refused: boolean
+  /**
+   * Tokens de la llamada. El coste va a cero a proposito: la API devuelve
+   * consumo, no dinero, y aqui no se inventa una tarifa. Solo Claude Code
+   * reporta `total_cost_usd`.
+   */
+  readonly usage: TokenUsage
 }
 
 /**

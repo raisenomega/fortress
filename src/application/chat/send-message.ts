@@ -4,6 +4,7 @@ import type { CodeAgent } from '@domain/chat/code-agent'
 import { effectiveMode } from '@domain/settings/operation-mode'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { recordChatRun } from '../telemetry/record-chat-run'
 import { appendMessage } from './chat-history'
 import { chooseEngine } from './choose-engine'
 import { produceReply } from './produce-reply'
@@ -37,10 +38,13 @@ export async function sendMessage(
   if (!user.ok) return err(user.error)
 
   const options = { context, assistant, codeAgent, project, input, mode, engine, onChunk }
-  const text = await produceReply(options)
+  const startedAt = Date.now()
+  const outcome = await produceReply(options)
+  const agentId = routeToAgent(input.prompt, input.enabledAgents)
 
-  const stored = persist('assistant', text, routeToAgent(input.prompt, input.enabledAgents))
+  const stored = persist('assistant', outcome.text, agentId)
   if (!stored.ok) return err(stored.error)
 
+  recordChatRun(context, { project, agentId, engine, outcome, startedAt, prompt: input.prompt })
   return ok({ user: user.value, assistant: stored.value, engine })
 }

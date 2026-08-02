@@ -42,6 +42,21 @@ CREATE INDEX IF NOT EXISTS idx_scans_project ON scans (project_id, at);
 -- El descarte sobrevive al escaneo que lo origino: las filas de findings se
 -- sustituyen enteras en cada escaneo, asi que la decision del operador tiene
 -- que vivir aparte o duraria hasta el siguiente scan.
+CREATE TABLE IF NOT EXISTS activity (
+  id         TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  agent_id   TEXT,
+  kind       TEXT NOT NULL,
+  summary    TEXT NOT NULL,
+  severity   TEXT,
+  file       TEXT NOT NULL DEFAULT '',
+  line       INTEGER,
+  at         TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_activity_project ON activity (project_id, at);
+CREATE INDEX IF NOT EXISTS idx_activity_agent   ON activity (agent_id, at);
+
 CREATE TABLE IF NOT EXISTS dismissals (
   project_id  TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   fingerprint TEXT NOT NULL,

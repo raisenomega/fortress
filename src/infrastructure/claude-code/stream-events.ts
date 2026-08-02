@@ -1,26 +1,18 @@
+import type { TokenUsage } from '@domain/telemetry/token-usage'
+import { parseAssistant, type AssistantEvent } from './parse-assistant'
+import { parseUsage } from './parse-usage'
+
 /**
  * Eventos del `--output-format stream-json` de Claude Code, quedandose solo
  * con lo que la UI necesita. La forma esta tomada de la salida real del CLI
  * 2.1.220, no de la documentacion.
  */
-import type { TokenUsage } from '@domain/telemetry/token-usage'
-import { parseUsage } from './parse-usage'
-
-export interface ParsedEvent {
-  readonly text?: string
-  /** Nombre de la herramienta que el agente acaba de usar (Read, Bash...). */
-  readonly tool?: string
+export interface ParsedEvent extends AssistantEvent {
   readonly finalText?: string
   readonly failed?: boolean
   readonly denials?: readonly string[]
   /** Solo lo trae el evento final: tokens y coste de toda la ejecucion. */
   readonly usage?: TokenUsage
-}
-
-interface ContentBlock {
-  type: string
-  text?: string
-  name?: string
 }
 
 /** Una linea NDJSON del CLI. Devuelve null si no aporta nada a la UI. */
@@ -36,24 +28,9 @@ export function parseStreamLine(line: string): ParsedEvent | null {
     return null
   }
 
-  if (event.type === 'assistant') return fromAssistant(event)
+  if (event.type === 'assistant') return parseAssistant(event)
   if (event.type === 'result') return fromResult(event)
   return null
-}
-
-function fromAssistant(event: Record<string, unknown>): ParsedEvent | null {
-  const message = event.message as { content?: ContentBlock[] } | undefined
-  const blocks = message?.content ?? []
-
-  const text = blocks
-    .filter((block) => block.type === 'text' && block.text)
-    .map((block) => block.text)
-    .join('')
-
-  const tool = blocks.find((block) => block.type === 'tool_use')?.name
-
-  if (!text && !tool) return null
-  return { ...(text ? { text } : {}), ...(tool ? { tool } : {}) }
 }
 
 function fromResult(event: Record<string, unknown>): ParsedEvent {

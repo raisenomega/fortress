@@ -4,6 +4,7 @@ import type { ChatMessage } from '@domain/chat/chat-message'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AppContext } from '../context'
+import { textOnly, type ReplyOutcome } from './reply-outcome'
 import { buildSystemPrompt } from './system-prompt'
 
 export interface ApiReplyOptions {
@@ -26,7 +27,7 @@ function toTurns(history: readonly ChatMessage[]): AssistantTurn[] {
  * Camino de respaldo: responde la API sin acceso al proyecto. No lee archivos
  * ni ejecuta nada; es lo que queda cuando Claude Code no esta instalado.
  */
-export async function replyFromApi(options: ApiReplyOptions): Promise<string> {
+export async function replyFromApi(options: ApiReplyOptions): Promise<ReplyOutcome> {
   const { context, assistant, project, enabledAgents, mode, onChunk } = options
 
   const reply = await assistant.stream(
@@ -37,7 +38,9 @@ export async function replyFromApi(options: ApiReplyOptions): Promise<string> {
     onChunk
   )
 
-  return reply.refused
+  const text = reply.refused
     ? 'La peticion fue declinada por los clasificadores de seguridad del modelo.'
     : reply.text
+
+  return textOnly(text, reply.usage)
 }

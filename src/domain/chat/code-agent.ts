@@ -20,6 +20,8 @@ export interface CodeAgentReply {
   readonly usage: TokenUsage
   /** Herramientas usadas, en orden. De aqui salen los "fixes aplicados". */
   readonly tools: readonly string[]
+  /** Rutas que el agente escribio. Nunca comandos: pueden llevar secretos. */
+  readonly edits: readonly string[]
 }
 
 /**

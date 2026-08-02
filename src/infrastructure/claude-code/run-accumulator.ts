@@ -16,6 +16,7 @@ export interface RunAccumulator {
 export function createRunAccumulator(onChunk: (delta: string) => void): RunAccumulator {
   const collected: string[] = []
   const tools: string[] = []
+  const edits: string[] = []
   let denials: readonly string[] = []
   let usage: TokenUsage = EMPTY_USAGE
   let finalText = ''
@@ -27,6 +28,7 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
       const event = parseStreamLine(line)
       if (!event) return
 
+      if (event.editedFile) edits.push(event.editedFile)
       if (event.tool) {
         tools.push(event.tool)
         onChunk(`\n· ${event.tool}\n`)
@@ -49,10 +51,10 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
 
     toReply(exitCode) {
       const text = collected.join('') || finalText
-      if (exitCode === 0 && !failed) return { text, failed: false, denials, usage, tools }
+      if (exitCode === 0 && !failed) return { text, failed: false, denials, usage, tools, edits }
 
       const detail = stderr.trim() || finalText || `el proceso termino con codigo ${exitCode}`
-      return { text: text || detail, failed: true, denials, usage, tools }
+      return { text: text || detail, failed: true, denials, usage, tools, edits }
     }
   }
 }

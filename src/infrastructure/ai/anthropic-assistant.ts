@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { Assistant, AssistantReply, AssistantRequest } from '@domain/chat/assistant'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 
 /** Claude Opus 5: piensa por defecto, asi que max_tokens cubre razonamiento + texto. */
 export const CHAT_MODEL = 'claude-opus-5'
@@ -16,6 +17,17 @@ function textOf(reply: Anthropic.Beta.BetaMessage): string {
     .filter((block): block is Anthropic.Beta.BetaTextBlock => block.type === 'text')
     .map((block) => block.text)
     .join('')
+}
+
+function usageOf(reply: Anthropic.Beta.BetaMessage): TokenUsage {
+  return {
+    inputTokens: reply.usage.input_tokens,
+    outputTokens: reply.usage.output_tokens,
+    cacheReadTokens: reply.usage.cache_read_input_tokens ?? 0,
+    cacheCreationTokens: reply.usage.cache_creation_input_tokens ?? 0,
+    costUsd: 0,
+    numTurns: 1
+  }
 }
 
 export function createAnthropicAssistant(apiKey: string): Assistant {
@@ -37,7 +49,11 @@ export function createAnthropicAssistant(apiKey: string): Assistant {
 
       // Hay que mirar stop_reason antes que el contenido: en un rechazo puede
       // venir vacio o truncado.
-      return { text: textOf(reply), refused: reply.stop_reason === 'refusal' }
+      return {
+        text: textOf(reply),
+        refused: reply.stop_reason === 'refusal',
+        usage: usageOf(reply)
+      }
     }
   }
 }
