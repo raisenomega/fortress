@@ -8,6 +8,7 @@ const { app } = require('electron')
 const { join } = require('path')
 const { writeFileSync } = require('fs')
 const harness = require('./lib/app-harness.cjs')
+const { simulateScan } = require('./lib/simulate-scan.cjs')
 const SEED = require('./checks/seed.cjs')
 
 const SCREENSHOT = join(__dirname, '..', '.ui-preview.png')
@@ -29,6 +30,7 @@ app.whenReady().then(async () => {
   await harness.loadRenderer(window)
 
   const seeded = await window.webContents.executeJavaScript(SEED)
+  simulateScan()
   await window.webContents.reload()
   await new Promise((resolve) => setTimeout(resolve, SETTLE_MS))
 

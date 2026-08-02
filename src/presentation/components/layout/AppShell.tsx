@@ -1,4 +1,5 @@
 import { ChatWindow } from '../chat/ChatWindow'
+import { MultiProjectView } from '../dashboard/MultiProjectView'
 import { Sidebar } from './Sidebar'
 import { StatusBar } from './StatusBar'
 import { TopBar } from './TopBar'
@@ -20,8 +21,12 @@ export function AppShell({
 
       <div className="grid min-h-0 flex-1 grid-cols-[248px_1fr]">
         <Sidebar onAddProject={onAddProject} />
-        <main className="min-h-0 overflow-hidden">
-          <ChatWindow onSend={onSend} />
+
+        <main className="flex min-h-0 flex-col overflow-hidden">
+          <MultiProjectView />
+          <div className="min-h-0 flex-1">
+            <ChatWindow onSend={onSend} />
+          </div>
         </main>
       </div>
 
