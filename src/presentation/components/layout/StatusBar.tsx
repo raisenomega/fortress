@@ -3,7 +3,6 @@ import { useHealthStore } from '../../stores/health-store'
 import { useProjectStore } from '../../stores/project-store'
 import { useSettingsStore } from '../../stores/settings-store'
 import { Icon } from '../common/Icon'
-import { UsageIndicator } from './UsageIndicator'
 
 export function StatusBar(): React.JSX.Element {
   const projectCount = useProjectStore((state) => state.projects.length)
@@ -32,7 +31,6 @@ export function StatusBar(): React.JSX.Element {
       </button>
 
       <span>{projectCount} proyectos</span>
-      <UsageIndicator />
       <span className="ml-auto capitalize">Modo {mode}</span>
     </footer>
   )

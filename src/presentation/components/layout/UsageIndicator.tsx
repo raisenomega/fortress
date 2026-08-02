@@ -27,7 +27,7 @@ export function UsageIndicator(): React.JSX.Element | null {
       type="button"
       onClick={() => setView('rendimiento')}
       title={`${title}. Pulsa para ver el detalle`}
-      className="tap rounded px-1 font-mono hover:text-foreground"
+      className="tap shrink-0 rounded px-1 font-mono text-primary hover:brightness-125"
     >
       {formatTokens(tokens)} tokens
       {cost ? ` · ${billing.mode === 'suscripcion' ? '~' : ''}${cost}` : ''}
