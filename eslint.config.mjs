@@ -35,5 +35,14 @@ export default defineConfig(
       '@typescript-eslint/ban-ts-comment': 'error'
     }
   },
+  {
+    // Scripts que Electron ejecuta directamente: son CommonJS de Node, no
+    // TypeScript. Las reglas de modulos ES y de tipado no aplican aqui.
+    files: ['scripts/**/*.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off'
+    }
+  },
   eslintConfigPrettier
 )

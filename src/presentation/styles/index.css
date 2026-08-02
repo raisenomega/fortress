@@ -1,6 +1,11 @@
 /* Entrada unica de estilos. Cada modulo se mantiene bajo 75 lineas. */
 @import 'tailwindcss';
 
+/* El root de Vite para el renderer es src/renderer, pero los componentes viven
+   en src/presentation. Sin este @source, Tailwind no escanea sus clases y no
+   genera ni una sola utilidad. */
+@source '../../presentation';
+
 @import './fonts.css';
 @import './tokens-omega.css';
 @import './tokens-light.css';
