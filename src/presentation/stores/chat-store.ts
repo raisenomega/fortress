@@ -4,14 +4,18 @@ import type { ChatMessage } from '@domain/chat/chat-message'
 interface ChatState {
   /** Historial por proyecto: cada proyecto tiene su propia conversacion. */
   readonly byProject: Readonly<Record<string, readonly ChatMessage[]>>
-  readonly streaming: boolean
-  /** Ultimo fallo al hablar con Claude, para mostrarlo sin bloquear la UI. */
-  readonly error: string | null
+  /**
+   * Estado de ejecucion y error, TAMBIEN por proyecto. Antes eran un solo
+   * valor global: si el proyecto A estaba respondiendo y cambiabas a B, el chat
+   * de B aparecia bloqueado y con el error de A. Cada proyecto lleva el suyo.
+   */
+  readonly streamingByProject: Readonly<Record<string, boolean>>
+  readonly errorByProject: Readonly<Record<string, string | null>>
   setMessages: (projectId: string, messages: readonly ChatMessage[]) => void
   appendMessage: (message: ChatMessage) => void
   replaceMessage: (id: string, message: ChatMessage) => void
-  setStreaming: (streaming: boolean) => void
-  setError: (error: string | null) => void
+  setStreaming: (projectId: string, streaming: boolean) => void
+  setError: (projectId: string, error: string | null) => void
 }
 
 function upsert(
@@ -26,8 +30,8 @@ function upsert(
 
 export const useChatStore = create<ChatState>((set) => ({
   byProject: {},
-  streaming: false,
-  error: null,
+  streamingByProject: {},
+  errorByProject: {},
 
   setMessages: (projectId, messages) =>
     set((state) => ({ byProject: { ...state.byProject, [projectId]: messages } })),
@@ -48,19 +52,11 @@ export const useChatStore = create<ChatState>((set) => ({
       }
     })),
 
-  setStreaming: (streaming) => set({ streaming }),
-  setError: (error) => set({ error })
+  setStreaming: (projectId, streaming) =>
+    set((state) => ({
+      streamingByProject: { ...state.streamingByProject, [projectId]: streaming }
+    })),
+
+  setError: (projectId, error) =>
+    set((state) => ({ errorByProject: { ...state.errorByProject, [projectId]: error } }))
 }))
-
-/**
- * Referencia estable para proyectos sin mensajes. Devolver un `[]` nuevo en
- * cada render haria que zustand viera un snapshot distinto siempre y React
- * entraria en un bucle de actualizacion infinito.
- */
-const NO_MESSAGES: readonly ChatMessage[] = []
-
-export function useProjectMessages(projectId: string | null): readonly ChatMessage[] {
-  return useChatStore((state) =>
-    projectId ? (state.byProject[projectId] ?? NO_MESSAGES) : NO_MESSAGES
-  )
-}

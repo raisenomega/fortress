@@ -30,8 +30,8 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
   const store = useChatStore.getState()
   const draft = draftAssistantMessage(input.projectId, input.mode)
 
-  store.setError(null)
-  store.setStreaming(true)
+  store.setError(input.projectId, null)
+  store.setStreaming(input.projectId, true)
   useRunMeterStore.getState().begin(Date.now())
   store.appendMessage(draftUserMessage(input.projectId, input.prompt, input.mode))
   store.appendMessage(draft)
@@ -50,12 +50,12 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
 
   try {
     const result = await api().chat.send(input)
-    if (!result.ok) useChatStore.getState().setError(result.error)
+    if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
   } finally {
     unsubscribe()
     unmeter()
     useRunMeterStore.getState().end()
-    useChatStore.getState().setStreaming(false)
+    useChatStore.getState().setStreaming(input.projectId, false)
     await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }
 }
