@@ -2,11 +2,9 @@ import type { IconName } from '@domain/shared/icon-name'
 import { useUiStore, type MainView } from '../../stores/ui-store'
 import { SidebarNavButton } from './SidebarNavButton'
 
+/** Pie del sidebar: solo lo que no pertenece a un proyecto concreto. */
 const ITEMS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }> = [
   { view: 'chat', iconName: 'message-square', label: 'Chat' },
-  { view: 'scan', iconName: 'shield', label: 'Escaneo' },
-  { view: 'actividad', iconName: 'zap', label: 'Actividad' },
-  { view: 'cognition', iconName: 'brain', label: 'Cognition' },
   { view: 'settings', iconName: 'settings', label: 'Configuracion' }
 ]
 

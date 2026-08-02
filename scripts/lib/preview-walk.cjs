@@ -1,6 +1,7 @@
 /** Recorrido por las pantallas de la app, capturando y verificando cada una. */
 const { clickByText, clickSelector, TOGGLES_INSIDE_TRACK } = require('../checks/ui-scripts.cjs')
 const { walkPerformance } = require('./preview-performance.cjs')
+const { walkShell } = require('./preview-shell.cjs')
 const { walkTimeline } = require('./preview-timeline.cjs')
 
 const SKIP_ONBOARDING = clickByText('Entrar sin configurar')
@@ -48,10 +49,7 @@ async function walkScreens(helpers) {
   await run(clickSelector('button[aria-label="Cerrar"]'))
 
   // clickByText mira textContent (crudo); el boton dice 'autonomo' en minusculas
-  await run(clickByText('autonomo'))
-  await pause(400)
-  await shoot('-autonomo')
-  await expect('modo autonomo', 'sin confirmacion')
+  await walkShell(helpers)
 
   await walkPerformance(helpers)
 
