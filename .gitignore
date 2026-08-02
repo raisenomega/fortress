@@ -1,0 +1,16 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+
+# Secrets — nunca commitear (R1)
+.env
+.env.*
+!.env.example
+
+# Datos locales de la app
+*.sqlite
+*.sqlite3
+*.db
