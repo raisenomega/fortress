@@ -1,10 +1,13 @@
-import './styles/globals.css'
+import '@presentation/styles/index.css'
 
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App'
+import { App } from '@presentation/App'
 
-createRoot(document.getElementById('root')!).render(
+const container = document.getElementById('root')
+if (!container) throw new Error('No se encontro el nodo #root en index.html')
+
+createRoot(container).render(
   <StrictMode>
     <App />
   </StrictMode>

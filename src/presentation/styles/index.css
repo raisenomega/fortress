@@ -1,0 +1,10 @@
+/* Entrada unica de estilos. Cada modulo se mantiene bajo 75 lineas. */
+@import 'tailwindcss';
+
+@import './fonts.css';
+@import './tokens-omega.css';
+@import './tokens-light.css';
+@import './theme.css';
+@import './animations.css';
+@import './base.css';
+@import './components.css';

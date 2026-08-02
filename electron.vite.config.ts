@@ -3,15 +3,20 @@ import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+/** Capas DDD compartidas por main, preload y renderer. */
+const alias = {
+  '@domain': resolve('src/domain'),
+  '@application': resolve('src/application'),
+  '@infrastructure': resolve('src/infrastructure'),
+  '@presentation': resolve('src/presentation'),
+  '@renderer': resolve('src/renderer/src')
+}
+
 export default defineConfig({
-  main: {},
-  preload: {},
+  main: { resolve: { alias } },
+  preload: { resolve: { alias } },
   renderer: {
-    resolve: {
-      alias: {
-        '@renderer': resolve('src/renderer/src')
-      }
-    },
+    resolve: { alias },
     plugins: [react(), tailwindcss()]
   }
 })

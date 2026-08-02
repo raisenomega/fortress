@@ -25,7 +25,14 @@ export default defineConfig(
     },
     rules: {
       ...eslintPluginReactHooks.configs.recommended.rules,
-      ...eslintPluginReactRefresh.configs.vite.rules
+      ...eslintPluginReactRefresh.configs.vite.rules,
+      // Regla de arquitectura del proyecto, verificable por maquina:
+      // ningun archivo pasa de 75 lineas y ninguna funcion de una responsabilidad.
+      'max-lines': ['error', { max: 75, skipBlankLines: false, skipComments: false }],
+      'max-lines-per-function': ['error', { max: 50, skipBlankLines: false, skipComments: false }],
+      // R5: tipado fuerte, sin atajos.
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/ban-ts-comment': 'error'
     }
   },
   eslintConfigPrettier

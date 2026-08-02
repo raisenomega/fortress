@@ -1,0 +1,20 @@
+@layer components {
+  /* Glass effect de la navegacion del proyecto nucleo */
+  .glass {
+    background-color: hsl(var(--card) / 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Tap feedback: scale + glow dorado */
+  .tap {
+    transition:
+      transform 0.12s ease-out,
+      filter 0.12s ease-out;
+  }
+
+  .tap:active {
+    transform: scale(0.94);
+    filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.55));
+  }
+}

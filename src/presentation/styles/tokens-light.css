@@ -1,0 +1,22 @@
+/* La app arranca en OMEGA (dark). El contrato de tokens permite conmutar a
+   light sin tocar un solo componente. */
+[data-theme='light'] {
+  --background: 40 20% 97%;
+  --foreground: 225 15% 12%;
+  --card: 0 0% 100%;
+  --card-foreground: 225 15% 12%;
+  --primary: 38 85% 45%;
+  --primary-hover: 38 90% 38%;
+  --primary-foreground: 40 20% 98%;
+  --secondary: 40 12% 92%;
+  --secondary-foreground: 225 15% 12%;
+  --muted: 40 12% 90%;
+  --muted-foreground: 225 8% 42%;
+  --accent: 38 60% 88%;
+  --accent-foreground: 225 15% 12%;
+  --border: 40 10% 85%;
+  --input: 40 10% 88%;
+  --sidebar-background: 40 16% 95%;
+  --sidebar-border: 40 10% 85%;
+  --low: 225 8% 42%;
+}

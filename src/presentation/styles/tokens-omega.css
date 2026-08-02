@@ -1,0 +1,36 @@
+/* ==========================================================================
+   IDENTIDAD CORPORATIVA RAISEN — Sistema 1 (app interna, base OMEGA)
+   Fondo negro-navy + primary DORADO. Sin violet, sin cyan, sin azul.
+   Tripletas HSL crudas para poder componer opacidad: hsl(var(--primary) / .5)
+   ========================================================================== */
+:root {
+  --background: 225 15% 5%;
+  --foreground: 40 6% 90%;
+  --card: 225 15% 8%;
+  --card-foreground: 40 6% 90%;
+  --primary: 38 85% 55%;
+  --primary-hover: 38 90% 62%;
+  --primary-foreground: 225 20% 5%;
+  --secondary: 225 12% 14%;
+  --secondary-foreground: 40 6% 90%;
+  --muted: 225 12% 18%;
+  --muted-foreground: 225 8% 55%;
+  --accent: 38 40% 20%;
+  --accent-foreground: 40 6% 90%;
+  --border: 225 12% 16%;
+  --input: 225 12% 14%;
+  --ring: 38 85% 55%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 40 6% 90%;
+  --sidebar-background: 225 15% 5%;
+  --sidebar-border: 225 12% 16%;
+
+  /* Escala de severidad FORTRESS — derivada de la paleta, nunca hardcodeada */
+  --critical: 0 72% 51%;
+  --high: 25 88% 55%;
+  --medium: 45 90% 55%;
+  --low: 225 8% 55%;
+  --success: 145 60% 45%;
+
+  --radius: 0.625rem;
+}
