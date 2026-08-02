@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { clearApiKey, hasApiKey, saveApiKey } from '../security/api-key-store'
+import { checkStoredApiKey, saveApiKey } from '@application/settings/save-api-key'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -11,14 +11,16 @@ export function registerSettingsHandlers(): void {
   })
 
   // La key entra cifrada y nunca vuelve a salir: el renderer solo puede
-  // preguntar si existe.
+  // preguntar si existe o pedir que se revalide.
   ipcMain.handle(IPC.settingsSaveApiKey, (_event, plainKey: string) =>
-    saveApiKey(getAppContext().settings, plainKey)
+    saveApiKey(getAppContext(), plainKey)
   )
 
-  ipcMain.handle(IPC.settingsHasApiKey, () => hasApiKey(getAppContext().settings))
+  ipcMain.handle(IPC.settingsHasApiKey, () => getAppContext().apiKeys.has())
+
+  ipcMain.handle(IPC.settingsCheckApiKey, () => checkStoredApiKey(getAppContext()))
 
   ipcMain.handle(IPC.settingsClearApiKey, () => {
-    clearApiKey(getAppContext().settings)
+    getAppContext().apiKeys.clear()
   })
 }

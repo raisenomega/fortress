@@ -1,20 +1,23 @@
-import { useState } from 'react'
 import { AppShell } from './components/layout/AppShell'
+import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
 import { AddProjectDialog } from './components/projects/AddProjectDialog'
-import { ApiKeyDialog } from './components/settings/ApiKeyDialog'
 import { useBootstrap } from './hooks/useBootstrap'
 import { sendMessage } from './services/chat-service'
 import { useAgentStore } from './stores/agent-store'
 import { useProjectStore } from './stores/project-store'
 import { useSettingsStore } from './stores/settings-store'
-
-type OpenDialog = 'none' | 'settings' | 'add-project'
+import { useUiStore } from './stores/ui-store'
 
 export function App(): React.JSX.Element {
-  const [dialog, setDialog] = useState<OpenDialog>('none')
   const mode = useSettingsStore((state) => state.mode)
+  const hasApiKey = useSettingsStore((state) => state.hasApiKey)
+  const apiKeyChecked = useSettingsStore((state) => state.apiKeyChecked)
   const enabledAgents = useAgentStore((state) => state.enabled)
   const activeProjectId = useProjectStore((state) => state.activeProjectId)
+  const addProjectOpen = useUiStore((state) => state.addProjectOpen)
+  const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
+  const onboardingDismissed = useUiStore((state) => state.onboardingDismissed)
+  const dismissOnboarding = useUiStore((state) => state.dismissOnboarding)
 
   useBootstrap()
 
@@ -23,17 +26,15 @@ export function App(): React.JSX.Element {
     void sendMessage({ projectId: activeProjectId, prompt, mode, enabledAgents })
   }
 
-  const close = (): void => setDialog('none')
+  // Se espera a saber si hay key para no parpadear el onboarding al arrancar.
+  if (apiKeyChecked && !hasApiKey && !onboardingDismissed) {
+    return <OnboardingScreen onSkip={dismissOnboarding} />
+  }
 
   return (
     <>
-      <AppShell
-        onAddProject={() => setDialog('add-project')}
-        onOpenSettings={() => setDialog('settings')}
-        onSend={handleSend}
-      />
-      {dialog === 'settings' ? <ApiKeyDialog onClose={close} /> : null}
-      {dialog === 'add-project' ? <AddProjectDialog onClose={close} /> : null}
+      <AppShell onSend={handleSend} />
+      {addProjectOpen ? <AddProjectDialog onClose={() => setAddProjectOpen(false)} /> : null}
     </>
   )
 }

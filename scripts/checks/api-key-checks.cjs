@@ -1,6 +1,10 @@
 /**
  * Camino sin API key y ciclo de vida de la key cifrada.
  * Se ejecutan DENTRO del renderer, contra el `window.api` real.
+ *
+ * Guardar valida la key contra la API real, asi que el resultado depende de si
+ * la maquina tiene red. Se comprueba el invariante en ambos casos, no un
+ * resultado concreto.
  */
 module.exports = `(async () => {
   const results = []
@@ -26,16 +30,23 @@ module.exports = `(async () => {
 
   check('rechaza una API key vacia', !(await window.api.settings.saveApiKey('   ')).ok)
 
-  const saved = await window.api.settings.saveApiKey('sk-ant-de-prueba')
+  const saved = await window.api.settings.saveApiKey('sk-ant-clave-falsa-de-prueba')
   if (saved.ok) {
-    check('guarda la API key cifrada', (await window.api.settings.hasApiKey()) === true)
+    // Sin red no se puede afirmar que sea mala: se guarda avisando.
+    check('sin verificar, avisa en el veredicto',
+          saved.value.status === 'sin-verificar', JSON.stringify(saved.value))
+    check('la key queda guardada', (await window.api.settings.hasApiKey()) === true)
     await window.api.settings.clearApiKey()
     check('borra la API key guardada', (await window.api.settings.hasApiKey()) === false)
   } else {
-    // Sin keyring disponible, lo correcto es negarse: nunca en texto plano.
-    check('sin keyring, se niega a guardar en claro',
-          saved.error.includes('cifrado'), saved.error)
+    // Con red la API la rechaza; sin keyring tampoco se guarda en claro.
+    check('una key no aceptada nunca se guarda',
+          (await window.api.settings.hasApiKey()) === false, saved.error)
   }
+
+  const stored = await window.api.settings.checkApiKey()
+  check('revalidar sin key configurada informa que falta',
+        stored.status === 'invalida', JSON.stringify(stored))
 
   const subscription = window.api.chat.onChunk(() => {})
   check('la suscripcion al streaming devuelve un cancelador',

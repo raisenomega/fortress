@@ -1,5 +1,7 @@
+import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import { parseOperationMode, type OperationMode } from '@domain/settings/operation-mode'
 import { SETTINGS_KEYS } from '@domain/settings/settings-repository'
+import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useSettingsStore } from '../stores/settings-store'
 
@@ -8,13 +10,16 @@ export async function refreshApiKeyStatus(): Promise<void> {
   useSettingsStore.getState().setHasApiKey(await api().settings.hasApiKey())
 }
 
-/** Devuelve el error si no se pudo guardar, o null si todo fue bien. */
-export async function saveApiKey(plainKey: string): Promise<string | null> {
+/** Valida contra la API y guarda si procede; devuelve el veredicto para la UI. */
+export async function saveApiKey(plainKey: string): Promise<Result<ApiKeyVerdict>> {
   const result = await api().settings.saveApiKey(plainKey)
-  if (!result.ok) return result.error
+  if (result.ok) await refreshApiKeyStatus()
+  return result
+}
 
-  await refreshApiKeyStatus()
-  return null
+/** Revalida la key ya guardada contra la API real. */
+export function checkApiKey(): Promise<ApiKeyVerdict> {
+  return api().settings.checkApiKey()
 }
 
 export async function clearApiKey(): Promise<void> {

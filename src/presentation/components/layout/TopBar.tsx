@@ -1,12 +1,10 @@
 import { useActiveProject } from '../../stores/project-store'
+import { useUiStore } from '../../stores/ui-store'
 import { ModeSelector } from '../settings/ModeSelector'
 
-interface TopBarProps {
-  readonly onOpenSettings: () => void
-}
-
-export function TopBar({ onOpenSettings }: TopBarProps): React.JSX.Element {
+export function TopBar(): React.JSX.Element {
   const project = useActiveProject()
+  const setView = useUiStore((state) => state.setView)
 
   return (
     <header className="glass flex h-12 shrink-0 items-center gap-4 border-b border-border px-4">
@@ -26,8 +24,8 @@ export function TopBar({ onOpenSettings }: TopBarProps): React.JSX.Element {
 
       <button
         type="button"
-        onClick={onOpenSettings}
-        title="API key de Claude"
+        onClick={() => setView('settings')}
+        title="Configuracion"
         className="tap shrink-0 rounded-md border border-border px-2 py-1 text-sm hover:border-primary/40"
       >
         ⚙

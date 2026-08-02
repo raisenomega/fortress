@@ -4,6 +4,8 @@ import { DEFAULT_OPERATION_MODE, type OperationMode } from '@domain/settings/ope
 interface SettingsState {
   readonly mode: OperationMode
   readonly hasApiKey: boolean
+  /** Hasta que no se consulta, no se sabe: evita parpadear el onboarding. */
+  readonly apiKeyChecked: boolean
   setMode: (mode: OperationMode) => void
   setHasApiKey: (hasApiKey: boolean) => void
 }
@@ -11,7 +13,8 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>((set) => ({
   mode: DEFAULT_OPERATION_MODE,
   hasApiKey: false,
+  apiKeyChecked: false,
 
   setMode: (mode) => set({ mode }),
-  setHasApiKey: (hasApiKey) => set({ hasApiKey })
+  setHasApiKey: (hasApiKey) => set({ hasApiKey, apiKeyChecked: true })
 }))

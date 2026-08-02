@@ -1,4 +1,6 @@
 import type { AppContext } from '@application/context'
+import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
+import { createSafeStorageApiKeyStore } from '../security/api-key-store'
 import { getDatabase } from './database'
 import { createSqliteChatRepository } from './sqlite-chat-repository'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
@@ -6,15 +8,19 @@ import { createSqliteSettingsRepository } from './sqlite-settings-repository'
 
 let context: AppContext | null = null
 
-/** Ensambla los adaptadores SQLite detras de los puertos del dominio. */
+/** Ensambla los adaptadores concretos detras de los puertos del dominio. */
 export function getAppContext(): AppContext {
   if (context) return context
 
   const db = getDatabase()
+  const settings = createSqliteSettingsRepository(db)
+
   context = {
     projects: createSqliteProjectRepository(db),
     chat: createSqliteChatRepository(db),
-    settings: createSqliteSettingsRepository(db)
+    settings,
+    apiKeys: createSafeStorageApiKeyStore(settings),
+    apiKeyValidator: createAnthropicKeyValidator()
   }
   return context
 }

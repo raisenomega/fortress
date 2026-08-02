@@ -14,6 +14,7 @@ export const IPC = {
   settingsSet: 'settings:set',
   settingsSaveApiKey: 'settings:save-api-key',
   settingsHasApiKey: 'settings:has-api-key',
+  settingsCheckApiKey: 'settings:check-api-key',
   settingsClearApiKey: 'settings:clear-api-key'
 } as const
 

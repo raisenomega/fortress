@@ -34,6 +34,7 @@ const api: FortressApi = {
     set: (key, value) => ipcRenderer.invoke(IPC.settingsSet, key, value),
     saveApiKey: (plainKey) => ipcRenderer.invoke(IPC.settingsSaveApiKey, plainKey),
     hasApiKey: () => ipcRenderer.invoke(IPC.settingsHasApiKey),
+    checkApiKey: () => ipcRenderer.invoke(IPC.settingsCheckApiKey),
     clearApiKey: () => ipcRenderer.invoke(IPC.settingsClearApiKey)
   }
 }

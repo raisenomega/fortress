@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import type { Assistant, AssistantReply, AssistantRequest } from '@domain/chat/assistant'
 
 /** Claude Opus 5: piensa por defecto, asi que max_tokens cubre razonamiento + texto. */
-const MODEL = 'claude-opus-5'
+export const CHAT_MODEL = 'claude-opus-5'
 const MAX_TOKENS = 64000
 
 /**
@@ -24,7 +24,7 @@ export function createAnthropicAssistant(apiKey: string): Assistant {
   return {
     async stream(request: AssistantRequest, onChunk): Promise<AssistantReply> {
       const stream = client.beta.messages.stream({
-        model: MODEL,
+        model: CHAT_MODEL,
         max_tokens: MAX_TOKENS,
         system: request.system,
         messages: request.turns.map((turn) => ({ role: turn.role, content: turn.content })),

@@ -19,7 +19,7 @@ function chunkSender(event: IpcMainInvokeEvent, projectId: string) {
 export function registerChatSendHandler(): void {
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()
-    const assistant = resolveAssistant(context.settings)
+    const assistant = resolveAssistant(context.apiKeys)
     if (!assistant.ok) return assistant
 
     try {

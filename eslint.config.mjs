@@ -41,7 +41,9 @@ export default defineConfig(
     files: ['scripts/**/*.cjs'],
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off'
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      // El limite de 75 lineas tambien rige aqui: es codigo del proyecto.
+      'max-lines': ['error', { max: 75, skipBlankLines: false, skipComments: false }]
     }
   },
   eslintConfigPrettier

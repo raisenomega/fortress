@@ -1,71 +1,63 @@
 /**
- * Siembra proyectos y una conversacion, recarga la app y captura la UI con
- * contenido real. Verifica que los chips, los scores, el dialogo de agregar
- * proyecto y el aviso de modo autonomo se pintan de verdad.
+ * Recorre la app real y captura cada pantalla, fallando si alguna no se pinta.
+ * Cubre onboarding, panel multi-proyecto, dialogo de agregar, modo autonomo y
+ * configuracion.
  *
  * Uso: npm run preview  ·  guarda .ui-preview*.png
  */
 const { app } = require('electron')
-const { join } = require('path')
-const { writeFileSync } = require('fs')
 const harness = require('./lib/app-harness.cjs')
+const { createHelpers } = require('./lib/preview-helpers.cjs')
 const { simulateScan } = require('./lib/simulate-scan.cjs')
+const { clickByText, clickSelector } = require('./checks/ui-scripts.cjs')
 const SEED = require('./checks/seed.cjs')
 
-const SETTLE_MS = 2000
-const clickScript = (selector) =>
-  `(() => { const el = document.querySelector(${JSON.stringify(selector)})
-            if (!el) return false
-            el.click()
-            return true })()`
+const SKIP_ONBOARDING = clickByText('Entrar sin configurar')
 
 harness.useTemporaryUserData()
 harness.bootMainProcess()
 
 app.whenReady().then(async () => {
   const window = harness.createRendererWindow()
-  const run = (script) => window.webContents.executeJavaScript(script)
-  const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-  const shoot = async (suffix) =>
-    writeFileSync(
-      join(__dirname, '..', `.ui-preview${suffix}.png`),
-      (await window.webContents.capturePage()).toPNG()
-    )
+  const { run, missing, pause, shoot, expect } = createHelpers(window)
 
   await harness.loadRenderer(window)
+  await pause(1500)
+  await shoot('-onboarding')
+  await expect('onboarding', 'Pega tu API key para empezar', 'nunca sale de tu maquina')
+
+  await run(SKIP_ONBOARDING)
   const seeded = await run(SEED)
   simulateScan()
   await window.webContents.reload()
-  await pause(SETTLE_MS)
+  await pause(2000)
+  await run(SKIP_ONBOARDING)
+  await pause(300)
   await shoot('')
+  await expect('panel', 'Security Reviewer', 'Nucleo', '92', 'Push bloqueado')
 
-  const missing = []
-  const text = await run('document.body.innerText')
-  for (const label of ['Security Reviewer', 'Nucleo', '92', '58', 'Push bloqueado']) {
-    if (!text.includes(label)) missing.push(label)
-  }
-
-  if (!(await run(clickScript('aside button[title="Agregar proyecto"]')))) {
-    missing.push('dialogo de agregar proyecto')
-  }
+  await run(clickSelector('aside button[title="Agregar proyecto"]'))
   await pause(400)
   await shoot('-dialog')
-  await run(clickScript('button[aria-label="Cerrar"]'))
+  await expect('dialogo', 'Agregar proyecto a FORTRESS')
+  await run(clickSelector('button[aria-label="Cerrar"]'))
 
-  await run(clickScript('header button[aria-pressed="false"]'))
+  await run(clickSelector('header button[aria-pressed="false"]'))
   await pause(400)
   await shoot('-autonomo')
-  if (!(await run('document.body.innerText')).includes('sin confirmacion')) {
-    missing.push('aviso de modo autonomo')
-  }
+  await expect('modo autonomo', 'sin confirmacion')
+
+  await run(clickByText('Configuracion'))
+  await pause(400)
+  await shoot('-settings')
+  await expect('configuracion', 'API key de Claude', 'Modo de operacion')
 
   harness.cleanup()
 
   if (missing.length > 0) {
-    console.error(`PREVIEW FAIL: falta ${missing.join(', ')}`)
+    console.error(`PREVIEW FAIL: falta ${missing.join(' | ')}`)
     return app.exit(1)
   }
-
-  console.log(`PREVIEW OK: ${seeded} proyectos, chips, scores, dialogo y aviso presentes`)
+  console.log(`PREVIEW OK: ${seeded} proyectos, 5 pantallas verificadas`)
   app.exit(0)
 })

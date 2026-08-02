@@ -2,6 +2,7 @@ import type { SendMessageInput, SendMessageOutput } from '@application/chat/send
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk } from '@domain/chat/chat-stream'
 import type { NewProject, Project } from '@domain/project/project'
+import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 
 /** Cancela la suscripcion a los fragmentos del streaming. */
@@ -30,9 +31,11 @@ export interface FortressApi {
   readonly settings: {
     get(key: string): Promise<string | null>
     set(key: string, value: string): Promise<void>
-    /** La key entra cifrada y nunca vuelve al renderer. */
-    saveApiKey(plainKey: string): Promise<Result<null>>
+    /** La key se valida contra la API, entra cifrada y nunca vuelve al renderer. */
+    saveApiKey(plainKey: string): Promise<Result<ApiKeyVerdict>>
     hasApiKey(): Promise<boolean>
+    /** Revalida la key ya guardada sin exponerla. */
+    checkApiKey(): Promise<ApiKeyVerdict>
     clearApiKey(): Promise<void>
   }
 }
