@@ -15,6 +15,7 @@
     "dev": "electron-vite dev",
     "build": "npm run typecheck && electron-vite build",
     "smoke": "npm run build && electron --no-sandbox scripts/render-smoke.cjs",
+    "test:persistence": "npm run build && electron --no-sandbox scripts/persistence-test.cjs",
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",

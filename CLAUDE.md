@@ -55,7 +55,12 @@ Definidos en `electron.vite.config.ts` + `tsconfig.node.json` + `tsconfig.web.js
 ## Verificacion antes de cada commit
 
 ```bash
-npm run typecheck   # tsc en node + web
-npm run lint        # incluye max-lines y no-explicit-any
-npm run build       # electron-vite build
+npm run typecheck        # tsc en node + web
+npm run lint             # incluye max-lines y no-explicit-any
+npm run smoke            # monta la UI real y falla si no pinta o hay errores
+npm run test:persistence # renderer -> preload -> IPC -> casos de uso -> SQLite
 ```
+
+Los dos ultimos levantan la app compilada contra un `userData` temporal: nunca
+tocan la base de datos real. Cazan lo que typecheck y lint no ven (bucles de
+render, estilos que no se generan, reglas de integridad de la base).

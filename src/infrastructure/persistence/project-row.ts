@@ -1,0 +1,35 @@
+import { normalizeScore } from '@domain/project/fortress-score'
+import type { Project } from '@domain/project/project'
+
+/** Fila cruda de la tabla projects. SQLite no tiene boolean: usa 0/1. */
+export interface ProjectRow {
+  readonly id: string
+  readonly name: string
+  readonly path: string
+  readonly stack: string
+  readonly git_remote: string | null
+  readonly git_branch: string | null
+  readonly fortress_score: number
+  readonly last_scan: string | null
+  readonly has_claude: number
+  readonly has_graph: number
+  readonly has_fortress: number
+  readonly created_at: string
+}
+
+export function toProject(row: ProjectRow): Project {
+  return {
+    id: row.id,
+    name: row.name,
+    path: row.path,
+    stack: row.stack,
+    gitRemote: row.git_remote,
+    gitBranch: row.git_branch,
+    fortressScore: normalizeScore(row.fortress_score),
+    lastScan: row.last_scan,
+    hasClaude: row.has_claude === 1,
+    hasGraph: row.has_graph === 1,
+    hasFortress: row.has_fortress === 1,
+    createdAt: row.created_at
+  }
+}

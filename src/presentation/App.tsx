@@ -1,31 +1,29 @@
-import { newId, nowIso } from '@domain/shared/id'
 import { AppShell } from './components/layout/AppShell'
-import { useChatStore } from './stores/chat-store'
+import { useBootstrap } from './hooks/useBootstrap'
+import { persistMessage } from './services/chat-service'
 import { useProjectStore } from './stores/project-store'
 import { useSettingsStore } from './stores/settings-store'
 
 export function App(): React.JSX.Element {
-  const appendMessage = useChatStore((state) => state.appendMessage)
   const mode = useSettingsStore((state) => state.mode)
   const activeProjectId = useProjectStore((state) => state.activeProjectId)
 
+  useBootstrap()
+
   /**
-   * El mensaje del operador ya se registra; la respuesta del asistente
+   * Guarda el mensaje del operador en SQLite. La respuesta del asistente
    * llega cuando se conecte la Claude API en el paso 6.
    */
-  function handleSend(text: string): void {
+  async function handleSend(text: string): Promise<void> {
     if (!activeProjectId) return
-    appendMessage({
-      id: newId(),
+    await persistMessage({
       projectId: activeProjectId,
       role: 'user',
       content: text,
       agentId: null,
-      mode,
-      createdAt: nowIso(),
-      pending: false
+      mode
     })
   }
 
-  return <AppShell onSend={handleSend} />
+  return <AppShell onSend={(text) => void handleSend(text)} />
 }
