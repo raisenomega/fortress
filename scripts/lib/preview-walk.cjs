@@ -36,7 +36,7 @@ async function walkScreens(helpers) {
   await run(clickSelector('[data-nav="Cognition"]'))
   await pause(500)
   await shoot('-cognition')
-  await expect('cognition', 'PTN-2026-001', 'EXTINTO', 'src/auth/', 'GENERACION')
+  await expect('cognition', 'PTN-2026-001', 'EXTINTO', 'src/auth/', 'GENERACION', 'KNOWLEDGE GRAPH')
   // El bloque EJEMPLO del log no puede acabar en pantalla.
   const texto = await run('document.body.innerText')
   if (texto.includes('inventado/')) missing.push('cognition: zona de EJEMPLO filtrada')

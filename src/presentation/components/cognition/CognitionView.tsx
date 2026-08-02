@@ -2,6 +2,7 @@ import { useCognition } from '../../stores/cognition-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
 import { AttentionMap } from './AttentionMap'
+import { GraphPanel } from '../graph/GraphPanel'
 import { CognitionBlock } from './CognitionBlock'
 import { CognitionSummary } from './CognitionSummary'
 import { PatternList } from './PatternList'
@@ -17,13 +18,22 @@ export function CognitionView(): React.JSX.Element {
 
   // FORTRESS lee este archivo, no lo escribe: decirlo evita que el operador
   // espere que la app lo cree sola.
+  const grafo = (
+    <CognitionBlock title="Knowledge Graph">
+      <GraphPanel />
+    </CognitionBlock>
+  )
+
   if (!snapshot.present) {
     return (
-      <EmptyState
-        iconName="brain"
-        title="Este proyecto no tiene COGNITION-LOG.md"
-        hint={`FORTRESS lo lee, no lo escribe. Lo crea Claude Code al cerrar una sesion en ${project.path}.`}
-      />
+      <div className="h-full space-y-5 overflow-y-auto px-4 py-4">
+        <EmptyState
+          iconName="brain"
+          title="Este proyecto no tiene COGNITION-LOG.md"
+          hint={`FORTRESS lo lee, no lo escribe. Lo crea Claude Code al cerrar sesion en ${project.path}.`}
+        />
+        {grafo}
+      </div>
     )
   }
 
@@ -42,6 +52,8 @@ export function CognitionView(): React.JSX.Element {
       <CognitionBlock title="Ultimas reflexiones">
         <ReflectionList reflections={snapshot.reflections} />
       </CognitionBlock>
+
+      {grafo}
     </div>
   )
 }

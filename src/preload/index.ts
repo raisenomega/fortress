@@ -39,6 +39,9 @@ const api: FortressApi = {
   cognition: {
     read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId)
   },
+  graph: {
+    status: (projectId) => ipcRenderer.invoke(IPC.graphStatus, projectId)
+  },
   activity: {
     byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),
     byAgent: (agentId, projectId, limit) =>

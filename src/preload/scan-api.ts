@@ -7,6 +7,7 @@ import type { ScanRecord } from '@domain/scan/scan-record'
 import type { Result } from '@domain/shared/result'
 import type { AgentStats } from '@application/telemetry/build-agent-stats'
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
+import type { GraphStatus } from '@domain/graph/graph-status'
 import type { Activity } from '@domain/telemetry/activity'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
@@ -53,4 +54,9 @@ export interface TelemetryApi {
 export interface CognitionApi {
   /** COGNITION-LOG.md del proyecto, ya parseado. Vacio si no existe. */
   read(projectId: string): Promise<CognitionSnapshot>
+}
+
+export interface GraphApi {
+  /** Solo detecta si el grafo esta configurado; no lee sus datos. */
+  status(projectId: string): Promise<GraphStatus>
 }

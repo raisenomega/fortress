@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
 import { loadCognition } from '../services/cognition-service'
+import { loadGraph } from '../services/graph-service'
 import { loadTimeline } from '../services/timeline-service'
 import { runHealthCheck } from '../services/health-service'
 import { loadProjects } from '../services/project-service'
@@ -33,5 +34,6 @@ export function useBootstrap(): void {
     void loadFindings(activeProjectId)
     void loadCognition(activeProjectId)
     void loadTimeline(activeProjectId)
+    void loadGraph(activeProjectId)
   }, [activeProjectId])
 }
