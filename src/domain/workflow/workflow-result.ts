@@ -22,21 +22,27 @@ export interface WorkflowOutcome {
   readonly stoppedBy: AgentId | null
 }
 
+/** Hallazgo con el agente que lo reporto: sin esto el informe no sabe de quien
+ *  es cada linea, y un hallazgo de Cognition parecia venir de Code Reviewer. */
+export interface AttributedFinding extends DetectedFinding {
+  readonly agentId: AgentId
+}
+
 /**
- * Hallazgos de todos los pasos, sin repetir. Dos agentes pueden ver el mismo
- * problema desde angulos distintos y describirlo casi igual; la huella los
- * colapsa para que el informe no cuente dos veces lo mismo.
+ * Hallazgos de todos los pasos, sin repetir y con su autor. Dos agentes pueden
+ * ver el mismo problema y describirlo casi igual; la huella los colapsa y el
+ * merito queda del primero que lo vio, no repartido ni mal atribuido.
  */
-export function consolidate(results: readonly StepResult[]): readonly DetectedFinding[] {
+export function consolidate(results: readonly StepResult[]): readonly AttributedFinding[] {
   const seen = new Set<string>()
-  const unicos: DetectedFinding[] = []
+  const unicos: AttributedFinding[] = []
 
   for (const result of results) {
     for (const finding of result.findings) {
       const print = fingerprintOf(finding)
       if (seen.has(print)) continue
       seen.add(print)
-      unicos.push(finding)
+      unicos.push({ ...finding, agentId: result.agentId })
     }
   }
 

@@ -16,7 +16,10 @@ function findingLines(outcome: WorkflowOutcome): readonly string[] {
     `### ${severity} (${counts[severity]})`,
     ...todos
       .filter((finding) => finding.severity === severity)
-      .map((f) => `- ${f.title} — \`${f.file}${f.line === null ? '' : `:${f.line}`}\``)
+      .map(
+        (f) =>
+          `- ${f.title} — \`${f.file}${f.line === null ? '' : `:${f.line}`}\` · ${name(f.agentId)}`
+      )
   ])
 }
 
@@ -29,10 +32,11 @@ export function buildWorkflowReport(workflow: Workflow, outcome: WorkflowOutcome
     .join(', ')
   const sinInforme = unreadable(outcome.results)
 
+  const quienes = participants(outcome.results)
   const lineas = [
     `## ${workflow.label}`,
     '',
-    `Agentes: ${participants(outcome.results).map(name).join(' → ')}`,
+    `${quienes.length} agentes: ${quienes.map(name).join(' → ')}`,
     `Score: ${scoreFromFindings(todos)}/100 · ${todos.length === 0 ? 'sin hallazgos' : resumen}`
   ]
 

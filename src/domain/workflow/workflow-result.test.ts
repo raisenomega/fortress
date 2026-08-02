@@ -25,17 +25,25 @@ describe('consolidate', () => {
     expect(salida).toHaveLength(2)
   })
 
-  it('no cuenta dos veces lo que dos agentes vieron igual', () => {
+  it('no cuenta dos veces lo mismo, y el merito es del primero que lo vio', () => {
     const salida = consolidate([
       step({ findings: [sql] }),
       step({ agentId: 'code-reviewer', findings: [sql] })
     ])
-    expect(salida).toEqual([sql])
+    expect(salida).toHaveLength(1)
+    expect(salida[0].agentId).toBe('security-reviewer')
+  })
+
+  it('cada hallazgo sale atribuido al agente que lo reporto', () => {
+    // El bug: un LOW de Cognition aparecia sin decir que era suyo, y parecia
+    // de Code Reviewer, que ni siquiera habia devuelto informe legible.
+    const salida = consolidate([step({ agentId: 'cognition', findings: [muerto] })])
+    expect(salida[0]).toMatchObject({ title: muerto.title, agentId: 'cognition' })
   })
 
   it('mantiene el orden en que se encontraron', () => {
     const salida = consolidate([step({ findings: [muerto, sql] })])
-    expect(salida[0]).toBe(muerto)
+    expect(salida[0].title).toBe(muerto.title)
   })
 })
 

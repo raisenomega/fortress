@@ -28,12 +28,22 @@ describe('buildWorkflowReport', () => {
     expect(informe.indexOf('### CRITICAL')).toBeLessThan(informe.indexOf('### LOW'))
   })
 
-  it('nombra a los agentes que participaron, en orden', () => {
+  it('dice cuantos agentes corrieron y en que orden', () => {
     const informe = buildWorkflowReport(seguridad, {
       results: [step({}), step({ agentId: 'cognition' })],
       stoppedBy: null
     })
-    expect(informe).toContain('Security Reviewer → Cognition')
+    expect(informe).toContain('2 agentes: Security Reviewer → Cognition')
+  })
+
+  it('atribuye cada hallazgo al agente que lo dio, no al grupo', () => {
+    // El bug real: un LOW de Cognition parecia de Code Reviewer.
+    const informe = buildWorkflowReport(seguridad, {
+      results: [step({ agentId: 'cognition', findings: [low] })],
+      stoppedBy: null
+    })
+    expect(informe).toContain('console.log')
+    expect(informe).toContain('Cognition')
   })
 
   it('explica por que se detuvo, no lo deja en silencio', () => {
