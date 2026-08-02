@@ -1,12 +1,18 @@
 import { ipcMain } from 'electron'
 import { checkStoredApiKey, saveApiKey } from '@application/settings/save-api-key'
+import { isPublicSettingKey } from '@domain/settings/settings-repository'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
 export function registerSettingsHandlers(): void {
-  ipcMain.handle(IPC.settingsGet, (_event, key: string) => getAppContext().settings.get(key))
+  // Lista blanca en los dos sentidos: sin ella el renderer podia leer la
+  // API key cifrada y sobrescribirla con settings:set.
+  ipcMain.handle(IPC.settingsGet, (_event, key: string) =>
+    isPublicSettingKey(key) ? getAppContext().settings.get(key) : null
+  )
 
   ipcMain.handle(IPC.settingsSet, (_event, key: string, value: string) => {
+    if (!isPublicSettingKey(key)) return
     getAppContext().settings.set(key, value)
   })
 

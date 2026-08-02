@@ -7,18 +7,19 @@ interface AuthStatus {
   readonly subscriptionType?: string
 }
 
-let cached: Billing | null = null
-
 /**
  * Como paga el operador lo que consumen los agentes. Se pregunta al CLI en vez
  * de suponerlo: con `authMethod: "claude.ai"` el `total_cost_usd` que reporta
  * es el precio equivalente por API, no una factura. Ensenarlo como coste a
  * secas hacia creer que un escaneo habia costado dos dolares reales.
  *
- * Se cachea por proceso: es una llamada al CLI y no cambia a mitad de sesion.
  */
-export function detectBilling(): Billing {
-  if (cached) return cached
+export function detectBilling(hasOwnKey: boolean): Billing {
+  // Si FORTRESS tiene su propia key, se la inyecta al proceso hijo en
+  // ANTHROPIC_API_KEY y eso ANULA la suscripcion: el consumo se factura a esa
+  // clave y aparece en la consola de Anthropic. Da igual lo que diga el CLI
+  // sobre como esta autenticado por su cuenta.
+  if (hasOwnKey) return { mode: 'api', plan: null }
 
   try {
     const probe = spawnSync(CLAUDE_BIN, ['auth', 'status'], { encoding: 'utf8', timeout: 10_000 })
@@ -27,11 +28,10 @@ export function detectBilling(): Billing {
     const status = JSON.parse(probe.stdout) as AuthStatus
     const suscripcion = status.authMethod === 'claude.ai'
 
-    cached = {
+    return {
       mode: suscripcion ? 'suscripcion' : 'api',
       plan: status.subscriptionType ?? null
     }
-    return cached
   } catch {
     return UNKNOWN_BILLING
   }

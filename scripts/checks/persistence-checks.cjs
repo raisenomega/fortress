@@ -45,8 +45,10 @@ module.exports = `(async () => {
   check('historiales aislados por proyecto', isolated.length === 1,
         JSON.stringify(isolated))
 
-  await window.api.settings.set('clave', 'valor')
-  check('persiste settings', (await window.api.settings.get('clave')) === 'valor')
+  // Con una clave real: la lista blanca rechaza las inventadas a proposito.
+  // No se usa operation_mode: otra suite comprueba que arranca sin valor.
+  await window.api.settings.set('budget_per_run_usd', '2.5')
+  check('persiste settings', (await window.api.settings.get('budget_per_run_usd')) === '2.5')
 
   const removed = await window.api.projects.remove(projectId)
   check('borra el proyecto', removed.ok, JSON.stringify(removed))

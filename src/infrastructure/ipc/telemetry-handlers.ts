@@ -12,7 +12,7 @@ import { IPC } from './channels'
 const SESSION_START = nowIso()
 
 export function registerTelemetryHandlers(): void {
-  ipcMain.handle(IPC.telemetryBilling, () => detectBilling())
+  ipcMain.handle(IPC.telemetryBilling, () => detectBilling(getAppContext().apiKeys.has()))
 
   ipcMain.handle(IPC.telemetryAverage, (_event, projectId: string) =>
     getAppContext().runs.averageRun(projectId)

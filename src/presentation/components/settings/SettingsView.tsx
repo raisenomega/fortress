@@ -1,4 +1,5 @@
 import { ApiKeySection } from './ApiKeySection'
+import { BudgetSection } from './BudgetSection'
 import { OperationModeSection } from './OperationModeSection'
 
 /** Pantalla de configuracion, accesible desde la barra lateral. */
@@ -14,6 +15,7 @@ export function SettingsView(): React.JSX.Element {
 
       <div className="flex max-w-2xl flex-col gap-4">
         <ApiKeySection />
+        <BudgetSection />
         <OperationModeSection />
       </div>
     </div>

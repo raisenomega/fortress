@@ -2,6 +2,7 @@ import { spawn } from 'child_process'
 import { existsSync, statSync } from 'fs'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
+import type { Budget } from '@domain/settings/run-budget'
 import { agentsForProject } from './agents-for-project'
 import { trackChild } from './child-registry'
 import { buildArgs, buildEnv, CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
@@ -13,7 +14,7 @@ import { collectRun } from './run-claude-process'
  *
  * El proyecto se fija con el cwd del proceso: el CLI no tiene flag --project.
  */
-export function createClaudeCodeAgent(apiKeys: ApiKeyStore): CodeAgent {
+export function createClaudeCodeAgent(apiKeys: ApiKeyStore, budget: Budget): CodeAgent {
   return {
     isAvailable: isClaudeInstalled,
 
@@ -30,7 +31,13 @@ export function createClaudeCodeAgent(apiKeys: ApiKeyStore): CodeAgent {
 
     run: (request, onChunk) => {
       const agents = agentsForProject(request.projectPath)
-      const args = buildArgs(request.prompt, request.permissionMode, agents, request.agentId)
+      const args = buildArgs(
+        request.prompt,
+        request.permissionMode,
+        agents,
+        request.agentId,
+        budget.perRun
+      )
 
       const child = spawn(CLAUDE_BIN, args, {
         cwd: request.projectPath,
