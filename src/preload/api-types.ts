@@ -7,6 +7,7 @@ import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 import type { ActivityApi, PushApi, ScanApi } from './scan-api'
 import type {
+  AccountApi,
   CognitionApi,
   GraphApi,
   MaintenanceApi,
@@ -48,6 +49,7 @@ export interface FortressApi {
   readonly scan: ScanApi
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi
+  readonly account: AccountApi
   readonly cognition: CognitionApi
   readonly graph: GraphApi
   readonly maintenance: MaintenanceApi

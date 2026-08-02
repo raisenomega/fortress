@@ -14,7 +14,11 @@ import { collectRun } from './run-claude-process'
  *
  * El proyecto se fija con el cwd del proceso: el CLI no tiene flag --project.
  */
-export function createClaudeCodeAgent(apiKeys: ApiKeyStore, budget: Budget): CodeAgent {
+export function createClaudeCodeAgent(
+  apiKeys: ApiKeyStore,
+  budget: Budget,
+  useApiKey: boolean
+): CodeAgent {
   return {
     isAvailable: isClaudeInstalled,
 
@@ -41,7 +45,9 @@ export function createClaudeCodeAgent(apiKeys: ApiKeyStore, budget: Budget): Cod
 
       const child = spawn(CLAUDE_BIN, args, {
         cwd: request.projectPath,
-        env: buildEnv(apiKeys.read())
+        // Solo se pasa la key si el operador eligio facturar a la key. Sin
+        // ella, `claude` usa su propia sesion y consume del plan.
+        env: buildEnv(useApiKey ? apiKeys.read() : null)
       })
       trackChild(child)
 

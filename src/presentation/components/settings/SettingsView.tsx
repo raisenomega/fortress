@@ -1,3 +1,4 @@
+import { AccountSection } from './AccountSection'
 import { ApiKeySection } from './ApiKeySection'
 import { BudgetSection } from './BudgetSection'
 import { OperationModeSection } from './OperationModeSection'
@@ -14,6 +15,7 @@ export function SettingsView(): React.JSX.Element {
       </header>
 
       <div className="flex max-w-2xl flex-col gap-4">
+        <AccountSection />
         <ApiKeySection />
         <BudgetSection />
         <OperationModeSection />

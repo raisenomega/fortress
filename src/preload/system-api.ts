@@ -4,7 +4,9 @@ import type { GraphStatus } from '@domain/graph/graph-status'
 import type { NewProjectDraft } from '@domain/newproject/new-project-draft'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
+import type { Account } from '@domain/settings/account'
 import type { Billing } from '@domain/telemetry/billing-mode'
+import type { Unsubscribe } from './api-types'
 import type { MeasuredRun } from '@domain/workflow/workflow-estimate'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 
@@ -49,4 +51,12 @@ export interface NewProjectApi {
   /** Que ruta saldria, y que hay dentro si ya existe. No crea nada. */
   planFolder(draft: NewProjectDraft): Promise<Result<FolderPlan>>
   createFolder(draft: NewProjectDraft, useExisting: boolean): Promise<Result<string>>
+}
+
+export interface AccountApi {
+  /** Cuenta con la que `claude` esta conectado, si lo esta. */
+  status(): Promise<Account>
+  /** Abre el inicio de sesion con la suscripcion. */
+  login(): Promise<void>
+  onOutput(listener: (text: string) => void): Unsubscribe
 }

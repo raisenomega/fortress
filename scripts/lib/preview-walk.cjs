@@ -64,7 +64,7 @@ async function walkScreens(helpers) {
   await run(clickSelector('[data-nav="Configuracion"]'))
   await pause(400)
   await shoot('-settings')
-  await expect('configuracion', 'API key de Claude', 'Modo de operacion', 'Topes de gasto')
+  await expect('configuracion', 'Cuenta de Claude', 'Mi cuenta de Claude', 'API key de Claude', 'Topes de gasto')
 
   await run(clickSelector('footer button[title="Ver el diagnostico del sistema"]'))
   await pause(400)

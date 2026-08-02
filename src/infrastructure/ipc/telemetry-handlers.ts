@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { nowIso } from '@domain/shared/id'
+import { usesApiKey } from '@application/settings/read-auth-source'
 import { detectBilling } from '../claude-code/detect-billing'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
@@ -12,7 +13,7 @@ import { IPC } from './channels'
 const SESSION_START = nowIso()
 
 export function registerTelemetryHandlers(): void {
-  ipcMain.handle(IPC.telemetryBilling, () => detectBilling(getAppContext().apiKeys.has()))
+  ipcMain.handle(IPC.telemetryBilling, () => detectBilling(usesApiKey(getAppContext())))
 
   ipcMain.handle(IPC.telemetryAverage, (_event, projectId: string) =>
     getAppContext().runs.averageRun(projectId)

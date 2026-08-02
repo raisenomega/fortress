@@ -5,6 +5,7 @@ import type { ScanSummary } from '@application/scan/scan-types'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
 import { err, type Result } from '@domain/shared/result'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
+import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget, spentToday } from '@application/settings/read-budget'
 import { dayLimitReached } from '@domain/settings/run-budget'
 import { getAppContext } from '../persistence/app-context'
@@ -30,7 +31,9 @@ async function handleRun(
   const limite = dayLimitReached(budget, spentToday(context, new Date()))
   if (limite !== null) return err(limite)
 
-  const scanner = createClaudeScanner(createClaudeCodeAgent(context.apiKeys, budget))
+  const scanner = createClaudeScanner(
+    createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+  )
 
   try {
     return await runScan(context, scanner, projectId, progressSender(event, projectId))

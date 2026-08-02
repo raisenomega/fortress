@@ -8,6 +8,7 @@ export interface SettingsRepository {
 export const SETTINGS_KEYS = {
   operationMode: 'operation_mode',
   activeProjectId: 'active_project_id',
+  authSource: 'auth_source',
   budgetPerRun: 'budget_per_run_usd',
   budgetPerDay: 'budget_per_day_usd',
   encryptedApiKey: 'encrypted_api_key'
@@ -23,6 +24,7 @@ export const SETTINGS_KEYS = {
 const PUBLIC_KEYS: ReadonlySet<string> = new Set([
   SETTINGS_KEYS.operationMode,
   SETTINGS_KEYS.activeProjectId,
+  SETTINGS_KEYS.authSource,
   SETTINGS_KEYS.budgetPerRun,
   SETTINGS_KEYS.budgetPerDay
 ])

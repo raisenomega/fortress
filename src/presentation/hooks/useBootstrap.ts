@@ -7,6 +7,7 @@ import { runHealthCheck } from '../services/health-service'
 import { loadProjects } from '../services/project-service'
 import { loadCounts, loadFindings } from '../services/scan-service'
 import { loadOperationMode, refreshApiKeyStatus } from '../services/settings-service'
+import { loadAccount } from '../services/account-service'
 import { loadBilling, refreshSessionUsage } from '../services/telemetry-service'
 import { useProjectStore } from '../stores/project-store'
 
@@ -23,6 +24,7 @@ export function useBootstrap(): void {
     void loadCounts()
     void refreshSessionUsage()
     void loadBilling()
+    void loadAccount()
     void refreshApiKeyStatus()
     void loadOperationMode()
     // Diagnostico automatico al abrir la app.

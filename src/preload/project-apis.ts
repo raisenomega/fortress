@@ -9,7 +9,15 @@ import { subscribe } from './subscribe'
  */
 export const projectApis: Pick<
   FortressApi,
-  'scan' | 'push' | 'telemetry' | 'cognition' | 'graph' | 'maintenance' | 'activity' | 'newProject'
+  | 'scan'
+  | 'push'
+  | 'telemetry'
+  | 'cognition'
+  | 'graph'
+  | 'maintenance'
+  | 'activity'
+  | 'newProject'
+  | 'account'
 > = {
   scan: {
     run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
@@ -23,6 +31,11 @@ export const projectApis: Pick<
   },
   push: {
     run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
+  },
+  account: {
+    status: () => ipcRenderer.invoke(IPC.accountStatus),
+    login: () => ipcRenderer.invoke(IPC.accountLogin),
+    onOutput: (listener) => subscribe(IPC.accountLoginOutput, listener)
   },
   telemetry: {
     billing: () => ipcRenderer.invoke(IPC.telemetryBilling),

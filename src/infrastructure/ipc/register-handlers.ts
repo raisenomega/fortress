@@ -1,3 +1,4 @@
+import { registerAccountHandlers } from './account-handlers'
 import { registerActivityHandlers } from './activity-handlers'
 import { registerChatHandlers } from './chat-handlers'
 import { registerCognitionHandlers } from './cognition-handlers'
@@ -27,4 +28,5 @@ export function registerIpcHandlers(): void {
   registerGraphHandlers()
   registerMaintenanceHandlers()
   registerNewProjectHandlers()
+  registerAccountHandlers()
 }

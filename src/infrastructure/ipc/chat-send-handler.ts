@@ -6,6 +6,7 @@ import { err, type Result } from '@domain/shared/result'
 import { resolveAssistant } from '../ai/assistant-factory'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { describeAssistantError } from '../ai/describe-error'
+import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget, spentToday } from '@application/settings/read-budget'
 import { dayLimitReached } from '@domain/settings/run-budget'
 import { getAppContext } from '../persistence/app-context'
@@ -32,7 +33,7 @@ export function registerChatSendHandler(): void {
     const limite = dayLimitReached(budget, spentToday(context, new Date()))
     if (limite !== null) return err(limite)
 
-    const codeAgent = createClaudeCodeAgent(context.apiKeys, budget)
+    const codeAgent = createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
     // Con el CLI instalado no hace falta API key: claude usa sus credenciales.
     const assistant = resolveAssistant(context.apiKeys)
 
