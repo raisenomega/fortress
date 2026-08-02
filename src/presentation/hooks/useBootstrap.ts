@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
 import { loadProjects } from '../services/project-service'
-import { refreshApiKeyStatus } from '../services/settings-service'
+import { loadOperationMode, refreshApiKeyStatus } from '../services/settings-service'
 import { useProjectStore } from '../stores/project-store'
 
 /**
@@ -14,6 +14,7 @@ export function useBootstrap(): void {
   useEffect(() => {
     void loadProjects()
     void refreshApiKeyStatus()
+    void loadOperationMode()
   }, [])
 
   useEffect(() => {

@@ -1,8 +1,9 @@
 /**
  * Siembra proyectos y una conversacion, recarga la app y captura la UI con
- * contenido real. Verifica ademas que los chips de agente y proyecto se pintan.
+ * contenido real. Verifica que los chips, los scores, el dialogo de agregar
+ * proyecto y el aviso de modo autonomo se pintan de verdad.
  *
- * Uso: npm run preview  ·  guarda .ui-preview.png
+ * Uso: npm run preview  ·  guarda .ui-preview*.png
  */
 const { app } = require('electron')
 const { join } = require('path')
@@ -11,51 +12,60 @@ const harness = require('./lib/app-harness.cjs')
 const { simulateScan } = require('./lib/simulate-scan.cjs')
 const SEED = require('./checks/seed.cjs')
 
-const SCREENSHOT = join(__dirname, '..', '.ui-preview.png')
-const DIALOG_SHOT = join(__dirname, '..', '.ui-preview-dialog.png')
 const SETTLE_MS = 2000
-
-const OPEN_ADD_PROJECT = `(() => {
-  const button = document.querySelector('aside button[title="Agregar proyecto"]')
-  if (!button) return false
-  button.click()
-  return true
-})()`
+const clickScript = (selector) =>
+  `(() => { const el = document.querySelector(${JSON.stringify(selector)})
+            if (!el) return false
+            el.click()
+            return true })()`
 
 harness.useTemporaryUserData()
 harness.bootMainProcess()
 
 app.whenReady().then(async () => {
   const window = harness.createRendererWindow()
-  await harness.loadRenderer(window)
+  const run = (script) => window.webContents.executeJavaScript(script)
+  const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  const shoot = async (suffix) =>
+    writeFileSync(
+      join(__dirname, '..', `.ui-preview${suffix}.png`),
+      (await window.webContents.capturePage()).toPNG()
+    )
 
-  const seeded = await window.webContents.executeJavaScript(SEED)
+  await harness.loadRenderer(window)
+  const seeded = await run(SEED)
   simulateScan()
   await window.webContents.reload()
-  await new Promise((resolve) => setTimeout(resolve, SETTLE_MS))
+  await pause(SETTLE_MS)
+  await shoot('')
 
-  writeFileSync(SCREENSHOT, (await window.webContents.capturePage()).toPNG())
+  const missing = []
+  const text = await run('document.body.innerText')
+  for (const label of ['Security Reviewer', 'Nucleo', '92', '58', 'Push bloqueado']) {
+    if (!text.includes(label)) missing.push(label)
+  }
 
-  const chips = await window.webContents.executeJavaScript(
-    "Array.from(document.querySelectorAll('article span')).map((n) => n.textContent).join('|')"
-  )
+  if (!(await run(clickScript('aside button[title="Agregar proyecto"]')))) {
+    missing.push('dialogo de agregar proyecto')
+  }
+  await pause(400)
+  await shoot('-dialog')
+  await run(clickScript('button[aria-label="Cerrar"]'))
 
-  const expected = ['Security Reviewer', 'Nucleo', 'supervisado']
-  const missing = expected.filter((label) => !chips.includes(label))
-
-  // El dialogo de agregar proyecto: se abre sin tocar el selector nativo.
-  const opened = await window.webContents.executeJavaScript(OPEN_ADD_PROJECT)
-  await new Promise((resolve) => setTimeout(resolve, 400))
-  writeFileSync(DIALOG_SHOT, (await window.webContents.capturePage()).toPNG())
-  if (!opened) missing.push('dialogo de agregar proyecto')
+  await run(clickScript('header button[aria-pressed="false"]'))
+  await pause(400)
+  await shoot('-autonomo')
+  if (!(await run('document.body.innerText')).includes('sin confirmacion')) {
+    missing.push('aviso de modo autonomo')
+  }
 
   harness.cleanup()
 
   if (missing.length > 0) {
-    console.error(`PREVIEW FAIL: faltan chips ${missing.join(', ')} — visto: ${chips}`)
+    console.error(`PREVIEW FAIL: falta ${missing.join(', ')}`)
     return app.exit(1)
   }
 
-  console.log(`PREVIEW OK: ${seeded} proyectos sembrados, chips presentes`)
+  console.log(`PREVIEW OK: ${seeded} proyectos, chips, scores, dialogo y aviso presentes`)
   app.exit(0)
 })

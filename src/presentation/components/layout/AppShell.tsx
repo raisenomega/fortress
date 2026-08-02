@@ -1,5 +1,6 @@
 import { ChatWindow } from '../chat/ChatWindow'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
+import { AutonomousNotice } from '../settings/AutonomousNotice'
 import { Sidebar } from './Sidebar'
 import { StatusBar } from './StatusBar'
 import { TopBar } from './TopBar'
@@ -18,6 +19,7 @@ export function AppShell({
   return (
     <div className="flex h-full flex-col bg-background">
       <TopBar onOpenSettings={onOpenSettings} />
+      <AutonomousNotice />
 
       <div className="grid min-h-0 flex-1 grid-cols-[248px_1fr]">
         <Sidebar onAddProject={onAddProject} />

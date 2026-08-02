@@ -1,3 +1,5 @@
+import { parseOperationMode, type OperationMode } from '@domain/settings/operation-mode'
+import { SETTINGS_KEYS } from '@domain/settings/settings-repository'
 import { api } from '../adapters/fortress-api'
 import { useSettingsStore } from '../stores/settings-store'
 
@@ -18,4 +20,15 @@ export async function saveApiKey(plainKey: string): Promise<string | null> {
 export async function clearApiKey(): Promise<void> {
   await api().settings.clearApiKey()
   await refreshApiKeyStatus()
+}
+
+/** El modo elegido sobrevive al reinicio; ante un valor raro cae a supervisado. */
+export async function loadOperationMode(): Promise<void> {
+  const stored = await api().settings.get(SETTINGS_KEYS.operationMode)
+  useSettingsStore.getState().setMode(parseOperationMode(stored))
+}
+
+export async function changeOperationMode(mode: OperationMode): Promise<void> {
+  useSettingsStore.getState().setMode(mode)
+  await api().settings.set(SETTINGS_KEYS.operationMode, mode)
 }

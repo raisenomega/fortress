@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { effectiveMode, isProtectedArea } from './operation-mode'
+import { effectiveMode, isProtectedArea, parseOperationMode } from './operation-mode'
+
+describe('parseOperationMode', () => {
+  it('acepta los modos validos', () => {
+    expect(parseOperationMode('autonomo')).toBe('autonomo')
+    expect(parseOperationMode('supervisado')).toBe('supervisado')
+  })
+
+  it('cae a supervisado ante cualquier valor desconocido', () => {
+    expect(parseOperationMode(null)).toBe('supervisado')
+    expect(parseOperationMode('')).toBe('supervisado')
+    expect(parseOperationMode('AUTONOMO')).toBe('supervisado')
+    expect(parseOperationMode('dios-modo')).toBe('supervisado')
+  })
+})
 
 describe('isProtectedArea', () => {
   it('detecta las areas criticas de CLAUDE.md', () => {
