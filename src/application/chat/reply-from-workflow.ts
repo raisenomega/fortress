@@ -8,6 +8,8 @@ import { routeWorkflow } from '@domain/workflow/route-workflow'
 import { buildWorkflowReport } from '@domain/workflow/workflow-report'
 import { consolidate, participants } from '@domain/workflow/workflow-result'
 import { runWorkflow } from '../workflow/run-workflow'
+import { replyFromChat } from './reply-from-chat'
+import { sumUsage } from './sum-usage'
 import type { ReplyOutcome } from './reply-outcome'
 
 export interface WorkflowReplyOptions {
@@ -29,6 +31,11 @@ export interface WorkflowReplyOptions {
  */
 export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<ReplyOutcome> {
   const workflow = routeWorkflow(options.prompt)
+
+  // Una pregunta libre no es un escaneo: se responde en conversacion, no con
+  // un informe de hallazgos vacio que descarta lo que el agente contesto.
+  if (workflow.id === 'libre') return replyFromChat(options)
+
   const plan = planWorkflow(workflow, options.excludedAgents)
 
   const outcome = await runWorkflow(
@@ -49,24 +56,7 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
   return {
     text: buildWorkflowReport(workflow, outcome) + aviso,
     failed: outcome.results.some((result) => result.failed),
-    usage: outcome.results.reduce(
-      (total, result) => ({
-        inputTokens: total.inputTokens + result.usage.inputTokens,
-        outputTokens: total.outputTokens + result.usage.outputTokens,
-        cacheReadTokens: total.cacheReadTokens + result.usage.cacheReadTokens,
-        cacheCreationTokens: total.cacheCreationTokens + result.usage.cacheCreationTokens,
-        costUsd: total.costUsd + result.usage.costUsd,
-        numTurns: total.numTurns + result.usage.numTurns
-      }),
-      {
-        inputTokens: 0,
-        outputTokens: 0,
-        cacheReadTokens: 0,
-        cacheCreationTokens: 0,
-        costUsd: 0,
-        numTurns: 0
-      }
-    ),
+    usage: sumUsage(outcome.results),
     tools: [],
     edits: [],
     agents: participants(outcome.results),
