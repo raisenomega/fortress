@@ -2,6 +2,7 @@ import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { NewChatMessage } from '@domain/chat/chat-message'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
+import { useRunMeterStore } from '../stores/run-meter-store'
 import { refreshSessionUsage } from './telemetry-service'
 import { draftAssistantMessage, draftUserMessage } from './streaming-message'
 
@@ -31,6 +32,7 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
 
   store.setError(null)
   store.setStreaming(true)
+  useRunMeterStore.getState().begin(Date.now())
   store.appendMessage(draftUserMessage(input.projectId, input.prompt, input.mode))
   store.appendMessage(draft)
 
@@ -40,12 +42,19 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
     buffer += chunk.delta
     useChatStore.getState().replaceMessage(draft.id, { ...draft, content: buffer })
   })
+  const unmeter = api().chat.onProgress((p) => {
+    if (p.projectId === input.projectId) {
+      useRunMeterStore.getState().progress(p.index, p.total, p.tokens, p.costUsd)
+    }
+  })
 
   try {
     const result = await api().chat.send(input)
     if (!result.ok) useChatStore.getState().setError(result.error)
   } finally {
     unsubscribe()
+    unmeter()
+    useRunMeterStore.getState().end()
     useChatStore.getState().setStreaming(false)
     await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }

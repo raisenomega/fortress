@@ -1,13 +1,14 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { sendMessage } from '@application/chat/send-message'
 import type { SendMessageInput } from '@application/chat/send-message-types'
-import type { ChatChunk } from '@domain/chat/chat-stream'
+import { usesApiKey } from '@application/settings/read-auth-source'
+import { readBudget } from '@application/settings/read-budget'
+import type { StepProgress } from '@application/workflow/step-progress'
+import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import { err, type Result } from '@domain/shared/result'
 import { resolveAssistant } from '../ai/assistant-factory'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { describeAssistantError } from '../ai/describe-error'
-import { usesApiKey } from '@application/settings/read-auth-source'
-import { readBudget } from '@application/settings/read-budget'
 import { getAppContext } from '../persistence/app-context'
 import { cancelRun, endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
@@ -19,6 +20,15 @@ function chunkSender(event: IpcMainInvokeEvent, projectId: string) {
     if (event.sender.isDestroyed()) return
     const chunk: ChatChunk = { projectId, delta }
     event.sender.send(IPC.chatChunk, chunk)
+  }
+}
+
+/** Manda el avance del workflow para el medidor en vivo (agentes/tokens/coste). */
+function progressSender(event: IpcMainInvokeEvent, projectId: string) {
+  return (p: StepProgress): void => {
+    if (event.sender.isDestroyed()) return
+    const message: ChatProgress = { projectId, ...p }
+    event.sender.send(IPC.chatProgress, message)
   }
 }
 
@@ -44,7 +54,7 @@ export function registerChatSendHandler(): void {
         codeAgent,
         input,
         chunkSender(event, input.projectId),
-        (index, total) => chunkSender(event, input.projectId)(`\n· paso ${index + 1}/${total}\n`),
+        progressSender(event, input.projectId),
         () => isCancelled(input.projectId)
       )
     } catch (error) {

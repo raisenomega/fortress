@@ -1,6 +1,8 @@
 import { QUICK_ACTIONS } from '@domain/chat/quick-actions'
+import { useRunMeterStore } from '../../stores/run-meter-store'
 import { Icon } from '../common/Icon'
 import { UsageIndicator } from '../layout/UsageIndicator'
+import { RunMeter } from './RunMeter'
 
 interface QuickActionsProps {
   readonly disabled: boolean
@@ -13,6 +15,9 @@ interface QuickActionsProps {
  * que lleva gastado justo al lado del boton que lo gasta.
  */
 export function QuickActions({ disabled, onPick }: QuickActionsProps): React.JSX.Element {
+  // Mientras corre, la frase en vivo (agentes/tiempo/gasto); parado, la sesion.
+  const running = useRunMeterStore((state) => state.startedAt !== null)
+
   return (
     <div className="flex items-center gap-2">
       <div className="flex flex-1 flex-wrap gap-1.5">
@@ -29,7 +34,7 @@ export function QuickActions({ disabled, onPick }: QuickActionsProps): React.JSX
           </button>
         ))}
       </div>
-      <UsageIndicator />
+      {running ? <RunMeter /> : <UsageIndicator />}
     </div>
   )
 }

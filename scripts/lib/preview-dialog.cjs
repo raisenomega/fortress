@@ -25,7 +25,13 @@ async function walkDialog(helpers) {
 
   await run(clickSelector('button[aria-label="Cerrar"]'))
 
-  // clickByText mira textContent (crudo); el boton dice 'autonomo' en minusculas
+  // Quitar proyecto: la X abre confirmacion; se cancela para no borrar la siembra.
+  await run(clickSelector('aside button[aria-label^="Quitar"]'))
+  await pause(400)
+  await shoot('-quitar-proyecto')
+  await expect('quitar proyecto', 'su chat, sus hallazgos', 'no se toca', 'Quitar proyecto')
+  await run(clickByText('Cancelar'))
+  await pause(300)
 }
 
 module.exports = { walkDialog }

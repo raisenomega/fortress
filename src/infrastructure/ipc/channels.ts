@@ -43,6 +43,7 @@ export const IPC = {
   chatStop: 'chat:stop',
   /** Evento main -> renderer con cada fragmento del streaming. */
   chatChunk: 'chat:chunk',
+  chatProgress: 'chat:progress',
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
   settingsSaveApiKey: 'settings:save-api-key',

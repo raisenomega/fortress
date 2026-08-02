@@ -1,3 +1,4 @@
+import type { StepProgress } from '../workflow/step-progress'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
@@ -15,7 +16,7 @@ export interface WorkflowReplyOptions {
   readonly prompt: string
   readonly mode: OperationMode
   readonly excludedAgents: readonly AgentId[]
-  readonly onStep: (index: number, total: number) => void
+  readonly onStep: (progress: StepProgress) => void
   readonly onChunk: (delta: string) => void
   readonly known: readonly string[]
   readonly isCancelled: () => boolean

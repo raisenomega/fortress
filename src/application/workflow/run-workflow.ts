@@ -6,14 +6,16 @@ import { permissionModeFor } from '@domain/settings/permission-mode'
 import { buildStepPrompt } from '@domain/workflow/step-prompt'
 import type { StepResult, WorkflowOutcome } from '@domain/workflow/workflow-result'
 import type { WorkflowPlan } from '@domain/workflow/plan-workflow'
+import { totalTokens } from '@domain/telemetry/token-usage'
 import { runStep } from './run-step'
+import type { StepProgress } from './step-progress'
 
 export interface WorkflowDeps {
   readonly codeAgent: CodeAgent
   readonly project: Project
   readonly mode: OperationMode
-  /** Avisa del paso que arranca, para que la UI lo pinte en vivo. */
-  readonly onStep: (index: number, total: number) => void
+  /** Paso que arranca, con tokens y coste ya gastados hasta ahi. */
+  readonly onStep: (progress: StepProgress) => void
   readonly onChunk: (delta: string) => void
   /** Hallazgos ya guardados, para que el agente no reescanee lo medido. */
   readonly known: readonly string[]
@@ -43,7 +45,12 @@ export async function runWorkflow(
     // Se mira antes de arrancar cada paso: detener no puede significar
     // "termina los seis que quedan y luego para".
     if (deps.isCancelled()) return { results, stoppedBy: null }
-    deps.onStep(index, plan.active.length)
+    deps.onStep({
+      index,
+      total: plan.active.length,
+      tokens: results.reduce((sum, r) => sum + totalTokens(r.usage), 0),
+      costUsd: results.reduce((sum, r) => sum + r.usage.costUsd, 0)
+    })
 
     const prompt = buildStepPrompt(step, {
       projectName: deps.project.name,

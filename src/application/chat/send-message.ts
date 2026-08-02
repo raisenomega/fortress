@@ -1,3 +1,4 @@
+import type { StepProgress } from '../workflow/step-progress'
 import type { Assistant } from '@domain/chat/assistant'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { effectiveMode } from '@domain/settings/operation-mode'
@@ -15,7 +16,7 @@ export async function sendMessage(
   codeAgent: CodeAgent,
   input: SendMessageInput,
   onChunk: (delta: string) => void,
-  onStep: (index: number, total: number) => void,
+  onStep: (progress: StepProgress) => void,
   isCancelled: () => boolean
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)

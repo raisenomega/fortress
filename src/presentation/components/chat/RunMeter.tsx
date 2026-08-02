@@ -1,0 +1,38 @@
+import { useEffect, useState } from 'react'
+import { costLabel } from '@domain/telemetry/billing-mode'
+import { formatCost, formatTokens } from '@domain/telemetry/format-usage'
+import { formatElapsed } from '../../format/elapsed'
+import { useRunMeterStore } from '../../stores/run-meter-store'
+import { useTelemetryStore } from '../../stores/telemetry-store'
+
+/**
+ * Medidor en vivo mientras corre un workflow: cuantos agentes van, cuanto
+ * tiempo llevan, y cuantos tokens y dinero han costado. En una frase, para
+ * poder comparar de un vistazo agentes contra tiempo y gasto.
+ */
+export function RunMeter(): React.JSX.Element | null {
+  const startedAt = useRunMeterStore((state) => state.startedAt)
+  const { step, total, tokens, costUsd } = useRunMeterStore()
+  const billing = useTelemetryStore((state) => state.billing)
+  const [now, setNow] = useState(() => Date.now())
+
+  // El cronometro late en el renderer: solo mientras algo corre.
+  useEffect(() => {
+    if (startedAt === null) return
+    const timer = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(timer)
+  }, [startedAt])
+
+  if (startedAt === null) return null
+
+  const agentes = total === 0 ? 'preparando' : `${step + 1}/${total} agentes`
+  const cost = formatCost(costUsd)
+  const prefijo = billing.mode === 'suscripcion' ? '~' : ''
+
+  return (
+    <span className="shrink-0 font-mono text-xs text-primary">
+      {agentes} · {formatElapsed(now - startedAt)} · {formatTokens(tokens)} tok
+      {cost ? ` · ${costLabel(billing).toLowerCase()} ${prefijo}${cost}` : ''}
+    </span>
+  )
+}

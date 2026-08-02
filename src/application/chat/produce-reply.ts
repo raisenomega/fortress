@@ -1,3 +1,4 @@
+import type { StepProgress } from '../workflow/step-progress'
 import type { AgentId } from '@domain/agent/agent'
 import type { Assistant } from '@domain/chat/assistant'
 import type { ChatEngine, CodeAgent } from '@domain/chat/code-agent'
@@ -22,7 +23,7 @@ export interface ReplyOptions {
   /** Agentes excluidos por el operador desde el sidebar. */
   readonly excludedAgents: readonly AgentId[]
   /** Progreso del workflow, paso a paso. */
-  readonly onStep: (index: number, total: number) => void
+  readonly onStep: (progress: StepProgress) => void
   readonly isCancelled: () => boolean
   readonly onChunk: (delta: string) => void
 }

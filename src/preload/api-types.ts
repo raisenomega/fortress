@@ -1,6 +1,6 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
-import type { ChatChunk } from '@domain/chat/chat-stream'
+import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import type { HealthReport } from '@domain/health/health-check'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
@@ -42,6 +42,8 @@ export interface FortressApi {
     /** Detiene el workflow en marcha. Devuelve procesos terminados. */
     stop(projectId: string): Promise<number>
     onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
+    /** Avance del workflow: agentes, tokens y coste en vivo. */
+    onProgress(listener: (p: ChatProgress) => void): Unsubscribe
   }
   readonly health: {
     /** Diagnostico completo del sistema. */
