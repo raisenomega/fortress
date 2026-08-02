@@ -52,12 +52,17 @@ app.whenReady().then(async () => {
   await shoot('-settings')
   await expect('configuracion', 'API key de Claude', 'Modo de operacion')
 
+  await run(clickSelector('footer button[title="Ver el diagnostico del sistema"]'))
+  await pause(400)
+  await shoot('-health')
+  await expect('diagnostico', 'Diagnostico del sistema', 'Como arreglarlo')
+
   harness.cleanup()
 
   if (missing.length > 0) {
     console.error(`PREVIEW FAIL: falta ${missing.join(' | ')}`)
     return app.exit(1)
   }
-  console.log(`PREVIEW OK: ${seeded} proyectos, 5 pantallas verificadas`)
+  console.log(`PREVIEW OK: ${seeded} proyectos, 6 pantallas verificadas`)
   app.exit(0)
 })

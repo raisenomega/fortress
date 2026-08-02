@@ -3,6 +3,7 @@ import type { NewProject } from '@domain/project/project'
 import { api } from '../../adapters/fortress-api'
 import { addProject } from '../../services/project-service'
 import { Modal } from '../common/Modal'
+import { AddSelfButton } from './AddSelfButton'
 import { ProjectDetected } from './ProjectDetected'
 import { ProjectFormFields } from './ProjectFormFields'
 
@@ -40,6 +41,7 @@ export function AddProjectDialog({ onClose }: AddProjectDialogProps): React.JSX.
     <Modal title="Agregar proyecto a FORTRESS" onClose={onClose}>
       <ProjectFormFields draft={draft} onChange={setDraft} onPickFolder={() => void pickFolder()} />
       <ProjectDetected draft={draft} />
+      <AddSelfButton onAdded={onClose} onError={setError} />
 
       {error ? <p className="mt-3 text-xs text-critical">{error}</p> : null}
 

@@ -1,5 +1,6 @@
 import { registerChatHandlers } from './chat-handlers'
 import { registerChatSendHandler } from './chat-send-handler'
+import { registerHealthHandlers } from './health-handlers'
 import { registerProjectHandlers } from './project-handlers'
 import { registerSettingsHandlers } from './settings-handlers'
 
@@ -9,4 +10,5 @@ export function registerIpcHandlers(): void {
   registerChatHandlers()
   registerChatSendHandler()
   registerSettingsHandlers()
+  registerHealthHandlers()
 }

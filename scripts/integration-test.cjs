@@ -10,7 +10,8 @@ const harness = require('./lib/app-harness.cjs')
 const SUITES = [
   ['Persistencia', require('./checks/persistence-checks.cjs')],
   ['API key y chat', require('./checks/api-key-checks.cjs')],
-  ['Modo de operacion', require('./checks/mode-checks.cjs')]
+  ['Modo de operacion', require('./checks/mode-checks.cjs')],
+  ['Self-diagnostics', require('./checks/health-checks.cjs')]
 ]
 
 harness.useTemporaryUserData()

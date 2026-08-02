@@ -1,9 +1,11 @@
+import { HealthPanel } from './components/health/HealthPanel'
 import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
 import { AddProjectDialog } from './components/projects/AddProjectDialog'
 import { useBootstrap } from './hooks/useBootstrap'
 import { sendMessage } from './services/chat-service'
 import { useAgentStore } from './stores/agent-store'
+import { useHealthStore } from './stores/health-store'
 import { useProjectStore } from './stores/project-store'
 import { useSettingsStore } from './stores/settings-store'
 import { useUiStore } from './stores/ui-store'
@@ -18,6 +20,7 @@ export function App(): React.JSX.Element {
   const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
   const onboardingDismissed = useUiStore((state) => state.onboardingDismissed)
   const dismissOnboarding = useUiStore((state) => state.dismissOnboarding)
+  const healthPanelOpen = useHealthStore((state) => state.panelOpen)
 
   useBootstrap()
 
@@ -35,6 +38,7 @@ export function App(): React.JSX.Element {
     <>
       <AppShell onSend={handleSend} />
       {addProjectOpen ? <AddProjectDialog onClose={() => setAddProjectOpen(false)} /> : null}
+      {healthPanelOpen ? <HealthPanel /> : null}
     </>
   )
 }

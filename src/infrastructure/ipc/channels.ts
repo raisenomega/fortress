@@ -4,6 +4,8 @@ export const IPC = {
   projectsAdd: 'projects:add',
   projectsRemove: 'projects:remove',
   projectsPickFolder: 'projects:pick-folder',
+  projectsSelf: 'projects:self',
+  healthRun: 'health:run',
   chatHistory: 'chat:history',
   chatAppend: 'chat:append',
   chatClear: 'chat:clear',

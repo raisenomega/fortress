@@ -1,6 +1,7 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk } from '@domain/chat/chat-stream'
+import type { HealthReport } from '@domain/health/health-check'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
@@ -20,6 +21,8 @@ export interface FortressApi {
     remove(id: string): Promise<Result<null>>
     /** Abre el selector nativo; null si el operador cancela. */
     pickFolder(): Promise<NewProject | null>
+    /** FORTRESS como proyecto; null si el codigo fuente no esta en disco. */
+    self(): Promise<NewProject | null>
   }
   readonly chat: {
     history(projectId: string): Promise<readonly ChatMessage[]>
@@ -27,6 +30,10 @@ export interface FortressApi {
     clear(projectId: string): Promise<void>
     send(input: SendMessageInput): Promise<Result<SendMessageOutput>>
     onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
+  }
+  readonly health: {
+    /** Diagnostico completo del sistema. */
+    run(): Promise<HealthReport>
   }
   readonly settings: {
     get(key: string): Promise<string | null>

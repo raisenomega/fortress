@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
+import { runHealthCheck } from '../services/health-service'
 import { loadProjects } from '../services/project-service'
 import { loadOperationMode, refreshApiKeyStatus } from '../services/settings-service'
 import { useProjectStore } from '../stores/project-store'
@@ -15,6 +16,8 @@ export function useBootstrap(): void {
     void loadProjects()
     void refreshApiKeyStatus()
     void loadOperationMode()
+    // Diagnostico automatico al abrir la app.
+    void runHealthCheck()
   }, [])
 
   useEffect(() => {

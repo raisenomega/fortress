@@ -23,6 +23,16 @@ export async function addProject(input: NewProject): Promise<Result<Project>> {
   return result
 }
 
+/**
+ * Agrega FORTRESS a si misma para poder auditarla con sus propios agentes.
+ * Devuelve null si el codigo fuente no esta accesible en disco.
+ */
+export async function addSelfProject(): Promise<Result<Project> | null> {
+  const self = await api().projects.self()
+  if (!self) return null
+  return addProject(self)
+}
+
 export async function removeProject(id: string): Promise<Result<null>> {
   const result = await api().projects.remove(id)
   if (result.ok) await loadProjects()
