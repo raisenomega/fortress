@@ -5,22 +5,44 @@ out
 .eslintcache
 *.log*
 
-# Secrets — nunca commitear (R1)
+# ---------------------------------------------------------------------------
+# Secretos — nunca se commitean (R1)
+# ---------------------------------------------------------------------------
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.p12
+*.keystore
 
-# Datos locales de la app
+# Bases de datos locales. Guardan el historial de chat y la API key cifrada
+# con safeStorage: aunque no este en claro, no tiene por que salir del equipo.
+*.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
-*.db
 
-# Salida del smoke test
+# ---------------------------------------------------------------------------
+# Documentacion interna de FORTRESS — se queda en el equipo
+# ---------------------------------------------------------------------------
+# Estos documentos viven en el directorio padre, fuera de este repo. Se listan
+# igualmente por si alguien copia uno aqui dentro: mas vale que git lo ignore
+# a que acabe en un push.
+FORTRESS*.md
+COGNITION*.md
+AGENTS-SELECTED.md
+DREAMING-CONFIG.md
+DEPLOYMENT-PLAYBOOK.md
+AUDIT-CHECKLIST.md
+# ARCHITECTURE.md NO se ignora: tu CLAUDE.md raiz dice que si se commitea.
+fortress-shield*.sh
+fortress-orchestrator*.sh
+
+# ---------------------------------------------------------------------------
+# Salida de los scripts de verificacion
+# ---------------------------------------------------------------------------
 .render-smoke.png
-.ui-preview.png
-.ui-preview-dialog.png
-.ui-preview-autonomo.png
-.ui-preview-onboarding.png
-.ui-preview-settings.png
-.ui-preview-health.png
+.ui-preview*.png
 .toggle-zoom.png
