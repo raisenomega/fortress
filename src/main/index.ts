@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
 import { registerIpcHandlers } from '@infrastructure/ipc/register-handlers'
 import { closeDatabase } from '@infrastructure/persistence/database'
+import { augmentPath } from '@infrastructure/system/augment-path'
 
 const APP_USER_MODEL_ID = 'com.fortress.command-center'
 const DATA_DIR = 'fortress-command-center'
@@ -16,6 +17,10 @@ const DATA_DIR = 'fortress-command-center'
  * verificacion escribieran en la base real en vez de en su carpeta temporal.
  */
 app.setName(DATA_DIR)
+
+// Antes de que nada lance un proceso hijo: lanzada con doble click, la app
+// hereda un PATH minimo y no encontraria claude, gh ni otras herramientas.
+augmentPath()
 
 /** Composition root: unico lugar donde se ensamblan las capas. */
 app.whenReady().then(() => {
