@@ -20,8 +20,9 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "test": "npm run build && electron --no-sandbox scripts/integration-test.cjs",
-    "preview": "npm run build && electron --no-sandbox scripts/ui-preview.cjs"
+    "test": "npm run test:unit && npm run build && electron --no-sandbox scripts/integration-test.cjs",
+    "preview": "npm run build && electron --no-sandbox scripts/ui-preview.cjs",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
@@ -54,6 +55,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vite": "^7.2.6",
+    "vitest": "^4.1.10",
     "zustand": "^5.0.14"
   }
 }

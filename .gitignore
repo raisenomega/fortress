@@ -18,3 +18,4 @@ out
 # Salida del smoke test
 .render-smoke.png
 .ui-preview.png
+.ui-preview-dialog.png

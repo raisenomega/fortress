@@ -57,8 +57,10 @@ Definidos en `electron.vite.config.ts` + `tsconfig.node.json` + `tsconfig.web.js
 ```bash
 npm run typecheck        # tsc en node + web
 npm run lint             # incluye max-lines y no-explicit-any
+npm run test:unit        # vitest sobre el dominio puro (sin Electron ni SQLite)
+npm test                 # unit + integracion (renderer -> preload -> IPC -> SQLite)
 npm run smoke            # monta la UI real y falla si no pinta o hay errores
-npm test                 # integracion: renderer -> preload -> IPC -> casos de uso
+npm run preview          # siembra datos y captura la UI con contenido
 ```
 
 Los dos ultimos levantan la app compilada contra un `userData` temporal: nunca

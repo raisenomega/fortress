@@ -3,6 +3,7 @@ export const IPC = {
   projectsList: 'projects:list',
   projectsAdd: 'projects:add',
   projectsRemove: 'projects:remove',
+  projectsPickFolder: 'projects:pick-folder',
   chatHistory: 'chat:history',
   chatAppend: 'chat:append',
   chatClear: 'chat:clear',

@@ -13,7 +13,8 @@ const api: FortressApi = {
   projects: {
     list: () => ipcRenderer.invoke(IPC.projectsList),
     add: (input) => ipcRenderer.invoke(IPC.projectsAdd, input),
-    remove: (id) => ipcRenderer.invoke(IPC.projectsRemove, id)
+    remove: (id) => ipcRenderer.invoke(IPC.projectsRemove, id),
+    pickFolder: () => ipcRenderer.invoke(IPC.projectsPickFolder)
   },
   chat: {
     history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),

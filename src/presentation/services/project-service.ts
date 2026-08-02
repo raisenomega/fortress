@@ -1,4 +1,4 @@
-import type { NewProject } from '@domain/project/project'
+import type { NewProject, Project } from '@domain/project/project'
 import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useProjectStore } from '../stores/project-store'
@@ -14,7 +14,7 @@ export async function loadProjects(): Promise<void> {
   }
 }
 
-export async function addProject(input: NewProject): Promise<Result<unknown>> {
+export async function addProject(input: NewProject): Promise<Result<Project>> {
   const result = await api().projects.add(input)
   if (result.ok) {
     await loadProjects()

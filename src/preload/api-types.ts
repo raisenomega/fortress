@@ -17,6 +17,8 @@ export interface FortressApi {
     list(): Promise<readonly Project[]>
     add(input: NewProject): Promise<Result<Project>>
     remove(id: string): Promise<Result<null>>
+    /** Abre el selector nativo; null si el operador cancela. */
+    pickFolder(): Promise<NewProject | null>
   }
   readonly chat: {
     history(projectId: string): Promise<readonly ChatMessage[]>

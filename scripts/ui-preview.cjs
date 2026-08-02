@@ -11,7 +11,15 @@ const harness = require('./lib/app-harness.cjs')
 const SEED = require('./checks/seed.cjs')
 
 const SCREENSHOT = join(__dirname, '..', '.ui-preview.png')
+const DIALOG_SHOT = join(__dirname, '..', '.ui-preview-dialog.png')
 const SETTLE_MS = 2000
+
+const OPEN_ADD_PROJECT = `(() => {
+  const button = document.querySelector('aside button[title="Agregar proyecto"]')
+  if (!button) return false
+  button.click()
+  return true
+})()`
 
 harness.useTemporaryUserData()
 harness.bootMainProcess()
@@ -32,6 +40,12 @@ app.whenReady().then(async () => {
 
   const expected = ['Security Reviewer', 'Nucleo', 'supervisado']
   const missing = expected.filter((label) => !chips.includes(label))
+
+  // El dialogo de agregar proyecto: se abre sin tocar el selector nativo.
+  const opened = await window.webContents.executeJavaScript(OPEN_ADD_PROJECT)
+  await new Promise((resolve) => setTimeout(resolve, 400))
+  writeFileSync(DIALOG_SHOT, (await window.webContents.capturePage()).toPNG())
+  if (!opened) missing.push('dialogo de agregar proyecto')
 
   harness.cleanup()
 
