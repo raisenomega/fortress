@@ -15,6 +15,10 @@ export const IPC = {
   /** Evento main -> renderer con el avance del escaneo. */
   scanProgress: 'scan:progress',
   pushRun: 'push:run',
+  telemetrySession: 'telemetry:session',
+  telemetrySince: 'telemetry:since',
+  telemetryByProject: 'telemetry:by-project',
+  telemetryRanking: 'telemetry:ranking',
   activityProject: 'activity:project',
   activityAgent: 'activity:agent',
   chatHistory: 'chat:history',

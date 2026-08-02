@@ -8,6 +8,7 @@ async function walkScreens(helpers) {
 
   await shoot('')
   await expect('panel', 'Security Reviewer', 'Nucleo', '99', 'Push bloqueado')
+  await expect('barra de estado', 'tokens', '$0.20')
 
   // Los switches de agentes: el circulo debe caer dentro de la pista.
   missing.push(...(await run(TOGGLES_INSIDE_TRACK)))

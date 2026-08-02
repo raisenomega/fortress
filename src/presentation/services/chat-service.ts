@@ -2,6 +2,7 @@ import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { NewChatMessage } from '@domain/chat/chat-message'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
+import { refreshSessionUsage } from './telemetry-service'
 import { draftAssistantMessage, draftUserMessage } from './streaming-message'
 
 /** Carga el historial persistido de un proyecto en el store. */
@@ -46,7 +47,7 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
   } finally {
     unsubscribe()
     useChatStore.getState().setStreaming(false)
-    await loadHistory(input.projectId)
+    await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }
 }
 

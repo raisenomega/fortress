@@ -1,4 +1,5 @@
 import { EMPTY_COUNTS } from '@domain/project/severity-counts'
+import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 
 /**
  * Doble del puente del preload. Solo lo usan los tests de los servicios: fuera
@@ -33,7 +34,8 @@ export function stubBridge(run: () => Promise<unknown>): BridgeSpy {
           counts: () => Promise.resolve({}),
           onProgress: () => () => {}
         },
-        projects: { list: () => Promise.resolve([]) }
+        projects: { list: () => Promise.resolve([]) },
+        telemetry: { session: () => Promise.resolve(EMPTY_USAGE) }
       }
     }
   })

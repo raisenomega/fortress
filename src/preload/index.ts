@@ -29,6 +29,12 @@ const api: FortressApi = {
     dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
     reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId)
   },
+  telemetry: {
+    session: () => ipcRenderer.invoke(IPC.telemetrySession),
+    since: (iso) => ipcRenderer.invoke(IPC.telemetrySince, iso),
+    byProject: (iso) => ipcRenderer.invoke(IPC.telemetryByProject, iso),
+    ranking: (iso, limit) => ipcRenderer.invoke(IPC.telemetryRanking, iso, limit)
+  },
   activity: {
     byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),
     byAgent: (agentId, projectId, limit) =>

@@ -6,6 +6,7 @@ import { registerProjectHandlers } from './project-handlers'
 import { registerPushHandlers } from './push-handlers'
 import { registerScanHandlers } from './scan-handlers'
 import { registerSettingsHandlers } from './settings-handlers'
+import { registerTelemetryHandlers } from './telemetry-handlers'
 
 /** Punto unico de registro IPC, invocado desde el composition root. */
 export function registerIpcHandlers(): void {
@@ -17,4 +18,5 @@ export function registerIpcHandlers(): void {
   registerScanHandlers()
   registerPushHandlers()
   registerActivityHandlers()
+  registerTelemetryHandlers()
 }

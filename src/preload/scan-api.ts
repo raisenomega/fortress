@@ -6,6 +6,8 @@ import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ScanRecord } from '@domain/scan/scan-record'
 import type { Result } from '@domain/shared/result'
 import type { Activity } from '@domain/telemetry/activity'
+import type { AgentRanking } from '@domain/telemetry/agent-run'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 import type { Unsubscribe } from './api-types'
 
 export interface ScanApi {
@@ -32,4 +34,12 @@ export interface ActivityApi {
 export interface PushApi {
   /** Rechazado si el proyecto tiene CRITICAL o no se ha escaneado. */
   run(projectId: string): Promise<Result<string>>
+}
+
+export interface TelemetryApi {
+  /** Consumo desde que arranco la app. */
+  session(): Promise<TokenUsage>
+  since(iso: string): Promise<TokenUsage>
+  byProject(iso: string): Promise<Readonly<Record<string, TokenUsage>>>
+  ranking(iso: string, limit: number): Promise<readonly AgentRanking[]>
 }

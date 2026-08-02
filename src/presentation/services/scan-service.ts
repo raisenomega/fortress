@@ -1,5 +1,6 @@
 import { api } from '../adapters/fortress-api'
 import { loadProjects } from './project-service'
+import { refreshSessionUsage } from './telemetry-service'
 import { useScanStore } from '../stores/scan-store'
 
 /** Conteos de todos los proyectos: los pide el tablero al arrancar. */
@@ -37,24 +38,24 @@ export async function runScan(projectId: string): Promise<void> {
     useScanStore.getState().finishScan(projectId, null, detail)
   } finally {
     unsubscribe()
-    await Promise.all([loadFindings(projectId), loadCounts(), loadProjects()])
+    await reloadAfterScan(projectId)
   }
 }
 
 /**
- * Descartar cambia el score y puede desbloquear un push, asi que despues hay
- * que releerlo todo: hallazgos, conteos y la fila del proyecto.
+ * Releer despues de un escaneo no puede tumbar el escaneo. Si algo aqui
+ * fallara, el resultado ya esta guardado y en pantalla: lo unico que pasa es
+ * que alguna cifra se ve vieja hasta el siguiente refresco.
  */
-async function setDismissed(projectId: string, findingId: string, off: boolean): Promise<void> {
-  const call = off ? api().scan.dismiss : api().scan.reopen
-  await call(findingId)
-  await Promise.all([loadFindings(projectId), loadCounts(), loadProjects()])
-}
-
-export function dismissFinding(projectId: string, findingId: string): Promise<void> {
-  return setDismissed(projectId, findingId, true)
-}
-
-export function reopenFinding(projectId: string, findingId: string): Promise<void> {
-  return setDismissed(projectId, findingId, false)
+export async function reloadAfterScan(projectId: string): Promise<void> {
+  try {
+    await Promise.all([
+      loadFindings(projectId),
+      loadCounts(),
+      loadProjects(),
+      refreshSessionUsage()
+    ])
+  } catch {
+    // Silencio deliberado: el escaneo si termino.
+  }
 }
