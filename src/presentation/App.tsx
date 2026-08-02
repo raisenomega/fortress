@@ -1,9 +1,9 @@
 import { AgentDetailModal } from './components/agents/AgentDetailModal'
 import { WorkflowPlanCard } from './components/workflow/WorkflowPlanCard'
 import { HealthPanel } from './components/health/HealthPanel'
+import { ProjectDialogs } from './components/newproject/ProjectDialogs'
 import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
-import { AddProjectDialog } from './components/projects/AddProjectDialog'
 import { useBootstrap } from './hooks/useBootstrap'
 import { useExcludedAgents } from './stores/agent-store'
 import { useHealthStore } from './stores/health-store'
@@ -18,8 +18,6 @@ export function App(): React.JSX.Element {
   const apiKeyChecked = useSettingsStore((state) => state.apiKeyChecked)
   const excludedAgents = useExcludedAgents()
   const activeProjectId = useProjectStore((state) => state.activeProjectId)
-  const addProjectOpen = useUiStore((state) => state.addProjectOpen)
-  const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
   const onboardingDismissed = useUiStore((state) => state.onboardingDismissed)
   const dismissOnboarding = useUiStore((state) => state.dismissOnboarding)
   const healthPanelOpen = useHealthStore((state) => state.panelOpen)
@@ -49,7 +47,7 @@ export function App(): React.JSX.Element {
           )
         }
       />
-      {addProjectOpen ? <AddProjectDialog onClose={() => setAddProjectOpen(false)} /> : null}
+      <ProjectDialogs />
       {healthPanelOpen ? <HealthPanel /> : null}
       {openAgentId ? (
         <AgentDetailModal agentId={openAgentId} onClose={() => setOpenAgent(null)} />

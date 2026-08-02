@@ -5,7 +5,8 @@ export type MainView = 'chat' | 'scan' | 'actividad' | 'cognition' | 'rendimient
 
 interface UiState {
   readonly view: MainView
-  readonly addProjectOpen: boolean
+  /** null cerrado, 'chooser' eligiendo, 'connect' conectando, 'create' creando. */
+  readonly projectDialog: 'chooser' | 'connect' | 'create' | null
   /** Agente cuyo detalle esta abierto, o null. */
   readonly openAgentId: AgentId | null
   /** El aviso de modo autonomo se cerro en esta activacion. */
@@ -13,7 +14,7 @@ interface UiState {
   /** Permite entrar a la app sin configurar la key todavia. */
   readonly onboardingDismissed: boolean
   setView: (view: MainView) => void
-  setAddProjectOpen: (open: boolean) => void
+  setProjectDialog: (dialog: 'chooser' | 'connect' | 'create' | null) => void
   setOpenAgent: (id: AgentId | null) => void
   hideAutonomousNotice: () => void
   showAutonomousNotice: () => void
@@ -22,13 +23,13 @@ interface UiState {
 
 export const useUiStore = create<UiState>((set) => ({
   view: 'chat',
-  addProjectOpen: false,
+  projectDialog: null,
   openAgentId: null,
   autonomousNoticeHidden: false,
   onboardingDismissed: false,
 
   setView: (view) => set({ view }),
-  setAddProjectOpen: (addProjectOpen) => set({ addProjectOpen }),
+  setProjectDialog: (projectDialog) => set({ projectDialog }),
   setOpenAgent: (openAgentId) => set({ openAgentId }),
   hideAutonomousNotice: () => set({ autonomousNoticeHidden: true }),
   showAutonomousNotice: () => set({ autonomousNoticeHidden: false }),

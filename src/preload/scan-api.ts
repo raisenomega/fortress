@@ -6,11 +6,7 @@ import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ScanRecord } from '@domain/scan/scan-record'
 import type { Result } from '@domain/shared/result'
 import type { AgentStats } from '@application/telemetry/build-agent-stats'
-import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
-import type { GraphStatus } from '@domain/graph/graph-status'
 import type { Activity } from '@domain/telemetry/activity'
-import type { AgentRanking } from '@domain/telemetry/agent-run'
-import type { TokenUsage } from '@domain/telemetry/token-usage'
 import type { Unsubscribe } from './api-types'
 
 export interface ScanApi {
@@ -41,29 +37,4 @@ export interface ActivityApi {
 export interface PushApi {
   /** Rechazado si el proyecto tiene CRITICAL o no se ha escaneado. */
   run(projectId: string): Promise<Result<string>>
-}
-
-export interface TelemetryApi {
-  /** Consumo desde que arranco la app. */
-  session(): Promise<TokenUsage>
-  since(iso: string): Promise<TokenUsage>
-  byProject(iso: string): Promise<Readonly<Record<string, TokenUsage>>>
-  ranking(iso: string, limit: number): Promise<readonly AgentRanking[]>
-}
-
-export interface CognitionApi {
-  /** COGNITION-LOG.md del proyecto, ya parseado. Vacio si no existe. */
-  read(projectId: string): Promise<CognitionSnapshot>
-}
-
-export interface GraphApi {
-  /** Solo detecta si el grafo esta configurado; no lee sus datos. */
-  status(projectId: string): Promise<GraphStatus>
-}
-
-export interface MaintenanceApi {
-  /** Procesos `claude` vivos ahora mismo. */
-  liveJobs(): Promise<number>
-  /** Los termina, vacia la cache y recarga. La base de datos no se toca. */
-  cleanup(): Promise<{ readonly killed: number }>
 }

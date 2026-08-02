@@ -16,7 +16,7 @@ import { SidebarViewLinks } from './SidebarViewLinks'
 export function Sidebar(): React.JSX.Element {
   const projectCount = useProjectStore((state) => state.projects.length)
   const activeCount = useActiveAgentCount()
-  const setAddProjectOpen = useUiStore((state) => state.setAddProjectOpen)
+  const setProjectDialog = useUiStore((state) => state.setProjectDialog)
   const collapsed = useSidebarStore((state) => state.collapsed)
 
   return (
@@ -36,7 +36,7 @@ export function Sidebar(): React.JSX.Element {
             action={
               <button
                 type="button"
-                onClick={() => setAddProjectOpen(true)}
+                onClick={() => setProjectDialog('chooser')}
                 title="Agregar proyecto"
                 className="tap rounded p-0.5 text-primary hover:bg-accent/40"
               >

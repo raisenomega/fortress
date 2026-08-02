@@ -5,15 +5,14 @@ import type { HealthReport } from '@domain/health/health-check'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
+import type { ActivityApi, PushApi, ScanApi } from './scan-api'
 import type {
-  ActivityApi,
   CognitionApi,
   GraphApi,
   MaintenanceApi,
-  PushApi,
-  ScanApi,
+  NewProjectApi,
   TelemetryApi
-} from './scan-api'
+} from './system-api'
 
 /** Cancela la suscripcion a los fragmentos del streaming. */
 export type Unsubscribe = () => void
@@ -50,6 +49,7 @@ export interface FortressApi {
   readonly cognition: CognitionApi
   readonly graph: GraphApi
   readonly maintenance: MaintenanceApi
+  readonly newProject: NewProjectApi
   readonly push: PushApi
   readonly settings: {
     get(key: string): Promise<string | null>

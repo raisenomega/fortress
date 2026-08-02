@@ -5,6 +5,7 @@ import { registerChatSendHandler } from './chat-send-handler'
 import { registerGraphHandlers } from './graph-handlers'
 import { registerHealthHandlers } from './health-handlers'
 import { registerMaintenanceHandlers } from './maintenance-handlers'
+import { registerNewProjectHandlers } from './newproject-handlers'
 import { registerProjectHandlers } from './project-handlers'
 import { registerPushHandlers } from './push-handlers'
 import { registerScanHandlers } from './scan-handlers'
@@ -25,4 +26,5 @@ export function registerIpcHandlers(): void {
   registerCognitionHandlers()
   registerGraphHandlers()
   registerMaintenanceHandlers()
+  registerNewProjectHandlers()
 }

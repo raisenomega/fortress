@@ -9,7 +9,7 @@ import { subscribe } from './subscribe'
  */
 export const projectApis: Pick<
   FortressApi,
-  'scan' | 'push' | 'telemetry' | 'cognition' | 'graph' | 'maintenance' | 'activity'
+  'scan' | 'push' | 'telemetry' | 'cognition' | 'graph' | 'maintenance' | 'activity' | 'newProject'
 > = {
   scan: {
     run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
@@ -35,6 +35,12 @@ export const projectApis: Pick<
   },
   graph: {
     status: (projectId) => ipcRenderer.invoke(IPC.graphStatus, projectId)
+  },
+  newProject: {
+    homeDirs: () => ipcRenderer.invoke(IPC.newProjectHomeDirs),
+    planFolder: (draft) => ipcRenderer.invoke(IPC.newProjectPlanFolder, draft),
+    createFolder: (draft, useExisting) =>
+      ipcRenderer.invoke(IPC.newProjectCreateFolder, draft, useExisting)
   },
   maintenance: {
     liveJobs: () => ipcRenderer.invoke(IPC.maintenanceLiveJobs),
