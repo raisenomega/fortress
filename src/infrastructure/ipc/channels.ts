@@ -22,6 +22,8 @@ export const IPC = {
   telemetryRanking: 'telemetry:ranking',
   cognitionRead: 'cognition:read',
   graphStatus: 'graph:status',
+  maintenanceCleanup: 'maintenance:cleanup',
+  maintenanceLiveJobs: 'maintenance:live-jobs',
   activityProject: 'activity:project',
   activityAgent: 'activity:agent',
   agentStats: 'agent:stats',

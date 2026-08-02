@@ -60,3 +60,10 @@ export interface GraphApi {
   /** Solo detecta si el grafo esta configurado; no lee sus datos. */
   status(projectId: string): Promise<GraphStatus>
 }
+
+export interface MaintenanceApi {
+  /** Procesos `claude` vivos ahora mismo. */
+  liveJobs(): Promise<number>
+  /** Los termina, vacia la cache y recarga. La base de datos no se toca. */
+  cleanup(): Promise<{ readonly killed: number }>
+}

@@ -3,6 +3,7 @@ import { existsSync, statSync } from 'fs'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
 import { agentsForProject } from './agents-for-project'
+import { trackChild } from './child-registry'
 import { buildArgs, buildEnv, CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { collectRun } from './run-claude-process'
 
@@ -35,6 +36,7 @@ export function createClaudeCodeAgent(apiKeys: ApiKeyStore): CodeAgent {
         cwd: request.projectPath,
         env: buildEnv(apiKeys.read())
       })
+      trackChild(child)
 
       return collectRun(child, onChunk)
     }

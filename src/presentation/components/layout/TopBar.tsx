@@ -3,6 +3,7 @@ import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { APP_NAME } from '../common/Logo'
 import { ModeSelector } from '../settings/ModeSelector'
+import { RefreshButton } from './RefreshButton'
 
 export function TopBar(): React.JSX.Element {
   const project = useActiveProject()
@@ -40,6 +41,8 @@ export function TopBar(): React.JSX.Element {
       </button>
 
       <ModeSelector />
+
+      <RefreshButton />
 
       <button
         type="button"

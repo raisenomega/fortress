@@ -3,6 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
 import { subscribe } from './subscribe'
+import { projectApis } from './project-apis'
 
 /**
  * Superficie minima expuesta al renderer: solo estas operaciones, nada de
@@ -10,6 +11,7 @@ import { subscribe } from './subscribe'
  * este puente — se cifra, se guarda y se usa en el proceso principal.
  */
 const api: FortressApi = {
+  ...projectApis,
   projects: {
     list: () => ipcRenderer.invoke(IPC.projectsList),
     add: (input) => ipcRenderer.invoke(IPC.projectsAdd, input),
@@ -19,37 +21,6 @@ const api: FortressApi = {
   },
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
-  },
-  scan: {
-    run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
-    findings: (projectId) => ipcRenderer.invoke(IPC.scanFindings, projectId),
-    counts: () => ipcRenderer.invoke(IPC.scanCounts),
-    onProgress: (listener) => subscribe(IPC.scanProgress, listener),
-    history: (projectId, limit) => ipcRenderer.invoke(IPC.scanHistory, projectId, limit),
-    historySince: (iso) => ipcRenderer.invoke(IPC.scanHistorySince, iso),
-    dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
-    reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId)
-  },
-  telemetry: {
-    session: () => ipcRenderer.invoke(IPC.telemetrySession),
-    since: (iso) => ipcRenderer.invoke(IPC.telemetrySince, iso),
-    byProject: (iso) => ipcRenderer.invoke(IPC.telemetryByProject, iso),
-    ranking: (iso, limit) => ipcRenderer.invoke(IPC.telemetryRanking, iso, limit)
-  },
-  cognition: {
-    read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId)
-  },
-  graph: {
-    status: (projectId) => ipcRenderer.invoke(IPC.graphStatus, projectId)
-  },
-  activity: {
-    byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),
-    byAgent: (agentId, projectId, limit) =>
-      ipcRenderer.invoke(IPC.activityAgent, agentId, projectId, limit),
-    stats: (agentId, projectId) => ipcRenderer.invoke(IPC.agentStats, agentId, projectId)
-  },
-  push: {
-    run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
   },
   chat: {
     history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),

@@ -4,6 +4,7 @@ import { registerCognitionHandlers } from './cognition-handlers'
 import { registerChatSendHandler } from './chat-send-handler'
 import { registerGraphHandlers } from './graph-handlers'
 import { registerHealthHandlers } from './health-handlers'
+import { registerMaintenanceHandlers } from './maintenance-handlers'
 import { registerProjectHandlers } from './project-handlers'
 import { registerPushHandlers } from './push-handlers'
 import { registerScanHandlers } from './scan-handlers'
@@ -23,4 +24,5 @@ export function registerIpcHandlers(): void {
   registerTelemetryHandlers()
   registerCognitionHandlers()
   registerGraphHandlers()
+  registerMaintenanceHandlers()
 }

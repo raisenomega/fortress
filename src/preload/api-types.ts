@@ -9,6 +9,7 @@ import type {
   ActivityApi,
   CognitionApi,
   GraphApi,
+  MaintenanceApi,
   PushApi,
   ScanApi,
   TelemetryApi
@@ -48,6 +49,7 @@ export interface FortressApi {
   readonly telemetry: TelemetryApi
   readonly cognition: CognitionApi
   readonly graph: GraphApi
+  readonly maintenance: MaintenanceApi
   readonly push: PushApi
   readonly settings: {
     get(key: string): Promise<string | null>
