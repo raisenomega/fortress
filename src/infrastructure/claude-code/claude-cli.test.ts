@@ -44,6 +44,13 @@ describe('buildArgs', () => {
     expect(built[built.indexOf('--max-budget-usd') + 1]).toBe('3')
   })
 
+  it('deja que el agente se autoverifique, y solo eso', () => {
+    const built = args()
+    expect(built).toContain('--allowedTools')
+    expect(built).toContain('Bash(npm run test:unit)')
+    expect(built.join(' ')).not.toContain('dangerously')
+  })
+
   it('un tope de cero desactiva el limite, si el operador lo decide', () => {
     expect(buildArgs('hola', 'plan', NO_AGENTS, null, 0)).not.toContain('--max-budget-usd')
   })

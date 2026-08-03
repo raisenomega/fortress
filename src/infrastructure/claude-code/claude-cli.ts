@@ -2,6 +2,7 @@ import { spawnSync } from 'child_process'
 import type { AgentId } from '@domain/agent/agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
+import { safeCommandRules } from '@domain/settings/safe-commands'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 
 export const CLAUDE_BIN = 'claude'
@@ -32,6 +33,10 @@ export function buildArgs(
   // Red de seguridad: sin tope, un agente sobre un repo enorme sigue leyendo
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
   if (maxUsd > 0) args.push(BUDGET_FLAG, String(maxUsd))
+
+  // El agente puede autoverificarse (tipos, lint, tests) y nada mas: correr
+  // esos tres comandos no necesita aprobacion; cualquier otro sigue bloqueado.
+  args.push('--allowedTools', ...safeCommandRules())
 
   // Los diez agentes viajan como JSON en cada llamada: asi FORTRESS no escribe
   // nada dentro del repositorio del operador para que existan.
