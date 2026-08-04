@@ -3,6 +3,7 @@ import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { APP_NAME } from '../common/Logo'
 import { ModeSelector } from '../settings/ModeSelector'
+import { OmegaChip } from './OmegaChip'
 import { RefreshButton } from './RefreshButton'
 
 export function TopBar(): React.JSX.Element {
@@ -39,6 +40,8 @@ export function TopBar(): React.JSX.Element {
         <BarChart3 size={13} aria-hidden />
         Rendimiento
       </button>
+
+      <OmegaChip />
 
       <ModeSelector />
 

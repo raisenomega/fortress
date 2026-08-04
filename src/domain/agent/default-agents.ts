@@ -1,6 +1,7 @@
 import type { Agent } from './agent'
+import { SENTINEL_OMEGA } from './sentinel-omega'
 
-/** Los seis agentes que vienen activos al instalar, en el orden de la spec. */
+/** Agentes activos al instalar: los seis de la spec + OMEGA, el meta-auditor. */
 export const DEFAULT_AGENTS: readonly Agent[] = [
   {
     id: 'security-reviewer',
@@ -43,5 +44,6 @@ export const DEFAULT_AGENTS: readonly Agent[] = [
     name: 'Cognition',
     purpose: 'Patrones aprendidos y reflexiones por sesion',
     enabledByDefault: true
-  }
+  },
+  SENTINEL_OMEGA
 ]

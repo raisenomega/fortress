@@ -4,8 +4,8 @@ import { routeToAgent } from './agent-router'
 import { SENTINEL_OMEGA } from './sentinel-omega'
 
 describe('SENTINEL OMEGA', () => {
-  it('llega apagado: se activa solo cuando el operador lo pide', () => {
-    expect(SENTINEL_OMEGA.enabledByDefault).toBe(false)
+  it('viene activo: es el meta-auditor del sistema', () => {
+    expect(SENTINEL_OMEGA.enabledByDefault).toBe(true)
   })
 
   it('su prompt usa la carta, no el generico name+purpose', () => {
