@@ -169,6 +169,18 @@ En orden de construcción:
     `integration-test` ya no da falso verde si una suite lanza (`eb292b2`);
     `guardRun` y `trusted` cubiertos por tests (`0b83c23`); el repo auditado no
     puede suplantar al `security-reviewer`/`sentinel-omega` (`ff83cce`).
+39. **Backlog de auto-mejora de FORTRESS (3 fases).** Mientras los agentes
+    trabajan en OTROS proyectos pueden descubrir límites/bugs/gaps de FORTRESS
+    mismo. Se capturan y ENRUTAN: los hallazgos del proyecto van al proyecto; lo
+    que es de FORTRESS va a un backlog propio. Fase A `b22598d`: dominio
+    (`SelfObservation`, parser `parseSelfNotes` de bloques `FORTRESS-NOTES:` con
+    tests), tabla `self_observations`, puerto+repo SQLite, AppContext. Fase B
+    `02982b0`: el prompt de reparación pide las notas y el loop las persiste,
+    etiquetadas con el proyecto donde surgieron (no como hallazgo del proyecto).
+    Fase C `5f3bc0e`: IPC `system:observations`/`resolve-observation`, sub-api
+    `system` en el preload, y vista "Auto-mejora FORTRESS" en el sidebar
+    (`MainView 'sistema'`) con tarjetas kind/área/nota/proyecto y "marcar
+    atendido". Propósito: FORTRESS madura con cada trabajo, en cualquier punto.
 
 ---
 
