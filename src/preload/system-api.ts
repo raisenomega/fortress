@@ -2,6 +2,7 @@ import type { FolderPlan } from '@application/newproject/prepare-folder'
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
 import type { GraphStatus } from '@domain/graph/graph-status'
 import type { NewProjectDraft } from '@domain/newproject/new-project-draft'
+import type { OmegaAuditReport } from '@domain/omega/audit-report'
 import type { OmegaEntry } from '@domain/omega/omega-entry'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
@@ -68,8 +69,7 @@ export interface PostureApi {
 }
 
 export interface OmegaApi {
-  /** OMEGA audita el proyecto y deja el asiento en el Libro de la Vida. */
-  audit(projectId: string): Promise<Result<OmegaEntry>>
-  /** Lee el Libro de la Vida del proyecto. Solo lectura: nunca se borra. */
+  /** OMEGA verifica los hallazgos contra el disco y escribe en el Libro de la Vida. */
+  audit(projectId: string): Promise<Result<OmegaAuditReport>>
   list(projectId: string): Promise<readonly OmegaEntry[]>
 }

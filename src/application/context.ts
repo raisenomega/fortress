@@ -6,6 +6,7 @@ import type { ScanHistoryRepository } from '@domain/scan/scan-record'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
 import type { SettingsRepository } from '@domain/settings/settings-repository'
 import type { CognitionWriter } from '@domain/cognition/cognition-writer'
+import type { FilesystemProbe } from '@domain/omega/filesystem-probe'
 import type { OmegaLog } from '@domain/omega/omega-log'
 import type { ActivityRepository } from '@domain/telemetry/activity'
 import type { AgentRunRepository } from '@domain/telemetry/agent-run-repository'
@@ -25,6 +26,7 @@ export interface AppContext {
   readonly activity: ActivityRepository
   readonly cognitionWriter: CognitionWriter
   readonly omegaLog: OmegaLog
+  readonly filesystemProbe: FilesystemProbe
   readonly connectors: ConnectorRepository
   readonly transaction: RunInTransaction
   readonly settings: SettingsRepository
