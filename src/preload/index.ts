@@ -19,7 +19,8 @@ const api: FortressApi = {
     add: (input) => ipcRenderer.invoke(IPC.projectsAdd, input),
     remove: (id) => ipcRenderer.invoke(IPC.projectsRemove, id),
     pickFolder: () => ipcRenderer.invoke(IPC.projectsPickFolder),
-    self: () => ipcRenderer.invoke(IPC.projectsSelf)
+    self: () => ipcRenderer.invoke(IPC.projectsSelf),
+    setTrusted: (id, trusted) => ipcRenderer.invoke(IPC.projectsSetTrusted, id, trusted)
   },
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)

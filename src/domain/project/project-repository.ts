@@ -9,4 +9,6 @@ export interface ProjectRepository {
   remove(id: string): void
   /** Deja constancia del ultimo escaneo. Es lo unico que escribe el score. */
   updateScan(id: string, score: number, scannedAt: string): void
+  /** Marca un proyecto de confianza: habilita la autoverificacion del agente. */
+  setTrusted(id: string, trusted: boolean): void
 }

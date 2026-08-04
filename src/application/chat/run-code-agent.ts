@@ -21,7 +21,13 @@ export async function runCodeAgent(
   onChunk: (delta: string) => void
 ): Promise<ReplyOutcome> {
   const reply = await agent.run(
-    { projectPath: project.path, prompt, permissionMode: permissionModeFor(mode), agentId },
+    {
+      projectPath: project.path,
+      prompt,
+      permissionMode: permissionModeFor(mode),
+      agentId,
+      trusted: project.trusted
+    },
     onChunk
   )
 

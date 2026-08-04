@@ -5,6 +5,7 @@ export const IPC = {
   projectsRemove: 'projects:remove',
   projectsPickFolder: 'projects:pick-folder',
   projectsSelf: 'projects:self',
+  projectsSetTrusted: 'projects:set-trusted',
   healthRun: 'health:run',
   scanRun: 'scan:run',
   scanFindings: 'scan:findings',

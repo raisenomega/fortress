@@ -12,6 +12,11 @@ export interface CodeAgentRequest {
   readonly permissionMode: ClaudePermissionMode
   /** Agente que se hace cargo. Null deja que Claude Code decida por su cuenta. */
   readonly agentId: AgentId | null
+  /**
+   * Proyecto de confianza. Solo entonces se pasa el allowlist de
+   * autoverificacion, y solo al editar (acceptEdits). Ver selfVerifyRules.
+   */
+  readonly trusted: boolean
 }
 
 export interface CodeAgentReply {

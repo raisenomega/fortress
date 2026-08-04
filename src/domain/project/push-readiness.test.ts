@@ -17,6 +17,7 @@ const project = (overrides: Partial<Project> = {}): Project => ({
   hasClaude: true,
   hasGraph: false,
   hasFortress: false,
+  trusted: false,
   createdAt: SCANNED,
   ...overrides
 })

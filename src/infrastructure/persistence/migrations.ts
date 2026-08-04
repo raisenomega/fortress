@@ -35,4 +35,10 @@ export function runMigrations(db: Db): void {
   for (const [column, statement] of FINDING_COLUMNS) {
     if (!hasColumn(db, 'findings', column)) db.exec(statement)
   }
+
+  // Confianza: bases anteriores no la tienen. Default 0 = no confiable, que es
+  // el lado seguro (el agente no auto-ejecuta scripts hasta que se marque).
+  if (!hasColumn(db, 'projects', 'trusted')) {
+    db.exec('ALTER TABLE projects ADD COLUMN trusted INTEGER NOT NULL DEFAULT 0')
+  }
 }

@@ -44,7 +44,8 @@ export function createClaudeCodeAgent(
         agents,
         request.agentId,
         budget.perRun,
-        mcpConfig
+        mcpConfig,
+        request.trusted
       )
 
       const child = spawn(CLAUDE_BIN, args, {

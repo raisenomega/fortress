@@ -26,7 +26,10 @@ export function createClaudeScanner(codeAgent: CodeAgent): Scanner {
           prompt: buildScanPrompt(request.projectName),
           permissionMode: 'plan',
           // La FASE 1 es cosa del Security Reviewer, siempre el mismo agente.
-          agentId: 'security-reviewer'
+          agentId: 'security-reviewer',
+          // Auditar es mirar: el escaner nunca se autoverifica, sea cual sea la
+          // confianza del proyecto. Doble seguro (ademas de que va en plan).
+          trusted: false
         },
         onProgress
       )

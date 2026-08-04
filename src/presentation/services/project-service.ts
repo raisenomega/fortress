@@ -38,3 +38,8 @@ export async function removeProject(id: string): Promise<Result<null>> {
   if (result.ok) await loadProjects()
   return result
 }
+
+export async function setProjectTrusted(id: string, trusted: boolean): Promise<void> {
+  const result = await api().projects.setTrusted(id, trusted)
+  if (result.ok) await loadProjects()
+}

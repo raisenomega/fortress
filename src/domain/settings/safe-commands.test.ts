@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { safeCommandRules } from './safe-commands'
+import { safeCommandRules, selfVerifyRules } from './safe-commands'
 
 describe('safeCommandRules', () => {
   it('permite verificar: tipos, lint y tests unitarios', () => {
@@ -20,5 +20,20 @@ describe('safeCommandRules', () => {
 
   it('nunca incluye el pase libre a la terminal', () => {
     expect(safeCommandRules().some((rule) => rule.includes('rm') || rule === 'Bash')).toBe(false)
+  })
+})
+
+describe('selfVerifyRules', () => {
+  it('da el allowlist solo al editar (acceptEdits) en repo de confianza', () => {
+    expect(selfVerifyRules('acceptEdits', true)).toEqual(safeCommandRules())
+  })
+
+  it('repo NO confiable: nada. `npm run X` es codigo del repo auditado', () => {
+    expect(selfVerifyRules('acceptEdits', false)).toEqual([])
+  })
+
+  it('en plan: nada, aunque sea de confianza. Auditar/proponer no edita', () => {
+    expect(selfVerifyRules('plan', true)).toEqual([])
+    expect(selfVerifyRules('plan', false)).toEqual([])
   })
 })

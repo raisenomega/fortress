@@ -3,7 +3,7 @@ import type { AgentId } from '@domain/agent/agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
-import { safeCommandRules } from '@domain/settings/safe-commands'
+import { selfVerifyRules } from '@domain/settings/safe-commands'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 
 export const CLAUDE_BIN = 'claude'
@@ -20,7 +20,9 @@ export function buildArgs(
   agentId: AgentId | null,
   maxUsd: number,
   /** JSON de buildMcpConfig, o null si no hay conectores activos. */
-  mcpConfig: string | null = null
+  mcpConfig: string | null = null,
+  /** Proyecto de confianza. Default false: el allowlist NO se pasa por defecto. */
+  trusted = false
 ): string[] {
   const args = [
     '-p',
@@ -37,17 +39,16 @@ export function buildArgs(
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
   if (maxUsd > 0) args.push(BUDGET_FLAG, String(maxUsd))
 
-  // El agente puede autoverificarse (tipos, lint, tests) y nada mas: correr
-  // esos tres comandos no necesita aprobacion; cualquier otro sigue bloqueado.
-  args.push('--allowedTools', ...safeCommandRules())
+  // El allowlist SOLO al editar (acceptEdits) en repo de confianza: `npm run X`
+  // es codigo del repo auditado. En plan o repo no confiable, bash sigue bloqueado.
+  const verifyRules = selfVerifyRules(permissionMode, trusted)
+  if (verifyRules.length > 0) args.push('--allowedTools', ...verifyRules)
 
-  // Los diez agentes viajan como JSON en cada llamada: asi FORTRESS no escribe
-  // nada dentro del repositorio del operador para que existan.
+  // Los diez agentes viajan como JSON: FORTRESS no escribe nada en el repo.
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)
 
-  // Aditivo por diseno: sin conectores activos mcpConfig es null y los
-  // argumentos salen identicos a como salian antes de existir esta linea.
+  // Aditivo: sin conectores mcpConfig es null y los args salen como antes.
   if (mcpConfig) args.push(MCP_CONFIG_FLAG, mcpConfig)
 
   return args

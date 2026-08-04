@@ -14,6 +14,7 @@ const project = (fortressScore: number, lastScan: string | null): Project => ({
   hasClaude: true,
   hasGraph: false,
   hasFortress: false,
+  trusted: false,
   createdAt: '2026-08-01T00:00:00.000Z'
 })
 

@@ -34,6 +34,7 @@ export interface FortressApi {
     pickFolder(): Promise<NewProject | null>
     /** FORTRESS como proyecto; null si el codigo fuente no esta en disco. */
     self(): Promise<NewProject | null>
+    setTrusted(id: string, trusted: boolean): Promise<Result<null>>
   }
   readonly chat: {
     history(projectId: string): Promise<readonly ChatMessage[]>

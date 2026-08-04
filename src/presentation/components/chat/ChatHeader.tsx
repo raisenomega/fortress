@@ -1,5 +1,6 @@
 import type { Project } from '@domain/project/project'
 import { scanStatus } from '@domain/project/scan-status'
+import { TrustToggle } from './TrustToggle'
 
 const DOT: Record<string, string> = {
   'sin-escanear': 'bg-muted-foreground',
@@ -26,9 +27,12 @@ export function ChatHeader({ project }: ChatHeaderProps): React.JSX.Element {
         {project.path}
         {project.gitBranch ? ` · ${project.gitBranch}` : ''}
       </span>
-      <span className="ml-auto shrink-0 text-[10px] tracking-wide text-muted-foreground uppercase">
-        chat aislado
-      </span>
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        <TrustToggle project={project} />
+        <span className="text-[10px] tracking-wide text-muted-foreground uppercase">
+          chat aislado
+        </span>
+      </div>
     </header>
   )
 }

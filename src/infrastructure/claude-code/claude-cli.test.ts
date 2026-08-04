@@ -44,18 +44,30 @@ describe('buildArgs', () => {
     expect(built[built.indexOf('--max-budget-usd') + 1]).toBe('3')
   })
 
-  it('deja que el agente se autoverifique, y solo eso', () => {
-    const built = args()
-    expect(built).toContain('--allowedTools')
-    expect(built).toContain('Bash(npm run test:unit)')
-    expect(built.join(' ')).not.toContain('dangerously')
-  })
-
   it('un tope de cero desactiva el limite, si el operador lo decide', () => {
     expect(buildArgs('hola', 'plan', NO_AGENTS, null, 0)).not.toContain('--max-budget-usd')
   })
 
   it('nunca salta las comprobaciones de permisos', () => {
     expect(args('hola', 'acceptEdits').join(' ')).not.toContain('dangerously-skip-permissions')
+  })
+})
+
+describe('buildArgs · allowlist de autoverificacion (gate de confianza)', () => {
+  it('el allowlist solo aparece al editar en un repo de confianza', () => {
+    const built = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true)
+    expect(built).toContain('--allowedTools')
+    expect(built).toContain('Bash(npm run test:unit)')
+  })
+
+  it('en plan NUNCA pasa el allowlist, aunque el repo sea de confianza', () => {
+    // El escaneo va en plan: auditar es mirar, no auto-ejecutar scripts del repo.
+    expect(buildArgs('hola', 'plan', NO_AGENTS, null, 3, null, true)).not.toContain('--allowedTools')
+  })
+
+  it('en un repo NO confiable no pasa el allowlist ni editando', () => {
+    // `npm run X` es codigo del repo auditado: sin confianza, no se auto-ejecuta.
+    const built = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, false)
+    expect(built).not.toContain('--allowedTools')
   })
 })

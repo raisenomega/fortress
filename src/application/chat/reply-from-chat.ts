@@ -28,7 +28,8 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
         mode: options.mode
       }),
       permissionMode: permissionModeFor(options.mode),
-      agentId
+      agentId,
+      trusted: options.project.trusted
     },
     options.onChunk
   )

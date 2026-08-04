@@ -20,7 +20,7 @@ export async function runStep(
   parse: ParseReport
 ): Promise<StepResult> {
   const reply = await deps.codeAgent.run(
-    { projectPath: deps.project.path, prompt, permissionMode, agentId },
+    { projectPath: deps.project.path, prompt, permissionMode, agentId, trusted: deps.project.trusted },
     deps.onChunk
   )
 

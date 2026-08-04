@@ -26,6 +26,12 @@ export interface Project {
   readonly hasClaude: boolean
   readonly hasGraph: boolean
   readonly hasFortress: boolean
+  /**
+   * Proyecto de confianza. Por defecto false: un repo no confiable NUNCA
+   * auto-ejecuta sus scripts. Solo si es true el agente puede autoverificarse
+   * (typecheck/lint/test), porque `npm run X` corre codigo del propio repo.
+   */
+  readonly trusted: boolean
   readonly createdAt: string
 }
 
