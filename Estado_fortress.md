@@ -182,8 +182,11 @@ Ordenada por lo que desbloquea más:
 - **D4 — Pipeline de despliegue** (Supabase/Vercel desde el chat). No construido.
 - **D5 — Instalador universal** (`fortress-full-installer.sh`) + onboarding
   visual de 5 pantallas para no técnicos. No construido.
-- **D6 — Sandbox de Chromium** (`main-window.ts:37`, el 4º hallazgo). Apagarlo
-  mal deja la app sin arrancar; necesita verificación aparte.
+- **D6 — Sandbox de Chromium (RESUELTO 2026-08-04).** `main-window.ts` pasó a
+  `sandbox: true`. Fue posible tras retirar `window.electron` (el preload solo
+  usa `ipcRenderer`/`contextBridge`, sin node). Verificado con `smoke` + `preview`
+  (montan la UI real y ejercen el bridge): la app arranca y pinta con el sandbox
+  encendido.
 - **D7 — Sección "Record"** que conserve lo importante de un proyecto tras
   quitarlo. Propuesta: exportar `FORTRESS-RECORD.md` a la propia carpeta del
   proyecto, no guardarlo dentro de FORTRESS (evita proyectos fantasma).

@@ -45,7 +45,9 @@ export function createMainWindow(): BrowserWindow {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
+      // El preload solo usa ipcRenderer/contextBridge (sin node), asi que el
+      // sandbox de Chromium puede quedar ENCENDIDO: aisla el renderer del SO.
+      sandbox: true,
       contextIsolation: true,
       nodeIntegration: false
     }
