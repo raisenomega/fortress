@@ -4,13 +4,9 @@ import { runLoop } from '@application/loop/run-loop'
 import { spentToday } from '@application/settings/read-budget'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
 import type { LoopStatus } from '@domain/loop/loop-status'
-import type { OperationMode } from '@domain/settings/operation-mode'
 import { buildDeps } from './loop-deps-factory'
 import { sendLoopStatus } from './loop-registry'
 import { resumeState } from './loop-resume'
-
-/** Inc 4: auditoria (supervisado, NO edita). Inc 5: 'autonomo' para reparar. */
-const LOOP_MODE: OperationMode = 'supervisado'
 
 interface Track {
   recentScores: readonly number[]
@@ -36,7 +32,8 @@ function standbyStatus(config: LoopConfig, track: Track, spent: number): LoopSta
  */
 export async function runEngine(context: AppContext, projectId: string): Promise<void> {
   const budget = readLoopBudget(context)
-  if (!context.projects.findById(projectId) || budget.costCapUsd <= 0 || budget.maxCycles <= 0) return
+  const project = context.projects.findById(projectId)
+  if (!project || budget.costCapUsd <= 0 || budget.maxCycles <= 0) return
 
   const { baseline, initial } = resumeState(context, projectId)
   const config: LoopConfig = { projectId, costCap: budget.costCapUsd, maxCycles: budget.maxCycles }
@@ -48,7 +45,7 @@ export async function runEngine(context: AppContext, projectId: string): Promise
   const deps = buildDeps({
     context,
     config,
-    mode: LOOP_MODE,
+    project,
     baseline,
     onStandby: () => sendLoopStatus(standbyStatus(config, track, spentToday(context, new Date()) - baseline)),
     persist: (recentScores, cyclesDone) => {
