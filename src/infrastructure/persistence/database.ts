@@ -3,6 +3,7 @@ import { app } from 'electron'
 import { join } from 'path'
 import { runMigrations } from './migrations'
 import { SCHEMA } from './schema'
+import { CONNECTOR_SCHEMA } from './schema-connectors'
 import { TELEMETRY_SCHEMA } from './schema-telemetry'
 
 export type Db = Database.Database
@@ -29,6 +30,7 @@ export function getDatabase(): Db {
   configure(db)
   db.exec(SCHEMA)
   db.exec(TELEMETRY_SCHEMA)
+  db.exec(CONNECTOR_SCHEMA)
   runMigrations(db)
   instance = db
   return db

@@ -24,6 +24,12 @@ async function walkCognition(helpers) {
     'Auditar exposicion',
     'ningun ataque de volumen'
   )
+
+  // Conectores (D3): panel de MCPs con toggles.
+  await run(clickSelector('[data-nav="Conectores"]'))
+  await pause(500)
+  await shoot('-conectores')
+  await expect('conectores', 'Figma', 'Canva')
 }
 
 module.exports = { walkCognition }

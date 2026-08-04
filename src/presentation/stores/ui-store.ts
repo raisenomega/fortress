@@ -2,7 +2,14 @@ import { create } from 'zustand'
 import type { AgentId } from '@domain/agent/agent'
 
 export type MainView =
-  'chat' | 'scan' | 'actividad' | 'cognition' | 'exposicion' | 'rendimiento' | 'settings'
+  | 'chat'
+  | 'scan'
+  | 'actividad'
+  | 'cognition'
+  | 'exposicion'
+  | 'rendimiento'
+  | 'settings'
+  | 'conectores'
 
 interface UiState {
   readonly view: MainView

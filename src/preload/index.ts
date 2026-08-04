@@ -3,6 +3,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
 import { subscribe } from './subscribe'
+import { connectorsApi } from './connectors-impl'
 import { projectApis } from './project-apis'
 
 /**
@@ -12,6 +13,7 @@ import { projectApis } from './project-apis'
  */
 const api: FortressApi = {
   ...projectApis,
+  connectors: connectorsApi,
   projects: {
     list: () => ipcRenderer.invoke(IPC.projectsList),
     add: (input) => ipcRenderer.invoke(IPC.projectsAdd, input),

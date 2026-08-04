@@ -3,6 +3,7 @@ import { registerPostureHandlers } from './posture-handlers'
 import { registerActivityHandlers } from './activity-handlers'
 import { registerChatHandlers } from './chat-handlers'
 import { registerCognitionHandlers } from './cognition-handlers'
+import { registerConnectorHandlers } from './connector-handlers'
 import { registerChatSendHandler } from './chat-send-handler'
 import { registerGraphHandlers } from './graph-handlers'
 import { registerHealthHandlers } from './health-handlers'
@@ -31,4 +32,5 @@ export function registerIpcHandlers(): void {
   registerNewProjectHandlers()
   registerAccountHandlers()
   registerPostureHandlers()
+  registerConnectorHandlers()
 }

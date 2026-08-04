@@ -6,6 +6,7 @@ import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 import type { ActivityApi, PushApi, ScanApi } from './scan-api'
+import type { ConnectorsApi } from './connectors-api'
 import type {
   AccountApi,
   PostureApi,
@@ -54,6 +55,7 @@ export interface FortressApi {
   readonly telemetry: TelemetryApi
   readonly account: AccountApi
   readonly posture: PostureApi
+  readonly connectors: ConnectorsApi
   readonly cognition: CognitionApi
   readonly graph: GraphApi
   readonly maintenance: MaintenanceApi

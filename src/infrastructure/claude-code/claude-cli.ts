@@ -1,6 +1,7 @@
 import { spawnSync } from 'child_process'
 import type { AgentId } from '@domain/agent/agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
+import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
 import { safeCommandRules } from '@domain/settings/safe-commands'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
@@ -17,7 +18,9 @@ export function buildArgs(
   permissionMode: ClaudePermissionMode,
   agents: Readonly<Record<string, AgentDefinition>>,
   agentId: AgentId | null,
-  maxUsd: number
+  maxUsd: number,
+  /** JSON de buildMcpConfig, o null si no hay conectores activos. */
+  mcpConfig: string | null = null
 ): string[] {
   const args = [
     '-p',
@@ -42,6 +45,10 @@ export function buildArgs(
   // nada dentro del repositorio del operador para que existan.
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)
+
+  // Aditivo por diseno: sin conectores activos mcpConfig es null y los
+  // argumentos salen identicos a como salian antes de existir esta linea.
+  if (mcpConfig) args.push(MCP_CONFIG_FLAG, mcpConfig)
 
   return args
 }

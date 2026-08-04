@@ -83,7 +83,9 @@ En orden de construcción:
     error y medidor por proyecto; medidor de agentes en vivo; quitar proyecto. `4664868`, `0b9dc9d`
 26. **Preguntas libres se responden en prosa** (no se fuerza el informe). `45c0db2`
 27. **Autoverificación del agente:** lista blanca de `typecheck`, `lint` y
-    `test:unit` — el agente puede verificarse y nada más. (este commit)
+    `test:unit` — el agente puede verificarse y nada más. `e60d94d`
+28. **Conectores MCP (D3, parcial):** panel + persistencia + toggles + MCP
+    custom, construido por el agente. Falta la inyección viva al spawn (ver D3).
 
 ---
 
@@ -111,9 +113,13 @@ Ordenada por lo que desbloquea más:
 - **D2 — Lector del Knowledge Graph.** La detección existe; falta leer nodos,
   aristas y fan-in. Depende de instalar `codebase-memory-mcp` y ver su formato
   real. No se escribe a ciegas.
-- **D3 — Sección "Conectores" (MCP).** Panel para Figma, Canva, GitHub,
-  Supabase, Linear, Slack, Notion, Sentry y MCP custom (URL). Guardar en SQLite
-  y pasarlos a `claude`. No construido.
+- **D3 — Sección "Conectores" (MCP) — PARCIAL.** Panel, persistencia SQLite,
+  toggles, MCP custom (solo https) y `buildMcpConfig`: hechos por el agente,
+  verificados. **Falta la inyección viva:** `claude-code-agent` todavía no pasa
+  los MCP activos al spawn (`buildArgs` acepta el parámetro pero nadie lo
+  alimenta). Se dejó a propósito: alimentar la ruta que ejecuta a TODOS los
+  agentes con una URL mala podría romper cada run, y no se verifica con la
+  lista blanca. Es el último cable, para hacerlo con cuidado.
 - **D4 — Pipeline de despliegue** (Supabase/Vercel desde el chat). No construido.
 - **D5 — Instalador universal** (`fortress-full-installer.sh`) + onboarding
   visual de 5 pantallas para no técnicos. No construido.

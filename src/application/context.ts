@@ -1,4 +1,5 @@
 import type { ChatRepository } from '@domain/chat/chat-repository'
+import type { ConnectorRepository } from '@domain/connectors/connector-repository'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
@@ -20,6 +21,7 @@ export interface AppContext {
   readonly chat: ChatRepository
   readonly runs: AgentRunRepository
   readonly activity: ActivityRepository
+  readonly connectors: ConnectorRepository
   readonly transaction: RunInTransaction
   readonly settings: SettingsRepository
   readonly apiKeys: ApiKeyStore

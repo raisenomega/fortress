@@ -1,6 +1,7 @@
 import { useUiStore, type MainView } from '../../stores/ui-store'
 import { ChatWindow } from '../chat/ChatWindow'
 import { CognitionView } from '../cognition/CognitionView'
+import { ConnectorsView } from '../connectors/ConnectorsView'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
 import { PerformanceView } from '../performance/PerformanceView'
 import { PostureView } from '../posture/PostureView'
@@ -18,7 +19,8 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   cognition: () => <CognitionView />,
   exposicion: () => <PostureView />,
   rendimiento: () => <PerformanceView />,
-  settings: () => <SettingsView />
+  settings: () => <SettingsView />,
+  conectores: () => <ConnectorsView />
 }
 
 interface MainAreaProps {

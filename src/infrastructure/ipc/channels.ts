@@ -44,6 +44,10 @@ export const IPC = {
   /** Evento main -> renderer con cada fragmento del streaming. */
   chatChunk: 'chat:chunk',
   chatProgress: 'chat:progress',
+  connectorsList: 'connectors:list',
+  connectorsSetEnabled: 'connectors:set-enabled',
+  connectorsAdd: 'connectors:add',
+  connectorsRemove: 'connectors:remove',
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
   settingsSaveApiKey: 'settings:save-api-key',

@@ -5,6 +5,7 @@ import { getDatabase } from './database'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
 import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
 import { createSqliteChatRepository } from './sqlite-chat-repository'
+import { createSqliteConnectorRepository } from './sqlite-connector-repository'
 import { createSqliteFindingRepository } from './sqlite-finding-repository'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
 import { createSqliteScanHistoryRepository } from './sqlite-scan-history-repository'
@@ -26,6 +27,7 @@ export function getAppContext(): AppContext {
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),
+    connectors: createSqliteConnectorRepository(db),
     transaction: (work) => db.transaction(work)(),
     settings,
     apiKeys: createSafeStorageApiKeyStore(settings),

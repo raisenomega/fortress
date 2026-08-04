@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { findSection, normalize, splitSections } from './sections'
 
-const MARKDOWN = ['# Log', '', '## Patrón activo', 'cuerpo uno', '', '## Reflexión', 'cuerpo dos'].join(
-  '\n'
-)
+const MARKDOWN = [
+  '# Log',
+  '',
+  '## Patrón activo',
+  'cuerpo uno',
+  '',
+  '## Reflexión',
+  'cuerpo dos'
+].join('\n')
 
 describe('normalize', () => {
   it('quita tildes y pasa a mayusculas', () => {
