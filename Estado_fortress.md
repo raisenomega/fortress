@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **377 unitarios · 93 integración ·
+Estado de verificación al día de hoy: **437 unitarios · 103 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -145,6 +145,30 @@ En orden de construcción:
     `2c667ff`. Celdas sin dato → `s/d` (no se inventan); §4 cubierto con niveles
     reales (resumen→evidencia→código en disco), sin CVEs inventados; §5/§6
     acciones destructivas rehusadas (testigo-no-actor + log eterno).
+35. **Grafo cableado + guía por rol + lector del panel (cierra D2).** El grafo
+    (MCP codebase-memory) viaja en `--mcp-config` y `--allowedTools` en CADA
+    spawn (`54c927e`); guía por rol (seguridad localiza, estructural rastrea,
+    `515a593`); el panel lee el índice real (nodos/aristas/archivos, `2d41359`);
+    telemetría de herramientas por agente (`c7f60fe`). Verificado en vivo: los
+    agentes estructurales usan get_architecture/search_graph/trace_path.
+36. **Loop autónomo — Fase 1 (5 incrementos).** Checkmark junto a confianza,
+    deshabilitado sin topes guardados (obligatorios) + confianza. Ciclo en el
+    main aislado por proyecto: escaneo→+5s→arreglo→verify→re-escaneo→+10s→repite.
+    Frenos: tope de gasto de sesión + nº de ciclos + parada 3×100. Resiliencia:
+    STANDBY por fallo transitorio (crédito/API/red) + sesión persistida que
+    REANUDA tras reinicio (nada se pierde). Reparación real: edita en acceptEdits
+    + verify (typecheck) + red git (checkpoint/revert, solo si la carpeta es raíz
+    del repo). Guardia de degradación: revierte si un arreglo baja el score.
+    Estado en HUD + pie; botón Detener rojo lo para. `3a44f00`–`fe0cf8c`, `299b5dd`.
+37. **Loop autónomo — Fase 2 (debate juez/defensa).** Al degradar, prueba
+    alternativas (el intento avisa al agente que el anterior empeoró); el JUEZ es
+    el re-escaneo objetivo; se queda con el que mejore o para con `sin-solucion`
+    tras 2 rondas. `5079885`.
+38. **Endurecimiento (hallazgos del propio escáner, con test de regresión).**
+    `window.electron` retirado (filtraba process.env+ipcRenderer, `bae3b2b`);
+    `integration-test` ya no da falso verde si una suite lanza (`eb292b2`);
+    `guardRun` y `trusted` cubiertos por tests (`0b83c23`); el repo auditado no
+    puede suplantar al `security-reviewer`/`sentinel-omega` (`ff83cce`).
 
 ---
 
@@ -169,7 +193,7 @@ Ordenada por lo que desbloquea más:
   Faltan: documentación generada (ARCHITECTURE/CLAUDE/COGNITION/.gitignore/
   .env.example/README), scaffold vía CLI, sistema FORTRESS (agentes en disco,
   routines, hooks), primer scan y alta en el sidebar. **La pieza grande.**
-- **D2 — Lector del Knowledge Graph (bloqueo resuelto, panel pendiente).**
+- **D2 — Lector del Knowledge Graph (RESUELTO 2026-08-04, ver operativo §35).**
   `codebase-memory-mcp` (MIT, v0.9.0) instalado en scope **user** y verificado:
   conecta, indexa el repo (2745 nodos / 6699 aristas), y un spawn tipo-FORTRESS
   ve sus 14 tools (`index_repository`, `get_architecture`, `search_graph`,
@@ -177,8 +201,8 @@ Ordenada por lo que desbloquea más:
   `--mcp-config` no-estricto = fusiona). Formato conocido: `project` = path
   slugificado, nodos Function/File/Interface/Route, aristas CALLS/IMPORTS/USAGE.
   CLAUDE.md raíz corregido: `get_callers()` no existe → `trace_path`/`search_graph`.
-  **Falta:** el panel de FORTRESS que lea nodos/aristas/fan-in (ahora sí, con
-  formato real, no a ciegas).
+  **HECHO:** el panel lee el índice real (`~/.cache/codebase-memory-mcp/<slug>.db`:
+  nodos/aristas/archivos/fecha), `2d41359`.
 - **D4 — Pipeline de despliegue** (Supabase/Vercel desde el chat). No construido.
 - **D5 — Instalador universal** (`fortress-full-installer.sh`) + onboarding
   visual de 5 pantallas para no técnicos. No construido.
@@ -190,11 +214,11 @@ Ordenada por lo que desbloquea más:
 - **D7 — Sección "Record"** que conserve lo importante de un proyecto tras
   quitarlo. Propuesta: exportar `FORTRESS-RECORD.md` a la propia carpeta del
   proyecto, no guardarlo dentro de FORTRESS (evita proyectos fantasma).
-- **D8 — Hallazgos de seguridad del propio FORTRESS aún abiertos:** los del
-  escaneo interno que no se han cerrado, validados uno a uno. Del último escaneo
-  (score 89): **cerrados** los dos MEDIUM — `operation-mode.ts` (guarda en
-  español, `a3ded40`) y `safe-commands.ts` (gate de confianza, `02a1706`).
-  Siguen abiertos: MEDIUM `main-window.ts` (=D6, sandbox Chromium), LOW
+- **D8 — Hallazgos de seguridad del propio FORTRESS.** Validados uno a uno.
+  **Cerrados:** MEDIUM `operation-mode.ts` (`a3ded40`), MEDIUM `safe-commands.ts`
+  (`02a1706`), MEDIUM `main-window.ts` (=D6 sandbox, `6bb5c1b`), HIGH
+  `window.electron` (`bae3b2b`), MEDIUM integridad del auditor (`ff83cce`), HIGH
+  falso verde de integration-test (`eb292b2`). **Siguen abiertos:** LOW
   `posture-handlers.ts:11` (sin guardRun) y LOW `index.html:14`
   (CSP `unsafe-inline`/`frame-ancestors`).
 - **D9 — Topes de gasto (RESUELTO 2026-08-04).** El tope diario, que se había
