@@ -16,3 +16,11 @@ export const useLoopStore = create<LoopStoreState>((set) => ({
 export function useLoopStatus(projectId: string | null): LoopStatus | null {
   return useLoopStore((state) => (projectId ? (state.byProject[projectId] ?? null) : null))
 }
+
+/** True si el loop del proyecto esta corriendo (reporto y aun no ha parado). */
+export function useLoopActive(projectId: string | null): boolean {
+  return useLoopStore((state) => {
+    const status = projectId ? state.byProject[projectId] : null
+    return status !== undefined && status !== null && status.stopReason === null
+  })
+}

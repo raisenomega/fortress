@@ -4,6 +4,7 @@ import {
   useProjectStreaming
 } from '../../stores/chat-selectors'
 import { useChatStore } from '../../stores/chat-store'
+import { useLoopActive } from '../../stores/loop-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
 import { ChatErrorBanner } from './ChatErrorBanner'
@@ -20,6 +21,10 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
   const project = useActiveProject()
   const messages = useProjectMessages(project?.id ?? null)
   const streaming = useProjectStreaming(project?.id ?? null)
+  // El loop corre en el main: su actividad tambien pone el chat "en marcha", asi
+  // el boton se vuelve el Detener rojo y sirve de parada manual del loop.
+  const loopActive = useLoopActive(project?.id ?? null)
+  const busy = streaming || loopActive
   const error = useProjectError(project?.id ?? null)
   const setError = useChatStore((state) => state.setError)
 
@@ -53,8 +58,8 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
       )}
 
       <ChatInput
-        disabled={streaming}
-        running={streaming}
+        disabled={busy}
+        running={busy}
         onStop={() => project && void stopWorkflow(project.id)}
         onSend={onSend}
       />
