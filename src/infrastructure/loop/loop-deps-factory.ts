@@ -5,7 +5,7 @@ import type { Project } from '@domain/project/project'
 import { gitRevert, gitSnapshot } from './loop-git'
 import { loopScan } from './loop-ops'
 import { loopRepair } from './loop-repair-op'
-import { isLoopCancelled, sendChatChunk, sendLoopStatus, waitOrCancel } from './loop-registry'
+import { isLoopCancelled, sendLoopChunk, sendLoopStatus, waitOrCancel } from './loop-registry'
 import { withStandby, type StandbyHooks } from './loop-standby'
 import { loopVerify } from './loop-verify'
 
@@ -37,7 +37,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
 
   // La salida en vivo del scan y de los agentes se reenvia al chat del proyecto:
   // el operador lee lo que hacen, como en una corrida normal. No un chat vacio.
-  const toChat = (delta: string): void => sendChatChunk(pid, delta)
+  const toChat = (delta: string): void => sendLoopChunk(pid, delta)
 
   return {
     scan: () =>

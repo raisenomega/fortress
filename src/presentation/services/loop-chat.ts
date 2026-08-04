@@ -2,7 +2,6 @@ import type { ChatMessage } from '@domain/chat/chat-message'
 import type { LoopStatus } from '@domain/loop/loop-status'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
-import { useLoopStore } from '../stores/loop-store'
 import { draftAssistantMessage } from './streaming-message'
 
 /** Borrador en curso del loop, por proyecto. Se ve en vivo; se cierra al cambiar de fase. */
@@ -10,11 +9,6 @@ const drafts = new Map<string, ChatMessage>()
 
 /** Fases que CIERRAN el mensaje anterior (nueva fase con salida propia, o fin). */
 const CLOSES: ReadonlySet<string> = new Set(['escaneando', 'reparando', 'debate', 'esperando', 'parado'])
-
-function loopActive(projectId: string): boolean {
-  const status = useLoopStore.getState().byProject[projectId]
-  return status !== undefined && status.stopReason === null
-}
 
 function finalize(projectId: string): void {
   const draft = drafts.get(projectId)
@@ -24,14 +18,13 @@ function finalize(projectId: string): void {
 }
 
 /**
- * Pinta la salida EN VIVO del loop en el chat del proyecto, igual que una
- * corrida normal: el main reenvia los chunks y aqui se acumulan en un mensaje.
- * Cada fase con salida es un mensaje; al cambiar de fase se cierra el anterior.
- * Solo actua si el loop de ese proyecto esta activo (no pisa un chat manual).
+ * Pinta la salida EN VIVO del loop en el chat del proyecto. Llega por su canal
+ * propio (loop:chunk), asi que se muestra SIEMPRE, sin depender de haber recibido
+ * antes el estado (evita la carrera al reanudar) y sin pisar un chat manual, que
+ * usa otro canal. Cada fase con salida es un mensaje; al cambiar de fase se cierra.
  */
 export function subscribeLoopChat(): () => void {
-  const offChunk = api().chat.onChunk((chunk) => {
-    if (!loopActive(chunk.projectId)) return
+  const offChunk = api().chat.onLoopChunk((chunk) => {
     const nuevo = !drafts.has(chunk.projectId)
     const base = drafts.get(chunk.projectId) ?? draftAssistantMessage(chunk.projectId, 'autonomo')
     if (nuevo) useChatStore.getState().appendMessage(base)

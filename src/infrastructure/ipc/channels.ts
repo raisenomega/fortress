@@ -8,6 +8,7 @@ export const IPC = {
   projectsSetTrusted: 'projects:set-trusted',
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
   loopStatus: 'loop:status',
+  loopChunk: 'loop:chunk',
   omegaAudit: 'omega:audit',
   omegaList: 'omega:list',
   omegaScore: 'omega:score',

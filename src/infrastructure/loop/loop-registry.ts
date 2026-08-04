@@ -47,11 +47,14 @@ export function sendLoopStatus(status: LoopStatus): void {
   if (win && !win.isDestroyed()) win.webContents.send(IPC.loopStatus, status)
 }
 
-/** Reenvia la salida EN VIVO del loop al chat, igual que una corrida normal:
- *  el operador lee lo que el agente hace en pantalla, no un chat vacio. */
-export function sendChatChunk(projectId: string, delta: string): void {
+/**
+ * Reenvia la salida EN VIVO del loop por un canal PROPIO (loop:chunk), no el del
+ * chat manual: asi el renderer la pinta siempre, sin depender de haber recibido
+ * antes el estado (evita la carrera al reanudar) y sin pisar un chat manual.
+ */
+export function sendLoopChunk(projectId: string, delta: string): void {
   const chunk: ChatChunk = { projectId, delta }
-  if (win && !win.isDestroyed()) win.webContents.send(IPC.chatChunk, chunk)
+  if (win && !win.isDestroyed()) win.webContents.send(IPC.loopChunk, chunk)
 }
 
 /** Espera ms, pero corta antes si el humano cancela: la parada es agil. */

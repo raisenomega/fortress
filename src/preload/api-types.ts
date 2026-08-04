@@ -45,8 +45,8 @@ export interface FortressApi {
     stop(projectId: string): Promise<number>
     onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
     onProgress(listener: (p: ChatProgress) => void): Unsubscribe
-    /** Estado del loop autonomo empujado por el main en cada transicion. */
     onLoopStatus(listener: (status: LoopStatus) => void): Unsubscribe
+    onLoopChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
   }
   readonly health: {
     run(): Promise<HealthReport>
