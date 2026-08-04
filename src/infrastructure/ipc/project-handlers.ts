@@ -5,6 +5,7 @@ import { removeProject } from '@application/project/remove-project'
 import { setProjectLoopEnabled } from '@application/project/set-project-loop-enabled'
 import { setProjectTrusted } from '@application/project/set-project-trusted'
 import { startLoop, stopLoop } from '../loop/loop-controller'
+import { exportProjectRecord } from '../project/export-record'
 import type { NewProject } from '@domain/project/project'
 import { getAppContext } from '../persistence/app-context'
 import { pickProjectFolder } from '../system/folder-picker'
@@ -15,7 +16,13 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle(IPC.projectsAdd, (_event, input: NewProject) => addProject(getAppContext(), input))
 
-  ipcMain.handle(IPC.projectsRemove, (_event, id: string) => removeProject(getAppContext(), id))
+  ipcMain.handle(IPC.projectsRemove, (_event, id: string) => {
+    const context = getAppContext()
+    // Deja el record en la carpeta del proyecto ANTES de borrar sus datos (D7).
+    const project = context.projects.findById(id)
+    if (project) exportProjectRecord(context, project)
+    return removeProject(context, id)
+  })
 
   ipcMain.handle(IPC.projectsSetTrusted, (_event, id: string, trusted: boolean) =>
     setProjectTrusted(getAppContext(), id, trusted)
