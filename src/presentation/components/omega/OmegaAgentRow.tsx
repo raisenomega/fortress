@@ -18,7 +18,11 @@ const tone = (v: number | null): string =>
 export function OmegaAgentRow({ agent, selected, onSelect }: OmegaAgentRowProps): React.JSX.Element {
   const cell = 'px-2 py-1 text-right'
   return (
-    <tr onClick={onSelect} className={`tap cursor-pointer border-b border-border ${selected ? 'bg-accent/30' : ''}`}>
+    <tr
+      onClick={onSelect}
+      data-omega-agent={agent.agentId}
+      className={`tap cursor-pointer border-b border-border ${selected ? 'bg-accent/30' : ''}`}
+    >
       <td className="px-2 py-1 text-foreground" title={agent.agentId}>{agent.name}</td>
       <td className={`${cell} ${tone(agent.compliance)}`} title="Ejecuciones sin fallo">
         {pct(agent.compliance)}

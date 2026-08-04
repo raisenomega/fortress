@@ -46,6 +46,12 @@ async function walkCognition(helpers) {
     'LIBRO DE LA VIDA',
     'Ejecutar auditoria'
   )
+
+  // Abre el perfil de un agente: debe mostrar metricas, historial y grafica.
+  await run(clickSelector('[data-omega-agent="security-reviewer"]'))
+  await pause(400)
+  await shoot('-omega-perfil')
+  await expect('omega perfil', 'METRICAS', 'HISTORIAL DE EJECUCIONES', 'GRAFICA DE RENDIMIENTO')
 }
 
 module.exports = { walkCognition }

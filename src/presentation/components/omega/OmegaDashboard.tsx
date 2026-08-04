@@ -36,7 +36,16 @@ export function OmegaDashboard({ project }: OmegaDashboardProps): React.JSX.Elem
 
       {selected ? (
         <OmegaSection title={`Perfil — ${selected}`}>
-          <OmegaAgentProfile agentId={selected} agents={data.agents} runs={data.runs} log={data.log} />
+          <OmegaAgentProfile
+            projectId={id}
+            projectName={project.name}
+            agentId={selected}
+            busy={auditing === id}
+            agents={data.agents}
+            runs={data.runs}
+            log={data.log}
+            loadSnippet={(file, line) => fetchSnippet(id, file, line)}
+          />
         </OmegaSection>
       ) : null}
 
