@@ -1,3 +1,4 @@
+import { SOLVED_STREAK } from '@domain/loop/loop-decision'
 import type { LoopPhase, LoopStatus } from '@domain/loop/loop-status'
 
 const PHASE: Record<LoopPhase, string> = {
@@ -19,8 +20,14 @@ export function LoopMeter({ status }: { status: LoopStatus }): React.JSX.Element
   return (
     <span className="font-mono text-primary">
       loop · {PHASE[status.phase]} · ciclo <span className="text-critical">{current}</span>
-      <span className="text-success">/{status.maxCycles}</span> · ${status.spentSession.toFixed(2)}/
-      {status.costCap}
+      <span className="text-success">/{status.maxCycles}</span>
+      {status.solvedStreak > 0 && (
+        <span className="text-success font-semibold">
+          {' '}
+          · 100×{status.solvedStreak}/{SOLVED_STREAK}
+        </span>
+      )}{' '}
+      · ${status.spentSession.toFixed(2)}/{status.costCap}
     </span>
   )
 }

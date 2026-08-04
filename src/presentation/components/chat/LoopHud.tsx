@@ -1,4 +1,5 @@
 import type { Project } from '@domain/project/project'
+import { SOLVED_STREAK } from '@domain/loop/loop-decision'
 import { STOP_LABEL, type LoopPhase } from '@domain/loop/loop-status'
 import { useLoopStatus } from '../../stores/loop-store'
 
@@ -30,8 +31,14 @@ export function LoopHud({ project }: { project: Project }): React.JSX.Element | 
   return (
     <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] ${border} ${base}`}>
       Loop · {label} · ciclo <span className={complete ? 'text-success' : 'text-critical'}>{current}</span>
-      <span className="text-success">/{status.maxCycles}</span> · ${status.spentSession.toFixed(2)}/
-      {status.costCap}
+      <span className="text-success">/{status.maxCycles}</span>
+      {status.solvedStreak > 0 && (
+        <span className="text-success font-semibold">
+          {' '}
+          · 100 seguidos {status.solvedStreak}/{SOLVED_STREAK}
+        </span>
+      )}{' '}
+      · ${status.spentSession.toFixed(2)}/{status.costCap}
     </span>
   )
 }

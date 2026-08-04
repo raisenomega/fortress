@@ -1,6 +1,7 @@
 import type { AppContext } from '@application/context'
 import type { LoopConfig } from '@application/loop/loop-deps'
 import { runLoop } from '@application/loop/run-loop'
+import { solvedStreak } from '@domain/loop/loop-decision'
 import { spentToday } from '@application/settings/read-budget'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
 import type { LoopStatus } from '@domain/loop/loop-status'
@@ -22,6 +23,7 @@ function standbyStatus(config: LoopConfig, track: Track, spent: number): LoopSta
     score: track.recentScores[0] ?? null,
     spentSession: spent,
     costCap: config.costCap,
+    solvedStreak: solvedStreak(track.recentScores),
     stopReason: null
   }
 }

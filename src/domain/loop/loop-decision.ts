@@ -25,12 +25,25 @@ export interface LoopState {
   readonly recentScores: readonly number[]
 }
 
-/** Escaneos 100/100 seguidos que se consideran "arco resuelto". */
-const SOLVED_STREAK = 3
+/** Escaneos 100/100 SEGUIDOS que se consideran "arco resuelto". */
+export const SOLVED_STREAK = 3
+
+/**
+ * Cuantos escaneos 100/100 van SEGUIDOS desde el mas reciente (tope: SOLVED_STREAK).
+ * Un score < 100 rompe la racha: tienen que ser consecutivos, no aislados.
+ */
+export function solvedStreak(scores: readonly number[]): number {
+  let n = 0
+  for (const score of scores) {
+    if (score !== 100) break
+    n += 1
+    if (n >= SOLVED_STREAK) break
+  }
+  return n
+}
 
 function solved(scores: readonly number[]): boolean {
-  if (scores.length < SOLVED_STREAK) return false
-  return scores.slice(0, SOLVED_STREAK).every((score) => score === 100)
+  return solvedStreak(scores) >= SOLVED_STREAK
 }
 
 /**

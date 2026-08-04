@@ -23,6 +23,8 @@ export interface LoopStatus {
   readonly score: number | null
   readonly spentSession: number
   readonly costCap: number
+  /** Escaneos 100/100 SEGUIDOS logrados (0-3): al llegar a 3 el arco se resuelve. */
+  readonly solvedStreak: number
   /** Motivo si ya paro, o null si sigue. */
   readonly stopReason: LoopStopReason | null
 }

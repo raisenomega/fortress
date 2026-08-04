@@ -1,4 +1,4 @@
-import { loopStop, type LoopStopReason } from '@domain/loop/loop-decision'
+import { loopStop, solvedStreak, type LoopStopReason } from '@domain/loop/loop-decision'
 import type { LoopPhase, LoopStatus } from '@domain/loop/loop-status'
 import type { LoopConfig, LoopDeps } from './loop-deps'
 
@@ -36,6 +36,7 @@ export function statusOf(
     score: p.score,
     spentSession: deps.spentSession(),
     costCap: config.costCap,
+    solvedStreak: solvedStreak(p.recentScores),
     stopReason
   }
 }
