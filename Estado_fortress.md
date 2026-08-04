@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **349 unitarios · 71 integración ·
+Estado de verificación al día de hoy: **367 unitarios · 87 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -112,6 +112,18 @@ En orden de construcción:
     autoverifica (auditar es mirar). Toggle en la cabecera del chat. Regla única
     en el dominio (`selfVerifyRules`), migración aditiva, tests de las 3
     combinaciones. `02a1706`
+32. **SENTINEL OMEGA — meta-auditor (6 fases).** El 11º agente, opcional, con
+    carta honesta (testigo-no-actor, evidencia-o-silencio, discrepancia-no-
+    intención, falible-por-diseño). **Fase 1** agente+carta `5d7b466`. **Fase 2**
+    Libro de la Vida: log append-only sin cascada — sobrevive al proyecto
+    `edae60e`. **Fase 3** motor de verificación: cada hallazgo vs filesystem
+    real, discrepancia con evidencia, sonda solo-lectura con guarda de path
+    traversal `8643c4b`. **Fase 4** puntuación multidimensional solo con datos
+    reales (veracidad/cumplimiento), `null` sin evidencia `28fa8f9`. **Fase 5**
+    panel + vista comparativa reportado-vs-verificado `8a0c950`. **Fase 6** veto
+    de push respaldado por evidencia (no afloja la regla, la documenta) `55efad8`.
+    Rehusadas a propósito (harían a OMEGA violar lo que vigila): toggle que
+    miente, pensamiento inferido, perfiles psicológicos, veredicto infalible.
 
 ---
 
