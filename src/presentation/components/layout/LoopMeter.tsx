@@ -5,6 +5,7 @@ const PHASE: Record<LoopPhase, string> = {
   esperando: 'esperando',
   reparando: 'agentes',
   verificando: 'verificando',
+  debate: 'debate',
   standby: 'standby',
   parado: 'parado'
 }

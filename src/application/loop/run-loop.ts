@@ -1,7 +1,8 @@
 import type { LoopStopReason } from '@domain/loop/loop-decision'
 import type { LoopPhase } from '@domain/loop/loop-status'
+import { runDebate } from './debate'
 import type { LoopConfig, LoopDeps } from './loop-deps'
-import { freshProgress, nextStop, statusOf, type Progress } from './loop-progress'
+import { freshProgress, nextStop, recordScore, statusOf, type Progress } from './loop-progress'
 
 const WAIT_AFTER_SCAN = 5000
 const WAIT_AFTER_FIX = 10000
@@ -20,11 +21,7 @@ export async function runLoop(
   const emit = (phase: LoopPhase, reason: LoopStopReason | null = null): void =>
     deps.emit(statusOf(config, deps, p, phase, reason))
   const halt = (reason: LoopStopReason): LoopStopReason => (emit('parado', reason), reason)
-  const record = (score: number): void => {
-    p.score = score
-    p.recentScores.unshift(score)
-    deps.persist(p.recentScores, p.cyclesDone)
-  }
+  const record = (score: number): void => recordScore(deps, p, score)
 
   const pre = nextStop(config, deps, p)
   if (pre) return halt(pre)
@@ -42,14 +39,19 @@ export async function runLoop(
     const before = p.recentScores[0]
     emit('reparando')
     await deps.snapshot()
-    await deps.fix()
+    await deps.fix(0)
     emit('verificando')
     if (!(await deps.verify())) return await deps.revert().then(() => halt('build-roto'))
 
     emit('escaneando')
-    const after = await deps.scan()
-    // El arreglo se mide por el re-escaneo: si baja el score, revierte y para.
-    if (after < before) return await deps.revert().then(() => halt('degradado'))
+    let after = await deps.scan()
+    // El arreglo se mide por el re-escaneo. Si baja, se abre el DEBATE: prueba
+    // alternativas y se queda con la que mejore; si ninguna, se rinde y para.
+    if (after < before) {
+      const outcome = await runDebate(config, deps, p, before)
+      if (outcome.score === null) return halt(outcome.reason ?? 'sin-solucion')
+      after = outcome.score
+    }
 
     p.cyclesDone += 1
     record(after)

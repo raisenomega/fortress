@@ -14,6 +14,13 @@ export function freshProgress(): Progress {
   return { recentScores: [], cyclesDone: 0, score: null }
 }
 
+/** Anota un score nuevo (el ultimo, y al frente del historial) y lo persiste. */
+export function recordScore(deps: LoopDeps, p: Progress, score: number): void {
+  p.score = score
+  p.recentScores.unshift(score)
+  deps.persist(p.recentScores, p.cyclesDone)
+}
+
 export function statusOf(
   config: LoopConfig,
   deps: LoopDeps,

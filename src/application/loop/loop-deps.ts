@@ -15,8 +15,8 @@ export interface LoopConfig {
 export interface LoopDeps {
   /** Escanea y devuelve el score (0-100). */
   readonly scan: () => Promise<number>
-  /** Fase de reparacion: los agentes editan el codigo. */
-  readonly fix: () => Promise<void>
+  /** Fase de reparacion: el agente edita. attempt>0 es una ronda del debate. */
+  readonly fix: (attempt: number) => Promise<void>
   /** Verifica el arbol tras reparar. false = build roto. */
   readonly verify: () => Promise<boolean>
   /** Checkpoint (git) antes de reparar. */

@@ -10,6 +10,7 @@ export type LoopStopReason =
   | 'resuelto'
   | 'build-roto'
   | 'degradado'
+  | 'sin-solucion'
 
 export interface LoopState {
   /** El humano intervino (toggle OFF / boton Detener). Manda sobre todo. */

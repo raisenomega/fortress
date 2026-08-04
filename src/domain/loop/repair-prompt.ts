@@ -8,12 +8,27 @@ const FIX_RULES = [
   '- Si un fix rompe un test o el typecheck, ese fix es incorrecto: revierte.'
 ].join('\n')
 
+/** En el debate, un intento >0 sabe que el anterior empeoro el proyecto. */
+function retryNote(attempt: number): readonly string[] {
+  if (attempt <= 0) return []
+  return [
+    '',
+    `AVISO: el intento anterior BAJO el score y se revirtio. Este es el intento ${attempt + 1}.`,
+    'Prueba un angulo DISTINTO y mas conservador; no repitas el cambio anterior.'
+  ]
+}
+
 /**
  * Prompt de la fase de REPARACION del loop: el agente EDITA para arreglar los
  * hallazgos conocidos y se autoverifica. Corre en acceptEdits (proyecto de
  * confianza). El checkpoint git y el verify del loop son la red por si rompe.
+ * `attempt` > 0 es una ronda del debate: el arreglo anterior empeoro el score.
  */
-export function buildRepairPrompt(projectName: string, known: readonly string[]): string {
+export function buildRepairPrompt(
+  projectName: string,
+  known: readonly string[],
+  attempt = 0
+): string {
   const lista = known.length > 0 ? known.map((line) => `- ${line}`).join('\n') : '- (sin hallazgos abiertos)'
   return [
     `Proyecto "${projectName}", el directorio de trabajo actual. Modo REPARACION AUTONOMA.`,
@@ -22,6 +37,7 @@ export function buildRepairPrompt(projectName: string, known: readonly string[])
     '',
     'Hallazgos a arreglar (de escaneos anteriores):',
     lista,
+    ...retryNote(attempt),
     '',
     'Tu tarea: ARREGLA esos hallazgos EDITANDO el codigo. Reglas:',
     FIX_RULES,

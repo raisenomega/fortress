@@ -46,13 +46,24 @@ describe('runLoop', () => {
     expect(revert).toHaveBeenCalledTimes(1)
   })
 
-  it('revierte y para si un arreglo baja el score aunque compile', async () => {
-    // Escaneo base 80; tras el arreglo el re-escaneo da 70 (peor) con build verde.
+  it('debate: si ningun intento mejora, revierte y para con sin-solucion', async () => {
+    // Base 80; el arreglo y todo intento del debate dan 70 (siempre peor).
     const scan = vi.fn().mockResolvedValueOnce(80).mockResolvedValue(70)
-    const revert = vi.fn().mockResolvedValue(undefined)
-    const reason = await runLoop(config, deps({ scan, revert }))
-    expect(reason).toBe('degradado')
-    expect(revert).toHaveBeenCalledTimes(1)
+    expect(await runLoop(config, deps({ scan }))).toBe('sin-solucion')
+  })
+
+  it('debate: si un intento mejora, el loop lo acepta y continua', async () => {
+    // Base 80; el arreglo empeora a 70; el intento 1 del debate mejora a 90.
+    const scan = vi
+      .fn()
+      .mockResolvedValueOnce(80)
+      .mockResolvedValueOnce(70)
+      .mockResolvedValueOnce(90)
+      .mockResolvedValue(90)
+    const fix = vi.fn().mockResolvedValue(undefined)
+    const reason = await runLoop({ ...config, maxCycles: 1 }, deps({ scan, fix }))
+    expect(reason).toBe('tope-ciclos') // acepta 90, cyclesDone=1, luego tope
+    expect(fix).toHaveBeenCalledWith(1) // hubo una ronda de debate
   })
 
   it('la cancelacion humana para en seco', async () => {

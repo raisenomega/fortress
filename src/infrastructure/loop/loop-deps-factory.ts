@@ -37,7 +37,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
 
   return {
     scan: () => withStandby(() => loopScan(context, pid, () => {}), hooks),
-    fix: () => withStandby(() => loopRepair(context, pid, () => {}), hooks),
+    fix: (attempt) => withStandby(() => loopRepair(context, pid, () => {}, attempt), hooks),
     verify: () => loopVerify(cwd),
     snapshot: () => {
       checkpoint = gitSnapshot(cwd)

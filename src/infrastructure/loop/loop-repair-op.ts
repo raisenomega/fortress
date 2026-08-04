@@ -17,7 +17,8 @@ import { guardRun } from '../run-guard'
 export async function loopRepair(
   context: AppContext,
   projectId: string,
-  onChunk: (delta: string) => void
+  onChunk: (delta: string) => void,
+  attempt = 0
 ): Promise<Result<void>> {
   const project = context.projects.findById(projectId)
   if (!project) return err('Ese proyecto ya no existe')
@@ -31,7 +32,7 @@ export async function loopRepair(
     usesApiKey(context),
     buildMcpConfig(context.connectors.list())
   )
-  const prompt = buildRepairPrompt(project.name, knownFindings(context, project))
+  const prompt = buildRepairPrompt(project.name, knownFindings(context, project), attempt)
   try {
     const reply = await codeAgent.run(
       { projectPath: project.path, prompt, permissionMode: 'acceptEdits', agentId: null, trusted: project.trusted },
