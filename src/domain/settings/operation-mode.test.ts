@@ -22,14 +22,30 @@ describe('isProtectedArea', () => {
     expect(isProtectedArea('cambia el flujo de payments')).toBe(true)
   })
 
+  it('detecta las areas en espanol, con y sin tildes', () => {
+    // El bug: "autenticacion" no contiene "auth", asi que el freno no saltaba.
+    expect(isProtectedArea('refactoriza la autenticación')).toBe(true)
+    expect(isProtectedArea('cambia los pagos con tarjeta')).toBe(true)
+    expect(isProtectedArea('revisa la seguridad y el cifrado')).toBe(true)
+    expect(isProtectedArea('actualiza la contraseña del usuario')).toBe(true)
+    expect(isProtectedArea('rota el token de sesión')).toBe(true)
+    // Sin tildes tambien: el operador no siempre las escribe.
+    expect(isProtectedArea('arregla la autorizacion')).toBe(true)
+  })
+
   it('no marca peticiones inocuas', () => {
     expect(isProtectedArea('renombra una variable')).toBe(false)
+    expect(isProtectedArea('formatea los archivos y ordena imports')).toBe(false)
   })
 })
 
 describe('effectiveMode', () => {
   it('degrada a supervisado si la peticion toca un area protegida', () => {
     expect(effectiveMode('autonomo', 'refactoriza el modulo de auth')).toBe('supervisado')
+  })
+
+  it('degrada tambien con la peticion en espanol', () => {
+    expect(effectiveMode('autonomo', 'refactoriza la autenticación')).toBe('supervisado')
   })
 
   it('mantiene autonomo en trabajo rutinario', () => {
