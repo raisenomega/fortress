@@ -3,6 +3,7 @@ import type { OmegaEntry } from '@domain/omega/omega-entry'
 const TONE: Record<string, string> = {
   ok: 'text-success',
   discrepancia: 'text-critical',
+  veto: 'text-critical',
   info: 'text-muted-foreground'
 }
 

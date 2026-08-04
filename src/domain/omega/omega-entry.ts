@@ -1,8 +1,11 @@
 /** Clase de asiento del Libro de la Vida. Forense: cada linea se clasifica. */
 export type OmegaKind = 'verificacion' | 'score' | 'nota'
 
-/** Veredicto. 'discrepancia' es lo unico acusatorio y siempre lleva evidencia. */
-export type OmegaVerdict = 'ok' | 'discrepancia' | 'info'
+/**
+ * Veredicto. 'discrepancia' (reportado != disco) y 'veto' (push bloqueado) son
+ * los acusatorios; ambos llevan evidencia siempre.
+ */
+export type OmegaVerdict = 'ok' | 'discrepancia' | 'info' | 'veto'
 
 /** Un asiento del Libro de la Vida. Inmutable: se anexa, jamas se edita ni borra. */
 export interface OmegaEntry {

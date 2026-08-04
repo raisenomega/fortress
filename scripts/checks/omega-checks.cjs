@@ -7,7 +7,7 @@
 const { mkdtempSync, mkdirSync, writeFileSync } = require('fs')
 const { join } = require('path')
 const { tmpdir } = require('os')
-const { withDb } = require('../lib/findings-seed.cjs')
+const { withDb, markScanned } = require('../lib/findings-seed.cjs')
 const { createRecorder } = require('../lib/renderer-checks.cjs')
 
 let seq = 0
@@ -78,6 +78,27 @@ module.exports = async function omegaChecks(window) {
     score.ok && score.value.compliance === null)
   check('overall bajo -> banda no-usar',
     score.ok && score.value.band === 'no-usar', JSON.stringify(score))
+
+  // --- Parte D: veto de push respaldado por evidencia ---
+  const dirD = mkdtempSync(join(tmpdir(), 'fortress-omega-push-'))
+  mkdirSync(join(dirD, 'src'), { recursive: true })
+  writeFileSync(join(dirD, 'src', 'real.ts'), 'x\ny\n')
+
+  const d = await run(`window.api.projects.add({ name: 'OmegaPush', path: '${dirD}',
+    stack: 'node', gitRemote: 'git@example.com:acme/omega.git', gitBranch: 'main', hasClaude: true })`)
+  const idD = d.ok ? d.value.id : ''
+  seedFinding(idD, 'CRITICAL', 'src/real.ts', 1)
+  markScanned(idD, 40)
+
+  const push = await run(`window.api.push.run('${idD}')`)
+  check('el push queda bloqueado por CRITICAL', !push.ok, JSON.stringify(push))
+  const vetoLog = await run(`window.api.omega.list('${idD}')`)
+  check('OMEGA registra un VETO con evidencia del CRITICAL',
+    vetoLog.some((e) => e.verdict === 'veto' && e.evidence.includes('src/real.ts:1')),
+    JSON.stringify(vetoLog))
+  check('el veto dice que el CRITICAL esta verificado en disco',
+    vetoLog.some((e) => e.verdict === 'veto' && e.summary.includes('1 verificados')),
+    JSON.stringify(vetoLog))
 
   return results
 }
