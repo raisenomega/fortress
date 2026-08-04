@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **367 unitarios · 93 integración ·
+Estado de verificación al día de hoy: **377 unitarios · 93 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -135,6 +135,16 @@ En orden de construcción:
     integridad: columnas mentiras/omisiones, profundidad, percentiles, CVEs
     concretos, borrar registros >90d (viola log eterno), reiniciar/restringir/
     bloquear agente (viola testigo-no-actor).
+34. **OMEGA superdashboard — estructura completa del spec (3 fases).** Header
+    global (§1): título+"el ojo que todo lo ve", `FORTRESS v1.0.0` real, estado,
+    integridad %, alertas por severidad, acciones (Actualizar/Exportar-JSON/
+    Configurar/Auditar) `cdf0262`. Tabla macro (§2): 5 columnas exactas
+    (Confiab./Efic./Profund./Discrep./Omisiones), ordenable, colores; perfil
+    micro (§3) con percentil real dentro del sistema, historial y discrepancias
+    `b408238`. Estadísticas globales (§7) + comparativa de 2 agentes (§8)
+    `2c667ff`. Celdas sin dato → `s/d` (no se inventan); §4 cubierto con niveles
+    reales (resumen→evidencia→código en disco), sin CVEs inventados; §5/§6
+    acciones destructivas rehusadas (testigo-no-actor + log eterno).
 
 ---
 
