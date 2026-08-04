@@ -45,10 +45,11 @@ export function buildRepairPrompt(
     'Al terminar verifica con npm run typecheck, npm run lint y npm run test:unit.',
     'Si algo queda en rojo, revierte tu cambio: nunca dejes el arbol roto.',
     '',
-    'Si algo de FORTRESS (la herramienta que te ejecuta, NO este proyecto) te limito',
-    '—falta una capacidad, un bug, un gap, una restriccion que te impidio trabajar bien—,',
-    'anotalo aparte al FINAL en un bloque, y nada mas despues. No es un hallazgo del',
-    'proyecto; es para que FORTRESS se mejore. Omitelo si no hubo nada:',
-    'FORTRESS-NOTES: [{"kind":"limitacion|bug|gap|falta","area":"zona","note":"que paso"}]'
+    'Si FORTRESS (la herramienta que te ejecuta, NO este proyecto) te limito o te falto',
+    'algo —un bug, un gap, una restriccion de entorno/permisos o de plan-mode que te',
+    'impidio trabajar, o la OPORTUNIDAD de una funcion, herramienta o agente nuevo que',
+    'te habria ayudado— anotalo aparte al FINAL en un bloque, y nada mas despues. No es',
+    'un hallazgo del proyecto; es para que FORTRESS madure. Omitelo si no hubo nada:',
+    'FORTRESS-NOTES: [{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note":"que paso o que crear"}]'
   ].join('\n')
 }

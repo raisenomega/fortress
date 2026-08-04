@@ -1,12 +1,19 @@
 /**
  * Observacion que un agente hace sobre FORTRESS MISMO mientras trabaja en OTRO
- * proyecto: un limite, un bug, un gap o una funcionalidad que le falto y que le
- * impidio hacer bien su trabajo. No es un hallazgo del proyecto (eso va al
- * proyecto); es material para que FORTRESS se mejore a si misma con cada trabajo.
+ * proyecto: un limite, un bug, un gap, algo que le falto (incluidos bloqueos de
+ * entorno/permisos/plan-mode) o la OPORTUNIDAD de una capacidad nueva. No es un
+ * hallazgo del proyecto (eso va al proyecto); es material para que FORTRESS se
+ * mejore a si misma con cada trabajo.
  */
-export type ObservationKind = 'bug' | 'gap' | 'limitacion' | 'falta'
+export type ObservationKind = 'bug' | 'gap' | 'limitacion' | 'falta' | 'oportunidad'
 
-export const OBSERVATION_KINDS: readonly ObservationKind[] = ['bug', 'gap', 'limitacion', 'falta']
+export const OBSERVATION_KINDS: readonly ObservationKind[] = [
+  'bug',
+  'gap',
+  'limitacion',
+  'falta',
+  'oportunidad'
+]
 
 export interface SelfObservation {
   readonly id: string
