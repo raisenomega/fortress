@@ -50,15 +50,19 @@ module.exports = `(async () => {
   await window.api.settings.set('budget_per_run_usd', '2.5')
   check('persiste settings', (await window.api.settings.get('budget_per_run_usd')) === '2.5')
 
-  const loopOf = async (id) =>
-    (await window.api.projects.list()).find((p) => p.id === id)?.loopEnabled
-  check('el loop nace apagado', (await loopOf(otherId)) === false)
+  const fieldOf = async (id, f) => (await window.api.projects.list()).find((p) => p.id === id)?.[f]
+  check('el loop nace apagado', (await fieldOf(otherId, 'loopEnabled')) === false)
   await window.api.projects.setLoopEnabled(otherId, true)
-  check('enciende el loop del proyecto', (await loopOf(otherId)) === true)
+  check('enciende el loop', (await fieldOf(otherId, 'loopEnabled')) === true)
   await window.api.projects.setLoopEnabled(otherId, false)
-  check('apaga el loop del proyecto', (await loopOf(otherId)) === false)
-  check('setLoopEnabled rechaza proyecto inexistente',
-        !(await window.api.projects.setLoopEnabled('no-existe', true)).ok)
+  check('apaga el loop', (await fieldOf(otherId, 'loopEnabled')) === false)
+  check('setLoopEnabled rechaza inexistente', !(await window.api.projects.setLoopEnabled('x', true)).ok)
+  check('el proyecto nace no confiable', (await fieldOf(otherId, 'trusted')) === false)
+  await window.api.projects.setTrusted(otherId, true)
+  check('marca de confianza', (await fieldOf(otherId, 'trusted')) === true)
+  await window.api.projects.setTrusted(otherId, false)
+  check('revoca la confianza', (await fieldOf(otherId, 'trusted')) === false)
+  check('setTrusted rechaza inexistente', !(await window.api.projects.setTrusted('x', true)).ok)
 
   const removed = await window.api.projects.remove(projectId)
   check('borra el proyecto', removed.ok, JSON.stringify(removed))

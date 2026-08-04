@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@domain': resolve('src/domain'),
+      '@application': resolve('src/application'),
       '@infrastructure': resolve('src/infrastructure')
     }
   },
