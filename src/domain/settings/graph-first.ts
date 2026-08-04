@@ -1,13 +1,49 @@
+import type { AgentId } from '../agent/agent'
+
 /**
- * Se inyecta en TODO prompt de agente (incluido OMEGA). Usar el grafo del
- * proyecto (MCP codebase-memory) ANTES de leer archivos a mano es lo que hace
- * sostenible el gasto: leer el codebase entero cada escaneo cuesta millones de
- * tokens de cache; el grafo responde lo mismo por una fraccion. No negociable.
+ * Se inyecta en TODO prompt de agente. Usar el grafo (MCP codebase-memory) antes
+ * de leer a mano es lo que hace sostenible el gasto. Pero el grafo ahorra
+ * distinto segun la tarea: en seguridad, para SALTAR al codigo sensible antes de
+ * grepear; en trabajo estructural, para responder "quien llama a que" sin releer
+ * el repo. Forzar el grafo donde grep es mejor optimizaria la metrica, no el gasto.
  */
+const BASE =
+  'GRAFO PRIMERO (no negociable): antes de leer archivos a mano, consulta el ' +
+  'grafo del proyecto por el MCP codebase-memory. Si es la primera vez, corre ' +
+  'index_repository sobre la raiz. Abre un archivo entero SOLO si el grafo no responde.'
+
+/** Chat general y agentes sin rol claro: la guia base con las tres herramientas. */
 export const GRAPH_FIRST =
-  'GRAFO PRIMERO (no negociable): antes de leer archivos con Read o buscar con ' +
-  'Grep, consulta el grafo del proyecto por el MCP codebase-memory. Si es la ' +
-  'primera vez, corre index_repository sobre la raiz; luego get_architecture para ' +
-  'el mapa, search_graph para localizar simbolos y trace_path para ver quien llama ' +
-  'a que. Abre un archivo entero SOLO si el grafo no da la respuesta. Leer todo el ' +
-  'codigo a mano quema tokens sin sentido.'
+  BASE +
+  ' Usa get_architecture para el mapa, search_graph para localizar simbolos y ' +
+  'trace_path para ver quien llama a que.'
+
+/** Seguridad: el grafo LOCALIZA el codigo sensible; grep inspecciona el patron. */
+export const GRAPH_FIRST_SECURITY =
+  BASE +
+  ' Empieza por search_graph/search_code para saltar directo al codigo de auth, ' +
+  'sesion, configuracion y acceso a datos, en vez de recorrer todo el arbol. Una ' +
+  'vez ahi, inspecciona a fondo ese punto.'
+
+/** Estructural: trace_path responde "quien llama / esta muerto" sin releer el repo. */
+export const GRAPH_FIRST_STRUCTURAL =
+  BASE +
+  ' Usa trace_path para saber quien llama a una funcion y si esta muerta, y ' +
+  'get_architecture para el mapa, en vez de grepear el repo entero: ahi el grafo ' +
+  'te ahorra la mayoria de las lecturas.'
+
+const STRUCTURAL: ReadonlySet<AgentId> = new Set([
+  'refactor-cleaner',
+  'code-reviewer',
+  'code-simplifier',
+  'planner',
+  'sentinel-omega',
+  'tdd-guide'
+])
+
+/** La guia del grafo segun el rol del agente: cada uno lo usa donde ahorra. */
+export function graphFirstFor(agentId: AgentId): string {
+  if (agentId === 'security-reviewer') return GRAPH_FIRST_SECURITY
+  if (STRUCTURAL.has(agentId)) return GRAPH_FIRST_STRUCTURAL
+  return GRAPH_FIRST
+}

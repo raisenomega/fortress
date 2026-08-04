@@ -4,7 +4,7 @@ import { SENTINEL_OMEGA } from '../agent/sentinel-omega'
 import { buildChatPrompt } from '../chat/chat-prompt'
 import { buildScanPrompt } from '../scan/scan-prompt'
 import { buildStepPrompt } from '../workflow/step-prompt'
-import { GRAPH_FIRST } from './graph-first'
+import { GRAPH_FIRST, graphFirstFor } from './graph-first'
 
 const HUELLA = 'GRAFO PRIMERO'
 
@@ -33,5 +33,13 @@ describe('GRAFO PRIMERO en todos los prompts (no negociable)', () => {
   it('la instruccion nombra las herramientas reales del grafo', () => {
     expect(GRAPH_FIRST).toContain('index_repository')
     expect(GRAPH_FIRST).toContain('search_graph')
+  })
+
+  it('la guia se adapta al rol: seguridad localiza, estructural rastrea llamadas', () => {
+    // Seguridad es cazar patrones (grep); el grafo solo SALTA al codigo sensible.
+    expect(graphFirstFor('security-reviewer')).toContain('search_code')
+    // Estructural es "quien llama / esta muerto": ahi trace_path reemplaza el grep.
+    expect(graphFirstFor('refactor-cleaner')).toContain('trace_path')
+    expect(graphFirstFor('cognition')).toBe(GRAPH_FIRST)
   })
 })
