@@ -282,9 +282,15 @@ Ordenada por lo que desbloquea más:
   sección de Capacidades en el panel con "Promover"/"Aprobar y promover" (el
   reversible no pide humano). Falta: auto-promover el reversible sin clic (hoy es
   manual);
-  (e) la auto-creación de una función/herramienta/agente en sí — la pieza de
-  máximo riesgo, con sandbox y reversión. Cada sub-paso es un incremento
-  verificable; ninguno se construye sin su freno. **La otra pieza grande, junto a D1.**
+  (e) la auto-creación en sí — la pieza de máximo riesgo. Plan aprobado (dossier
+  04, decisión clave: **datos, no código** — una capacidad es una fila que el
+  motor consume, nunca fuente generada + rebuild). Partido en tres:
+  **e0 — Proponer (HECHO)**: alta humana de una capacidad en 'propuesta'
+  (`proposeCapability`, validación, IPC + formulario en el panel); riesgo nulo,
+  no genera ni ejecuta nada, y por fin el panel muestra contenido real.
+  **e1 — Borrador** (agente redacta la definición en sandbox, inerte, OMEGA
+  audita) y **e2 — Activar** (dato activo con veto+firma humana+techo, reversible
+  con un toggle): planificados, no construidos. **La otra pieza grande, junto a D1.**
 
 ---
 
