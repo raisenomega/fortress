@@ -9,14 +9,10 @@ import type { Result } from '@domain/shared/result'
 import type { ActivityApi, PushApi, ScanApi } from './scan-api'
 import type { ConnectorsApi } from './connectors-api'
 import type { OmegaApi } from './omega-api'
+import type { SelfImprovementApi } from './self-improvement-api'
 import type {
-  AccountApi,
-  PostureApi,
-  CognitionApi,
-  GraphApi,
-  MaintenanceApi,
-  NewProjectApi,
-  TelemetryApi
+  AccountApi, PostureApi, CognitionApi, GraphApi,
+  MaintenanceApi, NewProjectApi, TelemetryApi
 } from './system-api'
 
 /** Cancela la suscripcion a los fragmentos del streaming. */
@@ -52,6 +48,7 @@ export interface FortressApi {
     run(): Promise<HealthReport>
   }
   readonly omega: OmegaApi
+  readonly system: SelfImprovementApi
   readonly scan: ScanApi
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi

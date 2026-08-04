@@ -9,6 +9,8 @@ export const IPC = {
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
   loopStatus: 'loop:status',
   loopChunk: 'loop:chunk',
+  systemObservations: 'system:observations',
+  systemResolveObservation: 'system:resolve-observation',
   omegaAudit: 'omega:audit',
   omegaList: 'omega:list',
   omegaScore: 'omega:score',

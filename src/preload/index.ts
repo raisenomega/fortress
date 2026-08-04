@@ -25,6 +25,10 @@ const api: FortressApi = {
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
+  system: {
+    observations: () => ipcRenderer.invoke(IPC.systemObservations),
+    resolveObservation: (id) => ipcRenderer.invoke(IPC.systemResolveObservation, id)
+  },
   omega: {
     audit: (projectId) => ipcRenderer.invoke(IPC.omegaAudit, projectId),
     list: (projectId) => ipcRenderer.invoke(IPC.omegaList, projectId),

@@ -12,7 +12,8 @@ const VIEWS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
   { view: 'cognition', iconName: 'brain', label: 'Cognition' },
   { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' },
-  { view: 'omega', iconName: 'eye', label: 'Sentinel Omega' }
+  { view: 'omega', iconName: 'eye', label: 'Sentinel Omega' },
+  { view: 'sistema', iconName: 'sparkles', label: 'Auto-mejora FORTRESS' }
 ]
 
 export function SidebarViewLinks(): React.JSX.Element {
