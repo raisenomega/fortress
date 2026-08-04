@@ -2,6 +2,7 @@ import type { FolderPlan } from '@application/newproject/prepare-folder'
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
 import type { GraphStatus } from '@domain/graph/graph-status'
 import type { NewProjectDraft } from '@domain/newproject/new-project-draft'
+import type { OmegaEntry } from '@domain/omega/omega-entry'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
 import type { PostureRequest, PostureResult } from '@domain/posture/posture-scan'
@@ -57,7 +58,6 @@ export interface NewProjectApi {
 export interface AccountApi {
   /** Cuenta con la que `claude` esta conectado, si lo esta. */
   status(): Promise<Account>
-  /** Abre el inicio de sesion con la suscripcion. */
   login(): Promise<void>
   onOutput(listener: (text: string) => void): Unsubscribe
 }
@@ -65,4 +65,11 @@ export interface AccountApi {
 export interface PostureApi {
   /** Audita la exposicion externa de un sitio propio. Solo lectura. */
   run(request: PostureRequest): Promise<Result<PostureResult>>
+}
+
+export interface OmegaApi {
+  /** OMEGA audita el proyecto y deja el asiento en el Libro de la Vida. */
+  audit(projectId: string): Promise<Result<OmegaEntry>>
+  /** Lee el Libro de la Vida del proyecto. Solo lectura: nunca se borra. */
+  list(projectId: string): Promise<readonly OmegaEntry[]>
 }

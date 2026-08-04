@@ -9,6 +9,7 @@ import { registerGraphHandlers } from './graph-handlers'
 import { registerHealthHandlers } from './health-handlers'
 import { registerMaintenanceHandlers } from './maintenance-handlers'
 import { registerNewProjectHandlers } from './newproject-handlers'
+import { registerOmegaHandlers } from './omega-handlers'
 import { registerProjectHandlers } from './project-handlers'
 import { registerPushHandlers } from './push-handlers'
 import { registerScanHandlers } from './scan-handlers'
@@ -33,4 +34,5 @@ export function registerIpcHandlers(): void {
   registerAccountHandlers()
   registerPostureHandlers()
   registerConnectorHandlers()
+  registerOmegaHandlers()
 }

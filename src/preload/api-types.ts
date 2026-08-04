@@ -14,6 +14,7 @@ import type {
   GraphApi,
   MaintenanceApi,
   NewProjectApi,
+  OmegaApi,
   TelemetryApi
 } from './system-api'
 
@@ -48,9 +49,9 @@ export interface FortressApi {
     onProgress(listener: (p: ChatProgress) => void): Unsubscribe
   }
   readonly health: {
-    /** Diagnostico completo del sistema. */
     run(): Promise<HealthReport>
   }
+  readonly omega: OmegaApi
   readonly scan: ScanApi
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi
@@ -68,7 +69,6 @@ export interface FortressApi {
     /** La key se valida contra la API, entra cifrada y nunca vuelve al renderer. */
     saveApiKey(plainKey: string): Promise<Result<ApiKeyVerdict>>
     hasApiKey(): Promise<boolean>
-    /** Revalida la key ya guardada sin exponerla. */
     checkApiKey(): Promise<ApiKeyVerdict>
     clearApiKey(): Promise<void>
   }

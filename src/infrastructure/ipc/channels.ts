@@ -6,6 +6,8 @@ export const IPC = {
   projectsPickFolder: 'projects:pick-folder',
   projectsSelf: 'projects:self',
   projectsSetTrusted: 'projects:set-trusted',
+  omegaAudit: 'omega:audit',
+  omegaList: 'omega:list',
   healthRun: 'health:run',
   scanRun: 'scan:run',
   scanFindings: 'scan:findings',

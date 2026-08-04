@@ -4,6 +4,7 @@ import { join } from 'path'
 import { runMigrations } from './migrations'
 import { SCHEMA } from './schema'
 import { CONNECTOR_SCHEMA } from './schema-connectors'
+import { OMEGA_SCHEMA } from './schema-omega'
 import { TELEMETRY_SCHEMA } from './schema-telemetry'
 
 export type Db = Database.Database
@@ -31,6 +32,7 @@ export function getDatabase(): Db {
   db.exec(SCHEMA)
   db.exec(TELEMETRY_SCHEMA)
   db.exec(CONNECTOR_SCHEMA)
+  db.exec(OMEGA_SCHEMA)
   runMigrations(db)
   instance = db
   return db

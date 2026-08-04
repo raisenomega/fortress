@@ -25,6 +25,10 @@ const api: FortressApi = {
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
+  omega: {
+    audit: (projectId) => ipcRenderer.invoke(IPC.omegaAudit, projectId),
+    list: (projectId) => ipcRenderer.invoke(IPC.omegaList, projectId)
+  },
   chat: {
     history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),
     append: (message) => ipcRenderer.invoke(IPC.chatAppend, message),

@@ -20,7 +20,8 @@ const SUITES = [
   ['Hallazgos', require('./checks/scan-checks.cjs')],
   ['Cognition', require('./checks/cognition-checks.cjs')],
   ['Descartes e historico', require('./checks/dismissal-checks.cjs')],
-  ['Push bloqueado por CRITICAL', require('./checks/push-checks.cjs')]
+  ['Push bloqueado por CRITICAL', require('./checks/push-checks.cjs')],
+  ['Libro de la Vida (OMEGA)', require('./checks/omega-checks.cjs')]
 ]
 
 harness.useTemporaryUserData()

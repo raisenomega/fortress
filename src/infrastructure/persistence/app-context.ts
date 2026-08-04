@@ -8,6 +8,7 @@ import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
 import { createSqliteChatRepository } from './sqlite-chat-repository'
 import { createSqliteConnectorRepository } from './sqlite-connector-repository'
 import { createSqliteFindingRepository } from './sqlite-finding-repository'
+import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
 import { createSqliteScanHistoryRepository } from './sqlite-scan-history-repository'
 import { createSqliteSettingsRepository } from './sqlite-settings-repository'
@@ -29,6 +30,7 @@ export function getAppContext(): AppContext {
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),
     cognitionWriter: { appendReflection },
+    omegaLog: createSqliteOmegaLog(db),
     connectors: createSqliteConnectorRepository(db),
     transaction: (work) => db.transaction(work)(),
     settings,
