@@ -287,7 +287,9 @@ Ordenada por lo que desbloquea más:
   motor consume, nunca fuente generada + rebuild). Partido en tres:
   **e0 — Proponer (HECHO)**: alta humana de una capacidad en 'propuesta'
   (`proposeCapability`, validación, IPC + formulario en el panel); riesgo nulo,
-  no genera ni ejecuta nada, y por fin el panel muestra contenido real.
+  no genera ni ejecuta nada, y por fin el panel muestra contenido real. La
+  tarjeta abre un **modal de detalle** (clic): barra de madurez con el camino
+  1k/20k/50k en su fracción real, episodios, veredicto de OMEGA y promoción.
   **e1 — Borrador** (agente redacta la definición en sandbox, inerte, OMEGA
   audita) y **e2 — Activar** (dato activo con veto+firma humana+techo, reversible
   con un toggle): planificados, no construidos. **La otra pieza grande, junto a D1.**
