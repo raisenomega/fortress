@@ -267,8 +267,13 @@ Ordenada por lo que desbloquea más:
   cascada + puerto + repo SQLite) y derivar su vista viva (`describeCapabilities`:
   episodios/fase/madurez del historial real, nada auto-incrementado), con IPC de
   solo lectura `system:capabilities`;
-  (c) el gate de OMEGA en vivo con evidencia (veto, no aprobación); el
-  cumplimiento real aún no alimenta la madurez (hoy 1, los fallos ya descuentan);
+  (c) **HECHO** — el gate de OMEGA en vivo con evidencia: `omegaGate` reutiliza la
+  MISMA puntuación por bandas que juzga a los agentes (`computeScore`), veta si la
+  banda cae a 'no-confiable' o peor, y con 'sin-datos' NO veta (silencio, no
+  aprobación); cada capacidad viva lo lleva adjunto (`omegaVeto`). Falta su
+  consumidor: el flujo de promoción real que lo lee (parte de d/e). El
+  cumplimiento fino aún no alimenta la madurez (hoy 1; los fallos ya descuentan
+  vía el veto y el puntaje);
   (d) UI de aprobación HUMANA para crear/oficializar un agente nuevo (lo
   reversible no la necesita); (e) la auto-creación de una función/herramienta/
   agente en sí — la pieza de máximo riesgo, con sandbox y reversión. Cada
