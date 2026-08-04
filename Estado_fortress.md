@@ -120,9 +120,16 @@ Ordenada por lo que desbloquea más:
   Faltan: documentación generada (ARCHITECTURE/CLAUDE/COGNITION/.gitignore/
   .env.example/README), scaffold vía CLI, sistema FORTRESS (agentes en disco,
   routines, hooks), primer scan y alta en el sidebar. **La pieza grande.**
-- **D2 — Lector del Knowledge Graph.** La detección existe; falta leer nodos,
-  aristas y fan-in. Depende de instalar `codebase-memory-mcp` y ver su formato
-  real. No se escribe a ciegas.
+- **D2 — Lector del Knowledge Graph (bloqueo resuelto, panel pendiente).**
+  `codebase-memory-mcp` (MIT, v0.9.0) instalado en scope **user** y verificado:
+  conecta, indexa el repo (2745 nodos / 6699 aristas), y un spawn tipo-FORTRESS
+  ve sus 14 tools (`index_repository`, `get_architecture`, `search_graph`,
+  `trace_path`, `get_code_snippet`…). **Los agentes ya lo usan** (scope user +
+  `--mcp-config` no-estricto = fusiona). Formato conocido: `project` = path
+  slugificado, nodos Function/File/Interface/Route, aristas CALLS/IMPORTS/USAGE.
+  CLAUDE.md raíz corregido: `get_callers()` no existe → `trace_path`/`search_graph`.
+  **Falta:** el panel de FORTRESS que lea nodos/aristas/fan-in (ahora sí, con
+  formato real, no a ciegas).
 - **D4 — Pipeline de despliegue** (Supabase/Vercel desde el chat). No construido.
 - **D5 — Instalador universal** (`fortress-full-installer.sh`) + onboarding
   visual de 5 pantallas para no técnicos. No construido.
