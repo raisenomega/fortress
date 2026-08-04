@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **344 unitarios · 71 integración ·
+Estado de verificación al día de hoy: **349 unitarios · 71 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -105,6 +105,13 @@ En orden de construcción:
     solo tenía inglés y comparaba con `includes()` literal. Fix fail-safe: lista
     ES+EN + normalización de acentos (NFD). `password/contraseña` ahora sí cubre.
     Tests de detección en español con y sin tildes. `a3ded40`
+31. **Gate de confianza por proyecto (cierra el filo del allowlist).** Flag
+    `trusted` por proyecto, **default false** (modelo Workspace Trust). El
+    allowlist de autoverificación solo se pasa cuando el agente **edita**
+    (acceptEdits) **Y** el repo es de confianza; el escáner nunca se
+    autoverifica (auditar es mirar). Toggle en la cabecera del chat. Regla única
+    en el dominio (`selfVerifyRules`), migración aditiva, tests de las 3
+    combinaciones. `02a1706`
 
 ---
 
@@ -149,11 +156,11 @@ Ordenada por lo que desbloquea más:
   proyecto, no guardarlo dentro de FORTRESS (evita proyectos fantasma).
 - **D8 — Hallazgos de seguridad del propio FORTRESS aún abiertos:** los del
   escaneo interno que no se han cerrado, validados uno a uno. Del último escaneo
-  (score 89): **cerrado** el MEDIUM de `operation-mode.ts` (guarda en español,
-  `a3ded40`). Siguen abiertos: MEDIUM `safe-commands.ts:11` (el filo del
-  allowlist de B1 — decidir modelo de amenaza antes de tocar), MEDIUM
-  `main-window.ts` (=D6, sandbox Chromium), LOW `posture-handlers.ts:11`
-  (sin guardRun) y LOW `index.html:14` (CSP `unsafe-inline`/`frame-ancestors`).
+  (score 89): **cerrados** los dos MEDIUM — `operation-mode.ts` (guarda en
+  español, `a3ded40`) y `safe-commands.ts` (gate de confianza, `02a1706`).
+  Siguen abiertos: MEDIUM `main-window.ts` (=D6, sandbox Chromium), LOW
+  `posture-handlers.ts:11` (sin guardRun) y LOW `index.html:14`
+  (CSP `unsafe-inline`/`frame-ancestors`).
 
 ---
 
