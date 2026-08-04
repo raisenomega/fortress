@@ -1,4 +1,5 @@
 import { AgentDetailModal } from './components/agents/AgentDetailModal'
+import { CapabilityModal } from './components/system/CapabilityModal'
 import { WorkflowPlanCard } from './components/workflow/WorkflowPlanCard'
 import { HealthPanel } from './components/health/HealthPanel'
 import { ProjectDialogs } from './components/newproject/ProjectDialogs'
@@ -23,6 +24,8 @@ export function App(): React.JSX.Element {
   const healthPanelOpen = useHealthStore((state) => state.panelOpen)
   const openAgentId = useUiStore((state) => state.openAgentId)
   const setOpenAgent = useUiStore((state) => state.setOpenAgent)
+  const openCapabilityId = useUiStore((state) => state.openCapabilityId)
+  const setOpenCapability = useUiStore((state) => state.setOpenCapability)
 
   const gate = useWorkflowGate(activeProjectId, mode, excludedAgents)
 
@@ -51,6 +54,9 @@ export function App(): React.JSX.Element {
       {healthPanelOpen ? <HealthPanel /> : null}
       {openAgentId ? (
         <AgentDetailModal agentId={openAgentId} onClose={() => setOpenAgent(null)} />
+      ) : null}
+      {openCapabilityId ? (
+        <CapabilityModal capabilityId={openCapabilityId} onClose={() => setOpenCapability(null)} />
       ) : null}
     </>
   )

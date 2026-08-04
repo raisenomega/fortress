@@ -1,5 +1,5 @@
 import type { Capability } from '@domain/system/capability'
-import { promoteCapability } from '../../services/self-improvement-service'
+import { useUiStore } from '../../stores/ui-store'
 import { CapabilityCard } from './CapabilityCard'
 
 interface CapabilitiesSectionProps {
@@ -9,6 +9,7 @@ interface CapabilitiesSectionProps {
 export function CapabilitiesSection({
   capabilities
 }: CapabilitiesSectionProps): React.JSX.Element | null {
+  const openCapability = useUiStore((state) => state.setOpenCapability)
   if (capabilities.length === 0) return null
   return (
     <section>
@@ -18,11 +19,7 @@ export function CapabilitiesSection({
       </p>
       <div className="mt-2 grid gap-2 lg:grid-cols-2">
         {capabilities.map((capability) => (
-          <CapabilityCard
-            key={capability.id}
-            capability={capability}
-            onPromote={(id, human) => void promoteCapability(id, human)}
-          />
+          <CapabilityCard key={capability.id} capability={capability} onOpen={openCapability} />
         ))}
       </div>
     </section>
