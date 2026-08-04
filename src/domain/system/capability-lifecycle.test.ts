@@ -16,6 +16,7 @@ function cap(episodes: number, phase: CapabilityPhase, kind: CapabilityKind = 'f
     episodes,
     phase,
     maturity: 0,
+    omegaVeto: { vetoed: false, band: 'sin-datos', reason: null },
     createdAt: '2026-08-04T00:00:00.000Z'
   }
 }

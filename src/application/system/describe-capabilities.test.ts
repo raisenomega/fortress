@@ -34,8 +34,15 @@ describe('describeCapabilities', () => {
     expect(c.maturity).toBe(0)
   })
 
-  it('los fallos reales bajan la madurez', () => {
+  it('los fallos reales bajan la madurez y disparan el veto de OMEGA', () => {
     const ledger = { episodeTallySince: () => ({ episodes: 100, failures: 50 }) }
-    expect(describeCapabilities(repo([stored()]), ledger)[0].maturity).toBe(50)
+    const [c] = describeCapabilities(repo([stored()]), ledger)
+    expect(c.maturity).toBe(50)
+    expect(c.omegaVeto.vetoed).toBe(true)
+  })
+
+  it('ejecuciones limpias: OMEGA no veta la promocion', () => {
+    const ledger = { episodeTallySince: () => ({ episodes: 20_000, failures: 0 }) }
+    expect(describeCapabilities(repo([stored()]), ledger)[0].omegaVeto.vetoed).toBe(false)
   })
 })

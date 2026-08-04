@@ -1,3 +1,5 @@
+import type { OmegaGateVerdict } from './capability-gate'
+
 /**
  * Capacidad que FORTRESS se crea a si misma a partir de una oportunidad
  * detectada: una funcion o una herramienta (reversibles) o un agente nuevo.
@@ -33,4 +35,6 @@ export interface Capability extends StoredCapability {
   readonly phase: CapabilityPhase
   /** Puntaje de madurez derivado de evidencia real (0..OFFICIAL_AT). */
   readonly maturity: number
+  /** Veredicto de OMEGA por evidencia: puede vetar la promocion, nunca aprobarla. */
+  readonly omegaVeto: OmegaGateVerdict
 }
