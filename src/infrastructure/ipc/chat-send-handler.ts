@@ -11,7 +11,8 @@ import { resolveAssistant } from '../ai/assistant-factory'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
-import { cancelRun, endRun, isCancelled } from '../run-control'
+import { stopLoop } from '../loop/loop-controller'
+import { endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { IPC } from './channels'
 
@@ -34,7 +35,8 @@ function progressSender(event: IpcMainInvokeEvent, projectId: string) {
 }
 
 export function registerChatSendHandler(): void {
-  ipcMain.handle(IPC.chatStop, (_event, projectId: string) => cancelRun(projectId))
+  // Detener corta el run en curso Y para el loop si estaba corriendo el proyecto.
+  ipcMain.handle(IPC.chatStop, (_event, projectId: string) => stopLoop(projectId))
 
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()

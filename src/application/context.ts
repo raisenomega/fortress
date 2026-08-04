@@ -1,5 +1,6 @@
 import type { ChatRepository } from '@domain/chat/chat-repository'
 import type { ConnectorRepository } from '@domain/connectors/connector-repository'
+import type { LoopSessionRepository } from '@domain/loop/loop-session-repository'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
@@ -28,6 +29,7 @@ export interface AppContext {
   readonly omegaLog: OmegaLog
   readonly filesystemProbe: FilesystemProbe
   readonly connectors: ConnectorRepository
+  readonly loopSessions: LoopSessionRepository
   readonly transaction: RunInTransaction
   readonly settings: SettingsRepository
   readonly apiKeys: ApiKeyStore

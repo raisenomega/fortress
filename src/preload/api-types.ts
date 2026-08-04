@@ -1,6 +1,7 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
+import type { LoopStatus } from '@domain/loop/loop-status'
 import type { HealthReport } from '@domain/health/health-check'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
@@ -30,9 +31,7 @@ export interface FortressApi {
     list(): Promise<readonly Project[]>
     add(input: NewProject): Promise<Result<Project>>
     remove(id: string): Promise<Result<null>>
-    /** Abre el selector nativo; null si el operador cancela. */
     pickFolder(): Promise<NewProject | null>
-    /** FORTRESS como proyecto; null si el codigo fuente no esta en disco. */
     self(): Promise<NewProject | null>
     setTrusted(id: string, trusted: boolean): Promise<Result<null>>
     setLoopEnabled(id: string, enabled: boolean): Promise<Result<null>>
@@ -45,8 +44,9 @@ export interface FortressApi {
     /** Detiene el workflow en marcha. Devuelve procesos terminados. */
     stop(projectId: string): Promise<number>
     onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
-    /** Avance del workflow: agentes, tokens y coste en vivo. */
     onProgress(listener: (p: ChatProgress) => void): Unsubscribe
+    /** Estado del loop autonomo empujado por el main en cada transicion. */
+    onLoopStatus(listener: (status: LoopStatus) => void): Unsubscribe
   }
   readonly health: {
     run(): Promise<HealthReport>

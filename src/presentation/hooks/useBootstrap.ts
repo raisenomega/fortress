@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
+import { subscribeLoop } from '../services/loop-service'
 import { loadCognition } from '../services/cognition-service'
 import { loadGraph } from '../services/graph-service'
 import { loadOmega } from '../services/omega-service'
@@ -30,6 +31,8 @@ export function useBootstrap(): void {
     void loadOperationMode()
     // Diagnostico automatico al abrir la app.
     void runHealthCheck()
+    // Estado del loop autonomo empujado por el main; se cancela al desmontar.
+    return subscribeLoop()
   }, [])
 
   useEffect(() => {

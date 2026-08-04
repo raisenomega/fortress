@@ -15,6 +15,7 @@ function deps(over: Partial<LoopDeps> = {}): LoopDeps {
     isCancelled: () => false,
     wait: () => Promise.resolve(),
     emit: () => {},
+    persist: () => {},
     ...over
   }
 }

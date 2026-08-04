@@ -42,7 +42,8 @@ const api: FortressApi = {
     send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
     stop: (projectId) => ipcRenderer.invoke(IPC.chatStop, projectId),
     onChunk: (listener) => subscribe(IPC.chatChunk, listener),
-    onProgress: (listener) => subscribe(IPC.chatProgress, listener)
+    onProgress: (listener) => subscribe(IPC.chatProgress, listener),
+    onLoopStatus: (listener) => subscribe(IPC.loopStatus, listener)
   },
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),

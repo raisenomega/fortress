@@ -1,7 +1,16 @@
 import type { LoopStopReason } from './loop-decision'
 
-/** En que fase del ciclo esta el loop, para pintarlo en vivo. */
-export type LoopPhase = 'escaneando' | 'esperando' | 'reparando' | 'verificando' | 'parado'
+/**
+ * En que fase del ciclo esta el loop, para pintarlo en vivo. 'standby' = un
+ * fallo transitorio (API/credito/red) lo tiene en pausa, esperando recuperarse.
+ */
+export type LoopPhase =
+  | 'escaneando'
+  | 'esperando'
+  | 'reparando'
+  | 'verificando'
+  | 'standby'
+  | 'parado'
 
 /** Estado del loop que el main empuja al renderer en cada transicion. */
 export interface LoopStatus {

@@ -1,5 +1,6 @@
 import type { Project } from '@domain/project/project'
 import { scanStatus } from '@domain/project/scan-status'
+import { LoopHud } from './LoopHud'
 import { LoopToggle } from './LoopToggle'
 import { TrustToggle } from './TrustToggle'
 
@@ -29,6 +30,7 @@ export function ChatHeader({ project }: ChatHeaderProps): React.JSX.Element {
         {project.gitBranch ? ` · ${project.gitBranch}` : ''}
       </span>
       <div className="ml-auto flex shrink-0 items-center gap-2">
+        <LoopHud project={project} />
         <TrustToggle project={project} />
         <LoopToggle project={project} />
       </div>

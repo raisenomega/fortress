@@ -29,4 +29,6 @@ export interface LoopDeps {
   readonly isCancelled: () => boolean
   readonly wait: (ms: number) => Promise<void>
   readonly emit: (status: LoopStatus) => void
+  /** Persiste el progreso para reanudar tras un reinicio. Nada se pierde. */
+  readonly persist: (recentScores: readonly number[], cyclesDone: number) => void
 }

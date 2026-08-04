@@ -1,6 +1,8 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
+import { resumeLoops } from '@infrastructure/loop/loop-controller'
+import { bindLoopWindow } from '@infrastructure/loop/loop-registry'
 import { registerIpcHandlers } from '@infrastructure/ipc/register-handlers'
 import { closeDatabase } from '@infrastructure/persistence/database'
 import { augmentPath } from '@infrastructure/system/augment-path'
@@ -28,7 +30,9 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
 
   registerIpcHandlers()
-  createMainWindow()
+  bindLoopWindow(createMainWindow())
+  // Reanuda los loops que quedaron vivos: nada se pierde tras un reinicio.
+  resumeLoops()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()

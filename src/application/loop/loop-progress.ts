@@ -9,6 +9,11 @@ export interface Progress {
   score: number | null
 }
 
+/** Progreso de una sesion que arranca de cero (no una que se reanuda). */
+export function freshProgress(): Progress {
+  return { recentScores: [], cyclesDone: 0, score: null }
+}
+
 export function statusOf(
   config: LoopConfig,
   deps: LoopDeps,

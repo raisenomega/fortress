@@ -54,4 +54,13 @@ CREATE TABLE IF NOT EXISTS findings (
 
 CREATE INDEX IF NOT EXISTS idx_findings_project
   ON findings (project_id);
+
+CREATE TABLE IF NOT EXISTS loop_sessions (
+  project_id     TEXT PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
+  active         INTEGER NOT NULL DEFAULT 0,
+  cycles_done    INTEGER NOT NULL DEFAULT 0,
+  recent_scores  TEXT NOT NULL DEFAULT '[]',
+  spent_baseline REAL NOT NULL DEFAULT 0,
+  updated_at     TEXT NOT NULL
+);
 `

@@ -4,6 +4,7 @@ import { listProjects } from '@application/project/list-projects'
 import { removeProject } from '@application/project/remove-project'
 import { setProjectLoopEnabled } from '@application/project/set-project-loop-enabled'
 import { setProjectTrusted } from '@application/project/set-project-trusted'
+import { startLoop, stopLoop } from '../loop/loop-controller'
 import type { NewProject } from '@domain/project/project'
 import { getAppContext } from '../persistence/app-context'
 import { pickProjectFolder } from '../system/folder-picker'
@@ -20,9 +21,12 @@ export function registerProjectHandlers(): void {
     setProjectTrusted(getAppContext(), id, trusted)
   )
 
-  ipcMain.handle(IPC.projectsSetLoopEnabled, (_event, id: string, enabled: boolean) =>
-    setProjectLoopEnabled(getAppContext(), id, enabled)
-  )
+  ipcMain.handle(IPC.projectsSetLoopEnabled, (_event, id: string, enabled: boolean) => {
+    const result = setProjectLoopEnabled(getAppContext(), id, enabled)
+    // El toggle arranca o para el loop de ese proyecto (aislado por proyecto).
+    if (result.ok) (enabled ? startLoop : stopLoop)(id)
+    return result
+  })
 
   // El dialogo se ancla a la ventana que lo pidio para que sea modal.
   ipcMain.handle(IPC.projectsPickFolder, (event) =>
