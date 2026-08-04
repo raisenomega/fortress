@@ -260,14 +260,20 @@ Ordenada por lo que desbloquea más:
   del toggle), así que no puede correr con presupuesto ilimitado. El tope por
   ejecución sigue en $3.
 - **D10 — Auto-mejora, autonomía del ciclo de vida.** El fundamento puro está
-  hecho (operativo §40); falta lo que tiene efectos reales, por orden de riesgo:
-  (a) contar episodios reales por capacidad desde el historial de ejecuciones;
-  (b) persistir capacidades (tabla + repo + puerto); (c) el gate de OMEGA en
-  vivo con evidencia (veto, no aprobación); (d) UI de aprobación HUMANA para
-  crear/oficializar un agente nuevo (lo reversible no la necesita); (e) la
-  auto-creación de una función/herramienta/agente en sí — la pieza de máximo
-  riesgo, con sandbox y reversión. Cada sub-paso es un incremento verificable;
-  ninguno se construye sin su freno. **La otra pieza grande, junto a D1.**
+  hecho (operativo §40). Por orden de riesgo:
+  (a) **HECHO** `ab51ed4` — contar episodios reales por capacidad desde el
+  historial (`agent_runs`, un run = un episodio; `episodeTallySince`);
+  (b) **HECHO** `ab51ed4` — persistir capacidades (tabla `capabilities` sin
+  cascada + puerto + repo SQLite) y derivar su vista viva (`describeCapabilities`:
+  episodios/fase/madurez del historial real, nada auto-incrementado), con IPC de
+  solo lectura `system:capabilities`;
+  (c) el gate de OMEGA en vivo con evidencia (veto, no aprobación); el
+  cumplimiento real aún no alimenta la madurez (hoy 1, los fallos ya descuentan);
+  (d) UI de aprobación HUMANA para crear/oficializar un agente nuevo (lo
+  reversible no la necesita); (e) la auto-creación de una función/herramienta/
+  agente en sí — la pieza de máximo riesgo, con sandbox y reversión. Cada
+  sub-paso es un incremento verificable; ninguno se construye sin su freno.
+  **La otra pieza grande, junto a D1.**
 
 ---
 
