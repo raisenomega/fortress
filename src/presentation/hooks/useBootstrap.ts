@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
+import { subscribeLoopChat } from '../services/loop-chat'
 import { subscribeLoop } from '../services/loop-service'
 import { loadCognition } from '../services/cognition-service'
 import { loadGraph } from '../services/graph-service'
@@ -31,8 +32,13 @@ export function useBootstrap(): void {
     void loadOperationMode()
     // Diagnostico automatico al abrir la app.
     void runHealthCheck()
-    // Estado del loop autonomo empujado por el main; se cancela al desmontar.
-    return subscribeLoop()
+    // Estado del loop + su salida en vivo al chat; se cancelan al desmontar.
+    const offLoop = subscribeLoop()
+    const offChat = subscribeLoopChat()
+    return () => {
+      offLoop()
+      offChat()
+    }
   }, [])
 
   useEffect(() => {

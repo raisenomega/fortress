@@ -5,7 +5,7 @@ import type { Project } from '@domain/project/project'
 import { gitRevert, gitSnapshot } from './loop-git'
 import { loopScan } from './loop-ops'
 import { loopRepair } from './loop-repair-op'
-import { isLoopCancelled, sendLoopStatus, waitOrCancel } from './loop-registry'
+import { isLoopCancelled, sendChatChunk, sendLoopStatus, waitOrCancel } from './loop-registry'
 import { withStandby, type StandbyHooks } from './loop-standby'
 import { loopVerify } from './loop-verify'
 
@@ -35,9 +35,21 @@ export function buildDeps(params: EngineParams): LoopDeps {
     waitOrCancel: (ms) => waitOrCancel(pid, ms)
   }
 
+  // La salida en vivo del scan y de los agentes se reenvia al chat del proyecto:
+  // el operador lee lo que hacen, como en una corrida normal. No un chat vacio.
+  const toChat = (delta: string): void => sendChatChunk(pid, delta)
+
   return {
-    scan: () => withStandby(() => loopScan(context, pid, () => {}), hooks),
-    fix: (attempt) => withStandby(() => loopRepair(context, pid, () => {}, attempt), hooks),
+    scan: () =>
+      withStandby(() => {
+        toChat('\n\n— Escaneando el proyecto —\n')
+        return loopScan(context, pid, toChat)
+      }, hooks),
+    fix: (attempt) =>
+      withStandby(() => {
+        toChat(attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Agentes reparando —\n')
+        return loopRepair(context, pid, toChat, attempt)
+      }, hooks),
     verify: () => loopVerify(cwd),
     snapshot: () => {
       checkpoint = gitSnapshot(cwd)

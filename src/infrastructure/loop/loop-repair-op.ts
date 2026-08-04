@@ -32,7 +32,10 @@ export async function loopRepair(
     usesApiKey(context),
     buildMcpConfig(context.connectors.list())
   )
-  const prompt = buildRepairPrompt(project.name, knownFindings(context, project), attempt)
+  const known = knownFindings(context, project)
+  // Muestra los hallazgos en el chat antes de que los agentes empiecen a editar.
+  onChunk(`Hallazgos a arreglar:\n${known.length ? known.map((k) => `- ${k}`).join('\n') : '(ninguno)'}\n\n`)
+  const prompt = buildRepairPrompt(project.name, known, attempt)
   try {
     const reply = await codeAgent.run(
       { projectPath: project.path, prompt, permissionMode: 'acceptEdits', agentId: null, trusted: project.trusted },

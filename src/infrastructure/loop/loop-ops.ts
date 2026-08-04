@@ -21,7 +21,13 @@ export async function loopScan(
   const scanner = createClaudeScanner(createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context)))
   try {
     const summary = await runScan(context, scanner, projectId, onProgress)
-    return summary.ok ? ok(summary.value.score) : err(summary.error)
+    if (!summary.ok) return err(summary.error)
+    const c = summary.value.counts
+    // Muestra el resultado en el chat tras el escaneo (antes de arrancar agentes).
+    onProgress(
+      `\n\nResultado: ${summary.value.score}/100 — ${c.CRITICAL} CRITICAL, ${c.HIGH} HIGH, ${c.MEDIUM} MEDIUM, ${c.LOW} LOW\n`
+    )
+    return ok(summary.value.score)
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
   } finally {
