@@ -1,3 +1,4 @@
+import type { NewCapability } from '@domain/system/capability'
 import { api } from '../adapters/fortress-api'
 import { useSelfImprovementStore } from '../stores/self-improvement-store'
 
@@ -15,6 +16,12 @@ export async function resolveObservation(id: string): Promise<void> {
 /** Relee las capacidades con su fase, madurez y veredicto de OMEGA. */
 export async function loadCapabilities(): Promise<void> {
   useSelfImprovementStore.getState().setCapabilities(await api().system.capabilities())
+}
+
+/** Registra una capacidad en 'propuesta' (humano) y refresca la lista. */
+export async function proposeCapability(input: NewCapability): Promise<void> {
+  await api().system.proposeCapability(input)
+  await loadCapabilities()
 }
 
 /** Pide el salto de fase; OMEGA puede vetarlo. Refresca al terminar. */

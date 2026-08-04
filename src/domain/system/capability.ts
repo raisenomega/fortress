@@ -8,6 +8,8 @@ import type { OmegaGateVerdict } from './capability-gate'
  */
 export type CapabilityKind = 'funcion' | 'herramienta' | 'agente'
 
+export const CAPABILITY_KINDS: readonly CapabilityKind[] = ['funcion', 'herramienta', 'agente']
+
 export type CapabilityPhase = 'propuesta' | 'prueba' | 'ciclo' | 'oficial'
 
 /** Episodios (ejecuciones reales) que marcan cada salto del ciclo de vida. */

@@ -21,5 +21,18 @@ module.exports = `(async () => {
   check('promover una capacidad inexistente falla limpio',
         promoted && promoted.ok === false, JSON.stringify(promoted))
 
+  const proposed = await window.api.system.proposeCapability(
+    { kind: 'agente', name: 'Redactor de pruebas', originObservation: 'manual' })
+  check('proponer una capacidad la crea en propuesta',
+        proposed && proposed.ok && proposed.value.phase === 'propuesta', JSON.stringify(proposed))
+
+  const live = await window.api.system.capabilities()
+  check('la capacidad propuesta aparece viva en propuesta',
+        live.length === 1 && live[0].phase === 'propuesta', JSON.stringify(live))
+
+  const early = await window.api.system.promoteCapability(proposed.value.id, true)
+  check('sin episodios no se puede promover (el freno del ciclo)',
+        early && early.ok === false, JSON.stringify(early))
+
   return results
 })()`

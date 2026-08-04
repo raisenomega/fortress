@@ -28,6 +28,7 @@ const api: FortressApi = {
   system: {
     observations: () => ipcRenderer.invoke(IPC.systemObservations),
     resolveObservation: (id) => ipcRenderer.invoke(IPC.systemResolveObservation, id),
+    proposeCapability: (input) => ipcRenderer.invoke(IPC.systemProposeCapability, input),
     capabilities: () => ipcRenderer.invoke(IPC.systemCapabilities),
     promoteCapability: (id, humanApproved) =>
       ipcRenderer.invoke(IPC.systemPromoteCapability, id, humanApproved)
