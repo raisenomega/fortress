@@ -1,4 +1,5 @@
 import type { Agent } from './agent'
+import { SENTINEL_OMEGA } from './sentinel-omega'
 
 /** Agentes que existen pero llegan apagados: se encienden cuando hacen falta. */
 export const OPTIONAL_AGENTS: readonly Agent[] = [
@@ -29,5 +30,6 @@ export const OPTIONAL_AGENTS: readonly Agent[] = [
     name: 'Opensource Sanitizer',
     purpose: 'Prepara el repo para publicarse sin filtrar nada',
     enabledByDefault: false
-  }
+  },
+  SENTINEL_OMEGA
 ]

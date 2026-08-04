@@ -20,12 +20,14 @@ const RULES = [
  * operador ve en el sidebar, y las dos cosas tienen que coincidir.
  */
 export function agentPrompt(agent: Agent): string {
-  return [
+  // OMEGA (y solo agentes con carta propia) llevan una identidad que las reglas
+  // comunes no capturan; el resto deriva su prompt de name + purpose.
+  const cabecera = agent.charter ?? [
     `Eres ${agent.name}, agente especializado de FORTRESS.`,
-    `Tu responsabilidad: ${agent.purpose}`,
-    '',
-    RULES
+    `Tu responsabilidad: ${agent.purpose}`
   ].join('\n')
+
+  return [cabecera, '', RULES].join('\n')
 }
 
 export interface AgentDefinition {

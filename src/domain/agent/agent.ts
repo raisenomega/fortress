@@ -9,7 +9,8 @@ export const AGENT_IDS = [
   'build-error-resolver',
   'e2e-runner',
   'code-simplifier',
-  'opensource-sanitizer'
+  'opensource-sanitizer',
+  'sentinel-omega'
 ] as const
 
 export type AgentId = (typeof AGENT_IDS)[number]
@@ -25,4 +26,10 @@ export interface Agent {
   readonly purpose: string
   /** Si aparece habilitado la primera vez que se abre la app. */
   readonly enabledByDefault: boolean
+  /**
+   * Carta propia que reemplaza al prompt generico. Solo la usan agentes con
+   * una identidad que las reglas comunes no capturan (SENTINEL OMEGA). El
+   * resto deriva su prompt de name + purpose.
+   */
+  readonly charter?: string
 }
