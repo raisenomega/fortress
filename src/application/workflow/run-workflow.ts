@@ -14,18 +14,23 @@ export interface WorkflowDeps {
   readonly codeAgent: CodeAgent
   readonly project: Project
   readonly mode: OperationMode
-  /** Paso que arranca, con tokens y coste ya gastados hasta ahi. */
   readonly onStep: (progress: StepProgress) => void
   readonly onChunk: (delta: string) => void
-  /** Hallazgos ya guardados, para que el agente no reescanee lo medido. */
   readonly known: readonly string[]
-  /** Verdadero si el operador pulso detener. Se mira entre pasos. */
   readonly isCancelled: () => boolean
 }
 
 /** Resumen de un paso para el siguiente: evita que se repitan hallazgos. */
 function summarize(result: StepResult): readonly string[] {
   return result.findings.map((finding) => `${finding.severity} ${finding.file}: ${finding.title}`)
+}
+
+/** Tokens y coste acumulados de los pasos ya terminados. */
+function progressOf(results: readonly StepResult[]): { tokens: number; costUsd: number } {
+  return {
+    tokens: results.reduce((sum, r) => sum + totalTokens(r.usage), 0),
+    costUsd: results.reduce((sum, r) => sum + r.usage.costUsd, 0)
+  }
 }
 
 /**
@@ -45,12 +50,7 @@ export async function runWorkflow(
     // Se mira antes de arrancar cada paso: detener no puede significar
     // "termina los seis que quedan y luego para".
     if (deps.isCancelled()) return { results, stoppedBy: null }
-    deps.onStep({
-      index,
-      total: plan.active.length,
-      tokens: results.reduce((sum, r) => sum + totalTokens(r.usage), 0),
-      costUsd: results.reduce((sum, r) => sum + r.usage.costUsd, 0)
-    })
+    deps.onStep({ index, total: plan.active.length, ...progressOf(results) })
 
     const prompt = buildStepPrompt(step, {
       projectName: deps.project.name,
@@ -67,5 +67,9 @@ export async function runWorkflow(
     if (bloquea) return { results, stoppedBy: step.agentId }
   }
 
+  // Cierre: el ultimo agente terminado tambien cuenta. Sin esto el medidor
+  // quedaba con el total de todos MENOS el ultimo paso.
+  const n = plan.active.length
+  deps.onStep({ index: n, total: n, ...progressOf(results) })
   return { results, stoppedBy: null }
 }

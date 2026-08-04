@@ -16,7 +16,7 @@ async function walkScreens(helpers) {
   await shoot('')
   await expect('panel', 'Security Reviewer', 'Nucleo', '99', 'Push bloqueado')
   await expect('cabecera de chat', 'CHAT AISLADO')
-  await expect('barra de estado', 'tokens', '$0.20')
+  await expect('barra de estado', 'tok', '$0.20')
 
   await walkPlan(helpers)
 

@@ -2,6 +2,7 @@ import { AGENT_CATALOG } from '@domain/agent/agent-catalog'
 import { routeToAgent } from '@domain/agent/agent-router'
 import { buildChatPrompt } from '@domain/chat/chat-prompt'
 import { permissionModeFor } from '@domain/settings/permission-mode'
+import { totalTokens } from '@domain/telemetry/token-usage'
 import type { ReplyOutcome } from './reply-outcome'
 import type { WorkflowReplyOptions } from './reply-from-workflow'
 
@@ -33,6 +34,10 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
     },
     options.onChunk
   )
+
+  // El consumo se conoce al terminar (el CLI lo reporta en el evento final): sin
+  // esto el medidor de un solo agente se quedaba en 0 todo el run.
+  options.onStep({ index: 0, total: 1, tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd })
 
   return {
     text: reply.text,

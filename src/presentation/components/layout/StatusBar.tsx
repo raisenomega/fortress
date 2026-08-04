@@ -1,12 +1,11 @@
 import { LEVEL_COLOR, LEVEL_ICON, LEVEL_LABEL } from '@domain/health/health-check'
 import { useHealthStore } from '../../stores/health-store'
 import { useProjectStore } from '../../stores/project-store'
-import { useSettingsStore } from '../../stores/settings-store'
 import { Icon } from '../common/Icon'
+import { FooterMeter } from './FooterMeter'
 
 export function StatusBar(): React.JSX.Element {
   const projectCount = useProjectStore((state) => state.projects.length)
-  const mode = useSettingsStore((state) => state.mode)
   const report = useHealthStore((state) => state.report)
   const running = useHealthStore((state) => state.running)
   const setPanelOpen = useHealthStore((state) => state.setPanelOpen)
@@ -31,7 +30,9 @@ export function StatusBar(): React.JSX.Element {
       </button>
 
       <span>{projectCount} proyectos</span>
-      <span className="ml-auto capitalize">Modo {mode}</span>
+      <div className="ml-auto">
+        <FooterMeter />
+      </div>
     </footer>
   )
 }
