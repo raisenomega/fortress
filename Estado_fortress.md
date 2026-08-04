@@ -270,15 +270,21 @@ Ordenada por lo que desbloquea más:
   (c) **HECHO** — el gate de OMEGA en vivo con evidencia: `omegaGate` reutiliza la
   MISMA puntuación por bandas que juzga a los agentes (`computeScore`), veta si la
   banda cae a 'no-confiable' o peor, y con 'sin-datos' NO veta (silencio, no
-  aprobación); cada capacidad viva lo lleva adjunto (`omegaVeto`). Falta su
-  consumidor: el flujo de promoción real que lo lee (parte de d/e). El
+  aprobación); cada capacidad viva lo lleva adjunto (`omegaVeto`). El
   cumplimiento fino aún no alimenta la madurez (hoy 1; los fallos ya descuentan
   vía el veto y el puntaje);
-  (d) UI de aprobación HUMANA para crear/oficializar un agente nuevo (lo
-  reversible no la necesita); (e) la auto-creación de una función/herramienta/
-  agente en sí — la pieza de máximo riesgo, con sandbox y reversión. Cada
-  sub-paso es un incremento verificable; ninguno se construye sin su freno.
-  **La otra pieza grande, junto a D1.**
+  (d) **HECHO** — el flujo de promoción que CONSUME el veto + la UI de aprobación
+  humana. La fase APROBADA ahora se persiste (columna `phase`, default
+  'propuesta', migración aditiva): acumular episodios hace elegible, no promueve.
+  `evaluatePromotion` describe el salto (elegible/destino/needsHuman/blocked) y
+  `canPromote` decide (OMEGA no veta + episodios + humano si es agente).
+  `promoteCapability` persiste el salto; IPC `system:promote-capability`. UI:
+  sección de Capacidades en el panel con "Promover"/"Aprobar y promover" (el
+  reversible no pide humano). Falta: auto-promover el reversible sin clic (hoy es
+  manual);
+  (e) la auto-creación de una función/herramienta/agente en sí — la pieza de
+  máximo riesgo, con sandbox y reversión. Cada sub-paso es un incremento
+  verificable; ninguno se construye sin su freno. **La otra pieza grande, junto a D1.**
 
 ---
 
