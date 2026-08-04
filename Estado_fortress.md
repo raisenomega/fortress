@@ -90,7 +90,10 @@ En orden de construcción:
     una URL mala degrada sin fallar. El escaneo no recibe MCP a proposito.
 29. **Los dos bucles de aprendizaje cerrados:** (a) el prompt del agente le
     ordena autoverificarse tras editar (correr typecheck/lint/test:unit de su
-    lista blanca y arreglar lo rojo); (b) tras cada escaneo FORTRESS escribe una
+    lista blanca y arreglar lo rojo) — **validado en vivo:** un spawn réplica de
+    FORTRESS editó un archivo y corrió los tres checks en orden (344 tests en
+    verde), mientras el allowlist **denegó** un `node -e` fuera de la lista
+    ("This command requires approval"); (b) tras cada escaneo FORTRESS escribe una
     reflexión determinista en el COGNITION-LOG.md del proyecto (score +
     hallazgos), por un puerto que respeta DDD. Un test de round-trip garantiza
     que lo escrito es exactamente lo que el panel lee. `09ecdcc`. **Fix de
