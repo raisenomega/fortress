@@ -1,4 +1,5 @@
 import { api } from '../adapters/fortress-api'
+import { loadCognition } from './cognition-service'
 import { loadProjects } from './project-service'
 import { refreshSessionUsage } from './telemetry-service'
 import { loadTimeline } from './timeline-service'
@@ -55,7 +56,10 @@ export async function reloadAfterScan(projectId: string): Promise<void> {
       loadCounts(),
       loadProjects(),
       refreshSessionUsage(),
-      loadTimeline(projectId)
+      loadTimeline(projectId),
+      // B2 escribe COGNITION-LOG.md al cerrar el escaneo; sin releerlo, el panel
+      // se queda con el estado vacio de antes hasta cambiar de proyecto.
+      loadCognition(projectId)
     ])
   } catch {
     // Silencio deliberado: el escaneo si termino.

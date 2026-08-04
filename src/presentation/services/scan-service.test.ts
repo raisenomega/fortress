@@ -42,4 +42,14 @@ describe('runScan', () => {
     await runScan('p1')
     expect(spy.calls).toBe(0)
   })
+
+  it('relee COGNITION-LOG.md al terminar: B2 lo escribe durante el escaneo', async () => {
+    // Regresion: el panel se quedaba con "no tiene COGNITION-LOG.md" porque
+    // solo se leia al cambiar de proyecto, no tras el escaneo que lo crea.
+    // El estado es un singleton: un test previo pudo dejar un escaneo "en curso".
+    useScanStore.getState().finishScan('previo', null, null)
+    const spy = stubBridge(() => Promise.resolve({ ok: true, value: SCAN_SUMMARY }))
+    await runScan('p1')
+    expect(spy.cognitionReads).toBe(1)
+  })
 })

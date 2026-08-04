@@ -1,3 +1,4 @@
+import { EMPTY_SNAPSHOT } from '@domain/cognition/cognition-log'
 import { EMPTY_COUNTS } from '@domain/project/severity-counts'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 
@@ -17,10 +18,12 @@ export const SCAN_SUMMARY = {
 export interface BridgeSpy {
   /** Veces que se pidio un escaneo al proceso principal. */
   calls: number
+  /** Veces que se releyo COGNITION-LOG.md (debe pasar tras cada escaneo). */
+  cognitionReads: number
 }
 
 export function stubBridge(run: () => Promise<unknown>): BridgeSpy {
-  const spy: BridgeSpy = { calls: 0 }
+  const spy: BridgeSpy = { calls: 0, cognitionReads: 0 }
 
   Object.assign(globalThis, {
     window: {
@@ -35,7 +38,14 @@ export function stubBridge(run: () => Promise<unknown>): BridgeSpy {
           onProgress: () => () => {}
         },
         projects: { list: () => Promise.resolve([]) },
-        telemetry: { session: () => Promise.resolve(EMPTY_USAGE) }
+        telemetry: { session: () => Promise.resolve(EMPTY_USAGE) },
+        activity: { byProject: () => Promise.resolve([]) },
+        cognition: {
+          read: () => {
+            spy.cognitionReads += 1
+            return Promise.resolve(EMPTY_SNAPSHOT)
+          }
+        }
       }
     }
   })
