@@ -84,8 +84,10 @@ En orden de construcción:
 26. **Preguntas libres se responden en prosa** (no se fuerza el informe). `45c0db2`
 27. **Autoverificación del agente:** lista blanca de `typecheck`, `lint` y
     `test:unit` — el agente puede verificarse y nada más. `e60d94d`
-28. **Conectores MCP (D3, parcial):** panel + persistencia + toggles + MCP
-    custom, construido por el agente. Falta la inyección viva al spawn (ver D3).
+28. **Conectores MCP (D3, completo):** panel + persistencia + toggles + MCP
+    custom (por el agente), y el cable vivo — los MCP activos llegan al spawn
+    del chat. Verificado con spawn real: un conector activo no rompe el run, y
+    una URL mala degrada sin fallar. El escaneo no recibe MCP a proposito.
 
 ---
 
@@ -113,13 +115,6 @@ Ordenada por lo que desbloquea más:
 - **D2 — Lector del Knowledge Graph.** La detección existe; falta leer nodos,
   aristas y fan-in. Depende de instalar `codebase-memory-mcp` y ver su formato
   real. No se escribe a ciegas.
-- **D3 — Sección "Conectores" (MCP) — PARCIAL.** Panel, persistencia SQLite,
-  toggles, MCP custom (solo https) y `buildMcpConfig`: hechos por el agente,
-  verificados. **Falta la inyección viva:** `claude-code-agent` todavía no pasa
-  los MCP activos al spawn (`buildArgs` acepta el parámetro pero nadie lo
-  alimenta). Se dejó a propósito: alimentar la ruta que ejecuta a TODOS los
-  agentes con una URL mala podría romper cada run, y no se verifica con la
-  lista blanca. Es el último cable, para hacerlo con cuidado.
 - **D4 — Pipeline de despliegue** (Supabase/Vercel desde el chat). No construido.
 - **D5 — Instalador universal** (`fortress-full-installer.sh`) + onboarding
   visual de 5 pantallas para no técnicos. No construido.

@@ -4,6 +4,7 @@ import type { SendMessageInput } from '@application/chat/send-message-types'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import type { StepProgress } from '@application/workflow/step-progress'
+import { buildMcpConfig } from '@domain/connectors/mcp-config'
 import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import { err, type Result } from '@domain/shared/result'
 import { resolveAssistant } from '../ai/assistant-factory'
@@ -43,7 +44,10 @@ export function registerChatSendHandler(): void {
     if (denegado !== null) return err(denegado)
 
     const budget = readBudget(context)
-    const codeAgent = createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+    // Los conectores MCP activos viajan al agente. Solo en el chat: un escaneo
+    // de seguridad no necesita Figma ni Canva.
+    const mcp = buildMcpConfig(context.connectors.list())
+    const codeAgent = createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context), mcp)
     // Con el CLI instalado no hace falta API key: claude usa sus credenciales.
     const assistant = resolveAssistant(context.apiKeys)
 

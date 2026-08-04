@@ -17,7 +17,10 @@ import { collectRun } from './run-claude-process'
 export function createClaudeCodeAgent(
   apiKeys: ApiKeyStore,
   budget: Budget,
-  useApiKey: boolean
+  useApiKey: boolean,
+  /** JSON de los conectores MCP activos, o null. Default null: sin conectores
+   *  los argumentos salen identicos a como salian antes de existir esto. */
+  mcpConfig: string | null = null
 ): CodeAgent {
   return {
     isAvailable: isClaudeInstalled,
@@ -40,7 +43,8 @@ export function createClaudeCodeAgent(
         request.permissionMode,
         agents,
         request.agentId,
-        budget.perRun
+        budget.perRun,
+        mcpConfig
       )
 
       const child = spawn(CLAUDE_BIN, args, {
