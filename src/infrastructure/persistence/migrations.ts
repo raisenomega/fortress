@@ -41,4 +41,9 @@ export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'projects', 'trusted')) {
     db.exec('ALTER TABLE projects ADD COLUMN trusted INTEGER NOT NULL DEFAULT 0')
   }
+
+  // Loop autonomo: bases anteriores no lo tienen. Default 0 = apagado.
+  if (!hasColumn(db, 'projects', 'loop_enabled')) {
+    db.exec('ALTER TABLE projects ADD COLUMN loop_enabled INTEGER NOT NULL DEFAULT 0')
+  }
 }

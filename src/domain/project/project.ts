@@ -32,6 +32,11 @@ export interface Project {
    * (typecheck/lint/test), porque `npm run X` corre codigo del propio repo.
    */
   readonly trusted: boolean
+  /**
+   * Loop autonomo encendido para este proyecto. Por defecto false. Solo se puede
+   * encender con topes de loop guardados y proyecto de confianza (ver LoopToggle).
+   */
+  readonly loopEnabled: boolean
   readonly createdAt: string
 }
 

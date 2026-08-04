@@ -20,7 +20,8 @@ const api: FortressApi = {
     remove: (id) => ipcRenderer.invoke(IPC.projectsRemove, id),
     pickFolder: () => ipcRenderer.invoke(IPC.projectsPickFolder),
     self: () => ipcRenderer.invoke(IPC.projectsSelf),
-    setTrusted: (id, trusted) => ipcRenderer.invoke(IPC.projectsSetTrusted, id, trusted)
+    setTrusted: (id, trusted) => ipcRenderer.invoke(IPC.projectsSetTrusted, id, trusted),
+    setLoopEnabled: (id, enabled) => ipcRenderer.invoke(IPC.projectsSetLoopEnabled, id, enabled)
   },
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)

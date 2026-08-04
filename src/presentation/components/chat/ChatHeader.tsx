@@ -1,5 +1,6 @@
 import type { Project } from '@domain/project/project'
 import { scanStatus } from '@domain/project/scan-status'
+import { LoopToggle } from './LoopToggle'
 import { TrustToggle } from './TrustToggle'
 
 const DOT: Record<string, string> = {
@@ -29,9 +30,7 @@ export function ChatHeader({ project }: ChatHeaderProps): React.JSX.Element {
       </span>
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <TrustToggle project={project} />
-        <span className="text-[10px] tracking-wide text-muted-foreground uppercase">
-          chat aislado
-        </span>
+        <LoopToggle project={project} />
       </div>
     </header>
   )

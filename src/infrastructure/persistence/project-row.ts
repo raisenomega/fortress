@@ -15,6 +15,7 @@ export interface ProjectRow {
   readonly has_graph: number
   readonly has_fortress: number
   readonly trusted: number
+  readonly loop_enabled: number
   readonly created_at: string
 }
 
@@ -32,6 +33,7 @@ export function toProject(row: ProjectRow): Project {
     hasGraph: row.has_graph === 1,
     hasFortress: row.has_fortress === 1,
     trusted: row.trusted === 1,
+    loopEnabled: row.loop_enabled === 1,
     createdAt: row.created_at
   }
 }

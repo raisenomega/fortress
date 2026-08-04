@@ -50,6 +50,16 @@ module.exports = `(async () => {
   await window.api.settings.set('budget_per_run_usd', '2.5')
   check('persiste settings', (await window.api.settings.get('budget_per_run_usd')) === '2.5')
 
+  const loopOf = async (id) =>
+    (await window.api.projects.list()).find((p) => p.id === id)?.loopEnabled
+  check('el loop nace apagado', (await loopOf(otherId)) === false)
+  await window.api.projects.setLoopEnabled(otherId, true)
+  check('enciende el loop del proyecto', (await loopOf(otherId)) === true)
+  await window.api.projects.setLoopEnabled(otherId, false)
+  check('apaga el loop del proyecto', (await loopOf(otherId)) === false)
+  check('setLoopEnabled rechaza proyecto inexistente',
+        !(await window.api.projects.setLoopEnabled('no-existe', true)).ok)
+
   const removed = await window.api.projects.remove(projectId)
   check('borra el proyecto', removed.ok, JSON.stringify(removed))
   check('CASCADE borra su historial',

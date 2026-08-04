@@ -2,6 +2,7 @@ import { BrowserWindow, ipcMain } from 'electron'
 import { addProject } from '@application/project/add-project'
 import { listProjects } from '@application/project/list-projects'
 import { removeProject } from '@application/project/remove-project'
+import { setProjectLoopEnabled } from '@application/project/set-project-loop-enabled'
 import { setProjectTrusted } from '@application/project/set-project-trusted'
 import type { NewProject } from '@domain/project/project'
 import { getAppContext } from '../persistence/app-context'
@@ -17,6 +18,10 @@ export function registerProjectHandlers(): void {
 
   ipcMain.handle(IPC.projectsSetTrusted, (_event, id: string, trusted: boolean) =>
     setProjectTrusted(getAppContext(), id, trusted)
+  )
+
+  ipcMain.handle(IPC.projectsSetLoopEnabled, (_event, id: string, enabled: boolean) =>
+    setProjectLoopEnabled(getAppContext(), id, enabled)
   )
 
   // El dialogo se ancla a la ventana que lo pidio para que sea modal.

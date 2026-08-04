@@ -1,6 +1,7 @@
 import { AccountSection } from './AccountSection'
 import { ApiKeySection } from './ApiKeySection'
 import { BudgetSection } from './BudgetSection'
+import { LoopBudgetSection } from './LoopBudgetSection'
 import { OperationModeSection } from './OperationModeSection'
 
 /** Pantalla de configuracion, accesible desde la barra lateral. */
@@ -18,6 +19,7 @@ export function SettingsView(): React.JSX.Element {
         <AccountSection />
         <ApiKeySection />
         <BudgetSection />
+        <LoopBudgetSection />
         <OperationModeSection />
       </div>
     </div>

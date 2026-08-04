@@ -11,6 +11,8 @@ export const SETTINGS_KEYS = {
   authSource: 'auth_source',
   budgetPerRun: 'budget_per_run_usd',
   budgetPerDay: 'budget_per_day_usd',
+  loopCostCap: 'loop_cost_cap_usd',
+  loopMaxCycles: 'loop_max_cycles',
   encryptedApiKey: 'encrypted_api_key'
 } as const
 
@@ -26,7 +28,9 @@ const PUBLIC_KEYS: ReadonlySet<string> = new Set([
   SETTINGS_KEYS.activeProjectId,
   SETTINGS_KEYS.authSource,
   SETTINGS_KEYS.budgetPerRun,
-  SETTINGS_KEYS.budgetPerDay
+  SETTINGS_KEYS.budgetPerDay,
+  SETTINGS_KEYS.loopCostCap,
+  SETTINGS_KEYS.loopMaxCycles
 ])
 
 export function isPublicSettingKey(key: string): boolean {

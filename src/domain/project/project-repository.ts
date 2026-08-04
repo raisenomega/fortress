@@ -11,4 +11,6 @@ export interface ProjectRepository {
   updateScan(id: string, score: number, scannedAt: string): void
   /** Marca un proyecto de confianza: habilita la autoverificacion del agente. */
   setTrusted(id: string, trusted: boolean): void
+  /** Enciende o apaga el loop autonomo para este proyecto. */
+  setLoopEnabled(id: string, enabled: boolean): void
 }

@@ -43,3 +43,8 @@ export async function setProjectTrusted(id: string, trusted: boolean): Promise<v
   const result = await api().projects.setTrusted(id, trusted)
   if (result.ok) await loadProjects()
 }
+
+export async function setProjectLoopEnabled(id: string, enabled: boolean): Promise<void> {
+  const result = await api().projects.setLoopEnabled(id, enabled)
+  if (result.ok) await loadProjects()
+}

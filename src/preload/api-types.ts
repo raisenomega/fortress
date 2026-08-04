@@ -22,9 +22,8 @@ import type {
 export type Unsubscribe = () => void
 
 /**
- * Contrato del puente main <-> renderer. Solo tipos: este modulo no aporta
- * codigo en runtime, por eso el renderer puede importarlo sin arrastrar
- * nada del proceso principal.
+ * Contrato del puente main <-> renderer. Solo tipos, sin runtime: el renderer
+ * puede importarlo sin arrastrar nada del proceso principal.
  */
 export interface FortressApi {
   readonly projects: {
@@ -36,6 +35,7 @@ export interface FortressApi {
     /** FORTRESS como proyecto; null si el codigo fuente no esta en disco. */
     self(): Promise<NewProject | null>
     setTrusted(id: string, trusted: boolean): Promise<Result<null>>
+    setLoopEnabled(id: string, enabled: boolean): Promise<Result<null>>
   }
   readonly chat: {
     history(projectId: string): Promise<readonly ChatMessage[]>
