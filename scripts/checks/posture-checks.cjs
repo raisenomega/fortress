@@ -14,5 +14,8 @@ module.exports = async function postureChecks(window) {
   )
   check('rechaza una direccion que no es web', !urlMala.ok, JSON.stringify(urlMala))
 
+  // El preload NO expone window.electron: filtraba process.env e ipcRenderer crudo.
+  check('window.electron no esta expuesto', (await run('typeof window.electron')) === 'undefined')
+
   return results
 }

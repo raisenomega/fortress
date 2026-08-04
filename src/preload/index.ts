@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
 import { subscribe } from './subscribe'
@@ -57,5 +56,4 @@ const api: FortressApi = {
 
 // contextIsolation esta forzado a true en main-window.ts, asi que este es el
 // unico camino: no hay fallback que escriba sobre `window` directamente.
-contextBridge.exposeInMainWorld('electron', electronAPI)
 contextBridge.exposeInMainWorld('api', api)
