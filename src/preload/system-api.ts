@@ -39,6 +39,8 @@ export interface MaintenanceApi {
   liveJobs(): Promise<number>
   /** Los termina, vacia la cache y recarga. La base de datos no se toca. */
   cleanup(): Promise<{ readonly killed: number }>
+  /** Mantiene la pantalla encendida (true) o libera el bloqueo (false). */
+  keepAwake(enable: boolean): Promise<void>
 }
 
 export interface HomeDir {

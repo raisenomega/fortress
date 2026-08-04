@@ -3,6 +3,7 @@ import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { APP_NAME } from '../common/Logo'
 import { ModeSelector } from '../settings/ModeSelector'
+import { KeepAwakeToggle } from './KeepAwakeToggle'
 import { OmegaChip } from './OmegaChip'
 import { RefreshButton } from './RefreshButton'
 
@@ -44,6 +45,8 @@ export function TopBar(): React.JSX.Element {
       <OmegaChip />
 
       <ModeSelector />
+
+      <KeepAwakeToggle />
 
       <RefreshButton />
     </header>

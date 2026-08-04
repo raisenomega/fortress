@@ -63,7 +63,8 @@ export const projectApis: Pick<
   },
   maintenance: {
     liveJobs: () => ipcRenderer.invoke(IPC.maintenanceLiveJobs),
-    cleanup: () => ipcRenderer.invoke(IPC.maintenanceCleanup)
+    cleanup: () => ipcRenderer.invoke(IPC.maintenanceCleanup),
+    keepAwake: (enable) => ipcRenderer.invoke(IPC.maintenanceKeepAwake, enable)
   },
   activity: {
     byProject: (projectId, limit) => ipcRenderer.invoke(IPC.activityProject, projectId, limit),

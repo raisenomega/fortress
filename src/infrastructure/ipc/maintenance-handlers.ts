@@ -1,5 +1,6 @@
 import { BrowserWindow, ipcMain, session } from 'electron'
 import { killAllChildren, liveChildCount } from '../claude-code/child-registry'
+import { setKeepAwake } from '../system/keep-awake'
 import { IPC } from './channels'
 
 export interface CleanupReport {
@@ -16,6 +17,9 @@ export interface CleanupReport {
  */
 export function registerMaintenanceHandlers(): void {
   ipcMain.handle(IPC.maintenanceLiveJobs, () => liveChildCount())
+
+  // Mantener la pantalla encendida mientras los agentes trabajan.
+  ipcMain.handle(IPC.maintenanceKeepAwake, (_event, enable: boolean) => setKeepAwake(enable))
 
   ipcMain.handle(IPC.maintenanceCleanup, async (event): Promise<CleanupReport> => {
     const killed = killAllChildren()

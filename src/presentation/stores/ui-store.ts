@@ -22,12 +22,15 @@ interface UiState {
   readonly autonomousNoticeHidden: boolean
   /** Permite entrar a la app sin configurar la key todavia. */
   readonly onboardingDismissed: boolean
+  /** Mantener la pantalla encendida mientras los agentes trabajan. */
+  readonly keepAwake: boolean
   setView: (view: MainView) => void
   setProjectDialog: (dialog: 'chooser' | 'connect' | 'create' | null) => void
   setOpenAgent: (id: AgentId | null) => void
   hideAutonomousNotice: () => void
   showAutonomousNotice: () => void
   dismissOnboarding: () => void
+  setKeepAwake: (on: boolean) => void
 }
 
 export const useUiStore = create<UiState>((set) => ({
@@ -36,11 +39,13 @@ export const useUiStore = create<UiState>((set) => ({
   openAgentId: null,
   autonomousNoticeHidden: false,
   onboardingDismissed: false,
+  keepAwake: false,
 
   setView: (view) => set({ view }),
   setProjectDialog: (projectDialog) => set({ projectDialog }),
   setOpenAgent: (openAgentId) => set({ openAgentId }),
   hideAutonomousNotice: () => set({ autonomousNoticeHidden: true }),
   showAutonomousNotice: () => set({ autonomousNoticeHidden: false }),
-  dismissOnboarding: () => set({ onboardingDismissed: true })
+  dismissOnboarding: () => set({ onboardingDismissed: true }),
+  setKeepAwake: (keepAwake) => set({ keepAwake })
 }))

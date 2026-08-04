@@ -13,6 +13,7 @@ export const IPC = {
   omegaRuns: 'omega:runs',
   omegaAgentRuns: 'omega:agent-runs',
   omegaSnippet: 'omega:snippet',
+  maintenanceKeepAwake: 'maintenance:keep-awake',
   healthRun: 'health:run',
   scanRun: 'scan:run',
   scanFindings: 'scan:findings',
