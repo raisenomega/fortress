@@ -21,7 +21,8 @@ const SUITES = [
   ['Cognition', require('./checks/cognition-checks.cjs')],
   ['Descartes e historico', require('./checks/dismissal-checks.cjs')],
   ['Push bloqueado por CRITICAL', require('./checks/push-checks.cjs')],
-  ['Libro de la Vida (OMEGA)', require('./checks/omega-checks.cjs')]
+  ['Libro de la Vida (OMEGA)', require('./checks/omega-checks.cjs')],
+  ['Puntuacion y veto (OMEGA)', require('./checks/omega-score-checks.cjs')]
 ]
 
 harness.useTemporaryUserData()

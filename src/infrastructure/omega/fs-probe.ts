@@ -40,7 +40,9 @@ export function createFsProbe(): FilesystemProbe {
         const to = Math.min(rows.length, line + 3)
         const lines: Array<{ n: number; text: string }> = []
         for (let n = from; n <= to; n += 1) lines.push({ n, text: rows[n - 1] })
-        return { found: true, lines }
+        // Si la linea citada supera el final del archivo no hay lineas que
+        // mostrar: found=false, no una evidencia vacia que parezca real.
+        return { found: lines.length > 0, lines }
       } catch {
         return NO_SNIPPET
       }
