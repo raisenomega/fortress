@@ -1,4 +1,4 @@
-import { fetchSnippet, runAudit } from '../../services/omega-service'
+import { fetchSnippet } from '../../services/omega-service'
 import { useOmega, useOmegaStore } from '../../stores/omega-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
@@ -29,7 +29,7 @@ export function OmegaView(): React.JSX.Element {
 
   return (
     <div className="h-full space-y-5 overflow-y-auto px-4 py-4">
-      <OmegaHeader log={data.log} busy={auditing === id} onAudit={() => void runAudit(id)} />
+      <OmegaHeader projectId={id} log={data.log} busy={auditing === id} />
 
       <OmegaSection title="Puntuacion de integridad">
         <OmegaScorePanel score={data.score} />

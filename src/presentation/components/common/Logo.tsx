@@ -2,6 +2,8 @@ import wordmark from '../../assets/fortress-wordmark.png'
 import mark from '../../assets/fortress-logo.png'
 
 export const APP_NAME = 'FORTRESS. by Raisen'
+/** Version real del binario (package.json). No se maquilla. */
+export const APP_VERSION = '1.0.0'
 
 interface LogoProps {
   /** `wordmark` es el logotipo horizontal; `mark` el cuadrado. */

@@ -38,6 +38,8 @@ async function walkCognition(helpers) {
   await expect(
     'omega',
     'SENTINEL OMEGA',
+    'EL OJO QUE TODO LO VE',
+    'FORTRESS v1.0.0',
     'AGENTES DEL SISTEMA',
     'LIBRO DE LA VIDA',
     'Ejecutar auditoria'

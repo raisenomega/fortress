@@ -1,48 +1,43 @@
+import { overview } from '@domain/omega/omega-overview'
 import type { OmegaEntry } from '@domain/omega/omega-entry'
 import { Icon } from '../common/Icon'
+import { APP_VERSION } from '../common/Logo'
+import { OmegaAlerts } from './OmegaAlerts'
+import { OmegaHeaderActions } from './OmegaHeaderActions'
 
 interface OmegaHeaderProps {
+  readonly projectId: string
   readonly log: readonly OmegaEntry[]
   readonly busy: boolean
-  readonly onAudit: () => void
 }
 
-/** Cabecera del superdashboard: metricas REALES contadas del Libro de la Vida. */
-export function OmegaHeader({ log, busy, onAudit }: OmegaHeaderProps): React.JSX.Element {
-  const discrepancias = log.filter((e) => e.verdict === 'discrepancia').length
-  const vetos = log.filter((e) => e.verdict === 'veto').length
-  const ultima = log[0]?.at ? log[0].at.slice(0, 19).replace('T', ' ') : '—'
-  const stats: ReadonlyArray<readonly [string, string]> = [
-    ['Registros', String(log.length)],
-    ['Discrepancias', String(discrepancias)],
-    ['Vetos', String(vetos)],
-    ['Ultimo asiento', ultima]
-  ]
+const sync = (at: string | null): string => (at ? at.slice(0, 19).replace('T', ' ') : '—')
+
+/** Header global del superdashboard (spec §1). Metricas REALES del Libro de la Vida. */
+export function OmegaHeader({ projectId, log, busy }: OmegaHeaderProps): React.JSX.Element {
+  const o = overview(log)
+  const integridad = o.integrity === null ? 's/d' : `${o.integrity}% de integridad`
 
   return (
-    <header className="space-y-3">
-      <div className="flex items-center gap-2">
-        <Icon name="eye" size={16} className="text-primary" />
-        <span className="text-sm font-semibold tracking-wide text-primary uppercase">
-          Sentinel Omega
+    <header className="space-y-3 rounded-md border border-primary/30 bg-card p-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <Icon name="eye" size={18} className="text-primary" />
+        <span className="text-sm font-semibold tracking-wide text-primary uppercase">Sentinel Omega</span>
+        <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
+          el ojo que todo lo ve
         </span>
-        <button
-          type="button"
-          onClick={onAudit}
-          disabled={busy}
-          className="tap ml-auto rounded border border-primary/40 px-2 py-1 text-xs text-primary disabled:opacity-50"
-        >
-          {busy ? 'Auditando…' : 'Ejecutar auditoria'}
-        </button>
+        <span className="ml-auto text-xs text-muted-foreground">Sistema: FORTRESS v{APP_VERSION}</span>
+        <span className={`text-xs ${busy ? 'text-critical' : 'text-success'}`}>
+          {busy ? 'Auditoria activa' : 'Observando'}
+        </span>
       </div>
-      <dl className="grid grid-cols-4 gap-2 text-xs">
-        {stats.map(([label, value]) => (
-          <div key={label} className="rounded-md border border-border bg-card px-2 py-1.5">
-            <dt className="text-muted-foreground">{label}</dt>
-            <dd className="text-foreground">{value}</dd>
-          </div>
-        ))}
-      </dl>
+
+      <p className="text-[11px] text-muted-foreground">
+        Ultima sincronizacion: {sync(o.lastAt)} · Registros: {o.records} · {integridad}
+      </p>
+
+      <OmegaAlerts overview={o} />
+      <OmegaHeaderActions projectId={projectId} busy={busy} />
     </header>
   )
 }

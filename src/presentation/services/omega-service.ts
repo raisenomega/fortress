@@ -37,3 +37,16 @@ export async function fetchSnippet(
   const result = await api().omega.snippet(projectId, file, line)
   return result.ok ? result.value : null
 }
+
+/** Exporta a JSON lo que el dashboard muestra: puntuacion, agentes y el log. */
+export function exportOmega(projectId: string): void {
+  const data = useOmegaStore.getState().byProject[projectId]
+  if (!data) return
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `omega-${projectId}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+}
