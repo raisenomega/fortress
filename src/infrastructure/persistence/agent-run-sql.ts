@@ -50,3 +50,7 @@ export const RANKING_SINCE = `SELECT agent_id, COUNT(*) AS runs,
 export const AVERAGE_RUN = `SELECT COUNT(*) AS runs,
   COALESCE(AVG(cost_usd), 0) AS avg_cost, COALESCE(AVG(duration_ms), 0) AS avg_ms
   FROM agent_runs WHERE project_id = ? AND failed = 0`
+
+/** Episodios (ejecuciones reales) y fallos desde una fecha ISO. Un run = un episodio. */
+export const EPISODE_TALLY_SINCE = `SELECT COUNT(*) AS episodes,
+  COALESCE(SUM(failed), 0) AS failures FROM agent_runs WHERE at >= ?`

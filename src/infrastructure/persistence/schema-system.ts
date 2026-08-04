@@ -1,0 +1,14 @@
+/**
+ * Tablas del propio FORTRESS (no de un proyecto): no cuelgan de projects ni
+ * cascadean al borrar uno. Aparte de schema.ts solo para no pasar de 75 lineas.
+ * Idempotentes: se aplican en cada arranque sin duplicar nada.
+ */
+export const SYSTEM_SCHEMA = `
+CREATE TABLE IF NOT EXISTS capabilities (
+  id                 TEXT PRIMARY KEY,
+  kind               TEXT NOT NULL,
+  name               TEXT NOT NULL,
+  origin_observation TEXT NOT NULL,
+  created_at         TEXT NOT NULL
+);
+`

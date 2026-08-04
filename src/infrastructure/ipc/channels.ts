@@ -11,6 +11,7 @@ export const IPC = {
   loopChunk: 'loop:chunk',
   systemObservations: 'system:observations',
   systemResolveObservation: 'system:resolve-observation',
+  systemCapabilities: 'system:capabilities',
   omegaAudit: 'omega:audit',
   omegaList: 'omega:list',
   omegaScore: 'omega:score',

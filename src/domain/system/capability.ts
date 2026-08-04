@@ -13,16 +13,24 @@ export const CREATE_AT = 1_000
 export const TRIAL_END = 20_000
 export const OFFICIAL_AT = 50_000
 
-export interface Capability {
-  readonly id: string
+/** Lo que aporta quien propone la capacidad; id y fecha los pone la base. */
+export interface NewCapability {
   readonly kind: CapabilityKind
   readonly name: string
   /** La observacion de oportunidad de la que nacio. */
   readonly originObservation: string
-  /** Episodios acumulados desde que se propuso. */
+}
+
+/** Fila persistida. episodes/phase/maturity NO se guardan: se derivan. */
+export interface StoredCapability extends NewCapability {
+  readonly id: string
+  readonly createdAt: string
+}
+
+/** Vista viva: la fila mas lo que se calcula del historial real de ejecuciones. */
+export interface Capability extends StoredCapability {
   readonly episodes: number
   readonly phase: CapabilityPhase
-  /** Puntaje de madurez calculado de evidencia real (0..OFFICIAL_AT). */
+  /** Puntaje de madurez derivado de evidencia real (0..OFFICIAL_AT). */
   readonly maturity: number
-  readonly createdAt: string
 }

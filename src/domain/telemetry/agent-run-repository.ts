@@ -18,6 +18,9 @@ export interface AgentRunRepository {
   /** Consumo desde una fecha ISO. Alimenta el "hoy / semana / mes". */
   usageSince(since: string): TokenUsage
 
+  /** Episodios (ejecuciones reales) y fallos desde una fecha ISO. Un run = un episodio. */
+  episodeTallySince(since: string): { readonly episodes: number; readonly failures: number }
+
   usageByProjectSince(since: string): Readonly<Record<string, TokenUsage>>
 
   /** Agentes mas activos desde una fecha. */

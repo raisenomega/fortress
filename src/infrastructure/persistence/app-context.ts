@@ -10,6 +10,7 @@ import { createSqliteChatRepository } from './sqlite-chat-repository'
 import { createSqliteConnectorRepository } from './sqlite-connector-repository'
 import { createSqliteFindingRepository } from './sqlite-finding-repository'
 import { createSqliteLoopSessionRepository } from './sqlite-loop-session-repository'
+import { createSqliteCapabilityRepository } from './sqlite-capability-repository'
 import { createSqliteSelfObservationRepository } from './sqlite-self-observation-repository'
 import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
@@ -38,6 +39,7 @@ export function getAppContext(): AppContext {
     connectors: createSqliteConnectorRepository(db),
     loopSessions: createSqliteLoopSessionRepository(db),
     selfObservations: createSqliteSelfObservationRepository(db),
+    capabilities: createSqliteCapabilityRepository(db),
     transaction: (work) => db.transaction(work)(),
     settings,
     apiKeys: createSafeStorageApiKeyStore(settings),

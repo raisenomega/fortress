@@ -12,6 +12,7 @@ const { checkToolDetection } = require('./lib/tool-detection.cjs')
 
 const SUITES = [
   ['Persistencia', require('./checks/persistence-checks.cjs')],
+  ['Auto-mejora (sistema)', require('./checks/system-checks.cjs')],
   ['API key y chat', require('./checks/api-key-checks.cjs')],
   ['Superficie externa', require('./checks/posture-checks.cjs')],
   ['Lista blanca de settings', require('./checks/settings-allowlist-checks.cjs')],
