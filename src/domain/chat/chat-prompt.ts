@@ -1,4 +1,5 @@
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
+import { SELF_VERIFY } from '../settings/self-verify'
 
 export interface ChatContext {
   readonly projectName: string
@@ -33,6 +34,8 @@ export function buildChatPrompt(question: string, ctx: ChatContext): string {
     question,
     '',
     'Respondele directo y con evidencia (archivo y linea si aplica). Es una',
-    'conversacion: no hace falta ningun bloque JSON.'
+    'conversacion: no hace falta ningun bloque JSON.',
+    '',
+    SELF_VERIFY
   ].join('\n')
 }

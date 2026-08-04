@@ -5,6 +5,7 @@ import type { ProjectRepository } from '@domain/project/project-repository'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
 import type { SettingsRepository } from '@domain/settings/settings-repository'
+import type { CognitionWriter } from '@domain/cognition/cognition-writer'
 import type { ActivityRepository } from '@domain/telemetry/activity'
 import type { AgentRunRepository } from '@domain/telemetry/agent-run-repository'
 import type { RunInTransaction } from '@domain/shared/transaction'
@@ -21,6 +22,7 @@ export interface AppContext {
   readonly chat: ChatRepository
   readonly runs: AgentRunRepository
   readonly activity: ActivityRepository
+  readonly cognitionWriter: CognitionWriter
   readonly connectors: ConnectorRepository
   readonly transaction: RunInTransaction
   readonly settings: SettingsRepository

@@ -4,6 +4,7 @@ import type { ScanOutcome } from '@domain/scan/scanner'
 import { scoreFromFindings } from '@domain/scan/score-from-findings'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
+import { buildReflectionEntry } from '@domain/cognition/reflection-entry'
 import { scanActivity } from '../telemetry/scan-activity'
 import type { ScanSummary } from './scan-types'
 
@@ -50,6 +51,14 @@ export function persistScan(
 
     context.activity.recordMany(scanActivity(project.id, SCANNER_AGENT, findings, counts, edits))
   })
+
+  // Cognition registra lo aprendido en la memoria del proyecto. Fuera de la
+  // transaccion: es un archivo, y perderlo no debe invalidar el escaneo.
+  context.cognitionWriter.appendReflection(
+    project.path,
+    project.name,
+    buildReflectionEntry(project.name, scannedAt, score, counts)
+  )
 
   return { projectId: project.id, score, scannedAt, durationMs, counts }
 }

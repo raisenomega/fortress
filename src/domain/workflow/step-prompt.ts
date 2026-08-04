@@ -1,6 +1,7 @@
 import { REPORT_CONTRACT } from '../scan/report-contract'
 import { SCAN_RULES } from '../scan/scan-checklist'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
+import { SELF_VERIFY } from '../settings/self-verify'
 import type { WorkflowStep } from './workflow'
 
 export interface StepContext {
@@ -57,6 +58,8 @@ export function buildStepPrompt(step: WorkflowStep, context: StepContext): strin
     '',
     'Reglas:',
     SCAN_RULES,
+    '',
+    SELF_VERIFY,
     '',
     REPORT_CONTRACT
   ].join('\n')
