@@ -30,6 +30,12 @@ async function walkCognition(helpers) {
   await pause(500)
   await shoot('-conectores')
   await expect('conectores', 'Figma', 'Canva')
+
+  // Sentinel Omega: panel de auditoria (puntuacion + Libro de la Vida).
+  await run(clickSelector('[data-nav="Sentinel Omega"]'))
+  await pause(500)
+  await shoot('-omega')
+  await expect('omega', 'SENTINEL OMEGA', 'LIBRO DE LA VIDA', 'Auditar')
 }
 
 module.exports = { walkCognition }

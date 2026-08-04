@@ -3,6 +3,7 @@ import { ChatWindow } from '../chat/ChatWindow'
 import { CognitionView } from '../cognition/CognitionView'
 import { ConnectorsView } from '../connectors/ConnectorsView'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
+import { OmegaView } from '../omega/OmegaView'
 import { PerformanceView } from '../performance/PerformanceView'
 import { PostureView } from '../posture/PostureView'
 import { ScanView } from '../scan/ScanView'
@@ -20,7 +21,8 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   exposicion: () => <PostureView />,
   rendimiento: () => <PerformanceView />,
   settings: () => <SettingsView />,
-  conectores: () => <ConnectorsView />
+  conectores: () => <ConnectorsView />,
+  omega: () => <OmegaView />
 }
 
 interface MainAreaProps {

@@ -10,6 +10,7 @@ export type MainView =
   | 'rendimiento'
   | 'settings'
   | 'conectores'
+  | 'omega'
 
 interface UiState {
   readonly view: MainView
