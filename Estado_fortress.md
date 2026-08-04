@@ -211,9 +211,10 @@ Ordenada por lo que desbloquea más:
   usa `ipcRenderer`/`contextBridge`, sin node). Verificado con `smoke` + `preview`
   (montan la UI real y ejercen el bridge): la app arranca y pinta con el sandbox
   encendido.
-- **D7 — Sección "Record"** que conserve lo importante de un proyecto tras
-  quitarlo. Propuesta: exportar `FORTRESS-RECORD.md` a la propia carpeta del
-  proyecto, no guardarlo dentro de FORTRESS (evita proyectos fantasma).
+- **D7 — Sección "Record" (RESUELTO 2026-08-04).** Al quitar un proyecto,
+  FORTRESS exporta `FORTRESS-RECORD.md` A SU carpeta (no dentro de FORTRESS)
+  con score, hallazgos abiertos por severidad y nº de escaneos, antes de borrar
+  sus datos. `buildProjectRecord` en dominio (2 tests). `b2b9d4d`.
 - **D8 — Hallazgos de seguridad del propio FORTRESS.** Validados uno a uno.
   **Cerrados:** MEDIUM `operation-mode.ts` (`a3ded40`), MEDIUM `safe-commands.ts`
   (`02a1706`), MEDIUM `main-window.ts` (=D6 sandbox, `6bb5c1b`), HIGH
