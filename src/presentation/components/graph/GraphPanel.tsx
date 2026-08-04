@@ -3,11 +3,12 @@ import { useGraph } from '../../stores/graph-store'
 import { useActiveProject } from '../../stores/project-store'
 import { Icon } from '../common/Icon'
 import { Notice } from '../common/Notice'
+import { GraphStatsGrid } from './GraphStatsGrid'
 
 /**
- * FORTRESS detecta el grafo pero todavia no lee su contenido. Se dice tal
- * cual: ensenar cero nodos y cero aristas sugeriria un grafo vacio, cuando lo
- * que pasa es que esta app aun no sabe leerlo.
+ * Detecta el grafo y, si esta indexado, lee su indice real (nodos, aristas,
+ * archivos, fecha). Si esta configurado pero sin indice, lo dice en vez de
+ * ensenar ceros que pareceria un grafo vacio.
  */
 export function GraphPanel(): React.JSX.Element {
   const project = useActiveProject()
@@ -31,13 +32,16 @@ export function GraphPanel(): React.JSX.Element {
     <div className="space-y-2">
       <p className="flex items-center gap-2 text-xs text-foreground">
         <Icon name="check-circle" size={13} className="text-success" />
-        Servidor <span className="font-mono text-primary">{graph.server}</span> configurado
+        Servidor <span className="font-mono text-primary">{graph.server}</span>
         <span className="text-muted-foreground">· {graph.source}</span>
       </p>
-      <Notice tone="ok">
-        FORTRESS lo detecta pero todavia no lee su grafo. Faltaria comprobar como guarda los datos
-        contra una instalacion real; escribir el lector a ciegas seria inventarselo.
-      </Notice>
+      {graph.stats ? (
+        <GraphStatsGrid stats={graph.stats} />
+      ) : (
+        <Notice tone="ok">
+          Configurado, pero aun sin indice. Los agentes lo crean con index_repository en el primer uso.
+        </Notice>
+      )}
     </div>
   )
 }
