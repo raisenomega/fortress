@@ -47,11 +47,19 @@ async function walkCognition(helpers) {
     'Ejecutar auditoria'
   )
 
-  // Click en un badge abre la pagina dedicada del agente.
+  // Click en un badge abre la pagina dedicada del agente (orden del spec).
   await run(clickSelector('[data-omega-agent="security-reviewer"]'))
   await pause(400)
   await shoot('-omega-agente')
-  await expect('omega agente', 'Volver a agentes', 'EFECTIVIDAD', 'HISTORIAL')
+  await expect(
+    'omega agente',
+    'Volver a agentes',
+    'EFECTIVIDAD',
+    'METRICAS',
+    'HISTORIAL DE EJECUCIONES',
+    'DISCREPANCIAS DETECTADAS',
+    'GRAFICA DE RENDIMIENTO'
+  )
 }
 
 module.exports = { walkCognition }

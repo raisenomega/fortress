@@ -31,6 +31,10 @@ export function OmegaDashboard({ project }: OmegaDashboardProps): React.JSX.Elem
         agent={agent}
         agents={data.agents}
         projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+        projectId={id}
+        busy={auditing === id}
+        log={data.log}
+        loadSnippet={(file, line) => fetchSnippet(id, file, line)}
         onBack={() => selectAgent(null)}
       />
     )
