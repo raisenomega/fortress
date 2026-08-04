@@ -54,6 +54,7 @@ async function walkCognition(helpers) {
   await expect(
     'omega agente',
     'Volver a agentes',
+    'AGENTE SECURITY REVIEWER',
     'EFECTIVIDAD',
     'METRICAS',
     'HISTORIAL DE EJECUCIONES',

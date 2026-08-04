@@ -26,7 +26,7 @@ export function OmegaExecPanel({ run, onClose }: OmegaExecPanelProps): React.JSX
   ]
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-40 w-80 space-y-3 overflow-y-auto border-l border-border bg-sidebar p-4 shadow-xl">
+    <aside className="fixed top-12 right-0 bottom-7 z-30 w-80 space-y-3 overflow-y-auto border-l border-border bg-sidebar p-4 shadow-xl">
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold text-foreground">{run.kind}</span>
         <span className={`rounded-full border border-current px-1.5 text-[10px] uppercase ${sev.tone}`}>

@@ -7,15 +7,13 @@ import type { OmegaEntry } from '@domain/omega/omega-entry'
 import type { AgentRun } from '@domain/telemetry/agent-run'
 import { useAgentRuns } from '../../hooks/useAgentRuns'
 import { pageMetrics } from './agent-page-model'
+import { OmegaAgentHeader } from './OmegaAgentHeader'
 import { OmegaDiscrepancyList } from './OmegaDiscrepancyList'
 import { OmegaDiscrepancyPanel } from './OmegaDiscrepancyPanel'
 import { OmegaExecPanel } from './OmegaExecPanel'
-import { OmegaHeader } from './OmegaHeader'
 import { OmegaHistorySection } from './OmegaHistorySection'
 import { OmegaMetricsTable } from './OmegaMetricsTable'
-import { OmegaPageHeader } from './OmegaPageHeader'
 import { OmegaPerfChart } from './OmegaPerfChart'
-import { OmegaProfileActions } from './OmegaProfileActions'
 import { OmegaSection } from './OmegaSection'
 
 export interface OmegaAgentPageProps {
@@ -29,7 +27,6 @@ export interface OmegaAgentPageProps {
   readonly onBack: () => void
 }
 
-/** Pagina del agente en el orden del spec; cada fila/discrepancia abre barra lateral. */
 export function OmegaAgentPage(props: OmegaAgentPageProps): React.JSX.Element {
   const { agent, agents, projects, projectId, busy, log, loadSnippet, onBack } = props
   const runs = useAgentRuns(agent.agentId)
@@ -42,13 +39,15 @@ export function OmegaAgentPage(props: OmegaAgentPageProps): React.JSX.Element {
       <button type="button" onClick={onBack} className="tap text-xs text-primary">
         ‹ Volver a agentes
       </button>
-      <OmegaHeader projectId={projectId} log={log} busy={busy} />
-      <OmegaPageHeader
+      <OmegaAgentHeader
         name={agent.name}
         subtitle={findAgent(agent.agentId as AgentId)?.purpose ?? ''}
         score={agent.compliance}
         runs={agent.runs}
         tokens={agent.outputTokens}
+        discrepancies={agent.discrepancies}
+        projectId={projectId}
+        busy={busy}
       />
       <OmegaSection title="Metricas">
         <OmegaMetricsTable metrics={pageMetrics(agent, agents)} />
@@ -62,10 +61,14 @@ export function OmegaAgentPage(props: OmegaAgentPageProps): React.JSX.Element {
       <OmegaSection title="Grafica de rendimiento">
         <OmegaPerfChart runs={runs} />
       </OmegaSection>
-      <OmegaProfileActions projectId={projectId} busy={busy} />
       {selRun ? <OmegaExecPanel run={selRun} onClose={() => setSelRun(null)} /> : null}
       {selDisc ? (
-        <OmegaDiscrepancyPanel entry={selDisc} loadSnippet={loadSnippet} onClose={() => setSelDisc(null)} />
+        <OmegaDiscrepancyPanel
+          entry={selDisc}
+          log={log}
+          loadSnippet={loadSnippet}
+          onClose={() => setSelDisc(null)}
+        />
       ) : null}
     </div>
   )
