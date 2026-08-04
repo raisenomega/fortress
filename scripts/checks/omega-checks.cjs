@@ -69,5 +69,15 @@ module.exports = async function omegaChecks(window) {
   check('el hallazgo real NO es discrepancia',
     log.some((e) => e.verdict === 'ok' && e.evidence.includes('real.ts:2')))
 
+  // --- Parte C: puntuacion con datos reales ---
+  const score = await run(`window.api.omega.score('${idB}')`)
+  check('la puntuacion sale con datos reales', score.ok, JSON.stringify(score))
+  check('veracidad = 33 (1 de 3 hallazgos cuadra)',
+    score.ok && score.value.veracity === 33, JSON.stringify(score))
+  check('sin runs del agente, cumplimiento es null (sin datos, no cero)',
+    score.ok && score.value.compliance === null)
+  check('overall bajo -> banda no-usar',
+    score.ok && score.value.band === 'no-usar', JSON.stringify(score))
+
   return results
 }

@@ -2,8 +2,6 @@ import type { FolderPlan } from '@application/newproject/prepare-folder'
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
 import type { GraphStatus } from '@domain/graph/graph-status'
 import type { NewProjectDraft } from '@domain/newproject/new-project-draft'
-import type { OmegaAuditReport } from '@domain/omega/audit-report'
-import type { OmegaEntry } from '@domain/omega/omega-entry'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
 import type { PostureRequest, PostureResult } from '@domain/posture/posture-scan'
@@ -68,8 +66,3 @@ export interface PostureApi {
   run(request: PostureRequest): Promise<Result<PostureResult>>
 }
 
-export interface OmegaApi {
-  /** OMEGA verifica los hallazgos contra el disco y escribe en el Libro de la Vida. */
-  audit(projectId: string): Promise<Result<OmegaAuditReport>>
-  list(projectId: string): Promise<readonly OmegaEntry[]>
-}

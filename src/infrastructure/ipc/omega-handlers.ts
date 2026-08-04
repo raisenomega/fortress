@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { auditProject } from '@application/omega/audit-project'
+import { scoreProject } from '@application/omega/score-project'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -15,5 +16,9 @@ export function registerOmegaHandlers(): void {
   // Solo lectura: el operador ve los asientos, nunca puede borrarlos ni editarlos.
   ipcMain.handle(IPC.omegaList, (_event, projectId: string) =>
     getAppContext().omegaLog.listByProject(projectId, LIST_LIMIT)
+  )
+
+  ipcMain.handle(IPC.omegaScore, (_event, projectId: string) =>
+    scoreProject(getAppContext(), projectId)
   )
 }

@@ -8,6 +8,7 @@ export const IPC = {
   projectsSetTrusted: 'projects:set-trusted',
   omegaAudit: 'omega:audit',
   omegaList: 'omega:list',
+  omegaScore: 'omega:score',
   healthRun: 'health:run',
   scanRun: 'scan:run',
   scanFindings: 'scan:findings',

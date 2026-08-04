@@ -7,6 +7,7 @@ import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 import type { ActivityApi, PushApi, ScanApi } from './scan-api'
 import type { ConnectorsApi } from './connectors-api'
+import type { OmegaApi } from './omega-api'
 import type {
   AccountApi,
   PostureApi,
@@ -14,7 +15,6 @@ import type {
   GraphApi,
   MaintenanceApi,
   NewProjectApi,
-  OmegaApi,
   TelemetryApi
 } from './system-api'
 

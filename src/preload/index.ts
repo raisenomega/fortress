@@ -27,7 +27,8 @@ const api: FortressApi = {
   },
   omega: {
     audit: (projectId) => ipcRenderer.invoke(IPC.omegaAudit, projectId),
-    list: (projectId) => ipcRenderer.invoke(IPC.omegaList, projectId)
+    list: (projectId) => ipcRenderer.invoke(IPC.omegaList, projectId),
+    score: (projectId) => ipcRenderer.invoke(IPC.omegaScore, projectId)
   },
   chat: {
     history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),
