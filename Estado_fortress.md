@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **367 unitarios · 87 integración ·
+Estado de verificación al día de hoy: **367 unitarios · 93 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -124,6 +124,17 @@ En orden de construcción:
     de push respaldado por evidencia (no afloja la regla, la documenta) `55efad8`.
     Rehusadas a propósito (harían a OMEGA violar lo que vigila): toggle que
     miente, pensamiento inferido, perfiles psicológicos, veredicto infalible.
+33. **OMEGA superdashboard + activación.** OMEGA pasa a agente activo por
+    defecto; chip dorado "OMEGA" (ojo) en el TopBar junto a Rendimiento `78b6d51`.
+    Capa de datos real: `omega.agents` (salud de los 11 agentes: ejec./fallos/
+    cumplimiento/tokens), `omega.runs` (ejecuciones recientes), `omega.snippet`
+    (código real de la evidencia, con guarda de path traversal) `2283939`.
+    Página completa dedicada: cabecera con métricas del log, puntuación, tabla
+    macro de agentes (fila→perfil micro), y Libro de la Vida con "ver evidencia"
+    (código real, no CVEs inventados) `fb08f4b`. Omitidas del spec por
+    integridad: columnas mentiras/omisiones, profundidad, percentiles, CVEs
+    concretos, borrar registros >90d (viola log eterno), reiniciar/restringir/
+    bloquear agente (viola testigo-no-actor).
 
 ---
 
