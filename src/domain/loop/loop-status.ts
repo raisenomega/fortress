@@ -22,5 +22,6 @@ export const STOP_LABEL: Record<LoopStopReason, string> = {
   detenido: 'Detenido por intervencion humana',
   'tope-gasto': 'Alcanzado el tope de gasto de la sesion',
   'tope-ciclos': 'Alcanzado el maximo de ciclos',
-  resuelto: 'Resuelto: 3 escaneos 100/100 seguidos'
+  resuelto: 'Resuelto: 3 escaneos 100/100 seguidos',
+  'build-roto': 'Un arreglo rompio el build: revertido y detenido'
 }

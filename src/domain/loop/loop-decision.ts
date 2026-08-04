@@ -1,5 +1,9 @@
-/** Por que se detuvo el loop. La UI lo traduce (ver STOP_LABEL en loop-status). */
-export type LoopStopReason = 'detenido' | 'tope-gasto' | 'tope-ciclos' | 'resuelto'
+/**
+ * Por que se detuvo el loop. La UI lo traduce (ver STOP_LABEL en loop-status).
+ * 'build-roto' no lo devuelve loopStop (no es un estado): lo emite el ciclo
+ * cuando el arreglo deja el arbol roto y se revierte.
+ */
+export type LoopStopReason = 'detenido' | 'tope-gasto' | 'tope-ciclos' | 'resuelto' | 'build-roto'
 
 export interface LoopState {
   /** El humano intervino (toggle OFF / boton Detener). Manda sobre todo. */
