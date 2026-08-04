@@ -1,9 +1,15 @@
 /**
  * Por que se detuvo el loop. La UI lo traduce (ver STOP_LABEL en loop-status).
- * 'build-roto' no lo devuelve loopStop (no es un estado): lo emite el ciclo
- * cuando el arreglo deja el arbol roto y se revierte.
+ * 'build-roto' y 'degradado' no los devuelve loopStop (no son estados): los
+ * emite el ciclo cuando el arreglo deja el arbol roto, o cuando baja el score.
  */
-export type LoopStopReason = 'detenido' | 'tope-gasto' | 'tope-ciclos' | 'resuelto' | 'build-roto'
+export type LoopStopReason =
+  | 'detenido'
+  | 'tope-gasto'
+  | 'tope-ciclos'
+  | 'resuelto'
+  | 'build-roto'
+  | 'degradado'
 
 export interface LoopState {
   /** El humano intervino (toggle OFF / boton Detener). Manda sobre todo. */

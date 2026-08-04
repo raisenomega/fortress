@@ -46,6 +46,15 @@ describe('runLoop', () => {
     expect(revert).toHaveBeenCalledTimes(1)
   })
 
+  it('revierte y para si un arreglo baja el score aunque compile', async () => {
+    // Escaneo base 80; tras el arreglo el re-escaneo da 70 (peor) con build verde.
+    const scan = vi.fn().mockResolvedValueOnce(80).mockResolvedValue(70)
+    const revert = vi.fn().mockResolvedValue(undefined)
+    const reason = await runLoop(config, deps({ scan, revert }))
+    expect(reason).toBe('degradado')
+    expect(revert).toHaveBeenCalledTimes(1)
+  })
+
   it('la cancelacion humana para en seco', async () => {
     expect(await runLoop(config, deps({ isCancelled: () => true }))).toBe('detenido')
   })
