@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **342 unitarios · 71 integración ·
+Estado de verificación al día de hoy: **344 unitarios · 71 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -96,6 +96,12 @@ En orden de construcción:
     que lo escrito es exactamente lo que el panel lee. `09ecdcc`. **Fix de
     refresco** (descubierto monitoreando en vivo): el panel solo releía Cognition
     al cambiar de proyecto; ahora también tras el escaneo que crea el log. `652c3ab`
+30. **Guarda de áreas protegidas en español (hallazgo del propio escáner).** En
+    autónomo, un prompt en español ("refactoriza la autenticación", "cambia los
+    pagos", "revisa la seguridad") NO degradaba a supervisado: `PROTECTED_AREAS`
+    solo tenía inglés y comparaba con `includes()` literal. Fix fail-safe: lista
+    ES+EN + normalización de acentos (NFD). `password/contraseña` ahora sí cubre.
+    Tests de detección en español con y sin tildes. `a3ded40`
 
 ---
 
@@ -139,7 +145,12 @@ Ordenada por lo que desbloquea más:
   quitarlo. Propuesta: exportar `FORTRESS-RECORD.md` a la propia carpeta del
   proyecto, no guardarlo dentro de FORTRESS (evita proyectos fantasma).
 - **D8 — Hallazgos de seguridad del propio FORTRESS aún abiertos:** los del
-  escaneo interno que no se han cerrado, validados uno a uno.
+  escaneo interno que no se han cerrado, validados uno a uno. Del último escaneo
+  (score 89): **cerrado** el MEDIUM de `operation-mode.ts` (guarda en español,
+  `a3ded40`). Siguen abiertos: MEDIUM `safe-commands.ts:11` (el filo del
+  allowlist de B1 — decidir modelo de amenaza antes de tocar), MEDIUM
+  `main-window.ts` (=D6, sandbox Chromium), LOW `posture-handlers.ts:11`
+  (sin guardRun) y LOW `index.html:14` (CSP `unsafe-inline`/`frame-ancestors`).
 
 ---
 
