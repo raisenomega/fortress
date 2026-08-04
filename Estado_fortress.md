@@ -181,6 +181,22 @@ En orden de construcción:
     `system` en el preload, y vista "Auto-mejora FORTRESS" en el sidebar
     (`MainView 'sistema'`) con tarjetas kind/área/nota/proyecto y "marcar
     atendido". Propósito: FORTRESS madura con cada trabajo, en cualquier punto.
+40. **Auto-mejora — fundamento del ciclo de vida (dominio puro, inerte).**
+    Primer paso hacia que FORTRESS se cree capacidades a sí misma. Captura
+    ampliada `2e08aff`: nuevo kind `oportunidad` (una función, herramienta o
+    agente nuevo que habría ayudado) y el prompt pide anotar también bloqueos
+    de entorno/permisos/plan-mode (los ejemplos que señaló el operador: MCP
+    bloqueado en plan mode, tsc/npm por permisos). Motor del ciclo `563f24d`,
+    solo dominio con 12 tests, SIN autonomía: umbrales por episodios (crear
+    1.000, prueba <20.000, ciclo <50.000, oficial), `phaseFor`/`nextMilestone`,
+    y dos decisiones del operador cableadas como invariantes — **gate por
+    riesgo** (OMEGA auto-aprueba lo reversible, un agente nuevo exige aprobación
+    HUMANA; OMEGA es testigo-no-actor: veta, no promociona solo) y **puntaje de
+    evidencia real** (`computeMaturity` deriva la nota de episodios/fallos/
+    cumplimiento; el sistema no se auto-asigna el puntaje). Falta (deuda D6):
+    contar episodios reales, persistir capacidades, el gate de OMEGA en vivo,
+    la aprobación humana en UI y la auto-creación en sí — nada de eso existe aún
+    (deuda D10).
 
 ---
 
@@ -243,6 +259,15 @@ Ordenada por lo que desbloquea más:
   por sesión (tope de gasto + nº de ciclos, sin defaults, exigidos por el gate
   del toggle), así que no puede correr con presupuesto ilimitado. El tope por
   ejecución sigue en $3.
+- **D10 — Auto-mejora, autonomía del ciclo de vida.** El fundamento puro está
+  hecho (operativo §40); falta lo que tiene efectos reales, por orden de riesgo:
+  (a) contar episodios reales por capacidad desde el historial de ejecuciones;
+  (b) persistir capacidades (tabla + repo + puerto); (c) el gate de OMEGA en
+  vivo con evidencia (veto, no aprobación); (d) UI de aprobación HUMANA para
+  crear/oficializar un agente nuevo (lo reversible no la necesita); (e) la
+  auto-creación de una función/herramienta/agente en sí — la pieza de máximo
+  riesgo, con sandbox y reversión. Cada sub-paso es un incremento verificable;
+  ninguno se construye sin su freno. **La otra pieza grande, junto a D1.**
 
 ---
 
