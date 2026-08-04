@@ -100,5 +100,23 @@ module.exports = async function omegaChecks(window) {
     vetoLog.some((e) => e.verdict === 'veto' && e.summary.includes('1 verificados')),
     JSON.stringify(vetoLog))
 
+  // --- Parte E: datos del superdashboard (salud de agentes + evidencia) ---
+  const agents = await run(`window.api.omega.agents('${idB}')`)
+  check('la salud macro cubre los 11 agentes del catalogo', agents.length === 11,
+    JSON.stringify(agents.map((a) => a.agentId)))
+  check('incluye a sentinel-omega en la tabla',
+    agents.some((a) => a.agentId === 'sentinel-omega'))
+  check('sin runs, el cumplimiento del agente es null (no cero)',
+    agents.every((a) => a.compliance === null))
+
+  const snippet = await run(`window.api.omega.snippet('${idB}', 'src/real.ts', 2)`)
+  check('la evidencia lee el codigo real del archivo', snippet.ok && snippet.value.found,
+    JSON.stringify(snippet))
+  check('la evidencia trae la linea citada', snippet.ok &&
+    snippet.value.lines.some((l) => l.n === 2), JSON.stringify(snippet))
+
+  const noEvidence = await run(`window.api.omega.snippet('${idB}', 'src/fantasma.ts', 1)`)
+  check('un archivo fantasma no inventa evidencia', noEvidence.ok && !noEvidence.value.found)
+
   return results
 }
