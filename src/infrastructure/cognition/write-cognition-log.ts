@@ -1,22 +1,28 @@
-import { appendFileSync, existsSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { cognitionBaseline } from '@domain/cognition/reflection-entry'
+import type { CognitionScan } from '@domain/cognition/cognition-writer'
+import { rebuildLog } from '@domain/cognition/rebuild-log'
 
 const FILE = 'COGNITION-LOG.md'
 
 /**
- * Añade una reflexion al COGNITION-LOG.md del proyecto. Si el archivo no existe,
- * lo crea con la cabecera minima. Es lo que hace que el panel deje de leer un
- * archivo que nadie rellenaba: FORTRESS registra lo que el escaneo encontro.
+ * Reescribe COGNITION-LOG.md tras un escaneo: patrones REGENERADOS de los
+ * hallazgos actuales (un hallazgo arreglado desaparece, no reaparece cada vez) +
+ * la reflexion de la sesion (las viejas se conservan). Es lo que hace que la
+ * memoria del proyecto acumule evidencia en vez de una sola frase.
  *
- * Mejor esfuerzo: si el disco falla, no se hunde el escaneo, que ya se guardo.
+ * Mejor esfuerzo: si el disco falla, el escaneo ya esta guardado y perder la
+ * memoria no lo invalida.
  */
-export function appendReflection(projectPath: string, projectName: string, entry: string): void {
+export function writeScan(scan: CognitionScan): void {
   try {
-    const path = join(projectPath, FILE)
-    if (!existsSync(path)) writeFileSync(path, cognitionBaseline(projectName))
-    appendFileSync(path, entry)
+    const path = join(scan.projectPath, FILE)
+    const existing = existsSync(path) ? readFileSync(path, 'utf8') : ''
+    writeFileSync(
+      path,
+      rebuildLog(existing, scan.projectName, scan.findings, scan.score, scan.counts, scan.at)
+    )
   } catch {
-    // El escaneo ya esta persistido; perder una reflexion no lo invalida.
+    // El escaneo ya esta persistido; perder la memoria no lo invalida.
   }
 }

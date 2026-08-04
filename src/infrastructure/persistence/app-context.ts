@@ -2,7 +2,7 @@ import type { AppContext } from '@application/context'
 import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
 import { createSafeStorageApiKeyStore } from '../security/api-key-store'
 import { getDatabase } from './database'
-import { appendReflection } from '../cognition/write-cognition-log'
+import { writeScan } from '../cognition/write-cognition-log'
 import { createFsProbe } from '../omega/fs-probe'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
 import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
@@ -30,7 +30,7 @@ export function getAppContext(): AppContext {
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),
-    cognitionWriter: { appendReflection },
+    cognitionWriter: { writeScan },
     omegaLog: createSqliteOmegaLog(db),
     filesystemProbe: createFsProbe(),
     connectors: createSqliteConnectorRepository(db),
