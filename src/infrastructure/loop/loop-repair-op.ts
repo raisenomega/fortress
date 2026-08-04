@@ -1,3 +1,4 @@
+import { appendMessage } from '@application/chat/chat-history'
 import { knownFindings } from '@application/chat/known-findings'
 import type { AppContext } from '@application/context'
 import { usesApiKey } from '@application/settings/read-auth-source'
@@ -41,7 +42,17 @@ export async function loopRepair(
       { projectPath: project.path, prompt, permissionMode: 'acceptEdits', agentId: null, trusted: project.trusted },
       onChunk
     )
-    return reply.failed ? err(reply.text) : ok(undefined)
+    if (reply.failed) return err(reply.text)
+    // Persistido: el trabajo del agente sobrevive al reinicio.
+    appendMessage(context, {
+      projectId,
+      role: 'assistant',
+      content: `Reparacion (${known.length} hallazgos):\n\n${reply.text}`,
+      agentId: null,
+      mode: 'autonomo',
+      engine: 'claude-code'
+    })
+    return ok(undefined)
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo al reparar')
   } finally {

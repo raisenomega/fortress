@@ -1,3 +1,4 @@
+import { appendMessage } from '@application/chat/chat-history'
 import type { AppContext } from '@application/context'
 import { runScan } from '@application/scan/run-scan'
 import { usesApiKey } from '@application/settings/read-auth-source'
@@ -23,10 +24,17 @@ export async function loopScan(
     const summary = await runScan(context, scanner, projectId, onProgress)
     if (!summary.ok) return err(summary.error)
     const c = summary.value.counts
-    // Muestra el resultado en el chat tras el escaneo (antes de arrancar agentes).
-    onProgress(
-      `\n\nResultado: ${summary.value.score}/100 — ${c.CRITICAL} CRITICAL, ${c.HIGH} HIGH, ${c.MEDIUM} MEDIUM, ${c.LOW} LOW\n`
-    )
+    const resultado = `Escaneo: ${summary.value.score}/100 — ${c.CRITICAL} CRITICAL, ${c.HIGH} HIGH, ${c.MEDIUM} MEDIUM, ${c.LOW} LOW`
+    onProgress(`\n\n${resultado}\n`) // en vivo
+    // Persistido: sobrevive al reinicio (el detalle en vivo es de sesion).
+    appendMessage(context, {
+      projectId,
+      role: 'assistant',
+      content: resultado,
+      agentId: 'security-reviewer',
+      mode: 'autonomo',
+      engine: 'claude-code'
+    })
     return ok(summary.value.score)
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
