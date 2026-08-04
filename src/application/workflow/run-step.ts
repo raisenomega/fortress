@@ -34,6 +34,7 @@ export async function runStep(
     reportRead: parsed.ok,
     failed: reply.failed,
     usage: reply.usage,
+    tools: reply.tools,
     durationMs: Date.now() - startedAt
   }
 }

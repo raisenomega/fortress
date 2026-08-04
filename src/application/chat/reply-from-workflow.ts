@@ -64,7 +64,8 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
       agentId: r.agentId,
       usage: r.usage,
       failed: r.failed,
-      durationMs: r.durationMs
+      durationMs: r.durationMs,
+      tools: r.tools
     })),
     findings: consolidate(outcome.results)
   }

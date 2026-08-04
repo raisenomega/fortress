@@ -8,6 +8,8 @@ export interface StepRun {
   readonly usage: TokenUsage
   readonly failed: boolean
   readonly durationMs: number
+  /** Herramientas del agente, en orden. Persiste el uso del grafo por agente. */
+  readonly tools: readonly string[]
 }
 
 /** Lo que produjo una respuesta, con la traza de lo que costo y lo que toco. */

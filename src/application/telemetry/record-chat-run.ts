@@ -35,7 +35,7 @@ export function recordChatRun(context: AppContext, input: ChatRunInput): void {
             durationMs: run.durationMs,
             failed: run.failed,
             usage: run.usage,
-            tools: []
+            tools: run.tools
           })
         }
       } else {

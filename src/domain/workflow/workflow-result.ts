@@ -14,6 +14,8 @@ export interface StepResult {
   readonly reportRead: boolean
   readonly failed: boolean
   readonly usage: TokenUsage
+  /** Herramientas que uso ESTE paso, en orden. Para ver el grafo por agente. */
+  readonly tools: readonly string[]
   /** Lo que tardo ESTE paso, para atribuir tiempo por agente y no en bloque. */
   readonly durationMs: number
 }

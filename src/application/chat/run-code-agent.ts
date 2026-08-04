@@ -40,7 +40,15 @@ export async function runCodeAgent(
     runs:
       agentId === null
         ? []
-        : [{ agentId, usage: reply.usage, failed: reply.failed, durationMs: Date.now() - startedAt }],
+        : [
+            {
+              agentId,
+              usage: reply.usage,
+              failed: reply.failed,
+              durationMs: Date.now() - startedAt,
+              tools: reply.tools
+            }
+          ],
     findings: []
   }
   if (reply.denials.length === 0) {

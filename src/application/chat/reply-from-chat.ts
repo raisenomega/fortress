@@ -47,7 +47,9 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
     tools: reply.tools,
     edits: reply.edits,
     agents: [agentId],
-    runs: [{ agentId, usage: reply.usage, failed: reply.failed, durationMs: Date.now() - startedAt }],
+    runs: [
+      { agentId, usage: reply.usage, failed: reply.failed, durationMs: Date.now() - startedAt, tools: reply.tools }
+    ],
     findings: []
   }
 }
