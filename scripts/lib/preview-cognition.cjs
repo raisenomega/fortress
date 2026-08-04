@@ -41,6 +41,8 @@ async function walkCognition(helpers) {
     'EL OJO QUE TODO LO VE',
     'FORTRESS v1.0.0',
     'AGENTES DEL SISTEMA',
+    'ESTADISTICAS GLOBALES',
+    'COMPARATIVA DE AGENTES',
     'LIBRO DE LA VIDA',
     'Ejecutar auditoria'
   )
