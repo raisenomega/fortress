@@ -30,8 +30,10 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
 
       if (event.editedFile) edits.push(event.editedFile)
       if (event.tool) {
+        // Solo el NOMBRE se persiste; el detalle (ruta/comando redactado) va
+        // por onChunk para leerse en vivo, pero nunca entra en `collected`.
         tools.push(event.tool)
-        onChunk(`\n· ${event.tool}\n`)
+        onChunk(`\n· ${event.tool}${event.detail ? ': ' + event.detail : ''}\n`)
       }
       if (event.text) {
         collected.push(event.text)
