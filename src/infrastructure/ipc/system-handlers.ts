@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { describeCapabilities } from '@application/system/describe-capabilities'
+import { promoteCapability } from '@application/system/promote-capability'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -16,4 +17,8 @@ export function registerSystemHandlers(): void {
     const ctx = getAppContext()
     return describeCapabilities(ctx.capabilities, ctx.runs)
   })
+
+  ipcMain.handle(IPC.systemPromoteCapability, (_event, id: string, humanApproved: boolean) =>
+    promoteCapability(getAppContext(), id, humanApproved)
+  )
 }

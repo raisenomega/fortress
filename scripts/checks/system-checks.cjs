@@ -17,5 +17,9 @@ module.exports = `(async () => {
   check('capacidades derivadas del historial, arrancan vacias',
         Array.isArray(caps) && caps.length === 0, JSON.stringify(caps))
 
+  const promoted = await window.api.system.promoteCapability('no-existe', true)
+  check('promover una capacidad inexistente falla limpio',
+        promoted && promoted.ok === false, JSON.stringify(promoted))
+
   return results
 })()`

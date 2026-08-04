@@ -1,21 +1,25 @@
 import { useEffect } from 'react'
-import { loadObservations, resolveObservation } from '../../services/self-improvement-service'
-import { useSelfObservations } from '../../stores/self-improvement-store'
+import { loadCapabilities, loadObservations } from '../../services/self-improvement-service'
+import { useCapabilities, useSelfObservations } from '../../stores/self-improvement-store'
 import { EmptyState } from '../common/EmptyState'
-import { ObservationCard } from './ObservationCard'
+import { CapabilitiesSection } from './CapabilitiesSection'
+import { ObservationsSection } from './ObservationsSection'
 
 /**
- * Pendientes de FORTRESS: lo que los agentes descubren de FORTRESS mismo
- * mientras trabajan en OTROS proyectos. Cada trabajo hace madurar al sistema.
+ * Auto-mejora de FORTRESS: lo que los agentes descubren de FORTRESS mismo en
+ * OTROS proyectos (backlog) y las capacidades que de ahi nacen y ascienden por
+ * episodios reales. Cada trabajo hace madurar al sistema.
  */
 export function SelfImprovementView(): React.JSX.Element {
   const observations = useSelfObservations()
+  const capabilities = useCapabilities()
 
   useEffect(() => {
     void loadObservations()
+    void loadCapabilities()
   }, [])
 
-  if (observations.length === 0) {
+  if (observations.length === 0 && capabilities.length === 0) {
     return (
       <EmptyState
         iconName="sparkles"
@@ -26,23 +30,9 @@ export function SelfImprovementView(): React.JSX.Element {
   }
 
   return (
-    <div className="h-full space-y-4 overflow-y-auto px-4 py-4">
-      <header>
-        <h2 className="text-base text-foreground">Auto-mejora de FORTRESS</h2>
-        <p className="text-xs text-muted-foreground">
-          {observations.length} pendientes que los agentes descubrieron trabajando.
-        </p>
-      </header>
-
-      <div className="grid gap-2 lg:grid-cols-2">
-        {observations.map((observation) => (
-          <ObservationCard
-            key={observation.id}
-            observation={observation}
-            onResolve={(id) => void resolveObservation(id)}
-          />
-        ))}
-      </div>
+    <div className="h-full space-y-6 overflow-y-auto px-4 py-4">
+      <CapabilitiesSection capabilities={capabilities} />
+      <ObservationsSection observations={observations} />
     </div>
   )
 }

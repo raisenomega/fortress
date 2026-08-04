@@ -1,25 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Capability, CapabilityKind, CapabilityPhase } from './capability'
-import {
-  canPromote,
-  nextMilestone,
-  phaseFor,
-  requiresHumanApproval
-} from './capability-lifecycle'
-
-function cap(episodes: number, phase: CapabilityPhase, kind: CapabilityKind = 'funcion'): Capability {
-  return {
-    id: 'c1',
-    kind,
-    name: 'nueva',
-    originObservation: 'o1',
-    episodes,
-    phase,
-    maturity: 0,
-    omegaVeto: { vetoed: false, band: 'sin-datos', reason: null },
-    createdAt: '2026-08-04T00:00:00.000Z'
-  }
-}
+import { nextMilestone, phaseFor, requiresHumanApproval } from './capability-lifecycle'
 
 describe('phaseFor', () => {
   it('cruza cada umbral en el episodio exacto', () => {
@@ -46,25 +26,5 @@ describe('requiresHumanApproval', () => {
     expect(requiresHumanApproval('agente')).toBe(true)
     expect(requiresHumanApproval('funcion')).toBe(false)
     expect(requiresHumanApproval('herramienta')).toBe(false)
-  })
-})
-
-describe('canPromote', () => {
-  it('sin cruzar umbral no promociona aunque OMEGA apruebe', () => {
-    expect(canPromote(cap(1_500, 'prueba'), { omegaApproved: true, humanApproved: true })).toBe(false)
-  })
-
-  it('OMEGA es testigo-no-actor: sin su ok, no hay salto', () => {
-    expect(canPromote(cap(20_000, 'prueba'), { omegaApproved: false, humanApproved: true })).toBe(false)
-  })
-
-  it('una funcion reversible salta solo con OMEGA', () => {
-    expect(canPromote(cap(20_000, 'prueba'), { omegaApproved: true, humanApproved: false })).toBe(true)
-  })
-
-  it('un agente nuevo exige ademas humano', () => {
-    const g = { omegaApproved: true, humanApproved: false }
-    expect(canPromote(cap(20_000, 'prueba', 'agente'), g)).toBe(false)
-    expect(canPromote(cap(20_000, 'prueba', 'agente'), { ...g, humanApproved: true })).toBe(true)
   })
 })

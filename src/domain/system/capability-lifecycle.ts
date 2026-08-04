@@ -2,7 +2,6 @@ import {
   CREATE_AT,
   TRIAL_END,
   OFFICIAL_AT,
-  type Capability,
   type CapabilityKind,
   type CapabilityPhase
 } from './capability'
@@ -26,23 +25,4 @@ export function nextMilestone(episodes: number): number | null {
 /** Un agente nuevo lo aprueba un humano; una funcion o herramienta (reversible) no. */
 export function requiresHumanApproval(kind: CapabilityKind): boolean {
   return kind === 'agente'
-}
-
-export interface PromotionGate {
-  /** OMEGA audito y no veto (evidencia sin bloqueos). */
-  readonly omegaApproved: boolean
-  /** Un humano dio el visto bueno. Solo obligatorio para agentes. */
-  readonly humanApproved: boolean
-}
-
-/**
- * Puede saltar de fase si los episodios cruzaron un umbral, OMEGA no veto y
- * —para un agente nuevo— un humano aprobo. OMEGA es testigo-no-actor: puede
- * BLOQUEAR, nunca promociona solo.
- */
-export function canPromote(capability: Capability, gate: PromotionGate): boolean {
-  if (phaseFor(capability.episodes) === capability.phase) return false
-  if (!gate.omegaApproved) return false
-  if (requiresHumanApproval(capability.kind) && !gate.humanApproved) return false
-  return true
 }

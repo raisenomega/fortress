@@ -12,6 +12,7 @@ export const IPC = {
   systemObservations: 'system:observations',
   systemResolveObservation: 'system:resolve-observation',
   systemCapabilities: 'system:capabilities',
+  systemPromoteCapability: 'system:promote-capability',
   omegaAudit: 'omega:audit',
   omegaList: 'omega:list',
   omegaScore: 'omega:score',

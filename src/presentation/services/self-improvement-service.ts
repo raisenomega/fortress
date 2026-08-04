@@ -11,3 +11,14 @@ export async function resolveObservation(id: string): Promise<void> {
   await api().system.resolveObservation(id)
   await loadObservations()
 }
+
+/** Relee las capacidades con su fase, madurez y veredicto de OMEGA. */
+export async function loadCapabilities(): Promise<void> {
+  useSelfImprovementStore.getState().setCapabilities(await api().system.capabilities())
+}
+
+/** Pide el salto de fase; OMEGA puede vetarlo. Refresca al terminar. */
+export async function promoteCapability(id: string, humanApproved: boolean): Promise<void> {
+  await api().system.promoteCapability(id, humanApproved)
+  await loadCapabilities()
+}

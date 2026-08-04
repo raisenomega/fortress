@@ -46,4 +46,10 @@ export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'projects', 'loop_enabled')) {
     db.exec('ALTER TABLE projects ADD COLUMN loop_enabled INTEGER NOT NULL DEFAULT 0')
   }
+
+  // Fase aprobada de una capacidad: bases que crearon la tabla sin ella. Default
+  // 'propuesta' = el lado seguro (nada asciende hasta que se apruebe el salto).
+  if (!hasColumn(db, 'capabilities', 'phase')) {
+    db.exec("ALTER TABLE capabilities ADD COLUMN phase TEXT NOT NULL DEFAULT 'propuesta'")
+  }
 }

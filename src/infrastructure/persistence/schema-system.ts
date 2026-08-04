@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS capabilities (
   kind               TEXT NOT NULL,
   name               TEXT NOT NULL,
   origin_observation TEXT NOT NULL,
+  phase              TEXT NOT NULL DEFAULT 'propuesta',
   created_at         TEXT NOT NULL
 );
 `
