@@ -218,9 +218,11 @@ Ordenada por lo que desbloquea más:
   **Cerrados:** MEDIUM `operation-mode.ts` (`a3ded40`), MEDIUM `safe-commands.ts`
   (`02a1706`), MEDIUM `main-window.ts` (=D6 sandbox, `6bb5c1b`), HIGH
   `window.electron` (`bae3b2b`), MEDIUM integridad del auditor (`ff83cce`), HIGH
-  falso verde de integration-test (`eb292b2`). **Siguen abiertos:** LOW
-  `posture-handlers.ts:11` (sin guardRun) y LOW `index.html:14`
-  (CSP `unsafe-inline`/`frame-ancestors`).
+  falso verde de integration-test (`eb292b2`), LOW `posture-handlers.ts` (ahora
+  pasa por guardRun con clave 'posture'). **Evaluado como no-defecto:** LOW
+  `index.html` CSP — `frame-ancestors` se IGNORA vía `<meta>` (solo header) y en
+  Electron el renderer es un archivo local no embebible; el `unsafe-inline` es
+  solo de `style-src`, compromiso aceptado de Tailwind. **D8 cerrado.**
 - **D9 — Topes de gasto (RESUELTO 2026-08-04).** El tope diario, que se había
   puesto en 0 para probar el grafo, se REACTIVÓ a `budget_per_day_usd = 50`: un
   backstop muy por encima de un workflow (~$16) que corta un desbocado, ajustable
