@@ -11,15 +11,20 @@ interface OmegaData {
   readonly runs: readonly AgentRun[]
 }
 
+/** Pestana activa del superdashboard (spec). */
+export type OmegaMode = 'agentes' | 'codigo' | 'proyectos' | 'config'
+
 interface OmegaState {
   readonly byProject: Readonly<Record<string, OmegaData>>
   /** Proyecto que OMEGA esta auditando ahora, o null. */
   readonly auditing: string | null
   /** Agente cuyo perfil esta abierto en el dashboard, o null. */
   readonly selectedAgent: string | null
+  readonly mode: OmegaMode
   setData: (projectId: string, data: OmegaData) => void
   setAuditing: (projectId: string | null) => void
   selectAgent: (agentId: string | null) => void
+  setMode: (mode: OmegaMode) => void
 }
 
 const EMPTY: OmegaData = { log: [], score: null, agents: [], runs: [] }
@@ -28,10 +33,12 @@ export const useOmegaStore = create<OmegaState>((set) => ({
   byProject: {},
   auditing: null,
   selectedAgent: null,
+  mode: 'agentes',
   setData: (projectId, data) =>
     set((state) => ({ byProject: { ...state.byProject, [projectId]: data } })),
   setAuditing: (auditing) => set({ auditing }),
-  selectAgent: (selectedAgent) => set({ selectedAgent })
+  selectAgent: (selectedAgent) => set({ selectedAgent }),
+  setMode: (mode) => set({ mode })
 }))
 
 /** Referencia estable por proyecto: un objeto nuevo por render meteria a React en bucle. */

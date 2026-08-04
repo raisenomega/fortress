@@ -28,7 +28,9 @@ export const ICON_NAMES = [
   'settings',
   'message-square',
   'terminal',
-  'castle'
+  'castle',
+  'users',
+  'code'
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

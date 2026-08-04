@@ -35,7 +35,7 @@ export function OmegaAgentPage(props: OmegaAgentPageProps): React.JSX.Element {
   const mias = log.filter((e) => e.agentId === agent.agentId)
 
   return (
-    <div className="h-full space-y-4 overflow-y-auto px-4 py-4">
+    <div className="space-y-4">
       <button type="button" onClick={onBack} className="tap text-xs text-primary">
         ‹ Volver a agentes
       </button>

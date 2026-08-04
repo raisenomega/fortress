@@ -5,6 +5,7 @@ import {
   Castle,
   CheckCircle,
   Circle,
+  Code2,
   Eye,
   FileText,
   FolderOpen,
@@ -21,6 +22,7 @@ import {
   Sparkles,
   Terminal,
   TestTube,
+  Users,
   Wrench,
   XCircle,
   Zap,
@@ -53,7 +55,9 @@ const REGISTRY: Record<IconName, LucideIcon> = {
   settings: Settings,
   'message-square': MessageSquare,
   terminal: Terminal,
-  castle: Castle
+  castle: Castle,
+  users: Users,
+  code: Code2
 }
 
 interface IconProps {

@@ -31,7 +31,7 @@ async function walkCognition(helpers) {
   await shoot('-conectores')
   await expect('conectores', 'Figma', 'Canva')
 
-  // Sentinel Omega: superdashboard (metricas, salud de agentes, Libro de la Vida).
+  // Sentinel Omega: superdashboard con pestañas (Agentes por defecto).
   await run(clickSelector('[data-nav="Sentinel Omega"]'))
   await pause(500)
   await shoot('-omega')
@@ -41,13 +41,18 @@ async function walkCognition(helpers) {
     'EL OJO QUE TODO LO VE',
     'FORTRESS v1.0.0',
     'AGENTES DEL SISTEMA',
-    'ESTADISTICAS GLOBALES',
-    'COMPARATIVA DE AGENTES',
-    'LIBRO DE LA VIDA',
-    'Ejecutar auditoria'
+    'ESTADISTICAS GLOBALES'
   )
 
-  // Click en un badge abre la pagina dedicada del agente (orden del spec).
+  // Pestaña CODIGO: resumen del escaneo + vulnerabilidades por severidad.
+  await run(clickSelector('[data-omega-tab="codigo"]'))
+  await pause(400)
+  await shoot('-omega-codigo')
+  await expect('omega codigo', 'RESUMEN DEL ESCANEO', 'VULNERABILIDADES POR SEVERIDAD', 'Escanear ahora')
+
+  // Vuelvo a la pestaña Agentes; click en un badge abre la pagina del agente.
+  await run(clickSelector('[data-omega-tab="agentes"]'))
+  await pause(300)
   await run(clickSelector('[data-omega-agent="security-reviewer"]'))
   await pause(400)
   await shoot('-omega-agente')
