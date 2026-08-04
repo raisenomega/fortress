@@ -6,24 +6,36 @@ interface OmegaAgentRowProps {
   readonly onSelect: () => void
 }
 
-const compliance = (value: number | null): string => (value === null ? '—' : `${value}%`)
-const tone = (value: number | null): string =>
-  value === null ? 'text-muted-foreground' : value >= 75 ? 'text-success' : 'text-critical'
+const pct = (v: number | null): string => (v === null ? 's/d' : `${v}%`)
+const tone = (v: number | null): string =>
+  v === null ? 'text-muted-foreground' : v >= 75 ? 'text-success' : v >= 50 ? 'text-medium' : 'text-critical'
 
-/** Una fila de la tabla macro: salud real de un agente. Click abre su perfil. */
+/**
+ * Fila de la tabla macro (spec §2). Confiabilidad y eficiencia con datos reales;
+ * profundidad y omisiones no las mide el sistema, asi que dicen s/d (no se
+ * inventan). Discrepancias son verificables. Click abre el perfil.
+ */
 export function OmegaAgentRow({ agent, selected, onSelect }: OmegaAgentRowProps): React.JSX.Element {
+  const cell = 'px-2 py-1 text-right'
   return (
-    <tr
-      onClick={onSelect}
-      className={`tap cursor-pointer border-b border-border ${selected ? 'bg-accent/30' : ''}`}
-    >
-      <td className="px-2 py-1 text-foreground">{agent.name}</td>
-      <td className="px-2 py-1 text-right text-muted-foreground">{agent.runs}</td>
-      <td className="px-2 py-1 text-right text-muted-foreground">{agent.failed}</td>
-      <td className={`px-2 py-1 text-right ${tone(agent.compliance)}`}>
-        {compliance(agent.compliance)}
+    <tr onClick={onSelect} className={`tap cursor-pointer border-b border-border ${selected ? 'bg-accent/30' : ''}`}>
+      <td className="px-2 py-1 text-foreground" title={agent.agentId}>{agent.name}</td>
+      <td className={`${cell} ${tone(agent.compliance)}`} title="Ejecuciones sin fallo">
+        {pct(agent.compliance)}
       </td>
-      <td className="px-2 py-1 text-right text-muted-foreground">{agent.outputTokens}</td>
+      <td className={`${cell} text-muted-foreground`} title="Tokens de salida por ejecucion">
+        {agent.tokensPerRun === null ? 's/d' : `${agent.tokensPerRun} tok`}
+      </td>
+      <td className={`${cell} text-muted-foreground`} title="OMEGA no mide profundidad; no se inventa">
+        s/d
+      </td>
+      <td className={`${cell} ${agent.discrepancies > 0 ? 'text-critical' : 'text-muted-foreground'}`}
+        title="Hallazgos que no cuadran con el disco">
+        {agent.discrepancies}
+      </td>
+      <td className={`${cell} text-muted-foreground`} title="No es medible sin verdad de referencia">
+        s/d
+      </td>
     </tr>
   )
 }

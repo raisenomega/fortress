@@ -1,36 +1,55 @@
+import type { AgentHealth } from '@domain/omega/agent-health'
+import { compliancePercentile } from '@domain/omega/agent-percentile'
+import type { OmegaEntry } from '@domain/omega/omega-entry'
 import type { AgentRun } from '@domain/telemetry/agent-run'
+import { OmegaAgentDiscrepancies } from './OmegaAgentDiscrepancies'
+import { OmegaAgentHistory } from './OmegaAgentHistory'
 
 interface OmegaAgentProfileProps {
   readonly agentId: string
+  readonly agents: readonly AgentHealth[]
   readonly runs: readonly AgentRun[]
+  readonly log: readonly OmegaEntry[]
 }
 
-/** Perfil micro: las ejecuciones REALES recientes del agente seleccionado. */
-export function OmegaAgentProfile({ agentId, runs }: OmegaAgentProfileProps): React.JSX.Element {
-  const propias = runs.filter((run) => run.agentId === agentId)
+const band = (c: number | null): string =>
+  c === null ? 'sin datos' : c >= 75 ? 'confiable' : c >= 50 ? 'cuestionable' : 'no confiable'
 
-  if (propias.length === 0) {
-    return (
-      <p className="text-xs text-muted-foreground">
-        Sin ejecuciones registradas de este agente en el proyecto.
-      </p>
-    )
-  }
+/** Perfil micro (spec §3): cabecera + metricas reales + historial + discrepancias. */
+export function OmegaAgentProfile(props: OmegaAgentProfileProps): React.JSX.Element | null {
+  const { agentId, agents, runs, log } = props
+  const agent = agents.find((a) => a.agentId === agentId)
+  if (!agent) return null
+
+  const pct = compliancePercentile(agents, agentId)
+  const metrics: ReadonlyArray<readonly [string, string]> = [
+    ['Confiabilidad', agent.compliance === null ? 's/d' : `${agent.compliance}%`],
+    ['Percentil (sistema)', pct === null ? 's/d' : `${pct}%`],
+    ['Discrepancias', String(agent.discrepancies)]
+  ]
 
   return (
-    <ul className="space-y-1">
-      {propias.map((run) => (
-        <li key={run.id} className="flex items-center gap-2 rounded border border-border px-2 py-1 text-xs">
-          <span className={run.failed ? 'text-critical' : 'text-success'}>
-            {run.failed ? 'fallo' : 'ok'}
-          </span>
-          <span className="text-muted-foreground">{run.kind}</span>
-          <span className="text-muted-foreground">{run.usage.outputTokens} tok</span>
-          <span className="ml-auto font-mono text-[10px] text-muted-foreground">
-            {run.at.slice(0, 16).replace('T', ' ')}
-          </span>
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        Estado: <span className="text-foreground">{band(agent.compliance)}</span> · Modelo: sesion
+        de Claude Code · {agent.runs} ejecuciones
+      </p>
+      <dl className="grid grid-cols-3 gap-2 text-xs">
+        {metrics.map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="text-foreground">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="space-y-1">
+        <h4 className="text-[10px] tracking-widest text-muted-foreground uppercase">Historial</h4>
+        <OmegaAgentHistory runs={runs.filter((r) => r.agentId === agentId)} />
+      </div>
+      <div className="space-y-1">
+        <h4 className="text-[10px] tracking-widest text-muted-foreground uppercase">Discrepancias</h4>
+        <OmegaAgentDiscrepancies entries={log.filter((e) => e.agentId === agentId)} />
+      </div>
+    </div>
   )
 }

@@ -12,5 +12,9 @@ export interface AgentHealth {
   /** % de ejecuciones sin fallo, o null si el agente no ha corrido. */
   readonly compliance: number | null
   readonly outputTokens: number
+  /** Tokens de salida por ejecucion (dato de eficiencia), o null si no ha corrido. */
+  readonly tokensPerRun: number | null
+  /** Discrepancias que OMEGA le detecto en el Libro de la Vida (verificable). */
+  readonly discrepancies: number
   readonly lastAt: string | null
 }

@@ -41,7 +41,12 @@ export function OmegaView(): React.JSX.Element {
 
       {selectedAgent ? (
         <OmegaSection title={`Perfil — ${selectedAgent}`}>
-          <OmegaAgentProfile agentId={selectedAgent} runs={data.runs} />
+          <OmegaAgentProfile
+            agentId={selectedAgent}
+            agents={data.agents}
+            runs={data.runs}
+            log={data.log}
+          />
         </OmegaSection>
       ) : null}
 
