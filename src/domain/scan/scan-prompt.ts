@@ -1,3 +1,4 @@
+import { GRAPH_FIRST } from '../settings/graph-first'
 import { REPORT_CONTRACT } from './report-contract'
 import { SCAN_RULES, SECURITY_CHECKLIST } from './scan-checklist'
 
@@ -6,6 +7,8 @@ export function buildScanPrompt(projectName: string): string {
   return [
     `Eres el Security Reviewer de FORTRESS. Audita el proyecto "${projectName}",`,
     'que es el directorio de trabajo actual.',
+    '',
+    GRAPH_FIRST,
     '',
     'Busca, en este orden:',
     SECURITY_CHECKLIST,

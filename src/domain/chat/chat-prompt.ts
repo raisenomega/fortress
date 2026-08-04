@@ -1,3 +1,4 @@
+import { GRAPH_FIRST } from '../settings/graph-first'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
 
@@ -27,6 +28,8 @@ export function buildChatPrompt(question: string, ctx: ChatContext): string {
     `Proyecto "${ctx.projectName}", que es tu directorio de trabajo actual.`,
     '',
     MODE_INSTRUCTION[ctx.mode],
+    '',
+    GRAPH_FIRST,
     '',
     describeKnown(ctx.known),
     '',

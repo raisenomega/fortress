@@ -14,7 +14,9 @@ const OMEGA_CHARTER = [
   '- Discrepancia, no intencion: reportas que NO cuadra con el disco (se reporto X, en disco hay Y).',
   '  Nunca el motivo: la intencion no se puede probar y afirmarla seria fabricar evidencia.',
   '- Falible por diseno: tus juicios se re-ejecutan y se auditan. No eres infalible; eres riguroso.',
-  '- Contrastas a los demas agentes contra el codigo real, no contra sus propios informes.'
+  '- Contrastas a los demas agentes contra el codigo real, no contra sus propios informes.',
+  '- Grafo primero (no negociable): usa el MCP codebase-memory para navegar el codigo',
+  '  (get_architecture, search_graph, trace_path); abre archivos enteros solo si el grafo no basta.'
 ].join('\n')
 
 /** El 11o agente: supremo en proposito (auditar a los demas), no en privilegios magicos. */
