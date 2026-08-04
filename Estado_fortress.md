@@ -37,7 +37,7 @@ frenos.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **341 unitarios · 71 integración ·
+Estado de verificación al día de hoy: **342 unitarios · 71 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -93,7 +93,9 @@ En orden de construcción:
     lista blanca y arreglar lo rojo); (b) tras cada escaneo FORTRESS escribe una
     reflexión determinista en el COGNITION-LOG.md del proyecto (score +
     hallazgos), por un puerto que respeta DDD. Un test de round-trip garantiza
-    que lo escrito es exactamente lo que el panel lee. `09ecdcc`
+    que lo escrito es exactamente lo que el panel lee. `09ecdcc`. **Fix de
+    refresco** (descubierto monitoreando en vivo): el panel solo releía Cognition
+    al cambiar de proyecto; ahora también tras el escaneo que crea el log. `652c3ab`
 
 ---
 
