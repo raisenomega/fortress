@@ -6,6 +6,7 @@ import { readBudget } from '@application/settings/read-budget'
 import { buildMcpConfig } from '@domain/connectors/mcp-config'
 import { buildRepairPrompt } from '@domain/loop/repair-prompt'
 import { err, ok, type Result } from '@domain/shared/result'
+import { parseSelfNotes } from '@domain/system/self-notes'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
@@ -43,6 +44,9 @@ export async function loopRepair(
       onChunk
     )
     if (reply.failed) return err(reply.text)
+    // Lo que el agente descubrio de FORTRESS mismo va al backlog de auto-mejora,
+    // etiquetado con el proyecto donde se descubrio (no es un hallazgo del proyecto).
+    for (const nota of parseSelfNotes(reply.text, project.name)) context.selfObservations.add(nota)
     // Persistido: el trabajo del agente sobrevive al reinicio.
     appendMessage(context, {
       projectId,

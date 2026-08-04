@@ -43,6 +43,12 @@ export function buildRepairPrompt(
     FIX_RULES,
     '',
     'Al terminar verifica con npm run typecheck, npm run lint y npm run test:unit.',
-    'Si algo queda en rojo, revierte tu cambio: nunca dejes el arbol roto.'
+    'Si algo queda en rojo, revierte tu cambio: nunca dejes el arbol roto.',
+    '',
+    'Si algo de FORTRESS (la herramienta que te ejecuta, NO este proyecto) te limito',
+    '—falta una capacidad, un bug, un gap, una restriccion que te impidio trabajar bien—,',
+    'anotalo aparte al FINAL en un bloque, y nada mas despues. No es un hallazgo del',
+    'proyecto; es para que FORTRESS se mejore. Omitelo si no hubo nada:',
+    'FORTRESS-NOTES: [{"kind":"limitacion|bug|gap|falta","area":"zona","note":"que paso"}]'
   ].join('\n')
 }
