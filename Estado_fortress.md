@@ -194,14 +194,13 @@ Ordenada por lo que desbloquea más:
   Siguen abiertos: MEDIUM `main-window.ts` (=D6, sandbox Chromium), LOW
   `posture-handlers.ts:11` (sin guardRun) y LOW `index.html:14`
   (CSP `unsafe-inline`/`frame-ancestors`).
-- **D9 — Topes de gasto por reajustar (tope diario desactivado temporalmente).**
-  El 2026-08-04, con la cuenta del operador con saldo, se guardó
-  `budget_per_day_usd = 0` (sin tope diario) para poder seguir probando el grafo
-  end-to-end; el bloqueo fue a $10.78/$10. El tope POR EJECUCIÓN sigue en $3.
-  PENDIENTE: fijar un tope diario sensato ANTES de enviar el loop autónomo —un
-  ciclo que no para con presupuesto ilimitado puede disparar el gasto— y exponer
-  ambos topes con claridad en Configuración (hoy `DEFAULT_PER_DAY` es un default
-  hardcoded, no hay fila guardada hasta que el operador la fija).
+- **D9 — Topes de gasto (RESUELTO 2026-08-04).** El tope diario, que se había
+  puesto en 0 para probar el grafo, se REACTIVÓ a `budget_per_day_usd = 50`: un
+  backstop muy por encima de un workflow (~$16) que corta un desbocado, ajustable
+  en Configuración. Ademas el loop autónomo tiene sus PROPIOS frenos obligatorios
+  por sesión (tope de gasto + nº de ciclos, sin defaults, exigidos por el gate
+  del toggle), así que no puede correr con presupuesto ilimitado. El tope por
+  ejecución sigue en $3.
 
 ---
 
