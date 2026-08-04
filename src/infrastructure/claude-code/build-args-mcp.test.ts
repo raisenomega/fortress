@@ -4,27 +4,40 @@ import { buildArgs } from './claude-cli'
 const AGENTS = { 'security-reviewer': { description: 'Audita', prompt: 'Eres el auditor' } }
 
 /**
- * buildArgs es la ruta por la que corren TODOS los agentes. Lo que se prueba
- * aqui no es que el flag nuevo funcione, sino que no haber tocado nada sigue
- * produciendo exactamente los mismos argumentos que antes.
+ * buildArgs es la ruta por la que corren TODOS los agentes. El grafo del
+ * proyecto viaja en --mcp-config en CADA spawn: consultarlo es no negociable.
+ * Los conectores se suman encima; nunca lo desplazan.
  */
+function mcpOf(built: string[]): { mcpServers: Record<string, unknown> } {
+  return JSON.parse(built[built.indexOf('--mcp-config') + 1])
+}
+
 describe('buildArgs con MCP', () => {
-  it('sin conectores los argumentos salen identicos a la firma vieja', () => {
-    expect(buildArgs('hola', 'plan', AGENTS, null, 3)).toEqual(
-      buildArgs('hola', 'plan', AGENTS, null, 3, null)
+  it('el grafo viaja SIEMPRE, con o sin conectores', () => {
+    const cfg = mcpOf(buildArgs('hola', 'plan', AGENTS, null, 3))
+    expect(cfg.mcpServers['codebase-memory']).toBeDefined()
+  })
+
+  it('sin conectores, la config MCP es solo el grafo', () => {
+    const cfg = mcpOf(buildArgs('hola', 'plan', AGENTS, null, 3, null))
+    expect(Object.keys(cfg.mcpServers)).toEqual(['codebase-memory'])
+  })
+
+  it('el grafo se permite en --allowedTools: sin la regla el MCP se auto-deniega', () => {
+    expect(buildArgs('hola', 'plan', AGENTS, null, 3)).toContain('mcp__codebase-memory')
+  })
+
+  it('con conectores, se suman al grafo sin desplazarlo', () => {
+    const conMcp = buildArgs(
+      'hola',
+      'plan',
+      AGENTS,
+      'security-reviewer',
+      3,
+      '{"mcpServers":{"figma":{"type":"http","url":"https://x/mcp"}}}'
     )
-  })
-
-  it('sin conectores no aparece --mcp-config', () => {
-    expect(buildArgs('hola', 'plan', AGENTS, null, 3)).not.toContain('--mcp-config')
-    expect(buildArgs('hola', 'plan', AGENTS, null, 3, null)).not.toContain('--mcp-config')
-  })
-
-  it('con configuracion la anade al final sin romper el resto', () => {
-    const base = buildArgs('hola', 'plan', AGENTS, 'security-reviewer', 3)
-    const conMcp = buildArgs('hola', 'plan', AGENTS, 'security-reviewer', 3, '{"mcpServers":{}}')
-
-    expect(conMcp.slice(0, base.length)).toEqual(base)
-    expect(conMcp.slice(base.length)).toEqual(['--mcp-config', '{"mcpServers":{}}'])
+    const cfg = mcpOf(conMcp)
+    expect(cfg.mcpServers.figma).toBeDefined()
+    expect(cfg.mcpServers['codebase-memory']).toBeDefined()
   })
 })

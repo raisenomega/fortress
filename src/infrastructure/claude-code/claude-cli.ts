@@ -1,6 +1,7 @@
 import { spawnSync } from 'child_process'
 import type { AgentId } from '@domain/agent/agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
+import { GRAPH_TOOL_RULE, withGraph } from '@domain/connectors/graph-mcp'
 import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
 import { selfVerifyRules } from '@domain/settings/safe-commands'
@@ -39,17 +40,16 @@ export function buildArgs(
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
   if (maxUsd > 0) args.push(BUDGET_FLAG, String(maxUsd))
 
-  // El allowlist SOLO al editar (acceptEdits) en repo de confianza: `npm run X`
-  // es codigo del repo auditado. En plan o repo no confiable, bash sigue bloqueado.
-  const verifyRules = selfVerifyRules(permissionMode, trusted)
-  if (verifyRules.length > 0) args.push('--allowedTools', ...verifyRules)
+  // Grafo SIEMPRE permitido (su consulta es no negociable); el allowlist de
+  // autoverificacion solo al editar en repo de confianza. Sin la regla del
+  // grafo, en plan headless la llamada al MCP se auto-deniega y cae a Bash.
+  args.push('--allowedTools', GRAPH_TOOL_RULE, ...selfVerifyRules(permissionMode, trusted))
 
-  // Los diez agentes viajan como JSON: FORTRESS no escribe nada en el repo.
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)
 
-  // Aditivo: sin conectores mcpConfig es null y los args salen como antes.
-  if (mcpConfig) args.push(MCP_CONFIG_FLAG, mcpConfig)
+  // El grafo viaja en TODO spawn. Si no arranca, Claude Code sigue sin el.
+  args.push(MCP_CONFIG_FLAG, withGraph(mcpConfig))
 
   return args
 }

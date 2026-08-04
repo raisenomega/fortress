@@ -54,20 +54,20 @@ describe('buildArgs', () => {
 })
 
 describe('buildArgs · allowlist de autoverificacion (gate de confianza)', () => {
-  it('el allowlist solo aparece al editar en un repo de confianza', () => {
-    const built = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true)
-    expect(built).toContain('--allowedTools')
-    expect(built).toContain('Bash(npm run test:unit)')
+  it('la autoverificacion solo aparece al editar en repo de confianza', () => {
+    expect(buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true)).toContain(
+      'Bash(npm run test:unit)'
+    )
   })
 
-  it('en plan NUNCA pasa el allowlist, aunque el repo sea de confianza', () => {
-    // El escaneo va en plan: auditar es mirar, no auto-ejecutar scripts del repo.
-    expect(buildArgs('hola', 'plan', NO_AGENTS, null, 3, null, true)).not.toContain('--allowedTools')
+  it('en plan NUNCA pasa la autoverificacion, aunque el repo sea de confianza', () => {
+    // Auditar es mirar: el escaneo va en plan y no auto-ejecuta scripts del repo.
+    const p = buildArgs('hola', 'plan', NO_AGENTS, null, 3, null, true)
+    expect(p).not.toContain('Bash(npm run test:unit)')
   })
 
-  it('en un repo NO confiable no pasa el allowlist ni editando', () => {
-    // `npm run X` es codigo del repo auditado: sin confianza, no se auto-ejecuta.
-    const built = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, false)
-    expect(built).not.toContain('--allowedTools')
+  it('en un repo NO confiable no pasa la autoverificacion ni editando', () => {
+    const e = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, false)
+    expect(e).not.toContain('Bash(npm run test:unit)')
   })
 })
