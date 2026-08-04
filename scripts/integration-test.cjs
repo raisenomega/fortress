@@ -48,6 +48,9 @@ app.whenReady().then(async () => {
     total += herramientas.length
     failed += report('Deteccion de herramientas', herramientas)
   } catch (error) {
+    // Una suite que LANZA debe hacer fallar la corrida: sin esto, failed seguia
+    // en 0 (se pone a 0 antes del bucle) y se imprimia OK pese a la excepcion.
+    failed += 1
     console.error(`\nINTEGRATION FAIL: ${error.message}`)
   } finally {
     harness.cleanup()
