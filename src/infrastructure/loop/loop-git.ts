@@ -1,14 +1,29 @@
 import { execFileSync } from 'child_process'
+import { resolve } from 'path'
 
 function git(cwd: string, args: readonly string[]): string {
   return execFileSync('git', args as string[], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
 }
 
 /**
+ * La carpeta debe ser la RAIZ de su propio repo. Si es una subcarpeta de un repo
+ * padre, git operaria sobre el padre entero: un `add -A` / `reset --hard` ahi
+ * podria destruir trabajo ajeno. En ese caso se trata como "sin red git".
+ */
+function isRepoRoot(cwd: string): boolean {
+  try {
+    return resolve(git(cwd, ['rev-parse', '--show-toplevel']).trim()) === resolve(cwd)
+  } catch {
+    return false
+  }
+}
+
+/**
  * Checkpoint ANTES de reparar: comitea el estado actual y devuelve su sha. Si no
- * es un repo git devuelve null: sin git no hay red de reversion (el loop lo sabe).
+ * es la raiz de un repo git devuelve null: sin red de reversion (el loop lo sabe).
  */
 export function gitSnapshot(cwd: string): string | null {
+  if (!isRepoRoot(cwd)) return null
   try {
     git(cwd, ['add', '-A'])
     git(cwd, ['commit', '-m', 'loop: checkpoint', '--allow-empty', '--no-verify'])
