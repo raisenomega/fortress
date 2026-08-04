@@ -25,6 +25,9 @@ export const SELECT_ONE = `SELECT ${COLUMNS} FROM agent_runs WHERE id = ?`
 export const SELECT_BY_PROJECT = `SELECT ${COLUMNS} FROM agent_runs
   WHERE project_id = ? ORDER BY at DESC LIMIT ?`
 
+export const SELECT_BY_AGENT = `SELECT ${COLUMNS} FROM agent_runs
+  WHERE agent_id = ? ORDER BY at DESC LIMIT ?`
+
 export const TOTALS_FOR_AGENT = `SELECT COUNT(*) AS runs,
   COALESCE(SUM(failed), 0) AS failed, COALESCE(SUM(edits), 0) AS edits,
   ${SUMS}, MAX(at) AS last_at

@@ -11,6 +11,7 @@ export const IPC = {
   omegaScore: 'omega:score',
   omegaAgents: 'omega:agents',
   omegaRuns: 'omega:runs',
+  omegaAgentRuns: 'omega:agent-runs',
   omegaSnippet: 'omega:snippet',
   healthRun: 'health:run',
   scanRun: 'scan:run',

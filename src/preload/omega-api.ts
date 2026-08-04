@@ -18,6 +18,8 @@ export interface OmegaApi {
   agents(projectId: string): Promise<readonly AgentHealth[]>
   /** Ejecuciones recientes del proyecto (perfil micro por agente). */
   runs(projectId: string): Promise<readonly AgentRun[]>
+  /** Ejecuciones de un agente cruzando proyectos (su pagina dedicada). */
+  agentRuns(agentId: string): Promise<readonly AgentRun[]>
   /** Codigo real alrededor de una linea: la evidencia que OMEGA cita. */
   snippet(projectId: string, file: string, line: number): Promise<Result<FileSnippet>>
 }

@@ -31,6 +31,7 @@ const api: FortressApi = {
     score: (projectId) => ipcRenderer.invoke(IPC.omegaScore, projectId),
     agents: (projectId) => ipcRenderer.invoke(IPC.omegaAgents, projectId),
     runs: (projectId) => ipcRenderer.invoke(IPC.omegaRuns, projectId),
+    agentRuns: (agentId) => ipcRenderer.invoke(IPC.omegaAgentRuns, agentId),
     snippet: (projectId, file, line) => ipcRenderer.invoke(IPC.omegaSnippet, projectId, file, line)
   },
   chat: {

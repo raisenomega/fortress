@@ -9,6 +9,9 @@ export interface AgentRunRepository {
   /** Ultimas ejecuciones de un proyecto, de la mas reciente a la mas antigua. */
   listByProject(projectId: string, limit: number): readonly AgentRun[]
 
+  /** Ultimas ejecuciones de un agente cruzando proyectos (para su pagina). */
+  listByAgent(agentId: string, limit: number): readonly AgentRun[]
+
   /** Acumulado de un agente; con projectId en null, en todos los proyectos. */
   totalsFor(agentId: AgentId, projectId: string | null): AgentRunTotals
 

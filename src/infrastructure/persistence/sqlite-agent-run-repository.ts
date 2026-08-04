@@ -19,6 +19,7 @@ export function createSqliteAgentRunRepository(db: Db): AgentRunRepository {
   const insert = db.prepare(SQL.INSERT_RUN)
   const selectOne = db.prepare(SQL.SELECT_ONE)
   const byProject = db.prepare(SQL.SELECT_BY_PROJECT)
+  const byAgent = db.prepare(SQL.SELECT_BY_AGENT)
   const totals = db.prepare(SQL.TOTALS_FOR_AGENT)
   const lastProject = db.prepare(SQL.LAST_PROJECT_FOR_AGENT)
   const ranking = db.prepare(SQL.RANKING_SINCE)
@@ -32,6 +33,9 @@ export function createSqliteAgentRunRepository(db: Db): AgentRunRepository {
 
     listByProject: (projectId, limit) =>
       (byProject.all(projectId, limit) as AgentRunRow[]).map(toAgentRun),
+
+    listByAgent: (agentId, limit) =>
+      (byAgent.all(agentId, limit) as AgentRunRow[]).map(toAgentRun),
 
     totalsFor: (agentId: AgentId, projectId): AgentRunTotals => {
       const scope = { agentId, projectId }

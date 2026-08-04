@@ -1,6 +1,12 @@
 import type { FileSnippet } from '@domain/omega/filesystem-probe'
+import type { AgentRun } from '@domain/telemetry/agent-run'
 import { api } from '../adapters/fortress-api'
 import { useOmegaStore } from '../stores/omega-store'
+
+/** Ejecuciones de un agente cruzando proyectos (su pagina dedicada). */
+export function fetchAgentRuns(agentId: string): Promise<readonly AgentRun[]> {
+  return api().omega.agentRuns(agentId)
+}
 
 /** Lee todo lo que pinta el superdashboard: log, puntuacion, salud y ejecuciones. */
 export async function loadOmega(projectId: string): Promise<void> {

@@ -36,6 +36,11 @@ export function registerOmegaHandlers(): void {
     getAppContext().runs.listByProject(projectId, RUNS_LIMIT)
   )
 
+  // Pagina de agente: sus ejecuciones cruzando proyectos.
+  ipcMain.handle(IPC.omegaAgentRuns, (_event, agentId: string) =>
+    getAppContext().runs.listByAgent(agentId, RUNS_LIMIT)
+  )
+
   // Evidencia: codigo real alrededor de la linea citada por un hallazgo.
   ipcMain.handle(IPC.omegaSnippet, (_event, projectId: string, file: string, line: number) =>
     readEvidence(getAppContext(), projectId, file, line)
