@@ -13,6 +13,7 @@ const step = (overrides: Partial<StepResult>): StepResult => ({
   reportRead: true,
   failed: false,
   usage: EMPTY_USAGE,
+  durationMs: 0,
   ...overrides
 })
 

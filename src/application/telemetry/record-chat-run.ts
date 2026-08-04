@@ -24,15 +24,31 @@ export function recordChatRun(context: AppContext, input: ChatRunInput): void {
 
   try {
     context.transaction(() => {
-      context.runs.record({
-        projectId: project.id,
-        agentId,
-        kind: 'chat',
-        durationMs: Date.now() - startedAt,
-        failed: outcome.failed,
-        usage: outcome.usage,
-        tools: outcome.tools
-      })
+      // Un run POR agente: sin esto el workflow entero se anotaba como un solo
+      // run del primer agente, y no se veia cuanto gasto cada uno.
+      if (outcome.runs.length > 0) {
+        for (const run of outcome.runs) {
+          context.runs.record({
+            projectId: project.id,
+            agentId: run.agentId,
+            kind: 'chat',
+            durationMs: run.durationMs,
+            failed: run.failed,
+            usage: run.usage,
+            tools: []
+          })
+        }
+      } else {
+        context.runs.record({
+          projectId: project.id,
+          agentId,
+          kind: 'chat',
+          durationMs: Date.now() - startedAt,
+          failed: outcome.failed,
+          usage: outcome.usage,
+          tools: outcome.tools
+        })
+      }
 
       context.activity.recordMany(chatActivity(project.id, agentId, engine, prompt, outcome))
     })

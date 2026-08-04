@@ -10,6 +10,7 @@ const outcome = (edits: string[] = []): ReplyOutcome => ({
   tools: [],
   edits,
   agents: [],
+  runs: [],
   findings: []
 })
 

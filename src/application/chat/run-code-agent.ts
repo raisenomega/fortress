@@ -20,6 +20,7 @@ export async function runCodeAgent(
   mode: OperationMode,
   onChunk: (delta: string) => void
 ): Promise<ReplyOutcome> {
+  const startedAt = Date.now()
   const reply = await agent.run(
     {
       projectPath: project.path,
@@ -36,6 +37,10 @@ export async function runCodeAgent(
     tools: reply.tools,
     edits: reply.edits,
     agents: agentId === null ? [] : [agentId],
+    runs:
+      agentId === null
+        ? []
+        : [{ agentId, usage: reply.usage, failed: reply.failed, durationMs: Date.now() - startedAt }],
     findings: []
   }
   if (reply.denials.length === 0) {

@@ -19,6 +19,7 @@ export async function runStep(
   permissionMode: ClaudePermissionMode,
   parse: ParseReport
 ): Promise<StepResult> {
+  const startedAt = Date.now()
   const reply = await deps.codeAgent.run(
     { projectPath: deps.project.path, prompt, permissionMode, agentId, trusted: deps.project.trusted },
     deps.onChunk
@@ -32,6 +33,7 @@ export async function runStep(
     findings: parsed.ok ? parsed.value : [],
     reportRead: parsed.ok,
     failed: reply.failed,
-    usage: reply.usage
+    usage: reply.usage,
+    durationMs: Date.now() - startedAt
   }
 }

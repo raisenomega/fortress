@@ -60,6 +60,12 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
     tools: [],
     edits: [],
     agents: participants(outcome.results),
+    runs: outcome.results.map((r) => ({
+      agentId: r.agentId,
+      usage: r.usage,
+      failed: r.failed,
+      durationMs: r.durationMs
+    })),
     findings: consolidate(outcome.results)
   }
 }
