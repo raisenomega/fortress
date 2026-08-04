@@ -36,6 +36,8 @@ AGENTS-SELECTED.md
 DREAMING-CONFIG.md
 DEPLOYMENT-PLAYBOOK.md
 AUDIT-CHECKLIST.md
+# Dossier vivo: PRD de origen, evolucion, leyenda y definiciones. No se commitea.
+DOSSIER/
 # ARCHITECTURE.md NO se ignora: tu CLAUDE.md raiz dice que si se commitea.
 fortress-shield*.sh
 fortress-orchestrator*.sh
