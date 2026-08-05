@@ -227,8 +227,14 @@ En orden de construcción:
     (`chat-prompt`, `agent-prompt`). El "Score" del informe de un workflow se
     rotuló **"Índice de estos hallazgos (no es la nota de seguridad)"** para no
     confundirlo con la nota de seguridad de la tarjeta (`workflow-report`).
-    **Pendiente hacia la visión:** score de **calidad general** (hoy solo
-    ciberseguridad) y el modo **"Construir desde cero"** (D1).
+    **Score de CALIDAD GENERAL (HECHO, primer tramo):** `quality-score.computeQualityScore`
+    puntúa TODAS las dimensiones (seguridad, bugs, tests, limpieza, arquitectura,
+    integridad…), con una CRITICAL de seguridad como **portón duro** (tope 64). La
+    auditoría integral (workflow `produccion`) muestra **"Calidad general: X/100"**
+    con el desglose por dimensión; cada agente aporta su materia. Tests del cómputo
+    + el portón. **Pendiente:** persistir la calidad general en la **tarjeta** (hoy
+    la tarjeta sigue mostrando la nota de seguridad) y el modo **"Construir desde
+    cero"** (D1).
 
 ---
 
