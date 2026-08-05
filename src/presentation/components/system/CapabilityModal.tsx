@@ -2,6 +2,7 @@ import { nextMilestone } from '@domain/system/capability-lifecycle'
 import { promoteCapability } from '../../services/self-improvement-service'
 import { useCapabilities } from '../../stores/self-improvement-store'
 import { Modal } from '../common/Modal'
+import { AgentDraftEditor } from './AgentDraftEditor'
 import { CapabilityNotes } from './CapabilityNotes'
 import { MaturityBar } from './MaturityBar'
 
@@ -49,6 +50,7 @@ export function CapabilityModal({
             {promotion.needsHuman ? `Aprobar y promover a ${promotion.to}` : `Promover a ${promotion.to}`}
           </button>
         ) : null}
+        {capability.kind === 'agente' ? <AgentDraftEditor capabilityId={capability.id} /> : null}
         <CapabilityNotes capabilityId={capability.id} />
         <p className="border-t border-border pt-3 text-[11px]">
           Aprende observando: leera el grafo, evaluara escenarios y consultara a los

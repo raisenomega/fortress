@@ -41,5 +41,16 @@ module.exports = `(async () => {
   check('la nota de refuerzo aparece en la capacidad',
         notes.length === 1 && notes[0].note.length > 0, JSON.stringify(notes))
 
+  const drafted = await window.api.system.setAgentDraft(proposed.value.id,
+    { name: 'Redactor auto', prompt: 'Analiza y resume el proyecto', iconName: 'sparkles' })
+  check('guardar el borrador del agente funciona', drafted && drafted.ok, JSON.stringify(drafted))
+  const noHuman = await window.api.system.activateAgent(proposed.value.id, false)
+  check('un agente no se activa sin firma humana', noHuman && noHuman.ok === false, JSON.stringify(noHuman))
+  const activated = await window.api.system.activateAgent(proposed.value.id, true)
+  check('con firma humana el agente se activa',
+        activated && activated.ok && activated.value.active === true, JSON.stringify(activated))
+  const off = await window.api.system.deactivateAgent(proposed.value.id)
+  check('desactivar revierte la inyeccion', off && off.ok, JSON.stringify(off))
+
   return results
 })()`

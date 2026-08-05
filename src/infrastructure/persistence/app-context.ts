@@ -12,6 +12,7 @@ import { createSqliteFindingRepository } from './sqlite-finding-repository'
 import { createSqliteLoopSessionRepository } from './sqlite-loop-session-repository'
 import { createSqliteCapabilityRepository } from './sqlite-capability-repository'
 import { createSqliteCapabilityNoteRepository } from './sqlite-capability-note-repository'
+import { createSqliteAgentDraftRepository } from './sqlite-agent-draft-repository'
 import { createSqliteSelfObservationRepository } from './sqlite-self-observation-repository'
 import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
@@ -42,6 +43,7 @@ export function getAppContext(): AppContext {
     selfObservations: createSqliteSelfObservationRepository(db),
     capabilities: createSqliteCapabilityRepository(db),
     capabilityNotes: createSqliteCapabilityNoteRepository(db),
+    agentDrafts: createSqliteAgentDraftRepository(db),
     transaction: (work) => db.transaction(work)(),
     settings,
     apiKeys: createSafeStorageApiKeyStore(settings),

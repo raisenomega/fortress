@@ -15,9 +15,15 @@ const AUDIT_AGENTS: ReadonlySet<string> = new Set(['security-reviewer', 'sentine
  * (limpieza, tests, etc.) los cede al repo si este define el suyo; los de
  * auditoria SIEMPRE son los de FORTRESS, aunque el repo defina uno con ese id.
  */
-export function agentsForProject(projectPath: string): Readonly<Record<string, AgentDefinition>> {
+export function agentsForProject(
+  projectPath: string,
+  /** Agentes auto-propuestos ACTIVOS. Default vacio: sin ellos, salida identica. */
+  customs: Readonly<Record<string, AgentDefinition>> = {}
+): Readonly<Record<string, AgentDefinition>> {
   const propios = projectAgentIds(projectPath)
-  return buildAgentsPayload(
+  const builtins = buildAgentsPayload(
     AGENT_CATALOG.filter((agent) => AUDIT_AGENTS.has(agent.id) || !propios.has(agent.id))
   )
+  // Los integrados GANAN ante cualquier choque de clave: un custom no los pisa.
+  return { ...customs, ...builtins }
 }

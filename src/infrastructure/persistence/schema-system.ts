@@ -22,4 +22,13 @@ CREATE TABLE IF NOT EXISTS capability_notes (
 );
 
 CREATE INDEX IF NOT EXISTS idx_cap_notes ON capability_notes (capability_id, created_at);
+
+CREATE TABLE IF NOT EXISTS agent_definitions (
+  capability_id TEXT PRIMARY KEY,
+  name          TEXT NOT NULL,
+  prompt        TEXT NOT NULL,
+  icon_name     TEXT NOT NULL,
+  active        INTEGER NOT NULL DEFAULT 0,
+  created_at    TEXT NOT NULL
+);
 `

@@ -5,6 +5,7 @@ import { proposeCapability } from '@application/system/propose-capability'
 import { addCapabilityNote, listCapabilityNotes } from '@application/system/capability-notes'
 import type { NewCapability } from '@domain/system/capability'
 import type { NewCapabilityNote } from '@domain/system/capability-note'
+import { registerAgentDraftHandlers } from './agent-draft-handlers'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -37,4 +38,6 @@ export function registerSystemHandlers(): void {
   ipcMain.handle(IPC.systemAddCapabilityNote, (_event, input: NewCapabilityNote) =>
     addCapabilityNote(getAppContext(), input)
   )
+
+  registerAgentDraftHandlers()
 }

@@ -9,5 +9,9 @@ export const SYSTEM_CHANNELS = {
   systemProposeCapability: 'system:propose-capability',
   systemPromoteCapability: 'system:promote-capability',
   systemCapabilityNotes: 'system:capability-notes',
-  systemAddCapabilityNote: 'system:add-capability-note'
+  systemAddCapabilityNote: 'system:add-capability-note',
+  systemAgentDraft: 'system:agent-draft',
+  systemSetAgentDraft: 'system:set-agent-draft',
+  systemActivateAgent: 'system:activate-agent',
+  systemDeactivateAgent: 'system:deactivate-agent'
 } as const

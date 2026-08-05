@@ -1,5 +1,8 @@
 import type { NewCapability } from '@domain/system/capability'
 import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capability-note'
+import type { AgentDraft } from '@domain/system/agent-draft'
+import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
+import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useSelfImprovementStore } from '../stores/self-improvement-store'
 
@@ -42,4 +45,29 @@ export async function addCapabilityNote(
 ): Promise<readonly CapabilityNote[]> {
   await api().system.addCapabilityNote(input)
   return api().system.capabilityNotes(input.capabilityId)
+}
+
+/** Borrador de la definicion de un agente auto-propuesto. */
+export async function loadAgentDraft(id: string): Promise<StoredAgentDraft | null> {
+  return api().system.agentDraft(id)
+}
+
+export async function saveAgentDraft(
+  id: string,
+  draft: AgentDraft
+): Promise<Result<StoredAgentDraft>> {
+  return api().system.setAgentDraft(id, draft)
+}
+
+/** Activa/desactiva la inyeccion del agente y refresca las capacidades. */
+export async function activateAgent(id: string, human: boolean): Promise<Result<StoredAgentDraft>> {
+  const result = await api().system.activateAgent(id, human)
+  await loadCapabilities()
+  return result
+}
+
+export async function deactivateAgent(id: string): Promise<Result<void>> {
+  const result = await api().system.deactivateAgent(id)
+  await loadCapabilities()
+  return result
 }

@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import { existsSync, statSync } from 'fs'
 import type { CodeAgent } from '@domain/chat/code-agent'
+import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
 import type { Budget } from '@domain/settings/run-budget'
 import { agentsForProject } from './agents-for-project'
@@ -20,7 +21,9 @@ export function createClaudeCodeAgent(
   useApiKey: boolean,
   /** JSON de los conectores MCP activos, o null. Default null: sin conectores
    *  los argumentos salen identicos a como salian antes de existir esto. */
-  mcpConfig: string | null = null
+  mcpConfig: string | null = null,
+  /** Agentes auto-propuestos ACTIVOS a inyectar. Default vacio: sin cambios. */
+  customAgents: Readonly<Record<string, AgentDefinition>> = {}
 ): CodeAgent {
   return {
     isAvailable: isClaudeInstalled,
@@ -37,7 +40,7 @@ export function createClaudeCodeAgent(
     },
 
     run: (request, onChunk) => {
-      const agents = agentsForProject(request.projectPath)
+      const agents = agentsForProject(request.projectPath, customAgents)
       const args = buildArgs(
         request.prompt,
         request.permissionMode,

@@ -3,6 +3,7 @@ import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
 import { subscribe } from './subscribe'
 import { connectorsApi } from './connectors-impl'
+import { systemApi } from './system-impl'
 import { projectApis } from './project-apis'
 
 /**
@@ -25,16 +26,7 @@ const api: FortressApi = {
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
-  system: {
-    observations: () => ipcRenderer.invoke(IPC.systemObservations),
-    resolveObservation: (id) => ipcRenderer.invoke(IPC.systemResolveObservation, id),
-    proposeCapability: (input) => ipcRenderer.invoke(IPC.systemProposeCapability, input),
-    capabilities: () => ipcRenderer.invoke(IPC.systemCapabilities),
-    promoteCapability: (id, humanApproved) =>
-      ipcRenderer.invoke(IPC.systemPromoteCapability, id, humanApproved),
-    capabilityNotes: (id) => ipcRenderer.invoke(IPC.systemCapabilityNotes, id),
-    addCapabilityNote: (input) => ipcRenderer.invoke(IPC.systemAddCapabilityNote, input)
-  },
+  system: systemApi,
   omega: {
     audit: (projectId) => ipcRenderer.invoke(IPC.omegaAudit, projectId),
     list: (projectId) => ipcRenderer.invoke(IPC.omegaList, projectId),

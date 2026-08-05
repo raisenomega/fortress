@@ -1,5 +1,7 @@
 import type { Capability, NewCapability, StoredCapability } from '@domain/system/capability'
 import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capability-note'
+import type { AgentDraft } from '@domain/system/agent-draft'
+import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
 import type { SelfObservation } from '@domain/system/self-observation'
 import type { Result } from '@domain/shared/result'
 
@@ -20,4 +22,10 @@ export interface SelfImprovementApi {
   /** Notas de refuerzo hacia una capacidad (dato seed de los agentes). */
   capabilityNotes(id: string): Promise<readonly CapabilityNote[]>
   addCapabilityNote(input: NewCapabilityNote): Promise<Result<CapabilityNote>>
+  /** Borrador de la definicion de un agente auto-propuesto (dato, no codigo). */
+  agentDraft(id: string): Promise<StoredAgentDraft | null>
+  setAgentDraft(id: string, draft: AgentDraft): Promise<Result<StoredAgentDraft>>
+  /** Activa/desactiva la inyeccion del agente en el despacho. */
+  activateAgent(id: string, humanApproved: boolean): Promise<Result<StoredAgentDraft>>
+  deactivateAgent(id: string): Promise<Result<void>>
 }
