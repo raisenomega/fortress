@@ -312,10 +312,17 @@ Ordenada por lo que desbloquea más:
   **Núcleo HECHO** `70a5bae`: `GenesisBudget` (topes obligatorios gasto+episodios,
   sin defaults, `genesisConfigured`) con su sección en Configuración; `genesisStop`
   (dominio puro: detenido>tope-gasto>tope-episodios>sin-trabajo); `runGenesis`
-  (orquestación con puertos inyectados) — 12 tests, inerte. **Pendiente**: el
-  engine real (cablea `runLearningEpisode`+promoción+coste de sesión+standby) y la
-  vista "Génesis de agentes" con toggle — el gasto autónomo en vivo, que se
-  construye aparte con el cuidado que exige un money-loop. **Pieza grande, junto a D1.**
+  (orquestación con puertos inyectados) — 12 tests, inerte. **Engine + vista HECHO**:
+  `genesis-engine`/`genesis-deps`/`genesis-ops` cablean `runLearningEpisode` en
+  sandbox con **coste REAL** (`costTrackingAgent` reporta `usage.costUsd`) y
+  promueven lo reversible (el agente queda pendiente de firma); `genesis-controller`
+  arranca/para; estado empujado por `system:genesis-status`; vista "Génesis de
+  agentes" (`MainView 'genesis'`) con toggle deshabilitado sin topes + HUD
+  (episodios/tope, gasto/tope, motivo). Freno probado en integración: sin topes
+  guardados no enciende. El agente-dato **no** entra a telemetría/`AgentId`.
+  **Última frontera cerrada**: FORTRESS entrena sus capacidades en bucle, con
+  topes manuales, humano en la activación de agentes y OMEGA vetando. Junto a D1
+  queda el resto de deuda del producto (no de la auto-mejora).
 
 ---
 
