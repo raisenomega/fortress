@@ -1,6 +1,7 @@
 import { findAgent } from '../agent/agent-catalog'
 import { countFindings, presentSeverities } from '../project/severity-counts'
 import { scoreFromFindings } from '../scan/score-from-findings'
+import { computeQualityScore, qualityReportLines } from '../scan/quality-score'
 import { SEVERITIES } from '../shared/severity'
 import type { Workflow } from './workflow'
 import { consolidate, participants, unreadable, type WorkflowOutcome } from './workflow-result'
@@ -40,6 +41,11 @@ export function buildWorkflowReport(workflow: Workflow, outcome: WorkflowOutcome
     `Indice de estos hallazgos: ${scoreFromFindings(todos)}/100 (no es la nota de ` +
       `seguridad del proyecto) · ${todos.length === 0 ? 'sin hallazgos' : resumen}`
   ]
+
+  // La auditoria integral (produccion) da la CALIDAD GENERAL: todas las dimensiones.
+  if (workflow.id === 'produccion') {
+    lineas.push('', ...qualityReportLines(computeQualityScore(todos)))
+  }
 
   if (outcome.stoppedBy !== null) {
     lineas.push(
