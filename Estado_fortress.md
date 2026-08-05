@@ -320,6 +320,12 @@ Ordenada por lo que desbloquea más:
   agentes" (`MainView 'genesis'`) con toggle deshabilitado sin topes + HUD
   (episodios/tope, gasto/tope, motivo). Freno probado en integración: sin topes
   guardados no enciende. El agente-dato **no** entra a telemetría/`AgentId`.
+  **Fix de parada (bug en vivo)**: en la 1ª corrida larga "Detener" NO detenía el
+  bucle (el modelo booleano `cancelled` se reseteaba con un arranque espurio,
+  des-cancelando la corrida). Reemplazado por **parada autoritativa por token**:
+  parar pone `activeToken=0` y ninguna corrida con otro token sigue; un arranque
+  nuevo toma token fresco y la vieja se autodetiene — la parada ya no se puede
+  deshacer. Toggle **coloreado** (verde Encender / rojo Detener / gris sin topes).
   **Última frontera cerrada**: FORTRESS entrena sus capacidades en bucle, con
   topes manuales, humano en la activación de agentes y OMEGA vetando. Junto a D1
   queda el resto de deuda del producto (no de la auto-mejora).
