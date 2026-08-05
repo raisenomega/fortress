@@ -22,11 +22,11 @@ function isRepoRoot(cwd: string): boolean {
  * Checkpoint ANTES de reparar: comitea el estado actual y devuelve su sha. Si no
  * es la raiz de un repo git devuelve null: sin red de reversion (el loop lo sabe).
  */
-export function gitSnapshot(cwd: string): string | null {
+export function gitSnapshot(cwd: string, message = 'loop: checkpoint'): string | null {
   if (!isRepoRoot(cwd)) return null
   try {
     git(cwd, ['add', '-A'])
-    git(cwd, ['commit', '-m', 'loop: checkpoint', '--allow-empty', '--no-verify'])
+    git(cwd, ['commit', '-m', message, '--allow-empty', '--no-verify'])
     return git(cwd, ['rev-parse', 'HEAD']).trim()
   } catch {
     return null

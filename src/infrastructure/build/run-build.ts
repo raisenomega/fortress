@@ -53,7 +53,7 @@ export async function runBuild(
     plan,
     agentFor(context),
     {
-      snapshot: () => gitSnapshot(project.path),
+      snapshot: () => gitSnapshot(project.path, 'build: checkpoint'),
       revert: (sha) => gitRevert(project.path, sha),
       verify: () => loopVerify(project.path)
     },
