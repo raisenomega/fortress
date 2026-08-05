@@ -28,4 +28,6 @@ export interface SelfImprovementApi {
   /** Activa/desactiva la inyeccion del agente en el despacho. */
   activateAgent(id: string, humanApproved: boolean): Promise<Result<StoredAgentDraft>>
   deactivateAgent(id: string): Promise<Result<void>>
+  /** Un agente redacta el borrador solo (corrida real, acotada). Sigue inerte. */
+  draftAgentAuto(id: string): Promise<Result<StoredAgentDraft>>
 }
