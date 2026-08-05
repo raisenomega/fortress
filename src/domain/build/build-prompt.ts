@@ -9,6 +9,22 @@ const BUILD_RULES = [
 ].join('\n')
 
 /**
+ * Prompt de INVESTIGACION (solo lectura): el agente explora y RESPONDE sobre el
+ * proyecto sin tocar nada. Sirve para entender antes de planear o construir.
+ */
+export function investigatePrompt(projectName: string, intent: string): string {
+  return [
+    `Proyecto "${projectName}", tu directorio de trabajo actual. Modo INVESTIGACION.`,
+    '',
+    'Pregunta del operador:',
+    intent,
+    '',
+    'Investiga el codigo y responde con evidencia (archivo:linea). SOLO LECTURA:',
+    'no modifiques nada. Se claro y directo; usa el grafo antes de abrir archivos.'
+  ].join('\n')
+}
+
+/**
  * Prompt de PLAN (fase 1, solo lectura): el planner disena que construir, sin
  * tocar nada. El humano aprueba este plan ANTES de que se escriba una linea.
  */

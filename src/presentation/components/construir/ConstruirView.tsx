@@ -1,32 +1,31 @@
 import { useActiveProject } from '../../stores/project-store'
 import { Notice } from '../common/Notice'
-import { ConstruirFlow } from './ConstruirFlow'
+import { ConstruirInput } from './ConstruirInput'
+import { ConstruirMessages } from './ConstruirMessages'
 
 /**
- * Construir: el operador describe una feature, el planner la disena, el humano
- * aprueba el plan y recien entonces se escribe codigo — con checkpoint git y
- * verify; si algo queda en rojo, se revierte. Solo sobre proyecto de confianza.
+ * Construir: chat minimalista, centrado y angosto, con el input abajo. A la
+ * izquierda se adjunta un archivo; a la derecha la flecha elige el modo (Plan /
+ * Investigacion / Ejecutor). Ejecutor exige un Plan previo y construye con red
+ * git+verify. Nunca sobre el propio repo de FORTRESS (bloqueado en el main).
  */
 export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
 
   return (
-    <div className="h-full space-y-5 overflow-y-auto px-4 py-4">
-      <header>
-        <h2 className="text-base text-foreground">Construir</h2>
-        <p className="text-xs text-muted-foreground">
-          Describe una funcionalidad. El plan lo apruebas tu; nada se escribe sin checkpoint git y
-          verificacion. Si queda en rojo, se revierte solo.
-        </p>
-      </header>
+    <div className="mx-auto flex h-full w-full max-w-md flex-col px-4 pt-4 pb-6">
       {!project ? (
         <Notice tone="error">Selecciona un proyecto para construir.</Notice>
       ) : !project.trusted ? (
-        <Notice tone="error">
-          Construir exige un proyecto de confianza. Activa la confianza primero.
-        </Notice>
+        <Notice tone="error">Construir exige un proyecto de confianza. Activala primero.</Notice>
       ) : (
-        <ConstruirFlow projectId={project.id} />
+        <>
+          <p className="pb-2 text-center text-[11px] text-muted-foreground">
+            Construir en {project.name}
+          </p>
+          <ConstruirMessages />
+          <ConstruirInput projectId={project.id} />
+        </>
       )}
     </div>
   )
