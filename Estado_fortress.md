@@ -43,8 +43,9 @@ sobre-cualificado para su contrato; (3) 11 agentes ⇒ mínimo **11× mejor** qu
 Claude solo (norte, no benchmark); (4) **arreglar Y construir desde cero** a nivel
 enterprise; (5) **chat general** conversacional sin perder ninguna función; (6)
 integridad OMEGA por encima de todo — la ambición se gana con evidencia, nunca
-inflando notas ni saltando frenos. **Hoy:** auditar/arreglar y auto-mejora ✔;
-score general, chat general y construir-desde-cero son la dirección en curso.
+inflando notas ni saltando frenos. **Hoy:** auditar/arreglar, auto-mejora, score
+general, chat general y **construir una feature** (B, §42) ✔; construir un
+proyecto **desde cero** (v2 = D1) es la dirección en curso.
 
 ---
 
@@ -60,7 +61,7 @@ score general, chat general y construir-desde-cero son la dirección en curso.
   (renderer→preload→IPC→SQLite, con userData temporal y PATH recortado) ·
   smoke/preview visual.
 
-Estado de verificación al día de hoy: **437 unitarios · 103 integración ·
+Estado de verificación al día de hoy: **530 unitarios · 116 integración ·
 migración · smoke · preview**, todo en verde. Cero archivos > 75 líneas.
 
 ---
@@ -241,15 +242,23 @@ En orden de construcción:
     tarjeta la muestra junto a la de seguridad ("Calidad gral: X/100"). Se fija
     solo tras una auditoría integral (`ReplyOutcome.comprehensive`), no por
     mencionar un tema.
-42. **Modo "Construir" — núcleo (B v1, dossier 07).** El salto auditor→constructor.
-    Decisiones: feature en proyecto existente · plan aprobado siempre · agente
-    general en modo crear. **HECHO** `b61447a`: `build-prompt` (crea la feature del
-    plan, convenciones del proyecto, verificar, no auth/pagos) + `build-feature`
-    (agente + deps inyectados: solo trusted+git; checkpoint→crea→verify→**revierte**
-    si falla o queda rojo), 9 tests, inerte. **Pendiente:** plan-gate + IPC + UI +
-    routing `construir` (deps reales `loop-git`/`loop-verify`) = lo que lo hace
-    disparable; y v2 = proyecto desde cero (D1). Blindaje de proveedor (constitución
-    §VI, solución 2) sigue pendiente.
+42. **Modo "Construir" — B COMPLETO y disparable (dossier 07).** El salto
+    auditor→constructor, funcionando de punta a punta. Decisiones: feature en
+    proyecto existente · **plan aprobado por el humano SIEMPRE** · agente general
+    (planner) en modo crear. Flujo en **dos fases**: (1) `runBuildPlan` — el planner
+    diseña el plan en solo-lectura (`'plan'`); (2) `runBuild` — `buildFeature` con
+    deps REALES (`gitSnapshot`/`gitRevert`/`loopVerify`): solo trusted+git;
+    checkpoint (`build: checkpoint`) → crea → verify → **revierte** si el agente
+    falla o queda rojo; el resultado se persiste en el chat del proyecto. IPC
+    `build:plan`/`build:feature` con `guardRun` (un carril por proyecto), puente en
+    preload (`build.plan`/`build.feature`), y **vista "Construir"** en el sidebar
+    (`MainView 'construir'`): describir → preparar plan → **aprobar** → construir,
+    avisando que nada se escribe sin tu firma y se revierte en rojo. Núcleo
+    `build-feature` con 9 tests (`b61447a`); el cableado en `f9d5073`/`83f1d2a`. La
+    corrida real la ejerce el operador (paga, no verificable en CI, como
+    `verify:scan`). **Trigger:** vista dedicada, NO verbos en el chat (decisión v1:
+    separación limpia, sin colisionar con el chat general). **Pendiente:** v2 =
+    proyecto desde cero (D1); blindaje de proveedor (constitución §VI, solución 2).
 
 ---
 
