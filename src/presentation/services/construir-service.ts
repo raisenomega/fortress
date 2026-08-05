@@ -1,6 +1,6 @@
 import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
-import { type ConstruirMode, useConstruirStore } from '../stores/construir-store'
+import { useConstruirStore } from '../stores/construir-store'
 import { sendExecute } from './construir-execute'
 
 /** Empuja el turno del usuario, corre la llamada y empuja la respuesta. */
@@ -29,19 +29,21 @@ export async function sendInvestigate(projectId: string, intent: string): Promis
   await ask('Investigacion', intent, api().build.investigate(projectId, intent))
 }
 
-/** Compone la intencion (texto + adjunto), limpia el input y despacha por modo. */
-export function submitConstruir(projectId: string, mode: ConstruirMode): void {
-  if (mode === 'ejecutor') {
+/** Envia con el MODO ACTIVO del store: compone la intencion (texto + adjunto),
+ *  limpia el input y despacha. Lo usan Enter y el boton de enviar. */
+export function submitConstruir(projectId: string): void {
+  const store = useConstruirStore.getState()
+  if (store.busy) return
+  if (store.mode === 'ejecutor') {
     void sendExecute(projectId)
     return
   }
-  const store = useConstruirStore.getState()
   const raw = store.input.trim()
   if (!raw) return
   const intent = store.attached ? `${raw}\n\nArchivo a leer: ${store.attached}` : raw
   store.setInput('')
   store.setAttached(null)
-  if (mode === 'plan') void sendPlan(projectId, intent)
+  if (store.mode === 'plan') void sendPlan(projectId, intent)
   else void sendInvestigate(projectId, intent)
 }
 

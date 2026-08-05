@@ -18,6 +18,7 @@ import {
   Play,
   Rocket,
   Search,
+  Send,
   Settings,
   Shield,
   ShieldOff,
@@ -62,5 +63,6 @@ export const ICON_REGISTRY: Record<IconName, LucideIcon> = {
   users: Users,
   code: Code2,
   'arrow-up': ArrowUp,
-  paperclip: Paperclip
+  paperclip: Paperclip,
+  send: Send
 }

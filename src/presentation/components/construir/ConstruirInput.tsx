@@ -1,13 +1,14 @@
 import { Icon } from '../common/Icon'
 import { useConstruirStore } from '../../stores/construir-store'
-import { attachFile } from '../../services/construir-service'
-import { ConstruirSend } from './ConstruirSend'
+import { attachFile, submitConstruir } from '../../services/construir-service'
+import { ConstruirModeButton } from './ConstruirModeButton'
+import { ConstruirSubmit } from './ConstruirSubmit'
 
 interface ConstruirInputProps {
   readonly projectId: string
 }
 
-/** Barra del chat: adjuntar (izq), texto, y la flecha/Detener (der). */
+/** Barra del chat: adjuntar (izq), texto (Enter envia), modo y enviar (der). */
 export function ConstruirInput({ projectId }: ConstruirInputProps): React.JSX.Element {
   const input = useConstruirStore((s) => s.input)
   const attached = useConstruirStore((s) => s.attached)
@@ -30,10 +31,17 @@ export function ConstruirInput({ projectId }: ConstruirInputProps): React.JSX.El
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              submitConstruir(projectId)
+            }
+          }}
           placeholder="Describe lo que quieres construir o investigar..."
-          className="max-h-32 min-h-[38px] flex-1 resize-none bg-transparent text-sm text-foreground outline-none"
+          className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent text-sm text-foreground outline-none"
         />
-        <ConstruirSend projectId={projectId} />
+        <ConstruirModeButton />
+        <ConstruirSubmit projectId={projectId} />
       </div>
     </div>
   )

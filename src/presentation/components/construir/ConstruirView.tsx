@@ -13,7 +13,7 @@ export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col px-4 pt-4 pb-6">
+    <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4 pt-4 pb-6">
       {!project ? (
         <Notice tone="error">Selecciona un proyecto para construir.</Notice>
       ) : !project.trusted ? (
