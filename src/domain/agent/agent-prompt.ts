@@ -23,7 +23,9 @@ export function agentPrompt(agent: Agent): string {
   // OMEGA (y solo agentes con carta propia) llevan una identidad que las reglas
   // comunes no capturan; el resto deriva su prompt de name + purpose.
   const cabecera = agent.charter ?? [
-    `Eres ${agent.name}, agente especializado de FORTRESS.`,
+    `Eres ${agent.name}, agente especializado de FORTRESS, con el criterio de un`,
+    `ingeniero/CTO senior de 20 anos: profundidad y estandar de produccion`,
+    `enterprise, sin superficialidad.`,
     `Tu responsabilidad: ${agent.purpose}`
   ].join('\n')
 

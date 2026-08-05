@@ -37,7 +37,8 @@ export function buildWorkflowReport(workflow: Workflow, outcome: WorkflowOutcome
     `## ${workflow.label}`,
     '',
     `${quienes.length} agentes: ${quienes.map(name).join(' → ')}`,
-    `Score: ${scoreFromFindings(todos)}/100 · ${todos.length === 0 ? 'sin hallazgos' : resumen}`
+    `Indice de estos hallazgos: ${scoreFromFindings(todos)}/100 (no es la nota de ` +
+      `seguridad del proyecto) · ${todos.length === 0 ? 'sin hallazgos' : resumen}`
   ]
 
   if (outcome.stoppedBy !== null) {

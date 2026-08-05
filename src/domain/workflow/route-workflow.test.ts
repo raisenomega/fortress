@@ -39,6 +39,16 @@ describe('routeWorkflow con los botones de atajo', () => {
   })
 })
 
+describe('routeWorkflow conversa por defecto (chat general)', () => {
+  it('menciona un tema -> conversa; da una orden -> dispara el workflow', () => {
+    expect(routeWorkflow('que es un test unitario?').id).toBe('libre')
+    expect(routeWorkflow('una prueba de que el login funciona').id).toBe('libre')
+    expect(routeWorkflow('explicame la seguridad del proyecto').id).toBe('libre')
+    expect(routeWorkflow('revisa la seguridad').id).toBe('seguridad')
+    expect(routeWorkflow('corre los tests').id).toBe('tests')
+  })
+})
+
 describe('routeWorkflow con mensaje libre', () => {
   it('arma el workflow con los temas que menciona el mensaje', () => {
     expect(agents('revisa la auth y de paso simplifica la complejidad')).toEqual([

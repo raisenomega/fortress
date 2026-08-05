@@ -1,5 +1,6 @@
 import type { AgentId } from '../agent/agent'
 import { findWorkflow } from './workflow-catalog'
+import { isCommand } from './workflow-intent'
 import { CLOSING_STEP, type Workflow, type WorkflowId } from './workflow'
 
 type NamedWorkflow = Exclude<WorkflowId, 'libre'>
@@ -48,12 +49,17 @@ function freeWorkflow(prompt: string): Workflow {
   }
 }
 
-/** Decide que workflow atiende un mensaje. Siempre devuelve uno. */
+/**
+ * Decide que atiende un mensaje. Un workflow completo SOLO si es una orden; si
+ * no, conversa (freeWorkflow -> prosa). Mencionar un tema no basta para escanear.
+ */
 export function routeWorkflow(prompt: string): Workflow {
   const lowered = prompt.toLowerCase()
 
-  for (const [id, phrases] of WORKFLOW_TRIGGERS) {
-    if (phrases.some((phrase) => lowered.includes(phrase))) return findWorkflow(id)
+  if (isCommand(lowered)) {
+    for (const [id, phrases] of WORKFLOW_TRIGGERS) {
+      if (phrases.some((phrase) => lowered.includes(phrase))) return findWorkflow(id)
+    }
   }
 
   return freeWorkflow(prompt)

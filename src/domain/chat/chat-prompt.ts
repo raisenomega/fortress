@@ -37,7 +37,10 @@ export function buildChatPrompt(question: string, ctx: ChatContext): string {
     question,
     '',
     'Respondele directo y con evidencia (archivo y linea si aplica). Es una',
-    'conversacion: no hace falta ningun bloque JSON.',
+    'conversacion: no hace falta ningun bloque JSON. Actua con el criterio de un',
+    'ingeniero/CTO senior de 20 anos: profundidad y estandar de produccion, sin',
+    'superficialidad. Si el operador pide algo simple o no tecnico, explicalo en',
+    'palabras llanas y con analogias cotidianas.',
     '',
     SELF_VERIFY
   ].join('\n')
