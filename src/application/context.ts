@@ -4,6 +4,7 @@ import type { LoopSessionRepository } from '@domain/loop/loop-session-repository
 import type { CapabilityRepository } from '@domain/system/capability-repository'
 import type { CapabilityNoteRepository } from '@domain/system/capability-note-repository'
 import type { AgentDraftRepository } from '@domain/system/agent-draft-repository'
+import type { CapabilityEpisodeRepository } from '@domain/system/capability-episode-repository'
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
@@ -38,6 +39,7 @@ export interface AppContext {
   readonly capabilities: CapabilityRepository
   readonly capabilityNotes: CapabilityNoteRepository
   readonly agentDrafts: AgentDraftRepository
+  readonly capabilityEpisodes: CapabilityEpisodeRepository
   readonly transaction: RunInTransaction
   readonly settings: SettingsRepository
   readonly apiKeys: ApiKeyStore

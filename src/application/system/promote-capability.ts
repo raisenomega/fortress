@@ -26,10 +26,10 @@ export function promoteCapability(
 ): Result<Capability> {
   const stored = context.capabilities.findById(id)
   if (!stored) return err('Esa capacidad ya no existe')
-  const live = liveCapability(stored, context.runs)
+  const live = liveCapability(stored, context.capabilityEpisodes.tallyFor(id))
   const to = live.promotion.to
   if (to === null || !canPromote(live.promotion, humanApproved)) return err(whyBlocked(live))
   context.capabilities.promote(id, to)
   const updated = context.capabilities.findById(id) as StoredCapability
-  return ok(liveCapability(updated, context.runs))
+  return ok(liveCapability(updated, context.capabilityEpisodes.tallyFor(id)))
 }

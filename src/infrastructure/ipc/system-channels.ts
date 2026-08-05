@@ -14,5 +14,6 @@ export const SYSTEM_CHANNELS = {
   systemSetAgentDraft: 'system:set-agent-draft',
   systemActivateAgent: 'system:activate-agent',
   systemDeactivateAgent: 'system:deactivate-agent',
-  systemDraftAgentAuto: 'system:draft-agent-auto'
+  systemDraftAgentAuto: 'system:draft-agent-auto',
+  systemRunEpisode: 'system:run-episode'
 } as const

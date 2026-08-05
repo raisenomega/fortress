@@ -1,5 +1,6 @@
 import type { AgentDraft } from '@domain/system/agent-draft'
 import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
+import type { CapabilityEpisode } from '@domain/system/capability-episode'
 import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { loadCapabilities } from './self-improvement-service'
@@ -32,4 +33,11 @@ export async function deactivateAgent(id: string): Promise<Result<void>> {
 /** Un agente redacta el borrador solo (corrida real). Sigue inerte hasta activar. */
 export async function draftAgentAuto(id: string): Promise<Result<StoredAgentDraft>> {
   return api().system.draftAgentAuto(id)
+}
+
+/** Corre un episodio de aprendizaje (corrida real) y refresca las capacidades. */
+export async function runEpisode(id: string): Promise<Result<CapabilityEpisode>> {
+  const result = await api().system.runEpisode(id)
+  await loadCapabilities()
+  return result
 }

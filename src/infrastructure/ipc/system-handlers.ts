@@ -6,6 +6,7 @@ import { addCapabilityNote, listCapabilityNotes } from '@application/system/capa
 import type { NewCapability } from '@domain/system/capability'
 import type { NewCapabilityNote } from '@domain/system/capability-note'
 import { registerAgentDraftHandlers } from './agent-draft-handlers'
+import { registerCapabilityEpisodeHandlers } from './capability-episode-handlers'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -20,7 +21,7 @@ export function registerSystemHandlers(): void {
 
   ipcMain.handle(IPC.systemCapabilities, () => {
     const ctx = getAppContext()
-    return describeCapabilities(ctx.capabilities, ctx.runs)
+    return describeCapabilities(ctx.capabilities, ctx.capabilityEpisodes)
   })
 
   ipcMain.handle(IPC.systemPromoteCapability, (_event, id: string, humanApproved: boolean) =>
@@ -40,4 +41,5 @@ export function registerSystemHandlers(): void {
   )
 
   registerAgentDraftHandlers()
+  registerCapabilityEpisodeHandlers()
 }

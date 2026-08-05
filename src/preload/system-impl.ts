@@ -15,5 +15,6 @@ export const systemApi: SelfImprovementApi = {
   setAgentDraft: (id, draft) => ipcRenderer.invoke(IPC.systemSetAgentDraft, id, draft),
   activateAgent: (id, human) => ipcRenderer.invoke(IPC.systemActivateAgent, id, human),
   deactivateAgent: (id) => ipcRenderer.invoke(IPC.systemDeactivateAgent, id),
-  draftAgentAuto: (id) => ipcRenderer.invoke(IPC.systemDraftAgentAuto, id)
+  draftAgentAuto: (id) => ipcRenderer.invoke(IPC.systemDraftAgentAuto, id),
+  runEpisode: (id) => ipcRenderer.invoke(IPC.systemRunEpisode, id)
 }

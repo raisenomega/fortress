@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { StoredCapability } from '@domain/system/capability'
 import type { CapabilityRepository } from '@domain/system/capability-repository'
-import type { AgentRunRepository } from '@domain/telemetry/agent-run-repository'
+import type { CapabilityEpisode } from '@domain/system/capability-episode'
+import type { CapabilityEpisodeRepository } from '@domain/system/capability-episode-repository'
 import type { AppContext } from '../context'
 import { promoteCapability } from './promote-capability'
 
@@ -27,10 +28,12 @@ function context(stored: StoredCapability, episodes: number, failures = 0): AppC
       phase = to
     }
   }
-  const runs: Pick<AgentRunRepository, 'episodeTallySince'> = {
-    episodeTallySince: () => ({ episodes, failures })
+  const capabilityEpisodes: CapabilityEpisodeRepository = {
+    record: () => ({}) as CapabilityEpisode,
+    listFor: () => [],
+    tallyFor: () => ({ episodes, failures })
   }
-  return { capabilities, runs } as unknown as AppContext
+  return { capabilities, capabilityEpisodes } as unknown as AppContext
 }
 
 describe('promoteCapability', () => {

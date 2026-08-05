@@ -2,6 +2,7 @@ import type { Capability, NewCapability, StoredCapability } from '@domain/system
 import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capability-note'
 import type { AgentDraft } from '@domain/system/agent-draft'
 import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
+import type { CapabilityEpisode } from '@domain/system/capability-episode'
 import type { SelfObservation } from '@domain/system/self-observation'
 import type { Result } from '@domain/shared/result'
 
@@ -30,4 +31,6 @@ export interface SelfImprovementApi {
   deactivateAgent(id: string): Promise<Result<void>>
   /** Un agente redacta el borrador solo (corrida real, acotada). Sigue inerte. */
   draftAgentAuto(id: string): Promise<Result<StoredAgentDraft>>
+  /** La capacidad resuelve UN escenario y lo registra como episodio propio. */
+  runEpisode(id: string): Promise<Result<CapabilityEpisode>>
 }

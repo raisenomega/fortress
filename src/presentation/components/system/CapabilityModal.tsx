@@ -5,11 +5,17 @@ import { Modal } from '../common/Modal'
 import { AgentDraftEditor } from './AgentDraftEditor'
 import { CapabilityNotes } from './CapabilityNotes'
 import { MaturityBar } from './MaturityBar'
+import { RunEpisodeButton } from './RunEpisodeButton'
 
 interface CapabilityModalProps {
   readonly capabilityId: string
   readonly onClose: () => void
 }
+
+const LEARN_NOTE =
+  'Aprende resolviendo escenarios: cada episodio cuenta y sube su madurez. Hoy cada ' +
+  'episodio es un disparo acotado (un clic); falta que lo haga en bucle por su cuenta, ' +
+  'con topes de coste: esa es la ultima frontera.'
 
 export function CapabilityModal({
   capabilityId,
@@ -50,13 +56,10 @@ export function CapabilityModal({
             {promotion.needsHuman ? `Aprobar y promover a ${promotion.to}` : `Promover a ${promotion.to}`}
           </button>
         ) : null}
+        <RunEpisodeButton capabilityId={capability.id} />
         {capability.kind === 'agente' ? <AgentDraftEditor capabilityId={capability.id} /> : null}
         <CapabilityNotes capabilityId={capability.id} />
-        <p className="border-t border-border pt-3 text-[11px]">
-          Aprende observando: leera el grafo, evaluara escenarios y consultara a los
-          agentes cuando le falte info — cada resolucion contara como episodio. Ese ciclo
-          autonomo es la fase siguiente (e1/e2); hoy la tarjeta ya refleja su progreso real.
-        </p>
+        <p className="border-t border-border pt-3 text-[11px]">{LEARN_NOTE}</p>
       </div>
     </Modal>
   )
