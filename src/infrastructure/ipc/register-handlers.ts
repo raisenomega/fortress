@@ -1,4 +1,5 @@
 import { registerAccountHandlers } from './account-handlers'
+import { registerBuildHandlers } from './build-handlers'
 import { registerPostureHandlers } from './posture-handlers'
 import { registerActivityHandlers } from './activity-handlers'
 import { registerChatHandlers } from './chat-handlers'
@@ -37,4 +38,5 @@ export function registerIpcHandlers(): void {
   registerConnectorHandlers()
   registerOmegaHandlers()
   registerSystemHandlers()
+  registerBuildHandlers()
 }

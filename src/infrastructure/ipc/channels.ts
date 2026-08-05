@@ -1,8 +1,10 @@
 import { SYSTEM_CHANNELS } from './system-channels'
+import { BUILD_CHANNELS } from './build-channels'
 
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
   ...SYSTEM_CHANNELS,
+  ...BUILD_CHANNELS,
   projectsList: 'projects:list',
   projectsAdd: 'projects:add',
   projectsRemove: 'projects:remove',
@@ -28,7 +30,6 @@ export const IPC = {
   scanHistorySince: 'scan:history-since',
   scanDismiss: 'scan:dismiss',
   scanReopen: 'scan:reopen',
-  /** Evento main -> renderer con el avance del escaneo. */
   scanProgress: 'scan:progress',
   pushRun: 'push:run',
   telemetrySession: 'telemetry:session',
@@ -56,7 +57,6 @@ export const IPC = {
   chatClear: 'chat:clear',
   chatSend: 'chat:send',
   chatStop: 'chat:stop',
-  /** Evento main -> renderer con cada fragmento del streaming. */
   chatChunk: 'chat:chunk',
   chatProgress: 'chat:progress',
   connectorsList: 'connectors:list',

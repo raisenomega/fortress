@@ -9,7 +9,24 @@ const BUILD_RULES = [
 ].join('\n')
 
 /**
- * Prompt de CONSTRUCCION: el agente CREA la feature del plan aprobado, en
+ * Prompt de PLAN (fase 1, solo lectura): el planner disena que construir, sin
+ * tocar nada. El humano aprueba este plan ANTES de que se escriba una linea.
+ */
+export function buildPlanPrompt(projectName: string, intent: string): string {
+  return [
+    `Proyecto "${projectName}", tu directorio de trabajo actual. Modo PLAN.`,
+    '',
+    'Intencion del operador:',
+    intent,
+    '',
+    'Disena un PLAN de implementacion concreto: que archivos crear/tocar, en que',
+    'orden, y los criterios de aceptacion. NO implementes nada: solo el plan, breve',
+    'y accionable, respetando las convenciones del proyecto.'
+  ].join('\n')
+}
+
+/**
+ * Prompt de CONSTRUCCION (fase 2): el agente CREA la feature del plan aprobado, en
  * acceptEdits (exige confianza). El checkpoint git + el verify son la red por si
  * deja el arbol roto. A diferencia de reparar, aqui se escribe codigo nuevo.
  */

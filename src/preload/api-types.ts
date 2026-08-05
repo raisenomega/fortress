@@ -7,6 +7,7 @@ import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 import type { ActivityApi, PushApi, ScanApi } from './scan-api'
+import type { BuildApi } from './build-api'
 import type { ConnectorsApi } from './connectors-api'
 import type { OmegaApi } from './omega-api'
 import type { SelfImprovementApi } from './self-improvement-api'
@@ -49,6 +50,7 @@ export interface FortressApi {
   }
   readonly omega: OmegaApi
   readonly system: SelfImprovementApi
+  readonly build: BuildApi
   readonly scan: ScanApi
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi

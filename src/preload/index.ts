@@ -4,6 +4,7 @@ import type { FortressApi } from './api-types'
 import { subscribe } from './subscribe'
 import { connectorsApi } from './connectors-impl'
 import { systemApi } from './system-impl'
+import { buildApi } from './build-impl'
 import { projectApis } from './project-apis'
 
 /**
@@ -27,6 +28,7 @@ const api: FortressApi = {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
   system: systemApi,
+  build: buildApi,
   omega: {
     audit: (projectId) => ipcRenderer.invoke(IPC.omegaAudit, projectId),
     list: (projectId) => ipcRenderer.invoke(IPC.omegaList, projectId),

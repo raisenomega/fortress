@@ -13,6 +13,7 @@ export type MainView =
   | 'omega'
   | 'sistema'
   | 'genesis'
+  | 'construir'
 
 interface UiState {
   readonly view: MainView
