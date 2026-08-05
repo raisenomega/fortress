@@ -240,8 +240,16 @@ En orden de construcción:
     (`projects.general_quality`, migración aditiva) vía `persistQuality`; la
     tarjeta la muestra junto a la de seguridad ("Calidad gral: X/100"). Se fija
     solo tras una auditoría integral (`ReplyOutcome.comprehensive`), no por
-    mencionar un tema. **Pendiente:** el modo **"Construir desde cero"** (D1, la
-    pieza mayor) y el blindaje de proveedor (solución 2 de la constitución §VI).
+    mencionar un tema.
+42. **Modo "Construir" — núcleo (B v1, dossier 07).** El salto auditor→constructor.
+    Decisiones: feature en proyecto existente · plan aprobado siempre · agente
+    general en modo crear. **HECHO** `b61447a`: `build-prompt` (crea la feature del
+    plan, convenciones del proyecto, verificar, no auth/pagos) + `build-feature`
+    (agente + deps inyectados: solo trusted+git; checkpoint→crea→verify→**revierte**
+    si falla o queda rojo), 9 tests, inerte. **Pendiente:** plan-gate + IPC + UI +
+    routing `construir` (deps reales `loop-git`/`loop-verify`) = lo que lo hace
+    disparable; y v2 = proyecto desde cero (D1). Blindaje de proveedor (constitución
+    §VI, solución 2) sigue pendiente.
 
 ---
 
