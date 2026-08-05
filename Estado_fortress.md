@@ -23,6 +23,20 @@ frenos.
 - **Instalado en:** `~/.local/bin/fortress`
 - **Base de datos:** `~/.config/fortress-command-center/fortress.db` (SQLite)
 
+### Visión / Norte (sube el listón, no lo baja — dossier 06)
+
+FORTRESS debe **superar** a Lovable.dev, Cursor, Antigravity IDE, Base44 y demás,
+con un diferenciador único: **100% nativa de Anthropic/Claude**. Estándares que
+fijan el trabajo: (1) el score debe reflejar **calidad general** de ingeniería a
+nivel **producción enterprise**, no solo ciberseguridad (la seguridad sigue como
+sub-score/portón duro); (2) cada agente = **CTO/ingeniero senior de 20 años**,
+sobre-cualificado para su contrato; (3) 11 agentes ⇒ mínimo **11× mejor** que un
+Claude solo (norte, no benchmark); (4) **arreglar Y construir desde cero** a nivel
+enterprise; (5) **chat general** conversacional sin perder ninguna función; (6)
+integridad OMEGA por encima de todo — la ambición se gana con evidencia, nunca
+inflando notas ni saltando frenos. **Hoy:** auditar/arreglar y auto-mejora ✔;
+score general, chat general y construir-desde-cero son la dirección en curso.
+
 ---
 
 ## 2. Arquitectura y reglas (no negociables)
@@ -197,6 +211,18 @@ En orden de construcción:
     contar episodios reales, persistir capacidades, el gate de OMEGA en vivo,
     la aprobación humana en UI y la auto-creación en sí — nada de eso existe aún
     (deuda D10).
+41. **Chat general + claridad de score (hacia la visión, dossier 06).** El chat
+    ahora **conversa por defecto**: un workflow completo SOLO se dispara con una
+    ORDEN (verbo imperativo o "listo para producción"); mencionar un tema como
+    "test" o "seguridad" ya NO lanza un escaneo (`workflow-intent.isCommand` +
+    `route-workflow`). Se conservan todas las funciones: la orden sigue corriendo
+    su workflow. El prompt conversacional y los agentes actúan con criterio de
+    **CTO/ingeniero senior** y responden en simple con analogías si se pide
+    (`chat-prompt`, `agent-prompt`). El "Score" del informe de un workflow se
+    rotuló **"Índice de estos hallazgos (no es la nota de seguridad)"** para no
+    confundirlo con la nota de seguridad de la tarjeta (`workflow-report`).
+    **Pendiente hacia la visión:** score de **calidad general** (hoy solo
+    ciberseguridad) y el modo **"Construir desde cero"** (D1).
 
 ---
 
