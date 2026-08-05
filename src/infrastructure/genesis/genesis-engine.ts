@@ -9,10 +9,10 @@ import { sendGenesisStatus } from './genesis-registry'
  * Motor del bucle de genesis: lee los topes, corre runGenesis con lo real y emite
  * el estado final. No arranca sin topes (genesisConfigured es el freno duro).
  */
-export async function runGenesisEngine(context: AppContext): Promise<void> {
+export async function runGenesisEngine(context: AppContext, token: number): Promise<void> {
   const budget = readGenesisBudget(context)
   if (!genesisConfigured(budget)) return
-  const runtime = buildGenesisRuntime(context, budget)
+  const runtime = buildGenesisRuntime(context, budget, token)
   const stopReason = await runGenesis(runtime.deps, budget)
   sendGenesisStatus({
     phase: 'parado',

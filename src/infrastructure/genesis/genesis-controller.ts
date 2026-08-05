@@ -1,15 +1,15 @@
 import { getAppContext } from '../persistence/app-context'
 import { runGenesisEngine } from './genesis-engine'
-import { cancelGenesis, clearGenesis, isGenesisRunning, markGenesisRunning } from './genesis-registry'
+import { clearGenesis, isGenesisRunning, markGenesisRunning, stopGenesisRun } from './genesis-registry'
 
-/** Arranca el bucle de genesis si no corre ya. Fire-and-forget; se limpia al terminar. */
+/** Arranca el bucle si no corre ya. Fire-and-forget; libera su token al terminar. */
 export function startGenesis(): void {
   if (isGenesisRunning()) return
-  markGenesisRunning()
-  void runGenesisEngine(getAppContext()).finally(clearGenesis)
+  const token = markGenesisRunning()
+  void runGenesisEngine(getAppContext(), token).finally(() => clearGenesis(token))
 }
 
-/** Parada de emergencia humana: marca cancelado; el ciclo lo consulta entre episodios. */
+/** Parada de emergencia humana: AUTORITATIVA (activeToken=0). El ciclo la ve entre episodios. */
 export function stopGenesis(): void {
-  cancelGenesis()
+  stopGenesisRun()
 }

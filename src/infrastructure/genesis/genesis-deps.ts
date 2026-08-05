@@ -16,7 +16,11 @@ export interface GenesisRuntime {
  * y promocion de lo reversible (un agente queda pendiente de firma humana, porque
  * promoteCapability con humanApproved=false no lo cruza). Aparte de la seguridad.
  */
-export function buildGenesisRuntime(context: AppContext, budget: GenesisBudget): GenesisRuntime {
+export function buildGenesisRuntime(
+  context: AppContext,
+  budget: GenesisBudget,
+  token: number
+): GenesisRuntime {
   let spent = 0
   let episodes = 0
   const deps: GenesisDeps = {
@@ -30,8 +34,8 @@ export function buildGenesisRuntime(context: AppContext, budget: GenesisBudget):
       return Promise.resolve()
     },
     spentSession: () => spent,
-    isCancelled: isGenesisCancelled,
-    wait: waitOrCancel,
+    isCancelled: () => isGenesisCancelled(token),
+    wait: (ms) => waitOrCancel(ms, token),
     emit: (done) => {
       episodes = done
       sendGenesisStatus({
