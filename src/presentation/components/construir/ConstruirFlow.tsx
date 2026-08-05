@@ -1,5 +1,5 @@
 import { useConstruirStore } from '../../stores/construir-store'
-import { buildApproved, preparePlan } from '../../services/construir-service'
+import { buildApproved, preparePlan, stopBuild } from '../../services/construir-service'
 import { Notice } from '../common/Notice'
 import { ConstruirForm } from './ConstruirForm'
 import { ConstruirReview } from './ConstruirReview'
@@ -17,8 +17,21 @@ export function ConstruirFlow({ projectId }: ConstruirFlowProps): React.JSX.Elem
   if (phase === 'idle') {
     return <ConstruirForm onPrepare={(intent) => void preparePlan(projectId, intent)} />
   }
-  if (phase === 'planning') {
-    return <p className="text-sm text-muted-foreground">Disenando el plan...</p>
+  if (phase === 'planning' || phase === 'building') {
+    const label =
+      phase === 'planning' ? 'Disenando el plan...' : 'Construyendo con red git+verify...'
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <button
+          type="button"
+          onClick={() => void stopBuild(projectId)}
+          className="tap rounded-md border border-critical/40 px-4 py-2 text-sm text-critical hover:bg-critical/10"
+        >
+          Detener
+        </button>
+      </div>
+    )
   }
   if (phase === 'review') {
     return (
@@ -31,10 +44,6 @@ export function ConstruirFlow({ projectId }: ConstruirFlowProps): React.JSX.Elem
       />
     )
   }
-  if (phase === 'building') {
-    return <p className="text-sm text-muted-foreground">Construyendo con red git+verify...</p>
-  }
-
   return (
     <div className="space-y-3">
       <Notice tone={phase === 'done' ? 'ok' : 'error'}>{message}</Notice>

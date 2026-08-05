@@ -4,5 +4,6 @@
  */
 export const BUILD_CHANNELS = {
   buildPlan: 'build:plan',
-  buildFeature: 'build:feature'
+  buildFeature: 'build:feature',
+  buildStop: 'build:stop'
 } as const

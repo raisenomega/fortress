@@ -5,4 +5,6 @@ import type { Result } from '@domain/shared/result'
 export interface BuildApi {
   plan(projectId: string, intent: string): Promise<Result<string>>
   feature(projectId: string, intent: string, plan: string): Promise<Result<void>>
+  /** Corta el agente en marcha (plan o build). Devuelve procesos terminados. */
+  stop(projectId: string): Promise<number>
 }

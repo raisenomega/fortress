@@ -19,6 +19,12 @@ function isOwnPackage(dir: string): boolean {
   }
 }
 
+/** ¿Esta carpeta es el propio repo de FORTRESS? Construir/editar sobre el se
+ *  prohibe: el agente pisaria el codigo vivo de la app mientras corre. */
+export function isFortressRepo(dir: string): boolean {
+  return isOwnPackage(dir)
+}
+
 /**
  * `app.getAppPath()` no siempre apunta a la raiz del codigo (al ejecutar un
  * script suelto devuelve su carpeta), asi que se sube hasta encontrar el

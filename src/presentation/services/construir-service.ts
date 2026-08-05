@@ -24,3 +24,9 @@ export async function buildApproved(
   else store.toError(result.error)
   await loadProjects()
 }
+
+/** Detener: corta el agente en marcha (plan o build) sin cerrar la app. */
+export async function stopBuild(projectId: string): Promise<void> {
+  await api().build.stop(projectId)
+  useConstruirStore.getState().toError('Detenido por ti.')
+}

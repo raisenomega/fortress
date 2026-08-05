@@ -6,5 +6,6 @@ import type { BuildApi } from './build-api'
 export const buildApi: BuildApi = {
   plan: (projectId, intent) => ipcRenderer.invoke(IPC.buildPlan, projectId, intent),
   feature: (projectId, intent, plan) =>
-    ipcRenderer.invoke(IPC.buildFeature, projectId, intent, plan)
+    ipcRenderer.invoke(IPC.buildFeature, projectId, intent, plan),
+  stop: (projectId) => ipcRenderer.invoke(IPC.buildStop, projectId)
 }
