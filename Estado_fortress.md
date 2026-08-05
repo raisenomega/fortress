@@ -25,6 +25,12 @@ frenos.
 
 ### Visión / Norte (sube el listón, no lo baja — dossier 06)
 
+**Constitución Parte 1:** `CONSTITUCION.md` (raíz) — "Vivir en el software" (2026-2050):
+el norte que cada agente y la plataforma deben encarnar. Nota de reconciliación
+pendiente: su Pilar 5 lista modelos DeepSeek/Kimi, que **contradice** la realidad
+y el diferenciador de FORTRESS (**100% nativa Anthropic/Claude**); a decidir con el operador.
+
+
 FORTRESS debe **superar** a Lovable.dev, Cursor, Antigravity IDE, Base44 y demás,
 con un diferenciador único: **100% nativa de Anthropic/Claude**. Estándares que
 fijan el trabajo: (1) el score debe reflejar **calidad general** de ingeniería a
