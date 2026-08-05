@@ -235,9 +235,13 @@ En orden de construcción:
     integridad…), con una CRITICAL de seguridad como **portón duro** (tope 64). La
     auditoría integral (workflow `produccion`) muestra **"Calidad general: X/100"**
     con el desglose por dimensión; cada agente aporta su materia. Tests del cómputo
-    + el portón. **Pendiente:** persistir la calidad general en la **tarjeta** (hoy
-    la tarjeta sigue mostrando la nota de seguridad) y el modo **"Construir desde
-    cero"** (D1).
+    + el portón. **Calidad general en la TARJETA (HECHO):** la auditoría integral
+    (workflow `produccion`) persiste la nota general en el proyecto
+    (`projects.general_quality`, migración aditiva) vía `persistQuality`; la
+    tarjeta la muestra junto a la de seguridad ("Calidad gral: X/100"). Se fija
+    solo tras una auditoría integral (`ReplyOutcome.comprehensive`), no por
+    mencionar un tema. **Pendiente:** el modo **"Construir desde cero"** (D1, la
+    pieza mayor) y el blindaje de proveedor (solución 2 de la constitución §VI).
 
 ---
 
