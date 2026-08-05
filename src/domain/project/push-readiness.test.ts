@@ -13,6 +13,7 @@ const project = (overrides: Partial<Project> = {}): Project => ({
   gitRemote: 'git@github.com:acme/p1.git',
   gitBranch: 'main',
   fortressScore: 100,
+  generalQuality: null,
   lastScan: SCANNED,
   hasClaude: true,
   hasGraph: false,

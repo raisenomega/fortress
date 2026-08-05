@@ -10,6 +10,7 @@ const project = (fortressScore: number, lastScan: string | null): Project => ({
   gitRemote: null,
   gitBranch: 'main',
   fortressScore,
+  generalQuality: null,
   lastScan,
   hasClaude: true,
   hasGraph: false,

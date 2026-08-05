@@ -5,6 +5,7 @@ import { effectiveMode } from '@domain/settings/operation-mode'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { recordChatRun } from '../telemetry/record-chat-run'
+import { persistQuality } from '../scan/persist-quality'
 import { appendMessage } from './chat-history'
 import { chooseEngine } from './choose-engine'
 import { produceReply } from './produce-reply'
@@ -54,5 +55,8 @@ export async function sendMessage(
   if (!stored.ok) return err(stored.error)
 
   recordChatRun(context, { project, agentId, engine, outcome, startedAt, prompt: input.prompt })
+  // Auditoria integral -> fija la CALIDAD GENERAL del proyecto (la tarjeta la muestra).
+  if (outcome.comprehensive) persistQuality(context, project, outcome.findings)
+
   return ok({ user: user.value, assistant: stored.value, engine })
 }

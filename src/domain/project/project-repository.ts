@@ -13,4 +13,6 @@ export interface ProjectRepository {
   setTrusted(id: string, trusted: boolean): void
   /** Enciende o apaga el loop autonomo para este proyecto. */
   setLoopEnabled(id: string, enabled: boolean): void
+  /** Nota de CALIDAD GENERAL, de una auditoria integral. Distinta del score de seguridad. */
+  setGeneralQuality(id: string, score: number): void
 }

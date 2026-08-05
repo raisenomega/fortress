@@ -25,6 +25,8 @@ export interface ReplyOutcome {
   readonly runs: readonly StepRun[]
   /** Hallazgos consolidados del workflow, ya sin repetir. */
   readonly findings: readonly DetectedFinding[]
+  /** True solo tras una auditoria integral (todas las dimensiones): fija la calidad general. */
+  readonly comprehensive?: boolean
 }
 
 /** Respuesta de solo texto: no hay herramientas ni archivos tocados. */

@@ -43,6 +43,11 @@ export function ProjectCard({ project, active, onSelect }: ProjectCardProps): Re
           {project.stack || 'stack sin detectar'}
         </p>
         <p className="mt-1 text-[11px] text-muted-foreground">{SCAN_LABEL[status]}</p>
+        {project.generalQuality === null ? null : (
+          <p className="text-[11px] text-muted-foreground">
+            Calidad gral: <span className="text-foreground">{project.generalQuality}/100</span>
+          </p>
+        )}
         {counts.CRITICAL > 0 ? (
           <p className="text-[11px] font-semibold text-critical">{counts.CRITICAL} CRITICAL</p>
         ) : null}

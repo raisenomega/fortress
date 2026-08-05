@@ -52,4 +52,9 @@ export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'capabilities', 'phase')) {
     db.exec("ALTER TABLE capabilities ADD COLUMN phase TEXT NOT NULL DEFAULT 'propuesta'")
   }
+
+  // Calidad general (todas las dimensiones). Nullable: null = sin auditoria integral.
+  if (!hasColumn(db, 'projects', 'general_quality')) {
+    db.exec('ALTER TABLE projects ADD COLUMN general_quality INTEGER')
+  }
 }

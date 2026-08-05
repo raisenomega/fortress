@@ -10,6 +10,7 @@ export interface ProjectRow {
   readonly git_remote: string | null
   readonly git_branch: string | null
   readonly fortress_score: number
+  readonly general_quality: number | null
   readonly last_scan: string | null
   readonly has_claude: number
   readonly has_graph: number
@@ -28,6 +29,7 @@ export function toProject(row: ProjectRow): Project {
     gitRemote: row.git_remote,
     gitBranch: row.git_branch,
     fortressScore: normalizeScore(row.fortress_score),
+    generalQuality: row.general_quality === null ? null : normalizeScore(row.general_quality),
     lastScan: row.last_scan,
     hasClaude: row.has_claude === 1,
     hasGraph: row.has_graph === 1,

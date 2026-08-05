@@ -22,6 +22,8 @@ export interface Project {
   readonly gitBranch: string | null
   /** Score FORTRESS 0-100. */
   readonly fortressScore: number
+  /** Calidad GENERAL (todas las dimensiones), o null si no hubo auditoria integral. */
+  readonly generalQuality: number | null
   readonly lastScan: string | null
   readonly hasClaude: boolean
   readonly hasGraph: boolean

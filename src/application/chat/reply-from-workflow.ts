@@ -60,6 +60,7 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
     tools: [],
     edits: [],
     agents: participants(outcome.results),
+    comprehensive: workflow.id === 'produccion',
     runs: outcome.results.map((r) => ({
       agentId: r.agentId,
       usage: r.usage,

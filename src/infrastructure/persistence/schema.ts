@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS projects (
   git_remote     TEXT,
   git_branch     TEXT,
   fortress_score INTEGER NOT NULL DEFAULT 0,
+  general_quality INTEGER,
   last_scan      TEXT,
   has_claude     INTEGER NOT NULL DEFAULT 0,
   has_graph      INTEGER NOT NULL DEFAULT 0,
