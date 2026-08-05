@@ -307,8 +307,15 @@ Ordenada por lo que desbloquea más:
   `capability_episodes`); la fase/madurez ahora derivan de esos episodios propios,
   no de la actividad global. Ambas corridas van con `guardRun` (coste+concurrencia)
   y su lógica está testeada con agente falso; la corrida real la ejerce el operador
-  (no verificable en CI, como `verify:scan`). **Última frontera**: que corra esos
-  episodios en BUCLE por su cuenta con topes de coste. **Pieza grande, junto a D1.**
+  (no verificable en CI, como `verify:scan`). **Última frontera — bucle de génesis**
+  (diseño en dossier 05): correr los episodios en BUCLE por su cuenta con topes.
+  **Núcleo HECHO** `70a5bae`: `GenesisBudget` (topes obligatorios gasto+episodios,
+  sin defaults, `genesisConfigured`) con su sección en Configuración; `genesisStop`
+  (dominio puro: detenido>tope-gasto>tope-episodios>sin-trabajo); `runGenesis`
+  (orquestación con puertos inyectados) — 12 tests, inerte. **Pendiente**: el
+  engine real (cablea `runLearningEpisode`+promoción+coste de sesión+standby) y la
+  vista "Génesis de agentes" con toggle — el gasto autónomo en vivo, que se
+  construye aparte con el cuidado que exige un money-loop. **Pieza grande, junto a D1.**
 
 ---
 
