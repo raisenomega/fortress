@@ -26,9 +26,12 @@ frenos.
 ### Visión / Norte (sube el listón, no lo baja — dossier 06)
 
 **Constitución Parte 1:** `CONSTITUCION.md` (raíz) — "Vivir en el software" (2026-2050):
-el norte que cada agente y la plataforma deben encarnar. Nota de reconciliación
-pendiente: su Pilar 5 lista modelos DeepSeek/Kimi, que **contradice** la realidad
-y el diferenciador de FORTRESS (**100% nativa Anthropic/Claude**); a decidir con el operador.
+el norte que cada agente y la plataforma deben encarnar. Pilar 5 **reconciliado** a
+**100% nativa Anthropic/Claude** (se quitaron DeepSeek/Kimi). Añadida **Sección VI —
+Nota de continuidad**: riesgo de depender de un solo proveedor, con nota honesta
+(afirmaciones Fable 5 / Musk marcadas como no verificadas/inexactas, sin fuentes
+inventadas) y **3 soluciones firmadas** (puerto `CodeAgent` como frontera única,
+selección de proveedor por config+factory, contrato mínimo + smoke por adaptador).
 
 
 FORTRESS debe **superar** a Lovable.dev, Cursor, Antigravity IDE, Base44 y demás,

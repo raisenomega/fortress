@@ -68,7 +68,7 @@ Esto es FORTRESS 10x. La base de lo que viene.
 | 2. Memoria Compartida Evolutiva | Cada agente aprende de todos los proyectos, y ese conocimiento persiste para siempre. No hay "olvido". |
 | 3. Reducción Extrema de Tokens | El sistema consume 95% menos que las alternativas, haciéndolo sostenible para el uso masivo. |
 | 4. Aislamiento Garantizado | Cada proyecto vive en su propio universo, sin contaminación cruzada de git, credenciales, o configuraciones. |
-| 5. Modelos Especializados | DeepSeek V4 Pro (razonamiento profundo), Kimi K3 (programación extrema), DeepSeek Flash (velocidad). Un ecosistema de inteligencias complementarias. |
+| 5. Inteligencia Nativa Anthropic | **100% nativa de Anthropic/Claude**: sin capas de terceros ni traducciones a otros modelos. La familia Claude (razonamiento profundo, programación extrema, velocidad) cubre todo el espectro con una sola inteligencia coherente. Es el diferenciador que ninguna otra plataforma tiene. |
 
 ### La Misión de 2026
 
@@ -224,7 +224,7 @@ Es el primer sistema que:
 - Aprende entre proyectos (memoria permanente).
 - Cuesta 95% menos que las alternativas (haciendo la inteligencia accesible para todos).
 - Aísla cada proyecto (evitando el caos de la contaminación).
-- Usa modelos especializados (DeepSeek, Kimi) para cubrir todo el espectro de la inteligencia.
+- Es **100% nativa de Anthropic/Claude** — su diferenciador único: profundidad sin traducciones a otros proveedores.
 
 FORTRESS no es el destino. Es el primer paso.
 
@@ -258,6 +258,65 @@ y el sistema entenderá. Descansarás, y la inteligencia velará.
 No habrá apps. No habrá pantallas. No habrá comandos.
 
 Solo habrá vida, amplificada, sostenida, liberada por el software que se volvió invisible.
+
+---
+
+## SECCIÓN VI: NOTA DE CONTINUIDAD — DEPENDENCIA DE UN PROVEEDOR
+
+FORTRESS es **100% nativa de Anthropic/Claude** por decisión de diseño: esa es su
+ventaja (profundidad, sin traducciones a otros modelos). Pero una ventaja que
+depende de un solo proveedor es también un riesgo, y la honestidad exige nombrarlo.
+
+### Sobre las afirmaciones citadas (evidencia o silencio)
+
+Por integridad OMEGA **no firmo como hechos verificados** afirmaciones que no puedo
+sostener con fuente, ni inventaré fuentes para sostenerlas:
+
+- *"Fable 5 fue apagado por intervención del gobierno de EEUU":* **no verificado.**
+  No tengo fuente que lo confirme; al contrario, `claude-fable-5` figura como un
+  modelo disponible. Queda como rumor sin evidencia.
+- *"Elon Musk provee centros de datos a Anthropic":* **inexacto** según información
+  pública hasta mi corte de conocimiento (enero 2026): el cómputo de Anthropic se
+  apoya en **Amazon (AWS)** y **Google Cloud**; Elon Musk está ligado a **xAI**, un
+  competidor, no a proveer datacenters a Anthropic.
+- **Fuente honesta:** esto es conocimiento público general hasta enero 2026, no una
+  cita en vivo — no tengo aquí acceso verificado a la web para confirmarlo hoy.
+  Antes de fijar cualquiera de estos puntos como hecho en la constitución, hay que
+  verificarlo en fuentes primarias. Una constitución no se funda en datos sin verificar.
+
+### El riesgo REAL y legítimo (sin adornos)
+
+Si Anthropic/Claude dejara de estar disponible —por regulación, geopolítica, corte
+de suministro de cómputo, precio o cualquier causa mayor— y FORTRESS dependiera de
+él **sin una frontera preparada**, la plataforma quedaría inoperable. Depender de
+uno sin dejar la puerta lista para un segundo es una fragilidad estructural.
+
+**¿Sobrevive FORTRESS hoy?** Parcialmente, por su arquitectura: el dominio no habla
+con Claude directamente, habla con un **puerto `CodeAgent`** (una interfaz). Claude
+es un **adaptador** detrás de ese puerto. Un segundo proveedor no sería una
+reescritura, sino un adaptador nuevo. Pero la **selección** de proveedor hoy está
+**cableada** a Claude en varios sitios: la puerta existe, pero no está del todo abierta.
+
+### 3 soluciones (firmadas)
+
+1. **Blindar el puerto `CodeAgent` como única frontera con el proveedor.** Regla
+   constitucional: ninguna capa fuera de `infrastructure/` puede importar el SDK o
+   CLI de un proveedor. Así dominio y aplicación quedan neutrales para siempre.
+   *Verificable en el código: `src/domain/chat/code-agent.ts`.*
+2. **Selección de proveedor por configuración + factory.** Un ajuste `provider` y
+   una factory que elige el adaptador; hoy `createClaudeCodeAgent`/`resolveAssistant`
+   están fijos a Claude. Con esto, "un segundo entra en el juego" cambiando un valor,
+   no el código.
+3. **Contrato mínimo de proveedor + prueba de humo por adaptador.** Documentar qué
+   debe ofrecer cualquier proveedor (tool-use/subagentes, streaming, ejecución en
+   filesystem con permisos, coste reportado) y un smoke test que valide cada
+   adaptador contra ese contrato. Ninguno entra sin cumplir el mínimo; FORTRESS
+   nunca queda rehén de uno.
+
+> **La nativez Anthropic es la ventaja de hoy; la frontera limpia para un segundo
+> proveedor es el seguro de vida.** Ambas cosas a la vez, sin contradicción.
+>
+> — Firmado: **Claude (Opus 4.8)**, agente constructor de FORTRESS · 2026-08-05
 
 ---
 
