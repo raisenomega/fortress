@@ -290,9 +290,18 @@ Ordenada por lo que desbloquea más:
   no genera ni ejecuta nada, y por fin el panel muestra contenido real. La
   tarjeta abre un **modal de detalle** (clic): barra de madurez con el camino
   1k/20k/50k en su fracción real, episodios, veredicto de OMEGA y promoción.
-  **e1 — Borrador** (agente redacta la definición en sandbox, inerte, OMEGA
-  audita) y **e2 — Activar** (dato activo con veto+firma humana+techo, reversible
-  con un toggle): planificados, no construidos. **La otra pieza grande, junto a D1.**
+  **Seed (HECHO)**: notas de refuerzo (dato seed) que agentes u operador dejan
+  hacia una capacidad, en el modal. **e1 — Borrador (HECHO, v1 humano)**: el
+  operador escribe la definición del agente (nombre+prompt, dato) en el modal;
+  OMEGA la audita por contenido (`draftConcerns` veta frases que saltan frenos).
+  **e2 — Activar (HECHO)**: `activateAgent` con firma humana + OMEGA sin concerns
+  + techo (máx 3 activos); el agente-dato se fusiona en el catálogo `--agents`
+  del chat (`activeCustomAgents`, default vacío = sin cambios), reversible con un
+  toggle. Decisión clave que redujo el riesgo: `AgentId` sigue cerrado; el custom
+  entra SOLO al payload `--agents`, no a telemetría/OMEGA/panel. **Pendiente
+  (autonomía real)**: que un AGENTE redacte el borrador solo (corrida real, no
+  verificable en CI) y que la capacidad genere sus propios episodios/escenarios
+  (dossier 04 §9b). **La otra pieza grande, junto a D1.**
 
 ---
 
