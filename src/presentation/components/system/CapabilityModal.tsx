@@ -2,6 +2,7 @@ import { nextMilestone } from '@domain/system/capability-lifecycle'
 import { promoteCapability } from '../../services/self-improvement-service'
 import { useCapabilities } from '../../stores/self-improvement-store'
 import { Modal } from '../common/Modal'
+import { CapabilityNotes } from './CapabilityNotes'
 import { MaturityBar } from './MaturityBar'
 
 interface CapabilityModalProps {
@@ -48,6 +49,7 @@ export function CapabilityModal({
             {promotion.needsHuman ? `Aprobar y promover a ${promotion.to}` : `Promover a ${promotion.to}`}
           </button>
         ) : null}
+        <CapabilityNotes capabilityId={capability.id} />
         <p className="border-t border-border pt-3 text-[11px]">
           Aprende observando: leera el grafo, evaluara escenarios y consultara a los
           agentes cuando le falte info — cada resolucion contara como episodio. Ese ciclo

@@ -34,5 +34,12 @@ module.exports = `(async () => {
   check('sin episodios no se puede promover (el freno del ciclo)',
         early && early.ok === false, JSON.stringify(early))
 
+  const noted = await window.api.system.addCapabilityNote(
+    { capabilityId: proposed.value.id, author: 'operador', note: 'refuerza el enfoque X' })
+  check('dejar una nota de refuerzo funciona', noted && noted.ok, JSON.stringify(noted))
+  const notes = await window.api.system.capabilityNotes(proposed.value.id)
+  check('la nota de refuerzo aparece en la capacidad',
+        notes.length === 1 && notes[0].note.length > 0, JSON.stringify(notes))
+
   return results
 })()`

@@ -1,0 +1,13 @@
+/**
+ * Canales del subsistema de auto-mejora (system:*), aparte para que crezcan sin
+ * apretar channels.ts. Se fusionan en IPC con un spread.
+ */
+export const SYSTEM_CHANNELS = {
+  systemObservations: 'system:observations',
+  systemResolveObservation: 'system:resolve-observation',
+  systemCapabilities: 'system:capabilities',
+  systemProposeCapability: 'system:propose-capability',
+  systemPromoteCapability: 'system:promote-capability',
+  systemCapabilityNotes: 'system:capability-notes',
+  systemAddCapabilityNote: 'system:add-capability-note'
+} as const

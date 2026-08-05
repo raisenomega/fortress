@@ -1,4 +1,5 @@
 import type { Capability, NewCapability, StoredCapability } from '@domain/system/capability'
+import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capability-note'
 import type { SelfObservation } from '@domain/system/self-observation'
 import type { Result } from '@domain/shared/result'
 
@@ -16,4 +17,7 @@ export interface SelfImprovementApi {
   capabilities(): Promise<readonly Capability[]>
   /** Salta una capacidad de fase si OMEGA no veta y (para un agente) hay humano. */
   promoteCapability(id: string, humanApproved: boolean): Promise<Result<Capability>>
+  /** Notas de refuerzo hacia una capacidad (dato seed de los agentes). */
+  capabilityNotes(id: string): Promise<readonly CapabilityNote[]>
+  addCapabilityNote(input: NewCapabilityNote): Promise<Result<CapabilityNote>>
 }

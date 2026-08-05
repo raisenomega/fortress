@@ -12,4 +12,14 @@ CREATE TABLE IF NOT EXISTS capabilities (
   phase              TEXT NOT NULL DEFAULT 'propuesta',
   created_at         TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS capability_notes (
+  id            TEXT PRIMARY KEY,
+  capability_id TEXT NOT NULL,
+  author        TEXT NOT NULL,
+  note          TEXT NOT NULL,
+  created_at    TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_cap_notes ON capability_notes (capability_id, created_at);
 `

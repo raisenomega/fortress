@@ -1,5 +1,8 @@
+import { SYSTEM_CHANNELS } from './system-channels'
+
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
+  ...SYSTEM_CHANNELS,
   projectsList: 'projects:list',
   projectsAdd: 'projects:add',
   projectsRemove: 'projects:remove',
@@ -9,10 +12,6 @@ export const IPC = {
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
   loopStatus: 'loop:status',
   loopChunk: 'loop:chunk',
-  systemObservations: 'system:observations',
-  systemResolveObservation: 'system:resolve-observation', systemCapabilities: 'system:capabilities',
-  systemProposeCapability: 'system:propose-capability',
-  systemPromoteCapability: 'system:promote-capability',
   omegaAudit: 'omega:audit',
   omegaList: 'omega:list',
   omegaScore: 'omega:score',

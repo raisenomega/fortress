@@ -2,7 +2,9 @@ import { ipcMain } from 'electron'
 import { describeCapabilities } from '@application/system/describe-capabilities'
 import { promoteCapability } from '@application/system/promote-capability'
 import { proposeCapability } from '@application/system/propose-capability'
+import { addCapabilityNote, listCapabilityNotes } from '@application/system/capability-notes'
 import type { NewCapability } from '@domain/system/capability'
+import type { NewCapabilityNote } from '@domain/system/capability-note'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -26,5 +28,13 @@ export function registerSystemHandlers(): void {
 
   ipcMain.handle(IPC.systemProposeCapability, (_event, input: NewCapability) =>
     proposeCapability(getAppContext(), input)
+  )
+
+  ipcMain.handle(IPC.systemCapabilityNotes, (_event, id: string) =>
+    listCapabilityNotes(getAppContext(), id)
+  )
+
+  ipcMain.handle(IPC.systemAddCapabilityNote, (_event, input: NewCapabilityNote) =>
+    addCapabilityNote(getAppContext(), input)
   )
 }
