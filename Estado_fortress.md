@@ -298,10 +298,17 @@ Ordenada por lo que desbloquea más:
   + techo (máx 3 activos); el agente-dato se fusiona en el catálogo `--agents`
   del chat (`activeCustomAgents`, default vacío = sin cambios), reversible con un
   toggle. Decisión clave que redujo el riesgo: `AgentId` sigue cerrado; el custom
-  entra SOLO al payload `--agents`, no a telemetría/OMEGA/panel. **Pendiente
-  (autonomía real)**: que un AGENTE redacte el borrador solo (corrida real, no
-  verificable en CI) y que la capacidad genere sus propios episodios/escenarios
-  (dossier 04 §9b). **La otra pieza grande, junto a D1.**
+  entra SOLO al payload `--agents`, no a telemetría/OMEGA/panel.
+  **Autonomía real (HECHO, acotada — un disparo humano, nunca un loop de gasto):**
+  (A) un AGENTE redacta el borrador solo (`draftAgentAuto`: corre en 'plan' en un
+  sandbox temporal, deja el borrador inerte; sigue exigiendo firma humana y
+  auditoría de OMEGA). (B) la capacidad genera sus PROPIOS episodios
+  (`runLearningEpisode`: se plantea y resuelve un escenario, lo registra en
+  `capability_episodes`); la fase/madurez ahora derivan de esos episodios propios,
+  no de la actividad global. Ambas corridas van con `guardRun` (coste+concurrencia)
+  y su lógica está testeada con agente falso; la corrida real la ejerce el operador
+  (no verificable en CI, como `verify:scan`). **Última frontera**: que corra esos
+  episodios en BUCLE por su cuenta con topes de coste. **Pieza grande, junto a D1.**
 
 ---
 
