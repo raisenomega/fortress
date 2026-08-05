@@ -13,6 +13,8 @@ export const SETTINGS_KEYS = {
   budgetPerDay: 'budget_per_day_usd',
   loopCostCap: 'loop_cost_cap_usd',
   loopMaxCycles: 'loop_max_cycles',
+  genesisCostCap: 'genesis_cost_cap_usd',
+  genesisMaxEpisodes: 'genesis_max_episodes',
   encryptedApiKey: 'encrypted_api_key'
 } as const
 
@@ -30,7 +32,9 @@ const PUBLIC_KEYS: ReadonlySet<string> = new Set([
   SETTINGS_KEYS.budgetPerRun,
   SETTINGS_KEYS.budgetPerDay,
   SETTINGS_KEYS.loopCostCap,
-  SETTINGS_KEYS.loopMaxCycles
+  SETTINGS_KEYS.loopMaxCycles,
+  SETTINGS_KEYS.genesisCostCap,
+  SETTINGS_KEYS.genesisMaxEpisodes
 ])
 
 export function isPublicSettingKey(key: string): boolean {
