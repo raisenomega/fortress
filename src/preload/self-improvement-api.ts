@@ -3,8 +3,10 @@ import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capabilit
 import type { AgentDraft } from '@domain/system/agent-draft'
 import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
 import type { CapabilityEpisode } from '@domain/system/capability-episode'
+import type { GenesisStatus } from '@domain/system/genesis-status'
 import type { SelfObservation } from '@domain/system/self-observation'
 import type { Result } from '@domain/shared/result'
+import type { Unsubscribe } from './api-types'
 
 /**
  * Backlog de auto-mejora: lo que los agentes descubren de FORTRESS mismo
@@ -33,4 +35,8 @@ export interface SelfImprovementApi {
   draftAgentAuto(id: string): Promise<Result<StoredAgentDraft>>
   /** La capacidad resuelve UN escenario y lo registra como episodio propio. */
   runEpisode(id: string): Promise<Result<CapabilityEpisode>>
+  /** Enciende/apaga el bucle de genesis (encender exige topes guardados). */
+  genesisToggle(on: boolean): Promise<Result<null>>
+  /** Suscribe al estado del bucle de genesis, empujado desde el main. */
+  onGenesisStatus(listener: (status: GenesisStatus) => void): Unsubscribe
 }

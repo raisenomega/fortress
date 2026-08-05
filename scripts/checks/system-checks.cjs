@@ -52,5 +52,9 @@ module.exports = `(async () => {
   const off = await window.api.system.deactivateAgent(proposed.value.id)
   check('desactivar revierte la inyeccion', off && off.ok, JSON.stringify(off))
 
+  const genesisOff = await window.api.system.genesisToggle(true)
+  check('el bucle de genesis no enciende sin topes guardados',
+        genesisOff && genesisOff.ok === false, JSON.stringify(genesisOff))
+
   return results
 })()`

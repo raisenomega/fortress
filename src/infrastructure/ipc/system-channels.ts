@@ -15,5 +15,7 @@ export const SYSTEM_CHANNELS = {
   systemActivateAgent: 'system:activate-agent',
   systemDeactivateAgent: 'system:deactivate-agent',
   systemDraftAgentAuto: 'system:draft-agent-auto',
-  systemRunEpisode: 'system:run-episode'
+  systemRunEpisode: 'system:run-episode',
+  systemGenesisToggle: 'system:genesis-toggle',
+  systemGenesisStatus: 'system:genesis-status'
 } as const

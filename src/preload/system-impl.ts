@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { SelfImprovementApi } from './self-improvement-api'
+import { subscribe } from './subscribe'
 
 /** Implementacion del puente del subsistema de auto-mejora (system:*). */
 export const systemApi: SelfImprovementApi = {
@@ -16,5 +17,7 @@ export const systemApi: SelfImprovementApi = {
   activateAgent: (id, human) => ipcRenderer.invoke(IPC.systemActivateAgent, id, human),
   deactivateAgent: (id) => ipcRenderer.invoke(IPC.systemDeactivateAgent, id),
   draftAgentAuto: (id) => ipcRenderer.invoke(IPC.systemDraftAgentAuto, id),
-  runEpisode: (id) => ipcRenderer.invoke(IPC.systemRunEpisode, id)
+  runEpisode: (id) => ipcRenderer.invoke(IPC.systemRunEpisode, id),
+  genesisToggle: (on) => ipcRenderer.invoke(IPC.systemGenesisToggle, on),
+  onGenesisStatus: (listener) => subscribe(IPC.systemGenesisStatus, listener)
 }

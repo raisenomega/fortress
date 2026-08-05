@@ -12,6 +12,7 @@ export type MainView =
   | 'conectores'
   | 'omega'
   | 'sistema'
+  | 'genesis'
 
 interface UiState {
   readonly view: MainView

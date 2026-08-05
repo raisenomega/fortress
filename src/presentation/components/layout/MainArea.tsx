@@ -6,6 +6,7 @@ import { MultiProjectView } from '../dashboard/MultiProjectView'
 import { OmegaView } from '../omega/OmegaView'
 import { PerformanceView } from '../performance/PerformanceView'
 import { PostureView } from '../posture/PostureView'
+import { GenesisView } from '../genesis/GenesisView'
 import { ScanView } from '../scan/ScanView'
 import { SelfImprovementView } from '../system/SelfImprovementView'
 import { SettingsView } from '../settings/SettingsView'
@@ -24,7 +25,8 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   settings: () => <SettingsView />,
   conectores: () => <ConnectorsView />,
   omega: () => <OmegaView />,
-  sistema: () => <SelfImprovementView />
+  sistema: () => <SelfImprovementView />,
+  genesis: () => <GenesisView />
 }
 
 interface MainAreaProps {

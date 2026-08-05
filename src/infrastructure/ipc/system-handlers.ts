@@ -7,6 +7,7 @@ import type { NewCapability } from '@domain/system/capability'
 import type { NewCapabilityNote } from '@domain/system/capability-note'
 import { registerAgentDraftHandlers } from './agent-draft-handlers'
 import { registerCapabilityEpisodeHandlers } from './capability-episode-handlers'
+import { registerGenesisHandlers } from './genesis-handlers'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -42,4 +43,5 @@ export function registerSystemHandlers(): void {
 
   registerAgentDraftHandlers()
   registerCapabilityEpisodeHandlers()
+  registerGenesisHandlers()
 }

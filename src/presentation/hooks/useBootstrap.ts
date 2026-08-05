@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { loadHistory } from '../services/chat-service'
 import { subscribeLoopChat } from '../services/loop-chat'
 import { subscribeLoop } from '../services/loop-service'
+import { subscribeGenesis } from '../services/genesis-service'
 import { loadCognition } from '../services/cognition-service'
 import { loadGraph } from '../services/graph-service'
 import { loadOmega } from '../services/omega-service'
@@ -35,9 +36,11 @@ export function useBootstrap(): void {
     // Estado del loop + su salida en vivo al chat; se cancelan al desmontar.
     const offLoop = subscribeLoop()
     const offChat = subscribeLoopChat()
+    const offGenesis = subscribeGenesis()
     return () => {
       offLoop()
       offChat()
+      offGenesis()
     }
   }, [])
 
