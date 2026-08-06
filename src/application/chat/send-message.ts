@@ -6,9 +6,10 @@ import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { recordChatRun } from '../telemetry/record-chat-run'
 import { persistQuality } from '../scan/persist-quality'
-import { appendMessage } from './chat-history'
 import { chooseEngine } from './choose-engine'
+import { persistTurn } from './persist-message'
 import { produceReply } from './produce-reply'
+import { runConfigurationTurn } from './run-configuration-turn'
 import type { SendMessageInput, SendMessageOutput } from './send-message-types'
 
 export async function sendMessage(
@@ -23,21 +24,21 @@ export async function sendMessage(
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
 
+  // Bloqueo autoritativo (vale en autonomo): un proyecto sin marco aprobado solo
+  // hace la entrevista de configuracion, nunca trabajo normal.
+  if (project.configState === 'PENDIENTE_CONFIGURACION') {
+    return runConfigurationTurn(context, codeAgent, project, input, onChunk)
+  }
+
   // El modo degrada a supervisado si la peticion toca un area protegida.
   const mode = effectiveMode(input.mode, input.prompt)
 
   const chosen = chooseEngine(codeAgent, assistant, project)
   if (!chosen.ok) return err(chosen.error)
   const engine = chosen.value
+  const meta = { mode, engine }
 
-  const persist = (
-    role: 'user' | 'assistant',
-    content: string,
-    agentId: SendMessageOutput['assistant']['agentId']
-  ): ReturnType<typeof appendMessage> =>
-    appendMessage(context, { projectId: project.id, role, content, agentId, mode, engine })
-
-  const user = persist('user', input.prompt, null)
+  const user = persistTurn(context, project.id, meta, 'user', input.prompt, null)
   if (!user.ok) return err(user.error)
 
   const startedAt = Date.now()
@@ -51,7 +52,7 @@ export async function sendMessage(
 
   // El chip del mensaje es el primer agente que participo de verdad.
   const agentId = outcome.agents[0] ?? null
-  const stored = persist('assistant', outcome.text, agentId)
+  const stored = persistTurn(context, project.id, meta, 'assistant', outcome.text, agentId)
   if (!stored.ok) return err(stored.error)
 
   recordChatRun(context, { project, agentId, engine, outcome, startedAt, prompt: input.prompt })
