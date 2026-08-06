@@ -1,3 +1,4 @@
+import type { ConfigState } from './config-state'
 import type { NewProject, Project } from './project'
 
 /** Puerto de persistencia de proyectos. La infraestructura lo implementa. */
@@ -15,4 +16,6 @@ export interface ProjectRepository {
   setLoopEnabled(id: string, enabled: boolean): void
   /** Nota de CALIDAD GENERAL, de una auditoria integral. Distinta del score de seguridad. */
   setGeneralQuality(id: string, score: number): void
+  /** Transicion del ciclo de vida del marco: PENDIENTE_CONFIGURACION -> CONFIGURADO. */
+  setConfigState(id: string, state: ConfigState): void
 }

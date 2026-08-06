@@ -1,3 +1,4 @@
+import { isConfigState } from '@domain/project/config-state'
 import { normalizeScore } from '@domain/project/fortress-score'
 import type { Project } from '@domain/project/project'
 
@@ -17,6 +18,7 @@ export interface ProjectRow {
   readonly has_fortress: number
   readonly trusted: number
   readonly loop_enabled: number
+  readonly config_state: string
   readonly created_at: string
 }
 
@@ -36,6 +38,7 @@ export function toProject(row: ProjectRow): Project {
     hasFortress: row.has_fortress === 1,
     trusted: row.trusted === 1,
     loopEnabled: row.loop_enabled === 1,
+    configState: isConfigState(row.config_state) ? row.config_state : 'CONFIGURADO',
     createdAt: row.created_at
   }
 }

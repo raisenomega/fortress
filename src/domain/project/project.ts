@@ -1,4 +1,5 @@
 import type { Severity } from '../shared/severity'
+import type { ConfigState } from './config-state'
 import type { FindingStatus } from './finding-status'
 
 export interface Finding {
@@ -39,6 +40,12 @@ export interface Project {
    * encender con topes de loop guardados y proyecto de confianza (ver LoopToggle).
    */
   readonly loopEnabled: boolean
+  /**
+   * Ciclo de vida del marco de gobierno. PENDIENTE_CONFIGURACION: recien creado,
+   * el chat solo hace la entrevista de configuracion. CONFIGURADO: marco aprobado
+   * y escrito; el chat trabaja normal. Ver `config-state.ts`.
+   */
+  readonly configState: ConfigState
   readonly createdAt: string
 }
 
@@ -50,4 +57,6 @@ export interface NewProject {
   readonly gitRemote: string | null
   readonly gitBranch: string | null
   readonly hasClaude: boolean
+  /** Omitido -> CONFIGURADO. El alta de proyecto VACIO lo fija en PENDIENTE. */
+  readonly configState?: ConfigState
 }

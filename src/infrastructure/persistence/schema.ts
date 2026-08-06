@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS projects (
   has_fortress   INTEGER NOT NULL DEFAULT 0,
   trusted        INTEGER NOT NULL DEFAULT 0,
   loop_enabled   INTEGER NOT NULL DEFAULT 0,
+  config_state   TEXT NOT NULL DEFAULT 'CONFIGURADO',
   created_at     TEXT NOT NULL
 );
 

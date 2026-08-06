@@ -19,6 +19,8 @@ async function verify(window) {
   const proyectos = await run('window.api.projects.list()')
   check('conserva los proyectos', proyectos.length === 1, JSON.stringify(proyectos))
   check('conserva el score anterior', proyectos[0]?.fortressScore === 64)
+  // Backfill del ciclo de vida: un proyecto que ya existia esta CONFIGURADO.
+  check('backfill de config_state a CONFIGURADO', proyectos[0]?.configState === 'CONFIGURADO')
 
   const historial = await run("window.api.chat.history('viejo')")
   check('conserva el historial de chat', historial.length === 1, JSON.stringify(historial))

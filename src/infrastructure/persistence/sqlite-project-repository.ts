@@ -6,7 +6,8 @@ import type { Db } from './database'
 import { toProject, type ProjectRow } from './project-row'
 
 const COLUMNS = `id, name, path, stack, git_remote, git_branch, fortress_score,
-  general_quality, last_scan, has_claude, has_graph, has_fortress, trusted, loop_enabled, created_at`
+  general_quality, last_scan, has_claude, has_graph, has_fortress, trusted, loop_enabled,
+  config_state, created_at`
 
 /** Parametros del INSERT. trusted no va: nace en 0 (no confiable) por defecto. */
 function toInsertParams(project: NewProject): Record<string, string | number | null> {
@@ -18,6 +19,7 @@ function toInsertParams(project: NewProject): Record<string, string | number | n
     gitRemote: project.gitRemote,
     gitBranch: project.gitBranch,
     hasClaude: project.hasClaude ? 1 : 0,
+    configState: project.configState ?? 'CONFIGURADO',
     createdAt: nowIso()
   }
 }
@@ -34,9 +36,12 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
   const updateTrusted = db.prepare('UPDATE projects SET trusted = ? WHERE id = ?')
   const updateLoop = db.prepare('UPDATE projects SET loop_enabled = ? WHERE id = ?')
   const updateQuality = db.prepare('UPDATE projects SET general_quality = ? WHERE id = ?')
+  const updateConfig = db.prepare('UPDATE projects SET config_state = ? WHERE id = ?')
   const insert = db.prepare(
-    `INSERT INTO projects (id, name, path, stack, git_remote, git_branch, has_claude, created_at)
-     VALUES (@id, @name, @path, @stack, @gitRemote, @gitBranch, @hasClaude, @createdAt)`
+    `INSERT INTO projects (id, name, path, stack, git_remote, git_branch, has_claude,
+       config_state, created_at)
+     VALUES (@id, @name, @path, @stack, @gitRemote, @gitBranch, @hasClaude,
+       @configState, @createdAt)`
   )
 
   return {
@@ -57,6 +62,7 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
     updateScan: (id, score, scannedAt) => updateScan.run(normalizeScore(score), scannedAt, id),
     setTrusted: (id, trusted) => updateTrusted.run(trusted ? 1 : 0, id),
     setLoopEnabled: (id, enabled) => updateLoop.run(enabled ? 1 : 0, id),
-    setGeneralQuality: (id, score) => updateQuality.run(normalizeScore(score), id)
+    setGeneralQuality: (id, score) => updateQuality.run(normalizeScore(score), id),
+    setConfigState: (id, state) => updateConfig.run(state, id)
   }
 }

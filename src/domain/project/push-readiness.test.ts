@@ -20,6 +20,7 @@ const project = (overrides: Partial<Project> = {}): Project => ({
   hasFortress: false,
   trusted: false,
   loopEnabled: false,
+  configState: 'CONFIGURADO',
   createdAt: SCANNED,
   ...overrides
 })

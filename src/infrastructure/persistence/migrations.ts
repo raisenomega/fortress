@@ -57,4 +57,10 @@ export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'projects', 'general_quality')) {
     db.exec('ALTER TABLE projects ADD COLUMN general_quality INTEGER')
   }
+
+  // Ciclo de vida del marco. Default 'CONFIGURADO': todo proyecto que ya existia
+  // esta configurado; solo el alta de proyecto VACIO escribe PENDIENTE.
+  if (!hasColumn(db, 'projects', 'config_state')) {
+    db.exec("ALTER TABLE projects ADD COLUMN config_state TEXT NOT NULL DEFAULT 'CONFIGURADO'")
+  }
 }
