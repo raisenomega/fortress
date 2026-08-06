@@ -3,9 +3,21 @@ import { err, ok, type Result } from '@domain/shared/result'
 
 const ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0' }
 const TIMEOUT_MS = 30 * 1000
-// Identidad inline: un repo recien creado no tiene user.name/email y `git commit`
-// falla sin ellos. No toca la config global del operador.
-const IDENTITY = ['-c', 'user.name=FORTRESS', '-c', 'user.email=fortress@raisen.local']
+
+// Identidad inline y firma desactivada: un repo recien creado no tiene
+// user.name/email (git commit falla sin ellos) y un `commit.gpgsign` global
+// buscaria una clave para un email que no es del operador y bloquearia el
+// commit. No toca la config global del operador.
+const COMMIT_ARGS = [
+  '-c',
+  'user.name=FORTRESS',
+  '-c',
+  'user.email=fortress@raisen.local',
+  '-c',
+  'commit.gpgsign=false',
+  'commit',
+  '-m'
+]
 
 function run(cwd: string, args: readonly string[]): Promise<Result<string>> {
   return new Promise((resolve) => {
@@ -16,9 +28,16 @@ function run(cwd: string, args: readonly string[]): Promise<Result<string>> {
   })
 }
 
-/** `git add -A` + commit inicial. execFile con args separados: sin shell. */
-export async function gitCommitAll(cwd: string, message: string): Promise<Result<string>> {
-  const added = await run(cwd, ['add', '-A'])
+/**
+ * Estagea SOLO los archivos indicados (nunca `git add -A`, que arrastraria
+ * contenido preexistente/secretos si la carpeta se reutilizo) y commitea.
+ */
+export async function gitCommit(
+  cwd: string,
+  files: readonly string[],
+  message: string
+): Promise<Result<string>> {
+  const added = await run(cwd, ['add', '--', ...files])
   if (!added.ok) return added
-  return run(cwd, [...IDENTITY, 'commit', '-m', message])
+  return run(cwd, [...COMMIT_ARGS, message])
 }

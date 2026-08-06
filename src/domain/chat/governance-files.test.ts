@@ -16,6 +16,12 @@ describe('buildGovernanceFiles', () => {
     expect(Object.keys(buildGovernanceFiles('MiApp', drafts))[0]).toBe('.gitignore')
   })
 
+  it('IGNORA nombres arbitrarios que el agente pudiera envolver (anti traversal)', () => {
+    const files = buildGovernanceFiles('MiApp', { ...drafts, '../../.bashrc': 'malo' })
+    expect(files['../../.bashrc']).toBeUndefined()
+    expect(Object.keys(files)).not.toContain('../../.bashrc')
+  })
+
   it('COGNITION-LOG lleva el nombre del proyecto y generacion 0', () => {
     expect(buildGovernanceFiles('Nucleo', {})['COGNITION-LOG.md']).toContain(
       '# COGNITION-LOG — Nucleo'
