@@ -13,6 +13,14 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  # Documentacion interna: no viaja en el instalable (el asar se extrae con
+  # `npx asar extract`). El .gitignore ya la declara "se queda en el equipo".
+  - '!DOSSIER/**'
+  - '!{CLAUDE.md,CONSTITUCION.md,COGNITION-LOG.md,Estado_fortress.md,Tarea-agente.md}'
+  - '!AUDITORIA-*.md'
+  - '!.ui-preview*.png'
+  - '!.render-smoke.png'
+  - '!install.sh'
 asarUnpack:
   - resources/**
   # Modulo nativo: el .node debe quedar fuera del asar para poder cargarse
