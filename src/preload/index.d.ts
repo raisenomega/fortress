@@ -1,9 +1,9 @@
-import type { ElectronAPI } from '@electron-toolkit/preload'
 import type { FortressApi } from './api-types'
 
 declare global {
   interface Window {
-    electron: ElectronAPI
+    // Solo se expone `api`: el bridge no publica `ipcRenderer` crudo. Declarar
+    // aqui un `electron` que no existe invitaba a "arreglarlo" exponiendolo.
     api: FortressApi
   }
 }
