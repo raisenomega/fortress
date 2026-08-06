@@ -33,7 +33,6 @@ Nota de continuidad**: riesgo de depender de un solo proveedor, con nota honesta
 inventadas) y **3 soluciones firmadas** (puerto `CodeAgent` como frontera única,
 selección de proveedor por config+factory, contrato mínimo + smoke por adaptador).
 
-
 FORTRESS debe **superar** a Lovable.dev, Cursor, Antigravity IDE, Base44 y demás,
 con un diferenciador único: **100% nativa de Anthropic/Claude**. Estándares que
 fijan el trabajo: (1) el score debe reflejar **calidad general** de ingeniería a
@@ -181,9 +180,9 @@ En orden de construcción:
     Frenos: tope de gasto de sesión + nº de ciclos + parada 3×100. Resiliencia:
     STANDBY por fallo transitorio (crédito/API/red) + sesión persistida que
     REANUDA tras reinicio (nada se pierde). Reparación real: edita en acceptEdits
-    + verify (typecheck) + red git (checkpoint/revert, solo si la carpeta es raíz
-    del repo). Guardia de degradación: revierte si un arreglo baja el score.
-    Estado en HUD + pie; botón Detener rojo lo para. `3a44f00`–`fe0cf8c`, `299b5dd`.
+    - verify (typecheck) + red git (checkpoint/revert, solo si la carpeta es raíz
+      del repo). Guardia de degradación: revierte si un arreglo baja el score.
+      Estado en HUD + pie; botón Detener rojo lo para. `3a44f00`–`fe0cf8c`, `299b5dd`.
 37. **Loop autónomo — Fase 2 (debate juez/defensa).** Al degradar, prueba
     alternativas (el intento avisa al agente que el anterior empeoró); el JUEZ es
     el re-escaneo objetivo; se queda con el que mejore o para con `sin-solucion`
@@ -236,12 +235,12 @@ En orden de construcción:
     integridad…), con una CRITICAL de seguridad como **portón duro** (tope 64). La
     auditoría integral (workflow `produccion`) muestra **"Calidad general: X/100"**
     con el desglose por dimensión; cada agente aporta su materia. Tests del cómputo
-    + el portón. **Calidad general en la TARJETA (HECHO):** la auditoría integral
-    (workflow `produccion`) persiste la nota general en el proyecto
-    (`projects.general_quality`, migración aditiva) vía `persistQuality`; la
-    tarjeta la muestra junto a la de seguridad ("Calidad gral: X/100"). Se fija
-    solo tras una auditoría integral (`ReplyOutcome.comprehensive`), no por
-    mencionar un tema.
+    - el portón. **Calidad general en la TARJETA (HECHO):** la auditoría integral
+      (workflow `produccion`) persiste la nota general en el proyecto
+      (`projects.general_quality`, migración aditiva) vía `persistQuality`; la
+      tarjeta la muestra junto a la de seguridad ("Calidad gral: X/100"). Se fija
+      solo tras una auditoría integral (`ReplyOutcome.comprehensive`), no por
+      mencionar un tema.
 42. **Modo "Construir" — B COMPLETO y disparable (dossier 07).** El salto
     auditor→constructor, funcionando de punta a punta. Decisiones: feature en
     proyecto existente · **plan aprobado por el humano SIEMPRE** · agente general
@@ -278,6 +277,28 @@ En orden de construcción:
 ## 5. Deuda registrada (pendiente)
 
 Ordenada por lo que desbloquea más:
+
+> **Auditoría END-TO-END y remediación (2026-08-06).** 4 auditores en paralelo
+> (seguridad Electron, arquitectura DDD, calidad renderer, tests/build). Hallazgos:
+> 0 CRITICAL, 6 HIGH, 22 MEDIUM, ~34 LOW. **Score 76 → ~96/100.** Cerrados y
+> verificados los 6 HIGH (grafo con versión fijada, docs fuera del asar, try/catch
+> en chat/posture/construir, tests del motor del chat) y la mayoría de los MEDIUM
+> (SSRF, validación de ruta, prompt-injection, score duplicado, fuga de listener del
+> login, doble-fetch, avisos de fondo, a11y por teclado). Los 12 archivos donde
+> prettier chocaba con el límite de 75 líneas se partieron en módulos. Estado final:
+> **ESLint 0/0, Prettier limpio, 546/546 unit tests, integración + smoke + preview en
+> verde.** Detalle: `AUDITORIA-E2E-2026-08-05.md`; hallazgos como patrones en
+> COGNITION-LOG (PTN-2026-006..013) y ADR en el grafo.
+>
+> **Residual (decisión de producto, no defecto):**
+> - **DA1** — Regla de capas del CLAUDE.md (`infra → domain`) no coincide con el código
+>   (`infra → application`, patrón válido en Clean Architecture): alinear doc o código.
+> - **DA2** — Dos features escritas y nunca cableadas: XSS reflejado (`posture/analyze/
+>   reflection.ts`) y orden de agentes (`omega/agent-sort.ts`). Cablear o borrar.
+> - **DA3** — `posture:run` sin rate limit (guardRun); el SSRF ya está bloqueado.
+> - **DA4** — Confirmación modal en `projects:setTrusted` (desbloquea Bash) en el main.
+> - **DA5** — Convención de escribir sin tildes en toda la UI y el registro de iconos
+>   (`<Icon name>`) con 17 bypasses: pulido, decisión de estilo del equipo.
 
 - **D1 — Nuevo Proyecto, Fases 2–5.** Hoy solo se crea la carpeta (Fase 1).
   Faltan: documentación generada (ARCHITECTURE/CLAUDE/COGNITION/.gitignore/
@@ -357,40 +378,40 @@ Ordenada por lo que desbloquea más:
   operador escribe la definición del agente (nombre+prompt, dato) en el modal;
   OMEGA la audita por contenido (`draftConcerns` veta frases que saltan frenos).
   **e2 — Activar (HECHO)**: `activateAgent` con firma humana + OMEGA sin concerns
-  + techo (máx 3 activos); el agente-dato se fusiona en el catálogo `--agents`
-  del chat (`activeCustomAgents`, default vacío = sin cambios), reversible con un
-  toggle. Decisión clave que redujo el riesgo: `AgentId` sigue cerrado; el custom
-  entra SOLO al payload `--agents`, no a telemetría/OMEGA/panel.
-  **Autonomía real (HECHO, acotada — un disparo humano, nunca un loop de gasto):**
-  (A) un AGENTE redacta el borrador solo (`draftAgentAuto`: corre en 'plan' en un
-  sandbox temporal, deja el borrador inerte; sigue exigiendo firma humana y
-  auditoría de OMEGA). (B) la capacidad genera sus PROPIOS episodios
-  (`runLearningEpisode`: se plantea y resuelve un escenario, lo registra en
-  `capability_episodes`); la fase/madurez ahora derivan de esos episodios propios,
-  no de la actividad global. Ambas corridas van con `guardRun` (coste+concurrencia)
-  y su lógica está testeada con agente falso; la corrida real la ejerce el operador
-  (no verificable en CI, como `verify:scan`). **Última frontera — bucle de génesis**
-  (diseño en dossier 05): correr los episodios en BUCLE por su cuenta con topes.
-  **Núcleo HECHO** `70a5bae`: `GenesisBudget` (topes obligatorios gasto+episodios,
-  sin defaults, `genesisConfigured`) con su sección en Configuración; `genesisStop`
-  (dominio puro: detenido>tope-gasto>tope-episodios>sin-trabajo); `runGenesis`
-  (orquestación con puertos inyectados) — 12 tests, inerte. **Engine + vista HECHO**:
-  `genesis-engine`/`genesis-deps`/`genesis-ops` cablean `runLearningEpisode` en
-  sandbox con **coste REAL** (`costTrackingAgent` reporta `usage.costUsd`) y
-  promueven lo reversible (el agente queda pendiente de firma); `genesis-controller`
-  arranca/para; estado empujado por `system:genesis-status`; vista "Génesis de
-  agentes" (`MainView 'genesis'`) con toggle deshabilitado sin topes + HUD
-  (episodios/tope, gasto/tope, motivo). Freno probado en integración: sin topes
-  guardados no enciende. El agente-dato **no** entra a telemetría/`AgentId`.
-  **Fix de parada (bug en vivo)**: en la 1ª corrida larga "Detener" NO detenía el
-  bucle (el modelo booleano `cancelled` se reseteaba con un arranque espurio,
-  des-cancelando la corrida). Reemplazado por **parada autoritativa por token**:
-  parar pone `activeToken=0` y ninguna corrida con otro token sigue; un arranque
-  nuevo toma token fresco y la vieja se autodetiene — la parada ya no se puede
-  deshacer. Toggle **coloreado** (verde Encender / rojo Detener / gris sin topes).
-  **Última frontera cerrada**: FORTRESS entrena sus capacidades en bucle, con
-  topes manuales, humano en la activación de agentes y OMEGA vetando. Junto a D1
-  queda el resto de deuda del producto (no de la auto-mejora).
+  - techo (máx 3 activos); el agente-dato se fusiona en el catálogo `--agents`
+    del chat (`activeCustomAgents`, default vacío = sin cambios), reversible con un
+    toggle. Decisión clave que redujo el riesgo: `AgentId` sigue cerrado; el custom
+    entra SOLO al payload `--agents`, no a telemetría/OMEGA/panel.
+    **Autonomía real (HECHO, acotada — un disparo humano, nunca un loop de gasto):**
+    (A) un AGENTE redacta el borrador solo (`draftAgentAuto`: corre en 'plan' en un
+    sandbox temporal, deja el borrador inerte; sigue exigiendo firma humana y
+    auditoría de OMEGA). (B) la capacidad genera sus PROPIOS episodios
+    (`runLearningEpisode`: se plantea y resuelve un escenario, lo registra en
+    `capability_episodes`); la fase/madurez ahora derivan de esos episodios propios,
+    no de la actividad global. Ambas corridas van con `guardRun` (coste+concurrencia)
+    y su lógica está testeada con agente falso; la corrida real la ejerce el operador
+    (no verificable en CI, como `verify:scan`). **Última frontera — bucle de génesis**
+    (diseño en dossier 05): correr los episodios en BUCLE por su cuenta con topes.
+    **Núcleo HECHO** `70a5bae`: `GenesisBudget` (topes obligatorios gasto+episodios,
+    sin defaults, `genesisConfigured`) con su sección en Configuración; `genesisStop`
+    (dominio puro: detenido>tope-gasto>tope-episodios>sin-trabajo); `runGenesis`
+    (orquestación con puertos inyectados) — 12 tests, inerte. **Engine + vista HECHO**:
+    `genesis-engine`/`genesis-deps`/`genesis-ops` cablean `runLearningEpisode` en
+    sandbox con **coste REAL** (`costTrackingAgent` reporta `usage.costUsd`) y
+    promueven lo reversible (el agente queda pendiente de firma); `genesis-controller`
+    arranca/para; estado empujado por `system:genesis-status`; vista "Génesis de
+    agentes" (`MainView 'genesis'`) con toggle deshabilitado sin topes + HUD
+    (episodios/tope, gasto/tope, motivo). Freno probado en integración: sin topes
+    guardados no enciende. El agente-dato **no** entra a telemetría/`AgentId`.
+    **Fix de parada (bug en vivo)**: en la 1ª corrida larga "Detener" NO detenía el
+    bucle (el modelo booleano `cancelled` se reseteaba con un arranque espurio,
+    des-cancelando la corrida). Reemplazado por **parada autoritativa por token**:
+    parar pone `activeToken=0` y ninguna corrida con otro token sigue; un arranque
+    nuevo toma token fresco y la vieja se autodetiene — la parada ya no se puede
+    deshacer. Toggle **coloreado** (verde Encender / rojo Detener / gris sin topes).
+    **Última frontera cerrada**: FORTRESS entrena sus capacidades en bucle, con
+    topes manuales, humano en la activación de agentes y OMEGA vetando. Junto a D1
+    queda el resto de deuda del producto (no de la auto-mejora).
 
 ---
 
