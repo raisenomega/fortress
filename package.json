@@ -31,11 +31,11 @@
     "@anthropic-ai/sdk": "^0.115.0",
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "better-sqlite3": "^13.0.2",
-    "lucide-react": "^1.28.0"
+    "better-sqlite3": "^13.0.2"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
+    "lucide-react": "^1.28.0",
     "@electron-toolkit/eslint-config-ts": "^3.1.0",
     "@electron-toolkit/tsconfig": "^2.0.0",
     "@fontsource/dm-sans": "^5.3.0",
