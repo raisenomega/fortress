@@ -1,5 +1,6 @@
 import { SYSTEM_CHANNELS } from './system-channels'
 import { BUILD_CHANNELS } from './build-channels'
+import { NEWPROJECT_CHANNELS } from './newproject-channels'
 
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
@@ -44,9 +45,7 @@ export const IPC = {
   telemetryRanking: 'telemetry:ranking',
   cognitionRead: 'cognition:read',
   graphStatus: 'graph:status',
-  newProjectHomeDirs: 'new-project:home-dirs',
-  newProjectPlanFolder: 'new-project:plan-folder',
-  newProjectCreateFolder: 'new-project:create-folder',
+  ...NEWPROJECT_CHANNELS,
   maintenanceCleanup: 'maintenance:cleanup',
   maintenanceLiveJobs: 'maintenance:live-jobs',
   activityProject: 'activity:project',
