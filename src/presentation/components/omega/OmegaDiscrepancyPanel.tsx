@@ -24,21 +24,28 @@ export function OmegaDiscrepancyPanel(props: OmegaDiscrepancyPanelProps): React.
 
   useEffect(() => {
     let live = true
-    if (match) void loadSnippet(match[1], Number(match[2])).then((s) => live && setSnippet(s))
+    const m = LOC.exec(entry.evidence)
+    if (m) void loadSnippet(m[1], Number(m[2])).then((s) => live && setSnippet(s))
     return () => {
       live = false
     }
-  }, [entry.evidence])
+  }, [entry.evidence, loadSnippet])
 
   return (
     <aside className="fixed top-12 right-0 bottom-7 z-30 w-96 space-y-3 overflow-y-auto border-l border-border bg-sidebar p-4 shadow-xl">
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold text-critical uppercase">Discrepancia</span>
-        <button type="button" onClick={onClose} className="tap ml-auto text-xs text-muted-foreground">
+        <button
+          type="button"
+          onClick={onClose}
+          className="tap ml-auto text-xs text-muted-foreground"
+        >
           Cerrar
         </button>
       </div>
-      <OmegaLevel n={1} title="Resumen">{entry.summary}</OmegaLevel>
+      <OmegaLevel n={1} title="Resumen">
+        {entry.summary}
+      </OmegaLevel>
       <OmegaLevel n={2} title="Evidencia en el archivo">
         {match ? snippet ? <OmegaEvidence snippet={snippet} /> : 'Cargando…' : 'Sin archivo:linea'}
       </OmegaLevel>

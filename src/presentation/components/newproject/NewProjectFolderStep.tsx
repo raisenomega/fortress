@@ -24,7 +24,7 @@ export function NewProjectFolderStep({ onClose }: NewProjectFolderStepProps): Re
 
   useEffect(() => {
     void refreshPlan(draft)
-  }, [draft.name, draft.parentDir])
+  }, [draft])
 
   return (
     <Modal title="Crear proyecto desde cero" onClose={onClose}>

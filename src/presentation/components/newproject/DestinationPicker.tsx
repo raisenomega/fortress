@@ -16,13 +16,14 @@ export function DestinationPicker({ value, onPick }: DestinationPickerProps): Re
   const [dirs, setDirs] = useState<readonly HomeDir[]>([])
 
   useEffect(() => {
-    void api()
-      .newProject.homeDirs()
-      .then((found) => {
-        setDirs(found)
-        if (value === '' && found[0]) onPick(found[0].path)
-      })
+    void api().newProject.homeDirs().then(setDirs)
   }, [])
+
+  // Al cargar los atajos, si aun no hay destino, se elige el primero. Tras el
+  // primer pick value deja de ser '' y no se vuelve a tocar la eleccion.
+  useEffect(() => {
+    if (value === '' && dirs[0]) onPick(dirs[0].path)
+  }, [dirs, value, onPick])
 
   return (
     <div className="flex flex-wrap gap-1.5">

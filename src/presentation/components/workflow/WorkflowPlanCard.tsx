@@ -28,14 +28,14 @@ export function WorkflowPlanCard({
   onCancel
 }: WorkflowPlanCardProps): React.JSX.Element {
   const excluded = useExcludedAgents()
-  const project = useActiveProject()
+  const projectId = useActiveProject()?.id
   const [measured, setMeasured] = useState<MeasuredRun | null>(null)
 
   // La media de ESTE proyecto: el valor de fabrica se midio en un repo de tres
   // archivos y en uno real se queda quince veces corto.
   useEffect(() => {
-    if (project) void api().telemetry.averageRun(project.id).then(setMeasured)
-  }, [project?.id])
+    if (projectId) void api().telemetry.averageRun(projectId).then(setMeasured)
+  }, [projectId])
 
   const plan = planWorkflow(routeWorkflow(prompt), excluded)
   const estimate = estimateWorkflow(plan.active.length, measured)
