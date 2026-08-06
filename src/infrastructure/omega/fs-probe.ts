@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from 'fs'
+import { existsSync, readFileSync, realpathSync, statSync } from 'fs'
 import { isAbsolute, join, relative } from 'path'
 import type { FileProbe } from '@domain/omega/finding-check'
 import type { FileSnippet, FilesystemProbe } from '@domain/omega/filesystem-probe'
@@ -12,7 +12,12 @@ function safeRead(projectPath: string, relativeFile: string): string | null {
   const rel = relative(projectPath, full)
   if (rel.startsWith('..') || isAbsolute(rel)) return null
   if (!existsSync(full) || !statSync(full).isFile()) return null
-  return readFileSync(full, 'utf8')
+  // Resuelve symlinks: un enlace DENTRO del repo puede apuntar fuera (p.ej. a
+  // ~/.ssh/id_rsa) y colarse por el filtro lexico. Se compara la ruta REAL.
+  const realFull = realpathSync(full)
+  const realRel = relative(realpathSync(projectPath), realFull)
+  if (realRel.startsWith('..') || isAbsolute(realRel)) return null
+  return readFileSync(realFull, 'utf8')
 }
 
 /**
