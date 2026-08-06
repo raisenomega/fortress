@@ -1,7 +1,12 @@
-import { normalizeScore } from '../project/fortress-score'
+import { scoreWithPenalties } from '../shared/penalty-score'
 import type { Severity } from '../shared/severity'
 import type { PostureFinding } from './posture-finding'
 
+/**
+ * La exposicion castiga MAS duro que el escaner interno (HIGH 10 vs 8, MEDIUM
+ * 4 vs 3) a proposito: un fallo publico y accesible pesa mas que el mismo en el
+ * codigo. Mismo algoritmo (scoreWithPenalties), distinta tabla, y explicito.
+ */
 const PENALTY: Readonly<Record<Severity, number>> = {
   CRITICAL: 25,
   HIGH: 10,
@@ -9,17 +14,7 @@ const PENALTY: Readonly<Record<Severity, number>> = {
   LOW: 1
 }
 
-const CRITICAL_CEILING = 64
-
-/**
- * Score de exposicion, misma logica que el interno: determinista y con techo
- * si hay algo CRITICAL. Un .env expuesto no puede dar un numero en verde por
- * mucho que el resto este bien.
- */
+/** Un .env expuesto no puede dar verde por mucho que el resto este bien. */
 export function postureScore(findings: readonly PostureFinding[]): number {
-  const penalty = findings.reduce((total, f) => total + PENALTY[f.severity], 0)
-  const score = normalizeScore(100 - penalty)
-
-  const hasCritical = findings.some((f) => f.severity === 'CRITICAL')
-  return hasCritical ? Math.min(score, CRITICAL_CEILING) : score
+  return scoreWithPenalties(findings, PENALTY)
 }
