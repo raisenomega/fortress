@@ -5,6 +5,7 @@ import { permissionModeFor } from '@domain/settings/permission-mode'
 import { totalTokens } from '@domain/telemetry/token-usage'
 import type { ReplyOutcome } from './reply-outcome'
 import type { WorkflowReplyOptions } from './reply-from-workflow'
+import { denialsNote, singleAgentOutcome } from './single-agent-outcome'
 
 /**
  * Respuesta conversacional a una pregunta libre: un solo agente, elegido por el
@@ -38,18 +39,13 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
 
   // El consumo se conoce al terminar (el CLI lo reporta en el evento final): sin
   // esto el medidor de un solo agente se quedaba en 0 todo el run.
-  options.onStep({ index: 0, total: 1, tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd })
+  options.onStep({
+    index: 0,
+    total: 1,
+    tokens: totalTokens(reply.usage),
+    costUsd: reply.usage.costUsd
+  })
 
-  return {
-    text: reply.text,
-    failed: reply.failed,
-    usage: reply.usage,
-    tools: reply.tools,
-    edits: reply.edits,
-    agents: [agentId],
-    runs: [
-      { agentId, usage: reply.usage, failed: reply.failed, durationMs: Date.now() - startedAt, tools: reply.tools }
-    ],
-    findings: []
-  }
+  // La nota de denials da la transparencia del modo supervisado (lo bloqueado).
+  return singleAgentOutcome(agentId, reply, denialsNote(options.mode, reply.denials), startedAt)
 }
