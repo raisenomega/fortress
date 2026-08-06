@@ -4,6 +4,7 @@ import { useOmegaStore } from '../../stores/omega-store'
 import { useProjectStore } from '../../stores/project-store'
 
 const DOT: Record<string, string> = {
+  nuevo: 'bg-primary',
   'sin-escanear': 'bg-muted-foreground',
   solido: 'bg-success',
   aceptable: 'bg-medium',

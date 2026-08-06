@@ -5,6 +5,7 @@ import { LoopToggle } from './LoopToggle'
 import { TrustToggle } from './TrustToggle'
 
 const DOT: Record<string, string> = {
+  nuevo: 'bg-primary',
   'sin-escanear': 'bg-muted-foreground',
   solido: 'bg-success',
   aceptable: 'bg-medium',

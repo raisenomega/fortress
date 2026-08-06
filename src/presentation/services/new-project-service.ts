@@ -4,7 +4,14 @@ import { api } from '../adapters/fortress-api'
 import { useNewProjectStore } from '../stores/new-project-store'
 import { useProjectStore } from '../stores/project-store'
 import { useUiStore } from '../stores/ui-store'
+import { sendMessage } from './chat-service'
 import { loadProjects } from './project-service'
+
+const KICKOFF = {
+  prompt: 'Configuremos el proyecto.',
+  mode: 'supervisado' as const,
+  excludedAgents: []
+}
 
 /** Recalcula la ruta que saldria. No crea nada: solo la ensena. */
 export async function refreshPlan(draft: NewProjectDraft): Promise<void> {
@@ -21,13 +28,15 @@ export async function refreshPlan(draft: NewProjectDraft): Promise<void> {
   store.setError(plan.error)
 }
 
-/** Tras crear y registrar: activa el proyecto y abre el chat (modo entrevista). */
+/** Tras crear y registrar: activa el proyecto, abre el chat y ARRANCA la
+ *  entrevista (FORTRESS abre la sesion, no espera al operador). */
 async function finishCreation(project: Project): Promise<void> {
   await loadProjects()
   useProjectStore.getState().setActiveProject(project.id)
   useUiStore.getState().setProjectDialog(null)
   useUiStore.getState().setView('chat')
   useNewProjectStore.getState().reset()
+  void sendMessage({ projectId: project.id, ...KICKOFF })
 }
 
 /**
