@@ -1,4 +1,4 @@
-import type { Result } from '@domain/shared/result'
+import { err, type Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useConstruirStore } from '../stores/construir-store'
 import { sendExecute } from './construir-execute'
@@ -12,10 +12,19 @@ async function ask(
   const store = useConstruirStore.getState()
   store.push({ role: 'user', text: `${label}: ${intent}` })
   store.setBusy(true)
-  const result = await call
-  store.setBusy(false)
-  store.push({ role: 'assistant', text: result.ok ? result.value : `No se pudo: ${result.error}` })
-  return result
+  try {
+    const result = await call
+    const text = result.ok ? result.value : `No se pudo: ${result.error}`
+    store.push({ role: 'assistant', text })
+    return result
+  } catch (error) {
+    // Sin catch, un fallo del canal dejaria busy:true y el input bloqueado.
+    const detail = error instanceof Error ? error.message : 'Se interrumpio'
+    store.push({ role: 'assistant', text: `No se pudo: ${detail}` })
+    return err(detail)
+  } finally {
+    store.setBusy(false)
+  }
 }
 
 /** Modo Plan: el planner devuelve un plan (solo lectura). Se guarda como pendiente. */

@@ -18,14 +18,21 @@ export async function sendExecute(projectId: string): Promise<void> {
   }
   store.push({ role: 'user', text: 'Ejecutor: construir el plan revisado' })
   store.setBusy(true)
-  const result = await api().build.feature(projectId, pending.intent, pending.plan)
-  store.setBusy(false)
-  store.push({
-    role: 'assistant',
-    text: result.ok
-      ? 'Construccion completada. Revisa los cambios en el proyecto.'
-      : `No se aplico: ${result.error}`
-  })
-  if (result.ok) store.setPendingPlan(null)
-  await loadProjects()
+  try {
+    const result = await api().build.feature(projectId, pending.intent, pending.plan)
+    store.push({
+      role: 'assistant',
+      text: result.ok
+        ? 'Construccion completada. Revisa los cambios en el proyecto.'
+        : `No se aplico: ${result.error}`
+    })
+    if (result.ok) store.setPendingPlan(null)
+  } catch (error) {
+    // Sin catch, un fallo del canal dejaria busy:true y el input bloqueado.
+    const detail = error instanceof Error ? error.message : 'Se interrumpio'
+    store.push({ role: 'assistant', text: `No se aplico: ${detail}` })
+  } finally {
+    store.setBusy(false)
+    await loadProjects()
+  }
 }

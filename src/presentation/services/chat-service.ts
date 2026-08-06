@@ -21,11 +21,8 @@ export async function persistMessage(message: NewChatMessage): Promise<string | 
   return null
 }
 
-/**
- * Envia la peticion a Claude pintando la respuesta segun llega. Al terminar
- * recarga el historial: la UI acaba mostrando exactamente lo persistido, tanto
- * si la respuesta se completo como si fallo a medias.
- */
+/** Envia la peticion a Claude pintando la respuesta segun llega; el finally
+ *  recarga el historial persistido tanto si se completo como si fallo. */
 export async function sendMessage(input: SendMessageInput): Promise<void> {
   const store = useChatStore.getState()
   const draft = draftAssistantMessage(input.projectId, input.mode)
@@ -51,6 +48,11 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
   try {
     const result = await api().chat.send(input)
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
+  } catch (error) {
+    // Sin catch, un fallo del canal IPC seria un rechazo no manejado y el
+    // finally recargaria el historial borrando el mensaje sin ninguna senal.
+    const detail = error instanceof Error ? error.message : 'El chat se interrumpio'
+    useChatStore.getState().setError(input.projectId, detail)
   } finally {
     unsubscribe()
     unmeter()
@@ -65,10 +67,7 @@ export async function clearHistory(projectId: string): Promise<void> {
   useChatStore.getState().setMessages(projectId, [])
 }
 
-/**
- * Detiene el workflow en marcha. Mata el paso actual y evita que arranquen los
- * siguientes; lo ya guardado se queda guardado.
- */
+/** Detiene el workflow: mata el paso actual y lo ya guardado se queda. */
 export async function stopWorkflow(projectId: string): Promise<void> {
   await api().chat.stop(projectId)
 }

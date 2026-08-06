@@ -10,10 +10,17 @@ export async function runPosture(): Promise<void> {
   if (running) return
 
   usePostureStore.getState().start()
-  const result = await api().posture.run({ url, depth, owned })
-  usePostureStore
-    .getState()
-    .finish(result.ok ? result.value : null, result.ok ? null : result.error)
+  try {
+    const result = await api().posture.run({ url, depth, owned })
+    usePostureStore
+      .getState()
+      .finish(result.ok ? result.value : null, result.ok ? null : result.error)
+  } catch (error) {
+    // Sin catch, un fallo del canal dejaria running:true para siempre y el
+    // boton bloqueado en "Auditando..." hasta reiniciar la app.
+    const detail = error instanceof Error ? error.message : 'La auditoria se interrumpio'
+    usePostureStore.getState().finish(null, detail)
+  }
 }
 
 /** Manda el informe al chat, con la pregunta ya escrita: solo pulsar Enter. */
