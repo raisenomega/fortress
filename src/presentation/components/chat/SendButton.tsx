@@ -18,7 +18,7 @@ export function SendButton({ running, disabled, onStop }: SendButtonProps): Reac
         type="button"
         onClick={onStop}
         title="Detener. Lo ya guardado se queda; los pasos que faltan no se ejecutan"
-        className="tap flex h-10 items-center gap-1.5 rounded-md bg-critical px-4 text-sm font-semibold text-white hover:brightness-110"
+        className="tap flex h-10 items-center gap-1.5 rounded-md bg-critical px-4 text-sm font-semibold text-destructive-foreground hover:brightness-110"
       >
         <Square size={13} aria-hidden />
         Detener

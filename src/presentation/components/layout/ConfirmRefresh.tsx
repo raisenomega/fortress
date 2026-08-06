@@ -35,7 +35,7 @@ export function ConfirmRefresh({
           <button
             type="button"
             onClick={onConfirm}
-            className="tap rounded-md bg-critical px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110"
+            className="tap rounded-md bg-critical px-3 py-1.5 text-xs font-semibold text-destructive-foreground hover:brightness-110"
           >
             Terminar y reiniciar
           </button>
