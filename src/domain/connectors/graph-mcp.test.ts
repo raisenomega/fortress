@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GRAPH_SERVER, GRAPH_TOOL_RULE, withGraph } from './graph-mcp'
+import { GRAPH_MCP_VERSION, GRAPH_SERVER, GRAPH_TOOL_RULE, withGraph } from './graph-mcp'
 import { buildMcpConfig } from './mcp-config'
 
 describe('withGraph', () => {
@@ -7,7 +7,7 @@ describe('withGraph', () => {
     const cfg = JSON.parse(withGraph(null))
     expect(cfg.mcpServers[GRAPH_SERVER]).toEqual({
       command: 'npx',
-      args: ['-y', 'codebase-memory-mcp']
+      args: ['-y', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`]
     })
   })
 

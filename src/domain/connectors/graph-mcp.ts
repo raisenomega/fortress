@@ -12,8 +12,19 @@ export const GRAPH_SERVER = 'codebase-memory'
  */
 export const GRAPH_TOOL_RULE = `mcp__${GRAPH_SERVER}`
 
+/**
+ * Version FIJADA del servidor del grafo. Sin fijarla, `npx` ejecutaria la ultima
+ * publicada en cada spawn: un paquete comprometido correria con los permisos del
+ * operador y con ANTHROPIC_API_KEY en el entorno. Subela a conciencia, revisando
+ * el changelog, no automaticamente.
+ */
+export const GRAPH_MCP_VERSION = '0.9.0'
+
 /** Servidor stdio del grafo, igual que `claude mcp add codebase-memory`. */
-const GRAPH_MCP = { command: 'npx', args: ['-y', 'codebase-memory-mcp'] } as const
+const GRAPH_MCP = {
+  command: 'npx',
+  args: ['-y', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`]
+} as const
 
 interface McpConfigShape {
   readonly mcpServers?: Record<string, unknown>
