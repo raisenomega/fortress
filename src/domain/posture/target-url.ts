@@ -1,4 +1,5 @@
 import { err, ok, type Result } from '../shared/result'
+import { isPrivateHost } from './private-host'
 
 const ALLOWED = new Set(['http:', 'https:'])
 
@@ -29,6 +30,9 @@ export function parseTarget(raw: string): Result<Target> {
     const parsed = new URL(withScheme)
     if (!ALLOWED.has(parsed.protocol)) return err('Solo se pueden auditar direcciones web')
     if (parsed.hostname === '') return err('Escribe la direccion de tu sitio')
+    if (isPrivateHost(parsed.hostname)) {
+      return err('No se pueden auditar direcciones internas o privadas')
+    }
 
     return ok({
       url: `${parsed.protocol}//${parsed.host}`,
