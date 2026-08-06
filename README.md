@@ -32,19 +32,19 @@ datos real.
 ## Distribucion (Linux)
 
 ```bash
-npm run icon          # regenera build/icon.png desde el SVG del emblema
+npm run icons         # regenera los iconos desde resources/fortress-logo.jpeg
 npm run build:linux   # genera ../dist/FORTRESS-<version>.AppImage
 ./install.sh          # instala ejecutable, icono, menu y acceso directo
 ```
 
 `install.sh` no necesita sudo. Deja:
 
-| Que | Donde |
-| --- | --- |
-| Ejecutable | `~/.local/bin/fortress` |
-| Entrada de menu | `~/.local/share/applications/fortress.desktop` |
-| Acceso directo | `~/Escritorio/FORTRESS.desktop` |
-| Icono | `~/.local/share/icons/hicolor/512x512/apps/fortress.png` |
+| Que             | Donde                                                    |
+| --------------- | -------------------------------------------------------- |
+| Ejecutable      | `~/.local/bin/fortress`                                  |
+| Entrada de menu | `~/.local/share/applications/fortress.desktop`           |
+| Acceso directo  | `~/Escritorio/FORTRESS.desktop`                          |
+| Icono           | `~/.local/share/icons/hicolor/512x512/apps/fortress.png` |
 
 Los AppImage necesitan `libfuse2` (`sudo apt install libfuse2`); el instalador
 avisa si falta. Para mac y win estan `npm run build:mac` y `build:win`.
