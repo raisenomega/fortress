@@ -1,5 +1,6 @@
 import { DRAFTED_DOCS } from '@domain/chat/config-docs'
 import { buildGovernanceFiles } from '@domain/chat/governance-files'
+import { isPending } from '@domain/project/config-state'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 
@@ -21,6 +22,9 @@ export async function executeConfiguration(
 ): Promise<Result<string>> {
   const project = context.projects.findById(projectId)
   if (!project) return err('El proyecto ya no existe')
+  // No re-escribir un proyecto ya configurado: pisaria docs y COGNITION-LOG.
+  if (!isPending(project.configState)) return err('El proyecto ya esta configurado.')
+  if (drafts === null || typeof drafts !== 'object') return err('Borradores invalidos.')
 
   const missing = DRAFTED_DOCS.filter((doc) => !drafts[doc]?.trim())
   if (missing.length > 0) return err(`Faltan documentos por aprobar: ${missing.join(', ')}`)

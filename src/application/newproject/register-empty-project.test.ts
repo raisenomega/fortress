@@ -36,9 +36,15 @@ describe('registerEmptyProject', () => {
     expect(added).toHaveLength(0)
   })
 
-  it('reusa la validacion de addProject: rechaza ruta relativa', async () => {
+  it('rechaza ruta relativa SIN llegar a git init (valida antes del efecto)', async () => {
     const { context } = ctx()
-    const r = await registerEmptyProject(context, okInit, { ...input, path: '../fuera' })
+    let initRan = false
+    const trackInit = (): Promise<Result<string>> => {
+      initRan = true
+      return Promise.resolve(ok('init'))
+    }
+    const r = await registerEmptyProject(context, trackInit, { ...input, path: '../fuera' })
     expect(r.ok).toBe(false)
+    expect(initRan).toBe(false)
   })
 })
