@@ -6,7 +6,7 @@ import { FIELD_CLASS, LabeledField } from '../common/LabeledField'
 /** Metes la URL de tu sitio, confirmas que es tuyo, eliges cuanto revisar. */
 export function PostureForm(): React.JSX.Element {
   const { url, depth, owned, running } = usePostureStore()
-  const store = usePostureStore()
+  const store = usePostureStore.getState()
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">

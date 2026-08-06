@@ -12,7 +12,10 @@ import { useTelemetryStore } from '../../stores/telemetry-store'
  */
 export function RunMeter(): React.JSX.Element | null {
   const startedAt = useRunMeterStore((state) => state.startedAt)
-  const { step, total, tokens, costUsd } = useRunMeterStore()
+  const step = useRunMeterStore((state) => state.step)
+  const total = useRunMeterStore((state) => state.total)
+  const tokens = useRunMeterStore((state) => state.tokens)
+  const costUsd = useRunMeterStore((state) => state.costUsd)
   const billing = useTelemetryStore((state) => state.billing)
   const [now, setNow] = useState(() => Date.now())
 

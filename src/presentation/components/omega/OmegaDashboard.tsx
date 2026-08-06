@@ -1,9 +1,10 @@
+import { useCallback } from 'react'
 import type { FileSnippet } from '@domain/omega/filesystem-probe'
 import type { Project } from '@domain/project/project'
 import { fetchSnippet } from '../../services/omega-service'
 import { useOmega, useOmegaStore } from '../../stores/omega-store'
 import { useProjectStore } from '../../stores/project-store'
-import { useScanStore } from '../../stores/scan-store'
+import { useProjectFindings } from '../../stores/scan-selectors'
 import { OmegaHeader } from './OmegaHeader'
 import { OmegaModeBody } from './OmegaModeBody'
 
@@ -20,9 +21,12 @@ export function OmegaDashboard({ project }: OmegaDashboardProps): React.JSX.Elem
   const selectAgent = useOmegaStore((s) => s.selectAgent)
   const mode = useOmegaStore((s) => s.mode)
   const projects = useProjectStore((s) => s.projects)
-  const findings = useScanStore((s) => s.byProject[id] ?? [])
-  const snippet = (file: string, line: number): Promise<FileSnippet | null> =>
-    fetchSnippet(id, file, line)
+  const findings = useProjectFindings(id)
+  // Estable por proyecto: los paneles la incluyen en sus deps sin re-cargar.
+  const snippet = useCallback(
+    (file: string, line: number): Promise<FileSnippet | null> => fetchSnippet(id, file, line),
+    [id]
+  )
 
   return (
     <div className="h-full space-y-5 overflow-y-auto px-4 py-4">

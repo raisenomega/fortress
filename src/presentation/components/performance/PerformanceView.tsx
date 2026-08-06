@@ -15,14 +15,23 @@ export function PerformanceView(): React.JSX.Element {
   const byProject = usePerformanceStore((state) => state.byProject)
   const ranking = usePerformanceStore((state) => state.ranking)
   const scans = usePerformanceStore((state) => state.scans)
+  const loading = usePerformanceStore((state) => state.loading)
 
+  // El picker solo cambia la ventana; este efecto es el unico que carga, asi
+  // no se dispara dos veces (una por el onPick y otra por el cambio de estado).
   useEffect(() => {
     void loadPerformance(window)
   }, [window])
 
   return (
     <div className="h-full space-y-5 overflow-y-auto px-4 py-4">
-      <WindowPicker current={window} onPick={(next) => void loadPerformance(next)} />
+      <div className="flex items-center gap-3">
+        <WindowPicker
+          current={window}
+          onPick={(next) => usePerformanceStore.getState().setWindow(next)}
+        />
+        {loading ? <span className="text-xs text-muted-foreground">Actualizando…</span> : null}
+      </div>
 
       <UsageCards usage={usage} />
 
