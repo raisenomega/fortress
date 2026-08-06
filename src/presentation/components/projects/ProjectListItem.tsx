@@ -3,6 +3,7 @@ import type { Project } from '@domain/project/project'
 import { SCAN_LABEL, scanStatus } from '@domain/project/scan-status'
 
 const DOT_CLASS = {
+  nuevo: 'bg-primary',
   'sin-escanear': 'bg-muted-foreground',
   solido: 'bg-success',
   aceptable: 'bg-medium',
@@ -46,9 +47,15 @@ export function ProjectListItem({
       >
         <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${DOT_CLASS[status]}`} />
         <span className="min-w-0 flex-1 truncate text-sm">{project.name}</span>
-        <span className="font-mono text-xs text-muted-foreground">
-          {status === 'sin-escanear' ? '—' : project.fortressScore}
-        </span>
+        {status === 'nuevo' ? (
+          <span className="shrink-0 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
+            nuevo
+          </span>
+        ) : (
+          <span className="font-mono text-xs text-muted-foreground">
+            {status === 'sin-escanear' ? '—' : project.fortressScore}
+          </span>
+        )}
       </button>
 
       <button

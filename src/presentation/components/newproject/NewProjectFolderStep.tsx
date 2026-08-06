@@ -47,7 +47,7 @@ export function NewProjectFolderStep({ onClose }: NewProjectFolderStepProps): Re
         {error ? <Notice tone="error">{error}</Notice> : null}
 
         <StepActions
-          confirmLabel="Crear la carpeta"
+          confirmLabel="Crear proyecto"
           disabled={target === null}
           onCancel={onClose}
           onConfirm={() => void createFolder()}

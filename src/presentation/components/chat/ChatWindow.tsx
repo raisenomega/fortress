@@ -7,11 +7,12 @@ import { useChatStore } from '../../stores/chat-store'
 import { useLoopActive } from '../../stores/loop-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
+import { ConfigurationCard } from '../config/ConfigurationCard'
+import { ChatBody } from './ChatBody'
 import { ChatErrorBanner } from './ChatErrorBanner'
 import { stopWorkflow } from '../../services/chat-service'
 import { ChatHeader } from './ChatHeader'
 import { ChatInput } from './ChatInput'
-import { ChatMessageList } from './ChatMessageList'
 
 interface ChatWindowProps {
   readonly onSend: (text: string) => void
@@ -41,21 +42,14 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <ChatHeader project={project} />
+      {project.configState === 'PENDIENTE_CONFIGURACION' ? (
+        <ConfigurationCard projectId={project.id} />
+      ) : null}
       {error ? (
         <ChatErrorBanner message={error} onDismiss={() => setError(project.id, null)} />
       ) : null}
 
-      {messages.length === 0 ? (
-        <div className="flex-1">
-          <EmptyState
-            iconName="message-square"
-            title={`Chat de ${project.name}`}
-            hint="Este historial es exclusivo de este proyecto. Empieza con una accion rapida o escribe tu peticion."
-          />
-        </div>
-      ) : (
-        <ChatMessageList messages={messages} />
-      )}
+      <ChatBody projectName={project.name} messages={messages} />
 
       <ChatInput
         disabled={busy}

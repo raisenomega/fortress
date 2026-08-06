@@ -1,6 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import { sendMessage } from '../services/chat-service'
+import { useActiveProject } from '../stores/project-store'
 import { useWorkflowStore } from '../stores/workflow-store'
 
 export interface WorkflowGate {
@@ -22,6 +23,9 @@ export function useWorkflowGate(
 ): WorkflowGate {
   const pendingPrompt = useWorkflowStore((state) => state.pendingPrompt)
   const setPending = useWorkflowStore((state) => state.setPending)
+  // Un proyecto sin marco aprobado no usa la plan-card: sus mensajes van directos
+  // a la entrevista de configuracion, con o sin modo supervisado.
+  const configuring = useActiveProject()?.configState === 'PENDIENTE_CONFIGURACION'
 
   const run = (prompt: string): void => {
     if (projectId) void sendMessage({ projectId, prompt, mode, excludedAgents })
@@ -29,7 +33,7 @@ export function useWorkflowGate(
 
   return {
     pendingPrompt,
-    send: (prompt) => (mode === 'supervisado' ? setPending(prompt) : run(prompt)),
+    send: (prompt) => (mode === 'supervisado' && !configuring ? setPending(prompt) : run(prompt)),
     approve: () => {
       const prompt = pendingPrompt
       setPending(null)

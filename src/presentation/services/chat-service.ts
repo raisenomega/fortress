@@ -3,6 +3,7 @@ import type { NewChatMessage } from '@domain/chat/chat-message'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
+import { captureConfigDrafts } from './capture-config-drafts'
 import { refreshSessionUsage } from './telemetry-service'
 import { draftAssistantMessage, draftUserMessage } from './streaming-message'
 
@@ -58,6 +59,7 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
     unmeter()
     useRunMeterStore.getState().end()
     useChatStore.getState().setStreaming(input.projectId, false)
+    captureConfigDrafts(input.projectId, buffer)
     await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }
 }
