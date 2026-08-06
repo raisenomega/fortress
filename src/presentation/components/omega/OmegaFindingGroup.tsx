@@ -1,5 +1,6 @@
 import type { Finding } from '@domain/project/project'
 import type { Severity } from '@domain/shared/severity'
+import { onActivate } from '../common/activate'
 
 const TONE: Record<Severity, string> = {
   CRITICAL: 'text-critical',
@@ -32,7 +33,10 @@ export function OmegaFindingGroup({
         {items.map((f) => (
           <li
             key={f.id}
+            role="button"
+            tabIndex={0}
             onClick={() => onSelect(f)}
+            onKeyDown={onActivate(() => onSelect(f))}
             className="tap cursor-pointer px-2 py-1.5 text-xs hover:bg-secondary/40"
           >
             <span className="text-foreground">{f.title}</span>

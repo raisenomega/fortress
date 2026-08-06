@@ -1,4 +1,5 @@
 import type { OmegaEntry } from '@domain/omega/omega-entry'
+import { onActivate } from '../common/activate'
 
 interface OmegaDiscrepancyListProps {
   readonly entries: readonly OmegaEntry[]
@@ -21,13 +22,18 @@ export function OmegaDiscrepancyList({
       {disc.map((entry) => (
         <li
           key={entry.id}
+          role="button"
+          tabIndex={0}
           onClick={() => onSelect(entry)}
+          onKeyDown={onActivate(() => onSelect(entry))}
           className="tap cursor-pointer px-2 py-1.5 text-xs hover:bg-secondary/40"
         >
           <span className="text-critical">discrepancia</span>{' '}
           <span className="text-foreground">{entry.summary}</span>
           {entry.evidence ? (
-            <span className="ml-1 font-mono text-[10px] text-muted-foreground">{entry.evidence}</span>
+            <span className="ml-1 font-mono text-[10px] text-muted-foreground">
+              {entry.evidence}
+            </span>
           ) : null}
         </li>
       ))}
