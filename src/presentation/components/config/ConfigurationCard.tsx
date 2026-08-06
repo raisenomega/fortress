@@ -1,4 +1,5 @@
 import { DRAFTED_DOCS } from '@domain/chat/config-docs'
+import { useProjectStreaming } from '../../stores/chat-selectors'
 import { useConfigurationStore } from '../../stores/configuration-store'
 import { ConfigActions } from './ConfigActions'
 import { ConfigDocPreview } from './ConfigDocPreview'
@@ -16,6 +17,7 @@ export function ConfigurationCard({ projectId }: ConfigurationCardProps): React.
   const drafts = useConfigurationStore((s) => s.drafts[projectId] ?? {})
   const approved = useConfigurationStore((s) => s.approved[projectId] ?? 0)
   const executing = useConfigurationStore((s) => s.executing[projectId] ?? false)
+  const streaming = useProjectStreaming(projectId)
 
   const total = DRAFTED_DOCS.length
   const ready = approved >= total
@@ -39,8 +41,9 @@ export function ConfigurationCard({ projectId }: ConfigurationCardProps): React.
       <ConfigActions
         projectId={projectId}
         ready={ready}
-        canApprove={Boolean(content)}
+        canApprove={Boolean(content?.trim()) && !streaming}
         executing={executing}
+        busy={streaming}
       />
     </section>
   )

@@ -26,7 +26,11 @@ export const useConfigurationStore = create<ConfigurationState>((set) => ({
     })),
   approve: (projectId) =>
     set((s) => ({ approved: { ...s.approved, [projectId]: (s.approved[projectId] ?? 0) + 1 } })),
-  restart: (projectId) => set((s) => ({ approved: { ...s.approved, [projectId]: 0 } })),
+  restart: (projectId) =>
+    set((s) => ({
+      approved: { ...s.approved, [projectId]: 0 },
+      drafts: { ...s.drafts, [projectId]: {} }
+    })),
   setExecuting: (projectId, on) => set((s) => ({ executing: { ...s.executing, [projectId]: on } })),
   clear: (projectId) =>
     set((s) => ({

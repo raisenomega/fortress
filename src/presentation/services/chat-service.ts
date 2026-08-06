@@ -1,5 +1,4 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
-import type { NewChatMessage } from '@domain/chat/chat-message'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
@@ -11,15 +10,6 @@ import { draftAssistantMessage, draftUserMessage } from './streaming-message'
 export async function loadHistory(projectId: string): Promise<void> {
   const messages = await api().chat.history(projectId)
   useChatStore.getState().setMessages(projectId, messages)
-}
-
-/** Persiste un mensaje suelto y lo agrega solo si SQLite lo acepto. */
-export async function persistMessage(message: NewChatMessage): Promise<string | null> {
-  const result = await api().chat.append(message)
-  if (!result.ok) return result.error
-
-  useChatStore.getState().appendMessage(result.value)
-  return null
 }
 
 /** Envia la peticion a Claude pintando la respuesta segun llega; el finally
@@ -49,6 +39,9 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
   try {
     const result = await api().chat.send(input)
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
+    // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
+    // stream (que puede traer lineas de herramienta o venir vacio).
+    else captureConfigDrafts(input.projectId, result.value.assistant.content)
   } catch (error) {
     // Sin catch, un fallo del canal IPC seria un rechazo no manejado y el
     // finally recargaria el historial borrando el mensaje sin ninguna senal.
@@ -59,7 +52,6 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
     unmeter()
     useRunMeterStore.getState().end()
     useChatStore.getState().setStreaming(input.projectId, false)
-    captureConfigDrafts(input.projectId, buffer)
     await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }
 }

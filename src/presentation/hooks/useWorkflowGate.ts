@@ -32,7 +32,9 @@ export function useWorkflowGate(
   }
 
   return {
-    pendingPrompt,
+    // En configuracion no hay plan-card: oculta un pendingPrompt residual de otro
+    // proyecto para que Aprobar no inyecte ese prompt viejo en la entrevista.
+    pendingPrompt: configuring ? null : pendingPrompt,
     send: (prompt) => (mode === 'supervisado' && !configuring ? setPending(prompt) : run(prompt)),
     approve: () => {
       const prompt = pendingPrompt

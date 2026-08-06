@@ -8,6 +8,8 @@ interface ChatInputProps {
   /** Mientras corre, el mismo boton pasa a detener. */
   readonly running: boolean
   readonly onStop: () => void
+  /** En configuracion no hay atajos: solo se responde a la entrevista. */
+  readonly configuring: boolean
 }
 
 /**
@@ -19,10 +21,13 @@ export function ChatInput({
   disabled,
   onSend,
   running,
-  onStop
+  onStop,
+  configuring
 }: ChatInputProps): React.JSX.Element {
   const draft = useWorkflowStore((state) => state.draft)
   const setDraft = useWorkflowStore((state) => state.setDraft)
+
+  const placeholder = configuring ? 'Responde para configurar...' : 'Pide una revision o un plan...'
 
   function submit(): void {
     const trimmed = draft.trim()
@@ -33,7 +38,7 @@ export function ChatInput({
 
   return (
     <div className="shrink-0 space-y-2 border-t border-border bg-sidebar px-4 py-3">
-      <QuickActions disabled={disabled} onPick={onSend} />
+      {configuring ? null : <QuickActions disabled={disabled} onPick={onSend} />}
 
       <form
         className="flex items-end gap-2"
@@ -46,7 +51,7 @@ export function ChatInput({
           rows={1}
           value={draft}
           disabled={disabled}
-          placeholder="Pide una revision, una limpieza, un plan..."
+          placeholder={placeholder}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
             if (event.key !== 'Enter' || event.shiftKey) return

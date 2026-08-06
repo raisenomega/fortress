@@ -56,6 +56,7 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
         running={busy}
         onStop={() => project && void stopWorkflow(project.id)}
         onSend={onSend}
+        configuring={project.configState === 'PENDIENTE_CONFIGURACION'}
       />
     </div>
   )

@@ -20,6 +20,7 @@ export function restartConfig(projectId: string): void {
 /** "Si, ejecutar": la app escribe el marco y commitea; el proyecto pasa a CONFIGURADO. */
 export async function executeConfig(projectId: string): Promise<void> {
   const store = useConfigurationStore.getState()
+  if (store.executing[projectId]) return // guarda de reentrada: doble clic no escribe dos veces
   store.setExecuting(projectId, true)
   try {
     const result = await api().newProject.execute(projectId, store.drafts[projectId] ?? {})

@@ -5,6 +5,8 @@ interface ConfigActionsProps {
   readonly ready: boolean
   readonly canApprove: boolean
   readonly executing: boolean
+  /** Un turno de entrevista esta en curso: no arrancar otro en paralelo. */
+  readonly busy: boolean
 }
 
 const PRIMARY =
@@ -13,13 +15,13 @@ const GHOST = 'tap rounded-md border border-border px-3 py-1.5 text-xs text-mute
 
 /** Botonera de la fase de aprobacion. Nada se escribe sin "Si, ejecutar". */
 export function ConfigActions(props: ConfigActionsProps): React.JSX.Element {
-  const { projectId, ready, canApprove, executing } = props
+  const { projectId, ready, canApprove, executing, busy } = props
   return (
     <div className="mt-3 flex items-center gap-2">
       {ready ? (
         <button
           type="button"
-          disabled={executing}
+          disabled={executing || busy}
           onClick={() => void executeConfig(projectId)}
           className={PRIMARY}
         >
@@ -35,7 +37,12 @@ export function ConfigActions(props: ConfigActionsProps): React.JSX.Element {
           Aprobar
         </button>
       )}
-      <button type="button" onClick={() => restartConfig(projectId)} className={GHOST}>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => restartConfig(projectId)}
+        className={GHOST}
+      >
         Empezar de nuevo
       </button>
     </div>
