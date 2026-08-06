@@ -29,7 +29,16 @@ export const COMMITTED_DOCS: readonly string[] = [
 export const DOC_OPEN = '<<<FORTRESS-DOC:'
 export const DOC_CLOSE = 'FORTRESS-DOC-END>>>'
 
-const BLOCK = /<<<FORTRESS-DOC:(.+?)\r?\n([\s\S]*?)\r?\nFORTRESS-DOC-END>>>/g
+// El cierre debe ir en su propia linea (anclado): asi un documento que MENCIONE
+// el marcador en prosa (p. ej. CLAUDE.md describiendo este formato) no trunca.
+const BLOCK = /<<<FORTRESS-DOC:(.+?)\r?\n([\s\S]*?)\r?\n[ \t]*FORTRESS-DOC-END>>>[ \t]*(?=\r?\n|$)/g
+
+/** Normaliza el nombre capturado al doc canonico (case-insensitive): una
+ *  desviacion del LLM ('constitution.md') no debe bloquear al operador. */
+function canonicalName(raw: string): string {
+  const lower = raw.trim().toLowerCase()
+  return DRAFTED_DOCS.find((doc) => doc.toLowerCase() === lower) ?? raw.trim()
+}
 
 /**
  * Captura los borradores que el agente envolvio en el marcador. Determinista:
@@ -38,6 +47,6 @@ const BLOCK = /<<<FORTRESS-DOC:(.+?)\r?\n([\s\S]*?)\r?\nFORTRESS-DOC-END>>>/g
  */
 export function parseDocBlocks(text: string): Map<string, string> {
   const out = new Map<string, string>()
-  for (const match of text.matchAll(BLOCK)) out.set(match[1].trim(), match[2])
+  for (const match of text.matchAll(BLOCK)) out.set(canonicalName(match[1]), match[2])
   return out
 }

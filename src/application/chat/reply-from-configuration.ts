@@ -20,6 +20,10 @@ export async function replyFromConfiguration(options: ConfigReplyOptions): Promi
   if (!options.codeAgent.isAvailable()) {
     return textOnly('Necesitas Claude Code instalado para configurar el proyecto.')
   }
+  // Igual que el camino normal (chooseEngine): un cwd inexistente (carpeta movida)
+  // debe dar un motivo legible, no un "spawn claude ENOENT" confuso.
+  const problem = options.codeAgent.precheck(options.project.path)
+  if (problem) return textOnly(problem)
 
   const reply = await options.codeAgent.run(
     {
@@ -31,5 +35,8 @@ export async function replyFromConfiguration(options: ConfigReplyOptions): Promi
     },
     options.onChunk
   )
+  if (reply.failed) {
+    return textOnly(reply.text || 'La entrevista de configuracion se interrumpio.', reply.usage)
+  }
   return textOnly(reply.text, reply.usage)
 }
