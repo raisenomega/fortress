@@ -2,6 +2,7 @@ import { parseAuthSource, type AuthSource } from '@domain/settings/auth-source'
 import { SETTINGS_KEYS } from '@domain/settings/settings-repository'
 import { api } from '../adapters/fortress-api'
 import { useAccountStore } from '../stores/account-store'
+import { reportError } from '../stores/toast-store'
 import { loadBilling } from './telemetry-service'
 
 export async function loadAccount(): Promise<void> {
@@ -20,16 +21,24 @@ export async function chooseAuthSource(source: AuthSource): Promise<void> {
   await loadBilling()
 }
 
-/** El CLI abre el navegador; su salida se va pintando por si pide un codigo. */
+let connecting = false
+
+/** El CLI abre el navegador; su salida se va pintando por si pide un codigo.
+ *  El listener se suelta cuando login() resuelve (al cerrar el proceso), no con
+ *  un temporizador; el guard evita apilar listeners si se pulsa dos veces. */
 export async function connectAccount(): Promise<void> {
-  const store = useAccountStore.getState()
-  store.clearOutput()
+  if (connecting) return
+  connecting = true
+  useAccountStore.getState().clearOutput()
 
   const stop = api().account.onOutput((text) => useAccountStore.getState().appendOutput(text))
-  await api().account.login()
-
-  window.setTimeout(() => {
+  try {
+    await api().account.login()
+  } catch (error) {
+    reportError(error instanceof Error ? error.message : 'No se pudo conectar la cuenta')
+  } finally {
     stop()
-    void loadAccount()
-  }, 60_000)
+    connecting = false
+    await loadAccount()
+  }
 }

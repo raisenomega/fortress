@@ -11,7 +11,5 @@ function sender(event: IpcMainInvokeEvent) {
 export function registerAccountHandlers(): void {
   ipcMain.handle(IPC.accountStatus, () => readAccount())
 
-  ipcMain.handle(IPC.accountLogin, (event) => {
-    startLogin(sender(event))
-  })
+  ipcMain.handle(IPC.accountLogin, (event) => startLogin(sender(event)))
 }

@@ -28,13 +28,23 @@ export function readAccount(): Account {
 /**
  * Arranca el inicio de sesion con la suscripcion. El CLI abre el navegador y
  * espera; su salida se reenvia tal cual para que el operador vea la URL o el
- * codigo si hace falta pegarlo, en vez de mirar una caja negra.
+ * codigo si hace falta pegarlo, en vez de mirar una caja negra. La promesa
+ * resuelve cuando el proceso termina: asi el renderer suelta el listener justo
+ * ahi, sin un temporizador fijo que lo dejaria colgado o lo cortaria antes.
  */
-export function startLogin(onOutput: (text: string) => void): void {
-  const child = spawn(CLAUDE_BIN, ['auth', 'login', '--claudeai'], { env: process.env })
+export function startLogin(onOutput: (text: string) => void): Promise<void> {
+  return new Promise((resolve) => {
+    const child = spawn(CLAUDE_BIN, ['auth', 'login', '--claudeai'], { env: process.env })
 
-  child.stdout.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
-  child.stderr.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
-  child.on('error', (error) => onOutput(`No se pudo iniciar sesion: ${error.message}`))
-  child.on('close', () => onOutput('\n[sesion terminada]\n'))
+    child.stdout.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
+    child.stderr.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
+    child.on('error', (error) => {
+      onOutput(`No se pudo iniciar sesion: ${error.message}`)
+      resolve()
+    })
+    child.on('close', () => {
+      onOutput('\n[sesion terminada]\n')
+      resolve()
+    })
+  })
 }
