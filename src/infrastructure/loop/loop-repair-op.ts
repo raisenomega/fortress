@@ -1,15 +1,14 @@
-import { appendMessage } from '@application/chat/chat-history'
 import { knownFindings } from '@application/chat/known-findings'
 import type { AppContext } from '@application/context'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import { buildMcpConfig } from '@domain/connectors/mcp-config'
 import { buildRepairPrompt } from '@domain/loop/repair-prompt'
-import { err, ok, type Result } from '@domain/shared/result'
-import { parseSelfNotes } from '@domain/system/self-notes'
+import { err, type Result } from '@domain/shared/result'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
+import { finishRepair } from './persist-repair'
 
 /**
  * Fase de REPARACION: un agente EDITA para arreglar los hallazgos conocidos, en
@@ -36,27 +35,23 @@ export async function loopRepair(
   )
   const known = knownFindings(context, project)
   // Muestra los hallazgos en el chat antes de que los agentes empiecen a editar.
-  onChunk(`Hallazgos a arreglar:\n${known.length ? known.map((k) => `- ${k}`).join('\n') : '(ninguno)'}\n\n`)
+  onChunk(
+    `Hallazgos a arreglar:\n${known.length ? known.map((k) => `- ${k}`).join('\n') : '(ninguno)'}\n\n`
+  )
   const prompt = buildRepairPrompt(project.name, known, attempt)
   try {
     const reply = await codeAgent.run(
-      { projectPath: project.path, prompt, permissionMode: 'acceptEdits', agentId: null, trusted: project.trusted },
+      {
+        projectPath: project.path,
+        prompt,
+        permissionMode: 'acceptEdits',
+        agentId: null,
+        trusted: project.trusted
+      },
       onChunk
     )
     if (reply.failed) return err(reply.text)
-    // Lo que el agente descubrio de FORTRESS mismo va al backlog de auto-mejora,
-    // etiquetado con el proyecto donde se descubrio (no es un hallazgo del proyecto).
-    for (const nota of parseSelfNotes(reply.text, project.name)) context.selfObservations.add(nota)
-    // Persistido: el trabajo del agente sobrevive al reinicio.
-    appendMessage(context, {
-      projectId,
-      role: 'assistant',
-      content: `Reparacion (${known.length} hallazgos):\n\n${reply.text}`,
-      agentId: null,
-      mode: 'autonomo',
-      engine: 'claude-code'
-    })
-    return ok(undefined)
+    return finishRepair(context, project, known, reply.text)
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo al reparar')
   } finally {

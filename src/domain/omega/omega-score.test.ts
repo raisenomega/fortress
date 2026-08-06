@@ -5,7 +5,13 @@ const NONE = { runs: 0, failedRuns: 0, outputTokens: 0, verifiedFindings: 0 }
 
 describe('computeScore', () => {
   it('todo cuadra y sin fallos: confiable absoluto', () => {
-    const s = computeScore({ ...NONE, okChecks: 10, discrepancies: 0, runs: 5, verifiedFindings: 10 })
+    const s = computeScore({
+      ...NONE,
+      okChecks: 10,
+      discrepancies: 0,
+      runs: 5,
+      verifiedFindings: 10
+    })
     expect(s.veracity).toBe(100)
     expect(s.compliance).toBe(100)
     expect(s.overall).toBe(100)
@@ -13,7 +19,13 @@ describe('computeScore', () => {
   })
 
   it('mitad de hallazgos son discrepancias: baja la veracidad', () => {
-    const s = computeScore({ ...NONE, okChecks: 5, discrepancies: 5, runs: 4, verifiedFindings: 10 })
+    const s = computeScore({
+      ...NONE,
+      okChecks: 5,
+      discrepancies: 5,
+      runs: 4,
+      verifiedFindings: 10
+    })
     expect(s.veracity).toBe(50)
   })
 
@@ -24,7 +36,9 @@ describe('computeScore', () => {
     expect(s.overall).toBeNull()
     expect(s.band).toBe('sin-datos')
   })
+})
 
+describe('computeScore (ponderacion parcial)', () => {
   it('solo pondera lo que tiene datos (compliance sin veracidad)', () => {
     const s = computeScore({ ...NONE, okChecks: 0, discrepancies: 0, runs: 4, failedRuns: 1 })
     expect(s.veracity).toBeNull()
@@ -32,7 +46,14 @@ describe('computeScore', () => {
   })
 
   it('tokens por hallazgo es informativo, no entra al overall', () => {
-    const s = computeScore({ okChecks: 2, discrepancies: 0, runs: 1, failedRuns: 0, outputTokens: 600, verifiedFindings: 2 })
+    const s = computeScore({
+      okChecks: 2,
+      discrepancies: 0,
+      runs: 1,
+      failedRuns: 0,
+      outputTokens: 600,
+      verifiedFindings: 2
+    })
     expect(s.tokensPerFinding).toBe(300)
     expect(s.overall).toBe(100) // veracidad+cumplimiento 100, la eficiencia no baja nada
   })

@@ -1,20 +1,15 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { sendMessage } from '@application/chat/send-message'
 import type { SendMessageInput } from '@application/chat/send-message-types'
-import { usesApiKey } from '@application/settings/read-auth-source'
-import { readBudget } from '@application/settings/read-budget'
 import type { StepProgress } from '@application/workflow/step-progress'
-import { buildMcpConfig } from '@domain/connectors/mcp-config'
 import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import { err, type Result } from '@domain/shared/result'
-import { resolveAssistant } from '../ai/assistant-factory'
-import { activeCustomAgents } from '../claude-code/active-custom-agents'
-import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
 import { stopLoop } from '../loop/loop-controller'
 import { endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
+import { buildChatEngines } from './chat-engines'
 import { IPC } from './channels'
 
 /** Emite fragmentos solo si la ventana sigue viva (el usuario pudo cerrarla). */
@@ -46,20 +41,12 @@ export function registerChatSendHandler(): void {
     const denegado = guardRun(context, input.projectId)
     if (denegado !== null) return err(denegado)
 
-    const budget = readBudget(context)
-    // Los conectores MCP activos viajan al agente. Solo en el chat: un escaneo
-    // de seguridad no necesita Figma ni Canva.
-    const mcp = buildMcpConfig(context.connectors.list())
-    // Agentes auto-propuestos ACTIVOS: se suman al catalogo --agents del chat.
-    const customs = activeCustomAgents(context.agentDrafts.listActive())
-    const codeAgent = createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context), mcp, customs)
-    // Con el CLI instalado no hace falta API key: claude usa sus credenciales.
-    const assistant = resolveAssistant(context.apiKeys)
+    const { codeAgent, assistant } = buildChatEngines(context)
 
     try {
       return await sendMessage(
         context,
-        assistant.ok ? assistant.value : null,
+        assistant,
         codeAgent,
         input,
         chunkSender(event, input.projectId),

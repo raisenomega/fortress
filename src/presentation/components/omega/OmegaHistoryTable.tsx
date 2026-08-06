@@ -1,4 +1,6 @@
 import type { AgentRun } from '@domain/telemetry/agent-run'
+import { onActivate } from '../common/activate'
+import { OmegaHistoryPager } from './OmegaHistoryPager'
 
 interface OmegaHistoryTableProps {
   readonly runs: readonly AgentRun[]
@@ -25,7 +27,10 @@ export function OmegaHistoryTable(props: OmegaHistoryTableProps): React.JSX.Elem
         {slice.map((run) => (
           <li
             key={run.id}
+            role="button"
+            tabIndex={0}
             onClick={() => onRow(run)}
+            onKeyDown={onActivate(() => onRow(run))}
             className="tap flex cursor-pointer items-center gap-2 px-2 py-1.5 text-xs hover:bg-secondary/40"
           >
             <span className={run.failed ? 'text-critical' : 'text-success'}>
@@ -39,22 +44,7 @@ export function OmegaHistoryTable(props: OmegaHistoryTableProps): React.JSX.Elem
           </li>
         ))}
       </ul>
-      {pages > 1 ? (
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <button type="button" className="tap" disabled={page === 0} onClick={() => onPage(page - 1)}>
-            ‹ Anterior
-          </button>
-          <span>{page + 1} / {pages}</span>
-          <button
-            type="button"
-            className="tap"
-            disabled={page + 1 >= pages}
-            onClick={() => onPage(page + 1)}
-          >
-            Siguiente ›
-          </button>
-        </div>
-      ) : null}
+      <OmegaHistoryPager page={page} pages={pages} onPage={onPage} />
     </div>
   )
 }
