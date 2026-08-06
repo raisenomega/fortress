@@ -24,12 +24,14 @@ export function registerProjectHandlers(): void {
     return removeProject(context, id)
   })
 
+  // trusted desbloquea el allowlist de Bash: se coacciona a booleano estricto
+  // para que el renderer no lo active con un valor "truthy" cualquiera.
   ipcMain.handle(IPC.projectsSetTrusted, (_event, id: string, trusted: boolean) =>
-    setProjectTrusted(getAppContext(), id, trusted)
+    setProjectTrusted(getAppContext(), String(id), trusted === true)
   )
 
   ipcMain.handle(IPC.projectsSetLoopEnabled, (_event, id: string, enabled: boolean) => {
-    const result = setProjectLoopEnabled(getAppContext(), id, enabled)
+    const result = setProjectLoopEnabled(getAppContext(), String(id), enabled === true)
     // El toggle arranca o para el loop de ese proyecto (aislado por proyecto).
     if (result.ok) (enabled ? startLoop : stopLoop)(id)
     return result
