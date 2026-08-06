@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../adapters/fortress-api'
+import { reportError } from '../../stores/toast-store'
 import { FIELD_CLASS, LabeledField } from '../common/LabeledField'
 
 interface BudgetFieldProps {
@@ -23,7 +24,14 @@ export function BudgetField({
     void api()
       .settings.get(settingKey)
       .then((stored) => setValue(stored ?? (fallback === undefined ? '' : String(fallback))))
-  }, [settingKey])
+  }, [settingKey, fallback])
+
+  // Es un freno del gasto autonomo: si no se guarda, el operador debe saberlo.
+  const save = (): void => {
+    void api()
+      .settings.set(settingKey, value)
+      .catch(() => reportError('No se pudo guardar el tope de gasto'))
+  }
 
   return (
     <LabeledField label={`${label} (${unit})`}>
@@ -31,7 +39,7 @@ export function BudgetField({
         inputMode="decimal"
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        onBlur={() => void api().settings.set(settingKey, value)}
+        onBlur={save}
         className={FIELD_CLASS}
       />
     </LabeledField>

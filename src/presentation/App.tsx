@@ -3,6 +3,7 @@ import { CapabilityModal } from './components/system/CapabilityModal'
 import { WorkflowPlanCard } from './components/workflow/WorkflowPlanCard'
 import { HealthPanel } from './components/health/HealthPanel'
 import { ProjectDialogs } from './components/newproject/ProjectDialogs'
+import { Toaster } from './components/common/Toaster'
 import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
 import { useBootstrap } from './hooks/useBootstrap'
@@ -51,6 +52,7 @@ export function App(): React.JSX.Element {
         }
       />
       <ProjectDialogs />
+      <Toaster />
       {healthPanelOpen ? <HealthPanel /> : null}
       {openAgentId ? (
         <AgentDetailModal agentId={openAgentId} onClose={() => setOpenAgent(null)} />

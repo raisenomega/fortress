@@ -1,6 +1,7 @@
 import { windowStart, type TimeWindow } from '@domain/telemetry/time-window'
 import { api } from '../adapters/fortress-api'
 import { usePerformanceStore } from '../stores/performance-store'
+import { reportError } from '../stores/toast-store'
 
 const TOP_AGENTS = 5
 
@@ -23,7 +24,8 @@ export async function loadPerformance(window: TimeWindow): Promise<void> {
       api().scan.historySince(since)
     ])
     usePerformanceStore.getState().setData({ usage, byProject, ranking, scans })
-  } catch {
+  } catch (error) {
     usePerformanceStore.getState().setLoading(false)
+    reportError(error instanceof Error ? error.message : 'No se pudo cargar el rendimiento')
   }
 }

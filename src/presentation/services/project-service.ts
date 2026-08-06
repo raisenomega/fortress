@@ -2,6 +2,7 @@ import type { NewProject, Project } from '@domain/project/project'
 import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useProjectStore } from '../stores/project-store'
+import { reportError } from '../stores/toast-store'
 
 /** Recarga la lista completa desde SQLite y la vuelca en el store. */
 export async function loadProjects(): Promise<void> {
@@ -40,11 +41,21 @@ export async function removeProject(id: string): Promise<Result<null>> {
 }
 
 export async function setProjectTrusted(id: string, trusted: boolean): Promise<void> {
-  const result = await api().projects.setTrusted(id, trusted)
-  if (result.ok) await loadProjects()
+  try {
+    const result = await api().projects.setTrusted(id, trusted)
+    if (result.ok) await loadProjects()
+    else reportError(result.error)
+  } catch (error) {
+    reportError(error instanceof Error ? error.message : 'No se pudo cambiar la confianza')
+  }
 }
 
 export async function setProjectLoopEnabled(id: string, enabled: boolean): Promise<void> {
-  const result = await api().projects.setLoopEnabled(id, enabled)
-  if (result.ok) await loadProjects()
+  try {
+    const result = await api().projects.setLoopEnabled(id, enabled)
+    if (result.ok) await loadProjects()
+    else reportError(result.error)
+  } catch (error) {
+    reportError(error instanceof Error ? error.message : 'No se pudo cambiar el loop')
+  }
 }
