@@ -31,7 +31,10 @@ function context(): { ctx: AppContext; recorded: NewCapabilityEpisode[] } {
     listFor: () => [],
     tallyFor: () => ({ episodes: 0, failures: 0 })
   }
-  return { ctx: { capabilities, agentDrafts, capabilityEpisodes } as unknown as AppContext, recorded }
+  return {
+    ctx: { capabilities, agentDrafts, capabilityEpisodes } as unknown as AppContext,
+    recorded
+  }
 }
 
 const BLOCK = 'EPISODE: {"outcome":"ok","summary":"resolvio un caso"}'
@@ -46,7 +49,12 @@ describe('runLearningEpisode', () => {
 
   it('si el agente falla, no registra y da error', async () => {
     const { ctx, recorded } = context()
-    const r = await runLearningEpisode(ctx, 'c1', fakeAgent(reply({ failed: true, text: 'x' })), '/tmp/x')
+    const r = await runLearningEpisode(
+      ctx,
+      'c1',
+      fakeAgent(reply({ failed: true, text: 'x' })),
+      '/tmp/x'
+    )
     expect(r.ok).toBe(false)
     expect(recorded).toHaveLength(0)
   })

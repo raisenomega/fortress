@@ -25,8 +25,7 @@ export function createRunAggregates(db: Db): Aggregates {
   return {
     usageSince: (since) => usageFromRow(usageSince.get(since) as UsageColumns),
 
-    episodeTallySince: (since) =>
-      tally.get(since) as { episodes: number; failures: number },
+    episodeTallySince: (since) => tally.get(since) as { episodes: number; failures: number },
 
     usageByProjectSince: (since) => {
       const rows = usageByProject.all(since) as Array<UsageColumns & { project_id: string }>

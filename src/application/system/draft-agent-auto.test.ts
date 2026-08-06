@@ -48,12 +48,22 @@ describe('draftAgentAuto', () => {
   })
 
   it('si el agente falla, devuelve error', async () => {
-    const r = await draftAgentAuto(context().ctx, 'c1', fakeAgent(reply({ failed: true, text: 'boom' })), '/tmp/x')
+    const r = await draftAgentAuto(
+      context().ctx,
+      'c1',
+      fakeAgent(reply({ failed: true, text: 'boom' })),
+      '/tmp/x'
+    )
     expect(r.ok).toBe(false)
   })
 
   it('si no hay bloque parseable, devuelve error', async () => {
-    const r = await draftAgentAuto(context().ctx, 'c1', fakeAgent(reply({ text: 'nada util' })), '/tmp/x')
+    const r = await draftAgentAuto(
+      context().ctx,
+      'c1',
+      fakeAgent(reply({ text: 'nada util' })),
+      '/tmp/x'
+    )
     expect(r.ok).toBe(false)
   })
 })

@@ -6,9 +6,14 @@ import { buildReflectionEntry } from './reflection-entry'
 const MARKER = '## REFLEXIONES POR SESION'
 
 function header(projectName: string): string {
-  return [`# COGNITION-LOG — ${projectName}`, '', '## GENERACION ACTUAL', '', 'Generacion: 0', ''].join(
-    '\n'
-  )
+  return [
+    `# COGNITION-LOG — ${projectName}`,
+    '',
+    '## GENERACION ACTUAL',
+    '',
+    'Generacion: 0',
+    ''
+  ].join('\n')
 }
 
 /** Las reflexiones ya escritas: se conservan (son historia, se acumulan). */

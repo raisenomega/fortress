@@ -11,7 +11,14 @@ const project = {
 } as Project
 
 const scan = { id: 's1', projectId: 'p', score: 72 } as ScanRecord
-const open: Finding = { id: 'f1', severity: 'HIGH', title: 'Fuga', file: 'src/a.ts', line: 9, status: 'open' }
+const open: Finding = {
+  id: 'f1',
+  severity: 'HIGH',
+  title: 'Fuga',
+  file: 'src/a.ts',
+  line: 9,
+  status: 'open'
+}
 const descartado: Finding = { ...open, id: 'f2', title: 'Falso', status: 'false_positive' }
 
 describe('buildProjectRecord', () => {

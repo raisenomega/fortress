@@ -27,7 +27,9 @@ export function recordPushDecision(context: AppContext, project: Project, blocke
     .listByProject(project.id)
     .filter((f) => f.status === 'open' && f.severity === 'CRITICAL')
   const verificados = criticals.filter(
-    (f) => checkFinding(f, context.filesystemProbe.probe(project.path, f.file)).verdict !== 'discrepancia'
+    (f) =>
+      checkFinding(f, context.filesystemProbe.probe(project.path, f.file)).verdict !==
+      'discrepancia'
   ).length
 
   context.omegaLog.append({

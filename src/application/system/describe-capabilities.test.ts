@@ -27,7 +27,10 @@ function episodes(tally: EpisodeTally): CapabilityEpisodeRepository {
 
 describe('describeCapabilities', () => {
   it('deriva madurez y elegibilidad de sus propios episodios', () => {
-    const [c] = describeCapabilities(repo([stored({ id: 'a' })]), episodes({ episodes: 20_000, failures: 0 }))
+    const [c] = describeCapabilities(
+      repo([stored({ id: 'a' })]),
+      episodes({ episodes: 20_000, failures: 0 })
+    )
     expect(c.episodes).toBe(20_000)
     expect(c.maturity).toBe(20_000)
     expect(c.phase).toBe('propuesta') // la fase es la APROBADA; los episodios solo hacen elegible

@@ -22,7 +22,10 @@ export interface GenesisDeps {
  * decision (topes/humano/sin-trabajo) lo pide. No conoce timers reales ni el
  * agente: los inyecta el engine. La seguridad vive en genesisStop.
  */
-export async function runGenesis(deps: GenesisDeps, budget: GenesisBudget): Promise<GenesisStopReason> {
+export async function runGenesis(
+  deps: GenesisDeps,
+  budget: GenesisBudget
+): Promise<GenesisStopReason> {
   let episodesDone = 0
   for (;;) {
     const id = deps.nextCapability()

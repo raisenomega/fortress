@@ -27,7 +27,9 @@ export function KeepAwakeToggle(): React.JSX.Element {
           : 'Pantalla puede apagarse. Click para mantenerla encendida mientras los agentes trabajan.'
       }
       className={`tap shrink-0 rounded-md border p-1.5 ${
-        on ? 'border-success/50 text-success' : 'border-border text-muted-foreground hover:text-foreground'
+        on
+          ? 'border-success/50 text-success'
+          : 'border-border text-muted-foreground hover:text-foreground'
       }`}
     >
       <CheckCircle size={15} aria-hidden />

@@ -25,7 +25,10 @@ function parseCount(raw: string | null): number {
 }
 
 /** Lee los topes de settings. Sin fijar -> 0, que genesisConfigured trata como no listo. */
-export function parseGenesisBudget(costCap: string | null, maxEpisodes: string | null): GenesisBudget {
+export function parseGenesisBudget(
+  costCap: string | null,
+  maxEpisodes: string | null
+): GenesisBudget {
   return { costCapUsd: parseAmount(costCap), maxEpisodes: parseCount(maxEpisodes) }
 }
 

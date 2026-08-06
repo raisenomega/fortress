@@ -16,9 +16,8 @@ export function GenesisHud({ status }: GenesisHudProps): React.JSX.Element {
   return (
     <div className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
       <p>
-        {status.phase === 'corriendo' ? 'Corriendo' : 'Parado'} · episodios{' '}
-        {status.episodesDone}/{status.maxEpisodes} · gasto {status.spentSession.toFixed(2)}/
-        {status.costCap} USD
+        {status.phase === 'corriendo' ? 'Corriendo' : 'Parado'} · episodios {status.episodesDone}/
+        {status.maxEpisodes} · gasto {status.spentSession.toFixed(2)}/{status.costCap} USD
       </p>
       {status.stopReason ? (
         <p className="mt-1 text-foreground">

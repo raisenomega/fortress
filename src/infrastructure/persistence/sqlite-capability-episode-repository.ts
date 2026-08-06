@@ -44,7 +44,6 @@ export function createSqliteCapabilityEpisodeRepository(db: Db): CapabilityEpiso
       return toEpisode(byId.get(id) as Row)
     },
     listFor: (capabilityId, limit) => (forCap.all(capabilityId, limit) as Row[]).map(toEpisode),
-    tallyFor: (capabilityId) =>
-      tally.get(capabilityId) as { episodes: number; failures: number }
+    tallyFor: (capabilityId) => tally.get(capabilityId) as { episodes: number; failures: number }
   }
 }

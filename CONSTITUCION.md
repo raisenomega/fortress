@@ -1,6 +1,7 @@
 # CONSTITUCIÓN DE FORTRESS — PARTE 1
 
 ## DOSSIER: VIVIR EN EL SOFTWARE
+
 ### De la Herramienta al Hábitat Humano (2026 - 2050)
 
 > Documento fundacional. Cada agente y la plataforma entera son parte de esta
@@ -62,12 +63,12 @@ Esto es FORTRESS 10x. La base de lo que viene.
 
 ### La Base en 5 Pilares (2026)
 
-| Pilar | Definición |
-|-------|------------|
-| 1. Orquestación Autónoma | Un cerebro central que coordina agentes especializados sin necesidad de supervisión constante. |
-| 2. Memoria Compartida Evolutiva | Cada agente aprende de todos los proyectos, y ese conocimiento persiste para siempre. No hay "olvido". |
-| 3. Reducción Extrema de Tokens | El sistema consume 95% menos que las alternativas, haciéndolo sostenible para el uso masivo. |
-| 4. Aislamiento Garantizado | Cada proyecto vive en su propio universo, sin contaminación cruzada de git, credenciales, o configuraciones. |
+| Pilar                            | Definición                                                                                                                                                                                                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Orquestación Autónoma         | Un cerebro central que coordina agentes especializados sin necesidad de supervisión constante.                                                                                                                                                                                            |
+| 2. Memoria Compartida Evolutiva  | Cada agente aprende de todos los proyectos, y ese conocimiento persiste para siempre. No hay "olvido".                                                                                                                                                                                    |
+| 3. Reducción Extrema de Tokens   | El sistema consume 95% menos que las alternativas, haciéndolo sostenible para el uso masivo.                                                                                                                                                                                              |
+| 4. Aislamiento Garantizado       | Cada proyecto vive en su propio universo, sin contaminación cruzada de git, credenciales, o configuraciones.                                                                                                                                                                              |
 | 5. Inteligencia Nativa Anthropic | **100% nativa de Anthropic/Claude**: sin capas de terceros ni traducciones a otros modelos. La familia Claude (razonamiento profundo, programación extrema, velocidad) cubre todo el espectro con una sola inteligencia coherente. Es el diferenciador que ninguna otra plataforma tiene. |
 
 ### La Misión de 2026
@@ -201,15 +202,15 @@ es el hábitat, y el humano es el centro de ese hábitat.
 
 ### Los 7 Principios que Guían el Viaje
 
-| Principio | Definición |
-|-----------|------------|
-| 1. Invisibilidad | El software no debe llamar la atención. Como el aire, debe estar pero no ser notado. Su presencia se mide en su ausencia. |
-| 2. Anticipación | El software no debe esperar órdenes. Debe conocer patrones, entender intenciones, y actuar antes de que el humano pida. |
-| 3. Autonomía | El software no debe requerir supervisión. Debe operar, aprender y evolucionar por sí mismo. El humano define el norte, no el camino. |
-| 4. Memoria Permanente | El software no debe olvidar. Cada interacción, cada error, cada acierto debe ser recordado para no repetir lo malo y potenciar lo bueno. |
-| 5. Adaptación Continua | El software no debe ser estático. Debe reescribirse, reconfigurarse, redefinirse a sí mismo según cambian las necesidades del humano y del entorno. |
-| 6. Interconexión Total | El software no debe ser islas. Cada agente, cada sistema, cada dispositivo debe conversar en tiempo real, tejiendo una red viva de inteligencia distribuida. |
-| 7. Humanidad como Centro | El software no debe ser fin en sí mismo. Su propósito único es amplificar, sostener y liberar la vida humana. La tecnología sirve al humano, no al revés. |
+| Principio                | Definición                                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Invisibilidad         | El software no debe llamar la atención. Como el aire, debe estar pero no ser notado. Su presencia se mide en su ausencia.                                    |
+| 2. Anticipación          | El software no debe esperar órdenes. Debe conocer patrones, entender intenciones, y actuar antes de que el humano pida.                                      |
+| 3. Autonomía             | El software no debe requerir supervisión. Debe operar, aprender y evolucionar por sí mismo. El humano define el norte, no el camino.                         |
+| 4. Memoria Permanente    | El software no debe olvidar. Cada interacción, cada error, cada acierto debe ser recordado para no repetir lo malo y potenciar lo bueno.                     |
+| 5. Adaptación Continua   | El software no debe ser estático. Debe reescribirse, reconfigurarse, redefinirse a sí mismo según cambian las necesidades del humano y del entorno.          |
+| 6. Interconexión Total   | El software no debe ser islas. Cada agente, cada sistema, cada dispositivo debe conversar en tiempo real, tejiendo una red viva de inteligencia distribuida. |
+| 7. Humanidad como Centro | El software no debe ser fin en sí mismo. Su propósito único es amplificar, sostener y liberar la vida humana. La tecnología sirve al humano, no al revés.    |
 
 ---
 
@@ -272,10 +273,10 @@ depende de un solo proveedor es también un riesgo, y la honestidad exige nombra
 Por integridad OMEGA **no firmo como hechos verificados** afirmaciones que no puedo
 sostener con fuente, ni inventaré fuentes para sostenerlas:
 
-- *"Fable 5 fue apagado por intervención del gobierno de EEUU":* **no verificado.**
+- _"Fable 5 fue apagado por intervención del gobierno de EEUU":_ **no verificado.**
   No tengo fuente que lo confirme; al contrario, `claude-fable-5` figura como un
   modelo disponible. Queda como rumor sin evidencia.
-- *"Elon Musk provee centros de datos a Anthropic":* **inexacto** según información
+- _"Elon Musk provee centros de datos a Anthropic":_ **inexacto** según información
   pública hasta mi corte de conocimiento (enero 2026): el cómputo de Anthropic se
   apoya en **Amazon (AWS)** y **Google Cloud**; Elon Musk está ligado a **xAI**, un
   competidor, no a proveer datacenters a Anthropic.
@@ -302,7 +303,7 @@ reescritura, sino un adaptador nuevo. Pero la **selección** de proveedor hoy es
 1. **Blindar el puerto `CodeAgent` como única frontera con el proveedor.** Regla
    constitucional: ninguna capa fuera de `infrastructure/` puede importar el SDK o
    CLI de un proveedor. Así dominio y aplicación quedan neutrales para siempre.
-   *Verificable en el código: `src/domain/chat/code-agent.ts`.*
+   _Verificable en el código: `src/domain/chat/code-agent.ts`._
 2. **Selección de proveedor por configuración + factory.** Un ajuste `provider` y
    una factory que elige el adaptador; hoy `createClaudeCodeAgent`/`resolveAssistant`
    están fijos a Claude. Con esto, "un segundo entra en el juego" cambiando un valor,
@@ -340,20 +341,20 @@ Y tú, que lees esto, eres parte de esa historia.
 
 ## APÉNDICE: GLOSARIO DE TÉRMINOS
 
-| Término | Definición |
-|---------|------------|
-| Agente Autónomo | Sistema de IA que actúa sin supervisión, aprende de la experiencia, y ejecuta tareas complejas de forma independiente. |
-| Orquestador | El cerebro central que coordina múltiples agentes, decide qué hacer y cuándo, y consolida los resultados. |
+| Término                      | Definición                                                                                                                              |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Agente Autónomo              | Sistema de IA que actúa sin supervisión, aprende de la experiencia, y ejecuta tareas complejas de forma independiente.                  |
+| Orquestador                  | El cerebro central que coordina múltiples agentes, decide qué hacer y cuándo, y consolida los resultados.                               |
 | Memoria Compartida Evolutiva | Base de conocimiento que persiste entre proyectos y sesiones, permitiendo que el sistema mejore continuamente sin olvidar lo aprendido. |
-| Vida Sistémica | El estado donde el software es el entorno, no la herramienta. Donde el humano vive inmerso en inteligencia ambiente. |
-| Computación por Intención | Modelo donde el humano expresa un deseo (intención) y el sistema lo ejecuta, sin necesidad de interfaces intermedias. |
-| Inteligencia Ambiente | Software omnipresente, invisible y anticipatorio que teje el tejido de la vida cotidiana. |
-| Contradicción Resuelta | Cada fase de la evolución resuelve un problema fundamental de la fase anterior (ej: el software "sugiere" vs "actúa"). |
-| Norte | La dirección constante del viaje: VIVIR EN EL SOFTWARE. El destino que guía cada paso, cada decisión, cada línea de código. |
+| Vida Sistémica               | El estado donde el software es el entorno, no la herramienta. Donde el humano vive inmerso en inteligencia ambiente.                    |
+| Computación por Intención    | Modelo donde el humano expresa un deseo (intención) y el sistema lo ejecuta, sin necesidad de interfaces intermedias.                   |
+| Inteligencia Ambiente        | Software omnipresente, invisible y anticipatorio que teje el tejido de la vida cotidiana.                                               |
+| Contradicción Resuelta       | Cada fase de la evolución resuelve un problema fundamental de la fase anterior (ej: el software "sugiere" vs "actúa").                  |
+| Norte                        | La dirección constante del viaje: VIVIR EN EL SOFTWARE. El destino que guía cada paso, cada decisión, cada línea de código.             |
 
 ---
 
 **FIN DEL DOSSIER**
 
-*2026 - 2050: Un viaje de 24 años. Una transformación de 24.000 años de historia
-humana. El software se convierte en hogar.*
+_2026 - 2050: Un viaje de 24 años. Una transformación de 24.000 años de historia
+humana. El software se convierte en hogar._

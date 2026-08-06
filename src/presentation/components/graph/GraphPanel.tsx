@@ -39,7 +39,8 @@ export function GraphPanel(): React.JSX.Element {
         <GraphStatsGrid stats={graph.stats} />
       ) : (
         <Notice tone="ok">
-          Configurado, pero aun sin indice. Los agentes lo crean con index_repository en el primer uso.
+          Configurado, pero aun sin indice. Los agentes lo crean con index_repository en el primer
+          uso.
         </Notice>
       )}
     </div>

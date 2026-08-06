@@ -44,7 +44,9 @@ export function OmegaModeBody(props: OmegaModeBodyProps): React.JSX.Element {
         />
       )
     }
-    return <OmegaAgentsView agents={props.agents} score={props.score} onSelect={props.onSelectAgent} />
+    return (
+      <OmegaAgentsView agents={props.agents} score={props.score} onSelect={props.onSelectAgent} />
+    )
   }
   if (props.mode === 'codigo') {
     return (

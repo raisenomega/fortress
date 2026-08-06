@@ -13,7 +13,11 @@ interface OmegaAgentsViewProps {
 }
 
 /** Scope de AGENTES: puntuacion, badges (click abre su pagina), estadisticas, comparativa. */
-export function OmegaAgentsView({ agents, score, onSelect }: OmegaAgentsViewProps): React.JSX.Element {
+export function OmegaAgentsView({
+  agents,
+  score,
+  onSelect
+}: OmegaAgentsViewProps): React.JSX.Element {
   const activos = agents.filter((a) => a.runs > 0).length
 
   return (

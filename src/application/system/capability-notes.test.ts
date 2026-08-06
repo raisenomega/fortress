@@ -18,7 +18,9 @@ function context(exists: boolean): { ctx: AppContext; added: number } {
       added += 1
       return { ...n, id: 'n1', createdAt: 'now' }
     },
-    listFor: () => [{ id: 'n1', capabilityId: 'c1', author: 'operador', note: 'hola', createdAt: 'now' }]
+    listFor: () => [
+      { id: 'n1', capabilityId: 'c1', author: 'operador', note: 'hola', createdAt: 'now' }
+    ]
   }
   return { ctx: { capabilities, capabilityNotes } as unknown as AppContext, added: added }
 }
@@ -26,21 +28,21 @@ function context(exists: boolean): { ctx: AppContext; added: number } {
 describe('addCapabilityNote', () => {
   it('guarda una nota valida', () => {
     const { ctx } = context(true)
-    expect(addCapabilityNote(ctx, { capabilityId: 'c1', author: 'operador', note: 'refuerza X' }).ok).toBe(
-      true
-    )
+    expect(
+      addCapabilityNote(ctx, { capabilityId: 'c1', author: 'operador', note: 'refuerza X' }).ok
+    ).toBe(true)
   })
 
   it('rechaza una nota vacia', () => {
-    expect(addCapabilityNote(context(true).ctx, { capabilityId: 'c1', author: 'x', note: ' ' }).ok).toBe(
-      false
-    )
+    expect(
+      addCapabilityNote(context(true).ctx, { capabilityId: 'c1', author: 'x', note: ' ' }).ok
+    ).toBe(false)
   })
 
   it('rechaza una capacidad inexistente', () => {
-    expect(addCapabilityNote(context(false).ctx, { capabilityId: 'x', author: 'x', note: 'y' }).ok).toBe(
-      false
-    )
+    expect(
+      addCapabilityNote(context(false).ctx, { capabilityId: 'x', author: 'x', note: 'y' }).ok
+    ).toBe(false)
   })
 })
 

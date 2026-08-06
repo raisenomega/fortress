@@ -59,7 +59,9 @@ export function computeScore(inputs: ScoreInputs): OmegaScore {
     veracity,
     compliance,
     tokensPerFinding:
-      inputs.verifiedFindings === 0 ? null : Math.round(inputs.outputTokens / inputs.verifiedFindings),
+      inputs.verifiedFindings === 0
+        ? null
+        : Math.round(inputs.outputTokens / inputs.verifiedFindings),
     overall,
     band: bandFor(overall)
   }

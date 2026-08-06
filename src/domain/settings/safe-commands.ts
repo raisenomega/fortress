@@ -24,9 +24,6 @@ export function safeCommandRules(): readonly string[] {
  * confiable eso seria ejecucion de codigo arbitrario. En plan (escaneo o
  * supervisado) el agente no edita, asi que no necesita autoverificarse.
  */
-export function selfVerifyRules(
-  mode: ClaudePermissionMode,
-  trusted: boolean
-): readonly string[] {
+export function selfVerifyRules(mode: ClaudePermissionMode, trusted: boolean): readonly string[] {
   return mode === 'acceptEdits' && trusted ? safeCommandRules() : []
 }

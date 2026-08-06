@@ -35,7 +35,9 @@ export function OmegaHeader(props: OmegaHeaderProps): React.JSX.Element {
     <header className="space-y-3 rounded-md border border-primary/30 bg-card p-3">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <Icon name="eye" size={18} className="text-primary" />
-        <span className="text-sm font-semibold tracking-wide text-primary uppercase">Sentinel Omega</span>
+        <span className="text-sm font-semibold tracking-wide text-primary uppercase">
+          Sentinel Omega
+        </span>
         <span className="text-[10px] tracking-widest text-muted-foreground uppercase">
           el ojo que todo lo ve
         </span>

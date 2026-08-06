@@ -8,7 +8,13 @@ import { draftAssistantMessage } from './streaming-message'
 const drafts = new Map<string, ChatMessage>()
 
 /** Fases que CIERRAN el mensaje anterior (nueva fase con salida propia, o fin). */
-const CLOSES: ReadonlySet<string> = new Set(['escaneando', 'reparando', 'debate', 'esperando', 'parado'])
+const CLOSES: ReadonlySet<string> = new Set([
+  'escaneando',
+  'reparando',
+  'debate',
+  'esperando',
+  'parado'
+])
 
 function finalize(projectId: string): void {
   const draft = drafts.get(projectId)

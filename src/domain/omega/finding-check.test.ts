@@ -11,14 +11,20 @@ describe('checkFinding', () => {
   })
 
   it('archivo inexistente: discrepancia con evidencia', () => {
-    const r = checkFinding({ ...base, file: 'src/fantasma.ts', line: 3 }, { exists: false, lineCount: 0 })
+    const r = checkFinding(
+      { ...base, file: 'src/fantasma.ts', line: 3 },
+      { exists: false, lineCount: 0 }
+    )
     expect(r.verdict).toBe('discrepancia')
     expect(r.summary).toContain('no existe')
     expect(r.evidence).toBe('src/fantasma.ts:3')
   })
 
   it('linea fuera de rango: discrepancia', () => {
-    const r = checkFinding({ ...base, file: 'src/a.ts', line: 999 }, { exists: true, lineCount: 40 })
+    const r = checkFinding(
+      { ...base, file: 'src/a.ts', line: 999 },
+      { exists: true, lineCount: 40 }
+    )
     expect(r.verdict).toBe('discrepancia')
     expect(r.summary).toContain('40 lineas')
   })
@@ -29,7 +35,10 @@ describe('checkFinding', () => {
   })
 
   it('archivo existe y no cita linea: ok', () => {
-    const r = checkFinding({ ...base, file: 'src/a.ts', line: null }, { exists: true, lineCount: 1 })
+    const r = checkFinding(
+      { ...base, file: 'src/a.ts', line: null },
+      { exists: true, lineCount: 1 }
+    )
     expect(r.verdict).toBe('ok')
   })
 })

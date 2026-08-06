@@ -11,8 +11,8 @@ export function LoopBudgetSection(): React.JSX.Element {
       <header>
         <h3 className="text-sm font-semibold text-foreground">Loop autonomo</h3>
         <p className="text-xs text-muted-foreground">
-          Frenos OBLIGATORIOS. Sin ambos guardados no se puede encender el loop. El ciclo se
-          detiene solo al superar el gasto o el numero de ciclos, lo que ocurra primero.
+          Frenos OBLIGATORIOS. Sin ambos guardados no se puede encender el loop. El ciclo se detiene
+          solo al superar el gasto o el numero de ciclos, lo que ocurra primero.
         </p>
       </header>
 
@@ -22,7 +22,11 @@ export function LoopBudgetSection(): React.JSX.Element {
           label="Tope de gasto por sesion"
           unit="USD"
         />
-        <BudgetField settingKey={SETTINGS_KEYS.loopMaxCycles} label="Maximo de ciclos" unit="ciclos" />
+        <BudgetField
+          settingKey={SETTINGS_KEYS.loopMaxCycles}
+          label="Maximo de ciclos"
+          unit="ciclos"
+        />
       </div>
     </section>
   )

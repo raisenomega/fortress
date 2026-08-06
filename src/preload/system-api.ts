@@ -67,4 +67,3 @@ export interface PostureApi {
   /** Audita la exposicion externa de un sitio propio. Solo lectura. */
   run(request: PostureRequest): Promise<Result<PostureResult>>
 }
-

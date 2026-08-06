@@ -19,7 +19,8 @@ interface OmegaCodeViewProps {
   readonly loadSnippet: (file: string, line: number) => Promise<FileSnippet | null>
 }
 
-const BTN = 'tap rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
+const BTN =
+  'tap rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
 
 /** Scope de CODIGO: resumen del escaneo + vulnerabilidades reales por severidad. */
 export function OmegaCodeView(props: OmegaCodeViewProps): React.JSX.Element {
@@ -48,7 +49,9 @@ export function OmegaCodeView(props: OmegaCodeViewProps): React.JSX.Element {
       </OmegaSection>
       <OmegaSection title="Vulnerabilidades por severidad">
         {abiertos.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Sin hallazgos abiertos. Escanea el proyecto.</p>
+          <p className="text-xs text-muted-foreground">
+            Sin hallazgos abiertos. Escanea el proyecto.
+          </p>
         ) : null}
         {SEVERITIES.map((sev) => (
           <OmegaFindingGroup key={sev} severity={sev} findings={findings} onSelect={setSel} />
@@ -57,7 +60,9 @@ export function OmegaCodeView(props: OmegaCodeViewProps): React.JSX.Element {
       <OmegaSection title="Libro de la Vida — reportado vs verificado">
         <OmegaLogList entries={log} loadSnippet={loadSnippet} />
       </OmegaSection>
-      {sel ? <OmegaFindingPanel finding={sel} loadSnippet={loadSnippet} onClose={() => setSel(null)} /> : null}
+      {sel ? (
+        <OmegaFindingPanel finding={sel} loadSnippet={loadSnippet} onClose={() => setSel(null)} />
+      ) : null}
     </div>
   )
 }

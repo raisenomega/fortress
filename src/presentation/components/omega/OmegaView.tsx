@@ -11,7 +11,9 @@ export function OmegaView(): React.JSX.Element {
   const project = useActiveProject()
 
   if (!project) {
-    return <EmptyState iconName="eye" title="Ningun proyecto" hint="Elige un proyecto para auditar." />
+    return (
+      <EmptyState iconName="eye" title="Ningun proyecto" hint="Elige un proyecto para auditar." />
+    )
   }
 
   return <OmegaDashboard project={project} />

@@ -11,8 +11,8 @@ export function GenesisBudgetSection(): React.JSX.Element {
       <header>
         <h3 className="text-sm font-semibold text-foreground">Genesis de agentes</h3>
         <p className="text-xs text-muted-foreground">
-          Frenos OBLIGATORIOS del gasto autonomo. Sin ambos guardados no se puede encender.
-          El bucle se detiene solo al superar el gasto o el numero de episodios.
+          Frenos OBLIGATORIOS del gasto autonomo. Sin ambos guardados no se puede encender. El bucle
+          se detiene solo al superar el gasto o el numero de episodios.
         </p>
       </header>
 

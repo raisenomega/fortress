@@ -21,7 +21,13 @@ export async function runStep(
 ): Promise<StepResult> {
   const startedAt = Date.now()
   const reply = await deps.codeAgent.run(
-    { projectPath: deps.project.path, prompt, permissionMode, agentId, trusted: deps.project.trusted },
+    {
+      projectPath: deps.project.path,
+      prompt,
+      permissionMode,
+      agentId,
+      trusted: deps.project.trusted
+    },
     deps.onChunk
   )
 

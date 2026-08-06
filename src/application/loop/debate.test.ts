@@ -30,7 +30,12 @@ describe('runDebate', () => {
 
   it('se rinde con sin-solucion si ningun intento mejora', async () => {
     const revert = vi.fn().mockResolvedValue(undefined)
-    const out = await runDebate(config, deps({ scan: vi.fn().mockResolvedValue(70), revert }), freshProgress(), 80)
+    const out = await runDebate(
+      config,
+      deps({ scan: vi.fn().mockResolvedValue(70), revert }),
+      freshProgress(),
+      80
+    )
     expect(out).toEqual({ score: null, reason: 'sin-solucion' })
     // 1 revert del arreglo que empeoro + 1 por cada uno de los 2 intentos fallidos.
     expect(revert).toHaveBeenCalledTimes(3)

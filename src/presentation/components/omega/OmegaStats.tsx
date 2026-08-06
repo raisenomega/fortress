@@ -31,14 +31,18 @@ export function OmegaStats({ agents }: OmegaStatsProps): React.JSX.Element {
           <p className="text-[10px] tracking-widest text-success uppercase">Mejores</p>
           {s.top.length === 0 ? <p className="text-muted-foreground">s/d</p> : null}
           {s.top.map((a) => (
-            <p key={a.agentId} className="text-foreground">{line(a)}</p>
+            <p key={a.agentId} className="text-foreground">
+              {line(a)}
+            </p>
           ))}
         </div>
         <div>
           <p className="text-[10px] tracking-widest text-critical uppercase">Peores</p>
           {s.bottom.length === 0 ? <p className="text-muted-foreground">s/d</p> : null}
           {s.bottom.map((a) => (
-            <p key={a.agentId} className="text-foreground">{line(a)}</p>
+            <p key={a.agentId} className="text-foreground">
+              {line(a)}
+            </p>
           ))}
         </div>
       </div>

@@ -29,7 +29,11 @@ export function ProposeCapability(): React.JSX.Element {
           placeholder="Nombre de la capacidad"
           className={`min-w-0 flex-1 ${FIELD}`}
         />
-        <select value={kind} onChange={(event) => setKind(event.target.value as CapabilityKind)} className={FIELD}>
+        <select
+          value={kind}
+          onChange={(event) => setKind(event.target.value as CapabilityKind)}
+          className={FIELD}
+        >
           {CAPABILITY_KINDS.map((option) => (
             <option key={option} value={option}>
               {option}

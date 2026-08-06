@@ -23,7 +23,12 @@ export function evaluatePromotion(
 ): Promotion {
   const to = nextPhase(approved)
   const reached = to !== null && ORDER.indexOf(phaseFor(episodes)) >= ORDER.indexOf(to)
-  return { eligible: reached, to, needsHuman: requiresHumanApproval(kind), blocked: omegaVeto.vetoed }
+  return {
+    eligible: reached,
+    to,
+    needsHuman: requiresHumanApproval(kind),
+    blocked: omegaVeto.vetoed
+  }
 }
 
 /**

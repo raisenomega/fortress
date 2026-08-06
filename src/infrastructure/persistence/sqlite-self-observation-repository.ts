@@ -32,7 +32,9 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
      VALUES (?, ?, ?, ?, ?, 0, ?)`
   )
   const byId = db.prepare('SELECT * FROM self_observations WHERE id = ?')
-  const open = db.prepare('SELECT * FROM self_observations WHERE resolved = 0 ORDER BY created_at DESC')
+  const open = db.prepare(
+    'SELECT * FROM self_observations WHERE resolved = 0 ORDER BY created_at DESC'
+  )
   const markResolved = db.prepare('UPDATE self_observations SET resolved = 1 WHERE id = ?')
 
   return {

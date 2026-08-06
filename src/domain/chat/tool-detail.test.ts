@@ -3,7 +3,9 @@ import { redactSecrets, toolDetail } from './tool-detail'
 
 describe('redactSecrets', () => {
   it('tacha una API key de Anthropic', () => {
-    expect(redactSecrets('export ANTHROPIC_API_KEY=sk-ant-abc123def456')).not.toContain('abc123def456')
+    expect(redactSecrets('export ANTHROPIC_API_KEY=sk-ant-abc123def456')).not.toContain(
+      'abc123def456'
+    )
     expect(redactSecrets('sk-ant-abc123def456')).toContain('***')
   })
 
@@ -29,7 +31,9 @@ describe('toolDetail', () => {
   })
 
   it('las herramientas del grafo muestran su consulta', () => {
-    expect(toolDetail('mcp__codebase-memory__search_code', { query: 'JSON.parse' })).toBe('JSON.parse')
+    expect(toolDetail('mcp__codebase-memory__search_code', { query: 'JSON.parse' })).toBe(
+      'JSON.parse'
+    )
   })
 
   it('sin input util devuelve undefined', () => {

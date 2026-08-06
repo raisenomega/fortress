@@ -19,7 +19,9 @@ export async function loopScan(
   if (busy !== null) return err(busy)
 
   const budget = readBudget(context)
-  const scanner = createClaudeScanner(createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context)))
+  const scanner = createClaudeScanner(
+    createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+  )
   try {
     const summary = await runScan(context, scanner, projectId, onProgress)
     if (!summary.ok) return err(summary.error)

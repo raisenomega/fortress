@@ -47,7 +47,9 @@ export function buildDeps(params: EngineParams): LoopDeps {
       }, hooks),
     fix: (attempt) =>
       withStandby(() => {
-        toChat(attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Agentes reparando —\n')
+        toChat(
+          attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Agentes reparando —\n'
+        )
         return loopRepair(context, pid, toChat, attempt)
       }, hooks),
     verify: () => loopVerify(cwd),

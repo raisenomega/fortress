@@ -16,7 +16,14 @@ function context(opts: Opts = {}): AppContext {
   const draft =
     opts.draft === null
       ? null
-      : { capabilityId: 'c1', name: 'R', prompt: 'analiza', iconName: 'sparkles', active: false, ...opts.draft }
+      : {
+          capabilityId: 'c1',
+          name: 'R',
+          prompt: 'analiza',
+          iconName: 'sparkles',
+          active: false,
+          ...opts.draft
+        }
   const capabilities: CapabilityRepository = {
     add: () => ({}) as StoredCapability,
     listAll: () => [],

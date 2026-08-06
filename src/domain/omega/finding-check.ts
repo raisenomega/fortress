@@ -22,7 +22,11 @@ export function checkFinding(finding: Finding, probe: FileProbe): FindingCheck {
   const loc = finding.line === null ? finding.file : `${finding.file}:${finding.line}`
 
   if (finding.file.trim() === '') {
-    return { verdict: 'info', summary: `"${finding.title}" no cita archivo: no verificable`, evidence: '' }
+    return {
+      verdict: 'info',
+      summary: `"${finding.title}" no cita archivo: no verificable`,
+      evidence: ''
+    }
   }
   if (!probe.exists) {
     return {

@@ -6,10 +6,14 @@ interface OmegaHeaderActionsProps {
   readonly busy: boolean
 }
 
-const BTN = 'tap rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
+const BTN =
+  'tap rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
 
 /** Las 4 acciones del header. Reales: recargar, exportar JSON, ir a ajustes, auditar. */
-export function OmegaHeaderActions({ projectId, busy }: OmegaHeaderActionsProps): React.JSX.Element {
+export function OmegaHeaderActions({
+  projectId,
+  busy
+}: OmegaHeaderActionsProps): React.JSX.Element {
   const setView = useUiStore((state) => state.setView)
 
   return (

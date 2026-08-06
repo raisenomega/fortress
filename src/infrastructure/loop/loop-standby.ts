@@ -23,7 +23,10 @@ export const STANDBY_MS = 60_000
  * recupere: nada se pierde, se sigue donde se quedo. Si es terminal, lanza
  * LoopTerminal. Si el humano cancela, lanza LoopCancelled.
  */
-export async function withStandby<T>(op: () => Promise<Result<T>>, hooks: StandbyHooks): Promise<T> {
+export async function withStandby<T>(
+  op: () => Promise<Result<T>>,
+  hooks: StandbyHooks
+): Promise<T> {
   for (;;) {
     if (hooks.isCancelled()) throw new LoopCancelled()
 

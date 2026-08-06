@@ -29,13 +29,17 @@ export function OmegaCompare({ agents }: OmegaCompareProps): React.JSX.Element {
       <div className="flex items-center gap-2">
         <select value={left} onChange={(e) => setLeft(e.target.value)} className={SEL}>
           {agents.map((x) => (
-            <option key={x.agentId} value={x.agentId}>{x.name}</option>
+            <option key={x.agentId} value={x.agentId}>
+              {x.name}
+            </option>
           ))}
         </select>
         <span className="text-muted-foreground">vs</span>
         <select value={right} onChange={(e) => setRight(e.target.value)} className={SEL}>
           {agents.map((x) => (
-            <option key={x.agentId} value={x.agentId}>{x.name}</option>
+            <option key={x.agentId} value={x.agentId}>
+              {x.name}
+            </option>
           ))}
         </select>
       </div>

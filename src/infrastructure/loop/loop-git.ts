@@ -2,7 +2,11 @@ import { execFileSync } from 'child_process'
 import { resolve } from 'path'
 
 function git(cwd: string, args: readonly string[]): string {
-  return execFileSync('git', args as string[], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+  return execFileSync('git', args as string[], {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore']
+  })
 }
 
 /**

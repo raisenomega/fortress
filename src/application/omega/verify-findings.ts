@@ -11,5 +11,7 @@ export function verifyFindings(context: AppContext, project: Project): readonly 
   return context.findings
     .listByProject(project.id)
     .filter((finding) => finding.status === 'open')
-    .map((finding) => checkFinding(finding, context.filesystemProbe.probe(project.path, finding.file)))
+    .map((finding) =>
+      checkFinding(finding, context.filesystemProbe.probe(project.path, finding.file))
+    )
 }

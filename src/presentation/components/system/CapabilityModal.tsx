@@ -53,7 +53,9 @@ export function CapabilityModal({
             onClick={() => void promoteCapability(capability.id, promotion.needsHuman)}
             className="rounded bg-primary/10 px-2 py-1 text-primary hover:bg-primary/20"
           >
-            {promotion.needsHuman ? `Aprobar y promover a ${promotion.to}` : `Promover a ${promotion.to}`}
+            {promotion.needsHuman
+              ? `Aprobar y promover a ${promotion.to}`
+              : `Promover a ${promotion.to}`}
           </button>
         ) : null}
         <RunEpisodeButton capabilityId={capability.id} />

@@ -27,8 +27,8 @@ export function GenesisView(): React.JSX.Element {
       <header>
         <h2 className="text-base text-foreground">Genesis de agentes</h2>
         <p className="text-xs text-muted-foreground">
-          El bucle entrena capacidades por su cuenta y para en los topes. Activar un
-          agente sigue exigiendo tu firma; OMEGA veta siempre.
+          El bucle entrena capacidades por su cuenta y para en los topes. Activar un agente sigue
+          exigiendo tu firma; OMEGA veta siempre.
         </p>
       </header>
       {configured ? null : (

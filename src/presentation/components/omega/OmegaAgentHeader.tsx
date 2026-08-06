@@ -12,7 +12,8 @@ interface OmegaAgentHeaderProps {
   readonly busy: boolean
 }
 
-const BTN = 'tap rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
+const BTN =
+  'tap rounded border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground'
 
 /** Header propio del agente, mismo estilo que el de OMEGA: titulo "Agente X",
  *  sus responsabilidades, cifras, barra a 1/4 y acciones del agente debajo. */

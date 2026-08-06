@@ -5,13 +5,7 @@ import type { LoopStopReason } from './loop-decision'
  * fallo transitorio (API/credito/red) lo tiene en pausa, esperando recuperarse.
  */
 export type LoopPhase =
-  | 'escaneando'
-  | 'esperando'
-  | 'reparando'
-  | 'verificando'
-  | 'debate'
-  | 'standby'
-  | 'parado'
+  'escaneando' | 'esperando' | 'reparando' | 'verificando' | 'debate' | 'standby' | 'parado'
 
 /** Estado del loop que el main empuja al renderer en cada transicion. */
 export interface LoopStatus {

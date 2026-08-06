@@ -24,5 +24,7 @@ const ACTION_VERBS: readonly string[] = [
 
 /** True si el mensaje es una ORDEN (imperativo o veredicto de produccion). */
 export function isCommand(lowered: string): boolean {
-  return lowered.includes('listo para produc') || ACTION_VERBS.some((verb) => lowered.includes(verb))
+  return (
+    lowered.includes('listo para produc') || ACTION_VERBS.some((verb) => lowered.includes(verb))
+  )
 }

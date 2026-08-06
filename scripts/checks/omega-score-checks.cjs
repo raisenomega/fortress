@@ -34,9 +34,14 @@ module.exports = async function omegaScoreChecks(window) {
 
   const agents = await run(`window.api.omega.agents('${idS}')`)
   check('la salud macro cubre los 11 agentes del catalogo', agents.length === 11)
-  check('incluye a sentinel-omega en la tabla', agents.some((a) => a.agentId === 'sentinel-omega'))
-  check('sin runs, el cumplimiento del agente es null (no cero)',
-    agents.every((a) => a.compliance === null))
+  check(
+    'incluye a sentinel-omega en la tabla',
+    agents.some((a) => a.agentId === 'sentinel-omega')
+  )
+  check(
+    'sin runs, el cumplimiento del agente es null (no cero)',
+    agents.every((a) => a.compliance === null)
+  )
 
   // --- Veto de push respaldado por evidencia ---
   const dirD = makeRepo('fortress-omega-push-', 'x\ny\n')

@@ -56,6 +56,7 @@ export function createSqliteOmegaLog(db: Db): OmegaLog {
       return stamped
     },
     list: (limit) => (selectAll.all(limit) as OmegaRow[]).map(toEntry),
-    listByProject: (projectId, limit) => (byProject.all(projectId, limit) as OmegaRow[]).map(toEntry)
+    listByProject: (projectId, limit) =>
+      (byProject.all(projectId, limit) as OmegaRow[]).map(toEntry)
   }
 }

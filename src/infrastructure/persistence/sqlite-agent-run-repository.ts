@@ -34,8 +34,7 @@ export function createSqliteAgentRunRepository(db: Db): AgentRunRepository {
     listByProject: (projectId, limit) =>
       (byProject.all(projectId, limit) as AgentRunRow[]).map(toAgentRun),
 
-    listByAgent: (agentId, limit) =>
-      (byAgent.all(agentId, limit) as AgentRunRow[]).map(toAgentRun),
+    listByAgent: (agentId, limit) => (byAgent.all(agentId, limit) as AgentRunRow[]).map(toAgentRun),
 
     totalsFor: (agentId: AgentId, projectId): AgentRunTotals => {
       const scope = { agentId, projectId }

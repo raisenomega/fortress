@@ -6,11 +6,7 @@ import type { AppContext } from '../context'
  * el agente puede autoverificarse: en un repo de confianza `npm run test:unit`
  * corre solo; en uno no confiable seria ejecutar codigo ajeno sin permiso.
  */
-export function setProjectTrusted(
-  context: AppContext,
-  id: string,
-  trusted: boolean
-): Result<null> {
+export function setProjectTrusted(context: AppContext, id: string, trusted: boolean): Result<null> {
   if (!context.projects.findById(id)) {
     return err('Ese proyecto ya no existe')
   }

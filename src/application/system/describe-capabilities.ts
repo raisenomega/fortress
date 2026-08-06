@@ -30,5 +30,7 @@ export function describeCapabilities(
   capabilities: CapabilityRepository,
   episodes: CapabilityEpisodeRepository
 ): readonly Capability[] {
-  return capabilities.listAll().map((stored) => liveCapability(stored, episodes.tallyFor(stored.id)))
+  return capabilities
+    .listAll()
+    .map((stored) => liveCapability(stored, episodes.tallyFor(stored.id)))
 }

@@ -32,8 +32,8 @@ export function SelfImprovementView(): React.JSX.Element {
       <ProposeCapability />
       {vacio ? (
         <p className="text-xs text-muted-foreground">
-          Aun no hay capacidades ni pendientes. Propon una arriba, o apareceran cuando
-          un agente tope con un limite de FORTRESS en otro proyecto.
+          Aun no hay capacidades ni pendientes. Propon una arriba, o apareceran cuando un agente
+          tope con un limite de FORTRESS en otro proyecto.
         </p>
       ) : null}
       <CapabilitiesSection capabilities={capabilities} />

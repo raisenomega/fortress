@@ -40,7 +40,13 @@ export async function buildFeature(
 
   const prompt = buildFeaturePrompt(project.name, intent, plan)
   const reply = await agent.run(
-    { projectPath: project.path, prompt, permissionMode: 'acceptEdits', agentId: null, trusted: true },
+    {
+      projectPath: project.path,
+      prompt,
+      permissionMode: 'acceptEdits',
+      agentId: null,
+      trusted: true
+    },
     onChunk
   )
   if (reply.failed) {

@@ -3,7 +3,9 @@ import { classifyFailure } from './failure-kind'
 
 describe('classifyFailure', () => {
   it('credito agotado es transitorio (standby, no muere)', () => {
-    expect(classifyFailure('Your credit balance is too low to run this request')).toBe('transitorio')
+    expect(classifyFailure('Your credit balance is too low to run this request')).toBe(
+      'transitorio'
+    )
     expect(classifyFailure('saldo insuficiente en la cuenta')).toBe('transitorio')
   })
 

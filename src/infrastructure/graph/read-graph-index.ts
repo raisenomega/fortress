@@ -27,8 +27,7 @@ export function readGraphIndex(projectPath: string): GraphStats | null {
     const count = (table: string): number =>
       (db!.prepare(`SELECT COUNT(*) AS c FROM ${table}`).get() as { c: number }).c
     const proj = db.prepare('SELECT indexed_at, root_path FROM projects LIMIT 1').get() as
-      | ProjectRow
-      | undefined
+      ProjectRow | undefined
 
     return {
       nodes: count('nodes'),

@@ -12,9 +12,7 @@ interface TrustToggleProps {
  */
 export function TrustToggle({ project }: TrustToggleProps): React.JSX.Element {
   const trusted = project.trusted
-  const tone = trusted
-    ? 'border-success/40 text-success'
-    : 'border-medium/40 text-medium'
+  const tone = trusted ? 'border-success/40 text-success' : 'border-medium/40 text-medium'
 
   return (
     <button
