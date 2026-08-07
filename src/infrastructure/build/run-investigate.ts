@@ -15,7 +15,9 @@ export async function runInvestigate(
     {
       projectPath: target.value.path,
       prompt: investigatePrompt(target.value.name, intent),
-      permissionMode: 'plan',
+      // 'lectura', no 'plan': plan bloquea TODO el MCP, asi que el grafo nunca
+      // respondia. En 'lectura' (default) el grafo ejecuta y no se puede escribir.
+      permissionMode: 'lectura',
       agentId: null,
       trusted: target.value.trusted
     },

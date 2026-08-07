@@ -13,6 +13,24 @@ export const GRAPH_SERVER = 'codebase-memory'
 export const GRAPH_TOOL_RULE = `mcp__${GRAPH_SERVER}`
 
 /**
+ * Herramientas de SOLO LECTURA del grafo. Se pre-autorizan en el modo lectura+grafo
+ * (que corre en `--permission-mode default`, porque plan BLOQUEA todo MCP). Las de
+ * escritura (index_repository, ingest_traces, manage_adr, delete_project) quedan
+ * FUERA a proposito: la indexacion tiene su propia accion con gate.
+ */
+export const GRAPH_READ_TOOLS: readonly string[] = [
+  'get_architecture',
+  'search_graph',
+  'trace_path',
+  'search_code',
+  'get_code_snippet',
+  'query_graph',
+  'list_projects',
+  'index_status',
+  'get_graph_schema'
+].map((tool) => `mcp__${GRAPH_SERVER}__${tool}`)
+
+/**
  * Version FIJADA que instala la accion "Instalar grafo" (`npm i -g
  * codebase-memory-mcp@VERSION`). Subela a conciencia, revisando el changelog.
  */

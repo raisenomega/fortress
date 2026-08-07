@@ -1,11 +1,11 @@
 import { spawnSync } from 'child_process'
 import type { AgentId } from '@domain/agent/agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
-import { GRAPH_TOOL_RULE, withGraph } from '@domain/connectors/graph-mcp'
+import { withGraph } from '@domain/connectors/graph-mcp'
 import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
-import { selfVerifyRules } from '@domain/settings/safe-commands'
-import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
+import { claudeModeArg, type ClaudePermissionMode } from '@domain/settings/permission-mode'
+import { buildAllowedTools } from './build-allowed-tools'
 
 export const CLAUDE_BIN = 'claude'
 
@@ -33,17 +33,16 @@ export function buildArgs(
     // stream-json solo emite el flujo completo de eventos con --verbose.
     '--verbose',
     '--permission-mode',
-    permissionMode
+    claudeModeArg(permissionMode)
   ]
 
   // Red de seguridad: sin tope, un agente sobre un repo enorme sigue leyendo
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
   if (maxUsd > 0) args.push(BUDGET_FLAG, String(maxUsd))
 
-  // Grafo SIEMPRE permitido (su consulta es no negociable); el allowlist de
-  // autoverificacion solo al editar en repo de confianza. Sin la regla del
-  // grafo, en plan headless la llamada al MCP se auto-deniega y cae a Bash.
-  args.push('--allowedTools', GRAPH_TOOL_RULE, ...selfVerifyRules(permissionMode, trusted, scripts))
+  // Allowlist segun el modo: en 'lectura' el grafo EJECUTA (plan lo bloqueaba);
+  // en plan/acceptEdits, la regla del grafo + autoverificacion cuando aplica.
+  args.push('--allowedTools', ...buildAllowedTools(permissionMode, trusted, scripts))
 
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)
