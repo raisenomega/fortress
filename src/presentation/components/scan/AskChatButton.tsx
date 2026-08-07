@@ -36,11 +36,11 @@ export function AskChatButton({
     <button
       type="button"
       onClick={open}
-      title="Abre el chat con la pregunta ya escrita"
+      title="Abre el Terminal con la pregunta ya escrita"
       className="tap flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/40 hover:text-foreground"
     >
       <MessageSquare size={13} aria-hidden />
-      Preguntar al chat
+      Preguntar al Terminal
     </button>
   )
 }

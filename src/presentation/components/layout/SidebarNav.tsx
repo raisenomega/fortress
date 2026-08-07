@@ -2,9 +2,9 @@ import type { IconName } from '@domain/shared/icon-name'
 import { useUiStore, type MainView } from '../../stores/ui-store'
 import { SidebarNavButton } from './SidebarNavButton'
 
-/** Pie del sidebar: solo lo que no pertenece a un proyecto concreto. */
+/** Pie del sidebar: el Chat de planificacion y los ajustes globales. */
 const ITEMS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }> = [
-  { view: 'chat', iconName: 'message-square', label: 'Chat' },
+  { view: 'construir', iconName: 'message-square', label: 'Chat' },
   { view: 'settings', iconName: 'settings', label: 'Configuracion' },
   { view: 'conectores', iconName: 'package', label: 'Conectores' }
 ]

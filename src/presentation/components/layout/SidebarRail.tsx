@@ -5,11 +5,12 @@ import { Icon } from '../common/Icon'
 
 /** Sidebar plegado: solo iconos, para dejarle la pantalla al contenido. */
 const RAIL: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }> = [
-  { view: 'chat', iconName: 'message-square', label: 'Chat' },
   { view: 'scan', iconName: 'shield', label: 'Escaneo' },
+  { view: 'chat', iconName: 'hard-hat', label: 'Terminal' },
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
   { view: 'cognition', iconName: 'brain', label: 'Cognition' },
   { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' },
+  { view: 'construir', iconName: 'message-square', label: 'Chat' },
   { view: 'settings', iconName: 'settings', label: 'Configuracion' }
 ]
 

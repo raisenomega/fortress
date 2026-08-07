@@ -14,7 +14,7 @@ export function ChatBody({ projectName, messages }: ChatBodyProps): React.JSX.El
       <div className="flex-1">
         <EmptyState
           iconName="message-square"
-          title={`Chat de ${projectName}`}
+          title={`Terminal de ${projectName}`}
           hint="Este historial es exclusivo de este proyecto. Empieza con una accion rapida o escribe tu peticion."
         />
       </div>

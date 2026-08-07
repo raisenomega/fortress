@@ -9,14 +9,16 @@ import { SidebarNavButton } from './SidebarNavButton'
  */
 const VIEWS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }> = [
   { view: 'scan', iconName: 'shield', label: 'Escaneo' },
+  // "Terminal" (antes el chat principal) = donde se ejecuta; va junto al Escaneo.
+  // El "Chat" (planificacion, antes "Construir") vive en el pie, junto a Ajustes.
+  { view: 'chat', iconName: 'hard-hat', label: 'Terminal' },
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
   { view: 'cognition', iconName: 'brain', label: 'Cognition' },
   { view: 'docs', iconName: 'file-text', label: 'Documentacion' },
   { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' },
   { view: 'omega', iconName: 'eye', label: 'Sentinel Omega' },
   { view: 'sistema', iconName: 'sparkles', label: 'Auto-mejora FORTRESS' },
-  { view: 'genesis', iconName: 'rocket', label: 'Genesis de agentes' },
-  { view: 'construir', iconName: 'hard-hat', label: 'Construir' }
+  { view: 'genesis', iconName: 'rocket', label: 'Genesis de agentes' }
 ]
 
 export function SidebarViewLinks(): React.JSX.Element {

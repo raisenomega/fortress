@@ -24,7 +24,7 @@ export function PostureResultView(): React.JSX.Element | null {
           onClick={sendPostureToChat}
           className="tap ml-auto rounded-md border border-border px-3 py-1.5 text-xs hover:border-primary/40"
         >
-          Llevar al chat
+          Llevar al Terminal
         </button>
       </div>
 

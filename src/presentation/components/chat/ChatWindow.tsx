@@ -34,12 +34,12 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
       <EmptyState
         iconName="castle"
         title="Ningun proyecto seleccionado"
-        hint="Agrega un proyecto desde la barra lateral para abrir su chat. Cada proyecto guarda su propio historial."
+        hint="Agrega un proyecto desde la barra lateral para abrir su terminal. Cada proyecto guarda su propio historial."
       />
     )
   }
 
-  // La entrevista vive en "Construir"; el chat es para trabajar ya configurado.
+  // La entrevista vive en el "Chat"; el Terminal es para trabajar ya configurado.
   if (project.configState === 'PENDIENTE_CONFIGURACION') {
     return <ConfigRedirect projectName={project.name} />
   }

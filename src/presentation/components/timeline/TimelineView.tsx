@@ -26,7 +26,7 @@ export function TimelineView(): React.JSX.Element {
         <p className="text-xs text-muted-foreground">
           {isFiltering(filter)
             ? 'Ninguna entrada cumple ese filtro.'
-            : 'Todavia no hay actividad en este proyecto. La generan los escaneos y el chat.'}
+            : 'Todavia no hay actividad en este proyecto. La generan los escaneos y los agentes.'}
         </p>
       ) : (
         <ul className="min-h-0 flex-1 overflow-y-auto">

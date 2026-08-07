@@ -21,13 +21,15 @@ export function ConstruirView(): React.JSX.Element {
   return (
     <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4 pt-4 pb-6">
       {!project ? (
-        <Notice tone="error">Selecciona un proyecto para construir.</Notice>
+        <Notice tone="error">Selecciona un proyecto.</Notice>
       ) : !project.trusted ? (
-        <Notice tone="error">Construir exige un proyecto de confianza. Activala primero.</Notice>
+        <Notice tone="error">
+          Trabajar aqui exige un proyecto de confianza. Activala primero.
+        </Notice>
       ) : (
         <>
           <p className="pb-2 text-center text-[11px] text-muted-foreground">
-            Construir en {project.name}
+            Chat de {project.name}
           </p>
           <ConstruirMessages />
           <ConstruirInput projectId={project.id} />

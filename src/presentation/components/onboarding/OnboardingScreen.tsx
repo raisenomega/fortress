@@ -31,7 +31,7 @@ export function OnboardingScreen({ onSkip }: OnboardingScreenProps): React.JSX.E
           onClick={onSkip}
           className="tap mt-4 text-xs text-muted-foreground underline hover:text-foreground"
         >
-          Entrar sin configurar (el chat no funcionara)
+          Entrar sin configurar (los agentes no funcionaran)
         </button>
       </div>
     </div>
