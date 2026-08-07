@@ -40,6 +40,15 @@ async function walkScreens(helpers) {
 
   await walkHandoff(helpers)
 
+  // Pagina "Chat" (planificacion): su input tiene adjuntar, selector de modo y
+  // enviar. Exige proyecto de confianza, asi que primero se marca en la cabecera.
+  await run(clickByText('No confiable'))
+  await pause(400)
+  await run(clickSelector('[data-nav="Chat"]'))
+  await pause(500)
+  await shoot('-chat-page')
+  await expect('pagina chat', 'Chat de', 'Describe lo que quieres')
+
   await walkTimeline(helpers)
 
   await walkCognition(helpers)
