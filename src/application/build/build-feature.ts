@@ -34,9 +34,9 @@ export async function buildFeature(
 ): Promise<Result<BuildResult>> {
   const project = context.projects.findById(projectId)
   if (!project) return err('El proyecto ya no existe')
-  if (!project.trusted) return err('Construir exige un proyecto de confianza')
+  if (!project.trusted) return err('Ejecutor exige un proyecto de confianza')
   const ref = deps.snapshot()
-  if (ref === null) return err('Construir exige un repo git para poder revertir')
+  if (ref === null) return err('Ejecutor exige un repo git para poder revertir')
 
   const prompt = buildFeaturePrompt(project.name, intent, plan)
   const reply = await agent.run(

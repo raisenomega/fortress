@@ -4,7 +4,7 @@ import type { AppContext } from '@application/context'
 import { err, ok, type Result } from '@domain/shared/result'
 import { gitRevert, gitSnapshot } from '../loop/loop-git'
 import { loopVerify } from '../loop/loop-verify'
-import { agentFor, resolveTarget } from './build-target'
+import { agentFor, resolveEditTarget } from './build-target'
 
 /** Fase 2: construye el plan aprobado con red git+verify y persiste el resultado. */
 export async function runBuild(
@@ -13,7 +13,8 @@ export async function runBuild(
   intent: string,
   plan: string
 ): Promise<Result<void>> {
-  const target = resolveTarget(context, projectId)
+  // Ejecutor SI edita: aqui blinda el repo de FORTRESS (Plan/Investigacion no).
+  const target = resolveEditTarget(context, projectId)
   if (!target.ok) return target
   const project = target.value
   const result = await buildFeature(

@@ -67,5 +67,8 @@ module.exports = async function newProjectChecks(window) {
   check('CONSTITUTION.md NO esta trackeado (interno)', !tracked.includes('CONSTITUTION.md'))
   check('ARCHITECTURE.md NO esta trackeado (interno)', !tracked.includes('ARCHITECTURE.md'))
 
+  // Guard del repo propio: solo Ejecutor (edicion) se bloquea; conversar no.
+  await require('./build-guard-check.cjs')(run, check)
+
   return results
 }
