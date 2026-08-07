@@ -13,18 +13,21 @@ export const GRAPH_SERVER = 'codebase-memory'
 export const GRAPH_TOOL_RULE = `mcp__${GRAPH_SERVER}`
 
 /**
- * Version FIJADA del servidor del grafo. Sin fijarla, `npx` ejecutaria la ultima
- * publicada en cada spawn: un paquete comprometido correria con los permisos del
- * operador y con ANTHROPIC_API_KEY en el entorno. Subela a conciencia, revisando
- * el changelog, no automaticamente.
+ * Version FIJADA que instala la accion "Instalar grafo" (`npm i -g
+ * codebase-memory-mcp@VERSION`). Subela a conciencia, revisando el changelog.
  */
 export const GRAPH_MCP_VERSION = '0.9.0'
 
-/** Servidor stdio del grafo, igual que `claude mcp add codebase-memory`. */
-const GRAPH_MCP = {
-  command: 'npx',
-  args: ['-y', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`]
-} as const
+/** Binario del grafo, ya instalado y en PATH (via la accion Instalar grafo). */
+export const GRAPH_BIN = 'codebase-memory-mcp'
+
+/**
+ * Servidor stdio del grafo. Apunta al BINARIO instalado, NO a `npx`: en headless,
+ * el spawn de `npx` dentro de `--mcp-config` falla el handshake MCP y el servidor
+ * queda "failed" con CERO herramientas (era el bug del circuito de tokens). El
+ * binario en PATH conecta al instante — verificado con el evento init de claude -p.
+ */
+const GRAPH_MCP = { type: 'stdio', command: GRAPH_BIN, args: [] } as const
 
 interface McpConfigShape {
   readonly mcpServers?: Record<string, unknown>

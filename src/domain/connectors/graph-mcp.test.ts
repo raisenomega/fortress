@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { GRAPH_MCP_VERSION, GRAPH_SERVER, GRAPH_TOOL_RULE, withGraph } from './graph-mcp'
+import { GRAPH_SERVER, GRAPH_TOOL_RULE, withGraph } from './graph-mcp'
 import { buildMcpConfig } from './mcp-config'
 
 describe('withGraph', () => {
-  it('mete el grafo aunque no haya conectores: nunca es opcional', () => {
+  it('mete el grafo (binario instalado, no npx) aunque no haya conectores', () => {
     const cfg = JSON.parse(withGraph(null))
     expect(cfg.mcpServers[GRAPH_SERVER]).toEqual({
-      command: 'npx',
-      args: ['-y', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`]
+      type: 'stdio',
+      command: 'codebase-memory-mcp',
+      args: []
     })
   })
 
