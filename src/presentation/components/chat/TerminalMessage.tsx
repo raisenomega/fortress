@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@domain/chat/chat-message'
+import { TerminalMeta } from './TerminalMeta'
 
 /** Prompt por rol: el usuario "escribe" tras el cursor; la salida no lleva prompt. */
 const PROMPT: Record<ChatMessage['role'], string> = {
@@ -20,16 +21,19 @@ interface TerminalMessageProps {
 /** Un mensaje pintado como linea de terminal: prompt dorado + salida monospace. */
 export function TerminalMessage({ message }: TerminalMessageProps): React.JSX.Element {
   return (
-    <div className="flex gap-2 font-mono text-[13px] leading-relaxed">
-      <span className="w-3 shrink-0 text-right text-primary select-none">
-        {PROMPT[message.role]}
-      </span>
-      <p className={`min-w-0 flex-1 break-words whitespace-pre-wrap ${TONE[message.role]}`}>
-        {message.content}
-        {message.pending ? (
-          <span className="ml-0.5 inline-block h-3.5 w-2 animate-pulse bg-primary align-text-bottom" />
-        ) : null}
-      </p>
+    <div className="font-mono text-[13px] leading-relaxed">
+      <TerminalMeta message={message} />
+      <div className="flex gap-2">
+        <span className="w-3 shrink-0 text-right text-primary select-none">
+          {PROMPT[message.role]}
+        </span>
+        <p className={`min-w-0 flex-1 break-words whitespace-pre-wrap ${TONE[message.role]}`}>
+          {message.content}
+          {message.pending ? (
+            <span className="ml-0.5 inline-block h-3.5 w-2 animate-pulse bg-primary align-text-bottom" />
+          ) : null}
+        </p>
+      </div>
     </div>
   )
 }
