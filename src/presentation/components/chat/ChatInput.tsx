@@ -1,4 +1,5 @@
 import { useWorkflowStore } from '../../stores/workflow-store'
+import { ChatTextarea } from './ChatTextarea'
 import { QuickActions } from './QuickActions'
 import { SendButton } from './SendButton'
 
@@ -10,6 +11,8 @@ interface ChatInputProps {
   readonly onStop: () => void
   /** En configuracion no hay atajos: solo se responde a la entrevista. */
   readonly configuring: boolean
+  /** Terminal: input monospace con prompt, sobre fondo de consola. */
+  readonly terminal?: boolean
 }
 
 /**
@@ -22,12 +25,14 @@ export function ChatInput({
   onSend,
   running,
   onStop,
-  configuring
+  configuring,
+  terminal
 }: ChatInputProps): React.JSX.Element {
   const draft = useWorkflowStore((state) => state.draft)
   const setDraft = useWorkflowStore((state) => state.setDraft)
 
   const placeholder = configuring ? 'Responde para configurar...' : 'Pide una revision o un plan...'
+  const box = terminal ? 'border-transparent bg-transparent font-mono' : 'border-border bg-input'
 
   function submit(): void {
     const trimmed = draft.trim()
@@ -37,7 +42,9 @@ export function ChatInput({
   }
 
   return (
-    <div className="shrink-0 space-y-2 border-t border-border bg-sidebar px-4 py-3">
+    <div
+      className={`shrink-0 space-y-2 border-t border-border px-4 py-3 ${terminal ? 'bg-background' : 'bg-sidebar'}`}
+    >
       {configuring ? null : <QuickActions disabled={disabled} onPick={onSend} />}
 
       <form
@@ -47,18 +54,14 @@ export function ChatInput({
           submit()
         }}
       >
-        <textarea
-          rows={1}
+        {terminal ? <span className="pb-2 font-mono text-primary select-none">❯</span> : null}
+        <ChatTextarea
           value={draft}
           disabled={disabled}
           placeholder={placeholder}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key !== 'Enter' || event.shiftKey) return
-            event.preventDefault()
-            submit()
-          }}
-          className="max-h-40 min-h-[2.5rem] flex-1 resize-y rounded-md border border-border bg-input px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
+          boxClass={box}
+          onChange={setDraft}
+          onEnter={submit}
         />
         <SendButton running={running} onStop={onStop} disabled={draft.trim().length === 0} />
       </form>

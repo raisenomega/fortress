@@ -51,7 +51,7 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
         <ChatErrorBanner message={error} onDismiss={() => setError(project.id, null)} />
       ) : null}
 
-      <ChatBody projectName={project.name} messages={messages} />
+      <ChatBody projectName={project.name} messages={messages} terminal />
 
       <ChatInput
         disabled={busy}
@@ -59,6 +59,7 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
         onStop={() => project && void stopWorkflow(project.id)}
         onSend={onSend}
         configuring={false}
+        terminal
       />
     </div>
   )

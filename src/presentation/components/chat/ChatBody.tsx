@@ -5,10 +5,12 @@ import { ChatMessageList } from './ChatMessageList'
 interface ChatBodyProps {
   readonly projectName: string
   readonly messages: readonly ChatMessage[]
+  /** Terminal: el historial se pinta como salida de consola. */
+  readonly terminal?: boolean
 }
 
 /** El cuerpo del chat: el historial, o el vacio inicial de un proyecto sin turnos. */
-export function ChatBody({ projectName, messages }: ChatBodyProps): React.JSX.Element {
+export function ChatBody({ projectName, messages, terminal }: ChatBodyProps): React.JSX.Element {
   if (messages.length === 0) {
     return (
       <div className="flex-1">
@@ -20,5 +22,5 @@ export function ChatBody({ projectName, messages }: ChatBodyProps): React.JSX.El
       </div>
     )
   }
-  return <ChatMessageList messages={messages} />
+  return <ChatMessageList messages={messages} terminal={terminal} />
 }

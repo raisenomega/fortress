@@ -21,7 +21,7 @@ export function ConfigInterview({ projectId }: ConfigInterviewProps): React.JSX.
     <div className="flex h-full min-h-0 flex-col">
       <ConfigurationCard projectId={projectId} />
       <div className="min-h-0 flex-1">
-        <ChatMessageList messages={messages} />
+        <ChatMessageList messages={messages} transfer />
       </div>
       <ChatInput
         disabled={streaming}
