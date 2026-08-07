@@ -3,6 +3,7 @@ import { loadDocs, readDoc } from '../../services/docs-service'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
 import { DocsList } from './DocsList'
+import { Markdown } from './Markdown'
 
 /**
  * Visor de documentacion del proyecto: lee los .md de la raiz (incluido el marco
@@ -39,9 +40,15 @@ export function DocsView(): React.JSX.Element {
   return (
     <div className="flex h-full min-h-0">
       <DocsList docs={docs} selected={selected} onSelect={setSelected} />
-      <pre className="min-h-0 flex-1 overflow-auto p-4 text-xs break-words whitespace-pre-wrap text-foreground">
-        {content || 'Este proyecto aun no tiene documentos .md en la raiz.'}
-      </pre>
+      <div className="min-h-0 flex-1 overflow-auto p-4">
+        {content ? (
+          <Markdown text={content} />
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            Este proyecto aun no tiene documentos .md en la raiz.
+          </p>
+        )}
+      </div>
     </div>
   )
 }
