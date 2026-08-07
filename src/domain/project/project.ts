@@ -27,7 +27,12 @@ export interface Project {
   readonly generalQuality: number | null
   readonly lastScan: string | null
   readonly hasClaude: boolean
+  /** Knowledge Graph indexado y conectable (codebase-memory). */
   readonly hasGraph: boolean
+  /** Nodos/aristas del grafo y cuando se indexo, o null si no hay grafo. */
+  readonly graphNodes: number | null
+  readonly graphEdges: number | null
+  readonly graphIndexedAt: string | null
   readonly hasFortress: boolean
   /**
    * Proyecto de confianza. Por defecto false: un repo no confiable NUNCA

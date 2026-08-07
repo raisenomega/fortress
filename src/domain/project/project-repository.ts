@@ -18,4 +18,6 @@ export interface ProjectRepository {
   setGeneralQuality(id: string, score: number): void
   /** Transicion del ciclo de vida del marco: PENDIENTE_CONFIGURACION -> CONFIGURADO. */
   setConfigState(id: string, state: ConfigState): void
+  /** Marca has_graph=1 y guarda las stats del indice (nodos, aristas, fecha ISO). */
+  setGraph(id: string, nodes: number, edges: number, indexedAt: string): void
 }

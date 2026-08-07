@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS projects (
   last_scan      TEXT,
   has_claude     INTEGER NOT NULL DEFAULT 0,
   has_graph      INTEGER NOT NULL DEFAULT 0,
+  graph_nodes INTEGER, graph_edges INTEGER, graph_indexed_at TEXT,
   has_fortress   INTEGER NOT NULL DEFAULT 0,
   trusted        INTEGER NOT NULL DEFAULT 0,
   loop_enabled   INTEGER NOT NULL DEFAULT 0,

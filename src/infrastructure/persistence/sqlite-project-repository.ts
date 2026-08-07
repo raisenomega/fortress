@@ -6,8 +6,8 @@ import type { Db } from './database'
 import { toProject, type ProjectRow } from './project-row'
 
 const COLUMNS = `id, name, path, stack, git_remote, git_branch, fortress_score,
-  general_quality, last_scan, has_claude, has_graph, has_fortress, trusted, loop_enabled,
-  config_state, created_at`
+  general_quality, last_scan, has_claude, has_graph, graph_nodes, graph_edges, graph_indexed_at,
+  has_fortress, trusted, loop_enabled, config_state, created_at`
 
 /** Parametros del INSERT. trusted no va: nace en 0 (no confiable) por defecto. */
 function toInsertParams(project: NewProject): Record<string, string | number | null> {
@@ -37,6 +37,10 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
   const updateLoop = db.prepare('UPDATE projects SET loop_enabled = ? WHERE id = ?')
   const updateQuality = db.prepare('UPDATE projects SET general_quality = ? WHERE id = ?')
   const updateConfig = db.prepare('UPDATE projects SET config_state = ? WHERE id = ?')
+  const updateGraph = db.prepare(
+    `UPDATE projects SET has_graph = 1, graph_nodes = ?, graph_edges = ?, graph_indexed_at = ?
+     WHERE id = ?`
+  )
   const insert = db.prepare(
     `INSERT INTO projects (id, name, path, stack, git_remote, git_branch, has_claude,
        config_state, created_at)
@@ -63,6 +67,7 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
     setTrusted: (id, trusted) => updateTrusted.run(trusted ? 1 : 0, id),
     setLoopEnabled: (id, enabled) => updateLoop.run(enabled ? 1 : 0, id),
     setGeneralQuality: (id, score) => updateQuality.run(normalizeScore(score), id),
-    setConfigState: (id, state) => updateConfig.run(state, id)
+    setConfigState: (id, state) => updateConfig.run(state, id),
+    setGraph: (id, nodes, edges, indexedAt) => updateGraph.run(nodes, edges, indexedAt, id)
   }
 }

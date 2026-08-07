@@ -15,6 +15,9 @@ export interface ProjectRow {
   readonly last_scan: string | null
   readonly has_claude: number
   readonly has_graph: number
+  readonly graph_nodes: number | null
+  readonly graph_edges: number | null
+  readonly graph_indexed_at: string | null
   readonly has_fortress: number
   readonly trusted: number
   readonly loop_enabled: number
@@ -35,6 +38,9 @@ export function toProject(row: ProjectRow): Project {
     lastScan: row.last_scan,
     hasClaude: row.has_claude === 1,
     hasGraph: row.has_graph === 1,
+    graphNodes: row.graph_nodes,
+    graphEdges: row.graph_edges,
+    graphIndexedAt: row.graph_indexed_at,
     hasFortress: row.has_fortress === 1,
     trusted: row.trusted === 1,
     loopEnabled: row.loop_enabled === 1,
