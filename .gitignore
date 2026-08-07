@@ -36,9 +36,15 @@ AGENTS-SELECTED.md
 DREAMING-CONFIG.md
 DEPLOYMENT-PLAYBOOK.md
 AUDIT-CHECKLIST.md
+# Documentacion interna estrategica: NUNCA sube al repo (regla inmutable). Habla
+# de estrategia, modelo de negocio, estructura y tecnologia = secreto interno.
+CLAUDE.md
+CONSTITUCION.md
+Estado_fortress.md
+Tarea-agente.md
+AUDITORIA-*.md
 # Dossier vivo: PRD de origen, evolucion, leyenda y definiciones. No se commitea.
 DOSSIER/
-# ARCHITECTURE.md NO se ignora: tu CLAUDE.md raiz dice que si se commitea.
 fortress-shield*.sh
 fortress-orchestrator*.sh
 
