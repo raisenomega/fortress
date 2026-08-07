@@ -28,13 +28,17 @@ export function RunMeter(): React.JSX.Element | null {
 
   if (startedAt === null) return null
 
-  const agentes = total === 0 ? 'preparando' : `${step + 1}/${total} agentes`
+  // El contador de agentes solo cuenta en un workflow multi-paso (escaneo,
+  // limpieza). Un turno de chat es 1 paso con TODOS los agentes disponibles como
+  // subagentes: mostrar "1/1 agentes" hacia creer que solo participaba uno.
+  const fase = total === 0 ? 'preparando' : total > 1 ? `${step + 1}/${total} agentes` : ''
   const cost = formatCost(costUsd)
   const prefijo = billing.mode === 'suscripcion' ? '~' : ''
 
   return (
     <span className="shrink-0 font-mono text-xs text-primary">
-      {agentes} · {formatElapsed(now - startedAt)} · {formatTokens(tokens)} tok
+      {fase ? `${fase} · ` : ''}
+      {formatElapsed(now - startedAt)} · {formatTokens(tokens)} tok
       {cost ? ` · ${costLabel(billing).toLowerCase()} ${prefijo}${cost}` : ''}
     </span>
   )
