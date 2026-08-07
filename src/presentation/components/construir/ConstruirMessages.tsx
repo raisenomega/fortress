@@ -1,5 +1,5 @@
 import { useConstruirStore } from '../../stores/construir-store'
-import { SendToTerminalButton } from './SendToTerminalButton'
+import { TransferBadge } from './TransferBadge'
 
 const USER = 'ml-auto max-w-[85%] rounded-lg bg-primary/10 px-3 py-2 text-sm text-foreground'
 const BOT =
@@ -23,9 +23,11 @@ export function ConstruirMessages(): React.JSX.Element {
             {msg.text}
           </div>
         ) : (
-          <div key={i}>
-            <div className={BOT}>{msg.text}</div>
-            <SendToTerminalButton text={msg.text} />
+          <div key={i} className={BOT}>
+            {msg.text}
+            <div className="mt-2 flex justify-end">
+              <TransferBadge text={msg.text} />
+            </div>
           </div>
         )
       )}
