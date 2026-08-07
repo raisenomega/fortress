@@ -1,8 +1,10 @@
 import { ipcMain } from 'electron'
 import { readGenesisBudget } from '@application/settings/read-genesis-budget'
+import { GRAPH_REQUIRED_MSG } from '@domain/graph/require-graph'
 import { genesisConfigured } from '@domain/settings/genesis-budget'
 import { err, ok, type Result } from '@domain/shared/result'
 import { startGenesis, stopGenesis } from '../genesis/genesis-controller'
+import { selfGraphMissing } from '../graph/self-graph'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -19,6 +21,7 @@ export function registerGenesisHandlers(): void {
     if (!genesisConfigured(readGenesisBudget(getAppContext()))) {
       return err('Fija los topes de genesis en Configuracion antes de encender')
     }
+    if (selfGraphMissing(getAppContext())) return err(GRAPH_REQUIRED_MSG)
     startGenesis()
     return ok(null)
   })

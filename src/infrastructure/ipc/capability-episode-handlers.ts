@@ -5,8 +5,10 @@ import { join } from 'path'
 import { runLearningEpisode } from '@application/system/run-learning-episode'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
+import { GRAPH_REQUIRED_MSG } from '@domain/graph/require-graph'
 import { err } from '@domain/shared/result'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
+import { selfGraphMissing } from '../graph/self-graph'
 import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
@@ -16,6 +18,7 @@ import { IPC } from './channels'
 export function registerCapabilityEpisodeHandlers(): void {
   ipcMain.handle(IPC.systemRunEpisode, async (_event, id: string) => {
     const context = getAppContext()
+    if (selfGraphMissing(context)) return err(GRAPH_REQUIRED_MSG)
     const busy = guardRun(context, id)
     if (busy !== null) return err(busy)
     const sandbox = mkdtempSync(join(tmpdir(), 'fortress-episode-'))
