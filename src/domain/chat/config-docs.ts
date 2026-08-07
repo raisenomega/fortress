@@ -12,18 +12,13 @@ export const DRAFTED_DOCS = [
 export type DraftedDoc = (typeof DRAFTED_DOCS)[number]
 
 /**
- * Los que SI se commitean (marco publico del proyecto). El resto —CONSTITUTION,
- * COGNITION-LOG, SECURITY-BASELINE— es estrategia interna y va en .gitignore.
+ * Los UNICOS que se commitean. TODA la documentacion de gobierno (CLAUDE,
+ * DDD-RULES, AGENTS, PROJECT-STATE, ARCHITECTURE, CONSTITUTION, COGNITION-LOG,
+ * SECURITY-BASELINE) es secreto interno estrategico —habla de estrategia, modelo
+ * de negocio, estructura y tecnologia— y NUNCA sube al repo (regla inmutable): va
+ * en el .gitignore de plantilla. Solo .gitignore y .env.example son publicos.
  */
-export const COMMITTED_DOCS: readonly string[] = [
-  'CLAUDE.md',
-  'DDD-RULES.md',
-  'AGENTS.md',
-  'PROJECT-STATE.md',
-  'ARCHITECTURE.md',
-  '.gitignore',
-  '.env.example'
-]
+export const COMMITTED_DOCS: readonly string[] = ['.gitignore', '.env.example']
 
 /** Marcadores del envelope: el agente envuelve cada borrador entre ellos. */
 export const DOC_OPEN = '<<<FORTRESS-DOC:'

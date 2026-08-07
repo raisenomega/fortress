@@ -1,10 +1,15 @@
 /** Los 3 archivos que la app genera por plantilla (no los redacta el agente). */
 
-export const GITIGNORE_TEMPLATE = `# Marco interno de FORTRESS: se queda en el equipo.
+export const GITIGNORE_TEMPLATE = `# Marco interno de FORTRESS: secreto estrategico, se queda en el equipo. NUNCA sube.
 FORTRESS*.md
 COGNITION*.md
 CONSTITUTION.md
 SECURITY-BASELINE.md
+CLAUDE.md
+DDD-RULES.md
+AGENTS.md
+PROJECT-STATE.md
+ARCHITECTURE.md
 .mcp.json
 .env
 *.db

@@ -1,4 +1,5 @@
 const { mkdtempSync, existsSync } = require('fs')
+const { execSync } = require('child_process')
 const { tmpdir } = require('os')
 const { join } = require('path')
 const { createRecorder } = require('../lib/renderer-checks.cjs')
@@ -58,6 +59,13 @@ module.exports = async function newProjectChecks(window) {
   check('el visor lee el contenido de un .md', doc.ok && doc.value.length > 0)
   const evil = await run(`window.api.docs.read('${id}', '../../../etc/passwd')`)
   check('el visor rechaza traversal', !evil.ok)
+
+  // Regla inmutable: la doc de gobierno NUNCA sube al repo; solo .gitignore/.env.example.
+  const tracked = execSync('git ls-files', { cwd: dir, encoding: 'utf8' }).split('\n')
+  check('el commit solo lleva .gitignore', tracked.includes('.gitignore'))
+  check('CLAUDE.md NO esta trackeado (interno)', !tracked.includes('CLAUDE.md'))
+  check('CONSTITUTION.md NO esta trackeado (interno)', !tracked.includes('CONSTITUTION.md'))
+  check('ARCHITECTURE.md NO esta trackeado (interno)', !tracked.includes('ARCHITECTURE.md'))
 
   return results
 }
