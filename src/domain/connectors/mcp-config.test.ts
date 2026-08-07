@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { ConnectorState } from './connector'
-import { buildMcpConfig } from './mcp-config'
+import { buildMcpConfig, mergeMcpConfig } from './mcp-config'
 
 function state(over: Partial<ConnectorState>): ConnectorState {
   return {
@@ -30,5 +30,22 @@ describe('buildMcpConfig', () => {
     expect(JSON.parse(json ?? '{}')).toEqual({
       mcpServers: { figma: { type: 'http', url: 'https://mcp.figma.com/mcp' } }
     })
+  })
+})
+
+describe('mergeMcpConfig', () => {
+  const project = { 'codebase-memory': { command: 'node', args: ['g.js'] } }
+
+  it('sin servidores del proyecto, devuelve el base intacto', () => {
+    expect(mergeMcpConfig(null, null)).toBeNull()
+    expect(mergeMcpConfig('{"mcpServers":{}}', {})).toBe('{"mcpServers":{}}')
+  })
+
+  it('suma los del proyecto a los conectores; el proyecto gana en clave repetida', () => {
+    const base =
+      '{"mcpServers":{"figma":{"type":"http","url":"https://x"},"codebase-memory":{"a":1}}}'
+    const cfg = JSON.parse(mergeMcpConfig(base, project) ?? '{}')
+    expect(cfg.mcpServers.figma).toBeDefined()
+    expect(cfg.mcpServers['codebase-memory']).toEqual({ command: 'node', args: ['g.js'] })
   })
 })

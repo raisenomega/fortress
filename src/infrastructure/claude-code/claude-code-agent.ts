@@ -4,10 +4,25 @@ import type { CodeAgent } from '@domain/chat/code-agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
 import type { Budget } from '@domain/settings/run-budget'
+import { mergeMcpConfig } from '@domain/connectors/mcp-config'
 import { agentsForProject } from './agents-for-project'
 import { trackChild } from './child-registry'
 import { buildArgs, buildEnv, CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
+import { readProjectMcpServers } from './project-mcp'
+import { readProjectScripts } from './project-scripts'
 import { collectRun } from './run-claude-process'
+
+/** La carpeta del proyecto tiene que existir y ser una carpeta antes de spawnear. */
+function precheckProjectPath(projectPath: string): string | null {
+  try {
+    if (statSync(projectPath).isDirectory()) return null
+    return `La ruta del proyecto no es una carpeta: ${projectPath}`
+  } catch {
+    return existsSync(projectPath)
+      ? `No se puede acceder a la carpeta del proyecto: ${projectPath}`
+      : `La carpeta del proyecto ya no existe: ${projectPath}`
+  }
+}
 
 /**
  * Ejecuta Claude Code dentro de la carpeta del proyecto. A diferencia del chat
@@ -27,28 +42,22 @@ export function createClaudeCodeAgent(
 ): CodeAgent {
   return {
     isAvailable: isClaudeInstalled,
-
-    precheck: (projectPath) => {
-      try {
-        if (statSync(projectPath).isDirectory()) return null
-        return `La ruta del proyecto no es una carpeta: ${projectPath}`
-      } catch {
-        return existsSync(projectPath)
-          ? `No se puede acceder a la carpeta del proyecto: ${projectPath}`
-          : `La carpeta del proyecto ya no existe: ${projectPath}`
-      }
-    },
+    precheck: precheckProjectPath,
 
     run: (request, onChunk) => {
       const agents = agentsForProject(request.projectPath, customAgents)
+      // El grafo real (codebase-memory con su graph.db) y demas MCP viven en el
+      // .mcp.json del proyecto; solo se pasan si es de confianza (ejecutan comandos).
+      const projectMcp = request.trusted ? readProjectMcpServers(request.projectPath) : null
       const args = buildArgs(
         request.prompt,
         request.permissionMode,
         agents,
         request.agentId,
         budget.perRun,
-        mcpConfig,
-        request.trusted
+        mergeMcpConfig(mcpConfig, projectMcp),
+        request.trusted,
+        readProjectScripts(request.projectPath)
       )
 
       const child = spawn(CLAUDE_BIN, args, {

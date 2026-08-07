@@ -28,6 +28,14 @@ describe('withGraph', () => {
     expect(cfg.mcpServers[GRAPH_SERVER]).toBeDefined()
   })
 
+  it('respeta un codebase-memory ya definido: el del proyecto gana al sintetizado', () => {
+    const propio = JSON.stringify({
+      mcpServers: { [GRAPH_SERVER]: { command: 'node', args: ['graph-server.js'] } }
+    })
+    const cfg = JSON.parse(withGraph(propio))
+    expect(cfg.mcpServers[GRAPH_SERVER]).toEqual({ command: 'node', args: ['graph-server.js'] })
+  })
+
   it('la regla de herramienta abre TODO el servidor del grafo', () => {
     expect(GRAPH_TOOL_RULE).toBe('mcp__codebase-memory')
   })

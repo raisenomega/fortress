@@ -37,6 +37,9 @@ interface McpConfigShape {
  */
 export function withGraph(connectorsJson: string | null): string {
   const base: McpConfigShape = connectorsJson ? (JSON.parse(connectorsJson) as McpConfigShape) : {}
-  const mcpServers = { ...(base.mcpServers ?? {}), [GRAPH_SERVER]: GRAPH_MCP }
+  // El grafo sintetizado (npx pineado) es el FALLBACK: si la config ya trae un
+  // codebase-memory —el del .mcp.json del proyecto, que apunta a su graph.db
+  // real— ese gana. Antes se pisaba siempre, y el grafo indexado no se usaba.
+  const mcpServers = { [GRAPH_SERVER]: GRAPH_MCP, ...(base.mcpServers ?? {}) }
   return JSON.stringify({ ...base, mcpServers })
 }

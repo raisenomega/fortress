@@ -28,3 +28,18 @@ export function buildMcpConfig(all: readonly ConnectorState[]): string | null {
 
   return JSON.stringify({ mcpServers })
 }
+
+/**
+ * Suma los servidores MCP del proyecto (su `.mcp.json`) encima de los conectores.
+ * Los del proyecto GANAN ante claves iguales: su definicion de codebase-memory
+ * apunta al graph.db real, y esa es la que debe viajar. Devuelve el JSON base
+ * intacto si no hay servidores extra, para no alterar el caso sin proyecto.
+ */
+export function mergeMcpConfig(
+  baseJson: string | null,
+  extra: Record<string, unknown> | null
+): string | null {
+  if (!extra || Object.keys(extra).length === 0) return baseJson
+  const base = baseJson ? (JSON.parse(baseJson) as { mcpServers?: Record<string, unknown> }) : {}
+  return JSON.stringify({ ...base, mcpServers: { ...(base.mcpServers ?? {}), ...extra } })
+}

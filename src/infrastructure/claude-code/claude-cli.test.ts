@@ -54,10 +54,10 @@ describe('buildArgs', () => {
 })
 
 describe('buildArgs · allowlist de autoverificacion (gate de confianza)', () => {
-  it('la autoverificacion solo aparece al editar en repo de confianza', () => {
-    expect(buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true)).toContain(
-      'Bash(npm run test:unit)'
-    )
+  it('al editar en confianza, el allowlist se arma de los scripts REALES del repo', () => {
+    const e = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true, ['type-check'])
+    expect(e).toContain('Bash(npm run type-check)')
+    expect(e).not.toContain('Bash(npm run typecheck)')
   })
 
   it('en plan NUNCA pasa la autoverificacion, aunque el repo sea de confianza', () => {

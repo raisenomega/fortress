@@ -10,9 +10,8 @@ import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 export const CLAUDE_BIN = 'claude'
 
 /**
- * Argumentos del CLI. Verificados contra `claude --help` de la version 2.1.220:
- * el flag no interactivo es `-p`, no `--headless`, y no existe `--project`
- * (el proyecto se fija con el cwd del proceso).
+ * Argumentos del CLI (verificado en `claude --help` 2.1.220): el flag headless
+ * es `-p`, no existe `--project` (el proyecto se fija con el cwd del proceso).
  */
 export function buildArgs(
   prompt: string,
@@ -20,10 +19,11 @@ export function buildArgs(
   agents: Readonly<Record<string, AgentDefinition>>,
   agentId: AgentId | null,
   maxUsd: number,
-  /** JSON de buildMcpConfig, o null si no hay conectores activos. */
+  /** JSON MCP (conectores + .mcp.json del proyecto), o null. */
   mcpConfig: string | null = null,
-  /** Proyecto de confianza. Default false: el allowlist NO se pasa por defecto. */
-  trusted = false
+  // trusted -> pasa allowlist; scripts (del package.json) -> de que se arma.
+  trusted = false,
+  scripts: readonly string[] = []
 ): string[] {
   const args = [
     '-p',
@@ -43,7 +43,7 @@ export function buildArgs(
   // Grafo SIEMPRE permitido (su consulta es no negociable); el allowlist de
   // autoverificacion solo al editar en repo de confianza. Sin la regla del
   // grafo, en plan headless la llamada al MCP se auto-deniega y cae a Bash.
-  args.push('--allowedTools', GRAPH_TOOL_RULE, ...selfVerifyRules(permissionMode, trusted))
+  args.push('--allowedTools', GRAPH_TOOL_RULE, ...selfVerifyRules(permissionMode, trusted, scripts))
 
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)
