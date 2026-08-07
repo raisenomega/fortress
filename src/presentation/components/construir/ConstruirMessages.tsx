@@ -1,5 +1,5 @@
 import { useConstruirStore } from '../../stores/construir-store'
-import { TransferBadge } from './TransferBadge'
+import { TransferBadge } from '../chat/TransferBadge'
 
 const USER = 'ml-auto max-w-[85%] rounded-lg bg-primary/10 px-3 py-2 text-sm text-foreground'
 const BOT =
