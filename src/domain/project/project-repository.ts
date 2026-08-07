@@ -1,3 +1,4 @@
+import type { DimensionScores } from '../score/dimension'
 import type { ConfigState } from './config-state'
 import type { NewProject, Project } from './project'
 
@@ -16,6 +17,8 @@ export interface ProjectRepository {
   setLoopEnabled(id: string, enabled: boolean): void
   /** Nota de CALIDAD GENERAL, de una auditoria integral. Distinta del score de seguridad. */
   setGeneralQuality(id: string, score: number): void
+  /** Score integral: global + parcial + las 6 dimensiones (cada una null = sin datos). */
+  setQuality(id: string, global: number, dims: DimensionScores, partial: boolean): void
   /** Transicion del ciclo de vida del marco: PENDIENTE_CONFIGURACION -> CONFIGURADO. */
   setConfigState(id: string, state: ConfigState): void
   /** Marca has_graph=1 y guarda las stats del indice (nodos, aristas, fecha ISO). */

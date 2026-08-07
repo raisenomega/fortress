@@ -1,6 +1,7 @@
 import { isConfigState } from '@domain/project/config-state'
 import { normalizeScore } from '@domain/project/fortress-score'
 import type { Project } from '@domain/project/project'
+import type { DimensionScores } from '@domain/score/dimension'
 
 /** Fila cruda de la tabla projects. SQLite no tiene boolean: usa 0/1. */
 export interface ProjectRow {
@@ -12,6 +13,13 @@ export interface ProjectRow {
   readonly git_branch: string | null
   readonly fortress_score: number
   readonly general_quality: number | null
+  readonly quality_partial: number | null
+  readonly dim_seguridad: number | null
+  readonly dim_correctitud: number | null
+  readonly dim_tests: number | null
+  readonly dim_mantenibilidad: number | null
+  readonly dim_dependencias: number | null
+  readonly dim_operacion: number | null
   readonly last_scan: string | null
   readonly has_claude: number
   readonly has_graph: number
@@ -25,6 +33,18 @@ export interface ProjectRow {
   readonly created_at: string
 }
 
+function toDimensions(row: ProjectRow): DimensionScores | null {
+  if (row.general_quality === null) return null
+  return {
+    seguridad: row.dim_seguridad,
+    correctitud: row.dim_correctitud,
+    tests: row.dim_tests,
+    mantenibilidad: row.dim_mantenibilidad,
+    dependencias: row.dim_dependencias,
+    operacion: row.dim_operacion
+  }
+}
+
 export function toProject(row: ProjectRow): Project {
   return {
     id: row.id,
@@ -35,6 +55,8 @@ export function toProject(row: ProjectRow): Project {
     gitBranch: row.git_branch,
     fortressScore: normalizeScore(row.fortress_score),
     generalQuality: row.general_quality === null ? null : normalizeScore(row.general_quality),
+    qualityDimensions: toDimensions(row),
+    qualityPartial: row.quality_partial === 1,
     lastScan: row.last_scan,
     hasClaude: row.has_claude === 1,
     hasGraph: row.has_graph === 1,

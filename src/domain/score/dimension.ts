@@ -8,6 +8,9 @@ export interface Dimension {
   readonly weight: number
 }
 
+/** Score por dimension (null = sin datos), como se persiste y se muestra. */
+export type DimensionScores = Readonly<Record<DimensionKey, number | null>>
+
 /** Orden y pesos acordados. El global es la media ponderada de las MEDIDAS. */
 export const DIMENSIONS: readonly Dimension[] = [
   { key: 'seguridad', label: 'Seguridad', weight: 30 },

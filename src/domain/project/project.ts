@@ -1,3 +1,4 @@
+import type { DimensionScores } from '../score/dimension'
 import type { Severity } from '../shared/severity'
 import type { ConfigState } from './config-state'
 import type { FindingStatus } from './finding-status'
@@ -23,8 +24,12 @@ export interface Project {
   readonly gitBranch: string | null
   /** Score FORTRESS 0-100. */
   readonly fortressScore: number
-  /** Calidad GENERAL (todas las dimensiones), o null si no hubo auditoria integral. */
+  /** Calidad GENERAL (global del score integral), o null si no hubo auditoria. */
   readonly generalQuality: number | null
+  /** Score por dimension del ultimo audit integral (cada uno null = sin datos), o null. */
+  readonly qualityDimensions: DimensionScores | null
+  /** true si el ultimo score global quedo PARCIAL (alguna dimension sin datos). */
+  readonly qualityPartial: boolean
   readonly lastScan: string | null
   readonly hasClaude: boolean
   /** Knowledge Graph indexado y conectable (codebase-memory). */

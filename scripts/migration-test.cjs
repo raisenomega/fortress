@@ -21,6 +21,9 @@ async function verify(window) {
   check('conserva el score anterior', proyectos[0]?.fortressScore === 64)
   // Backfill del ciclo de vida: un proyecto que ya existia esta CONFIGURADO.
   check('backfill de config_state a CONFIGURADO', proyectos[0]?.configState === 'CONFIGURADO')
+  // Backfill del score integral: sin auditar aun, dimensiones null y no parcial.
+  check('backfill score integral: sin dimensiones', proyectos[0]?.qualityDimensions === null)
+  check('backfill score integral: no parcial', proyectos[0]?.qualityPartial === false)
 
   const historial = await run("window.api.chat.history('viejo')")
   check('conserva el historial de chat', historial.length === 1, JSON.stringify(historial))

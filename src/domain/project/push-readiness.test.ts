@@ -14,6 +14,8 @@ const project = (overrides: Partial<Project> = {}): Project => ({
   gitBranch: 'main',
   fortressScore: 100,
   generalQuality: null,
+  qualityDimensions: null,
+  qualityPartial: false,
   lastScan: SCANNED,
   hasClaude: true,
   hasGraph: false,

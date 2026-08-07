@@ -1,3 +1,4 @@
+import { addProjectColumns } from './add-project-columns'
 import type { Db } from './database'
 
 interface ColumnRow {
@@ -64,10 +65,6 @@ export function runMigrations(db: Db): void {
     db.exec("ALTER TABLE projects ADD COLUMN config_state TEXT NOT NULL DEFAULT 'CONFIGURADO'")
   }
 
-  // Stats del grafo (nullables; null = sin indexar). has_graph ya existe.
-  for (const col of ['graph_nodes INTEGER', 'graph_edges INTEGER', 'graph_indexed_at TEXT']) {
-    if (!hasColumn(db, 'projects', col.split(' ')[0])) {
-      db.exec(`ALTER TABLE projects ADD COLUMN ${col}`)
-    }
-  }
+  // Stats del grafo + las 6 columnas del score integral (todas nullables).
+  addProjectColumns(db)
 }

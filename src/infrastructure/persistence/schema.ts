@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS projects (
   git_remote     TEXT,
   git_branch     TEXT,
   fortress_score INTEGER NOT NULL DEFAULT 0,
-  general_quality INTEGER,
+  general_quality INTEGER, quality_partial INTEGER, dim_seguridad INTEGER, dim_correctitud INTEGER,
+  dim_tests INTEGER, dim_mantenibilidad INTEGER, dim_dependencias INTEGER, dim_operacion INTEGER,
   last_scan      TEXT,
   has_claude     INTEGER NOT NULL DEFAULT 0,
   has_graph      INTEGER NOT NULL DEFAULT 0,
@@ -22,7 +23,6 @@ CREATE TABLE IF NOT EXISTS projects (
   config_state   TEXT NOT NULL DEFAULT 'CONFIGURADO',
   created_at     TEXT NOT NULL
 );
-
 CREATE TABLE IF NOT EXISTS chat_messages (
   id         TEXT PRIMARY KEY,
   project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,

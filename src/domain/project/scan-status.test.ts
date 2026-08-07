@@ -11,6 +11,8 @@ const project = (fortressScore: number, lastScan: string | null): Project => ({
   gitBranch: 'main',
   fortressScore,
   generalQuality: null,
+  qualityDimensions: null,
+  qualityPartial: false,
   lastScan,
   hasClaude: true,
   hasGraph: false,
