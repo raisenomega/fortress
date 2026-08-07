@@ -1,4 +1,5 @@
 import { useConstruirStore } from '../../stores/construir-store'
+import { SendToTerminalButton } from './SendToTerminalButton'
 
 const USER = 'ml-auto max-w-[85%] rounded-lg bg-primary/10 px-3 py-2 text-sm text-foreground'
 const BOT =
@@ -16,11 +17,18 @@ export function ConstruirMessages(): React.JSX.Element {
           Describe lo que quieres. Elige el modo con la flecha.
         </p>
       ) : null}
-      {messages.map((msg, i) => (
-        <div key={i} className={msg.role === 'user' ? USER : BOT}>
-          {msg.text}
-        </div>
-      ))}
+      {messages.map((msg, i) =>
+        msg.role === 'user' ? (
+          <div key={i} className={USER}>
+            {msg.text}
+          </div>
+        ) : (
+          <div key={i}>
+            <div className={BOT}>{msg.text}</div>
+            <SendToTerminalButton text={msg.text} />
+          </div>
+        )
+      )}
       {busy ? <p className="text-xs text-muted-foreground">Trabajando...</p> : null}
     </div>
   )
