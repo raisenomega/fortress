@@ -1,11 +1,8 @@
-import { useGraphActionStore } from '../../stores/graph-action-store'
+import { useGraphAction } from '../../stores/graph-action-store'
 
-/** Lo que dejan las acciones: progreso de instalar, resultado de verificar, error. */
-export function GraphActionResult(): React.JSX.Element {
-  const running = useGraphActionStore((state) => state.running)
-  const progress = useGraphActionStore((state) => state.progress)
-  const verify = useGraphActionStore((state) => state.verify)
-  const error = useGraphActionStore((state) => state.error)
+/** Lo que dejan las acciones del proyecto: progreso, resultado de verificar, error. */
+export function GraphActionResult({ projectId }: { projectId: string }): React.JSX.Element {
+  const { running, progress, verify, error } = useGraphAction(projectId)
 
   return (
     <>
