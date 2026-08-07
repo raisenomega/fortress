@@ -28,13 +28,13 @@ export async function refreshPlan(draft: NewProjectDraft): Promise<void> {
   store.setError(plan.error)
 }
 
-/** Tras crear y registrar: activa el proyecto, abre el chat y ARRANCA la
- *  entrevista (FORTRESS abre la sesion, no espera al operador). */
+/** Tras crear y registrar: activa el proyecto, abre "Construir" (donde vive la
+ *  entrevista) y ARRANCA la sesion (FORTRESS abre, no espera al operador). */
 async function finishCreation(project: Project): Promise<void> {
   await loadProjects()
   useProjectStore.getState().setActiveProject(project.id)
   useUiStore.getState().setProjectDialog(null)
-  useUiStore.getState().setView('chat')
+  useUiStore.getState().setView('construir')
   useNewProjectStore.getState().reset()
   void sendMessage({ projectId: project.id, ...KICKOFF })
 }

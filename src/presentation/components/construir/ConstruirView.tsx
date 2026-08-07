@@ -1,5 +1,6 @@
 import { useActiveProject } from '../../stores/project-store'
 import { Notice } from '../common/Notice'
+import { ConfigInterview } from './ConfigInterview'
 import { ConstruirInput } from './ConstruirInput'
 import { ConstruirMessages } from './ConstruirMessages'
 
@@ -11,6 +12,11 @@ import { ConstruirMessages } from './ConstruirMessages'
  */
 export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
+
+  // Un proyecto sin marco aprobado: aqui ocurre su entrevista de configuracion.
+  if (project?.configState === 'PENDIENTE_CONFIGURACION') {
+    return <ConfigInterview projectId={project.id} />
+  }
 
   return (
     <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4 pt-4 pb-6">

@@ -1,6 +1,7 @@
 import { api } from '../adapters/fortress-api'
 import { useConfigurationStore } from '../stores/configuration-store'
 import { reportError } from '../stores/toast-store'
+import { useUiStore } from '../stores/ui-store'
 import { sendMessage } from './chat-service'
 import { loadProjects } from './project-service'
 
@@ -27,6 +28,8 @@ export async function executeConfig(projectId: string): Promise<void> {
     if (!result.ok) return reportError(result.error)
     await loadProjects()
     store.clear(projectId)
+    // Marco aprobado: el proyecto pasa al chat, donde ocurre la ejecucion real.
+    useUiStore.getState().setView('chat')
   } catch (error) {
     reportError(error instanceof Error ? error.message : 'No se pudo escribir el marco')
   } finally {
