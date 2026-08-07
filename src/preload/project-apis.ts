@@ -28,12 +28,8 @@ export const projectApis: Pick<
     dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
     reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId)
   },
-  push: {
-    run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId)
-  },
-  posture: {
-    run: (request) => ipcRenderer.invoke(IPC.postureRun, request)
-  },
+  push: { run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId) },
+  posture: { run: (request) => ipcRenderer.invoke(IPC.postureRun, request) },
   account: {
     status: () => ipcRenderer.invoke(IPC.accountStatus),
     login: () => ipcRenderer.invoke(IPC.accountLogin),
@@ -47,11 +43,13 @@ export const projectApis: Pick<
     byProject: (iso) => ipcRenderer.invoke(IPC.telemetryByProject, iso),
     ranking: (iso, limit) => ipcRenderer.invoke(IPC.telemetryRanking, iso, limit)
   },
-  cognition: {
-    read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId)
-  },
+  cognition: { read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId) },
   graph: {
-    status: (projectId) => ipcRenderer.invoke(IPC.graphStatus, projectId)
+    status: (projectId) => ipcRenderer.invoke(IPC.graphStatus, projectId),
+    install: (projectId) => ipcRenderer.invoke(IPC.graphInstall, projectId),
+    verify: (projectId) => ipcRenderer.invoke(IPC.graphVerify, projectId),
+    ab: (projectId, question) => ipcRenderer.invoke(IPC.graphAb, projectId, question),
+    onProgress: (listener) => subscribe(IPC.graphProgress, listener)
   },
   newProject: {
     homeDirs: () => ipcRenderer.invoke(IPC.newProjectHomeDirs),

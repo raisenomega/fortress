@@ -1,11 +1,13 @@
 import { SYSTEM_CHANNELS } from './system-channels'
 import { BUILD_CHANNELS } from './build-channels'
+import { GRAPH_CHANNELS } from './graph-channels'
 import { NEWPROJECT_CHANNELS } from './newproject-channels'
 
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
   ...SYSTEM_CHANNELS,
   ...BUILD_CHANNELS,
+  ...GRAPH_CHANNELS,
   projectsList: 'projects:list',
   projectsAdd: 'projects:add',
   projectsRemove: 'projects:remove',

@@ -7,6 +7,7 @@ import { registerCognitionHandlers } from './cognition-handlers'
 import { registerConnectorHandlers } from './connector-handlers'
 import { registerChatSendHandler } from './chat-send-handler'
 import { registerGraphHandlers } from './graph-handlers'
+import { registerGraphActionHandlers } from './graph-action-handlers'
 import { registerHealthHandlers } from './health-handlers'
 import { registerMaintenanceHandlers } from './maintenance-handlers'
 import { registerNewProjectHandlers } from './newproject-handlers'
@@ -31,6 +32,7 @@ export function registerIpcHandlers(): void {
   registerTelemetryHandlers()
   registerCognitionHandlers()
   registerGraphHandlers()
+  registerGraphActionHandlers()
   registerMaintenanceHandlers()
   registerNewProjectHandlers()
   registerAccountHandlers()

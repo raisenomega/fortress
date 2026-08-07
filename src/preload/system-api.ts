@@ -1,4 +1,5 @@
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
+import type { GraphAb, GraphVerify } from '@domain/graph/graph-actions'
 import type { GraphStatus } from '@domain/graph/graph-status'
 import type { Result } from '@domain/shared/result'
 import type { AgentRanking } from '@domain/telemetry/agent-run'
@@ -30,6 +31,13 @@ export interface CognitionApi {
 export interface GraphApi {
   /** Solo detecta si el grafo esta configurado; no lee sus datos. */
   status(projectId: string): Promise<GraphStatus>
+  /** Asegura binario + .mcp.json + indice, y persiste las stats. Con progreso. */
+  install(projectId: string): Promise<Result<GraphStatus>>
+  /** Sesion real de claude -p: confirma que el grafo conecta y con que tools. */
+  verify(projectId: string): Promise<GraphVerify>
+  /** Misma pregunta en 'lectura' (solo grafo) y 'normal' (grafo+read): tokens de cada una. */
+  ab(projectId: string, question: string): Promise<Result<GraphAb>>
+  onProgress(listener: (chunk: { projectId: string; delta: string }) => void): Unsubscribe
 }
 
 export interface MaintenanceApi {
