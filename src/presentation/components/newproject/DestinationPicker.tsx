@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../../adapters/fortress-api'
-import type { HomeDir } from '../../../preload/system-api'
+import type { HomeDir } from '../../../preload/newproject-api'
 
 interface DestinationPickerProps {
   readonly value: string

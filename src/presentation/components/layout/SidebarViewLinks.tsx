@@ -11,6 +11,7 @@ const VIEWS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }
   { view: 'scan', iconName: 'shield', label: 'Escaneo' },
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
   { view: 'cognition', iconName: 'brain', label: 'Cognition' },
+  { view: 'docs', iconName: 'file-text', label: 'Documentacion' },
   { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' },
   { view: 'omega', iconName: 'eye', label: 'Sentinel Omega' },
   { view: 'sistema', iconName: 'sparkles', label: 'Auto-mejora FORTRESS' },

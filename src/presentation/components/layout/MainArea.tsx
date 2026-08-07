@@ -1,6 +1,7 @@
 import { useUiStore, type MainView } from '../../stores/ui-store'
 import { ChatWindow } from '../chat/ChatWindow'
 import { CognitionView } from '../cognition/CognitionView'
+import { DocsView } from '../docs/DocsView'
 import { ConnectorsView } from '../connectors/ConnectorsView'
 import { ConstruirView } from '../construir/ConstruirView'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
@@ -28,7 +29,8 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   omega: () => <OmegaView />,
   sistema: () => <SelfImprovementView />,
   genesis: () => <GenesisView />,
-  construir: () => <ConstruirView />
+  construir: () => <ConstruirView />,
+  docs: () => <DocsView />
 }
 
 interface MainAreaProps {

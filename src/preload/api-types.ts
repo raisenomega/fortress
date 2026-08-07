@@ -3,6 +3,7 @@ import type { ActivityApi, PushApi, ScanApi } from './scan-api'
 import type { BuildApi } from './build-api'
 import type { ChatApi, ProjectsApi, SettingsApi } from './core-apis'
 import type { ConnectorsApi } from './connectors-api'
+import type { DocsApi, NewProjectApi } from './newproject-api'
 import type { OmegaApi } from './omega-api'
 import type { SelfImprovementApi } from './self-improvement-api'
 import type {
@@ -11,7 +12,6 @@ import type {
   CognitionApi,
   GraphApi,
   MaintenanceApi,
-  NewProjectApi,
   TelemetryApi
 } from './system-api'
 
@@ -42,5 +42,6 @@ export interface FortressApi {
   readonly maintenance: MaintenanceApi
   readonly newProject: NewProjectApi
   readonly push: PushApi
+  readonly docs: DocsApi
   readonly settings: SettingsApi
 }

@@ -14,6 +14,7 @@ export type MainView =
   | 'sistema'
   | 'genesis'
   | 'construir'
+  | 'docs'
 
 interface UiState {
   readonly view: MainView

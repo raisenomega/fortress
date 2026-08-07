@@ -48,5 +48,16 @@ module.exports = async function newProjectChecks(window) {
   )
   check('con documentos faltantes, rechaza', !bad.ok)
 
+  // Visor de documentacion IN-APP: lista los .md (incluido el interno) y los lee.
+  const docs = await run(`window.api.docs.list('${id}')`)
+  check(
+    'el visor lista los .md del proyecto (incluido CONSTITUTION)',
+    docs.includes('CONSTITUTION.md')
+  )
+  const doc = await run(`window.api.docs.read('${id}', 'CLAUDE.md')`)
+  check('el visor lee el contenido de un .md', doc.ok && doc.value.length > 0)
+  const evil = await run(`window.api.docs.read('${id}', '../../../etc/passwd')`)
+  check('el visor rechaza traversal', !evil.ok)
+
   return results
 }
