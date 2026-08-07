@@ -21,7 +21,7 @@ async function walkDialog(helpers) {
   })()`)
   await pause(600)
   await shoot('-nuevo-proyecto')
-  await expect('nuevo proyecto', 'SE CREARA EN', 'mi-app-genial', 'Crear la carpeta')
+  await expect('nuevo proyecto', 'SE CREARA EN', 'mi-app-genial', 'Crear proyecto')
 
   await run(clickSelector('button[aria-label="Cerrar"]'))
 
