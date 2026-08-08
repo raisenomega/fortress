@@ -47,11 +47,21 @@ describe('computeIntegralScore', () => {
     expect(r.partial).toBe(true)
     expect(r.missing).toHaveLength(6)
   })
+})
 
+describe('computeIntegralScore · sin datos vs medido', () => {
   it('null explicito = sin datos, distinto de [] (medida limpia = 100)', () => {
     const conNull = computeIntegralScore({ seguridad: [], tests: null })
     const medida = conNull.byDimension.find((d) => d.key === 'tests')
     expect(medida?.score).toBeNull()
     expect(conNull.byDimension.find((d) => d.key === 'seguridad')?.score).toBe(100)
+  })
+
+  it('score DIRECTO (sin tests = 0) cuenta como MEDIDO, no como sin datos', () => {
+    const r = computeIntegralScore({ seguridad: [], tests: { score: 0 } })
+    expect(r.byDimension.find((d) => d.key === 'tests')?.score).toBe(0)
+    expect(r.missing).not.toContain('Tests')
+    // seguridad 100 (w30) + tests 0 (w15) = 3000/45 = 67
+    expect(r.global).toBe(67)
   })
 })

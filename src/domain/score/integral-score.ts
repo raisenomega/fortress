@@ -1,11 +1,15 @@
+import { normalizeScore } from '../project/fortress-score'
 import { scoreFromFindings } from '../scan/score-from-findings'
 import { CRITICAL_CEILING } from '../shared/penalty-score'
 import type { HasSeverity } from '../shared/severity'
 import { DIMENSIONS, type DimensionKey } from './dimension'
 
-/** Hallazgos de una dimension, o null/ausente = SIN DATOS (no medida). */
-export type DimensionFindings = readonly HasSeverity[] | null | undefined
-export type FindingsByDimension = Readonly<Partial<Record<DimensionKey, DimensionFindings>>>
+/**
+ * Entrada de una dimension: sus hallazgos (penalizados 25/8/3/1), un score
+ * DIRECTO (p.ej. "sin tests" = 0, o cobertura), o null/ausente = SIN DATOS.
+ */
+export type DimensionInput = readonly HasSeverity[] | { readonly score: number } | null | undefined
+export type InputByDimension = Readonly<Partial<Record<DimensionKey, DimensionInput>>>
 
 export interface DimensionScore {
   readonly key: DimensionKey
@@ -24,32 +28,36 @@ export interface IntegralScore {
   readonly byDimension: readonly DimensionScore[]
 }
 
-function scoreDimension(findings: DimensionFindings): number | null {
-  return findings === null || findings === undefined ? null : scoreFromFindings(findings)
+function isFindings(input: DimensionInput): input is readonly HasSeverity[] {
+  return Array.isArray(input)
+}
+
+function scoreDimension(input: DimensionInput): number | null {
+  if (input === null || input === undefined) return null
+  return isFindings(input) ? scoreFromFindings(input) : normalizeScore(input.score)
 }
 
 /**
- * Score integral: por dimension, score determinista de sus hallazgos (o null si
- * no se midio). El global es la media PONDERADA de las medidas (una dimension sin
- * datos NO cuenta como 100). Con cualquier CRITICAL abierto, techo 64.
+ * Score integral: por dimension, score determinista (o null si no se midio). El
+ * global es la media PONDERADA de las medidas (sin datos NO cuenta como 100). Con
+ * cualquier CRITICAL abierto en una dimension medida por hallazgos, techo 64.
  */
-export function computeIntegralScore(byKey: FindingsByDimension): IntegralScore {
+export function computeIntegralScore(byKey: InputByDimension): IntegralScore {
   const byDimension: DimensionScore[] = DIMENSIONS.map((dim) => ({
     key: dim.key,
     label: dim.label,
     weight: dim.weight,
     score: scoreDimension(byKey[dim.key]),
-    count: byKey[dim.key]?.length ?? 0
+    count: isFindings(byKey[dim.key]) ? (byKey[dim.key] as readonly HasSeverity[]).length : 0
   }))
-  const weightSum = byDimension.reduce((sum, d) => (d.score === null ? sum : sum + d.weight), 0)
-  const weighted = byDimension.reduce(
-    (sum, d) => (d.score === null ? sum : sum + d.weight * d.score),
-    0
-  )
+  const measured = byDimension.filter((d) => d.score !== null)
+  const weightSum = measured.reduce((sum, d) => sum + d.weight, 0)
+  const weighted = measured.reduce((sum, d) => sum + d.weight * (d.score ?? 0), 0)
   const mean = weightSum === 0 ? 0 : Math.round(weighted / weightSum)
-  const critical = DIMENSIONS.some((d) =>
-    (byKey[d.key] ?? []).some((f) => f.severity === 'CRITICAL')
-  )
+  const critical = DIMENSIONS.some((d) => {
+    const input = byKey[d.key]
+    return isFindings(input) && input.some((finding) => finding.severity === 'CRITICAL')
+  })
   const missing = byDimension.filter((d) => d.score === null).map((d) => d.label)
   return {
     global: critical ? Math.min(mean, CRITICAL_CEILING) : mean,
