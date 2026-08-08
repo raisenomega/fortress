@@ -31,10 +31,18 @@ datos real.
 
 ## Distribucion (Linux)
 
+> **Regla no negociable: cierra la app ANTES de instalar.** El AppImage se ejecuta
+> desde un mount FUSE en caliente; sobrescribir `~/.local/bin/fortress` con la app
+> corriendo la crashea. `install.sh` lo hace cumplir (`refuse_if_running` aborta si
+> detecta la app viva y verifica el PID antes y despues); aun asi, el flujo correcto
+> es: cerrar la app -> build -> install -> relanzar fresca. Nunca en caliente.
+
 ```bash
+# 1. cierra FORTRESS por completo
 npm run icons         # regenera los iconos desde resources/fortress-logo.jpeg
 npm run build:linux   # genera ../dist/FORTRESS-<version>.AppImage
-./install.sh          # instala ejecutable, icono, menu y acceso directo
+./install.sh          # copia el binario (aborta si la app sigue viva)
+# 4. relanza la app fresca
 ```
 
 `install.sh` no necesita sudo. Deja:
