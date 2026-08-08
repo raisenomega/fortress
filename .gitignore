@@ -54,3 +54,4 @@ fortress-orchestrator*.sh
 .render-smoke.png
 .ui-preview*.png
 .toggle-zoom.png
+*.tsbuildinfo
