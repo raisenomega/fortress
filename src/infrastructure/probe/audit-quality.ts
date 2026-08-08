@@ -5,6 +5,7 @@ import { correctnessProbe } from './correctness-probe'
 import { dependenciesProbe } from './dependencies-probe'
 import { maintainabilityProbe } from './maintainability-probe'
 import { operationProbe } from './operation-probe'
+import { readOnly } from './read-only-guard'
 import { testsProbe } from './tests-probe'
 
 /** Corre los 5 probes en serie (no en paralelo: no compiten por CPU/dist). */
@@ -28,7 +29,10 @@ export async function auditQuality(
   trusted: boolean,
   securityFindings: readonly HasSeverity[] | null
 ): Promise<QualityAudit> {
-  const probes: InputByDimension = trusted ? await runProbes(projectPath) : {}
+  // readOnly: los probes de build dejan artefactos; se borran para no tocar el repo.
+  const probes: InputByDimension = trusted
+    ? await readOnly(projectPath, () => runProbes(projectPath))
+    : {}
   const inputs: InputByDimension = { seguridad: securityFindings ?? undefined, ...probes }
   return { score: computeIntegralScore(inputs), inputs }
 }
