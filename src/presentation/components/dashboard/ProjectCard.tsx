@@ -24,6 +24,10 @@ export function ProjectCard({ project, active, onSelect }: ProjectCardProps): Re
   const counts = useProjectCounts(project.id)
   const state = pushState(project, counts)
   const push = PUSH[state]
+  // El gauge muestra el score INTEGRAL de 6 dimensiones cuando ya se audito; si
+  // no, cae al de seguridad. La linea "Seguridad" deja ver el sub-score aparte.
+  const integral = project.generalQuality
+  const gauge = integral ?? project.fortressScore
 
   return (
     <button
@@ -35,7 +39,7 @@ export function ProjectCard({ project, active, onSelect }: ProjectCardProps): Re
         active ? 'border-primary/50 bg-accent/20' : 'border-border bg-card hover:border-primary/30'
       }`}
     >
-      <ScoreGauge score={project.fortressScore} scanned={status !== 'sin-escanear'} />
+      <ScoreGauge score={gauge} scanned={integral !== null || status !== 'sin-escanear'} />
 
       <div className="min-w-0 flex-1">
         <p className="truncate font-display text-sm font-bold text-foreground">{project.name}</p>
@@ -43,9 +47,9 @@ export function ProjectCard({ project, active, onSelect }: ProjectCardProps): Re
           {project.stack || 'stack sin detectar'}
         </p>
         <p className="mt-1 text-[11px] text-muted-foreground">{SCAN_LABEL[status]}</p>
-        {project.generalQuality === null ? null : (
+        {integral === null ? null : (
           <p className="text-[11px] text-muted-foreground">
-            Calidad gral: <span className="text-foreground">{project.generalQuality}/100</span>
+            Seguridad: <span className="text-foreground">{project.fortressScore}/100</span>
           </p>
         )}
         {counts.CRITICAL > 0 ? (
