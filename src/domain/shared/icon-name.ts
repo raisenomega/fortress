@@ -23,6 +23,8 @@ export const ICON_NAMES = [
   'eye',
   'zap',
   'gauge',
+  'chevron-up',
+  'chevron-down',
   'folder-open',
   'git-branch',
   'file-text',

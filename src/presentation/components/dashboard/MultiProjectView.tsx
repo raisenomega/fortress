@@ -1,5 +1,5 @@
 import { useProjectStore } from '../../stores/project-store'
-import { ProjectCard } from './ProjectCard'
+import { ProjectCardSlot } from './ProjectCardSlot'
 
 /**
  * Franja con todos los proyectos a la vez, cada uno con su score. Es la vista
@@ -20,7 +20,7 @@ export function MultiProjectView(): React.JSX.Element | null {
       </h4>
       <div className="flex gap-3 overflow-x-auto pb-1">
         {projects.map((project) => (
-          <ProjectCard
+          <ProjectCardSlot
             key={project.id}
             project={project}
             active={project.id === activeProjectId}
