@@ -1,6 +1,11 @@
 import { spawn, spawnSync } from 'child_process'
 import { NO_ACCOUNT, type Account } from '@domain/settings/account'
 import { CLAUDE_BIN } from './claude-cli'
+import { trackChild } from './child-registry'
+
+// Dos logins a la vez pelean por el mismo navegador y la misma credencial:
+// el flag garantiza que solo uno corre (estilo genesis-registry).
+let isLoginRunning = false
 
 interface StatusJson {
   readonly loggedIn?: boolean
@@ -34,15 +39,25 @@ export function readAccount(): Account {
  */
 export function startLogin(onOutput: (text: string) => void): Promise<void> {
   return new Promise((resolve) => {
+    if (isLoginRunning) {
+      onOutput('Ya hay un inicio de sesion en curso: termina ese primero.\n')
+      resolve()
+      return
+    }
+    isLoginRunning = true
+
     const child = spawn(CLAUDE_BIN, ['auth', 'login', '--claudeai'], { env: process.env })
+    trackChild(child)
 
     child.stdout.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
     child.stderr.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
     child.on('error', (error) => {
+      isLoginRunning = false
       onOutput(`No se pudo iniciar sesion: ${error.message}`)
       resolve()
     })
     child.on('close', () => {
+      isLoginRunning = false
       onOutput('\n[sesion terminada]\n')
       resolve()
     })
