@@ -6,6 +6,8 @@ export interface CognitionScan {
   readonly projectPath: string
   readonly projectName: string
   readonly findings: readonly DetectedFinding[]
+  /** Hallazgos que estaban abiertos y este escaneo ya no vio: se extinguen. */
+  readonly resolved: readonly DetectedFinding[]
   readonly score: number
   readonly counts: SeverityCounts
   readonly at: string

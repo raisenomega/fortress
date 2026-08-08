@@ -24,6 +24,30 @@ export function buildPatterns(findings: readonly DetectedFinding[], at: string):
     .join('\n')
 }
 
+/**
+ * Patrones EXTINTOS: hallazgos que un escaneo posterior ya no encontro. No se
+ * borran sin rastro — se registran RESUELTOS con evidencia (ubicacion original +
+ * fecha). Es el ciclo de vida: un patron que ya no aplica se extingue, con prueba.
+ */
+export function buildExtinct(resolved: readonly DetectedFinding[], at: string): string {
+  const year = at.slice(0, 4)
+  const fecha = at.slice(0, 10)
+  // Offset 900 para no chocar con la numeracion de los ACTIVE (001..).
+  return resolved
+    .map((f, i) =>
+      [
+        `## PTN-${year}-${String(900 + i)}: ${f.title}`,
+        '',
+        'Estado: EXTINTO',
+        `Severidad: ${f.severity}`,
+        `Resuelto: ${fecha}`,
+        `Evidencia: el escaneo ya no lo reporta (ubicacion original ${f.file}:${f.line ?? '-'})`,
+        ''
+      ].join('\n')
+    )
+    .join('\n')
+}
+
 /** Mapa de atencion real: los archivos con hallazgos, pesados por cuantos tienen. */
 export function buildAttention(findings: readonly DetectedFinding[]): string {
   const porArchivo = new Map<string, number>()

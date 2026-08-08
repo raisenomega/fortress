@@ -20,7 +20,15 @@ export function writeScan(scan: CognitionScan): void {
     const existing = existsSync(path) ? readFileSync(path, 'utf8') : ''
     writeFileSync(
       path,
-      rebuildLog(existing, scan.projectName, scan.findings, scan.score, scan.counts, scan.at)
+      rebuildLog(
+        existing,
+        scan.projectName,
+        scan.findings,
+        scan.resolved,
+        scan.score,
+        scan.counts,
+        scan.at
+      )
     )
   } catch {
     // El escaneo ya esta persistido; perder la memoria no lo invalida.
