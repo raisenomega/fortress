@@ -36,6 +36,13 @@ export interface FindingRepository {
     at: string
   ): void
 
+  /**
+   * Cierra el ciclo de vida de los hallazgos indicados, con fecha. Solo lo
+   * llama quien ya reunio la evidencia de las DOS pruebas de la extincion:
+   * ausencia en el escaneo Y archivo tocado desde la primera deteccion.
+   */
+  markExtinct(ids: readonly string[], at: string): void
+
   /** Marca un hallazgo como falso positivo y recuerda la decision. */
   dismiss(findingId: string): boolean
 

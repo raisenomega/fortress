@@ -29,5 +29,5 @@ export async function runScan(
   )
   if (!outcome.ok) return err(outcome.error)
 
-  return ok(persistScan(context, project, outcome.value))
+  return ok(await persistScan(context, project, outcome.value))
 }

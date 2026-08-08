@@ -6,6 +6,7 @@ import type { CapabilityNoteRepository } from '@domain/system/capability-note-re
 import type { AgentDraftRepository } from '@domain/system/agent-draft-repository'
 import type { CapabilityEpisodeRepository } from '@domain/system/capability-episode-repository'
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
+import type { FileHistory } from '@domain/project/file-history'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { QualityHistoryRepository } from '@domain/score/quality-record'
@@ -27,6 +28,8 @@ import type { RunInTransaction } from '@domain/shared/transaction'
 export interface AppContext {
   readonly projects: ProjectRepository
   readonly findings: FindingRepository
+  /** git: si el archivo de un hallazgo cambio desde que se detecto. */
+  readonly fileHistory: FileHistory
   readonly scans: ScanHistoryRepository
   readonly qualityHistory: QualityHistoryRepository
   readonly chat: ChatRepository

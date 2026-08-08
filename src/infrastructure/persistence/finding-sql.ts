@@ -6,17 +6,27 @@ const BY_URGENCY = `CASE status WHEN 'open' THEN 0 ELSE 1 END,
   CASE severity WHEN 'CRITICAL' THEN 0 WHEN 'HIGH' THEN 1 WHEN 'MEDIUM' THEN 2 ELSE 3 END,
   file, line`
 
+/**
+ * Lo que sigue pidiendo accion. Un EXTINCT ya no: se demostro que se arreglo
+ * —ausente del escaneo Y con su archivo tocado— y queda como historia, no como
+ * tarea. Sin este filtro la lista crece para siempre desde que la base dejo de
+ * borrar, y el tablero acabaria mostrando problemas ya cerrados.
+ */
+const VIVOS = "project_id = ? AND lifecycle != 'EXTINCT'"
+
 export const SELECT_BY_PROJECT = `SELECT ${COLUMNS} FROM findings
-  WHERE project_id = ? ORDER BY ${BY_URGENCY}`
+  WHERE ${VIVOS} ORDER BY ${BY_URGENCY}`
 
 /**
- * Solo cuenta lo abierto. Un CRITICAL descartado por el operador no puede
- * seguir bloqueando el push: descartar tiene que significar algo.
+ * Solo cuenta lo abierto y no extinto. Un CRITICAL descartado por el operador
+ * no puede seguir bloqueando el push: descartar tiene que significar algo. Y
+ * extinguir tambien.
  */
 export const COUNTS_BY_PROJECT = `SELECT project_id, severity, COUNT(*) AS total
-  FROM findings WHERE status = 'open' GROUP BY project_id, severity`
+  FROM findings WHERE status = 'open' AND lifecycle != 'EXTINCT'
+  GROUP BY project_id, severity`
 
-/** El expediente completo: lo que la base recuerda, no solo lo que se ve. */
+/** El expediente completo: TODO lo que la base recuerda, extintos incluidos. */
 export const SELECT_MEMORY = `SELECT id, identity, severity, title, file, line, status,
   lifecycle, first_seen, last_seen, resolved_at FROM findings
   WHERE project_id = ? ORDER BY ${BY_URGENCY}`
@@ -43,6 +53,10 @@ export const TOUCH_FINDING = `UPDATE findings SET severity = @severity, title = 
 export const SELECT_FINDING = `SELECT project_id, fingerprint FROM findings WHERE id = ?`
 
 export const SET_STATUS = 'UPDATE findings SET status = ? WHERE id = ?'
+
+/** La transicion a extinto deja fecha: sin ella no habria como auditarla. */
+export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved_at = @at
+  WHERE id = @id AND lifecycle = 'ACTIVE'`
 
 export const INSERT_DISMISSAL = `INSERT OR REPLACE INTO dismissals
   (project_id, fingerprint, at) VALUES (?, ?, ?)`

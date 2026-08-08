@@ -3,6 +3,7 @@ import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
 import { createSafeStorageApiKeyStore } from '../security/api-key-store'
 import { getDatabase } from './database'
 import { writeScan } from '../cognition/write-cognition-log'
+import { createGitFileHistory } from '../git/file-history'
 import { createFsProbe } from '../omega/fs-probe'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
 import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
@@ -33,6 +34,7 @@ export function getAppContext(): AppContext {
   context = {
     projects: createSqliteProjectRepository(db),
     findings: createSqliteFindingRepository(db),
+    fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),
     qualityHistory: createSqliteQualityHistoryRepository(db),
     chat: createSqliteChatRepository(db),
