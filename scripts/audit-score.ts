@@ -1,5 +1,9 @@
+import Database from 'better-sqlite3'
+import { homedir } from 'os'
+import { join } from 'path'
 import { DIMENSIONS } from '../src/domain/score/dimension'
 import { auditQuality } from '../src/infrastructure/probe/audit-quality'
+import type { HasSeverity } from '../src/domain/shared/severity'
 
 const path = process.argv[2]
 if (!path) {
@@ -7,8 +11,26 @@ if (!path) {
   process.exit(1)
 }
 
-// trusted=true; seguridad sin datos (no corremos el scan de agente aqui).
-const audit = auditQuality(path, true, null)
+/** Seguridad = los hallazgos abiertos del ultimo escaneo persistido (reusa el scan). */
+function securityFindings(projectPath: string): HasSeverity[] | null {
+  try {
+    const db = new Database(join(homedir(), '.config/fortress-command-center/fortress.db'), {
+      readonly: true
+    })
+    const project = db.prepare('SELECT id FROM projects WHERE path = ?').get(projectPath) as
+      { id: string } | undefined
+    if (!project) return null
+    const rows = db
+      .prepare("SELECT severity FROM findings WHERE project_id = ? AND status = 'open'")
+      .all(project.id) as HasSeverity[]
+    db.close()
+    return rows
+  } catch {
+    return null
+  }
+}
+
+const audit = auditQuality(path, true, securityFindings(path))
 const s = audit.score
 
 console.log(`\n=== ${path} ===`)
