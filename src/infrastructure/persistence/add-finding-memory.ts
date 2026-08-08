@@ -1,0 +1,61 @@
+import { findingIdentity } from '@domain/project/finding-identity'
+import { isSeverity } from '@domain/shared/severity'
+import type { Db } from './database'
+
+interface ColumnRow {
+  readonly name: string
+}
+
+interface LegacyRow {
+  readonly id: string
+  readonly severity: string
+  readonly title: string
+  readonly file: string
+  readonly created_at: string
+}
+
+/**
+ * Columnas de la MEMORIA de un hallazgo. Se anaden sin CHECK porque SQLite no
+ * lo admite en un ALTER; la validacion la hace el dominio al leer.
+ */
+const COLUMNS: ReadonlyArray<readonly [string, string]> = [
+  ['identity', "ALTER TABLE findings ADD COLUMN identity TEXT NOT NULL DEFAULT ''"],
+  ['lifecycle', "ALTER TABLE findings ADD COLUMN lifecycle TEXT NOT NULL DEFAULT 'ACTIVE'"],
+  ['first_seen', "ALTER TABLE findings ADD COLUMN first_seen TEXT NOT NULL DEFAULT ''"],
+  ['last_seen', "ALTER TABLE findings ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''"],
+  ['resolved_at', 'ALTER TABLE findings ADD COLUMN resolved_at TEXT']
+]
+
+const PENDING = `SELECT id, severity, title, file, created_at FROM findings WHERE identity = ''`
+
+const FILL = `UPDATE findings SET identity = @identity, first_seen = @at, last_seen = @at
+  WHERE id = @id`
+
+function hasColumn(db: Db, column: string): boolean {
+  return (db.pragma('table_info(findings)') as ColumnRow[]).some((c) => c.name === column)
+}
+
+/**
+ * Migra las filas que ya existen: les calcula su clave estable y les da una
+ * historia. Las fechas salen de `created_at`, que es lo unico que la version
+ * anterior guardaba — no se inventa una fecha mas reciente, que haria parecer
+ * recien visto algo que lleva semanas.
+ *
+ * Idempotente: solo toca las filas sin clave, asi que repetirla no hace nada.
+ */
+export function addFindingMemory(db: Db): void {
+  for (const [column, statement] of COLUMNS) {
+    if (!hasColumn(db, column)) db.exec(statement)
+  }
+
+  const fill = db.prepare(FILL)
+  const backfill = db.transaction((rows: readonly LegacyRow[]) => {
+    for (const row of rows) {
+      const severity = isSeverity(row.severity) ? row.severity : 'MEDIUM'
+      const identity = findingIdentity({ ...row, severity, line: null })
+      fill.run({ id: row.id, identity, at: row.created_at })
+    }
+  })
+
+  backfill(db.prepare(PENDING).all() as LegacyRow[])
+}

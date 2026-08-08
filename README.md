@@ -20,7 +20,7 @@ sirve exportar `ANTHROPIC_API_KEY` antes de arrancar.
 ```bash
 npm run typecheck   # tsc en node + web
 npm run lint        # incluye el limite de 75 lineas por archivo
-npm run test:unit   # vitest sobre el dominio puro
+npm run test:unit   # vitest: dominio puro + persistencia sobre SQLite en memoria
 npm test            # unit + integracion (renderer -> preload -> IPC -> SQLite)
 npm run smoke       # monta la UI real y falla si no pinta
 npm run preview     # recorre las 6 pantallas y las captura

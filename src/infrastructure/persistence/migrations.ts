@@ -1,3 +1,4 @@
+import { addFindingMemory } from './add-finding-memory'
 import { addProjectColumns } from './add-project-columns'
 import type { Db } from './database'
 
@@ -36,6 +37,10 @@ export function runMigrations(db: Db): void {
   for (const [column, statement] of FINDING_COLUMNS) {
     if (!hasColumn(db, 'findings', column)) db.exec(statement)
   }
+
+  // Memoria del hallazgo (clave estable, ciclo de vida, fechas): va aparte
+  // porque ademas de anadir columnas rellena la historia de las filas viejas.
+  addFindingMemory(db)
 
   // Confianza: bases anteriores no la tienen. Default 0 = no confiable, que es
   // el lado seguro (el agente no auto-ejecuta scripts hasta que se marque).

@@ -1,8 +1,8 @@
 import type { FindingRepository } from '@domain/project/finding-repository'
 import { EMPTY_COUNTS, type SeverityCounts } from '@domain/project/severity-counts'
-import { nowIso } from '@domain/shared/id'
 import { isSeverity, type Severity } from '@domain/shared/severity'
 import type { Db } from './database'
+import { toMemory, type MemoryRow } from './finding-memory-row'
 import { toFinding, toInsert, type FindingRow } from './finding-row'
 import * as SQL from './finding-sql'
 import { createFindingWrites } from './finding-writes'
@@ -16,11 +16,14 @@ interface CountRow {
 /** Todas las consultas van parametrizadas: nunca se concatena input. */
 export function createSqliteFindingRepository(db: Db): FindingRepository {
   const byProject = db.prepare(SQL.SELECT_BY_PROJECT)
+  const memoryOf = db.prepare(SQL.SELECT_MEMORY)
   const counts = db.prepare(SQL.COUNTS_BY_PROJECT)
   const writes = createFindingWrites(db)
 
   return {
     listByProject: (projectId) => (byProject.all(projectId) as FindingRow[]).map(toFinding),
+
+    listMemory: (projectId) => (memoryOf.all(projectId) as MemoryRow[]).map(toMemory),
 
     countsByProject: () => {
       const totals: Record<string, Record<Severity, number>> = {}
@@ -32,13 +35,12 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
       return totals as Readonly<Record<string, SeverityCounts>>
     },
 
-    replaceForProject: (projectId, scanId, findings) => {
+    syncFromScan: (projectId, scanId, findings, at) => {
       const dismissed = writes.dismissedFingerprints(projectId)
-      const createdAt = nowIso()
 
-      writes.replace(
+      writes.sync(
         projectId,
-        findings.map((finding) => toInsert(projectId, scanId, finding, dismissed, createdAt))
+        findings.map((finding) => toInsert(projectId, scanId, finding, dismissed, at))
       )
     },
 

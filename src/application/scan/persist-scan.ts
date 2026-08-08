@@ -31,7 +31,7 @@ function commitScanRows(
       durationMs,
       at: scannedAt
     })
-    context.findings.replaceForProject(project.id, scan.id, findings)
+    context.findings.syncFromScan(project.id, scan.id, findings, scannedAt)
     context.projects.updateScan(project.id, score, scannedAt)
     context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs, failed: false, usage, tools }) // prettier-ignore
     context.activity.recordMany(scanActivity(project.id, SCANNER_AGENT, findings, counts, edits))

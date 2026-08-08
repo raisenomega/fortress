@@ -1,4 +1,5 @@
 import { fingerprintOf } from '@domain/project/finding-fingerprint'
+import { findingIdentity } from '@domain/project/finding-identity'
 import { isFindingStatus } from '@domain/project/finding-status'
 import type { Finding } from '@domain/project/project'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
@@ -25,9 +26,12 @@ export interface FindingInsert {
   readonly file: string
   readonly line: number | null
   readonly fingerprint: string
+  /** Clave estable: decide si esto es una fila nueva o una que ya existia. */
+  readonly identity: string
   readonly status: string
   readonly scanId: string
-  readonly createdAt: string
+  /** Momento del escaneo. Sirve de created_at, first_seen y last_seen. */
+  readonly at: string
 }
 
 /**
@@ -51,7 +55,7 @@ export function toInsert(
   scanId: string,
   finding: DetectedFinding,
   dismissed: ReadonlySet<string>,
-  createdAt: string
+  at: string
 ): FindingInsert {
   const fingerprint = fingerprintOf(finding)
 
@@ -60,10 +64,11 @@ export function toInsert(
     projectId,
     scanId,
     fingerprint,
+    identity: findingIdentity(finding),
     // Un hallazgo ya descartado antes entra descartado: la decision del
     // operador no se pierde porque haya pasado otro escaneo por encima.
     status: dismissed.has(fingerprint) ? 'false_positive' : 'open',
-    createdAt,
+    at,
     ...finding
   }
 }
