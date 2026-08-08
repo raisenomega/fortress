@@ -16,8 +16,24 @@ export interface Selection {
   readonly reason: string
 }
 
-/** En modo ESTRENO solo se consideran hallazgos LOW (terreno seguro). */
-const DEBUT: Severity = 'LOW'
+/**
+ * Severidades que el motor puede tocar en modo ESTRENO.
+ *
+ * Empezo en solo-LOW. Subio a MEDIUM el 2026-08-08, despues de que el motor
+ * completara una ejecucion auditada de punta a punta sobre un LOW
+ * (claude-account): eligio por superficie, VERIFICO antes de proponer —
+ * atrapando un hallazgo obsoleto— y paso por worktree + gate + OMEGA + firma
+ * humana. HIGH y CRITICAL siguen fuera: piden mas confianza acumulada.
+ *
+ * Ampliar el estreno NO relaja ninguna red: el elegido sigue pasando por las
+ * tres zonas y la firma. Solo cambia sobre que puede trabajar el motor.
+ */
+const DEBUT: readonly Severity[] = ['LOW', 'MEDIUM']
+
+/** true si el hallazgo cae en el terreno que el motor tiene permitido estrenar. */
+export function isDebutEligible(c: Candidate): boolean {
+  return DEBUT.includes(c.severity)
+}
 
 /** Cuantos controles debe agregar el fix (cada "ni" suma uno). */
 function concerns(title: string): number {
@@ -41,17 +57,17 @@ function order(a: Candidate, b: Candidate): number {
 }
 
 /**
- * C1 — SELECCION: elige de forma DETERMINISTA que hallazgo LOW atacar. NO genera
- * fix ni toca codigo: solo devuelve el elegido y su justificacion (o null si no
- * hay LOW abiertos). Puro: mismo input, en cualquier orden, mismo elegido.
+ * C1 — SELECCION: elige de forma DETERMINISTA que hallazgo elegible atacar. NO
+ * genera fix ni toca codigo: solo devuelve el elegido y su justificacion (o null
+ * si no hay elegibles). Puro: mismo input, en cualquier orden, mismo elegido.
  */
 export function selectTarget(candidates: readonly Candidate[]): Selection | null {
-  const lows = candidates.filter((c) => c.severity === DEBUT)
-  if (lows.length === 0) return null
-  const target = [...lows].sort(order)[0]
+  const eligible = candidates.filter(isDebutEligible)
+  if (eligible.length === 0) return null
+  const target = [...eligible].sort(order)[0]
   const reason =
     `${target.title} (${target.file}:${target.line}, ${target.severity}). Elegido: MENOR ` +
-    `superficie (${surface(target)}) entre los LOW — fix ADITIVO de un control ya establecido ` +
-    `en el repo, no reescritura de logica. Seguro para estrenar: LOW, contenido, patron probado.`
+    `superficie (${surface(target)}) entre los elegibles (${DEBUT.join('/')}) — fix ADITIVO de ` +
+    `un control ya establecido en el repo, no reescritura de logica. Contenido y verificable.`
   return { target, reason }
 }

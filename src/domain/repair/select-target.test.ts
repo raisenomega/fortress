@@ -40,9 +40,9 @@ const POSTURE: Candidate = {
 const ALL = [HIGH, MEDIUM, FS, ACCOUNT, POSTURE]
 
 describe('selectTarget (C1 seleccion)', () => {
-  it('modo estreno: solo considera LOW, nunca HIGH/MEDIUM (y sin LOW -> null)', () => {
-    expect(selectTarget(ALL)?.target.severity).toBe('LOW')
-    expect(selectTarget([HIGH, MEDIUM])).toBeNull()
+  it('modo estreno: MEDIUM entra, HIGH no (sin elegibles -> null)', () => {
+    expect(selectTarget([HIGH, MEDIUM])?.target.id).toBe(MEDIUM.id)
+    expect(selectTarget([HIGH])).toBeNull()
   })
 
   it('determinista: mismo input en cualquier orden -> mismo elegido', () => {
@@ -51,7 +51,7 @@ describe('selectTarget (C1 seleccion)', () => {
     const c = selectTarget([...ALL].reverse())
     expect(a?.target.id).toBe(b?.target.id)
     expect(a?.target.id).toBe(c?.target.id)
-    expect(a?.target.id).toBe(POSTURE.id) // el mas contenido: guardRun aditivo, 1 concern
+    expect(a?.target.id).toBe(MEDIUM.id) // aditivo de 1 control y el archivo menor
   })
 
   it('C1 NO propone ni edita: pura, devuelve solo {target, reason}, no muta el input', () => {
