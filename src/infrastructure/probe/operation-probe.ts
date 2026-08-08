@@ -23,7 +23,7 @@ function gitignoreProtects(base: string): boolean {
 }
 
 /** Probe de Operacion: docs, CI, .gitignore y secretos trackeados. Solo confianza. */
-export function operationProbe(projectPath: string): DetectedFinding[] {
+export async function operationProbe(projectPath: string): Promise<DetectedFinding[]> {
   const out: DetectedFinding[] = []
   if (!has(projectPath, 'README.md', 'README', 'readme.md')) out.push(at('MEDIUM', 'Sin README'))
   if (!has(projectPath, 'ARCHITECTURE.md', 'docs/ARCHITECTURE.md')) {
@@ -34,7 +34,7 @@ export function operationProbe(projectPath: string): DetectedFinding[] {
   }
   if (!has(projectPath, '.gitignore')) out.push(at('MEDIUM', 'Sin .gitignore'))
   else if (!gitignoreProtects(projectPath)) out.push(at('MEDIUM', '.gitignore no protege .env'))
-  if (runCommand('git', ['ls-files', '.env'], projectPath).out.trim() !== '') {
+  if ((await runCommand('git', ['ls-files', '.env'], projectPath)).out.trim() !== '') {
     out.push(at('HIGH', '.env trackeado en git (secreto commiteado)'))
   }
   return out

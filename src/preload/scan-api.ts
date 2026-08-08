@@ -4,6 +4,7 @@ import type { Finding } from '@domain/project/project'
 import type { SeverityCounts } from '@domain/project/severity-counts'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ScanRecord } from '@domain/scan/scan-record'
+import type { IntegralScore } from '@domain/score/integral-score'
 import type { Result } from '@domain/shared/result'
 import type { AgentStats } from '@application/telemetry/build-agent-stats'
 import type { Activity } from '@domain/telemetry/activity'
@@ -37,4 +38,12 @@ export interface ActivityApi {
 export interface PushApi {
   /** Rechazado si el proyecto tiene CRITICAL o no se ha escaneado. */
   run(projectId: string): Promise<Result<string>>
+}
+
+export interface QualityApi {
+  /**
+   * Audita las 6 dimensiones (Seguridad reusa el ultimo escaneo; el resto corre
+   * probes en proyectos de confianza). Puede tardar minutos; no congela la UI.
+   */
+  run(projectId: string): Promise<Result<IntegralScore>>
 }

@@ -22,12 +22,13 @@ export interface TsAudit {
  * diferencia de `tsc --noEmit` que las ignora — la trampa del verde falso). Si el
  * script del proyecto reporta 0 pero el real encuentra errores, el gate esta roto.
  */
-export function auditTsc(projectPath: string, script: string | undefined): TsAudit {
+export async function auditTsc(projectPath: string, script: string | undefined): Promise<TsAudit> {
   if (!existsSync(join(projectPath, 'tsconfig.json'))) {
     return { hasTs: script !== undefined, neutered: false, errors: 0 }
   }
-  const real = realErrors(runCommand('npx', ['tsc', '-b', '--noEmit', '--force'], projectPath).out)
+  const build = await runCommand('npx', ['tsc', '-b', '--noEmit', '--force'], projectPath)
+  const real = realErrors(build.out)
   if (script === undefined) return { hasTs: true, neutered: false, errors: real }
-  const scriptErrors = realErrors(runCommand('npm', ['run', script], projectPath).out)
+  const scriptErrors = realErrors((await runCommand('npm', ['run', script], projectPath)).out)
   return { hasTs: true, neutered: scriptErrors === 0 && real > 0, errors: real }
 }

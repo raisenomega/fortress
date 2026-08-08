@@ -8,6 +8,7 @@ import { subscribe } from './subscribe'
 export const projectApis: Pick<
   FortressApi,
   | 'scan'
+  | 'quality'
   | 'push'
   | 'telemetry'
   | 'cognition'
@@ -28,6 +29,7 @@ export const projectApis: Pick<
     dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
     reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId)
   },
+  quality: { run: (projectId) => ipcRenderer.invoke(IPC.qualityRun, projectId) },
   push: { run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId) },
   posture: { run: (request) => ipcRenderer.invoke(IPC.postureRun, request) },
   account: {

@@ -15,6 +15,7 @@ import { registerOmegaHandlers } from './omega-handlers'
 import { registerProjectHandlers } from './project-handlers'
 import { registerPushHandlers } from './push-handlers'
 import { registerScanHandlers } from './scan-handlers'
+import { registerQualityHandlers } from './quality-handlers'
 import { registerSettingsHandlers } from './settings-handlers'
 import { registerSystemHandlers } from './system-handlers'
 import { registerTelemetryHandlers } from './telemetry-handlers'
@@ -27,6 +28,7 @@ export function registerIpcHandlers(): void {
   registerSettingsHandlers()
   registerHealthHandlers()
   registerScanHandlers()
+  registerQualityHandlers()
   registerPushHandlers()
   registerActivityHandlers()
   registerTelemetryHandlers()

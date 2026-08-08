@@ -1,5 +1,5 @@
 import type { HealthReport } from '@domain/health/health-check'
-import type { ActivityApi, PushApi, ScanApi } from './scan-api'
+import type { ActivityApi, PushApi, QualityApi, ScanApi } from './scan-api'
 import type { BuildApi } from './build-api'
 import type { ChatApi, ProjectsApi, SettingsApi } from './core-apis'
 import type { ConnectorsApi } from './connectors-api'
@@ -32,6 +32,7 @@ export interface FortressApi {
   readonly system: SelfImprovementApi
   readonly build: BuildApi
   readonly scan: ScanApi
+  readonly quality: QualityApi
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi
   readonly account: AccountApi

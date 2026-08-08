@@ -1,8 +1,5 @@
-import {
-  computeIntegralScore,
-  type IntegralScore,
-  type InputByDimension
-} from '@domain/score/integral-score'
+import { computeIntegralScore, type InputByDimension } from '@domain/score/integral-score'
+import type { QualityAudit, QualityAuditor } from '@domain/score/quality-auditor'
 import type { HasSeverity } from '@domain/shared/severity'
 import { correctnessProbe } from './correctness-probe'
 import { dependenciesProbe } from './dependencies-probe'
@@ -10,10 +7,15 @@ import { maintainabilityProbe } from './maintainability-probe'
 import { operationProbe } from './operation-probe'
 import { testsProbe } from './tests-probe'
 
-export interface QualityAudit {
-  readonly score: IntegralScore
-  /** Entradas por dimension (hallazgos o score directo): para el desglose. */
-  readonly inputs: InputByDimension
+/** Corre los 5 probes en serie (no en paralelo: no compiten por CPU/dist). */
+async function runProbes(projectPath: string): Promise<InputByDimension> {
+  return {
+    correctitud: await correctnessProbe(projectPath),
+    tests: await testsProbe(projectPath),
+    mantenibilidad: await maintainabilityProbe(projectPath),
+    dependencias: await dependenciesProbe(projectPath),
+    operacion: await operationProbe(projectPath)
+  }
 }
 
 /**
@@ -21,20 +23,15 @@ export interface QualityAudit {
  * escaneo (securityFindings). Los 5 probes SOLO corren en proyectos de CONFIANZA;
  * si no, esas dimensiones quedan SIN DATOS y el global se marca PARCIAL.
  */
-export function auditQuality(
+export async function auditQuality(
   projectPath: string,
   trusted: boolean,
   securityFindings: readonly HasSeverity[] | null
-): QualityAudit {
-  const probes: InputByDimension = trusted
-    ? {
-        correctitud: correctnessProbe(projectPath),
-        tests: testsProbe(projectPath),
-        mantenibilidad: maintainabilityProbe(projectPath),
-        dependencias: dependenciesProbe(projectPath),
-        operacion: operationProbe(projectPath)
-      }
-    : {}
+): Promise<QualityAudit> {
+  const probes: InputByDimension = trusted ? await runProbes(projectPath) : {}
   const inputs: InputByDimension = { seguridad: securityFindings ?? undefined, ...probes }
   return { score: computeIntegralScore(inputs), inputs }
 }
+
+/** Adaptador del puerto QualityAuditor para la inyeccion en los casos de uso. */
+export const probeAuditor: QualityAuditor = { audit: auditQuality }

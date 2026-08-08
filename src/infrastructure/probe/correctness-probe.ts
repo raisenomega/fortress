@@ -15,17 +15,17 @@ function lintErrors(out: string): number {
 }
 
 /** Probe de Correctitud: typecheck REAL (tsc -b) + verde falso + lint + build. */
-export function correctnessProbe(projectPath: string): DetectedFinding[] {
+export async function correctnessProbe(projectPath: string): Promise<DetectedFinding[]> {
   const scripts = readProjectScripts(projectPath)
-  const ts = auditTsc(projectPath, pick(scripts, ['typecheck', 'type-check', 'tsc']))
+  const ts = await auditTsc(projectPath, pick(scripts, ['typecheck', 'type-check', 'tsc']))
   const lint = pick(scripts, ['lint', 'eslint'])
   const build = pick(scripts, ['build'])
   const signals: CorrectnessSignals = {
     hasTypecheck: ts.hasTs,
     neuteredGate: ts.neutered,
     typeErrors: ts.errors,
-    lintErrors: lint ? lintErrors(runCommand('npm', ['run', lint], projectPath).out) : 0,
-    buildFailed: build ? runCommand('npm', ['run', build], projectPath).code !== 0 : false
+    lintErrors: lint ? lintErrors((await runCommand('npm', ['run', lint], projectPath)).out) : 0,
+    buildFailed: build ? (await runCommand('npm', ['run', build], projectPath)).code !== 0 : false
   }
   return correctnessFindings(signals)
 }

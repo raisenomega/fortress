@@ -17,8 +17,8 @@ function parseAudit(out: string): AuditCounts {
 }
 
 /** Probe de Dependencias: `npm audit` por severidad. Solo confianza. */
-export function dependenciesProbe(projectPath: string): DetectedFinding[] {
+export async function dependenciesProbe(projectPath: string): Promise<DetectedFinding[]> {
   if (!existsSync(join(projectPath, 'package.json'))) return []
-  const result = runCommand('npm', ['audit', '--json'], projectPath)
+  const result = await runCommand('npm', ['audit', '--json'], projectPath)
   return auditFindings(parseAudit(result.out))
 }

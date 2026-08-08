@@ -34,6 +34,7 @@ export const IPC = {
   scanDismiss: 'scan:dismiss',
   scanReopen: 'scan:reopen',
   scanProgress: 'scan:progress',
+  qualityRun: 'quality:run',
   pushRun: 'push:run',
   telemetrySession: 'telemetry:session',
   postureRun: 'posture:run',
@@ -71,5 +72,4 @@ export const IPC = {
   settingsCheckApiKey: 'settings:check-api-key',
   settingsClearApiKey: 'settings:clear-api-key'
 } as const
-
 export type IpcChannel = (typeof IPC)[keyof typeof IPC]

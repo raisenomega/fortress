@@ -14,8 +14,8 @@ function pick(scripts: readonly string[], names: readonly string[]): string | un
   return names.find((name) => scripts.includes(name))
 }
 
-function hasTestFiles(projectPath: string): boolean {
-  const files = runCommand('git', ['ls-files'], projectPath).out
+async function hasTestFiles(projectPath: string): Promise<boolean> {
+  const files = (await runCommand('git', ['ls-files'], projectPath)).out
   return /\.(test|spec)\.[jt]sx?|(^|\/)__tests__\//.test(files)
 }
 
@@ -23,9 +23,9 @@ function hasTestFiles(projectPath: string): boolean {
  * Probe de Tests: sin tests = 0 (MEDIDO, no "sin datos"). Si hay, corre la suite
  * (CI=true, una vez) y penaliza si falla. Pasar = limpio (100).
  */
-export function testsProbe(projectPath: string): DimensionInput {
+export async function testsProbe(projectPath: string): Promise<DimensionInput> {
   const script = pick(readProjectScripts(projectPath), ['test:unit', 'test', 'unit'])
-  if (!script && !hasTestFiles(projectPath)) return { score: 0 }
+  if (!script && !(await hasTestFiles(projectPath))) return { score: 0 }
   if (!script) return NO_SCRIPT
-  return runCommand('npm', ['run', script], projectPath).code === 0 ? [] : FAILS
+  return (await runCommand('npm', ['run', script], projectPath)).code === 0 ? [] : FAILS
 }

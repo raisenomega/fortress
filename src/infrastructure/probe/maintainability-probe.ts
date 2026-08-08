@@ -15,19 +15,19 @@ function lineCount(projectPath: string, file: string): number {
 }
 
 /** Suma de marcas TODO/FIXME/HACK (git grep -c da "archivo:conteo" por linea). */
-function todoDebt(projectPath: string): number {
-  return runCommand('git', ['grep', '-IEc', 'TODO|FIXME|HACK'], projectPath)
-    .out.split('\n')
+async function todoDebt(projectPath: string): Promise<number> {
+  const grep = await runCommand('git', ['grep', '-IEc', 'TODO|FIXME|HACK'], projectPath)
+  return grep.out
+    .split('\n')
     .filter(Boolean)
     .reduce((sum, line) => sum + Number(line.split(':').pop() ?? 0), 0)
 }
 
 /** Probe de Mantenibilidad: archivos largos + deuda TODO/FIXME. Solo confianza. */
-export function maintainabilityProbe(projectPath: string): DetectedFinding[] {
+export async function maintainabilityProbe(projectPath: string): Promise<DetectedFinding[]> {
   const out: DetectedFinding[] = []
-  const files = runCommand('git', ['ls-files'], projectPath)
-    .out.split('\n')
-    .filter((f) => SOURCE.test(f))
+  const listed = await runCommand('git', ['ls-files'], projectPath)
+  const files = listed.out.split('\n').filter((f) => SOURCE.test(f))
   const large = files.filter((file) => lineCount(projectPath, file) > LIMIT)
   for (const file of large.slice(0, 6)) {
     out.push({ severity: 'LOW', title: `Archivo largo (>${LIMIT} lineas)`, file, line: null })
@@ -40,7 +40,7 @@ export function maintainabilityProbe(projectPath: string): DetectedFinding[] {
       line: null
     })
   }
-  const todos = todoDebt(projectPath)
+  const todos = await todoDebt(projectPath)
   if (todos > 20)
     out.push({
       severity: 'MEDIUM',
