@@ -47,6 +47,7 @@ function toAnalysis(target: Candidate, out: RunOut): Analysis {
   const text = (k: string): string => (j[k] ?? '').trim()
   return {
     target,
+    status: text('status') || 'DESCONOCIDO',
     whatToChange: text('whatToChange'),
     where: text('where'),
     patternToCopy: text('patternToCopy'),

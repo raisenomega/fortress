@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isComplete, type Analysis, type Analyst } from '@domain/repair/analysis'
+import { isActionable, isComplete, type Analysis, type Analyst } from '@domain/repair/analysis'
 import type { Candidate, Selection } from '@domain/repair/select-target'
 import { analyzeTarget } from './analyze-target'
 
@@ -13,6 +13,7 @@ const TARGET: Candidate = {
 const SEL: Selection = { target: TARGET, reason: 'menor superficie' }
 const FULL: Analysis = {
   target: TARGET,
+  status: 'REAL',
   whatToChange: 'a',
   where: 'b',
   patternToCopy: 'c',
@@ -37,5 +38,11 @@ describe('analyzeTarget (C2 analisis)', () => {
   it('isComplete exige TODAS las partes con contenido', () => {
     expect(isComplete(FULL)).toBe(true)
     expect(isComplete({ ...FULL, risk: '   ' })).toBe(false)
+  })
+
+  it('isActionable: solo REAL habilita C3; OBSOLETO no (se extingue, como posture)', () => {
+    expect(isActionable(FULL)).toBe(true)
+    expect(isActionable({ ...FULL, status: 'OBSOLETO' })).toBe(false)
+    expect(isActionable({ ...FULL, status: 'real' })).toBe(true) // case-insensitive
   })
 })

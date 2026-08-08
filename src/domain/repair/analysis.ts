@@ -6,6 +6,8 @@ import type { Candidate } from './select-target'
  */
 export interface Analysis {
   readonly target: Candidate
+  /** Veredicto verificado contra el archivo real: "REAL" (accionable) u "OBSOLETO". */
+  readonly status: string
   readonly whatToChange: string
   readonly where: string
   /** El patron a copiar y de donde (guardRun en scan-handlers/quality-handlers). */
@@ -21,6 +23,11 @@ export function isComplete(a: Analysis): boolean {
   return [a.whatToChange, a.where, a.patternToCopy, a.doNotTouch, a.risk].every(
     (part) => part.trim().length > 0
   )
+}
+
+/** REAL y accionable (no obsoleto): C3 solo debe proponer sobre esto. */
+export function isActionable(a: Analysis): boolean {
+  return a.status.trim().toUpperCase() === 'REAL'
 }
 
 /** Puerto: el analista grafo-primero que ESTUDIA el hallazgo. Infra lo implementa. */
