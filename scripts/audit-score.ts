@@ -41,6 +41,9 @@ async function main(): Promise<void> {
     console.log(`  ${d.label.padEnd(15)} ${val}   (${d.count} hallazgos)`)
   }
   console.log(`  faltan: ${s.missing.join(', ') || '(ninguna)'}`)
+  const g = audit.integrity
+  console.log(`  CAPA 3 integridad: ${g.clean ? 'LIMPIO (byte-identico)' : 'CONTAMINADO'}`)
+  for (const v of g.violations.slice(0, 10)) console.log(`    ! ${v.kind} ${v.path}`)
 
   for (const dim of DIMENSIONS) {
     const input = audit.inputs[dim.key]
