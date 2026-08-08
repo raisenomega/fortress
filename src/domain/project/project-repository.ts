@@ -23,4 +23,6 @@ export interface ProjectRepository {
   setConfigState(id: string, state: ConfigState): void
   /** Marca has_graph=1 y guarda las stats del indice (nodos, aristas, fecha ISO). */
   setGraph(id: string, nodes: number, edges: number, indexedAt: string): void
+  /** Circuit breaker (Capa 4): marca el proyecto CONTAMINADO con el detalle forense. */
+  markContaminated(id: string, detail: string): void
 }

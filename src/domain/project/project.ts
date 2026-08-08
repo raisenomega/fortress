@@ -50,6 +50,9 @@ export interface Project {
    * encender con topes de loop guardados y proyecto de confianza (ver LoopToggle).
    */
   readonly loopEnabled: boolean
+  /** Circuit breaker (Capa 4): una auditoria lo dejo sucio; bloqueado hasta revision humana. */
+  readonly contaminated: boolean
+  readonly contaminationDetail: string | null
   /**
    * Ciclo de vida del marco de gobierno. PENDIENTE_CONFIGURACION: recien creado,
    * el chat solo hace la entrevista de configuracion. CONFIGURADO: marco aprobado

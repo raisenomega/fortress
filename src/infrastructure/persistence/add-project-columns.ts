@@ -15,7 +15,10 @@ const COLUMNS = [
   'dim_tests INTEGER',
   'dim_mantenibilidad INTEGER',
   'dim_dependencias INTEGER',
-  'dim_operacion INTEGER'
+  'dim_operacion INTEGER',
+  // Circuit breaker (Capa 4): fecha ISO en que una auditoria dejo el proyecto sucio.
+  'contaminated_at TEXT',
+  'contamination_detail TEXT'
 ]
 
 function has(db: Db, column: string): boolean {

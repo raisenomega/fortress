@@ -4,7 +4,7 @@ import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { readOnly } from './read-only-guard'
 
-describe('readOnly', () => {
+describe('readOnly (guard de 4 capas)', () => {
   let dir: string
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), 'ro-'))
@@ -12,30 +12,33 @@ describe('readOnly', () => {
   })
   afterEach(() => rmSync(dir, { recursive: true, force: true }))
 
-  it('borra los archivos y carpetas NUEVOS que deja el trabajo (tsbuildinfo, dist)', async () => {
-    await readOnly(dir, async () => {
+  it('borra archivos NUEVOS y sus carpetas (tsbuildinfo, dist) -> integridad limpia', async () => {
+    const { integrity } = await readOnly(dir, async () => {
       writeFileSync(join(dir, 'x.tsbuildinfo'), '{}')
       mkdirSync(join(dir, 'dist'))
       writeFileSync(join(dir, 'dist', 'bundle.js'), 'x')
     })
     expect(existsSync(join(dir, 'x.tsbuildinfo'))).toBe(false)
     expect(existsSync(join(dir, 'dist'))).toBe(false)
+    expect(integrity.clean).toBe(true)
   })
 
-  it('NO toca lo que ya existia: la fuente queda byte-identica', async () => {
-    await readOnly(dir, async () => writeFileSync(join(dir, 'nuevo.txt'), 'z'))
-    expect(existsSync(join(dir, 'source.ts'))).toBe(true)
+  it('CAPA 2: RESTAURA un archivo trackeado modificado (caso inject-sw-version)', async () => {
+    const { integrity } = await readOnly(dir, async () => {
+      writeFileSync(join(dir, 'source.ts'), 'const a = 999 // reescrito por un prebuild')
+    })
+    // Capa 2 lo dejo como estaba; Capa 3 lo confirma.
     expect(readFileSync(join(dir, 'source.ts'), 'utf8')).toBe('const a = 1')
+    expect(integrity.clean).toBe(true)
   })
 
-  it('devuelve el valor del trabajo y limpia aun si lanza', async () => {
-    expect(await readOnly(dir, async () => 42)).toBe(42)
+  it('restaura incluso si el trabajo LANZA (limpieza en finally) y re-lanza', async () => {
     await expect(
       readOnly(dir, async () => {
-        writeFileSync(join(dir, 'temp.log'), 'x')
+        writeFileSync(join(dir, 'source.ts'), 'cambiado a medias')
         throw new Error('probe fallo')
       })
     ).rejects.toThrow('probe fallo')
-    expect(existsSync(join(dir, 'temp.log'))).toBe(false)
+    expect(readFileSync(join(dir, 'source.ts'), 'utf8')).toBe('const a = 1')
   })
 })

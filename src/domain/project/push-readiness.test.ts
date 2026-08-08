@@ -25,6 +25,8 @@ const project = (overrides: Partial<Project> = {}): Project => ({
   hasFortress: false,
   trusted: false,
   loopEnabled: false,
+  contaminated: false,
+  contaminationDetail: null,
   configState: 'CONFIGURADO',
   createdAt: SCANNED,
   ...overrides

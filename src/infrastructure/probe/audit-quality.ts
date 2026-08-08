@@ -1,3 +1,4 @@
+import type { IntegrityReport } from '@domain/probe/integrity'
 import { computeIntegralScore, type InputByDimension } from '@domain/score/integral-score'
 import type { QualityAudit, QualityAuditor } from '@domain/score/quality-auditor'
 import type { HasSeverity } from '@domain/shared/severity'
@@ -29,12 +30,17 @@ export async function auditQuality(
   trusted: boolean,
   securityFindings: readonly HasSeverity[] | null
 ): Promise<QualityAudit> {
-  // readOnly: los probes de build dejan artefactos; se borran para no tocar el repo.
-  const probes: InputByDimension = trusted
-    ? await readOnly(projectPath, () => runProbes(projectPath))
-    : {}
+  // readOnly (defensa en profundidad): corre los probes y garantiza byte-identico.
+  const clean: IntegrityReport = { clean: true, violations: [] }
+  let probes: InputByDimension = {}
+  let integrity = clean
+  if (trusted) {
+    const guarded = await readOnly(projectPath, () => runProbes(projectPath))
+    probes = guarded.value
+    integrity = guarded.integrity
+  }
   const inputs: InputByDimension = { seguridad: securityFindings ?? undefined, ...probes }
-  return { score: computeIntegralScore(inputs), inputs }
+  return { score: computeIntegralScore(inputs), inputs, integrity }
 }
 
 /** Adaptador del puerto QualityAuditor para la inyeccion en los casos de uso. */

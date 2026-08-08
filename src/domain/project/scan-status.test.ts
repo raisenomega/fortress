@@ -22,6 +22,8 @@ const project = (fortressScore: number, lastScan: string | null): Project => ({
   hasFortress: false,
   trusted: false,
   loopEnabled: false,
+  contaminated: false,
+  contaminationDetail: null,
   configState: 'CONFIGURADO',
   createdAt: '2026-08-01T00:00:00.000Z'
 })

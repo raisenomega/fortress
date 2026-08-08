@@ -3,9 +3,10 @@ import type { AppContext } from '@application/context'
 import { endRun } from './run-control'
 import { guardRun } from './run-guard'
 
-/** Fake minimo: guardRun solo toca settings (tope) y runs (gasto de hoy). */
+/** Fake minimo: guardRun toca projects (contaminado), settings (tope) y runs (gasto). */
 function context(perDay: string | null, costUsd: number): AppContext {
   return {
+    projects: { findById: () => ({ contaminated: false }) },
     settings: { get: (key: string) => (key === 'budget_per_day_usd' ? perDay : null) },
     runs: { usageSince: () => ({ costUsd }) }
   } as unknown as AppContext
@@ -32,5 +33,14 @@ describe('guardRun', () => {
 
   it('perDay=0 nunca bloquea por gasto', () => {
     expect(guardRun(context('0', 9999), 'p')).toBeNull()
+  })
+
+  it('CAPA 4: bloquea un proyecto CONTAMINADO antes que nada', () => {
+    const ctx = {
+      projects: { findById: () => ({ contaminated: true }) },
+      settings: { get: () => null },
+      runs: { usageSince: () => ({ costUsd: 0 }) }
+    } as unknown as AppContext
+    expect(guardRun(ctx, 'p')).toContain('CONTAMINADO')
   })
 })

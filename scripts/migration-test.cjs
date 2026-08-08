@@ -24,6 +24,8 @@ async function verify(window) {
   // Backfill del score integral: sin auditar aun, dimensiones null y no parcial.
   check('backfill score integral: sin dimensiones', proyectos[0]?.qualityDimensions === null)
   check('backfill score integral: no parcial', proyectos[0]?.qualityPartial === false)
+  // Backfill del circuit breaker: un proyecto viejo no esta contaminado.
+  check('backfill circuit breaker: no contaminado', proyectos[0]?.contaminated === false)
 
   const historial = await run("window.api.chat.history('viejo')")
   check('conserva el historial de chat', historial.length === 1, JSON.stringify(historial))

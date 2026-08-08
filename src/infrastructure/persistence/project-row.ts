@@ -29,10 +29,11 @@ export interface ProjectRow {
   readonly has_fortress: number
   readonly trusted: number
   readonly loop_enabled: number
+  readonly contaminated_at: string | null
+  readonly contamination_detail: string | null
   readonly config_state: string
   readonly created_at: string
 }
-
 function toDimensions(row: ProjectRow): DimensionScores | null {
   if (row.general_quality === null) return null
   return {
@@ -66,6 +67,8 @@ export function toProject(row: ProjectRow): Project {
     hasFortress: row.has_fortress === 1,
     trusted: row.trusted === 1,
     loopEnabled: row.loop_enabled === 1,
+    contaminated: row.contaminated_at !== null,
+    contaminationDetail: row.contamination_detail,
     configState: isConfigState(row.config_state) ? row.config_state : 'CONFIGURADO',
     createdAt: row.created_at
   }

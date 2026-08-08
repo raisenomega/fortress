@@ -1,5 +1,6 @@
 import type { AppContext } from '@application/context'
 import { readBudget, spentToday } from '@application/settings/read-budget'
+import { CONTAMINATED_BLOCK } from '@domain/probe/contamination'
 import { dayLimitReached } from '@domain/settings/run-budget'
 import { tryBeginRun } from './run-control'
 
@@ -16,6 +17,9 @@ const BUSY =
  * colar una segunda ejecucion entre las dos operaciones.
  */
 export function guardRun(context: AppContext, projectId: string): string | null {
+  // Circuit breaker (Capa 4): un proyecto contaminado se bloquea hasta revision humana.
+  if (context.projects.findById(projectId)?.contaminated) return CONTAMINATED_BLOCK
+
   const limite = dayLimitReached(readBudget(context), spentToday(context, new Date()))
   if (limite !== null) return limite
 

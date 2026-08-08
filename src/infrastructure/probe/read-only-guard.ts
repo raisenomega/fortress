@@ -1,41 +1,38 @@
-import { lstatSync, readdirSync, rmSync } from 'fs'
-import { join } from 'path'
+import { rmSync } from 'fs'
+import type { IntegrityReport } from '@domain/probe/integrity'
+import { restore } from './restore'
+import { takeSnapshot } from './snapshot'
+import { verify } from './verify'
 
-const SKIP = new Set(['node_modules', '.git'])
-
-/** Rutas de archivos y carpetas del proyecto, salteando node_modules/.git y symlinks. */
-function walk(dir: string, acc: string[] = []): string[] {
-  let entries: string[] = []
-  try {
-    entries = readdirSync(dir)
-  } catch {
-    return acc
-  }
-  for (const name of entries) {
-    if (SKIP.has(name)) continue
-    const full = join(dir, name)
-    const stat = lstatSync(full)
-    acc.push(full)
-    if (stat.isDirectory()) walk(full, acc)
-  }
-  return acc
+export interface Guarded<T> {
+  readonly value: T
+  readonly integrity: IntegrityReport
 }
 
 /**
- * Garantiza que auditar NO deje rastro. Los probes de build (`tsc -b`, `vite build`)
- * crean artefactos (tsbuildinfo, dist) en el proyecto. Se anota el arbol antes, se
- * corre `work`, y se borra CUALQUIER ruta nueva despues (mas profundo primero, para
- * vaciar carpetas). Nunca toca lo que ya existia ni la fuente: un proyecto de
- * PRODUCCION queda byte-identico tras la auditoria.
+ * Defensa en profundidad para que auditar no deje rastro. Tres capas que se
+ * verifican entre si (para que algo se escape tienen que fallar las tres):
+ *  CAPA 1 `takeSnapshot`  — foto "antes" (hash + copia byte-a-byte)
+ *  CAPA 2 `restore`       — borra lo nuevo, restaura lo modificado/borrado
+ *  CAPA 3 `verify`        — re-hashea todo y compara; NO se cree a si mismo
+ * La CAPA 4 (circuit breaker) la dispara el caso de uso cuando `integrity` no esta
+ * limpio: marca el proyecto CONTAMINADO y exige intervencion humana.
  */
-export async function readOnly<T>(projectPath: string, work: () => Promise<T>): Promise<T> {
-  const before = new Set(walk(projectPath))
+export async function readOnly<T>(
+  projectPath: string,
+  work: () => Promise<T>
+): Promise<Guarded<T>> {
+  const snap = takeSnapshot(projectPath)
+  let value: T | undefined
+  let failure: unknown
   try {
-    return await work()
-  } finally {
-    const fresh = walk(projectPath).filter((path) => !before.has(path))
-    for (const path of fresh.sort((a, b) => b.length - a.length)) {
-      rmSync(path, { recursive: true, force: true })
-    }
+    value = await work()
+  } catch (error) {
+    failure = error
   }
+  restore(projectPath, snap)
+  const integrity = verify(projectPath, snap)
+  rmSync(snap.copyDir, { recursive: true, force: true })
+  if (failure) throw failure
+  return { value: value as T, integrity }
 }
