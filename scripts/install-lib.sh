@@ -54,3 +54,37 @@ warn_path_missing() {
   echo "[aviso] ~/.local/bin no esta en tu PATH; el comando 'fortress' no funcionara."
   echo "  Anade a ~/.bashrc:  export PATH=\"\$HOME/.local/bin:\$PATH\""
 }
+
+# GUARDRAIL: reemplazar el AppImage bajo su mount FUSE vivo crashea la app (paso una
+# vez). Nunca instalar EN CALIENTE. Ver CLAUDE.md > "Rebuild+install seguro".
+running_fortress_signals() {
+  {
+    pgrep -f 'mount_fortre' 2>/dev/null
+    pgrep -f "$BIN_PATH" 2>/dev/null
+    mount 2>/dev/null | grep -qi fortress && echo 'fuse-mount'
+  } | sort -u | grep -v '^$' || true
+}
+
+# CAPA 1: rechaza la instalacion si la app esta viva (verificacion de PID ANTES).
+refuse_if_running() {
+  local signals
+  signals="$(running_fortress_signals | tr '\n' ' ')"
+  if [ -n "${signals// /}" ]; then
+    echo "[ABORTADO] FORTRESS parece EN EJECUCION (senal: $signals)." >&2
+    echo "  Reemplazar el AppImage en caliente crashea la app viva." >&2
+    echo "  Cierrala por completo y vuelve a correr ./install.sh." >&2
+    exit 1
+  fi
+  echo "[guard] PID antes: ninguno (app cerrada). Reemplazo en frio: seguro."
+}
+
+# CAPA 2: confirma que el reemplazo no dejo/arranco un proceso (verificacion DESPUES).
+verify_after_install() {
+  local signals
+  signals="$(running_fortress_signals | tr '\n' ' ')"
+  if [ -n "${signals// /}" ]; then
+    echo "[aviso] Senal de FORTRESS tras instalar ($signals): instalar no debe arrancar la app." >&2
+  else
+    echo "[guard] PID despues: ninguno. Binario reemplazado sin proceso vivo afectado."
+  fi
+}

@@ -18,8 +18,12 @@ fi
 
 warn_missing_fuse
 
+# GUARDRAIL (no negociable): jamas reemplazar el binario con la app corriendo.
+refuse_if_running
+
 mkdir -p "$(dirname "$BIN_PATH")" "$(dirname "$ICON_PATH")" "$MENU_DIR"
 install -m 755 "$APPIMAGE" "$BIN_PATH"
+verify_after_install
 install -m 644 "$HERE/build/icon.png" "$ICON_PATH"
 write_desktop_entry "$MENU_FILE"
 
