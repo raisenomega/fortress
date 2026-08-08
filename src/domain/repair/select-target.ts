@@ -1,3 +1,4 @@
+import { isAdditive } from './additive'
 import type { Severity } from '../shared/severity'
 
 /** Subconjunto puro de un hallazgo, suficiente para ELEGIR cual reparar. */
@@ -17,11 +18,6 @@ export interface Selection {
 
 /** En modo ESTRENO solo se consideran hallazgos LOW (terreno seguro). */
 const DEBUT: Severity = 'LOW'
-
-/** true si el fix es ADITIVO (agregar un control faltante), no reescribir logica. */
-function isAdditive(title: string): boolean {
-  return /\b(sin|falta)\b|no pasa por|no (usa|llama|trackea|registra|guarda)/i.test(title)
-}
 
 /** Cuantos controles debe agregar el fix (cada "ni" suma uno). */
 function concerns(title: string): number {

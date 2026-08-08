@@ -61,8 +61,11 @@ describe('selectTarget (C1 seleccion)', () => {
     expect(input).toEqual(ALL) // no muto el array de entrada
   })
 
-  it('la superficie ordena: guardRun aditivo < trackChild (2 concerns) < path-traversal (reescritura)', () => {
-    expect(surface(POSTURE)).toBeLessThan(surface(ACCOUNT))
-    expect(surface(ACCOUNT)).toBeLessThan(surface(FS))
+  it('empatados en superficie, desempata file/line/id (nunca el orden de entrada)', () => {
+    // POSTURE y FS son ambos aditivos de 1 control: empatan a superficie 1 y
+    // gana el archivo menor. El detalle de surface() vive en surface.test.ts.
+    expect(surface(POSTURE)).toBe(surface(FS))
+    expect(selectTarget([FS, POSTURE])?.target.id).toBe(POSTURE.id)
+    expect(selectTarget([POSTURE, FS])?.target.id).toBe(POSTURE.id)
   })
 })
