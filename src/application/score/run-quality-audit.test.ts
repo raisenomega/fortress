@@ -13,6 +13,7 @@ const CLEAN: IntegrityReport = { clean: true, violations: [] }
 
 interface Saved {
   global?: number
+  recorded?: number
   contaminatedWith?: string
 }
 
@@ -27,7 +28,12 @@ function fakeContext(saved: Saved): AppContext {
         saved.contaminatedWith = detail
       }
     },
-    findings: { listByProject: (): readonly Finding[] => [OPEN, DISMISSED] }
+    findings: { listByProject: (): readonly Finding[] => [OPEN, DISMISSED] },
+    qualityHistory: {
+      record: (_id: string, global: number): void => {
+        saved.recorded = global
+      }
+    }
   } as unknown as AppContext
 }
 
@@ -44,6 +50,7 @@ describe('runQualityAudit', () => {
     const result = await runQualityAudit(fakeContext(saved), auditorWith(CLEAN), 'p1')
     expect(result.ok && result.value.global).toBe(94)
     expect(saved.global).toBe(94)
+    expect(saved.recorded).toBe(94) // punto de tendencia registrado
     expect(saved.contaminatedWith).toBeUndefined()
   })
 

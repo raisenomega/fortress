@@ -8,6 +8,7 @@ import type { CapabilityEpisodeRepository } from '@domain/system/capability-epis
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
+import type { QualityHistoryRepository } from '@domain/score/quality-record'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
 import type { SettingsRepository } from '@domain/settings/settings-repository'
@@ -27,6 +28,7 @@ export interface AppContext {
   readonly projects: ProjectRepository
   readonly findings: FindingRepository
   readonly scans: ScanHistoryRepository
+  readonly qualityHistory: QualityHistoryRepository
   readonly chat: ChatRepository
   readonly runs: AgentRunRepository
   readonly activity: ActivityRepository

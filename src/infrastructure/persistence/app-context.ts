@@ -17,6 +17,7 @@ import { createSqliteCapabilityEpisodeRepository } from './sqlite-capability-epi
 import { createSqliteSelfObservationRepository } from './sqlite-self-observation-repository'
 import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
+import { createSqliteQualityHistoryRepository } from './sqlite-quality-history-repository'
 import { createSqliteScanHistoryRepository } from './sqlite-scan-history-repository'
 import { createSqliteSettingsRepository } from './sqlite-settings-repository'
 
@@ -33,6 +34,7 @@ export function getAppContext(): AppContext {
     projects: createSqliteProjectRepository(db),
     findings: createSqliteFindingRepository(db),
     scans: createSqliteScanHistoryRepository(db),
+    qualityHistory: createSqliteQualityHistoryRepository(db),
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),

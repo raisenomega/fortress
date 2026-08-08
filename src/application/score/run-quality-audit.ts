@@ -32,6 +32,9 @@ export async function runQualityAudit(
     return err(`${CONTAMINATED_MSG} ${detail}`)
   }
 
-  context.projects.setQuality(projectId, score.global, dimensionScoresOf(score), score.partial)
+  const dims = dimensionScoresOf(score)
+  context.projects.setQuality(projectId, score.global, dims, score.partial)
+  // Historia para la tendencia: cada auditoria deja un punto con timestamp.
+  context.qualityHistory.record(projectId, score.global, score.partial, dims)
   return ok(score)
 }
