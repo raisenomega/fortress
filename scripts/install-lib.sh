@@ -58,11 +58,17 @@ warn_path_missing() {
 # GUARDRAIL: reemplazar el AppImage bajo su mount FUSE vivo crashea la app (paso una
 # vez). Nunca instalar EN CALIENTE. Ver CLAUDE.md > "Rebuild+install seguro".
 running_fortress_signals() {
-  {
-    pgrep -f 'mount_fortre' 2>/dev/null
-    pgrep -f "$BIN_PATH" 2>/dev/null
-    mount 2>/dev/null | grep -qi fortress && echo 'fuse-mount'
-  } | sort -u | grep -v '^$' || true
+  # Señal DEFINITIVA: el mount FUSE del AppImage (existe solo mientras la app corre).
+  # NO se matchea argv: `pgrep -f <binario>` daba falsos positivos con extracciones o
+  # greps que solo MENCIONAN la ruta. El proceso real se confirma via /proc/exe.
+  mount 2>/dev/null | grep -qi 'fortress' && echo 'fuse-mount'
+  local pid
+  for pid in $(pgrep -x fortress 2>/dev/null; pgrep -x electron 2>/dev/null); do
+    case "$(readlink "/proc/$pid/exe" 2>/dev/null)" in
+      *ortress* | *FORTRESS*) echo "app-$pid" ;;
+    esac
+  done
+  true
 }
 
 # CAPA 1: rechaza la instalacion si la app esta viva (verificacion de PID ANTES).
