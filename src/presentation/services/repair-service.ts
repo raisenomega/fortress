@@ -2,12 +2,14 @@ import { api } from '../adapters/fortress-api'
 import { reportError } from '../stores/toast-store'
 import { useRepairStore } from '../stores/repair-store'
 
-/** Localiza el proyecto que ES el propio repo: el debut del motor es self. */
+/**
+ * Localiza el proyecto que ES el propio repo: el debut del motor es self. Lo
+ * resuelve el main (repair:self): projects.self() es null en la app
+ * empaquetada y aqui el codigo corre justamente empaquetado.
+ */
 export async function locateSelfProject(): Promise<void> {
   try {
-    const self = await api().projects.self()
-    const projects = await api().projects.list()
-    const own = self === null ? null : (projects.find((p) => p.path === self.path) ?? null)
+    const own = await api().repair.self()
     useRepairStore.getState().setProject(own?.id ?? null)
     if (own) await loadRepair(own.id)
   } catch (error) {

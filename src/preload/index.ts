@@ -28,6 +28,7 @@ const api: FortressApi = {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
   repair: {
+    self: () => ipcRenderer.invoke(IPC.repairSelf),
     propose: (projectId) => ipcRenderer.invoke(IPC.repairPropose, projectId),
     list: (projectId) => ipcRenderer.invoke(IPC.repairList, projectId),
     get: (id) => ipcRenderer.invoke(IPC.repairGet, id)

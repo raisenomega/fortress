@@ -2,5 +2,6 @@
 export const REPAIR_CHANNELS = {
   repairPropose: 'repair:propose',
   repairList: 'repair:list',
-  repairGet: 'repair:get'
+  repairGet: 'repair:get',
+  repairSelf: 'repair:self'
 } as const

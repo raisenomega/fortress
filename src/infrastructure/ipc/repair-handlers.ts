@@ -5,9 +5,18 @@ import type { Proposal } from '@domain/repair/proposal'
 import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
+import { isFortressRepo } from '../system/self-project'
 import { IPC } from './channels'
 
 export function registerRepairHandlers(): void {
+  // El proyecto que ES el propio repo, resuelto AQUI: en la app empaquetada
+  // projects.self() es null (el codigo vive en el asar), pero el proyecto
+  // registrado con el repo en disco se reconoce por su package.json.
+  ipcMain.handle(
+    IPC.repairSelf,
+    () => getAppContext().projects.list().find((p) => isFortressRepo(p.path)) ?? null
+  )
+
   // C2 spawnea un agente real (read-only): pasa por la misma guardia que
   // cualquier corrida — busy, tope diario y circuit breaker de contaminacion.
   ipcMain.handle(

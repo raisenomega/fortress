@@ -15,6 +15,17 @@ module.exports = async function repairChecks(window) {
   const id = added.ok ? added.value.id : ''
   check('el proyecto de prueba existe', added.ok, JSON.stringify(added))
 
+  // repair:self resuelve el proyecto propio EN EL MAIN (por package.json), la
+  // via que sobrevive al empaquetado. Aqui debe hallar el registrado por la
+  // suite del loop (path del repo real) y no confundirse con este de /tmp.
+  const propio = await run('window.api.repair.self()')
+  const self = await run('window.api.projects.self()')
+  check(
+    'repair:self localiza el proyecto registrado que ES el repo propio',
+    propio !== null && self !== null && propio.path === self.path,
+    JSON.stringify({ propio: propio?.path, self: self?.path })
+  )
+
   const vacia = await run(`window.api.repair.list('${id}')`)
   check('repair:list arranca vacio', Array.isArray(vacia) && vacia.length === 0)
 
