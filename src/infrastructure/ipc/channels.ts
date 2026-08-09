@@ -2,12 +2,16 @@ import { SYSTEM_CHANNELS } from './system-channels'
 import { BUILD_CHANNELS } from './build-channels'
 import { GRAPH_CHANNELS } from './graph-channels'
 import { NEWPROJECT_CHANNELS } from './newproject-channels'
+import { OMEGA_CHANNELS } from './omega-channels'
+import { REPAIR_CHANNELS } from './repair-channels'
 
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
   ...SYSTEM_CHANNELS,
   ...BUILD_CHANNELS,
   ...GRAPH_CHANNELS,
+  ...OMEGA_CHANNELS,
+  ...REPAIR_CHANNELS,
   projectsList: 'projects:list',
   projectsAdd: 'projects:add',
   projectsRemove: 'projects:remove',
@@ -17,13 +21,6 @@ export const IPC = {
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
   loopStatus: 'loop:status',
   loopChunk: 'loop:chunk',
-  omegaAudit: 'omega:audit',
-  omegaList: 'omega:list',
-  omegaScore: 'omega:score',
-  omegaAgents: 'omega:agents',
-  omegaRuns: 'omega:runs',
-  omegaAgentRuns: 'omega:agent-runs',
-  omegaSnippet: 'omega:snippet',
   maintenanceKeepAwake: 'maintenance:keep-awake',
   healthRun: 'health:run',
   scanRun: 'scan:run',

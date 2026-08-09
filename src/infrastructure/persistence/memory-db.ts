@@ -5,6 +5,7 @@ import { SCHEMA } from './schema'
 import { CONNECTOR_SCHEMA } from './schema-connectors'
 import { OMEGA_SCHEMA } from './schema-omega'
 import { QUALITY_SCHEMA } from './schema-quality'
+import { REPAIR_SCHEMA } from './schema-repair'
 import { SYSTEM_SCHEMA } from './schema-system'
 import { TELEMETRY_SCHEMA } from './schema-telemetry'
 
@@ -27,7 +28,8 @@ export function createMemoryDb(): Db {
     CONNECTOR_SCHEMA,
     OMEGA_SCHEMA,
     SYSTEM_SCHEMA,
-    QUALITY_SCHEMA
+    QUALITY_SCHEMA,
+    REPAIR_SCHEMA
   ]) {
     db.exec(schema)
   }
