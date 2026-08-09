@@ -1,10 +1,13 @@
 import type { AppContext } from '@application/context'
 import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
+import { CLAUDE_BIN } from '../claude-code/claude-cli'
 import { createSafeStorageApiKeyStore } from '../security/api-key-store'
 import { getDatabase } from './database'
 import { writeScan } from '../cognition/write-cognition-log'
 import { createGitFileHistory } from '../git/file-history'
+import { headSha } from '../git/head-sha'
 import { createFsProbe } from '../omega/fs-probe'
+import { createGraphAnalyst } from '../repair/graph-analyst'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
 import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
 import { createSqliteChatRepository } from './sqlite-chat-repository'
@@ -19,6 +22,7 @@ import { createSqliteSelfObservationRepository } from './sqlite-self-observation
 import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
 import { createSqliteQualityHistoryRepository } from './sqlite-quality-history-repository'
+import { createSqliteRepairProposalRepository } from './sqlite-repair-proposal-repository'
 import { createSqliteScanHistoryRepository } from './sqlite-scan-history-repository'
 import { createSqliteSettingsRepository } from './sqlite-settings-repository'
 
@@ -37,6 +41,9 @@ export function getAppContext(): AppContext {
     fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),
     qualityHistory: createSqliteQualityHistoryRepository(db),
+    repairProposals: createSqliteRepairProposalRepository(db),
+    analystFor: (projectPath) => createGraphAnalyst(CLAUDE_BIN, projectPath),
+    headSha,
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),

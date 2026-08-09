@@ -9,6 +9,8 @@ import type { SelfObservationRepository } from '@domain/system/self-observation-
 import type { FileHistory } from '@domain/project/file-history'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
+import type { Analyst } from '@domain/repair/analysis'
+import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
 import type { QualityHistoryRepository } from '@domain/score/quality-record'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
@@ -32,6 +34,12 @@ export interface AppContext {
   readonly fileHistory: FileHistory
   readonly scans: ScanHistoryRepository
   readonly qualityHistory: QualityHistoryRepository
+  /** Expediente del motor de reparacion disciplinado (propuestas C1->C2->C3). */
+  readonly repairProposals: RepairProposalRepository
+  /** Analista C2 (grafo-primero, solo lectura) anclado a la carpeta del proyecto. */
+  readonly analystFor: (projectPath: string) => Analyst
+  /** SHA de HEAD del repo del proyecto, o null si no hay git. */
+  readonly headSha: (projectPath: string) => string | null
   readonly chat: ChatRepository
   readonly runs: AgentRunRepository
   readonly activity: ActivityRepository

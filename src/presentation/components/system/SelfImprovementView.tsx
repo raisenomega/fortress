@@ -4,6 +4,7 @@ import { useCapabilities, useSelfObservations } from '../../stores/self-improvem
 import { CapabilitiesSection } from './CapabilitiesSection'
 import { ObservationsSection } from './ObservationsSection'
 import { ProposeCapability } from './ProposeCapability'
+import { RepairSection } from './RepairSection'
 
 /**
  * Auto-mejora de FORTRESS: lo que los agentes descubren de FORTRESS mismo en
@@ -38,6 +39,7 @@ export function SelfImprovementView(): React.JSX.Element {
       ) : null}
       <CapabilitiesSection capabilities={capabilities} />
       <ObservationsSection observations={observations} />
+      <RepairSection />
     </div>
   )
 }

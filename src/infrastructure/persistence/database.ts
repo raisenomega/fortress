@@ -6,6 +6,7 @@ import { SCHEMA } from './schema'
 import { CONNECTOR_SCHEMA } from './schema-connectors'
 import { OMEGA_SCHEMA } from './schema-omega'
 import { QUALITY_SCHEMA } from './schema-quality'
+import { REPAIR_SCHEMA } from './schema-repair'
 import { SYSTEM_SCHEMA } from './schema-system'
 import { TELEMETRY_SCHEMA } from './schema-telemetry'
 
@@ -37,6 +38,7 @@ export function getDatabase(): Db {
   db.exec(OMEGA_SCHEMA)
   db.exec(SYSTEM_SCHEMA)
   db.exec(QUALITY_SCHEMA)
+  db.exec(REPAIR_SCHEMA)
   runMigrations(db)
   instance = db
   return db
