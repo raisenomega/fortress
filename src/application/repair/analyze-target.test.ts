@@ -22,12 +22,18 @@ const FULL: Analysis = {
   tokensUsed: 500
 }
 
+const RESULT = {
+  analysis: FULL,
+  runMeta: { tokensUsed: 500, durationMs: 99, startedAt: 1, endedAt: 100 }
+}
+
 describe('analyzeTarget (C2 analisis)', () => {
-  it('devuelve el analisis del analista SIN mutar la seleccion (no toca nada)', async () => {
-    const analyst: Analyst = { study: async () => FULL }
+  it('devuelve analisis + factura del analista SIN mutar la seleccion', async () => {
+    const analyst: Analyst = { study: async () => RESULT }
     const before = JSON.stringify(SEL)
     const result = await analyzeTarget(analyst, SEL)
-    expect(result).toBe(FULL)
+    expect(result.analysis).toBe(FULL)
+    expect(result.runMeta.durationMs).toBe(99)
     expect(JSON.stringify(SEL)).toBe(before)
   })
 

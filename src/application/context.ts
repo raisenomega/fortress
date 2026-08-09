@@ -11,6 +11,7 @@ import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { Analyst } from '@domain/repair/analysis'
 import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
+import type { ProposalEventLog } from './repair/proposal-event-log'
 import type { QualityHistoryRepository } from '@domain/score/quality-record'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
@@ -36,6 +37,8 @@ export interface AppContext {
   readonly qualityHistory: QualityHistoryRepository
   /** Expediente del motor de reparacion disciplinado (propuestas C1->C2->C3). */
   readonly repairProposals: RepairProposalRepository
+  /** Libro de vida: un evento por eslabon de cada propuesta. Telemetria, no gate. */
+  readonly eventLog: ProposalEventLog
   /** Analista C2 (grafo-primero, solo lectura) anclado a la carpeta del proyecto. */
   readonly analystFor: (projectPath: string) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */

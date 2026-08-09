@@ -25,7 +25,7 @@ const selection = selectTarget(rows)
 async function main(): Promise<void> {
   if (!selection) return console.log('sin hallazgos elegibles para analizar')
   console.log(`C2 analiza: ${selection.target.file}:${selection.target.line} (grafo-primero)...`)
-  const a = await analyzeTarget(createGraphAnalyst(CLAUDE, FCC), selection)
+  const { analysis: a, runMeta } = await analyzeTarget(createGraphAnalyst(CLAUDE, FCC), selection)
   console.log('\n=== C2 · ANALISIS (inerte, sin proponer fix) ===')
   console.log(
     `VEREDICTO:       ${a.status}  -> ${isActionable(a) ? 'C3 puede proponer' : 'OBSOLETO: extinguir + siguiente elegible'}`
@@ -35,7 +35,9 @@ async function main(): Promise<void> {
   console.log(`PATRON A COPIAR: ${a.patternToCopy}`)
   console.log(`NO TOCAR:        ${a.doNotTouch}`)
   console.log(`RIESGO:          ${a.risk}`)
-  console.log(`\ncompleto (listo para C3): ${isComplete(a)} | tokens del grafo: ${a.tokensUsed}`)
+  console.log(
+    `\ncompleto (listo para C3): ${isComplete(a)} | tokens: ${a.tokensUsed} | ${runMeta.durationMs}ms`
+  )
 }
 
 void main()

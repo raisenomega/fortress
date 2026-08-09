@@ -1,5 +1,6 @@
 import type { Project } from '@domain/project/project'
 import type { Proposal } from '@domain/repair/proposal'
+import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { Result } from '@domain/shared/result'
 
 /** Motor de reparacion disciplinado. En I1 solo C1 (elegir) + C2 (entender). */
@@ -18,4 +19,6 @@ export interface RepairApi {
   /** Expediente del proyecto, del mas reciente al mas antiguo. */
   list(projectId: string): Promise<readonly Proposal[]>
   get(id: string): Promise<Proposal | null>
+  /** El libro de vida de una propuesta, en orden de seq. */
+  events(proposalId: string): Promise<readonly ProposalEvent[]>
 }

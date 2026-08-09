@@ -1,6 +1,7 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
 import type { Analyst } from '@domain/repair/analysis'
 import type { Proposal } from '@domain/repair/proposal'
+import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
 import type { AppContext } from '../context'
 
@@ -17,6 +18,7 @@ export interface Bench {
   readonly context: AppContext
   readonly inserted: Proposal[]
   readonly patches: Array<ProposalPatch & { id: string }>
+  readonly events: ProposalEvent[]
 }
 
 interface Opciones {
@@ -26,18 +28,24 @@ interface Opciones {
   readonly obsoleteIds?: readonly string[]
   /** HEAD del repo; null simula un proyecto sin git. */
   readonly sha?: string | null
+  /** true: el libro de vida LANZA al asentar (probar que no revierte nada). */
+  readonly eventLogThrows?: boolean
 }
 
-/** Contexto falso completo: registra inserciones y patches para asertar. */
+/** Contexto falso completo: registra inserciones, patches y eventos. */
 export function bench(opts: Opciones): Bench {
   const inserted: Proposal[] = []
   const patches: Array<ProposalPatch & { id: string }> = []
+  const events: ProposalEvent[] = []
   const analyst: Analyst = {
     study: (target) =>
       Promise.resolve({
-        target, status: opts.verdictStatus ?? 'REAL', whatToChange: 'w', where: 'd',
-        patternToCopy: 'p', doNotTouch: 'n', risk: 'riesgo bajo', tokensUsed: 1
-      }) // prettier-ignore
+        analysis: {
+          target, status: opts.verdictStatus ?? 'REAL', whatToChange: 'w', where: 'd',
+          patternToCopy: 'p', doNotTouch: 'n', risk: 'riesgo bajo', tokensUsed: 7
+        }, // prettier-ignore
+        runMeta: { tokensUsed: 7, durationMs: 99, startedAt: 1, endedAt: 100 }
+      })
   }
   const context = {
     projects: { findById: () => ({ id: 'p1', path: '/repo/p1' }) },
@@ -50,8 +58,16 @@ export function bench(opts: Opciones): Bench {
       findById: () => null,
       listByProject: () => []
     },
+    eventLog: {
+      record: (event: ProposalEvent): Promise<void> => {
+        if (opts.eventLogThrows) return Promise.reject(new Error('libro roto'))
+        events.push(event)
+        return Promise.resolve()
+      },
+      list: () => Promise.resolve(events)
+    },
     analystFor: () => analyst,
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha)
   } as unknown as AppContext
-  return { context, inserted, patches }
+  return { context, inserted, patches, events }
 }

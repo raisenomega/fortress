@@ -9,6 +9,7 @@ import { selectTarget, type Candidate } from '@domain/repair/select-target'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
+import { recordAnalyzed, recordElegido } from './record-plan-events'
 
 /** Candidatos: ACTIVE y abiertos, menos los declarados OBSOLETOS bajo el
  *  escaneo vigente (un fantasma no se re-analiza en la misma generacion). */
@@ -39,12 +40,14 @@ export async function planRepair(context: AppContext, projectId: string): Promis
   const now = Date.now()
   const proposal: Proposal = { id: newId(), projectId, findingId: selection.target.id, baseSha, state: 'ELEGIDO', createdAt: now, updatedAt: now } // prettier-ignore
   context.repairProposals.insert(proposal)
+  await recordElegido(context.eventLog, proposal, scanId)
 
-  const analysis = await analyzeTarget(context.analystFor(project.path), selection)
-  const verdict: AnalysisVerdict = isActionable(analysis) ? 'REAL' : 'OBSOLETO'
+  const result = await analyzeTarget(context.analystFor(project.path), selection)
+  const verdict: AnalysisVerdict = isActionable(result.analysis) ? 'REAL' : 'OBSOLETO'
   const state: ProposalState = verdict === 'REAL' ? 'ANALIZADO' : 'CADUCADO'
   if (!canTransition(proposal.state, state)) return proposal
-  const patch = { state, analysisVerdict: verdict, analysisReason: analysis.risk, updatedAt: Date.now() } // prettier-ignore
+  const patch = { state, analysisVerdict: verdict, analysisReason: result.analysis.risk, updatedAt: Date.now() } // prettier-ignore
   context.repairProposals.update(proposal.id, patch)
+  await recordAnalyzed(context.eventLog, proposal, result, state)
   return { ...proposal, ...patch }
 }

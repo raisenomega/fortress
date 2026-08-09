@@ -1,7 +1,7 @@
 {
   "name": "fortress-command-center",
   "version": "1.0.0",
-  "description": "FORTRESS Command Center — interfaz única para gestionar múltiples proyectos con agentes de IA",
+  "description": "FORTRESS Command Center \u2014 interfaz \u00fanica para gestionar m\u00faltiples proyectos con agentes de IA",
   "main": "./out/main/index.js",
   "author": "raisenomega",
   "homepage": "https://github.com/raisenomega/fortress",
@@ -25,7 +25,8 @@
     "test:unit": "vitest run",
     "install:desktop": "./install.sh",
     "icons": "electron --no-sandbox scripts/make-icons.cjs",
-    "verify:scan": "npm run build && electron --no-sandbox scripts/scan-verification.cjs"
+    "verify:scan": "npm run build && electron --no-sandbox scripts/scan-verification.cjs",
+    "backfill:proposal-events": "node scripts/backfill-events-i1.5.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

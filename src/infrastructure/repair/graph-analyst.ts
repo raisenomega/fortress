@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
-import type { Analysis, Analyst } from '@domain/repair/analysis'
-import type { Candidate } from '@domain/repair/select-target'
+import type { Analyst } from '@domain/repair/analysis'
+import { toAnalysis, type RunOut } from './parse-analysis'
 
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
@@ -11,11 +11,6 @@ const TOOLS =
   'mcp__codebase-memory__get_architecture,mcp__codebase-memory__search_graph,' +
   'mcp__codebase-memory__trace_path,mcp__codebase-memory__get_code_snippet,' +
   'mcp__codebase-memory__search_code,Read,Grep,Glob'
-
-interface RunOut {
-  readonly result: string
-  readonly tokens: number
-}
 
 function run(bin: string, cwd: string, prompt: string): Promise<RunOut> {
   // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config
@@ -41,26 +36,24 @@ function run(bin: string, cwd: string, prompt: string): Promise<RunOut> {
   })
 }
 
-function toAnalysis(target: Candidate, out: RunOut): Analysis {
-  const match = out.result.match(/\{[\s\S]*\}/)
-  const j = (match ? JSON.parse(match[0]) : {}) as Record<string, string>
-  const text = (k: string): string => (j[k] ?? '').trim()
-  return {
-    target,
-    status: text('status') || 'DESCONOCIDO',
-    whatToChange: text('whatToChange'),
-    where: text('where'),
-    patternToCopy: text('patternToCopy'),
-    doNotTouch: text('doNotTouch'),
-    risk: text('risk'),
-    tokensUsed: out.tokens
-  }
-}
-
-/** Analista real: corre claude -p GRAFO-PRIMERO (read-only) y arma el Analysis. */
+/** Analista real: corre claude -p GRAFO-PRIMERO (read-only) y arma el Analysis
+ *  con su factura. tokensUsed va undefined si el parser no lo saco: no se
+ *  inventan numeros. agentRunId queda pendiente (C2 no registra en agent_runs). */
 export function createGraphAnalyst(claudeBin: string, projectPath: string): Analyst {
   return {
-    study: async (target) =>
-      toAnalysis(target, await run(claudeBin, projectPath, buildAnalysisPrompt(target)))
+    study: async (target) => {
+      const startedAt = Date.now()
+      const out = await run(claudeBin, projectPath, buildAnalysisPrompt(target))
+      const endedAt = Date.now()
+      return {
+        analysis: toAnalysis(target, out),
+        runMeta: {
+          tokensUsed: out.tokens > 0 ? out.tokens : undefined,
+          durationMs: endedAt - startedAt,
+          startedAt,
+          endedAt
+        }
+      }
+    }
   }
 }

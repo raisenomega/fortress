@@ -30,7 +30,25 @@ export function isActionable(a: Analysis): boolean {
   return a.status.trim().toUpperCase() === 'REAL'
 }
 
+/** Metadatos de la corrida del analista: lo que costo y cuanto tardo. */
+export interface AnalystRunMeta {
+  /** Id en agent_runs, si la corrida se registro alli (hoy no: deuda anotada). */
+  readonly agentRunId?: string
+  /** undefined si el parser no pudo extraerlo: no se inventan numeros. */
+  readonly tokensUsed?: number
+  readonly durationMs: number
+  readonly model?: string
+  readonly startedAt: number
+  readonly endedAt: number
+}
+
+/** El entendimiento MAS su factura: el analisis nunca viaja sin su coste. */
+export interface AnalystResult {
+  readonly analysis: Analysis
+  readonly runMeta: AnalystRunMeta
+}
+
 /** Puerto: el analista grafo-primero que ESTUDIA el hallazgo. Infra lo implementa. */
 export interface Analyst {
-  study(target: Candidate): Promise<Analysis>
+  study(target: Candidate): Promise<AnalystResult>
 }

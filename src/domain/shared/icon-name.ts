@@ -36,7 +36,9 @@ export const ICON_NAMES = [
   'code',
   'arrow-up',
   'paperclip',
-  'send'
+  'send',
+  'chevron-right',
+  'git-merge'
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

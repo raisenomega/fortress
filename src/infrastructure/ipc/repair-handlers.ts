@@ -14,7 +14,10 @@ export function registerRepairHandlers(): void {
   // registrado con el repo en disco se reconoce por su package.json.
   ipcMain.handle(
     IPC.repairSelf,
-    () => getAppContext().projects.list().find((p) => isFortressRepo(p.path)) ?? null
+    () =>
+      getAppContext()
+        .projects.list()
+        .find((p) => isFortressRepo(p.path)) ?? null
   )
 
   // C2 spawnea un agente real (read-only): pasa por la misma guardia que
@@ -42,5 +45,10 @@ export function registerRepairHandlers(): void {
 
   ipcMain.handle(IPC.repairGet, (_event, id: string) =>
     getAppContext().repairProposals.findById(String(id))
+  )
+
+  // El libro de vida completo de una propuesta, en orden de seq.
+  ipcMain.handle(IPC.repairEvents, (_event, proposalId: string) =>
+    getAppContext().eventLog.list(String(proposalId))
   )
 }

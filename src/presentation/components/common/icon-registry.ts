@@ -5,15 +5,12 @@ import {
   Brush,
   Castle,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
   Circle,
   Code2,
   Eye,
   FileText,
   FolderOpen,
   Gauge,
-  GitBranch,
   HardHat,
   MessageSquare,
   Package,
@@ -35,9 +32,11 @@ import {
   type LucideIcon
 } from 'lucide-react'
 import type { IconName } from '@domain/shared/icon-name'
+import { FLOW_ICONS } from './icon-registry-flow'
 
 /** Mapa nombre semantico -> glifo Lucide. Aparte de Icon.tsx para que crezca. */
 export const ICON_REGISTRY: Record<IconName, LucideIcon> = {
+  ...FLOW_ICONS,
   shield: Shield,
   'shield-off': ShieldOff,
   search: Search,
@@ -57,10 +56,7 @@ export const ICON_REGISTRY: Record<IconName, LucideIcon> = {
   eye: Eye,
   zap: Zap,
   gauge: Gauge,
-  'chevron-up': ChevronUp,
-  'chevron-down': ChevronDown,
   'folder-open': FolderOpen,
-  'git-branch': GitBranch,
   'file-text': FileText,
   settings: Settings,
   'message-square': MessageSquare,
