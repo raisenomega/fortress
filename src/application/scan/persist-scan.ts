@@ -22,8 +22,6 @@ export async function persistScan(
   outcome: ScanOutcome
 ): Promise<ScanSummary> {
   const { findings, durationMs } = outcome
-  const score = scoreFromFindings(findings)
-  const counts = countFindings(findings)
   const scannedAt = nowIso()
 
   const { extinct, stillAlive } = await decideExtinctions(
@@ -32,6 +30,15 @@ export async function persistScan(
     context.findings.listMemory(project.id),
     findings
   )
+
+  // El score puntua el EXPEDIENTE, no la corrida: lo reportado hoy MAS los
+  // ACTIVE que este escaneo no nombro y nadie arreglo. Puntuar solo la corrida
+  // mentia por omision — 92 en el tablero con un HIGH vivo en la base (78 real).
+  // Es la misma regla que ya sigue el log de COGNITION, para que numero y
+  // registro cuenten la misma historia.
+  const expediente = [...findings, ...asDetected(stillAlive)]
+  const score = scoreFromFindings(expediente)
+  const counts = countFindings(expediente)
 
   commitScanRows(context, project, outcome, {
     score,
@@ -45,10 +52,10 @@ export async function persistScan(
   context.cognitionWriter.writeScan({
     projectPath: project.path,
     projectName: project.name,
-    // Los ACTIVE del log son los del expediente, no solo los de esta corrida:
-    // un ausente que nadie ha arreglado sigue listado. Si solo se escribiera lo
-    // reportado, dejaria de mentir llamandolo extinto para mentir callandolo.
-    findings: [...findings, ...asDetected(stillAlive)],
+    // El expediente entero: un ausente que nadie ha arreglado sigue listado. Si
+    // solo se escribiera lo reportado, dejaria de mentir llamandolo extinto
+    // para mentir callandolo.
+    findings: expediente,
     // Extintos: SOLO los que pasaron las dos pruebas.
     resolved: asDetected(extinct),
     score,
