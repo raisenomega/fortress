@@ -52,8 +52,12 @@ module.exports = `(async () => {
 
   const fieldOf = async (id, f) => (await window.api.projects.list()).find((p) => p.id === id)?.[f]
   check('el loop nace apagado', (await fieldOf(otherId, 'loopEnabled')) === false)
-  await window.api.projects.setLoopEnabled(otherId, true)
-  check('enciende el loop', (await fieldOf(otherId, 'loopEnabled')) === true)
+  // Un encendido con exito arrancaria un motor REAL (agentes incluidos), asi
+  // que aqui se ejercita el gate del main: sin confianza ni topes, rechaza.
+  // Los caminos de rechazo, uno a uno, viven en loop-guard-checks.
+  const denegado = await window.api.projects.setLoopEnabled(otherId, true)
+  check('encenderlo sin confianza ni topes se RECHAZA', !denegado.ok)
+  check('el flag sigue apagado tras el rechazo', (await fieldOf(otherId, 'loopEnabled')) === false)
   await window.api.projects.setLoopEnabled(otherId, false)
   check('apaga el loop', (await fieldOf(otherId, 'loopEnabled')) === false)
   check('setLoopEnabled rechaza inexistente', !(await window.api.projects.setLoopEnabled('x', true)).ok)

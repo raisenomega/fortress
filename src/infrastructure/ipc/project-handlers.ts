@@ -9,6 +9,7 @@ import { exportProjectRecord } from '../project/export-record'
 import type { NewProject } from '@domain/project/project'
 import { getAppContext } from '../persistence/app-context'
 import { pickProjectFolder } from '../system/folder-picker'
+import { isFortressRepo } from '../system/self-project'
 import { IPC } from './channels'
 
 export function registerProjectHandlers(): void {
@@ -26,12 +27,13 @@ export function registerProjectHandlers(): void {
 
   // trusted desbloquea el allowlist de Bash: se coacciona a booleano estricto
   // para que el renderer no lo active con un valor "truthy" cualquiera.
+  // Revocar detiene el loop en curso (stopLoop): quitar la confianza es parar.
   ipcMain.handle(IPC.projectsSetTrusted, (_event, id: string, trusted: boolean) =>
-    setProjectTrusted(getAppContext(), String(id), trusted === true)
+    setProjectTrusted(getAppContext(), String(id), trusted === true, stopLoop)
   )
 
   ipcMain.handle(IPC.projectsSetLoopEnabled, (_event, id: string, enabled: boolean) => {
-    const result = setProjectLoopEnabled(getAppContext(), String(id), enabled === true)
+    const result = setProjectLoopEnabled(getAppContext(), String(id), enabled === true, isFortressRepo) // prettier-ignore
     // El toggle arranca o para el loop de ese proyecto (aislado por proyecto).
     if (result.ok) (enabled ? startLoop : stopLoop)(id)
     return result
