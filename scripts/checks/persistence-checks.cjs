@@ -52,12 +52,9 @@ module.exports = `(async () => {
 
   const fieldOf = async (id, f) => (await window.api.projects.list()).find((p) => p.id === id)?.[f]
   check('el loop nace apagado', (await fieldOf(otherId, 'loopEnabled')) === false)
-  // Un encendido con exito arrancaria un motor REAL (agentes incluidos), asi
-  // que aqui se ejercita el gate del main: sin confianza ni topes, rechaza.
-  // Los caminos de rechazo, uno a uno, viven en loop-guard-checks.
-  const denegado = await window.api.projects.setLoopEnabled(otherId, true)
-  check('encenderlo sin confianza ni topes se RECHAZA', !denegado.ok)
-  check('el flag sigue apagado tras el rechazo', (await fieldOf(otherId, 'loopEnabled')) === false)
+  // Encenderlo de verdad arrancaria un motor real: el detalle del gate esta en loop-guard-checks.
+  check('encenderlo sin confianza ni topes se RECHAZA',
+        !(await window.api.projects.setLoopEnabled(otherId, true)).ok)
   await window.api.projects.setLoopEnabled(otherId, false)
   check('apaga el loop', (await fieldOf(otherId, 'loopEnabled')) === false)
   check('setLoopEnabled rechaza inexistente', !(await window.api.projects.setLoopEnabled('x', true)).ok)
@@ -70,8 +67,7 @@ module.exports = `(async () => {
 
   const removed = await window.api.projects.remove(projectId)
   check('borra el proyecto', removed.ok, JSON.stringify(removed))
-  check('CASCADE borra su historial',
-        (await window.api.chat.history(projectId)).length === 0)
+  check('CASCADE borra su historial', (await window.api.chat.history(projectId)).length === 0)
   check('no toca los demas proyectos',
         (await window.api.chat.history(otherId)).length === 1)
 
