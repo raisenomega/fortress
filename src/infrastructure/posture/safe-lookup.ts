@@ -5,15 +5,12 @@ import { isPrivateHost } from '@domain/posture/private-host'
 const BLOCKED = 'La direccion resuelve a una IP interna o privada'
 const EMPTY = 'La direccion no resolvio a ninguna IP'
 
-/** `::ffff:127.0.0.1` es 127.0.0.1 disfrazado: se compara en su forma IPv4. */
-function asIpv4(address: string): string {
-  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i.exec(address)
-  return mapped ? mapped[1] : address
-}
-
 /** La primera IP privada de la resolucion, o null si todas son publicas. */
 export function firstBlocked(addresses: readonly LookupAddress[]): string | null {
-  const hit = addresses.find((entry) => isPrivateHost(asIpv4(entry.address)))
+  // El desenmascarado del IPv4 mapeado ya vive dentro de isPrivateHost, para
+  // que las dos capas usen la MISMA regla y no puedan discrepar sobre si
+  // `::ffff:7f00:1` es privada.
+  const hit = addresses.find((entry) => isPrivateHost(entry.address))
   return hit ? hit.address : null
 }
 

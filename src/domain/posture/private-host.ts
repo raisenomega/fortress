@@ -4,10 +4,14 @@
  * locales. Sin esto la app se vuelve un escaner de la red interna del operador,
  * activable desde el renderer o sugerible por la propia IA.
  */
+import { unmapIpv4 } from './unmap-ipv4'
+
 const LOCAL_NAME = /^(localhost|[^.]+\.local)$/i
 
 export function isPrivateHost(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/^\[|\]$/g, '')
+  // Se quita el disfraz ANTES de decidir: `::ffff:7f00:1` es 127.0.0.1, y sin
+  // desenmascararlo no casaba con ninguna regla y pasaba por publico.
+  const host = unmapIpv4(hostname.toLowerCase().replace(/^\[|\]$/g, ''))
   if (LOCAL_NAME.test(host)) return true
   if (host === '::1' || host === '::') return true
   if (/^f[cd][0-9a-f]{2}:/.test(host) || /^fe[89ab][0-9a-f]:/.test(host)) return true
