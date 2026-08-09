@@ -61,7 +61,12 @@ export async function clearHistory(projectId: string): Promise<void> {
   useChatStore.getState().setMessages(projectId, [])
 }
 
-/** Detiene el workflow: mata el paso actual y lo ya guardado se queda. */
+/**
+ * Detiene TODO lo del proyecto: el run en curso (chat o loop) y el loop si
+ * corre. El input se libera YA: aunque un stream zombi suelte bytes un momento
+ * mas, el operador recupera el control; el finally del envio lo re-confirma.
+ */
 export async function stopWorkflow(projectId: string): Promise<void> {
   await api().chat.stop(projectId)
+  useChatStore.getState().setStreaming(projectId, false)
 }

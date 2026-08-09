@@ -6,8 +6,8 @@ import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import { err, type Result } from '@domain/shared/result'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
-import { stopLoop } from '../loop/loop-controller'
-import { endRun, isCancelled } from '../run-control'
+import { cancelLoop } from '../loop/loop-registry'
+import { cancelRun, endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { buildChatEngines } from './chat-engines'
 import { IPC } from './channels'
@@ -31,8 +31,14 @@ function progressSender(event: IpcMainInvokeEvent, projectId: string) {
 }
 
 export function registerChatSendHandler(): void {
-  // Detener corta el run en curso Y para el loop si estaba corriendo el proyecto.
-  ipcMain.handle(IPC.chatStop, (_event, projectId: string) => stopLoop(projectId))
+  // Detener TOTAL del proyecto: marca el loop (si corre, su espera corta en
+  // <=2s) Y corta el proceso vivo (chat o loop, con escalada a SIGKILL).
+  // Devuelve cuantos corto — el contrato Promise<number> que ChatApi ya promete.
+  ipcMain.handle(IPC.chatStop, (_event, projectId: string) => {
+    const id = String(projectId)
+    cancelLoop(id)
+    return cancelRun(id)
+  })
 
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()
