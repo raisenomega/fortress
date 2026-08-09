@@ -4,11 +4,13 @@ import {
   ChevronUp,
   GitBranch,
   GitMerge,
+  RefreshCw,
   type LucideIcon
 } from 'lucide-react'
 import type { IconName } from '@domain/shared/icon-name'
 
-type FlowIconName = 'chevron-up' | 'chevron-down' | 'chevron-right' | 'git-branch' | 'git-merge'
+type FlowIconName =
+  'chevron-up' | 'chevron-down' | 'chevron-right' | 'git-branch' | 'git-merge' | 'refresh-cw'
 
 /** Glifos de flujo y navegacion, separados del registro base por el limite de 75. */
 export const FLOW_ICONS: Pick<Record<IconName, LucideIcon>, FlowIconName> = {
@@ -16,5 +18,6 @@ export const FLOW_ICONS: Pick<Record<IconName, LucideIcon>, FlowIconName> = {
   'chevron-down': ChevronDown,
   'chevron-right': ChevronRight,
   'git-branch': GitBranch,
-  'git-merge': GitMerge
+  'git-merge': GitMerge,
+  'refresh-cw': RefreshCw
 }

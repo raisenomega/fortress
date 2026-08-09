@@ -18,7 +18,14 @@ const COLUMNS = [
   'dim_operacion INTEGER',
   // Circuit breaker (Capa 4): fecha ISO en que una auditoria dejo el proyecto sucio.
   'contaminated_at TEXT',
-  'contamination_detail TEXT'
+  'contamination_detail TEXT',
+  // Reindexado automatico del grafo (I1.5-a): que SHA quedo indexado y si hay
+  // una corrida en marcha. status: IDLE | RUNNING | ERROR.
+  'graph_indexed_at_sha TEXT',
+  'graph_indexed_at_ts INTEGER',
+  "graph_indexing_status TEXT NOT NULL DEFAULT 'IDLE'",
+  'graph_indexing_started_at INTEGER',
+  'graph_indexing_error TEXT'
 ]
 
 function has(db: Db, column: string): boolean {
