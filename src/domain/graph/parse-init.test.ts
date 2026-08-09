@@ -8,7 +8,11 @@ describe('parseInitEvent', () => {
     const result = parseInitEvent(
       init({
         mcp_servers: [{ name: 'codebase-memory', status: 'connected' }],
-        tools: ['mcp__codebase-memory__get_architecture', 'mcp__codebase-memory__trace_path', 'Read']
+        tools: [
+          'mcp__codebase-memory__get_architecture',
+          'mcp__codebase-memory__trace_path',
+          'Read'
+        ]
       })
     )
     expect(result).toEqual({ connected: true, tools: ['get_architecture', 'trace_path'] })

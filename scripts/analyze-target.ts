@@ -27,7 +27,9 @@ async function main(): Promise<void> {
   console.log(`C2 analiza: ${selection.target.file}:${selection.target.line} (grafo-primero)...`)
   const a = await analyzeTarget(createGraphAnalyst(CLAUDE, FCC), selection)
   console.log('\n=== C2 · ANALISIS (inerte, sin proponer fix) ===')
-  console.log(`VEREDICTO:       ${a.status}  -> ${isActionable(a) ? 'C3 puede proponer' : 'OBSOLETO: extinguir + siguiente elegible'}`)
+  console.log(
+    `VEREDICTO:       ${a.status}  -> ${isActionable(a) ? 'C3 puede proponer' : 'OBSOLETO: extinguir + siguiente elegible'}`
+  )
   console.log(`QUE CAMBIAR:     ${a.whatToChange}`)
   console.log(`DONDE:           ${a.where}`)
   console.log(`PATRON A COPIAR: ${a.patternToCopy}`)
