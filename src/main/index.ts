@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
+import { reconcileAllOnBoot } from '@infrastructure/graph/reconcile-service'
 import { resumeLoops } from '@infrastructure/loop/loop-controller'
 import { bindLoopWindow } from '@infrastructure/loop/loop-registry'
 import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
@@ -36,6 +37,8 @@ app.whenReady().then(() => {
   bindGenesisWindow(mainWindow)
   // Reanuda los loops que quedaron vivos: nada se pierde tras un reinicio.
   resumeLoops()
+  // Alinea el grafo de cada proyecto con su HEAD, en background y de a uno.
+  reconcileAllOnBoot()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()

@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
 import { subscribe } from './subscribe'
+import { graphApi } from './graph-impl'
 
 /** Mitad del puente: todo lo que cuelga de un proyecto. Separado de index.ts
  *  solo por tamano; el contrato sigue siendo uno solo, FortressApi. */
@@ -46,13 +47,7 @@ export const projectApis: Pick<
     ranking: (iso, limit) => ipcRenderer.invoke(IPC.telemetryRanking, iso, limit)
   },
   cognition: { read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId) },
-  graph: {
-    status: (projectId) => ipcRenderer.invoke(IPC.graphStatus, projectId),
-    install: (projectId) => ipcRenderer.invoke(IPC.graphInstall, projectId),
-    verify: (projectId) => ipcRenderer.invoke(IPC.graphVerify, projectId),
-    ab: (projectId, question) => ipcRenderer.invoke(IPC.graphAb, projectId, question),
-    onProgress: (listener) => subscribe(IPC.graphProgress, listener)
-  },
+  graph: graphApi,
   newProject: {
     homeDirs: () => ipcRenderer.invoke(IPC.newProjectHomeDirs),
     planFolder: (draft) => ipcRenderer.invoke(IPC.newProjectPlanFolder, draft),

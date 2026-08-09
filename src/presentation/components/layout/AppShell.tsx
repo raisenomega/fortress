@@ -1,5 +1,6 @@
 import { AutonomousNotice } from '../settings/AutonomousNotice'
 import { useSidebarStore } from '../../stores/sidebar-store'
+import { useGraphFocus } from '../../hooks/use-graph-focus'
 import { MainArea } from './MainArea'
 import { Sidebar } from './Sidebar'
 import { StatusBar } from './StatusBar'
@@ -13,6 +14,7 @@ interface AppShellProps {
 
 export function AppShell({ onSend, plan }: AppShellProps): React.JSX.Element {
   const collapsed = useSidebarStore((state) => state.collapsed)
+  useGraphFocus()
 
   return (
     <div className="flex h-full flex-col bg-background">

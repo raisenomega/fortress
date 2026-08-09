@@ -11,6 +11,7 @@ import type { FindingRepository } from '@domain/project/finding-repository'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { Analyst } from '@domain/repair/analysis'
 import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
+import type { GraphStateRepository } from '@domain/graph/graph-state'
 import type { ProposalEventLog } from './repair/proposal-event-log'
 import type { QualityHistoryRepository } from '@domain/score/quality-record'
 import type { ScanHistoryRepository } from '@domain/scan/scan-record'
@@ -43,6 +44,8 @@ export interface AppContext {
   readonly analystFor: (projectPath: string) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */
   readonly headSha: (projectPath: string) => string | null
+  /** Estado del indice del grafo por proyecto (reindexado automatico). */
+  readonly graphState: GraphStateRepository
   readonly chat: ChatRepository
   readonly runs: AgentRunRepository
   readonly activity: ActivityRepository

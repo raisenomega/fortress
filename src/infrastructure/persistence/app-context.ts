@@ -24,6 +24,7 @@ import { createSqliteProjectRepository } from './sqlite-project-repository'
 import { createSqliteQualityHistoryRepository } from './sqlite-quality-history-repository'
 import { createProposalEventLog } from './proposal-event-log'
 import { createSqliteProposalEventRepository } from './sqlite-proposal-event-repository'
+import { createSqliteGraphStateRepository } from './sqlite-graph-state-repository'
 import { createSqliteRepairProposalRepository } from './sqlite-repair-proposal-repository'
 import { createSqliteScanHistoryRepository } from './sqlite-scan-history-repository'
 import { createSqliteSettingsRepository } from './sqlite-settings-repository'
@@ -47,6 +48,7 @@ export function getAppContext(): AppContext {
     eventLog: createProposalEventLog(createSqliteProposalEventRepository(db)),
     analystFor: (projectPath) => createGraphAnalyst(CLAUDE_BIN, projectPath),
     headSha,
+    graphState: createSqliteGraphStateRepository(db),
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),

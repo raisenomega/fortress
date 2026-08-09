@@ -1,3 +1,5 @@
+import type { ReconcileOutcome } from '@application/graph/reconcile-graph'
+import type { ReindexSnapshot } from '@domain/graph/graph-state'
 import type { CognitionSnapshot } from '@domain/cognition/cognition-log'
 import type { GraphAb, GraphVerify } from '@domain/graph/graph-actions'
 import type { GraphStatus } from '@domain/graph/graph-status'
@@ -38,6 +40,13 @@ export interface GraphApi {
   /** Misma pregunta en 'lectura' (solo grafo) y 'normal' (grafo+read): tokens de cada una. */
   ab(projectId: string, question: string): Promise<Result<GraphAb>>
   onProgress(listener: (chunk: { projectId: string; delta: string }) => void): Unsubscribe
+  /** Reindexado en background si HEAD != indexado. Devuelve la DECISION, no espera. */
+  reindex(projectId: string): Promise<ReconcileOutcome>
+  /** Estado persistido + HEAD vivo, o null si el proyecto no existe. */
+  state(projectId: string): Promise<ReindexSnapshot | null>
+  /** El renderer avisa que este proyecto tomo foco: reconciliar en background. */
+  focus(projectId: string): Promise<null>
+  onReindexChanged(listener: (projectId: string) => void): Unsubscribe
 }
 
 export interface MaintenanceApi {
