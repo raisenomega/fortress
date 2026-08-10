@@ -15,6 +15,7 @@ import { registerNewProjectHandlers } from './newproject-handlers'
 import { registerOmegaHandlers } from './omega-handlers'
 import { registerProjectHandlers } from './project-handlers'
 import { registerPushHandlers } from './push-handlers'
+import { registerRepairGateHandler } from './repair-gate-handler'
 import { registerRepairGenerateHandler } from './repair-generate-handler'
 import { registerRepairHandlers } from './repair-handlers'
 import { registerScanHandlers } from './scan-handlers'
@@ -33,6 +34,7 @@ export function registerIpcHandlers(): void {
   registerScanHandlers()
   registerRepairHandlers()
   registerRepairGenerateHandler()
+  registerRepairGateHandler()
   registerQualityHandlers()
   registerPushHandlers()
   registerActivityHandlers()

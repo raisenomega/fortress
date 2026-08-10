@@ -6,7 +6,11 @@ export const REJECTION_REASONS = [
   'no_diff_produced',
   'worktree_contaminated',
   'orphan_before_generate',
-  'superseded'
+  'superseded',
+  'gate_failed',
+  'gate_timeout',
+  'npm_ci_failed',
+  'worktree_missing'
 ] as const
 
 export type RejectionReason = (typeof REJECTION_REASONS)[number]

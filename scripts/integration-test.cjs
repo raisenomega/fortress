@@ -27,6 +27,7 @@ const SUITES = [
   ['Libro de vida (I1.5-b)', require('./checks/repair-events-checks.cjs')],
   ['Grafo reconciliado (I1.5-a)', require('./checks/graph-reindex-checks.cjs')],
   ['Generacion C3 (I2)', require('./checks/repair-generate-checks.cjs')],
+  ['Gate hermetico (I3)', require('./checks/repair-gate-checks.cjs')],
   ['Libro de la Vida (OMEGA)', require('./checks/omega-checks.cjs')],
   ['Puntuacion y veto (OMEGA)', require('./checks/omega-score-checks.cjs')],
   ['Crear proyecto desde cero', require('./checks/newproject-checks.cjs')]

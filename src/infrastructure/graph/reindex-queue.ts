@@ -5,13 +5,14 @@
  * STALE_MS. Un fallo de un trabajo no bloquea a los siguientes.
  */
 export interface ReindexQueue {
-  enqueue(job: () => Promise<void>): Promise<void>
+  /** Devuelve lo que el job devuelva: la cola serializa, no traga resultados. */
+  enqueue<T>(job: () => Promise<T>): Promise<T>
 }
 
 export function createReindexQueue(): ReindexQueue {
-  let tail: Promise<void> = Promise.resolve()
+  let tail: Promise<unknown> = Promise.resolve()
   return {
-    enqueue: (job) => {
+    enqueue: <T>(job: () => Promise<T>): Promise<T> => {
       const turn = tail.then(job, job)
       tail = turn.catch(() => undefined)
       return turn
