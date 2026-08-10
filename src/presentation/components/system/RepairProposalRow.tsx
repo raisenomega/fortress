@@ -21,8 +21,11 @@ export function RepairProposalRow({
   const [open, setOpen] = useState(false)
   const [events, setEvents] = useState<readonly ProposalEvent[]>([])
 
+  const loadEvents = async (): Promise<void> => {
+    setEvents(await api().repair.events(proposal.id))
+  }
   const toggle = async (): Promise<void> => {
-    if (!open) setEvents(await api().repair.events(proposal.id))
+    if (!open) await loadEvents()
     setOpen(!open)
   }
 
@@ -34,7 +37,8 @@ export function RepairProposalRow({
         open={open}
         onToggle={() => void toggle()}
       />
-      <RepairGenerateButton proposal={proposal} />
+      {/* Si la fila esta abierta al terminar la generacion, el libro se refresca. */}
+      <RepairGenerateButton proposal={proposal} onDone={() => open && void loadEvents()} />
       {open ? <ProposalEventList events={events} /> : null}
     </div>
   )

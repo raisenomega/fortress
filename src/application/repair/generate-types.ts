@@ -33,6 +33,12 @@ export interface GenerateDeps {
   readonly now: () => number
 }
 
+export interface Produced {
+  readonly worktreePath: string
+  readonly allowed: string[]
+  readonly cost: number
+}
+
 export type GenerateResult =
   | { ok: true; proposalId: string; commitSha: string; files: readonly string[] }
   | { ok: false; reason: RejectionReason | 'invalid_state'; detail?: string }

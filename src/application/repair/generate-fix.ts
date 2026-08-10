@@ -1,15 +1,15 @@
-import { computeAllowedFiles } from '@domain/repair/allowed-files'
 import { exceededBudget } from '@domain/repair/budget'
 import { canTransition } from '@domain/repair/proposal'
 import { buildGeneratorPrompt } from '@domain/repair/generator-prompt'
 import { checkScope } from '@domain/repair/scope-check'
 import { toSlug } from '@domain/repair/slug'
 import type { AppContext } from '../context'
-import type { GenerateDeps, GenerateResult } from './generate-types'
+import type { GenerateDeps, GenerateResult, Produced } from './generate-types'
 import { admitProposal, type Admitted } from './generate-guards'
-import { makeFail, type FailFn } from './generate-fail'
+import type { FailFn } from './generate-fail'
+import { prepareWorktree } from './generate-setup'
 import { loadAnalysis } from './load-analysis'
-import { emitDecision, emitGeneratorRun, emitOutcome } from './record-generate-events'
+import { emitGeneratorRun, emitOutcome } from './record-generate-events'
 
 /**
  * C3 — GENERAR: worktree aislado sobre base_sha, generador con cwd anclado,
@@ -24,29 +24,17 @@ export async function generateFix(
   const admitted = await admitProposal(ctx, proposalId, deps, loadAnalysis)
   if ('failed' in admitted) return admitted.failed
   const a = admitted
-  const worktreePath = `${deps.worktreeRoot}/${a.proposal.id}`
-  const branch = `repair/${a.proposal.id.slice(0, 8)}-${toSlug(a.analysis.target.title)}`
-  const fail = makeFail(ctx, deps, a, worktreePath, branch)
 
-  const created = await deps.worktrees.create(a.proposal.baseSha, a.project.path, worktreePath, branch) // prettier-ignore
-  if (!created.ok) return fail('worktree_contaminated', { error: created.error }, true)
-  await emitDecision(ctx.eventLog, a.cursor, a.proposal.id, 'WORKTREE_CREATE', { worktreePath, branch, baseSha: a.proposal.baseSha, ok: true }, deps.now()) // prettier-ignore
-
-  const sandbox = deps.sandbox(worktreePath, a.proposal.id, a.project.path)
-  if (!sandbox.ok) return fail('worktree_contaminated', { error: sandbox.error }, false)
-  const allowed = computeAllowedFiles(a.analysis.where)
-  if (allowed.length === 0) return fail('scope_violation', { where: a.analysis.where }, false)
+  const prepared = await prepareWorktree(ctx, a, deps)
+  if ('failed' in prepared) return prepared.failed
+  const { worktreePath, allowed, fail } = prepared
 
   const result = await deps.generator.generate(worktreePath, buildGeneratorPrompt(a.analysis))
   await emitGeneratorRun(ctx.eventLog, a.cursor, a.proposal.id, result.runMeta)
+  // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
   if (!result.ok) return fail('generator_error', { error: result.error }, true)
 
   return verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
-}
-interface Produced {
-  readonly worktreePath: string
-  readonly allowed: string[]
-  readonly cost: number
 }
 
 /** Post-generacion: diff real, correa de scope, presupuesto final y commit. */
@@ -57,10 +45,13 @@ async function verifyAndCommit(
   fail: FailFn,
   p: Produced
 ): Promise<GenerateResult> {
+  // Se limpia: termino sin diff, no hay nada que preservar.
   if (!(await deps.worktrees.hasChanges(p.worktreePath))) return fail('no_diff_produced', {}, false)
   const changed = await deps.worktrees.changedFiles(p.worktreePath)
   const scope = checkScope(changed, p.allowed)
+  // CONSERVADO para autopsia: el generador produjo cambios FUERA de scope.
   if (!scope.ok) return fail('scope_violation', { violations: scope.violations }, true)
+  // CONSERVADO: el commit del fix existiria pero el coste excedio; autopsia posible.
   if (exceededBudget(a.spent, p.cost)) return fail('budget_exceeded', { spent: a.spent, cost: p.cost }, true) // prettier-ignore
 
   const message = `repair(${toSlug(a.analysis.target.title)}): ${a.analysis.whatToChange.slice(0, 60)}` // prettier-ignore
