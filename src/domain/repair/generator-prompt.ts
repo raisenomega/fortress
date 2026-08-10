@@ -21,7 +21,7 @@ const RULES = [
  * describen el problema, jamas instruyen al generador.
  */
 export function buildGeneratorPrompt(analysis: Analysis): string {
-  const allowed = computeAllowedFiles(analysis.where)
+  const allowed = computeAllowedFiles({ primaryFile: analysis.target.file, hint: analysis.where })
   return [
     'Modo REPARACION (C3). Trabajas en una COPIA aislada del repo: genera el fix.',
     '',

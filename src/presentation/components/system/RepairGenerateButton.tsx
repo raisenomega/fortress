@@ -7,6 +7,8 @@ import { Icon } from '../common/Icon'
 
 interface RepairGenerateButtonProps {
   readonly proposal: Proposal
+  /** Se invoca al terminar (exito o rechazo): la fila refresca su libro. */
+  readonly onDone?: () => void
 }
 
 /**
@@ -14,7 +16,8 @@ interface RepairGenerateButtonProps {
  * Solo existe para ANALIZADO(REAL). Explicito por propuesta: sin automacion.
  */
 export function RepairGenerateButton({
-  proposal
+  proposal,
+  onDone
 }: RepairGenerateButtonProps): React.JSX.Element | null {
   const [busy, setBusy] = useState(false)
   if (proposal.state !== 'ANALIZADO' || proposal.analysisVerdict !== 'REAL') return null
@@ -29,6 +32,7 @@ export function RepairGenerateButton({
     } finally {
       setBusy(false)
       await loadRepair(proposal.projectId)
+      onDone?.()
     }
   }
 

@@ -14,6 +14,7 @@ export interface Opciones {
   readonly changed?: readonly string[]
   readonly sandboxError?: string
   readonly conAnalisis?: boolean
+  readonly sinPrimary?: boolean
 }
 
 export interface Bench {
@@ -22,6 +23,7 @@ export interface Bench {
   readonly patches: Array<ProposalPatch & { id: string }>
   readonly events: ProposalEvent[]
   readonly calls: string[]
+  readonly prompts: string[]
 }
 
 export const ANALYSIS = {
@@ -39,7 +41,8 @@ export function cadenaDe(opts: Opciones): ProposalEvent[] {
     buildAgentRunEvent({ proposalId: 'prop-1', seq: 1, phase: 'ANALYZE', actor: 'claude-analyst', costTokens: opts.spentPrevio ?? 1000, ts: 1 }) // prettier-ignore
   ]
   if (opts.conAnalisis !== false) {
-    chain.push(buildTransitionEvent({ proposalId: 'prop-1', seq: 2, phase: 'ANALYZE', toState: 'ANALIZADO', evidenceJson: JSON.stringify(ANALYSIS), ts: 2 })) // prettier-ignore
+    const analysis = opts.sinPrimary === true ? { ...ANALYSIS, target: { ...ANALYSIS.target, file: '' } } : ANALYSIS // prettier-ignore
+    chain.push(buildTransitionEvent({ proposalId: 'prop-1', seq: 2, phase: 'ANALYZE', toState: 'ANALIZADO', evidenceJson: JSON.stringify(analysis), ts: 2 })) // prettier-ignore
   }
   return chain
 }
