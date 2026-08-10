@@ -21,4 +21,6 @@ export interface RepairProposalRepository {
    * anclado a ese mismo escaneo. Un escaneo nuevo levanta la exclusion.
    */
   findObsoleteFindingIds(projectId: string, currentScanId: string): readonly string[]
+  /** R1 (supersede): la ANALIZADO(REAL) mas reciente de ese hallazgo, o null. */
+  findLatestAnalyzedRealByFinding(projectId: string, findingId: string): Proposal | null
 }

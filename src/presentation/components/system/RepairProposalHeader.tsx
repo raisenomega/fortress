@@ -8,12 +8,16 @@ import { Icon } from '../common/Icon'
 const STATE_ICON: Partial<Record<ProposalState, IconName>> = {
   ELEGIDO: 'circle',
   ANALIZADO: 'check-circle',
+  GENERADO: 'git-branch',
+  RECHAZADO: 'x-circle',
   CADUCADO: 'x-circle'
 }
 
 const STATE_TONE: Partial<Record<ProposalState, string>> = {
   ELEGIDO: 'text-medium',
   ANALIZADO: 'text-success',
+  GENERADO: 'text-primary',
+  RECHAZADO: 'text-critical',
   CADUCADO: 'text-muted-foreground'
 }
 
@@ -48,7 +52,7 @@ export function RepairProposalHeader({
       </span>
       <span className="font-mono text-muted-foreground">{proposal.id.slice(0, 6)}</span>
       <span className="min-w-0 flex-1 truncate text-foreground">{donde}</span>
-      <span className={`shrink-0 ${tone}`}>
+      <span className={`shrink-0 ${tone}`} title={proposal.analysisReason ?? ''}>
         {proposal.state}
         {proposal.analysisVerdict === undefined ? '' : ` (${proposal.analysisVerdict})`}
       </span>

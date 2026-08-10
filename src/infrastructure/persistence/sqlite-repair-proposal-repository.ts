@@ -1,16 +1,7 @@
 import type { AnalysisVerdict, Proposal, ProposalState } from '@domain/repair/proposal'
 import type { ProposalPatch, RepairProposalRepository } from '@domain/repair/proposal-repository'
 import type { Db } from './database'
-
-const COLS = 'id, project_id, finding_id, base_sha, state, analysis_verdict, analysis_reason, created_at, updated_at' // prettier-ignore
-
-/** La propuesta mas reciente de cada hallazgo quedo OBSOLETA bajo ese escaneo. */
-const OBSOLETOS = `SELECT p.finding_id FROM repair_proposals p
-  JOIN findings f ON f.id = p.finding_id AND f.scan_id = @scanId
-  WHERE p.project_id = @projectId AND p.state = 'CADUCADO'
-    AND p.analysis_verdict = 'OBSOLETO'
-    AND p.created_at = (SELECT MAX(q.created_at) FROM repair_proposals q
-                        WHERE q.finding_id = p.finding_id)`
+import { COLS, LATEST_ANALYZED_REAL, OBSOLETOS } from './repair-proposal-sql'
 
 interface Row {
   readonly id: string
@@ -50,6 +41,7 @@ export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepo
     `SELECT ${COLS} FROM repair_proposals WHERE project_id = ? ORDER BY updated_at DESC`
   )
   const obsoletos = db.prepare(OBSOLETOS)
+  const latestReal = db.prepare(LATEST_ANALYZED_REAL)
 
   return {
     insert: (p) => void insert.run(p),
@@ -67,6 +59,10 @@ export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepo
     },
     listByProject: (projectId) => (byProject.all(projectId) as Row[]).map(toProposal),
     findObsoleteFindingIds: (projectId, currentScanId) =>
-      (obsoletos.all({ projectId, scanId: currentScanId }) as Row[]).map((r) => r.finding_id)
+      (obsoletos.all({ projectId, scanId: currentScanId }) as Row[]).map((r) => r.finding_id),
+    findLatestAnalyzedRealByFinding: (projectId, findingId) => {
+      const row = latestReal.get({ projectId, findingId }) as Row | undefined
+      return row === undefined ? null : toProposal(row)
+    }
   }
 }

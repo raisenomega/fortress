@@ -1,0 +1,16 @@
+/** Por que una propuesta NO llego a GENERADO. La razon viaja en analysis_reason. */
+export const REJECTION_REASONS = [
+  'scope_violation',
+  'budget_exceeded',
+  'generator_error',
+  'no_diff_produced',
+  'worktree_contaminated',
+  'orphan_before_generate',
+  'superseded'
+] as const
+
+export type RejectionReason = (typeof REJECTION_REASONS)[number]
+
+export function isRejectionReason(value: string): value is RejectionReason {
+  return (REJECTION_REASONS as readonly string[]).includes(value)
+}

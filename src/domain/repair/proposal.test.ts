@@ -9,7 +9,7 @@ const ESTADOS: readonly ProposalState[] = [
 /** La maquina acordada, entera: lo que no esta aqui debe rechazarse. */
 const VALIDAS: ReadonlyArray<readonly [ProposalState, ProposalState]> = [
   ['ELEGIDO', 'ANALIZADO'], ['ELEGIDO', 'CADUCADO'],
-  ['ANALIZADO', 'GENERADO'], ['ANALIZADO', 'CADUCADO'],
+  ['ANALIZADO', 'GENERADO'], ['ANALIZADO', 'RECHAZADO'], ['ANALIZADO', 'CADUCADO'],
   ['GENERADO', 'GATE'], ['GENERADO', 'CADUCADO'],
   ['GATE', 'OMEGA'], ['GATE', 'RECHAZADO'], ['GATE', 'CADUCADO'],
   ['OMEGA', 'APROBADO'], ['OMEGA', 'RECHAZADO'], ['OMEGA', 'CADUCADO'],

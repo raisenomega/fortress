@@ -35,7 +35,7 @@ export interface Proposal {
  *  los vivos: base movida, analisis obsoleto o re-validacion fallida. */
 const NEXT: Readonly<Record<ProposalState, readonly ProposalState[]>> = {
   ELEGIDO: ['ANALIZADO', 'CADUCADO'],
-  ANALIZADO: ['GENERADO', 'CADUCADO'],
+  ANALIZADO: ['GENERADO', 'RECHAZADO', 'CADUCADO'],
   GENERADO: ['GATE', 'CADUCADO'],
   GATE: ['OMEGA', 'RECHAZADO', 'CADUCADO'],
   OMEGA: ['APROBADO', 'RECHAZADO', 'CADUCADO'],

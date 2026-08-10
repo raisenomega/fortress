@@ -1,0 +1,61 @@
+import { git, lastLine, porcelainFiles, shortstat } from './repair-git'
+
+export interface WorktreeDiff {
+  readonly files: readonly string[]
+  readonly insertions: number
+  readonly deletions: number
+}
+
+/** Puerto de los worktrees del motor. Todo git por args array; nada de shell. */
+export interface WorktreeManager {
+  create(baseSha: string, projectRepoPath: string, worktreePath: string, branchName: string): Promise<{ ok: true } | { ok: false; error: string }> // prettier-ignore
+  /** --force y rama fuera; mejor esfuerzo: limpiar no puede romper nada. */
+  remove(worktreePath: string, branchName: string, projectRepoPath: string): Promise<void>
+  isClean(worktreePath: string): Promise<boolean>
+  hasChanges(worktreePath: string): Promise<boolean>
+  /** Tocados segun status --porcelain: INCLUYE untracked (un test nuevo cuenta). */
+  changedFiles(worktreePath: string): Promise<string[]>
+  /** Post-commit: lo que separa a HEAD del ancla, para la evidencia del libro. */
+  diff(worktreePath: string, baseSha: string): Promise<WorktreeDiff>
+  commit(worktreePath: string, message: string): Promise<{ ok: true; sha: string } | { ok: false; error: string }> // prettier-ignore
+}
+
+export function createWorktreeManager(): WorktreeManager {
+  const status = (worktreePath: string): Promise<{ code: number; out: string }> =>
+    git(worktreePath, ['status', '--porcelain'])
+
+  return {
+    create: async (baseSha, projectRepoPath, worktreePath, branchName) => {
+      const result = await git(projectRepoPath, ['worktree', 'add', '-b', branchName, worktreePath, baseSha]) // prettier-ignore
+      return result.code === 0 ? { ok: true } : { ok: false, error: lastLine(result.out) }
+    },
+    remove: async (worktreePath, branchName, projectRepoPath) => {
+      await git(projectRepoPath, ['worktree', 'remove', '--force', worktreePath])
+      if (branchName !== '') await git(projectRepoPath, ['branch', '-D', branchName])
+    },
+    isClean: async (worktreePath) => {
+      const result = await status(worktreePath)
+      return result.code === 0 && result.out.trim() === ''
+    },
+    hasChanges: async (worktreePath) => {
+      const result = await status(worktreePath)
+      return result.code === 0 && result.out.trim() !== ''
+    },
+    changedFiles: async (worktreePath) => porcelainFiles((await status(worktreePath)).out),
+    diff: async (worktreePath, baseSha) => {
+      const names = await git(worktreePath, ['diff', '--name-only', baseSha, 'HEAD'])
+      const stat = await git(worktreePath, ['diff', '--shortstat', baseSha, 'HEAD'])
+      return {
+        files: names.out.split('\n').filter((line) => line.trim() !== ''),
+        ...shortstat(stat.out)
+      }
+    },
+    commit: async (worktreePath, message) => {
+      await git(worktreePath, ['add', '-A'])
+      const result = await git(worktreePath, ['commit', '-m', message, '--no-verify'])
+      if (result.code !== 0) return { ok: false, error: lastLine(result.out) }
+      const sha = await git(worktreePath, ['rev-parse', 'HEAD'])
+      return { ok: true, sha: sha.out.trim() }
+    }
+  }
+}
