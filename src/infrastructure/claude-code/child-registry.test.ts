@@ -1,10 +1,11 @@
 import type { ChildProcess } from 'child_process'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { killAllChildren, liveChildCount, trackChild } from './child-registry'
 
-/** Proceso de mentira: solo hace falta que registre kill y sus listeners. */
+/** Proceso de mentira. `once` acumula listeners: el registro cuelga DOS de close
+ *  (descontarse + cancelar la escalada) y pisarse uno era mentira del fake. */
 function fakeChild(): ChildProcess & { killed: string[]; close: () => void } {
-  const listeners: Record<string, () => void> = {}
+  const listeners: Record<string, Array<() => void>> = {}
   const child = {
     killed: [] as string[],
     kill(signal: string) {
@@ -12,15 +13,19 @@ function fakeChild(): ChildProcess & { killed: string[]; close: () => void } {
       return true
     },
     once(event: string, handler: () => void) {
-      listeners[event] = handler
+      ;(listeners[event] ??= []).push(handler)
       return child
     },
-    close: () => listeners.close?.()
+    close: () => (listeners.close ?? []).forEach((handler) => handler())
   }
   return child as unknown as ChildProcess & { killed: string[]; close: () => void }
 }
 
-beforeEach(() => killAllChildren())
+beforeEach(() => {
+  vi.useFakeTimers()
+  killAllChildren()
+})
+afterEach(() => vi.useRealTimers())
 
 describe('child-registry', () => {
   it('cuenta los procesos vivos', () => {
@@ -36,21 +41,35 @@ describe('child-registry', () => {
     expect(liveChildCount()).toBe(0)
   })
 
-  it('los termina con SIGTERM, no a lo bruto', () => {
-    // SIGTERM le da al proceso ocasion de cerrar sus descriptores.
+  it('primero SIGTERM: ocasion de cerrar descriptores antes de desaparecer', () => {
     const child = fakeChild()
     trackChild(child)
     killAllChildren()
     expect(child.killed).toEqual(['SIGTERM'])
   })
 
-  it('devuelve cuantos habia para poder decirlo', () => {
+  it('un proceso que IGNORA el SIGTERM recibe SIGKILL a los 3s', () => {
+    const child = fakeChild()
+    trackChild(child)
+    killAllChildren()
+
+    vi.advanceTimersByTime(3000)
+    expect(child.killed).toEqual(['SIGTERM', 'SIGKILL'])
+  })
+
+  it('un proceso que muere por las buenas NO recibe SIGKILL', () => {
+    const child = fakeChild()
+    trackChild(child)
+    killAllChildren()
+    child.close() // murio dentro del periodo de gracia
+    vi.advanceTimersByTime(5000)
+    expect(child.killed).toEqual(['SIGTERM'])
+  })
+
+  it('devuelve cuantos habia para poder decirlo, y matar sin nada vivo no revienta', () => {
     trackChild(fakeChild())
     trackChild(fakeChild())
     expect(killAllChildren()).toBe(2)
-  })
-
-  it('matar sin nada vivo no revienta', () => {
     expect(killAllChildren()).toBe(0)
   })
 })

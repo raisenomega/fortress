@@ -62,5 +62,9 @@ module.exports = async function loopGuardChecks(window) {
   )
   check('revocar la confianza apaga el flag del loop', trasRevocar.loop_enabled === 0)
 
+  // Detener es total e idempotente: responde el conteo aunque no corra nada.
+  const detenido = await run(`window.api.chat.stop('${ajeno.value.id}')`)
+  check('chat:stop cumple su contrato Promise<number>', detenido === 0)
+
   return results
 }
