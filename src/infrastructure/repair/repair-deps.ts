@@ -1,13 +1,15 @@
 import { app } from 'electron'
-import { existsSync, readdirSync, rmSync } from 'fs'
+import { existsSync } from 'fs'
 import { join } from 'path'
 import type { GateDeps } from '@application/repair/run-gate'
+import type { OmegaDeps } from '@application/repair/run-omega'
 import type { GenerateDeps } from '@application/repair/generate-types'
-import type { ReclaimDeps } from '@application/repair/reclaim-worktrees'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
 import { createGraphGenerator } from './graph-generator'
+import { createGraphOmega } from './graph-omega'
+import { readAtHead, readAtSha, showHead } from './worktree-file-reader'
 import { assertRepairSandbox } from './repair-sandbox'
 import { createWorktreeManager } from './worktree-manager'
 
@@ -42,16 +44,19 @@ export function buildGateDeps(): GateDeps {
   }
 }
 
-/** Deps reales del reclaim de arranque. */
-export function buildReclaimDeps(): ReclaimDeps {
-  const root = worktreeRoot()
+/** Deps reales de OMEGA (I4): lectura estricta, cola compartida con el gate. */
+export function buildOmegaDeps(): OmegaDeps {
   const manager = createWorktreeManager()
   return {
-    listWorktreeDirs: () => (existsSync(root) ? readdirSync(root) : []),
-    pathOf: (proposalId) => join(root, proposalId),
-    removeWorktree: (worktreePath, projectRepoPath) =>
-      manager.remove(worktreePath, '', projectRepoPath),
-    rmDir: (path) => rmSync(path, { recursive: true, force: true }),
+    worktreeRoot: worktreeRoot(),
+    worktreeExists: (path) => existsSync(path),
+    isClean: (path) => manager.isClean(path),
+    changedFiles: async (worktreePath, baseSha) => (await manager.diff(worktreePath, baseSha)).files, // prettier-ignore
+    diffText: (worktreePath) => showHead(worktreePath),
+    readPost: (worktreePath, relPath) => readAtHead(worktreePath, relPath),
+    readPre: (worktreePath, baseSha, relPath) => readAtSha(worktreePath, baseSha, relPath),
+    omega: createGraphOmega(CLAUDE_BIN),
+    enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }
 }

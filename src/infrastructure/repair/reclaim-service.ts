@@ -1,6 +1,6 @@
 import { reclaimWorktrees } from '@application/repair/reclaim-worktrees'
 import { getAppContext } from '../persistence/app-context'
-import { buildReclaimDeps } from './repair-deps'
+import { buildReclaimDeps } from './reclaim-deps'
 
 /**
  * Reconcilia los worktrees huerfanos al arrancar, en background y con falla

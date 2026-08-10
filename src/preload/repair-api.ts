@@ -1,5 +1,6 @@
 import type { GenerateResult } from '@application/repair/generate-types'
 import type { RunGateResult } from '@application/repair/run-gate'
+import type { RunOmegaResult } from '@application/repair/run-omega'
 import type { Project } from '@domain/project/project'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
@@ -33,4 +34,6 @@ export interface RepairApi {
    * DENTRO del worktree; minutos). GATE si verde; RECHAZADO con autopsia.
    */
   runGate(proposalId: string): Promise<RunGateResult>
+  /** I4 — juicio semantico independiente. APROBADO -> OMEGA; VETADO -> RECHAZADO. */
+  runOmega(proposalId: string): Promise<RunOmegaResult>
 }
