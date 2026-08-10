@@ -4,6 +4,7 @@ import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { api } from '../../adapters/fortress-api'
 import { ProposalEventList } from './ProposalEventList'
+import { RepairGenerateButton } from './RepairGenerateButton'
 import { RepairProposalHeader } from './RepairProposalHeader'
 
 interface RepairProposalRowProps {
@@ -33,6 +34,7 @@ export function RepairProposalRow({
         open={open}
         onToggle={() => void toggle()}
       />
+      <RepairGenerateButton proposal={proposal} />
       {open ? <ProposalEventList events={events} /> : null}
     </div>
   )

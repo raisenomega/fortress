@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
 import { reconcileAllOnBoot } from '@infrastructure/graph/reconcile-service'
+import { reclaimRepairWorktrees } from '@infrastructure/repair/reclaim-service'
 import { resumeLoops } from '@infrastructure/loop/loop-controller'
 import { bindLoopWindow } from '@infrastructure/loop/loop-registry'
 import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
@@ -39,6 +40,8 @@ app.whenReady().then(() => {
   resumeLoops()
   // Alinea el grafo de cada proyecto con su HEAD, en background y de a uno.
   reconcileAllOnBoot()
+  // Worktrees huerfanos de reparaciones interrumpidas: se reconcilian aqui.
+  reclaimRepairWorktrees()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()

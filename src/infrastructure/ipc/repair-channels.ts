@@ -4,5 +4,6 @@ export const REPAIR_CHANNELS = {
   repairList: 'repair:list',
   repairGet: 'repair:get',
   repairSelf: 'repair:self',
-  repairEvents: 'repair:events'
+  repairEvents: 'repair:events',
+  repairGenerate: 'repair:generate'
 } as const

@@ -1,9 +1,10 @@
+import type { GenerateResult } from '@application/repair/generate-types'
 import type { Project } from '@domain/project/project'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { Result } from '@domain/shared/result'
 
-/** Motor de reparacion disciplinado. En I1 solo C1 (elegir) + C2 (entender). */
+/** Motor de reparacion disciplinado: C1 elegir, C2 entender, C3 generar. */
 export interface RepairApi {
   /**
    * El proyecto registrado que ES el propio repo de FORTRESS, resuelto en el
@@ -21,4 +22,9 @@ export interface RepairApi {
   get(id: string): Promise<Proposal | null>
   /** El libro de vida de una propuesta, en orden de seq. */
   events(proposalId: string): Promise<readonly ProposalEvent[]>
+  /**
+   * C3 — genera el fix en un worktree aislado (agente real, puede tardar
+   * minutos). Termina en GENERADO o RECHAZADO; jamas toca el arbol vivo.
+   */
+  generate(proposalId: string): Promise<GenerateResult>
 }

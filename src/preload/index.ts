@@ -6,6 +6,7 @@ import { connectorsApi } from './connectors-impl'
 import { systemApi } from './system-impl'
 import { buildApi } from './build-impl'
 import { projectApis } from './project-apis'
+import { repairApi } from './repair-impl'
 
 /**
  * Superficie minima expuesta al renderer: solo estas operaciones, nada de
@@ -27,13 +28,7 @@ const api: FortressApi = {
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
-  repair: {
-    self: () => ipcRenderer.invoke(IPC.repairSelf),
-    propose: (projectId) => ipcRenderer.invoke(IPC.repairPropose, projectId),
-    list: (projectId) => ipcRenderer.invoke(IPC.repairList, projectId),
-    get: (id) => ipcRenderer.invoke(IPC.repairGet, id),
-    events: (proposalId) => ipcRenderer.invoke(IPC.repairEvents, proposalId)
-  },
+  repair: repairApi,
   docs: {
     list: (projectId) => ipcRenderer.invoke(IPC.docsList, projectId),
     read: (projectId, name) => ipcRenderer.invoke(IPC.docsRead, projectId, name)

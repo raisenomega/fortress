@@ -5,7 +5,7 @@ import type { ProposalState } from './proposal'
 export type EventPhase =
   'SELECT' | 'ANALYZE' | 'GENERATE' | 'GATE' | 'OMEGA' | 'APPROVE' | 'MERGE' | 'EXPIRE'
 export type EventType = 'TRANSITION' | 'AGENT_RUN' | 'DECISION' | 'ERROR'
-export type Actor = 'motor' | 'claude-analyst' | 'gate' | 'omega' | 'human'
+export type Actor = 'motor' | 'claude-analyst' | 'claude-generator' | 'gate' | 'omega' | 'human'
 
 /**
  * Un eslabon del libro de vida de una propuesta: quien hizo que, cuando, con
