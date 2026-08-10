@@ -10,7 +10,11 @@ export const REJECTION_REASONS = [
   'gate_failed',
   'gate_timeout',
   'npm_ci_failed',
-  'worktree_missing'
+  'worktree_missing',
+  'omega_vetado',
+  'omega_timeout',
+  'omega_error',
+  'omega_response_invalid'
 ] as const
 
 export type RejectionReason = (typeof REJECTION_REASONS)[number]

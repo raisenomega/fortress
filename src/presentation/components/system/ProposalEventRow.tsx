@@ -3,6 +3,18 @@ import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { formatMoment } from '../../format/time'
 import { Icon } from '../common/Icon'
 import { iconDe } from './proposal-event-view'
+import { OmegaVerdictTable } from './OmegaVerdictTable'
+import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+
+/** El verdict de OMEGA embebido en la evidencia, o null si no lo hay. */
+function verdictDe(evidenceJson: string): OmegaVerdict | null {
+  try {
+    const parsed = JSON.parse(evidenceJson) as { verdict?: OmegaVerdict }
+    return parsed.verdict?.veredicto_global !== undefined ? parsed.verdict : null
+  } catch {
+    return null
+  }
+}
 
 /** Coste del eslabon, solo con lo que se sepa: nada se inventa. */
 function costeDe(event: ProposalEvent): string {
@@ -47,9 +59,13 @@ export function ProposalEventRow({ event }: ProposalEventRowProps): React.JSX.El
         </button>
       )}
       {showEvidence && event.evidenceJson !== undefined ? (
-        <pre className="text-muted-foreground max-h-40 overflow-auto text-[10px]">
-          {event.evidenceJson}
-        </pre>
+        verdictDe(event.evidenceJson) !== null ? (
+          <OmegaVerdictTable verdict={verdictDe(event.evidenceJson) as OmegaVerdict} />
+        ) : (
+          <pre className="text-muted-foreground max-h-40 overflow-auto text-[10px]">
+            {event.evidenceJson}
+          </pre>
+        )
       ) : null}
     </div>
   )

@@ -6,6 +6,7 @@ import { api } from '../../adapters/fortress-api'
 import { ProposalEventList } from './ProposalEventList'
 import { RepairGateButton } from './RepairGateButton'
 import { RepairGenerateButton } from './RepairGenerateButton'
+import { RepairOmegaButton } from './RepairOmegaButton'
 import { RepairProposalHeader } from './RepairProposalHeader'
 
 interface RepairProposalRowProps {
@@ -41,6 +42,8 @@ export function RepairProposalRow({
       {/* Si la fila esta abierta al terminar la generacion, el libro se refresca. */}
       <RepairGenerateButton proposal={proposal} onDone={() => open && void loadEvents()} />
       <RepairGateButton proposal={proposal} onDone={() => open && void loadEvents()} />
+      {/* Refetch incondicional: sin stale closure (leccion I3.1). */}
+      <RepairOmegaButton proposal={proposal} onDone={() => void loadEvents()} />
       {open ? <ProposalEventList events={events} /> : null}
     </div>
   )

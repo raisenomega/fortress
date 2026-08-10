@@ -10,6 +10,7 @@ const STATE_ICON: Partial<Record<ProposalState, IconName>> = {
   ANALIZADO: 'check-circle',
   GENERADO: 'git-branch',
   GATE: 'shield',
+  OMEGA: 'eye',
   RECHAZADO: 'x-circle',
   CADUCADO: 'x-circle'
 }
@@ -19,6 +20,7 @@ const STATE_TONE: Partial<Record<ProposalState, string>> = {
   ANALIZADO: 'text-success',
   GENERADO: 'text-primary',
   GATE: 'text-success',
+  OMEGA: 'text-primary',
   RECHAZADO: 'text-critical',
   CADUCADO: 'text-muted-foreground'
 }

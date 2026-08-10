@@ -4,6 +4,8 @@ import type { ProposalEvent } from './proposal-event'
 export const MAX_TOKENS_PER_PROPOSAL = 2_000_000
 /** Lo minimo que una corrida de generador puede necesitar: sin ese margen, ni se spawnea. */
 export const MIN_GENERATOR_BUDGET = 200_000
+/** Margen minimo para una corrida de OMEGA (D21). */
+export const MIN_OMEGA_BUDGET = 300_000
 
 /** Lo ya gastado por la propuesta: suma de AGENT_RUN con coste conocido. */
 export function computeSpent(events: readonly ProposalEvent[]): number {
