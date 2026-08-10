@@ -36,7 +36,7 @@ export interface Proposal {
 const NEXT: Readonly<Record<ProposalState, readonly ProposalState[]>> = {
   ELEGIDO: ['ANALIZADO', 'CADUCADO'],
   ANALIZADO: ['GENERADO', 'RECHAZADO', 'CADUCADO'],
-  GENERADO: ['GATE', 'CADUCADO'],
+  GENERADO: ['GATE', 'RECHAZADO', 'CADUCADO'],
   GATE: ['OMEGA', 'RECHAZADO', 'CADUCADO'],
   OMEGA: ['APROBADO', 'RECHAZADO', 'CADUCADO'],
   APROBADO: ['MERGEADO', 'CADUCADO'],

@@ -1,19 +1,8 @@
 import { useState } from 'react'
-import type { EventPhase, ProposalEvent } from '@domain/repair/proposal-event'
-import type { IconName } from '@domain/shared/icon-name'
+import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { formatMoment } from '../../format/time'
 import { Icon } from '../common/Icon'
-
-const PHASE_ICON: Record<EventPhase, IconName> = {
-  SELECT: 'circle',
-  ANALYZE: 'search',
-  GENERATE: 'wrench',
-  GATE: 'check-circle',
-  OMEGA: 'eye',
-  APPROVE: 'check-circle',
-  MERGE: 'git-merge',
-  EXPIRE: 'x-circle'
-}
+import { iconDe } from './proposal-event-view'
 
 /** Coste del eslabon, solo con lo que se sepa: nada se inventa. */
 function costeDe(event: ProposalEvent): string {
@@ -36,7 +25,7 @@ export function ProposalEventRow({ event }: ProposalEventRowProps): React.JSX.El
   return (
     <div className="border-border/60 border-l pl-2 text-[11px]">
       <div className="flex items-center gap-1.5">
-        <Icon name={PHASE_ICON[event.phase]} size={10} />
+        <Icon name={iconDe(event)} size={10} />
         <span className="text-foreground">{event.phase}</span>
         <span className="text-muted-foreground">{event.actor}</span>
         <span className="flex-1" />

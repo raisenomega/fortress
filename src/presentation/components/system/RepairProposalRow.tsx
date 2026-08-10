@@ -4,6 +4,7 @@ import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { api } from '../../adapters/fortress-api'
 import { ProposalEventList } from './ProposalEventList'
+import { RepairGateButton } from './RepairGateButton'
 import { RepairGenerateButton } from './RepairGenerateButton'
 import { RepairProposalHeader } from './RepairProposalHeader'
 
@@ -39,6 +40,7 @@ export function RepairProposalRow({
       />
       {/* Si la fila esta abierta al terminar la generacion, el libro se refresca. */}
       <RepairGenerateButton proposal={proposal} onDone={() => open && void loadEvents()} />
+      <RepairGateButton proposal={proposal} onDone={() => open && void loadEvents()} />
       {open ? <ProposalEventList events={events} /> : null}
     </div>
   )

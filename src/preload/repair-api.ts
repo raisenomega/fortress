@@ -1,4 +1,5 @@
 import type { GenerateResult } from '@application/repair/generate-types'
+import type { RunGateResult } from '@application/repair/run-gate'
 import type { Project } from '@domain/project/project'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
@@ -27,4 +28,9 @@ export interface RepairApi {
    * minutos). Termina en GENERADO o RECHAZADO; jamas toca el arbol vivo.
    */
   generate(proposalId: string): Promise<GenerateResult>
+  /**
+   * I3 — juicio hermetico del fix (npm ci + typecheck + lint + test:unit
+   * DENTRO del worktree; minutos). GATE si verde; RECHAZADO con autopsia.
+   */
+  runGate(proposalId: string): Promise<RunGateResult>
 }
