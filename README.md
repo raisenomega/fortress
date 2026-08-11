@@ -14,8 +14,9 @@ local: no hay servidores propios ni telemetría.
 
 ## Documentación
 
-- `docs/` — Documentación pública del proyecto FORTRESS. En construcción
-  (Fase 1 del plan documental); empezar por `docs/README.md` cuando exista.
+- `docs/` — Documentación pública del proyecto FORTRESS. Ya contiene
+  `OVERVIEW.md` (qué es, estado honesto) y `ARCHITECTURE.md` (capas, reglas,
+  runtime); el resto en construcción (Fase 1 del plan documental).
 - `templates/` — Plantillas universales que FORTRESS distribuye a otros
   proyectos (CLAUDE.md, ARCHITECTURE.md, framework de seguridad, agentes,
   etc.). NO son documentación de FORTRESS mismo; ver `templates/README.md`.
@@ -29,9 +30,6 @@ local: no hay servidores propios ni telemetría.
   otros proyectos.
 - `COGNITION-LOG.md` — log operativo del sistema: lo leen y escriben el motor
   de escaneo y los agentes en runtime. Path fijo por diseño.
-- `ARCHITECTURE.md` — arquitectura real del proyecto, presente en raíz. Se
-  moverá a `docs/ARCHITECTURE.md` en Fase 1 (tarea 1.2) con ampliación
-  completa.
 - `CONSTITUCION.md` — manifiesto filosófico presente en raíz del proyecto. Su
   ubicación final se decidirá en Fase 1 (tarea 1.7).
 
@@ -95,8 +93,7 @@ Capas DDD con dependencias hacia adentro: `presentation -> application ->
 domain` e `infrastructure -> domain`. El dominio no importa de ninguna otra
 capa y no conoce Electron, React ni SQLite.
 
-Reglas de código y detalle de cada capa: `docs/ARCHITECTURE.md` (por completar
-en Fase 1).
+Reglas de código y detalle de cada capa: `docs/ARCHITECTURE.md`.
 
 ## Dónde vive tu información
 
