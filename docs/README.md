@@ -94,3 +94,7 @@ Documentos por completar (historia y operativa):
   proyectos; no documentan a FORTRESS mismo.
 - `internal/` — documentación interna del operador (gitignored, no visible
   en el repo).
+
+`CONSTITUCION.md` en la raíz del proyecto es un manifiesto interno del
+operador. Su ubicación final (pública, interna, o retirada) se decidirá en
+el capítulo de producción.
