@@ -7,11 +7,12 @@ Center. Para clonar, correr y construir el proyecto, empieza por el
 
 ## Estado de la documentación
 
-A fecha de 2026-08-11, los 5 documentos fundacionales están disponibles
-(overview, arquitectura, principios, glosario y modelo de seguridad). Las
-secciones de flujos end-to-end, agentes, modelo de datos, IPC, decisiones de
-arquitectura y páginas de UI están en construcción, en fases retroactivas del
-plan documental. Este índice se actualiza a medida que llegan.
+A fecha de 2026-08-11, están disponibles los 5 documentos fundacionales
+(overview, arquitectura, principios, glosario y modelo de seguridad) y el
+capítulo completo del motor de auto-reparación (3 flujos, actores, modelo de
+datos, IPC y 30 ADRs). Los flujos del sistema pre-motor, las páginas de UI,
+la historia y los documentos operativos siguen en construcción. Este índice
+se actualiza a medida que llegan.
 
 ## Por dónde empezar
 
@@ -45,17 +46,23 @@ Documentos listos:
   histórico de forma intencional: describe qué protege, no dónde buscar
   debilidades.
 
-Documentos por completar (motor de auto-reparación):
+Documentos del capítulo del motor de auto-reparación (listos):
 
-- `DATA-MODEL.md` — esquema SQLite completo (tablas, índices, migraciones).
-- `IPC.md` — canales IPC agrupados por dominio.
-- `AGENTS.md` — los agentes del sistema.
-- `FLOWS/SELF-REPAIR.md` — la cadena completa del motor: elegir, entender,
-  generar en worktree, gate hermético, revisor semántico.
-- `FLOWS/GRAPH-REINDEX.md` — reindexado automático del Knowledge Graph.
-- `FLOWS/RETRY.md` — reintento explícito de propuestas rechazadas.
-- `DECISIONS/` — ADRs (Architecture Decision Records) del capítulo del
-  motor.
+- **[DATA-MODEL.md](DATA-MODEL.md)** — el esquema SQLite completo: las 19
+  tablas con columnas, índices y migraciones exactas.
+- **[IPC.md](IPC.md)** — los 105 canales IPC por dominio, con contratos y
+  guards por clase.
+- **[AGENTS.md](AGENTS.md)** — los 4 actores del motor (3 agentes LLM + el
+  gate mecánico); se ampliará con los 11 agentes de auditoría.
+- **[FLOWS/SELF-REPAIR.md](FLOWS/SELF-REPAIR.md)** — la cadena completa del
+  motor con ejemplo real y costes.
+- **[FLOWS/GRAPH-REINDEX.md](FLOWS/GRAPH-REINDEX.md)** — el realineado
+  automático del Knowledge Graph.
+- **[FLOWS/RETRY.md](FLOWS/RETRY.md)** — el reintento explícito de
+  propuestas rechazadas.
+- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-030 (motor de
+  auto-reparación); las fases retroactivas añadirán los del sistema
+  pre-motor.
 
 Documentos por completar (sistema pre-motor):
 
