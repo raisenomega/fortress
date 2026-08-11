@@ -39,7 +39,8 @@ export const ICON_NAMES = [
   'send',
   'chevron-right',
   'git-merge',
-  'refresh-cw'
+  'refresh-cw',
+  'rotate-ccw'
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

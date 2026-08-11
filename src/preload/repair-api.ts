@@ -1,4 +1,5 @@
 import type { GenerateResult } from '@application/repair/generate-types'
+import type { RetryResult } from '@application/repair/retry-repair'
 import type { RunGateResult } from '@application/repair/run-gate'
 import type { RunOmegaResult } from '@application/repair/run-omega'
 import type { Project } from '@domain/project/project'
@@ -36,4 +37,9 @@ export interface RepairApi {
   runGate(proposalId: string): Promise<RunGateResult>
   /** I4 — juicio semantico independiente. APROBADO -> OMEGA; VETADO -> RECHAZADO. */
   runOmega(proposalId: string): Promise<RunOmegaResult>
+  /**
+   * I4.2 — reintento explicito de un RECHAZADO de razonamiento (D24):
+   * propuesta NUEVA sobre el HEAD actual con C2 fresco; la vieja no se muta.
+   */
+  retry(proposalId: string): Promise<RetryResult>
 }

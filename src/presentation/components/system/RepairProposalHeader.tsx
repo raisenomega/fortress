@@ -1,29 +1,8 @@
 import type { Finding } from '@domain/project/project'
-import type { Proposal, ProposalState } from '@domain/repair/proposal'
-import type { IconName } from '@domain/shared/icon-name'
+import type { Proposal } from '@domain/repair/proposal'
 import { formatMoment } from '../../format/time'
 import { Icon } from '../common/Icon'
-
-/** Solo los estados que I1 produce llevan glifo propio; el resto cae a circulo. */
-const STATE_ICON: Partial<Record<ProposalState, IconName>> = {
-  ELEGIDO: 'circle',
-  ANALIZADO: 'check-circle',
-  GENERADO: 'git-branch',
-  GATE: 'shield',
-  OMEGA: 'eye',
-  RECHAZADO: 'x-circle',
-  CADUCADO: 'x-circle'
-}
-
-const STATE_TONE: Partial<Record<ProposalState, string>> = {
-  ELEGIDO: 'text-medium',
-  ANALIZADO: 'text-success',
-  GENERADO: 'text-primary',
-  GATE: 'text-success',
-  OMEGA: 'text-primary',
-  RECHAZADO: 'text-critical',
-  CADUCADO: 'text-muted-foreground'
-}
+import { retryLineage, STATE_ICON, STATE_TONE } from './repair-proposal-badges'
 
 interface RepairProposalHeaderProps {
   readonly proposal: Proposal
@@ -43,6 +22,7 @@ export function RepairProposalHeader({
     ? `${finding.severity} ${finding.file}${finding.line === null ? '' : `:${finding.line}`}`
     : `hallazgo ${proposal.findingId.slice(0, 6)}`
   const tone = STATE_TONE[proposal.state] ?? 'text-foreground'
+  const lineage = retryLineage(proposal.analysisReason)
 
   return (
     <button
@@ -55,6 +35,11 @@ export function RepairProposalHeader({
         <Icon name={STATE_ICON[proposal.state] ?? 'circle'} size={12} />
       </span>
       <span className="font-mono text-muted-foreground">{proposal.id.slice(0, 6)}</span>
+      {lineage === null ? null : (
+        <span className="border-border text-muted-foreground shrink-0 rounded border px-1 font-mono text-[10px]">
+          retry de {lineage}
+        </span>
+      )}
       <span className="min-w-0 flex-1 truncate text-foreground">{donde}</span>
       <span className={`shrink-0 ${tone}`} title={proposal.analysisReason ?? ''}>
         {proposal.state}

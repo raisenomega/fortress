@@ -8,6 +8,7 @@ import { RepairGateButton } from './RepairGateButton'
 import { RepairGenerateButton } from './RepairGenerateButton'
 import { RepairOmegaButton } from './RepairOmegaButton'
 import { RepairProposalHeader } from './RepairProposalHeader'
+import { RepairRetryButton } from './RepairRetryButton'
 
 interface RepairProposalRowProps {
   readonly proposal: Proposal
@@ -44,6 +45,7 @@ export function RepairProposalRow({
       <RepairGateButton proposal={proposal} onDone={() => open && void loadEvents()} />
       {/* Refetch incondicional: sin stale closure (leccion I3.1). */}
       <RepairOmegaButton proposal={proposal} onDone={() => void loadEvents()} />
+      <RepairRetryButton proposal={proposal} onDone={() => void loadEvents()} />
       {open ? <ProposalEventList events={events} /> : null}
     </div>
   )
