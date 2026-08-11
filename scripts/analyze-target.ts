@@ -6,8 +6,9 @@ import { selectTarget, type Candidate } from '../src/domain/repair/select-target
 import { analyzeTarget } from '../src/application/repair/analyze-target'
 import { createGraphAnalyst } from '../src/infrastructure/repair/graph-analyst'
 
-const FCC = '/home/jojo/Escritorio/Raisen_FCC/fortress-command-center'
-const CLAUDE = '/home/jojo/.nvm/versions/node/v24.18.0/bin/claude'
+// Runner de dev: se corre desde la raiz del repo, o con FCC_ROOT/CLAUDE_BIN.
+const FCC = process.env.FCC_ROOT ?? process.cwd()
+const CLAUDE = process.env.CLAUDE_BIN ?? 'claude'
 
 const db = new Database(join(homedir(), '.config/fortress-command-center/fortress.db'), {
   readonly: true
