@@ -5,12 +5,19 @@ import {
   GitBranch,
   GitMerge,
   RefreshCw,
+  RotateCcw,
   type LucideIcon
 } from 'lucide-react'
 import type { IconName } from '@domain/shared/icon-name'
 
 type FlowIconName =
-  'chevron-up' | 'chevron-down' | 'chevron-right' | 'git-branch' | 'git-merge' | 'refresh-cw'
+  | 'chevron-up'
+  | 'chevron-down'
+  | 'chevron-right'
+  | 'git-branch'
+  | 'git-merge'
+  | 'refresh-cw'
+  | 'rotate-ccw'
 
 /** Glifos de flujo y navegacion, separados del registro base por el limite de 75. */
 export const FLOW_ICONS: Pick<Record<IconName, LucideIcon>, FlowIconName> = {
@@ -19,5 +26,6 @@ export const FLOW_ICONS: Pick<Record<IconName, LucideIcon>, FlowIconName> = {
   'chevron-right': ChevronRight,
   'git-branch': GitBranch,
   'git-merge': GitMerge,
-  'refresh-cw': RefreshCw
+  'refresh-cw': RefreshCw,
+  'rotate-ccw': RotateCcw
 }

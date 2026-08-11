@@ -31,8 +31,9 @@ function toProposal(r: Row): Proposal {
 
 /** Consultas parametrizadas siempre: nunca se concatena input. */
 export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepository {
+  // analysis_reason SI se persiste al nacer (I4.2: "retry_of=<id>" viaja ahi).
   const insert = db.prepare(`INSERT INTO repair_proposals (${COLS})
-    VALUES (@id, @projectId, @findingId, @baseSha, @state, NULL, NULL, @createdAt, @updatedAt)`)
+    VALUES (@id, @projectId, @findingId, @baseSha, @state, NULL, @analysisReason, @createdAt, @updatedAt)`)
   const update = db.prepare(`UPDATE repair_proposals SET state = @state,
     analysis_verdict = @verdict, analysis_reason = @reason, updated_at = @updatedAt
     WHERE id = @id`)
@@ -44,7 +45,12 @@ export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepo
   const latestReal = db.prepare(LATEST_ANALYZED_REAL)
 
   return {
-    insert: (p) => void insert.run(p),
+    insert: (p) =>
+      void insert.run({
+        id: p.id, projectId: p.projectId, findingId: p.findingId, baseSha: p.baseSha,
+        state: p.state, analysisReason: p.analysisReason ?? null,
+        createdAt: p.createdAt, updatedAt: p.updatedAt
+      }), // prettier-ignore
     update: (id, patch: ProposalPatch) =>
       void update.run({
         id,

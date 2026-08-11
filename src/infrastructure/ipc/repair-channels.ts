@@ -7,5 +7,6 @@ export const REPAIR_CHANNELS = {
   repairEvents: 'repair:events',
   repairGenerate: 'repair:generate',
   repairRunGate: 'repair:run-gate',
-  repairRunOmega: 'repair:run-omega'
+  repairRunOmega: 'repair:run-omega',
+  repairRetry: 'repair:retry'
 } as const
