@@ -25,28 +25,30 @@ out
 *.sqlite3
 
 # ---------------------------------------------------------------------------
-# Documentacion interna de FORTRESS — se queda en el equipo
+# Internal documentation (never commit)
 # ---------------------------------------------------------------------------
-# Estos documentos viven en el directorio padre, fuera de este repo. Se listan
-# igualmente por si alguien copia uno aqui dentro: mas vale que git lo ignore
-# a que acabe en un push.
-FORTRESS*.md
-COGNITION*.md
-AGENTS-SELECTED.md
-DREAMING-CONFIG.md
-DEPLOYMENT-PLAYBOOK.md
-AUDIT-CHECKLIST.md
-# Documentacion interna estrategica: NUNCA sube al repo (regla inmutable). Habla
-# de estrategia, modelo de negocio, estructura y tecnologia = secreto interno.
-CLAUDE.md
-CONSTITUCION.md
-Estado_fortress.md
-Tarea-agente.md
-AUDITORIA-*.md
-# Dossier vivo: PRD de origen, evolucion, leyenda y definiciones. No se commitea.
-DOSSIER/
-fortress-shield*.sh
-fortress-orchestrator*.sh
+# Consolidado 2026-08-10: patrones ANCLADOS a la raiz. Las copias deliberadas
+# del kit universal en templates/ SI se commitean (tarea 0.1); lo que nunca
+# sube es el ejemplar operativo de la raiz y la carpeta internal/ completa.
+/internal/
+/CLAUDE.md
+/COGNITION*.md
+/FORTRESS*.md
+/CONSTITUCION.md
+/Estado_fortress.md
+/Tarea-agente.md
+/AUDITORIA-*.md
+/AGENTS-SELECTED.md
+/DREAMING-CONFIG.md
+/DEPLOYMENT-PLAYBOOK.md
+/AUDIT-CHECKLIST.md
+/DOSSIER/
+/fortress-shield*.sh
+/fortress-orchestrator*.sh
+# Defensa en profundidad: la estrategia y este plan documental se ignoran a
+# CUALQUIER profundidad — jamas existira una copia legitima commiteable.
+FORTRESS-MAPA-MAESTRO-*.md
+FORTRESS-GUIA-DOCUMENTACION-*.md
 
 # ---------------------------------------------------------------------------
 # Salida de los scripts de verificacion

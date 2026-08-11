@@ -16,6 +16,8 @@ files:
   # Documentacion interna: no viaja en el instalable (el asar se extrae con
   # `npx asar extract`). El .gitignore ya la declara "se queda en el equipo".
   - '!DOSSIER/**'
+  # Kit universal: se distribuye a proyectos, no viaja en el binario.
+  - '!templates/**'
   - '!{CLAUDE.md,CONSTITUCION.md,COGNITION-LOG.md,Estado_fortress.md,Tarea-agente.md}'
   - '!AUDITORIA-*.md'
   - '!.ui-preview*.png'
