@@ -158,7 +158,7 @@ Identidad visual unica de la aplicacion:
   un paso humano, deliberado y en frio.
 - La documentacion interna, `templates/` y los artefactos de verificacion se
   excluyen del asar por patron en `electron-builder.yml`.
-- Proceso completo de release: `docs/RELEASE.md` (por completar, Fase 5).
+- Proceso completo de release: `docs/RELEASE.md`.
 
 ## Testing
 
@@ -175,8 +175,7 @@ Identidad visual unica de la aplicacion:
 ## Verificacion
 
 Gate minimo antes de cada commit: `typecheck` + `lint` + `test:unit`; el gate
-completo agrega `npm test`. Proceso de contribucion: `docs/CONTRIBUTING.md`
-(por completar, Fase 5).
+completo agrega `npm test`. Proceso de contribucion: `docs/CONTRIBUTING.md`.
 
 ## Documentacion consumida por el runtime
 

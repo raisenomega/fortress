@@ -85,15 +85,22 @@ Documentos del sistema pre-motor (listos):
 - **[AGENTS.md](AGENTS.md)** — ampliado con los 11 agentes de auditoría
   (además de los 4 del motor).
 
-Documentos por completar (historia y operativa):
+Documentos de historia y operativa (listos):
 
-- `HISTORY.md` — cronología del proyecto.
-- `CHANGELOG.md` — releases.
-- `ROADMAP.md` — próximos bloques técnicos.
-- `CONTRIBUTING.md` — cómo se trabaja en FORTRESS.
-- `TROUBLESHOOTING.md` — problemas conocidos y soluciones.
-- `RELEASE.md` — proceso de release y rebuild.
-- `DEV-SETUP.md` — configuración de un desarrollador desde cero.
+- **[HISTORY.md](HISTORY.md)** — cómo se construyó el proyecto, por temas y
+  con fechas verificadas contra el historial de git.
+- **[CHANGELOG.md](CHANGELOG.md)** — los hitos por fecha, etiquetados por
+  categoría. Sin números de versión mientras no haya release público.
+- **[ROADMAP.md](ROADMAP.md)** — las direcciones próximas, sin fechas de
+  compromiso.
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — las disciplinas del proyecto, qué
+  verifica la máquina y qué depende del criterio, y qué no cambia sin ADR.
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** — problemas conocidos, con
+  síntoma, causa y solución.
+- **[RELEASE.md](RELEASE.md)** — instalación, reconstrucción en frío y el
+  estado real de la distribución.
+- **[DEV-SETUP.md](DEV-SETUP.md)** — poner en marcha un entorno de desarrollo
+  desde cero.
 
 ## Convenciones
 

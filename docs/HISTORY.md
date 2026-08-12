@@ -312,7 +312,5 @@ abordará cuando el corpus esté completo.
   auditoría.
 - [PRINCIPLES](PRINCIPLES.md) — los principios de método que emergieron del
   desarrollo y de la documentación.
-- `docs/CHANGELOG.md` (por completar en Fase 4) — el registro cronológico de
-  cambios por hito.
-- `docs/ROADMAP.md` (por completar en Fase 4) — las direcciones próximas del
-  proyecto.
+- [CHANGELOG](CHANGELOG.md) — el registro cronológico de cambios por hito.
+- [ROADMAP](ROADMAP.md) — las direcciones próximas del proyecto.
