@@ -7,19 +7,26 @@ disciplinas de contribución, ver [CONTRIBUTING](CONTRIBUTING.md).
 ## Requisitos previos
 
 FORTRESS es una aplicación Electron con React y TypeScript, y usa un módulo
-nativo de base de datos (better-sqlite3) que se compila durante la instalación.
+nativo de base de datos (better-sqlite3) que se resuelve durante la instalación.
 Hacen falta:
 
-- **Node.js**, una versión LTS reciente (20 o 22). La versión mínima no está
-  fijada todavía en `package.json`; el toolchain de construcción requiere una
-  LTS actual.
-- **Un toolchain nativo** para compilar el módulo de base de datos, según el
-  sistema operativo:
+- **Node.js**, una versión LTS reciente (20, 22 o 24). La versión mínima no está
+  fijada todavía en `package.json`; definir un campo `engines.node` explícito
+  está abierto a contribución externa (ver [CONTRIBUTING](CONTRIBUTING.md)).
+- **Un toolchain nativo**, solo si tu plataforma lo necesita (ver más abajo),
+  según el sistema operativo:
   - **Linux:** `build-essential` (compilador de C++) y `python3`.
   - **macOS:** las Command Line Tools de Xcode (`xcode-select --install`).
   - **Windows:** Visual Studio Build Tools con la carga de trabajo de escritorio
     de C++, y Python 3. El antiguo paquete `windows-build-tools` está
     descontinuado; no se usa.
+
+**En la práctica, casi nunca se compila nada.** better-sqlite3 distribuye
+binarios precompilados para las plataformas mayoritarias —linux-x64, macOS
+(Intel y ARM), Windows, musl y arm64—, y durante la instalación se selecciona
+el que corresponde de forma automática. El toolchain nativo solo hace falta si
+tu plataforma carece de binario precompilado o si fuerzas la compilación desde
+el código fuente.
 
 ## Clonar e instalar
 
@@ -29,9 +36,10 @@ cd fortress
 npm install
 ```
 
-Al terminar `npm install`, un paso posterior recompila automáticamente el módulo
-nativo de base de datos contra la versión de Electron del proyecto. Si ese paso
-falla, casi siempre es porque falta el toolchain nativo del sistema operativo
+Al terminar `npm install`, un paso posterior resuelve el módulo nativo de base
+de datos contra la versión de Electron del proyecto: toma el binario
+precompilado que corresponde a tu plataforma o, si no existe, lo compila. Si ese
+paso falla, casi siempre es porque falta el toolchain nativo del sistema
 (ver Requisitos).
 
 ## Arrancar en desarrollo
@@ -81,7 +89,7 @@ npm run build:win       # Windows
 
 La salida queda fuera del repositorio. El procedimiento de reconstruir e
 instalar el binario ya instalado tiene sus propios cuidados; ver
-[RELEASE](RELEASE.md) (por completar en la fase de documentación operativa).
+[RELEASE](RELEASE.md).
 
 ## Estructura del proyecto
 
@@ -114,11 +122,10 @@ clone.
 - **`npm install` falla al compilar el módulo de base de datos** → falta el
   toolchain nativo; instala el de tu sistema operativo (ver Requisitos).
 - **La aplicación no arranca en desarrollo** → verifica que tu Node.js es una
-  LTS reciente (20 o 22).
+  LTS reciente (20, 22 o 24).
 
 Para problemas más allá de la puesta a punto, ver
-[TROUBLESHOOTING](TROUBLESHOOTING.md) (por completar en la fase de documentación
-operativa).
+[TROUBLESHOOTING](TROUBLESHOOTING.md).
 
 ## Referencias
 
