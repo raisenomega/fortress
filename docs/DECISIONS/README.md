@@ -21,12 +21,19 @@ Cronológica por orden de descubrimiento en las sesiones, no por
 importancia. **Nunca se re-numera un ADR.** Si una decisión es superada, se
 marca "Superada por ADR-X" en su estado; el archivo original permanece.
 
-ADR-001 a ADR-030: capítulo del motor de auto-reparación. ADR-031 a
-ADR-057: sistema pre-motor (arquitectura, motor de IA, agentes de
-auditoría, grafo, loop autónomo, ciclo de capacidades, génesis y doctrina
-transversal). Ambos son registro retroactivo del 2026-08-11. Las fechas de
-los ADRs pre-motor son aproximadas (fase del proyecto), consistentes con la
-línea temporal.
+Los ADRs se agrupan en tres bloques por su origen:
+
+- **ADR-001 a ADR-030** — capítulo del motor de auto-reparación.
+- **ADR-031 a ADR-057** — sistema pre-motor (arquitectura, motor de IA,
+  agentes de auditoría, grafo, loop autónomo, ciclo de capacidades, génesis y
+  doctrina transversal).
+- **ADR-058 en adelante** — decisiones contemporáneas: se escriben **antes**
+  del cambio que las aplica, según la regla de [CONTRIBUTING](../CONTRIBUTING.md).
+
+Los dos primeros bloques son registro **retroactivo** del 2026-08-11: se
+escribieron después de las decisiones que registran. Las fechas de los ADRs
+pre-motor son aproximadas (fase del proyecto), consistentes con la línea
+temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 
 ## Índice
 
@@ -89,6 +96,7 @@ línea temporal.
 | [ADR-055](adr-055-configuracion-guiada-envelope.md) | Configuración guiada con envelope de documentos de gobierno | 2026-08-06 | Aceptada | Configuración |
 | [ADR-056](adr-056-cero-telemetria.md) | Cero telemetría, doctrina contractual | 2026-08-04 | Aceptada | Doctrina |
 | [ADR-057](adr-057-puerto-codeagent-frontera-proveedor.md) | Puerto CodeAgent como frontera única con el proveedor | 2026-08-06 | Aceptada | Arquitectura |
+| [ADR-058](adr-058-capas-de-exclusion-explicitas.md) | Cada capa de exclusión declara su propia lista | 2026-08-12 | Aceptada | Empaquetado |
 
 ## Referencias
 

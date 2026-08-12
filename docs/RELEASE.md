@@ -19,11 +19,16 @@ existan, serán hitos registrados en [CHANGELOG](CHANGELOG.md).
 
 ## Qué incluye el binario
 
-El binario contiene la aplicación y solo la aplicación. Los documentos internos
-del operador y el kit de plantillas que FORTRESS distribuye a otros proyectos
-quedan fuera del instalable a propósito: no viajan en él. El módulo nativo de
-base de datos sí viaja, empaquetado de forma que pueda cargarse en tiempo de
-ejecución.
+El instalable lleva la aplicación. La carpeta interna del operador y el kit de
+plantillas que FORTRESS distribuye a otros proyectos quedan excluidos del
+empaquetado y no viajan en él. El módulo nativo de base de datos sí viaja,
+empaquetado de forma que pueda cargarse en tiempo de ejecución.
+
+Que un archivo esté excluido del repositorio no implica que esté excluido del
+instalable: son capas distintas y cada una declara la suya
+([ADR-058](DECISIONS/adr-058-capas-de-exclusion-explicitas.md)). Por eso la
+exclusión no se da por supuesta: al reconstruir el binario se extrae el paquete
+y se comprueba que las carpetas internas no están dentro, antes de instalarlo.
 
 ## Instalación en Linux
 

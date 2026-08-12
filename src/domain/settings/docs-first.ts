@@ -30,7 +30,7 @@ export const DOCS_FIRST_SECURITY =
 export const DOCS_FIRST_STRUCTURAL =
   'DOCS FIRST (estructural): Antes de una decision estructural (arquitectura, ' +
   'capa, dependencia), consulta docs/ARCHITECTURE.md (DDD + capas) y ' +
-  'docs/PRINCIPLES.md. Los 57 ADRs en docs/DECISIONS/ registran decisiones ' +
+  'docs/PRINCIPLES.md. Los ADRs en docs/DECISIONS/ registran decisiones ' +
   'previas firmadas; consulta el indice antes de proponer cambios estructurales.'
 
 /**

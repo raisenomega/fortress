@@ -287,23 +287,48 @@ y explica, construido con la misma disciplina de inventario y verificación con
 que se construyó el sistema. El sistema no solo funciona; puede reconstruirse
 desde su documentación.
 
+## El día siguiente: integración y armonización (2026-08-12)
+
+El plan documental se cerró al día siguiente con los documentos operativos —cómo
+contribuir, cómo montar un entorno, cómo resolver problemas y cómo distribuir—.
+Con el corpus completo quedaba la pieza que lo justificaba: que el propio sistema
+supiera que existe. Los agentes recibieron una referencia a `docs/` en su prompt,
+distinta según el trabajo de cada uno: quien decide dónde va un cambio consulta la
+arquitectura y las decisiones firmadas; quien juzga seguridad, el modelo de
+amenazas. No se les copió la doctrina al prompt: se les enseñó dónde vive y cómo
+pedirla.
+
+Esa integración destapó las deudas que el propio corpus había ido acumulando, y
+saldarlas ocupó el resto del día: comentarios del código que citaban como fuente
+un archivo que no viaja en el repositorio, referencias que anunciaban como
+pendientes documentos ya escritos, una alerta de dependencias, y un defecto por el
+que los avisos idénticos se apilaban en la interfaz en lugar de agruparse —
+arreglado en el almacén de avisos, de modo que valga para todos los emisores y no
+solo para el que lo destapó.
+
+El último hallazgo llegó al reconstruir el binario. La verificación del paquete
+descubrió que un patrón de exclusión obsoleto —nombraba una carpeta que se había
+renombrado tiempo atrás— dejaba pasar la carpeta interna del operador al
+instalable, pese a estar correctamente excluida del repositorio. Se corrigió, y la
+lección quedó firmada como decisión arquitectónica: cada capa de exclusión declara
+su propia lista y ninguna hereda de otra. Ver
+[DECISIONS/](DECISIONS/adr-058-capas-de-exclusion-explicitas.md) y
+[RELEASE](RELEASE.md).
+
 ## Presente
 
-FORTRESS está escribiendo su Fase 4 documental —esta historia, el registro
-cronológico de cambios y el mapa de direcciones próximas— para completar la
-referencia narrativa y prospectiva del proyecto. La Fase 5, con los documentos
-operativos de contribución, resolución de problemas, release y puesta a punto
-de un entorno de desarrollo, queda pendiente a continuación.
+El plan documental está completo y los agentes conocen la documentación que
+explica el sistema en el que trabajan. Las deudas que la integración destapó
+quedaron saldadas.
 
-Más allá del plan documental, queda una integración final: que los agentes del
-sistema lean su propia documentación de forma consciente, cerrando el círculo
-entre lo que FORTRESS es y lo que FORTRESS sabe de sí misma. Esa pieza se
-abordará cuando el corpus esté completo.
+Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
+convertir el auditor en un entorno de desarrollo asistido completo, y preparar el
+proyecto para publicarse. Sin fechas de compromiso, como todo aquí.
 
 ## Referencias
 
-- [DECISIONS/](DECISIONS/README.md) — los cincuenta y siete registros de
-  decisión arquitectónica (ADR-001 a ADR-057) que sostienen esta historia.
+- [DECISIONS/](DECISIONS/README.md) — los cincuenta y ocho registros de
+  decisión arquitectónica (ADR-001 a ADR-058) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),

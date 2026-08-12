@@ -53,7 +53,7 @@ archivos:
   rápido: qué es FORTRESS y cómo está construido.
 - [PRINCIPLES](PRINCIPLES.md) — los diecinueve principios de método firmados.
 - [FLOWS/](FLOWS/SELF-REPAIR.md) — los flujos operativos por dominio.
-- [DECISIONS/](DECISIONS/README.md) — las cincuenta y siete decisiones
+- [DECISIONS/](DECISIONS/README.md) — las cincuenta y ocho decisiones
   arquitectónicas.
 - [PAGES/](PAGES/README.md) — las vistas de la interfaz.
 - [HISTORY](HISTORY.md), [CHANGELOG](CHANGELOG.md) y [ROADMAP](ROADMAP.md) — de

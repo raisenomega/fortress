@@ -10,7 +10,7 @@ Center. Para clonar, correr y construir el proyecto, empieza por el
 Al cierre de Fase 3 (2026-08-11):
 
 - 18 documentos públicos (9 de nivel superior + 9 flujos en `FLOWS/`), más
-  las carpetas `DECISIONS/` (57 ADRs + índice) y `PAGES/` (15 vistas +
+  las carpetas `DECISIONS/` (58 ADRs + índice) y `PAGES/` (15 vistas +
   índice).
 - Fases 0, 1, 2 y 3 del plan documental cerradas: los 5 documentos
   fundacionales, el capítulo completo del motor de auto-reparación y el
@@ -68,7 +68,7 @@ Documentos del capítulo del motor de auto-reparación (listos):
   automático del Knowledge Graph.
 - **[FLOWS/RETRY.md](FLOWS/RETRY.md)** — el reintento explícito de
   propuestas rechazadas.
-- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-057: el capítulo del
+- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-058: el capítulo del
   motor de auto-reparación (001-030) y el del sistema pre-motor (031-057).
 
 Documentos del sistema pre-motor (listos):
