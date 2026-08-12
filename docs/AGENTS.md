@@ -201,6 +201,13 @@ telemetría es común (ver Trazabilidad).
 - **Cuándo se activa:** ON por defecto; post-escaneo y "¿qué aprendimos?".
 - **Salida esperada:** patrones con causa raíz y prevención, hacia el
   COGNITION-LOG del proyecto.
+- **Los dos bucles de aprendizaje:** el sistema aprende por dos lazos
+  distintos que no se mezclan. El bucle TÉCNICO es la autoverificación del
+  agente tras editar (corre su allowlist de typecheck, lint y tests y se
+  corrige sin humano); cierra calidad en cada cambio. El bucle COGNITIVO es
+  la reflexión: tras cada escaneo el MOTOR —no el LLM— reescribe de forma
+  determinista el COGNITION-LOG; persiste memoria entre sesiones. Decisión de
+  fondo: `docs/DECISIONS/adr-047-dos-bucles-de-aprendizaje.md`.
 
 #### Build Error Resolver (`build-error-resolver`)
 
@@ -250,6 +257,21 @@ Los cuatro pilares de su carta (descritos por intención):
 Y una regla operativa dura de su carta: **grafo-primero, no negociable** —
 navega el código por el Knowledge Graph y abre archivos enteros solo si el
 grafo no basta.
+
+Tres funciones se le REHUSARON a propósito, porque lo darían poder para
+violar justo lo que vigila:
+
+- **No un toggle que miente:** su estado refleja lo que hace, no una casilla
+  decorativa que diga una cosa mientras el sistema hace otra.
+- **No el pensamiento inferido:** reporta discrepancias observables contra el
+  filesystem, nunca los motivos supuestos de nadie (la intención no se prueba).
+- **No el veredicto infalible:** sus juicios se re-ejecutan y auditan; ninguno
+  es final por autoridad.
+
+Y la regla que fija su alcance: **OMEGA solo puede FRENAR; quien promueve es
+el gate por riesgo** — puede vetar y bloquear el push, pero jamás promueve
+una capacidad ni aprueba en solitario (`docs/DECISIONS/adr-046-sentinel-omega-carta-y-noes.md`,
+`docs/FLOWS/CAPABILITIES.md`).
 
 - **Cuándo se activa:** ON por defecto; post-escaneo y bajo demanda.
 - **Salida esperada:** vetos respaldados por evidencia (incluido el bloqueo
@@ -304,10 +326,10 @@ WHERE project_id = ? AND kind = 'scan' AND at >= ?;
 ## Referencias
 
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md) — la familia 1 en acción.
-- `docs/FLOWS/SCAN.md` (por completar) — la familia 2 en acción.
+- [FLOWS/SCAN](FLOWS/SCAN.md) — la familia 2 en acción.
 - [SECURITY-MODEL](SECURITY-MODEL.md) — el modelo de amenazas.
 - [GLOSSARY](GLOSSARY.md) — términos de ambas familias.
 - [DATA-MODEL](DATA-MODEL.md) — agent_runs, proposal_events y las
   definiciones de agentes auto-creados.
-- [PRINCIPLES](PRINCIPLES.md) — principios 6 y 10 (y el futuro registro
-  formal de "al agente no se le cree por fe").
+- [PRINCIPLES](PRINCIPLES.md) — principios 6 y 10, y el 18 ("al agente no se
+  le cree por fe"), registro formal de la regla que estos actores encarnan.
