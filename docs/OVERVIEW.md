@@ -101,10 +101,10 @@ backlog de auto-mejora · seed de refuerzo · bucle de génesis con topes.
   independiente, 6 ejes, el motor recomputa el veredicto).
 - ✔ Cadena end-to-end probada en vivo: el espécimen 675723c5 recorrió
   C2 → C3 → Gate → OMEGA APROBADO con evidencia completa en su libro de vida.
-- ◑ Reintento explícito de propuestas rechazadas (I4.2): implementado con
-  gate verde, esperando firma humana.
-- ○ I5: firma humana + merge local del fix aprobado (siguiente incremento).
-- ○ I6: retiro del loop autónomo viejo en favor del motor disciplinado.
+- ◑ Reintento explícito de propuestas rechazadas: implementado, con gate
+  verde y esperando firma humana.
+- ○ Firma humana y merge local del fix aprobado (siguiente incremento).
+- ○ Retiro del loop autónomo viejo en favor del motor disciplinado.
 
 **Parcial (◑):** ciclo de vida de capacidades (falta auto-promoción de lo
 reversible) · agente auto-creado (v1: redacción humana) · auto-creación
@@ -114,9 +114,10 @@ elevación) · presentación unificada del score de calidad general.
 **Pendiente (○):** crear un proyecto desde cero a nivel producción (modo
 Construir) · pipeline de despliegue desde el chat · instalador universal.
 
-**Documentación:** en construcción activa. `docs/` arranca con este OVERVIEW;
-el resto (arquitectura, principios, modelo de seguridad, glosario, flujos,
-ADRs, historia) llega en las Fases 1-5 del plan documental interno
+**Documentación:** el grueso de `docs/` ya está: los documentos
+fundacionales, el capítulo del motor de auto-reparación y el del sistema
+pre-motor (flujos, vistas y ADRs). Quedan la historia y los documentos
+operativos, en fases posteriores del plan documental interno
 (`internal/FORTRESS-GUIA-DOCUMENTACION-*.md`).
 
 ## Próximos pasos
@@ -130,6 +131,3 @@ técnico público de los próximos bloques.
 - Para principios: `docs/PRINCIPLES.md`
 - Para modelo de seguridad: `docs/SECURITY-MODEL.md`
 - Para glosario: `docs/GLOSSARY.md`
-
-(Todos por completar en las tareas siguientes de Fase 1; los enlaces se
-activan a medida que existan.)

@@ -21,9 +21,12 @@ Cronológica por orden de descubrimiento en las sesiones, no por
 importancia. **Nunca se re-numera un ADR.** Si una decisión es superada, se
 marca "Superada por ADR-X" en su estado; el archivo original permanece.
 
-ADR-001 a ADR-030: capítulo del motor de auto-reparación (registro
-retroactivo, 2026-08-11). ADR-031 en adelante: sistema pre-motor (por
-completar en una fase posterior).
+ADR-001 a ADR-030: capítulo del motor de auto-reparación. ADR-031 a
+ADR-057: sistema pre-motor (arquitectura, motor de IA, agentes de
+auditoría, grafo, loop autónomo, ciclo de capacidades, génesis y doctrina
+transversal). Ambos son registro retroactivo del 2026-08-11. Las fechas de
+los ADRs pre-motor son aproximadas (fase del proyecto), consistentes con la
+línea temporal.
 
 ## Índice
 
@@ -59,6 +62,33 @@ completar en una fase posterior).
 | [ADR-028](adr-028-reintento-solo-razonamiento.md) | Reintento solo por razones de razonamiento | 2026-08-08 | Aceptada | Reintento |
 | [ADR-029](adr-029-reintento-propuesta-nueva.md) | El reintento crea una propuesta nueva con vínculo | 2026-08-08 | Aceptada | Reintento |
 | [ADR-030](adr-030-reintento-analisis-fresco.md) | El reintento corre análisis fresco, sin cachear el viejo | 2026-08-08 | Aceptada | Reintento |
+| [ADR-031](adr-031-ddd-estricto-dependencias-hacia-adentro.md) | DDD estricto con dependencias hacia adentro | 2026-08-01 | Aceptada | Arquitectura |
+| [ADR-032](adr-032-reglas-duras-verificadas-por-eslint.md) | Reglas duras verificadas por la máquina | 2026-08-01 | Aceptada | Arquitectura |
+| [ADR-033](adr-033-cli-headless-en-vez-del-sdk.md) | Claude Code CLI en vez del SDK | 2026-08-01 | Aceptada | Motor de IA |
+| [ADR-034](adr-034-safestorage-para-la-api-key.md) | safeStorage para la API key, nunca al renderer | 2026-08-01 | Aceptada | Seguridad |
+| [ADR-035](adr-035-tema-omega-identidad-visual-unica.md) | Tema OMEGA como identidad visual única | 2026-08-03 | Aceptada | UI |
+| [ADR-036](adr-036-sqlite-modular-migraciones-aditivas.md) | Persistencia SQLite modular, migraciones aditivas | 2026-08-03 | Aceptada | Persistencia |
+| [ADR-037](adr-037-ipc-agregador-central-unico.md) | IPC agregador central único, cero fire-and-forget | 2026-08-03 | Aceptada | IPC |
+| [ADR-038](adr-038-aislamiento-estricto-por-proyecto.md) | Aislamiento estricto por proyecto | 2026-08-03 | Aceptada | Arquitectura |
+| [ADR-039](adr-039-escaner-score-determinista-push-bloqueado.md) | Escáner con score determinista y push bloqueado por CRITICAL | 2026-08-04 | Aceptada | Escaneo |
+| [ADR-040](adr-040-modo-supervisado-autonomo-degradacion.md) | Modo supervisado/autónomo con degradación por petición | 2026-08-04 | Aceptada | Chat |
+| [ADR-041](adr-041-autoverificacion-allowlist-minimo.md) | Autoverificación del agente con allowlist mínimo | 2026-08-04 | Aceptada | Chat |
+| [ADR-042](adr-042-sin-dependencias-nuevas-sin-justificacion.md) | Sin dependencias nuevas sin justificación | 2026-08-04 | Aceptada | Arquitectura |
+| [ADR-043](adr-043-conectores-mcp-cable-vivo-al-spawn.md) | Conectores MCP con cable vivo al spawn | 2026-08-05 | Aceptada | Chat |
+| [ADR-044](adr-044-workspace-trust-por-proyecto.md) | Workspace Trust, confianza por proyecto, default false | 2026-08-05 | Aceptada | Seguridad |
+| [ADR-045](adr-045-agentes-catalogo-de-datos.md) | Los 11 agentes de auditoría como catálogo de datos | 2026-08-05 | Aceptada | Agentes |
+| [ADR-046](adr-046-sentinel-omega-carta-y-noes.md) | Sentinel Omega, su carta y sus "no" deliberados | 2026-08-05 | Aceptada | Agentes |
+| [ADR-047](adr-047-dos-bucles-de-aprendizaje.md) | Los dos bucles de aprendizaje | 2026-08-05 | Aceptada | Sistema |
+| [ADR-048](adr-048-knowledge-graph-via-mcp.md) | Knowledge Graph vía MCP, grafo primero | 2026-08-06 | Aceptada | Grafo |
+| [ADR-049](adr-049-loop-autonomo-pre-motor.md) | Loop autónomo pre-motor | 2026-08-06 | Aceptada | Motor autónomo |
+| [ADR-050](adr-050-backlog-auto-mejora.md) | Backlog de auto-mejora con enrutamiento de observaciones | 2026-08-07 | Aceptada | Auto-mejora |
+| [ADR-051](adr-051-ciclo-capacidades-dos-ejes.md) | Ciclo de capacidades: fase y madurez como dos ejes | 2026-08-07 | Aceptada | Capacidades |
+| [ADR-052](adr-052-gate-por-kind.md) | Gate por kind: reversible avanza, agente exige humano | 2026-08-07 | Aceptada | Capacidades |
+| [ADR-053](adr-053-agente-como-dato.md) | Agente-como-dato, no código generado | 2026-08-07 | Aceptada | Capacidades |
+| [ADR-054](adr-054-bucle-de-genesis.md) | Bucle de génesis con topes obligatorios | 2026-08-08 | Aceptada | Génesis |
+| [ADR-055](adr-055-configuracion-guiada-envelope.md) | Configuración guiada con envelope de documentos de gobierno | 2026-08-06 | Aceptada | Configuración |
+| [ADR-056](adr-056-cero-telemetria.md) | Cero telemetría, doctrina contractual | 2026-08-04 | Aceptada | Doctrina |
+| [ADR-057](adr-057-puerto-codeagent-frontera-proveedor.md) | Puerto CodeAgent como frontera única con el proveedor | 2026-08-06 | Aceptada | Arquitectura |
 
 ## Referencias
 

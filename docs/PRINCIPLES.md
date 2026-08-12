@@ -176,6 +176,40 @@ Formato uniforme: **Contexto** (el error que lo parió) / **Regla** /
 - **Ejemplo:** un nombre arbitrario envuelto por el agente (p. ej.
   `../../.bashrc`) jamás se escribe: solo los documentos de la allowlist.
 
+## 17. Documentar el estado presente y el estado de diseño por separado
+
+- **Contexto:** al documentar la firma del motor, la doctrina del eslabón
+  (verificaciones previas, merge `--no-ff`, push humano) se describió como si
+  ya viviera integrada en la aplicación, cuando hoy la firma es un merge
+  manual del operador en su terminal. Describir el diseño como presente
+  miente sobre lo que un ingeniero encontrará al abrir la app.
+- **Regla:** documentar cómo quisiéramos que fuera el sistema es diseño;
+  documentar cómo es hoy es honestidad. Los dos coexisten y se declaran por
+  separado; ninguno oculta al otro. Cada capacidad lleva su estado presente
+  explícito cuando difiere del diseño.
+- **Ejemplo:** el flujo de auto-reparación describe la doctrina completa de
+  la firma Y declara aparte que hoy esa firma es un merge manual del
+  operador, con la integración en la app en construcción. La distinción
+  entre bucle diseñado y bucle presente se aplica con más fuerza en
+  `docs/FLOWS/LOOP-VIEJO.md`; su decisión de fondo es
+  `docs/DECISIONS/adr-049-loop-autonomo-pre-motor.md`.
+
+## 18. Al agente no se le cree por fe
+
+- **Contexto:** un agente LLM reporta su propio consumo de tokens, dice qué
+  archivos tocó y emite un veredicto. Confiar en esos tres reportes deja al
+  sistema a merced de un desliz — o una alucinación — del modelo.
+- **Regla:** lo que el agente afirma sobre sí mismo se verifica con una
+  fuente dura, no con su palabra. La factura de tokens sale del JSON real de
+  la herramienta (y si no se puede leer, queda vacía, no se inventa); los
+  archivos tocados los detecta el motor con `git diff`, no el reporte del
+  agente; el veredicto global lo recomputa el motor desde los ejes.
+- **Ejemplo:** los cuatro actores del motor operan bajo esta regla
+  (`docs/AGENTS.md`); Sentinel Omega la lleva al extremo con
+  evidencia-o-silencio: sin archivo:línea comprobable, el puntaje es nulo, no
+  un número inventado
+  (`docs/DECISIONS/adr-046-sentinel-omega-carta-y-noes.md`).
+
 ## Sobre este documento
 
 Este archivo crece. Cada principio nuevo se añade con su contexto de origen
@@ -184,5 +218,5 @@ evoluciona. La numeración sigue el orden de incorporación al documento (cada
 contexto lleva su origen); no implica importancia.
 
 Relacionados: `docs/OVERVIEW.md` (qué es FORTRESS), `docs/ARCHITECTURE.md`
-(las reglas duras que varios principios alimentan), `docs/GLOSSARY.md` (por
-completar).
+(las reglas duras que varios principios alimentan), `docs/GLOSSARY.md` (los
+términos que estos principios usan).

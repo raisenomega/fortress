@@ -86,7 +86,11 @@ entiende no es quien escribe.
 
 ### claude-omega
 Actor del revisor semántico independiente del motor (no confundir con
-[Sentinel OMEGA](#sentinel-omega), el agente 11 de auditoría).
+[Sentinel OMEGA](#sentinel-omega), el agente 11 de auditoría). Aparece como
+`omega` en el libro de vida (`proposal_events.actor`): es la etiqueta corta
+de telemetría, no otro actor — el nombre conceptual completo es claude-omega.
+Es el único actor del motor cuya etiqueta se acorta; analyst, generator y
+gate se registran con su nombre completo.
 
 ### CLAUDE.md
 Doctrina de agente. Dos ubicaciones con roles distintos: en la raíz del repo

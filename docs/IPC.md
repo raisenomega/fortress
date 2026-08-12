@@ -82,7 +82,13 @@ Chat por proyecto que actúa de verdad, con streaming.
 | `chat:send` | R/R | SendMessageInput → Result<SendMessageOutput> | guardRun; modo autónomo exige proyecto confiable; bloqueo hasta CONFIGURADO |
 | `chat:stop` | R/R | projectId → number (procesos matados, kill de grupo) | — |
 | `chat:chunk` | PUSH | ChatChunk (streaming del agente) | — |
-| `chat:progress` | PUSH | ChatProgress (qué toca cada herramienta) | — |
+| `chat:progress` | PUSH | ChatProgress { index, total, tokens, costUsd } — medidor | — |
+
+`chat:progress` es un MEDIDOR de avance del workflow, no un flujo de eventos
+de estado: empuja `{ index, total, tokens, costUsd }` (qué herramienta toca
+en curso y cuánto se lleva gastado), no señales `started`/`done`/`error`. El
+cierre de la conversación llega por la resolución de la Promise de
+`chat:send`; el aborto, por `chat:stop`.
 
 ### scan
 
@@ -269,7 +275,7 @@ El panel del meta-auditor y el Libro de la Vida.
 Este dominio expone SOLO push de estado: no hay invocaciones
 renderer → main del loop autónomo pre-motor (su encendido va por
 `projects:set-loop-enabled`, con su guard). Su comportamiento se documenta
-en `docs/FLOWS/LOOP-VIEJO.md` (por completar). El loop autónomo está
+en `docs/FLOWS/LOOP-VIEJO.md`. El loop autónomo está
 planificado para retiro en un incremento futuro, en favor del motor
 disciplinado.
 

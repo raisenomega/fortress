@@ -135,7 +135,7 @@ Identidad visual unica de la aplicacion:
 - Migraciones aditivas: `hasColumn` + `ALTER TABLE`, sin ORM. Las columnas
   nuevas llevan default para que el esquema viejo siga siendo valido.
 - Todas las consultas parametrizadas; nunca se concatena input.
-- Detalle completo del esquema: `docs/DATA-MODEL.md` (por completar, Fase 2).
+- Detalle completo del esquema: `docs/DATA-MODEL.md`.
 
 ## Comunicacion entre procesos (IPC)
 
@@ -148,7 +148,7 @@ Identidad visual unica de la aplicacion:
   (`infrastructure/ipc/register-handlers.ts`).
 - Las llamadas a la API de Claude salen del proceso main; la API key (cifrada
   con `safeStorage`) jamas cruza el bridge.
-- Detalle completo de canales: `docs/IPC.md` (por completar, Fase 2).
+- Detalle completo de canales: `docs/IPC.md`.
 
 ## Distribucion
 
@@ -199,6 +199,6 @@ Tres documentos viven donde viven porque el CODIGO los consume ahi:
 ## Documentos relacionados
 
 - Vision y estado: `docs/OVERVIEW.md`
-- Glosario: `docs/GLOSSARY.md` (por completar)
-- Modelo de seguridad: `docs/SECURITY-MODEL.md` (por completar)
-- Principios de metodo: `docs/PRINCIPLES.md` (por completar)
+- Glosario: `docs/GLOSSARY.md`
+- Modelo de seguridad: `docs/SECURITY-MODEL.md`
+- Principios de metodo: `docs/PRINCIPLES.md`

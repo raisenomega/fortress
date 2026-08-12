@@ -121,5 +121,4 @@ anterior y se reclama — nada queda "corriendo" para siempre.
 - [GLOSSARY](../GLOSSARY.md) — términos: MCP, decideReindex, worktree.
 - [PRINCIPLES](../PRINCIPLES.md) — principio 11 (la cola es de proceso, no
   persistida).
-- `docs/DATA-MODEL.md` (por completar) — columnas de proyectos relacionadas
-  con el índice.
+- `docs/DATA-MODEL.md` — columnas de proyectos relacionadas con el índice.
