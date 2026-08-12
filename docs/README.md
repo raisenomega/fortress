@@ -7,13 +7,20 @@ Center. Para clonar, correr y construir el proyecto, empieza por el
 
 ## Estado de la documentación
 
-A fecha de 2026-08-11, están disponibles los 5 documentos fundacionales
-(overview, arquitectura, principios, glosario y modelo de seguridad), el
-capítulo completo del motor de auto-reparación (3 flujos, actores, modelo de
-datos, IPC y 30 ADRs) y el capítulo del sistema pre-motor (6 flujos, las 15
-vistas de la interfaz y los agentes de auditoría). Siguen en construcción
-los ADRs previos al motor, la historia y los documentos operativos. Este
-índice se actualiza a medida que llegan.
+Al cierre de Fase 3 (2026-08-11):
+
+- 18 documentos públicos (9 de nivel superior + 9 flujos en `FLOWS/`), más
+  las carpetas `DECISIONS/` (57 ADRs + índice) y `PAGES/` (15 vistas +
+  índice).
+- Fases 0, 1, 2 y 3 del plan documental cerradas: los 5 documentos
+  fundacionales, el capítulo completo del motor de auto-reparación y el
+  capítulo completo del sistema pre-motor.
+- Pendientes: Fase 4 (`HISTORY`, `CHANGELOG`, `ROADMAP`) y Fase 5
+  (`CONTRIBUTING`, `TROUBLESHOOTING`, `RELEASE`, `DEV-SETUP`).
+- La integración con el sistema —el indexado consciente de `docs/` por los
+  agentes— queda para una fase posterior.
+
+Este índice se actualiza a medida que llegan los documentos.
 
 ## Por dónde empezar
 
@@ -36,7 +43,7 @@ Documentos listos:
   reales del código, las reglas duras verificadas por ESLint, base de datos,
   IPC, distribución, testing y qué documentos consume el runtime (y por qué
   viven donde viven).
-- **[PRINCIPLES.md](PRINCIPLES.md)** — 16 principios de método, cada uno
+- **[PRINCIPLES.md](PRINCIPLES.md)** — 18 principios de método, cada uno
   nacido de un error real, con contexto, regla y ejemplo. El documento crece
   y nunca borra un principio.
 - **[GLOSSARY.md](GLOSSARY.md)** — 61 términos en orden alfabético con
@@ -53,17 +60,16 @@ Documentos del capítulo del motor de auto-reparación (listos):
   tablas con columnas, índices y migraciones exactas.
 - **[IPC.md](IPC.md)** — los 105 canales IPC por dominio, con contratos y
   guards por clase.
-- **[AGENTS.md](AGENTS.md)** — los 4 actores del motor (3 agentes LLM + el
-  gate mecánico); se ampliará con los 11 agentes de auditoría.
+- **[AGENTS.md](AGENTS.md)** — las dos familias: los 4 actores del motor (3
+  agentes LLM + el gate mecánico) y los 11 agentes de auditoría.
 - **[FLOWS/SELF-REPAIR.md](FLOWS/SELF-REPAIR.md)** — la cadena completa del
   motor con ejemplo real y costes.
 - **[FLOWS/GRAPH-REINDEX.md](FLOWS/GRAPH-REINDEX.md)** — el realineado
   automático del Knowledge Graph.
 - **[FLOWS/RETRY.md](FLOWS/RETRY.md)** — el reintento explícito de
   propuestas rechazadas.
-- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-030 (motor de
-  auto-reparación); las fases retroactivas añadirán los del sistema
-  pre-motor.
+- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-057: el capítulo del
+  motor de auto-reparación (001-030) y el del sistema pre-motor (031-057).
 
 Documentos del sistema pre-motor (listos):
 
@@ -78,10 +84,6 @@ Documentos del sistema pre-motor (listos):
   Incluye un README con la sección sobre el cruce de nombres Terminal/Chat.
 - **[AGENTS.md](AGENTS.md)** — ampliado con los 11 agentes de auditoría
   (además de los 4 del motor).
-
-Documentos por completar (sistema pre-motor):
-
-- `DECISIONS/` — ADRs adicionales previos al motor.
 
 Documentos por completar (historia y operativa):
 
