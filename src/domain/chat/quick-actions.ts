@@ -1,6 +1,10 @@
 import type { IconName } from '../shared/icon-name'
 
-/** Atajos del chat: mapean a los comandos documentados en CLAUDE.md. */
+/**
+ * Atajos del chat, visibles sobre el input de la Terminal (ver
+ * docs/PAGES/terminal.md). Su texto es lo que activa el router por palabras
+ * clave, no un comando aparte (ver docs/AGENTS.md).
+ */
 export interface QuickAction {
   readonly id: string
   readonly iconName: IconName
