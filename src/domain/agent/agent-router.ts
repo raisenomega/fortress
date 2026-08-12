@@ -1,6 +1,6 @@
 import type { AgentId } from './agent'
 
-/** Palabras que activan cada agente, segun la tabla de CLAUDE.md. */
+/** Palabras que activan cada agente. El despacho por intencion: docs/AGENTS.md. */
 const TRIGGERS: ReadonlyArray<readonly [AgentId, readonly string[]]> = [
   // Primero: si lo nombras explicitamente, manda OMEGA (pero solo si esta activo).
   ['sentinel-omega', ['sentinel omega', 'omega', 'auditar agentes', 'audita los agentes']],
