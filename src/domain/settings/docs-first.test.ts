@@ -28,7 +28,7 @@ describe('docsFirstFor', () => {
 
   it('el trabajo tactico se queda en la general, aunque el grafo lo trate como estructural', () => {
     // code-reviewer y tdd-guide son STRUCTURAL para el grafo: miran estructura
-    // del codigo. Pero un null sin verificar no se resuelve leyendo 57 ADRs.
+    // del codigo. Pero un null sin verificar no se resuelve leyendo los ADRs.
     for (const id of ['code-reviewer', 'tdd-guide', 'cognition'] as const) {
       expect(docsFirstFor(id)).toBe(DOCS_FIRST_GENERAL)
     }

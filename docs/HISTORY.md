@@ -302,8 +302,8 @@ abordará cuando el corpus esté completo.
 
 ## Referencias
 
-- [DECISIONS/](DECISIONS/README.md) — los cincuenta y siete registros de
-  decisión arquitectónica (ADR-001 a ADR-057) que sostienen esta historia.
+- [DECISIONS/](DECISIONS/README.md) — los cincuenta y ocho registros de
+  decisión arquitectónica (ADR-001 a ADR-058) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),
