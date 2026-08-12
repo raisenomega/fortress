@@ -40,7 +40,7 @@ linter. Un cambio que las rompa no pasa el gate.
 
 Las capas y las reglas de dependencia están en
 [ARCHITECTURE](ARCHITECTURE.md); los principios de método que sostienen todo
-esto, en [PRINCIPLES](PRINCIPLES.md) —dieciocho, cada uno nacido de un error
+esto, en [PRINCIPLES](PRINCIPLES.md) —diecinueve, cada uno nacido de un error
 real—.
 
 ## Cómo leer el corpus documental
@@ -51,7 +51,7 @@ archivos:
 - [README](README.md) — el índice y el estado de la documentación.
 - [OVERVIEW](OVERVIEW.md) y [ARCHITECTURE](ARCHITECTURE.md) — el contexto
   rápido: qué es FORTRESS y cómo está construido.
-- [PRINCIPLES](PRINCIPLES.md) — los dieciocho principios de método firmados.
+- [PRINCIPLES](PRINCIPLES.md) — los diecinueve principios de método firmados.
 - [FLOWS/](FLOWS/SELF-REPAIR.md) — los flujos operativos por dominio.
 - [DECISIONS/](DECISIONS/README.md) — las cincuenta y siete decisiones
   arquitectónicas.
@@ -99,9 +99,13 @@ llegan como PR directo: primero la decisión con su ADR, después el código.
 ## Mensajes de commit
 
 Formato de commits convencionales: `tipo(alcance): descripción breve`. Los
-tipos son `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf` y
-`security`. Cada commit hace una sola cosa; el mensaje describe qué cambió y por
-qué, nunca "cambios varios".
+tipos son `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`,
+`security` y `system`. Cada commit hace una sola cosa; el mensaje describe qué
+cambió y por qué, nunca "cambios varios".
+
+`system` cubre los cambios en la infraestructura del sistema: los prompts base
+de los agentes, la configuración del grafo y el cableado de `docs/` en los
+agentes. Su rama usa el prefijo `system/`, no `docs/`.
 
 ## Reportar un problema
 

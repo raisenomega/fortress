@@ -1,9 +1,11 @@
+import { docsFirstFor } from '../settings/docs-first'
 import type { Agent } from './agent'
 
 /**
- * Reglas comunes a los diez agentes, sacadas de CLAUDE.md. Van en el prompt de
- * cada uno porque el CLI los ejecuta como subagentes independientes: lo que no
- * este aqui, no lo saben.
+ * Reglas comunes a los agentes de auditoria (Sentinel Omega + 10). Fuente
+ * publica: docs/PRINCIPLES.md. Van copiadas en el prompt de cada uno porque el
+ * CLI los ejecuta como subagentes independientes: lo que no este aqui, no lo
+ * saben. La referencia a docs/ que se anade abajo les dice donde esta el resto.
  */
 const RULES = [
   'Reglas que no se negocian:',
@@ -31,7 +33,7 @@ export function agentPrompt(agent: Agent): string {
       `Tu responsabilidad: ${agent.purpose}`
     ].join('\n')
 
-  return [cabecera, '', RULES].join('\n')
+  return [cabecera, '', RULES, '', docsFirstFor(agent.id)].join('\n')
 }
 
 export interface AgentDefinition {

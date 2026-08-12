@@ -210,6 +210,28 @@ Formato uniforme: **Contexto** (el error que lo parió) / **Regla** /
   un número inventado
   (`docs/DECISIONS/adr-046-sentinel-omega-carta-y-noes.md`).
 
+## 19. El COGNITION-LOG es fuente interna de auditoría, no de documentación pública
+
+- **Contexto:** al escribir la guía pública de resolución de problemas, la
+  fuente natural parecía ser el COGNITION-LOG del proyecto — cientos de líneas
+  de patrones donde el sistema registra sus propios hallazgos de seguridad al
+  auditarse a sí mismo. Publicarlos habría convertido la guía en un mapa de
+  dónde buscar debilidad si un guard se rompe, aunque los hallazgos ya
+  estuvieran corregidos.
+- **Regla:** los patrones del COGNITION-LOG documentan hallazgos internos de
+  seguridad y aprendizajes operativos; su contenido no cruza a documentos
+  públicos. La documentación pública se construye de fuentes públicas
+  verificables —flujos documentados, configuración trackeada, comportamiento
+  observable por el usuario— y publica solo la CLASE de protección: qué se
+  protege, no dónde atacar (la doctrina de `docs/SECURITY-MODEL.md`, y la
+  misma base conceptual del principio 6).
+- **Ejemplo:** `docs/TROUBLESHOOTING.md` se construyó con problemas
+  observables por el usuario —síntoma, causa, solución— verificados contra los
+  flujos públicos y el script de instalación, sin una sola entrada tomada del
+  COGNITION-LOG. El log sigue donde debe: como memoria interna del proyecto
+  que el escaneo reescribe (`docs/FLOWS/SCAN.md`) y una vista de solo lectura
+  muestra (`docs/PAGES/cognition.md`).
+
 ## Sobre este documento
 
 Este archivo crece. Cada principio nuevo se añade con su contexto de origen

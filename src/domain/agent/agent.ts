@@ -1,4 +1,4 @@
-/** Identificadores de los agentes especializados definidos en CLAUDE.md. */
+/** Identificadores de los agentes de auditoria. Fuente publica: docs/AGENTS.md. */
 export const AGENT_IDS = [
   'security-reviewer',
   'code-reviewer',
