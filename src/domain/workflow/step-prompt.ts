@@ -1,5 +1,6 @@
 import { REPORT_CONTRACT } from '../scan/report-contract'
 import { SCAN_RULES } from '../scan/scan-checklist'
+import { docsFirstFor } from '../settings/docs-first'
 import { graphFirstFor } from '../settings/graph-first'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
@@ -52,6 +53,8 @@ export function buildStepPrompt(step: WorkflowStep, context: StepContext): strin
     MODE_INSTRUCTION[context.mode],
     '',
     graphFirstFor(step.agentId),
+    '',
+    docsFirstFor(step.agentId),
     '',
     describeKnown(context.known),
     '',

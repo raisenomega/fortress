@@ -1,3 +1,4 @@
+import { DOCS_FIRST_GENERAL } from '../settings/docs-first'
 import { GRAPH_FIRST } from '../settings/graph-first'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
@@ -30,6 +31,8 @@ export function buildChatPrompt(question: string, ctx: ChatContext): string {
     MODE_INSTRUCTION[ctx.mode],
     '',
     GRAPH_FIRST,
+    '',
+    DOCS_FIRST_GENERAL,
     '',
     describeKnown(ctx.known),
     '',
