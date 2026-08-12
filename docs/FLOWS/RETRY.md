@@ -169,7 +169,5 @@ Casos donde conviene investigar en lugar de reintentar mecánicamente:
   reabren) y 11 (la cola es de proceso).
 - [GLOSSARY](../GLOSSARY.md) — RECHAZADO, supersede, extinción honesta,
   base_sha.
-- `docs/AGENTS.md` (por completar) — los agentes que corren en cada
-  eslabón.
-- `docs/DATA-MODEL.md` (por completar) — la tabla de propuestas y el libro
-  de vida.
+- `docs/AGENTS.md` — los agentes que corren en cada eslabón.
+- `docs/DATA-MODEL.md` — la tabla de propuestas y el libro de vida.

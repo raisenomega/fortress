@@ -67,7 +67,7 @@ Todos corren en **sandbox**: una carpeta aislada del proyecto real, en modo
 sin edición (el agente PROPONE acciones pero no toca el filesystem), con la
 confianza desactivada (no puede escapar del sandbox). Cero riesgo sobre el
 proyecto vivo del operador. El bucle continuo de episodios automáticos es la
-génesis, con su propio flujo ([GENESIS](GENESIS.md), por completar).
+génesis, con su propio flujo ([GENESIS](GENESIS.md)).
 
 ### Gate por kind — tres tipos, tres reglas
 
@@ -250,7 +250,7 @@ WHERE capability_id = ? ORDER BY created_at DESC;
 
 - [DATA-MODEL](../DATA-MODEL.md) — capabilities, capability_episodes,
   capability_notes y las definiciones de agente auto-creado.
-- [FLOWS/GENESIS](GENESIS.md) (por completar) — el bucle continuo de
+- [FLOWS/GENESIS](GENESIS.md) — el bucle continuo de
   episodios automáticos.
 - [AGENTS](../AGENTS.md) — los 11 agentes del sistema y cómo se distinguen
   del agente-dato.

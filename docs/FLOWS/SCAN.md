@@ -237,8 +237,7 @@ WHERE project_id = ? ORDER BY at DESC LIMIT 10;
   de memoria), scans, quality_scans, dismissals.
 - [FLOWS/SELF-REPAIR](SELF-REPAIR.md) — qué pasa con un hallazgo elegible
   cuando el motor lo toma.
-- `docs/FLOWS/POSTURE.md` (por completar) — la superficie externa es otro
-  flujo.
+- [FLOWS/POSTURE](POSTURE.md) — la superficie externa es otro flujo.
 - [PRINCIPLES](../PRINCIPLES.md) — principios 6 y 10; el score honesto por
   expediente nació como decisión de arquitectura
   ([ADR-001](../DECISIONS/adr-001-score-honesto-por-expediente-active.md)).

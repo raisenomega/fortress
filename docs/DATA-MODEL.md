@@ -537,5 +537,4 @@ GROUP BY severity;
 - [FLOWS/GRAPH-REINDEX](FLOWS/GRAPH-REINDEX.md) — quién opera las columnas
   graph_* de projects.
 - [GLOSSARY](GLOSSARY.md) — términos.
-- `docs/IPC.md` (por completar) — los canales que leen y escriben estas
-  tablas.
+- `docs/IPC.md` — los canales que leen y escriben estas tablas.
