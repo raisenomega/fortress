@@ -240,7 +240,24 @@ el humano puede pulsar "Reintentar". El reintento crea una propuesta NUEVA
 con `base_sha` fresco (el HEAD actual) y un vínculo textual a la previa; la
 vieja queda inmutable. Los rechazos TÉCNICOS (presupuesto, timeouts,
 worktree perdido) no ofrecen reintento: repetir sin arreglar la causa daría
-lo mismo. Detalle del flujo: `docs/FLOWS/RETRY.md` (por completar).
+lo mismo. Detalle del flujo: `docs/FLOWS/RETRY.md`.
+
+## Ubicación en la UI
+
+El motor no es solo un flujo de fondo: el operador lo conduce desde una
+vista. Vive en **Auto-mejora FORTRESS** (nombre interno del view `sistema`),
+en su sección **Motor de reparación** — la tercera de tres secciones
+apiladas, bajo el backlog de observaciones y las capacidades.
+
+Cada propuesta se muestra con su estado de la máquina y los botones del
+eslabón que toca, visibles solo en el estado correcto: generar el fix, correr
+el gate, correr el revisor OMEGA y reintentar una propuesta rechazada por
+razones de razonamiento. La firma del merge sigue la doctrina de arriba: hoy
+es un merge manual del operador — no hay un botón de firma en la app todavía
+(la integración está en construcción; ver `docs/PRINCIPLES.md`, principio
+17).
+
+Detalle de la vista: `docs/PAGES/auto-mejora.md`.
 
 ## Referencias
 
@@ -251,10 +268,10 @@ lo mismo. Detalle del flujo: `docs/FLOWS/RETRY.md` (por completar).
   11 (la cola es de proceso), 12 (los terminales no se re-abren).
 - `docs/GLOSSARY.md` — todos los términos de este flujo.
 - `docs/SECURITY-MODEL.md` — modelo de amenazas.
-- `docs/FLOWS/GRAPH-REINDEX.md` (por completar) — cómo el grafo se mantiene
-  alineado con el HEAD.
-- `docs/FLOWS/RETRY.md` (por completar) — flujo de reintento explícito.
-- `docs/AGENTS.md` (por completar) — claude-analyst, claude-generator,
-  claude-omega y el corredor del gate.
-- `docs/DATA-MODEL.md` (por completar) — tablas de propuestas y del libro
-  de vida.
+- `docs/FLOWS/GRAPH-REINDEX.md` — cómo el grafo se mantiene alineado con el
+  HEAD.
+- `docs/FLOWS/RETRY.md` — flujo de reintento explícito.
+- `docs/AGENTS.md` — claude-analyst, claude-generator, claude-omega y el
+  corredor del gate.
+- `docs/DATA-MODEL.md` — tablas de propuestas y del libro de vida.
+- `docs/PAGES/auto-mejora.md` — la vista que opera este motor.
