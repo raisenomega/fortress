@@ -99,9 +99,13 @@ llegan como PR directo: primero la decisión con su ADR, después el código.
 ## Mensajes de commit
 
 Formato de commits convencionales: `tipo(alcance): descripción breve`. Los
-tipos son `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf` y
-`security`. Cada commit hace una sola cosa; el mensaje describe qué cambió y por
-qué, nunca "cambios varios".
+tipos son `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`,
+`security` y `system`. Cada commit hace una sola cosa; el mensaje describe qué
+cambió y por qué, nunca "cambios varios".
+
+`system` cubre los cambios en la infraestructura del sistema: los prompts base
+de los agentes, la configuración del grafo y el cableado de `docs/` en los
+agentes. Su rama usa el prefijo `system/`, no `docs/`.
 
 ## Reportar un problema
 
