@@ -14,8 +14,10 @@ const DOCS = 'docs/'
 export const DOCS_FIRST_GENERAL =
   `DOCS FIRST: El proyecto tiene documentacion publica en ${DOCS}. Consulta ` +
   'docs/PRINCIPLES.md (19 principios firmados del proyecto) cuando una decision ' +
-  'toque disciplina o convencion. Los archivos .md en docs/ estan indexados en ' +
-  "el grafo; pidelos con file_pattern '*.md' cuando el dominio del hallazgo lo requiera."
+  'toque disciplina o convencion. Los flujos operativos end-to-end estan en ' +
+  'docs/FLOWS/ (9 flujos: escaneo, chat, motor, capacidades, genesis y otros). ' +
+  'Los archivos .md en docs/ estan indexados en el grafo; pidelos con ' +
+  "file_pattern '*.md' cuando el dominio del hallazgo lo requiera."
 
 /** Seguridad: el modelo de amenazas y la superficie externa ya estan escritos. */
 export const DOCS_FIRST_SECURITY =
@@ -32,11 +34,31 @@ export const DOCS_FIRST_STRUCTURAL =
   'previas firmadas; consulta el indice antes de proponer cambios estructurales.'
 
 /**
- * La referencia documental segun el rol del agente. Por defecto la general: la
- * variante de seguridad solo donde el veredicto ES de seguridad, para no
- * mandar a todos a leer el modelo de amenazas cuando no viene al caso.
+ * Quienes deciden DONDE va un cambio, no solo si esta bien: sin los ADRs
+ * pueden borrar o "simplificar" algo que es deliberado y esta firmado.
+ */
+const STRUCTURAL: ReadonlySet<AgentId> = new Set([
+  'planner',
+  'refactor-cleaner',
+  'code-simplifier'
+])
+
+/** Quienes emiten juicio sobre lo que se protege o sobre lo que se publica. */
+const SECURITY: ReadonlySet<AgentId> = new Set([
+  'security-reviewer',
+  'opensource-sanitizer',
+  'sentinel-omega'
+])
+
+/**
+ * La referencia documental segun el rol del agente. El eje NO es el mismo que
+ * el del grafo: alli se clasifica por COMO se consulta el codigo; aqui, por QUE
+ * documentacion necesita la decision. Por eso code-reviewer y tdd-guide, que el
+ * grafo trata como estructurales, se quedan en la general: su trabajo es tactico
+ * (un bug, un test) y los ADRs solo les anadirian ruido.
  */
 export function docsFirstFor(agentId: AgentId): string {
-  if (agentId === 'security-reviewer') return DOCS_FIRST_SECURITY
+  if (SECURITY.has(agentId)) return DOCS_FIRST_SECURITY
+  if (STRUCTURAL.has(agentId)) return DOCS_FIRST_STRUCTURAL
   return DOCS_FIRST_GENERAL
 }

@@ -28,6 +28,9 @@
     "verify:scan": "npm run build && electron --no-sandbox scripts/scan-verification.cjs",
     "backfill:proposal-events": "node scripts/backfill-events-i1.5.ts"
   },
+  "overrides": {
+    "nanoid": "^3.3.17"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
     "@electron-toolkit/preload": "^3.0.2",

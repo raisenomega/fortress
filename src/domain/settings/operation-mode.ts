@@ -1,5 +1,5 @@
 /**
- * Modo de operacion del agente (ver CLAUDE.md raiz).
+ * Modo de operacion del agente (ver docs/FLOWS/CHAT.md).
  * - supervisado: propone cambios y espera aprobacion.
  * - autonomo: aplica cambios y reporta resultados.
  */

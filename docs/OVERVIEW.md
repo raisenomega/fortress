@@ -122,8 +122,8 @@ operativos, en fases posteriores del plan documental interno
 
 ## Próximos pasos
 
-Ver `docs/ROADMAP.md` (por crear en Fase 4 del plan documental): roadmap
-técnico público de los próximos bloques.
+Ver [ROADMAP](ROADMAP.md): las direcciones próximas del proyecto, sin fechas de
+compromiso.
 
 ## Documentos siguientes
 

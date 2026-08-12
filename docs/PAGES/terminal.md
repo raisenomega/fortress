@@ -37,6 +37,12 @@ Dos zonas apiladas:
 - **Diálogo de proyecto:** desde aquí se abre el alta de proyecto (elegir,
   conectar o crear) — ver [Nuevo proyecto](nuevo-proyecto.md).
 - **Input del chat:** escribe la intención; envía al motor de chat.
+- **Atajos:** cinco botones sobre el input que envían una petición
+  predefinida — revisar seguridad, limpiar código, buscar bugs, escribir
+  tests y comprobar si está listo para producción. El texto de cada uno es lo
+  que activa el router por palabras clave (ver [AGENTS](../AGENTS.md), "Cómo
+  se despachan"). No se muestran mientras el proyecto está en la entrevista
+  de configuración.
 - **Botón de envío:** dispara el turno; deshabilitado si el proyecto está
   pendiente de configuración.
 - **Toggle de modo (supervisado / autónomo):** el modo autónomo exige

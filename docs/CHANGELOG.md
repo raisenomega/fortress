@@ -145,4 +145,4 @@ Origen del proyecto.
 - [HISTORY](HISTORY.md) — la narrativa completa del proyecto.
 - [DECISIONS/](DECISIONS/README.md) — las cincuenta y siete decisiones
   arquitectónicas (ADR-001 a ADR-057).
-- `docs/ROADMAP.md` (por completar en Fase 4) — las direcciones próximas.
+- [ROADMAP](ROADMAP.md) — las direcciones próximas.
