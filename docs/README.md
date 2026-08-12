@@ -8,11 +8,12 @@ Center. Para clonar, correr y construir el proyecto, empieza por el
 ## Estado de la documentación
 
 A fecha de 2026-08-11, están disponibles los 5 documentos fundacionales
-(overview, arquitectura, principios, glosario y modelo de seguridad) y el
+(overview, arquitectura, principios, glosario y modelo de seguridad), el
 capítulo completo del motor de auto-reparación (3 flujos, actores, modelo de
-datos, IPC y 30 ADRs). Los flujos del sistema pre-motor, las páginas de UI,
-la historia y los documentos operativos siguen en construcción. Este índice
-se actualiza a medida que llegan.
+datos, IPC y 30 ADRs) y el capítulo del sistema pre-motor (6 flujos, las 15
+vistas de la interfaz y los agentes de auditoría). Siguen en construcción
+los ADRs previos al motor, la historia y los documentos operativos. Este
+índice se actualiza a medida que llegan.
 
 ## Por dónde empezar
 
@@ -64,13 +65,22 @@ Documentos del capítulo del motor de auto-reparación (listos):
   auto-reparación); las fases retroactivas añadirán los del sistema
   pre-motor.
 
+Documentos del sistema pre-motor (listos):
+
+- **[FLOWS/SCAN.md](FLOWS/SCAN.md)**, **[FLOWS/CHAT.md](FLOWS/CHAT.md)**,
+  **[FLOWS/LOOP-VIEJO.md](FLOWS/LOOP-VIEJO.md)**,
+  **[FLOWS/POSTURE.md](FLOWS/POSTURE.md)**,
+  **[FLOWS/CAPABILITIES.md](FLOWS/CAPABILITIES.md)**,
+  **[FLOWS/GENESIS.md](FLOWS/GENESIS.md)** — los flujos end-to-end del
+  sistema pre-motor.
+- **[PAGES/](PAGES/README.md)** — las 15 vistas y superficies transversales
+  de la interfaz, documentadas por etiqueta visible con mapeo interno.
+  Incluye un README con la sección sobre el cruce de nombres Terminal/Chat.
+- **[AGENTS.md](AGENTS.md)** — ampliado con los 11 agentes de auditoría
+  (además de los 4 del motor).
+
 Documentos por completar (sistema pre-motor):
 
-- `FLOWS/SCAN.md`, `FLOWS/CHAT.md`, `FLOWS/LOOP-VIEJO.md`,
-  `FLOWS/POSTURE.md`, `FLOWS/CAPABILITIES.md`, `FLOWS/GENESIS.md` — los
-  flujos end-to-end restantes.
-- `PAGES/` — una entrada por vista de la interfaz.
-- `AGENTS.md` consolidado — los 11 agentes originales más los del motor.
 - `DECISIONS/` — ADRs adicionales previos al motor.
 
 Documentos por completar (historia y operativa):
