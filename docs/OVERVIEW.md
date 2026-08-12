@@ -101,10 +101,10 @@ backlog de auto-mejora · seed de refuerzo · bucle de génesis con topes.
   independiente, 6 ejes, el motor recomputa el veredicto).
 - ✔ Cadena end-to-end probada en vivo: el espécimen 675723c5 recorrió
   C2 → C3 → Gate → OMEGA APROBADO con evidencia completa en su libro de vida.
-- ◑ Reintento explícito de propuestas rechazadas (I4.2): implementado con
-  gate verde, esperando firma humana.
-- ○ I5: firma humana + merge local del fix aprobado (siguiente incremento).
-- ○ I6: retiro del loop autónomo viejo en favor del motor disciplinado.
+- ◑ Reintento explícito de propuestas rechazadas: implementado, con gate
+  verde y esperando firma humana.
+- ○ Firma humana y merge local del fix aprobado (siguiente incremento).
+- ○ Retiro del loop autónomo viejo en favor del motor disciplinado.
 
 **Parcial (◑):** ciclo de vida de capacidades (falta auto-promoción de lo
 reversible) · agente auto-creado (v1: redacción humana) · auto-creación
