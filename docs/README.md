@@ -43,7 +43,7 @@ Documentos listos:
   reales del código, las reglas duras verificadas por ESLint, base de datos,
   IPC, distribución, testing y qué documentos consume el runtime (y por qué
   viven donde viven).
-- **[PRINCIPLES.md](PRINCIPLES.md)** — 18 principios de método, cada uno
+- **[PRINCIPLES.md](PRINCIPLES.md)** — 19 principios de método, cada uno
   nacido de un error real, con contexto, regla y ejemplo. El documento crece
   y nunca borra un principio.
 - **[GLOSSARY.md](GLOSSARY.md)** — 61 términos en orden alfabético con
