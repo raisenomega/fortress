@@ -27,6 +27,11 @@ export interface RepairProposalRepository {
    * curso; si muriera (terminal), el hallazgo vuelve a la cola (ADR-059).
    */
   findLiveFindingIds(projectId: string): readonly string[]
+  /**
+   * TODAS las propuestas vivas, de todos los proyectos: la reconciliacion de
+   * arranque recorre la BD entera, no un proyecto concreto (ADR-059).
+   */
+  listLive(): readonly Proposal[]
   /** R1 (supersede): la ANALIZADO(REAL) mas reciente de ese hallazgo, o null. */
   findLatestAnalyzedRealByFinding(projectId: string, findingId: string): Proposal | null
 }

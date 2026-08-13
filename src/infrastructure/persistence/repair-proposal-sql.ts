@@ -16,6 +16,12 @@ export const liveFindingIds = (terminales: readonly string[]): string =>
   `SELECT DISTINCT finding_id FROM repair_proposals
    WHERE project_id = ? AND state NOT IN (${terminales.map(() => '?').join(', ')})`
 
+/** Las propuestas vivas de todos los proyectos, en orden de nacimiento. */
+export const liveProposals = (terminales: readonly string[]): string =>
+  `SELECT ${COLS} FROM repair_proposals
+   WHERE state NOT IN (${terminales.map(() => '?').join(', ')})
+   ORDER BY created_at`
+
 /** R1 (supersede): la ANALIZADO(REAL) mas reciente de un hallazgo manda. */
 export const LATEST_ANALYZED_REAL = `SELECT ${COLS} FROM repair_proposals
   WHERE project_id = @projectId AND finding_id = @findingId

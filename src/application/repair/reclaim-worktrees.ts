@@ -1,4 +1,5 @@
 import { isTerminal } from '@domain/repair/proposal'
+import { RECLAIM_REASONS } from '@domain/repair/reclaim-reasons'
 import type { AppContext } from '../context'
 import { cursorFrom, emitOutcome } from './record-generate-events'
 
@@ -43,8 +44,9 @@ export async function reclaimWorktrees(
         cleaned += 1
       } else if (proposal.state === 'ANALIZADO') {
         const cursor = cursorFrom(await ctx.eventLog.list(id))
-        ctx.repairProposals.update(id, { state: 'RECHAZADO', analysisVerdict: proposal.analysisVerdict ?? 'REAL', analysisReason: 'orphan_before_generate', updatedAt: deps.now() }) // prettier-ignore
-        await emitOutcome(ctx.eventLog, cursor, id, 'RECHAZADO', 'orphan_before_generate', {}, deps.now()) // prettier-ignore
+        const motivo = RECLAIM_REASONS.ORPHAN_BEFORE_GENERATE
+        ctx.repairProposals.update(id, { state: 'RECHAZADO', analysisVerdict: proposal.analysisVerdict ?? 'REAL', analysisReason: motivo, updatedAt: deps.now() }) // prettier-ignore
+        await emitOutcome(ctx.eventLog, cursor, id, 'RECHAZADO', motivo, {}, deps.now())
         await remove()
         reclaimed += 1
       }
