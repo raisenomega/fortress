@@ -9,6 +9,7 @@ import { getAppContext } from '../persistence/app-context'
 import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
+import { isFortressRepo } from '../system/self-project'
 import { buildChatEngines } from './chat-engines'
 import { IPC } from './channels'
 
@@ -57,7 +58,8 @@ export function registerChatSendHandler(): void {
         input,
         chunkSender(event, input.projectId),
         progressSender(event, input.projectId),
-        () => isCancelled(input.projectId)
+        () => isCancelled(input.projectId),
+        isFortressRepo
       )
     } catch (error) {
       return err(describeAssistantError(error))

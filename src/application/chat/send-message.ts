@@ -1,12 +1,11 @@
 import type { StepProgress } from '../workflow/step-progress'
 import type { Assistant } from '@domain/chat/assistant'
 import type { CodeAgent } from '@domain/chat/code-agent'
-import { effectiveMode } from '@domain/settings/operation-mode'
+import { effectiveMode, SELF_REPO_SUPERVISED } from '@domain/settings/operation-mode'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
-import { recordChatRun } from '../telemetry/record-chat-run'
-import { persistQuality } from '../scan/persist-quality'
 import { chooseEngine } from './choose-engine'
+import { finishTurn } from './finish-turn'
 import { persistTurn } from './persist-message'
 import { produceReply } from './produce-reply'
 import { runConfigurationTurn } from './run-configuration-turn'
@@ -19,7 +18,9 @@ export async function sendMessage(
   input: SendMessageInput,
   onChunk: (delta: string) => void,
   onStep: (progress: StepProgress) => void,
-  isCancelled: () => boolean
+  isCancelled: () => boolean,
+  /** Lo inyecta la infra (leer package.json del disco es su terreno). */
+  isSelfRepo: (path: string) => boolean = () => false
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
@@ -30,8 +31,11 @@ export async function sendMessage(
     return runConfigurationTurn(context, codeAgent, project, input, onChunk)
   }
 
-  // El modo degrada a supervisado si la peticion toca un area protegida.
-  const mode = effectiveMode(input.mode, input.prompt)
+  // Degrada a supervisado si la peticion toca un area protegida O si el
+  // objetivo es el propio repo: el codigo propio no se aplica sin revision.
+  const selfRepo = isSelfRepo(project.path)
+  const mode = effectiveMode(input.mode, input.prompt, selfRepo)
+  const aviso = selfRepo && input.mode === 'autonomo' ? SELF_REPO_SUPERVISED : ''
 
   const chosen = chooseEngine(codeAgent, assistant, project)
   if (!chosen.ok) return err(chosen.error)
@@ -50,14 +54,8 @@ export async function sendMessage(
     onChunk
   })
 
-  // El chip del mensaje es el primer agente que participo de verdad.
-  const agentId = outcome.agents[0] ?? null
-  const stored = persistTurn(context, project.id, meta, 'assistant', outcome.text, agentId)
+  const stored = finishTurn({ context, project, meta, outcome, aviso, startedAt, prompt: input.prompt }) // prettier-ignore
   if (!stored.ok) return err(stored.error)
-
-  recordChatRun(context, { project, agentId, engine, outcome, startedAt, prompt: input.prompt })
-  // Auditoria integral -> fija la CALIDAD GENERAL del proyecto (la tarjeta la muestra).
-  if (outcome.comprehensive) persistQuality(context, project, outcome.findings)
 
   return ok({ user: user.value, assistant: stored.value, engine })
 }

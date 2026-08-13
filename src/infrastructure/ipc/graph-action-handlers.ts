@@ -1,6 +1,6 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { usesApiKey } from '@application/settings/read-auth-source'
-import type { GraphVerify } from '@domain/graph/graph-actions'
+import type { GraphAb, GraphVerify } from '@domain/graph/graph-actions'
 import type { GraphStatus } from '@domain/graph/graph-status'
 import { err, type Result } from '@domain/shared/result'
 import { abGraph } from '../graph/ab-graph'
@@ -30,6 +30,22 @@ async function handleInstall(event: IpcMainInvokeEvent, id: string): Promise<Res
   }
 }
 
+/**
+ * El A/B lanza DOS corridas del CLI. Sin el guard evadia el tope diario, el
+ * carril de concurrencia y el circuit breaker de contaminacion: tres redes que
+ * el resto de los canales que gastan si respetan.
+ */
+async function handleAb(id: string, question: string): Promise<Result<GraphAb>> {
+  const context = getAppContext()
+  const busy = guardRun(context, id)
+  if (busy !== null) return err(busy)
+  try {
+    return await abGraph(context, id, question)
+  } finally {
+    endRun(id)
+  }
+}
+
 function handleVerify(id: string): Promise<GraphVerify> {
   const context = getAppContext()
   const project = context.projects.findById(id)
@@ -41,7 +57,5 @@ function handleVerify(id: string): Promise<GraphVerify> {
 export function registerGraphActionHandlers(): void {
   ipcMain.handle(IPC.graphInstall, (event, id: string) => handleInstall(event, id))
   ipcMain.handle(IPC.graphVerify, (_event, id: string) => handleVerify(id))
-  ipcMain.handle(IPC.graphAb, (_event, id: string, question: string) =>
-    abGraph(getAppContext(), id, question)
-  )
+  ipcMain.handle(IPC.graphAb, (_event, id: string, question: string) => handleAb(id, question))
 }

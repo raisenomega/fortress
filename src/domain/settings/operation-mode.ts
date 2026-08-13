@@ -1,3 +1,5 @@
+import { isProtectedArea } from './protected-areas'
+
 /**
  * Modo de operacion del agente (ver docs/FLOWS/CHAT.md).
  * - supervisado: propone cambios y espera aprobacion.
@@ -16,36 +18,36 @@ export function parseOperationMode(value: string | null): OperationMode {
     : DEFAULT_OPERATION_MODE
 }
 
+export { isProtectedArea, PROTECTED_AREAS } from './protected-areas'
+
 /**
- * Areas que nunca se tocan en modo autonomo: al detectarlas el agente vuelve a
- * supervisado. Cubre ES + EN porque el operador escribe en espanol y el freno
- * fallaba en silencio: "autenticacion" no contiene "auth". Sobre-degradar es
- * seguro (como mucho pide permiso de mas); infra-degradar es el peligro. Los
- * terminos van sin tildes; la comparacion normaliza acentos antes de buscar.
+ * Lo que se le dice al operador cuando el objetivo es el propio repo. No es un
+ * rechazo: leer y analizar FORTRESS desde el Terminal es util y no arriesga
+ * nada. Lo que no puede pasar es que APLIQUE.
  */
-// Por categoria (cada linea): auth/sesion · pagos · bd/permisos · secretos/cifrado.
-const PROTECTED_WORDS =
-  'auth autenticacion autorizacion login sesion credencial contrasena password ' +
-  'payment pago cobro facturacion tarjeta checkout ' +
-  'rls politica permiso ' +
-  'security seguridad secret secreto token clave cifrad encript encrypt'
+export const SELF_REPO_SUPERVISED =
+  '\n\n---\nSobre el propio repo de FORTRESS trabajo en supervisado: leo, analizo ' +
+  'y propongo, pero no aplico. Los cambios en el codigo propio pasan por el motor ' +
+  'de Auto-mejora (worktree aislado + gate + revisor + firma humana).'
 
-export const PROTECTED_AREAS = PROTECTED_WORDS.split(' ')
-
-/** Quita tildes/diacriticos: "autenticacion" debe casar con "autenticación". */
-function stripAccents(text: string): string {
-  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-}
-
-export function isProtectedArea(text: string): boolean {
-  const lowered = stripAccents(text.toLowerCase())
-  return PROTECTED_AREAS.some((area) => lowered.includes(area))
-}
-
-/** El modo efectivo degrada a supervisado si la peticion toca un area protegida. */
-export function effectiveMode(mode: OperationMode, request: string): OperationMode {
-  if (mode === 'autonomo' && isProtectedArea(request)) return 'supervisado'
-  return mode
+/**
+ * El modo efectivo degrada a supervisado si la peticion toca un area protegida
+ * O si el objetivo es el propio repo de FORTRESS.
+ *
+ * El repo propio degrada por la misma razon que existe el motor disciplinado:
+ * los guards del sistema (este archivo, el gate del loop, el allowlist de
+ * comandos) son archivos como cualquier otro. Un agente autonomo que "limpia
+ * codigo muerto" o "simplifica esta funcion" sobre ellos puede desmontar su
+ * propia jaula sin ninguna mala intencion y sin revisor que lo vea. Escribir
+ * sobre el codigo propio exige revision externa, y esa vive en el motor.
+ */
+export function effectiveMode(
+  mode: OperationMode,
+  request: string,
+  selfRepo = false
+): OperationMode {
+  if (mode !== 'autonomo') return mode
+  return selfRepo || isProtectedArea(request) ? 'supervisado' : mode
 }
 
 /**
