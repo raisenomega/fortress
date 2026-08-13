@@ -51,9 +51,9 @@ archivos:
 - [README](README.md) — el índice y el estado de la documentación.
 - [OVERVIEW](OVERVIEW.md) y [ARCHITECTURE](ARCHITECTURE.md) — el contexto
   rápido: qué es FORTRESS y cómo está construido.
-- [PRINCIPLES](PRINCIPLES.md) — los diecinueve principios de método firmados.
+- [PRINCIPLES](PRINCIPLES.md) — los veinte principios de método firmados.
 - [FLOWS/](FLOWS/SELF-REPAIR.md) — los flujos operativos por dominio.
-- [DECISIONS/](DECISIONS/README.md) — las cincuenta y ocho decisiones
+- [DECISIONS/](DECISIONS/README.md) — las cincuenta y nueve decisiones
   arquitectónicas.
 - [PAGES/](PAGES/README.md) — las vistas de la interfaz.
 - [HISTORY](HISTORY.md), [CHANGELOG](CHANGELOG.md) y [ROADMAP](ROADMAP.md) — de

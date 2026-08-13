@@ -13,7 +13,7 @@ const DOCS = 'docs/'
 /** Chat y agentes sin rol claro: donde vive la doctrina y como consultarla. */
 export const DOCS_FIRST_GENERAL =
   `DOCS FIRST: El proyecto tiene documentacion publica en ${DOCS}. Consulta ` +
-  'docs/PRINCIPLES.md (19 principios firmados del proyecto) cuando una decision ' +
+  'docs/PRINCIPLES.md (los principios firmados del proyecto) cuando una decision ' +
   'toque disciplina o convencion. Los flujos operativos end-to-end estan en ' +
   'docs/FLOWS/ (9 flujos: escaneo, chat, motor, capacidades, genesis y otros). ' +
   'Los archivos .md en docs/ estan indexados en el grafo; pidelos con ' +

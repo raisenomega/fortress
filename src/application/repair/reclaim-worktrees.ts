@@ -1,3 +1,4 @@
+import { isTerminal } from '@domain/repair/proposal'
 import type { AppContext } from '../context'
 import { cursorFrom, emitOutcome } from './record-generate-events'
 
@@ -11,8 +12,6 @@ export interface ReclaimDeps {
   rmDir(path: string): void
   now(): number
 }
-
-const TERMINAL: ReadonlySet<string> = new Set(['MERGEADO', 'RECHAZADO', 'CADUCADO'])
 
 /**
  * Al arrancar: los worktrees que quedaron de una sesion anterior se reconcilian
@@ -39,7 +38,7 @@ export async function reclaimWorktrees(
       const remove = (): Promise<void> | void =>
         repo === null ? deps.rmDir(path) : deps.removeWorktree(path, repo)
 
-      if (TERMINAL.has(proposal.state)) {
+      if (isTerminal(proposal.state)) {
         await remove()
         cleaned += 1
       } else if (proposal.state === 'ANALIZADO') {

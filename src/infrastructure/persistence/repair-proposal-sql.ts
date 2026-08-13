@@ -8,6 +8,14 @@ export const OBSOLETOS = `SELECT p.finding_id FROM repair_proposals p
     AND p.created_at = (SELECT MAX(q.created_at) FROM repair_proposals q
                         WHERE q.finding_id = p.finding_id)`
 
+/**
+ * Hallazgos con propuesta viva. Los terminales llegan del dominio y se pasan
+ * como parametros: los `?` se generan por CANTIDAD, nunca se concatena valor.
+ */
+export const liveFindingIds = (terminales: readonly string[]): string =>
+  `SELECT DISTINCT finding_id FROM repair_proposals
+   WHERE project_id = ? AND state NOT IN (${terminales.map(() => '?').join(', ')})`
+
 /** R1 (supersede): la ANALIZADO(REAL) mas reciente de un hallazgo manda. */
 export const LATEST_ANALYZED_REAL = `SELECT ${COLS} FROM repair_proposals
   WHERE project_id = @projectId AND finding_id = @findingId

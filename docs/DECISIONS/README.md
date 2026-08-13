@@ -97,6 +97,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-056](adr-056-cero-telemetria.md) | Cero telemetría, doctrina contractual | 2026-08-04 | Aceptada | Doctrina |
 | [ADR-057](adr-057-puerto-codeagent-frontera-proveedor.md) | Puerto CodeAgent como frontera única con el proveedor | 2026-08-06 | Aceptada | Arquitectura |
 | [ADR-058](adr-058-capas-de-exclusion-explicitas.md) | Cada capa de exclusión declara su propia lista | 2026-08-12 | Aceptada | Empaquetado |
+| [ADR-059](adr-059-capas-de-estado-no-heredan.md) | Ninguna capa hereda estado de otra por proximidad conceptual | 2026-08-13 | Aceptada | Arquitectura |
 
 ## Referencias
 

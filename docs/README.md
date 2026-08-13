@@ -7,20 +7,19 @@ Center. Para clonar, correr y construir el proyecto, empieza por el
 
 ## Estado de la documentación
 
-Al cierre de Fase 3 (2026-08-11):
+Estado a 2026-08-13:
 
-- 18 documentos públicos (9 de nivel superior + 9 flujos en `FLOWS/`), más
-  las carpetas `DECISIONS/` (58 ADRs + índice) y `PAGES/` (15 vistas +
-  índice).
-- Fases 0, 1, 2 y 3 del plan documental cerradas: los 5 documentos
-  fundacionales, el capítulo completo del motor de auto-reparación y el
-  capítulo completo del sistema pre-motor.
-- Pendientes: Fase 4 (`HISTORY`, `CHANGELOG`, `ROADMAP`) y Fase 5
-  (`CONTRIBUTING`, `TROUBLESHOOTING`, `RELEASE`, `DEV-SETUP`).
-- La integración con el sistema —el indexado consciente de `docs/` por los
-  agentes— queda para una fase posterior.
+- 101 documentos públicos: 16 de nivel superior, 9 flujos en `FLOWS/`, más las
+  carpetas `DECISIONS/` (59 ADRs + índice) y `PAGES/` (15 vistas + índice).
+- El corpus está completo: los documentos fundacionales, el capítulo del motor
+  de auto-reparación, el del sistema pre-motor, la historia y la trazabilidad,
+  y los documentos operativos de contribución, entorno, resolución de problemas
+  y distribución.
+- La integración con el sistema está hecha: cada agente recibe en su prompt la
+  referencia a los documentos que su trabajo necesita, y los `.md` de `docs/`
+  están indexados en el grafo.
 
-Este índice se actualiza a medida que llegan los documentos.
+Este índice se actualiza a medida que el corpus cambia.
 
 ## Por dónde empezar
 
@@ -43,7 +42,7 @@ Documentos listos:
   reales del código, las reglas duras verificadas por ESLint, base de datos,
   IPC, distribución, testing y qué documentos consume el runtime (y por qué
   viven donde viven).
-- **[PRINCIPLES.md](PRINCIPLES.md)** — 19 principios de método, cada uno
+- **[PRINCIPLES.md](PRINCIPLES.md)** — 20 principios de método, cada uno
   nacido de un error real, con contexto, regla y ejemplo. El documento crece
   y nunca borra un principio.
 - **[GLOSSARY.md](GLOSSARY.md)** — 61 términos en orden alfabético con
@@ -68,8 +67,9 @@ Documentos del capítulo del motor de auto-reparación (listos):
   automático del Knowledge Graph.
 - **[FLOWS/RETRY.md](FLOWS/RETRY.md)** — el reintento explícito de
   propuestas rechazadas.
-- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-058: el capítulo del
-  motor de auto-reparación (001-030) y el del sistema pre-motor (031-057).
+- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-059: el capítulo del
+  motor de auto-reparación (001-030), el del sistema pre-motor (031-057) y las
+  decisiones contemporáneas (058-059).
 
 Documentos del sistema pre-motor (listos):
 

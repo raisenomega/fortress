@@ -26,6 +26,7 @@ interface Opciones {
   /** Lo que el analista fake respondera como `status` (REAL / OBSOLETO). */
   readonly verdictStatus?: string
   readonly obsoleteIds?: readonly string[]
+  readonly liveIds?: readonly string[]
   /** HEAD del repo; null simula un proyecto sin git. */
   readonly sha?: string | null
   /** true: el libro de vida LANZA al asentar (probar que no revierte nada). */
@@ -55,6 +56,7 @@ export function bench(opts: Opciones): Bench {
       insert: (p: Proposal): void => void inserted.push(p),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch }),
       findObsoleteFindingIds: () => opts.obsoleteIds ?? [],
+      findLiveFindingIds: () => opts.liveIds ?? [],
       findById: () => null,
       listByProject: () => []
     },

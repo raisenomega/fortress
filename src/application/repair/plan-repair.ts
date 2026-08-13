@@ -12,9 +12,13 @@ import { analyzeTarget } from './analyze-target'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
 
 /** Candidatos: ACTIVE y abiertos, menos los declarados OBSOLETOS bajo el
- *  escaneo vigente (un fantasma no se re-analiza en la misma generacion). */
+ *  escaneo vigente (un fantasma no se re-analiza en la misma generacion) y
+ *  menos los que ya tienen una propuesta VIVA: la seleccion es determinista, y
+ *  sin este descuento el mismo hallazgo saldria elegido en cada ronda mientras
+ *  su propuesta espera la firma (ADR-059, primera aplicacion). */
 function candidates(context: AppContext, projectId: string, scanId: string): Candidate[] {
   const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, scanId))
+  for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
   return context.findings
     .listMemory(projectId)
     .filter((f) => f.lifecycle === 'ACTIVE' && f.status === 'open' && !excluded.has(f.id))
