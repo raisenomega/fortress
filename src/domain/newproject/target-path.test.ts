@@ -24,6 +24,27 @@ describe('resolveTarget', () => {
     expect(raro.ok && raro.value).toBe('/home/jojo/Escritorio/etc')
   })
 
+  it('rechaza un padre relativo: el destino no lo decide el renderer', () => {
+    const relativo = resolveTarget('Escritorio/proyectos', 'app')
+    expect(relativo.ok).toBe(false)
+    expect(!relativo.ok && relativo.error).toContain('absoluta')
+  })
+
+  it('rechaza un padre que se sale de si mismo con ".."', () => {
+    // Sin esto se listaria (y se crearia) fuera de la carpeta elegida.
+    expect(resolveTarget('/home/jojo/../../etc', 'app').ok).toBe(false)
+    expect(resolveTarget('C:\\Users\\jojo\\..\\..\\Windows', 'app').ok).toBe(false)
+  })
+
+  it('rechaza un padre que ni siquiera es texto, sin reventar', () => {
+    expect(resolveTarget(null as unknown as string, 'app').ok).toBe(false)
+  })
+
+  it('acepta el padre de Windows, que llega con la otra barra', () => {
+    const win = resolveTarget('C:\\Users\\jojo', 'Mi App')
+    expect(win.ok && win.value.endsWith('mi-app')).toBe(true)
+  })
+
   it('rechaza un nombre sin caracteres utilizables', () => {
     const vacio = resolveTarget('/home/jojo/Escritorio', '###')
     expect(vacio.ok).toBe(false)
