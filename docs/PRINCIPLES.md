@@ -232,6 +232,31 @@ Formato uniforme: **Contexto** (el error que lo parió) / **Regla** /
   que el escaneo reescribe (`docs/FLOWS/SCAN.md`) y una vista de solo lectura
   muestra (`docs/PAGES/cognition.md`).
 
+## 20. Ninguna capa hereda estado de otra por proximidad conceptual
+
+- **Contexto:** el sistema guarda estado sobre los mismos conceptos en sitios
+  distintos —la base de datos, el sistema de archivos, el control de versiones,
+  el empaquetador—, y cada uno responde una pregunta diferente. En una misma
+  jornada aparecieron cuatro casos del mismo defecto: material excluido del
+  repositorio que sí viajaba en el instalable; una selección que reelegía un
+  hallazgo cuya propuesta ya estaba en curso; un worktree retirado a mano que
+  dejaba su propuesta viva sin respaldo en disco; y un veredicto de aprobación
+  que nunca se distinguía de un descarte porque nada escribía el estado
+  siguiente. Cuatro superficies, un solo defecto.
+- **Regla:** cuando dos capas mantienen estado sobre el mismo concepto, cada
+  una declara su propia consulta o su propio filtro, explícito y completo.
+  Ninguna da por hecho que otra la cubre. Reconciliar dos capas es trabajo de
+  código escrito para eso, no una propiedad que emerja de que ambas hablen de
+  lo mismo. Corolario operativo: toda superficie que ofrezca una acción sobre
+  un estado verifica la coherencia de las capas implicadas ANTES de ofrecerla;
+  ofrecer una acción cuya precondición no se comprobó rompe el contrato en
+  silencio.
+- **Ejemplo:** la exclusión del empaquetador y la del control de versiones son
+  listas independientes y así se declaran (principio 3 aplicado a otra
+  dimensión, y `docs/DECISIONS/adr-058-capas-de-exclusion-explicitas.md`). Las
+  otras tres manifestaciones y las correcciones previstas para cada una están
+  en `docs/DECISIONS/adr-059-capas-de-estado-no-heredan.md`.
+
 ## Sobre este documento
 
 Este archivo crece. Cada principio nuevo se añade con su contexto de origen
