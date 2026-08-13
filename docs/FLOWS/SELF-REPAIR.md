@@ -177,7 +177,7 @@ evidencia estructurada en JSON.
   reales y separar "no está" de "está pero la interfaz no lo muestra"
   (`docs/PRINCIPLES.md`, principio 7).
 
-## Ejemplo concreto: propuesta 675723c5
+## Ejemplo concreto: propuesta 288e299f
 
 Hallazgo original: un directorio padre sin validar permitía crear carpetas
 arbitrarias y filtrar listados (severidad LOW). Cadena completa real:
@@ -185,18 +185,23 @@ arbitrarias y filtrar listados (severidad LOW). Cadena completa real:
 | Eslabón | Resultado | Coste |
 |---|---|---|
 | Elegir | Seleccionado por menor superficie | 0 tokens |
-| Entender | REAL — el hallazgo persistía en el código vivo | 485.917 tokens · 145 s |
-| Generar | Fix commiteado en worktree: 2 archivos, +19/−3 líneas; reutilizó un guard existente del dominio hallado vía grafo | 296.811 tokens · 86 s |
-| Gate | npm ci (63 s, 451 paquetes) + typecheck (27 s) + lint (45 s) + test:unit (34 s, 844 tests) — todo verde | 169 s totales |
-| Revisor | resuelve=SÍ · alcance=SÍ · intocable=SÍ · calidad=BUENO · riesgo=MENOR → APROBADO | 49.328 tokens · 37 s |
+| Entender | REAL — el hallazgo persistía en el código vivo | 443.928 tokens · 150 s |
+| Generar | Fix commiteado en worktree: 2 archivos, +42/−4 líneas; reutilizó un guard existente del dominio hallado vía grafo y añadió cuatro pruebas | 576.849 tokens · 185 s |
+| Gate | npm ci (29 s) + typecheck (19 s) + lint (35 s) + test:unit (33 s) — todo verde | 116 s totales |
+| Revisor | resuelve=SÍ · alcance=SÍ · intocable=SÍ · calidad=BUENO · riesgo=MENOR → APROBADO | 203.803 tokens · 86 s |
 
-Coste total: **832.056 de 2.000.000 tokens permitidos** — cabe con margen.
-El revisor dejó además un riesgo residual honesto documentado (un caso que
-el fix no cubre y que exige decisión humana), exactamente el tipo de juicio
-por el que existe un revisor semántico además de un gate mecánico.
+Coste total: **1.224.580 de 2.000.000 tokens permitidos** — cabe con margen.
+El revisor dejó además un riesgo residual honesto documentado (un padre
+absoluto pero ajeno sigue revelando existencia y permitiendo crear un nivel;
+acotarlo es otro control y una decisión de producto), exactamente el tipo de
+juicio por el que existe un revisor semántico además de un gate mecánico.
 
-Estado al momento de escribir este documento: OMEGA (aprobado), esperando
-firma humana.
+Firmada y mergeada a la rama principal el 2026-08-13: el fix vive en el commit
+`f987edb`, integrado bajo el merge `58e8571`. La decisión de cuál mergear se
+tomó por contenido y no por fecha —había una segunda propuesta para el mismo
+hallazgo, aprobada también por el revisor, que resolvía el caso del valor no
+textual de forma incompleta—; ese episodio es una de las manifestaciones que
+sostienen [ADR-059](../DECISIONS/adr-059-capas-de-estado-no-heredan.md).
 
 ## Salvaguardas de seguridad
 

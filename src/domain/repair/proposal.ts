@@ -49,3 +49,17 @@ const NEXT: Readonly<Record<ProposalState, readonly ProposalState[]>> = {
 export function canTransition(from: ProposalState, to: ProposalState): boolean {
   return NEXT[from].includes(to)
 }
+
+/**
+ * Un estado es TERMINAL cuando no tiene salida: la propuesta murio ahi. Se
+ * DERIVA de la tabla de transiciones, no se declara aparte — una segunda lista
+ * del mismo concepto envejeceria por su cuenta (ADR-059).
+ */
+export function isTerminal(state: ProposalState): boolean {
+  return NEXT[state].length === 0
+}
+
+/** Los terminales enumerados, para las consultas que necesitan listarlos. */
+export const TERMINAL_STATES: readonly ProposalState[] = (
+  Object.keys(NEXT) as ProposalState[]
+).filter(isTerminal)
