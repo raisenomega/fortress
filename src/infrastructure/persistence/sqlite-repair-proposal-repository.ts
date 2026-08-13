@@ -2,7 +2,7 @@ import { TERMINAL_STATES } from '@domain/repair/proposal'
 import type { ProposalPatch, RepairProposalRepository } from '@domain/repair/proposal-repository'
 import type { Db } from './database'
 import { toProposal, type Row } from './repair-proposal-row'
-import { COLS, LATEST_ANALYZED_REAL, liveFindingIds, OBSOLETOS } from './repair-proposal-sql'
+import { COLS, LATEST_ANALYZED_REAL, liveFindingIds, liveProposals, OBSOLETOS } from './repair-proposal-sql' // prettier-ignore
 
 /** Consultas parametrizadas siempre: nunca se concatena input. */
 export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepository {
@@ -18,6 +18,7 @@ export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepo
   )
   const obsoletos = db.prepare(OBSOLETOS)
   const vivas = db.prepare(liveFindingIds(TERMINAL_STATES))
+  const propuestasVivas = db.prepare(liveProposals(TERMINAL_STATES))
   const latestReal = db.prepare(LATEST_ANALYZED_REAL)
 
   return {
@@ -44,6 +45,7 @@ export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepo
       (obsoletos.all({ projectId, scanId: currentScanId }) as Row[]).map((r) => r.finding_id),
     findLiveFindingIds: (projectId) =>
       (vivas.all(projectId, ...TERMINAL_STATES) as Row[]).map((r) => r.finding_id),
+    listLive: () => (propuestasVivas.all(...TERMINAL_STATES) as Row[]).map(toProposal),
     findLatestAnalyzedRealByFinding: (projectId, findingId) => {
       const row = latestReal.get({ projectId, findingId }) as Row | undefined
       return row === undefined ? null : toProposal(row)
