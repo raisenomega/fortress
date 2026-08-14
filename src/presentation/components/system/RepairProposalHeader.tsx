@@ -41,7 +41,7 @@ export function RepairProposalHeader({
         </span>
       )}
       <span className="min-w-0 flex-1 truncate text-foreground">{donde}</span>
-      <span className={`shrink-0 ${tone}`} title={proposal.analysisReason ?? ''}>
+      <span className={`shrink-0 ${tone}`}>
         {proposal.state}
         {proposal.analysisVerdict === undefined ? '' : ` (${proposal.analysisVerdict})`}
       </span>

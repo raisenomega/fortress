@@ -26,3 +26,14 @@ export const STATE_TONE: Partial<Record<ProposalState, string>> = {
 export function retryLineage(reason: string | undefined): string | null {
   return reason?.startsWith('retry_of=') === true ? reason.slice(9, 17) : null
 }
+
+/**
+ * La razon sin el prefijo de linaje. El badge "retry de X" ya lo muestra en
+ * limpio; repetirlo en el texto gastaria la primera linea en algo ya dicho, y
+ * ademas en el formato de maquina.
+ */
+export function reasonBody(reason: string | undefined): string {
+  if (reason === undefined) return ''
+  if (retryLineage(reason) === null) return reason
+  return reason.slice(17).replace(/^[\s;—-]+/, '')
+}

@@ -3,11 +3,13 @@ import type { Finding } from '@domain/project/project'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { api } from '../../adapters/fortress-api'
+import { ExpandableText } from '../common/ExpandableText'
 import { ProposalEventList } from './ProposalEventList'
 import { RepairGateButton } from './RepairGateButton'
 import { RepairGenerateButton } from './RepairGenerateButton'
 import { RepairOmegaButton } from './RepairOmegaButton'
 import { RepairProposalHeader } from './RepairProposalHeader'
+import { reasonBody } from './repair-proposal-badges'
 import { RepairRetryButton } from './RepairRetryButton'
 
 interface RepairProposalRowProps {
@@ -39,6 +41,11 @@ export function RepairProposalRow({
         finding={finding}
         open={open}
         onToggle={() => void toggle()}
+      />
+      {/* Fuera del boton de la cabecera: un boton no puede anidar otro. */}
+      <ExpandableText
+        text={reasonBody(proposal.analysisReason)}
+        className="text-muted-foreground px-2 pb-1 text-[11px]"
       />
       {/* Si la fila esta abierta al terminar la generacion, el libro se refresca. */}
       <RepairGenerateButton proposal={proposal} onDone={() => open && void loadEvents()} />

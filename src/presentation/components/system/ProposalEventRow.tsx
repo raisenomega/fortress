@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { formatMoment } from '../../format/time'
+import { ExpandableText } from '../common/ExpandableText'
 import { Icon } from '../common/Icon'
 import { iconDe } from './proposal-event-view'
 import { OmegaVerdictTable } from './OmegaVerdictTable'
@@ -46,9 +47,7 @@ export function ProposalEventRow({ event }: ProposalEventRowProps): React.JSX.El
           {formatMoment(new Date(event.ts).toISOString())}
         </span>
       </div>
-      {event.reason === undefined ? null : (
-        <p className="text-muted-foreground truncate">{event.reason.slice(0, 120)}</p>
-      )}
+      <ExpandableText text={event.reason ?? ''} className="text-muted-foreground" />
       {event.evidenceJson === undefined ? null : (
         <button
           type="button"
