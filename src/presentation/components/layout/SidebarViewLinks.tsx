@@ -17,6 +17,7 @@ const VIEWS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }
   { view: 'docs', iconName: 'file-text', label: 'Documentacion' },
   { view: 'exposicion', iconName: 'shield', label: 'Superficie externa' },
   { view: 'omega', iconName: 'eye', label: 'Sentinel Omega' },
+  { view: 'motor', iconName: 'wrench', label: 'Motor de reparacion' },
   { view: 'sistema', iconName: 'sparkles', label: 'Auto-mejora FORTRESS' },
   { view: 'genesis', iconName: 'rocket', label: 'Genesis de agentes' }
 ]

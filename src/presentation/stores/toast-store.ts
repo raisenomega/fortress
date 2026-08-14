@@ -39,3 +39,12 @@ export const useToastStore = create<ToastState>((set) => ({
 export function reportError(message: string): void {
   useToastStore.getState().push(message)
 }
+
+/**
+ * Mismo canal, otro nombre: hay resultados correctos que el operador tiene que
+ * saber igualmente. Llamarlos error en el sitio de la llamada seria mentir
+ * sobre lo que paso.
+ */
+export function notify(message: string): void {
+  useToastStore.getState().push(message)
+}

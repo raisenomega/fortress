@@ -2,18 +2,12 @@ import type { GenerateResult } from '@application/repair/generate-types'
 import type { RetryResult } from '@application/repair/retry-repair'
 import type { RunGateResult } from '@application/repair/run-gate'
 import type { RunOmegaResult } from '@application/repair/run-omega'
-import type { Project } from '@domain/project/project'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { Result } from '@domain/shared/result'
 
 /** Motor de reparacion disciplinado: C1 elegir, C2 entender, C3 generar. */
 export interface RepairApi {
-  /**
-   * El proyecto registrado que ES el propio repo de FORTRESS, resuelto en el
-   * main (funciona tambien empaquetado, donde projects.self() es null).
-   */
-  self(): Promise<Project | null>
   /**
    * C1 elige el hallazgo mas contenido y C2 lo analiza con un agente real
    * (solo lectura, puede tardar). null si no hay candidato elegible. NO

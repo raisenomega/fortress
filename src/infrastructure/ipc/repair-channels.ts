@@ -3,7 +3,6 @@ export const REPAIR_CHANNELS = {
   repairPropose: 'repair:propose',
   repairList: 'repair:list',
   repairGet: 'repair:get',
-  repairSelf: 'repair:self',
   repairEvents: 'repair:events',
   repairGenerate: 'repair:generate',
   repairRunGate: 'repair:run-gate',
