@@ -1,0 +1,26 @@
+{
+  "autoMerge": {
+    "enabled": true,
+    "severities": ["LOW"],
+    "maxDiffLines": 10,
+    "maxFiles": 1,
+    "blacklist": [
+      "**/migrations/**",
+      "**/.env*",
+      "**/secrets/**",
+      "**/api-key*",
+      ".github/workflows/**",
+      "docs/**",
+      "src/renderer/index.html",
+      "src/infrastructure/ipc/**",
+      "src/preload/**",
+      "electron/**",
+      "electron-builder.yml",
+      "package.json",
+      "package-lock.json",
+      "vitest.config.ts",
+      "tsconfig*.json",
+      "install.sh"
+    ]
+  }
+}
