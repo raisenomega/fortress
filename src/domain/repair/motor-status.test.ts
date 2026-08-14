@@ -16,13 +16,13 @@ describe('reduceMotorStatus: la contaminacion gana a todo', () => {
     expect(reduce([], true)).toEqual({ kind: 'stopped-critical', reason: CONTAMINADO })
   })
 
-  it('proyecto contaminado con una propuesta esperando firma: manda el bloqueo', () => {
-    // Firmar no serviria de nada: guardRun no dejaria correr nada despues.
+  it('proyecto contaminado con una propuesta esperando: manda el bloqueo', () => {
+    // Atenderla no serviria de nada: guardRun no dejaria correr nada despues.
     expect(reduce(['OMEGA'], true)).toMatchObject({ kind: 'stopped-critical' })
   })
 })
 
-describe('reduceMotorStatus: manda lo que pide accion del operador', () => {
+describe('reduceMotorStatus: toda propuesta viva espera a una persona', () => {
   it('sin propuestas: nada pendiente', () => {
     expect(reduce([])).toEqual({ kind: 'clean' })
   })
@@ -31,25 +31,23 @@ describe('reduceMotorStatus: manda lo que pide accion del operador', () => {
     expect(reduce(['MERGEADO', 'RECHAZADO', 'CADUCADO'])).toEqual({ kind: 'clean' })
   })
 
-  it('una en OMEGA: espera firma', () => {
+  it('una recien analizada cuenta: lleva parada desde que se analizo', () => {
+    // El motor no la esta trabajando. Espera a que el operador pulse Generar,
+    // y llamar a eso "procesando" escondia lo unico que habia que hacer.
+    expect(reduce(['ANALIZADO'])).toEqual({ kind: 'awaiting-review', count: 1 })
+  })
+
+  it('una en OMEGA cuenta igual: firma humana pendiente', () => {
     expect(reduce(['OMEGA'])).toEqual({ kind: 'awaiting-review', count: 1 })
   })
 
-  it('cuenta las que esperan, no las vivas', () => {
-    expect(reduce(['OMEGA', 'APROBADO', 'GATE', 'MERGEADO'])).toMatchObject({ count: 2 })
+  it('cuenta las vivas y solo las vivas', () => {
+    expect(reduce(['ELEGIDO', 'GATE', 'OMEGA', 'MERGEADO', 'CADUCADO'])).toMatchObject({ count: 3 })
   })
 
-  it('una corriendo y otra esperando: gana la que espera', () => {
-    // Decir "procesando" aqui esconderia la unica que pedia algo del operador.
-    expect(reduce(['GATE', 'OMEGA'])).toEqual({ kind: 'awaiting-review', count: 1 })
-  })
-
-  it('solo trabajo en curso: procesando, con la propuesta que lo ocupa', () => {
-    expect(reduce(['GATE'])).toEqual({ kind: 'processing', proposalId: 'p-0' })
-  })
-
-  it('las fases activas se deducen por resta, no por lista', () => {
-    // ELEGIDO no aparece nombrado en el reductor y aun asi cuenta como vivo.
-    expect(reduce(['ELEGIDO'])).toMatchObject({ kind: 'processing' })
+  it('lo vivo sale de la tabla de transiciones, no de una lista propia', () => {
+    // Ningun estado esta nombrado en el reductor: si manana se anade una fase
+    // no terminal, cuenta sola.
+    expect(reduce(['GENERADO'])).toMatchObject({ kind: 'awaiting-review' })
   })
 })
