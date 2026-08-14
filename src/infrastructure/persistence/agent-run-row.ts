@@ -1,5 +1,5 @@
 import type { AgentId } from '@domain/agent/agent'
-import type { AgentRun, NewAgentRun } from '@domain/telemetry/agent-run'
+import type { AgentRun, NewAgentRun, RunKind } from '@domain/telemetry/agent-run'
 import { countEdits } from '@domain/telemetry/edit-tools'
 import { usageFromRow, type UsageColumns } from './usage-row'
 
@@ -14,6 +14,10 @@ export interface AgentRunRow extends UsageColumns {
   readonly at: string
 }
 
+/** El CHECK de la tabla ya los acota; esto protege de una base tocada a mano. */
+const isRunKind = (value: string): value is RunKind =>
+  value === 'chat' || value === 'scan' || value === 'repair'
+
 /** Las herramientas se guardan separadas por coma: son nombres, no texto libre. */
 const SEPARATOR = ','
 
@@ -22,7 +26,7 @@ export function toAgentRun(row: AgentRunRow): AgentRun {
     id: row.id,
     projectId: row.project_id,
     agentId: (row.agent_id as AgentId | null) ?? null,
-    kind: row.kind === 'scan' ? 'scan' : 'chat',
+    kind: isRunKind(row.kind) ? row.kind : 'chat',
     durationMs: row.duration_ms,
     failed: row.failed === 1,
     usage: usageFromRow(row),
