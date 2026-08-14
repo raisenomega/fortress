@@ -1,7 +1,6 @@
-import { canTransition, type Proposal, type ProposalState } from '@domain/repair/proposal'
-import { buildTransitionEvent, type EventPhase } from '@domain/repair/proposal-event'
 import type { AppContext } from '../context'
-import { cursorFrom, next, safeRecord, type BookCursor } from './book-cursor'
+import { advanceProposal } from './advance-proposal'
+import { cursorFrom } from './book-cursor'
 import { commitOf, decideOrphan } from './reconcile-verdict'
 
 export interface ReconcileDeps {
@@ -10,30 +9,6 @@ export interface ReconcileDeps {
   /** true SOLO si se puede probar que el commit ya esta en HEAD del repo. */
   isMerged(repoPath: string, commitSha: string): boolean
   now(): number
-}
-
-const FASE: Readonly<Record<string, EventPhase>> = {
-  APROBADO: 'APPROVE',
-  MERGEADO: 'MERGE',
-  CADUCADO: 'EXPIRE'
-}
-
-/** Recorre el camino firmado. canTransition sigue siendo el unico juez. */
-async function advance(
-  ctx: AppContext,
-  proposal: Proposal,
-  path: readonly ProposalState[],
-  reason: string,
-  cursor: BookCursor,
-  now: number
-): Promise<void> {
-  let from = proposal.state
-  for (const to of path) {
-    if (!canTransition(from, to)) return
-    ctx.repairProposals.update(proposal.id, { state: to, analysisVerdict: proposal.analysisVerdict ?? 'REAL', analysisReason: reason, updatedAt: now }) // prettier-ignore
-    await safeRecord(ctx.eventLog, buildTransitionEvent({ proposalId: proposal.id, seq: next(cursor), phase: FASE[to] ?? 'EXPIRE', fromState: from, toState: to, reason, ts: now })) // prettier-ignore
-    from = to
-  }
 }
 
 /**
@@ -61,7 +36,7 @@ export async function reconcileOrphanProposals(
       const repo = ctx.projects.findById(proposal.projectId)?.path ?? null
       const verdict = decideOrphan(proposal.state, commitOf(events), repo, deps.isMerged)
       if (verdict === null) continue
-      await advance(ctx, proposal, verdict.path, verdict.reason, cursorFrom(events), deps.now())
+      await advanceProposal(ctx, proposal, verdict.path, verdict.reason, cursorFrom(events), deps.now()) // prettier-ignore
       if (verdict.path.includes('MERGEADO')) merged += 1
       else expired += 1
     } catch (error) {

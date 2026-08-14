@@ -7,7 +7,7 @@ function decision(over: Partial<MergeDecision> = {}): MergeDecision {
   return {
     projectId: 'p1', proposalId: '1225c9a7-bbbb', severity: 'LOW', files: ['src/a.ts'],
     diffLines: 8, policy: APROBADA, configError: null, gate: null, omega: null,
-    commitSha: null, ...over
+    applyError: null, commitSha: null, ...over
   } // prettier-ignore
 }
 

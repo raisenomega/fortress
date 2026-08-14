@@ -1,10 +1,13 @@
 import { app } from 'electron'
 import { existsSync } from 'fs'
 import { join } from 'path'
+import type { AutoMergeDeps } from '@application/repair/auto-merge-types'
 import type { GateDeps } from '@application/repair/run-gate'
 import type { OmegaDeps } from '@application/repair/run-omega'
 import type { GenerateDeps } from '@application/repair/generate-types'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
+import { readFortressConfig } from '../project/fortress-config'
+import { createGitMergeApplier } from './git-merge-applier'
 import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
 import { createGraphGenerator } from './graph-generator'
@@ -59,4 +62,9 @@ export function buildOmegaDeps(): OmegaDeps {
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }
+}
+
+/** Deps de la integracion automatica: git contra el repo vivo y el config del proyecto. */
+export function buildAutoMergeDeps(): AutoMergeDeps {
+  return { mergeApplier: createGitMergeApplier(), readConfig: readFortressConfig, now: Date.now }
 }
