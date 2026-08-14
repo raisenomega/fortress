@@ -2,6 +2,7 @@ import type { GateOutcome } from '../repair/gate-result'
 import type { OmegaVerdict } from '../repair/omega-verdict'
 import type { PolicyEvaluation } from '../repair/auto-merge-policy'
 import type { Severity } from '../shared/severity'
+import { evidencia, motivo } from './merge-decision-text'
 import type { NewOmegaEntry } from './omega-entry'
 
 /** Todo lo que hizo falta para decidir, junto: la decision se defiende sola. */
@@ -18,39 +19,18 @@ export interface MergeDecision {
   readonly gate: GateOutcome | null
   /** El juicio de los seis ejes, o null si no se llego a el. */
   readonly omega: OmegaVerdict | null
+  /**
+   * Lo que dijo git cuando la integracion SE INTENTO y no salio; null si no se
+   * intento o si salio. Es el unico fallo posterior a que todos los filtros
+   * dijeran que si, y sin el ese caso se leeria como una integracion aplicada.
+   */
+  readonly applyError: string | null
   /** Presente solo si la integracion ocurrio. */
   readonly commitSha: string | null
 }
 
-/**
- * Por que NO se integro sola, en orden de la cadena. La configuracion va
- * primero: si no se puede leer, no hay politica que evaluar. La AUSENCIA de
- * politica distingue ese caso, igual que gate y revisor nulos dicen que esa
- * fase no llego a correr.
- */
-function motivo(d: MergeDecision): string | null {
-  if (d.configError !== null) return `configuracion ilegible — ${d.configError}`
-  if (d.policy === null) return 'la politica no se llego a evaluar'
-  if (d.policy.reason !== null) return `politica — ${d.policy.reason}`
-  if (d.gate !== null && !d.gate.ok) return `gate — ${d.gate.reason} en ${d.gate.failedAt}`
-  if (d.omega !== null && d.omega.veredicto_global === 'VETADO') {
-    return `revisor — ${d.omega.razon}`
-  }
-  return null
-}
-
-/** Lo comprobable despues: que se miro, no solo que se decidio. */
-function evidencia(d: MergeDecision): string {
-  const partes = [
-    `propuesta=${d.proposalId.slice(0, 8)}`,
-    `severidad=${d.severity}`,
-    `lineas=${d.diffLines}`,
-    `archivos=${d.files.join(', ')}`
-  ]
-  if (d.commitSha !== null) partes.push(`commit=${d.commitSha.slice(0, 7)}`)
-  if (d.policy?.conditionFailed != null) partes.push(`condicion=${d.policy.conditionFailed}`)
-  return partes.join(' · ')
-}
+// Como se NARRA la decision vive en `merge-decision-text.ts`: aqui esta QUE se
+// registro, alli COMO se cuenta. La forma cambia mucho menos que el relato.
 
 /**
  * Asiento de una decision de integracion automatica. Hereda la doctrina de la
