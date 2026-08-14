@@ -1,5 +1,12 @@
-/** Clase de asiento del Libro de la Vida. Forense: cada linea se clasifica. */
-export type OmegaKind = 'verificacion' | 'score' | 'nota'
+/**
+ * Clase de asiento del Libro de la Vida. Forense: cada linea se clasifica.
+ *
+ * 'merge' clasifica las decisiones de integracion automatica. Tiene clase
+ * propia y no cae en 'nota' porque en modo autonomo es el asiento mas
+ * numeroso: dejarlo sin clasificar obligaria a buscar cadenas en el resumen
+ * para listarlas, que es justo lo que este campo existe para evitar.
+ */
+export type OmegaKind = 'verificacion' | 'score' | 'nota' | 'merge'
 
 /**
  * Veredicto. 'discrepancia' (reportado != disco) y 'veto' (push bloqueado) son
