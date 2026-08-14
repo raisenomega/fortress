@@ -10,7 +10,7 @@ Center. Para clonar, correr y construir el proyecto, empieza por el
 Estado a 2026-08-13:
 
 - 101 documentos públicos: 16 de nivel superior, 9 flujos en `FLOWS/`, más las
-  carpetas `DECISIONS/` (59 ADRs + índice) y `PAGES/` (15 vistas + índice).
+  carpetas `DECISIONS/` (60 ADRs + índice) y `PAGES/` (15 vistas + índice).
 - El corpus está completo: los documentos fundacionales, el capítulo del motor
   de auto-reparación, el del sistema pre-motor, la historia y la trazabilidad,
   y los documentos operativos de contribución, entorno, resolución de problemas
@@ -42,7 +42,7 @@ Documentos listos:
   reales del código, las reglas duras verificadas por ESLint, base de datos,
   IPC, distribución, testing y qué documentos consume el runtime (y por qué
   viven donde viven).
-- **[PRINCIPLES.md](PRINCIPLES.md)** — 20 principios de método, cada uno
+- **[PRINCIPLES.md](PRINCIPLES.md)** — 21 principios de método, cada uno
   nacido de un error real, con contexto, regla y ejemplo. El documento crece
   y nunca borra un principio.
 - **[GLOSSARY.md](GLOSSARY.md)** — 61 términos en orden alfabético con
@@ -67,7 +67,7 @@ Documentos del capítulo del motor de auto-reparación (listos):
   automático del Knowledge Graph.
 - **[FLOWS/RETRY.md](FLOWS/RETRY.md)** — el reintento explícito de
   propuestas rechazadas.
-- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-059: el capítulo del
+- **[DECISIONS/](DECISIONS/README.md)** — ADR-001 a ADR-060: el capítulo del
   motor de auto-reparación (001-030), el del sistema pre-motor (031-057) y las
   decisiones contemporáneas (058-059).
 

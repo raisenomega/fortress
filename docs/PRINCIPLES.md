@@ -257,6 +257,32 @@ Formato uniforme: **Contexto** (el error que lo parió) / **Regla** /
   otras tres manifestaciones y las correcciones previstas para cada una están
   en `docs/DECISIONS/adr-059-capas-de-estado-no-heredan.md`.
 
+## 21. Un sistema no aplica por su cuenta un cambio a las reglas que gobiernan lo que puede aplicar por su cuenta
+
+- **Contexto:** el mismo día aparecieron dos formas de que el sistema pudiera
+  modificar sus propios frenos sin que nadie lo mirase. Primero el terminal de
+  la aplicación, en modo autónomo sobre el repositorio propio: una petición
+  cotidiana —limpiar código muerto, simplificar una función— sobre uno de los
+  archivos que codifican los guards podía desmontar la jaula desde dentro, sin
+  mala intención y sin revisor. Después, al diseñar la lista de exclusión de la
+  integración automática: organizada por dominios de negocio dejaba fuera esos
+  mismos archivos, así que el motor podría integrarlos por su cuenta. Misma
+  clase de daño, otra puerta.
+- **Regla:** proponer sí; aplicar sin revisión externa, no. El sistema puede
+  razonar sobre sus propias reglas y proponer cambios sobre ellas —son código
+  como cualquier otro y pueden tener defectos—, pero no puede integrarlos solo.
+  Alcanza a los archivos que implementan la política de autonomía y al archivo
+  que declara esa política, que **se cubre a sí mismo por defecto**: si esa
+  protección fuese declarativa sería eliminable por declaración, y bastaría una
+  propuesta que la borrase para abrir todo lo demás. La protección es
+  estructural, no configurable.
+- **Ejemplo:** el modo efectivo degrada a supervisado cuando el objetivo es el
+  repositorio propio, con el motivo escrito en el propio código
+  (`src/domain/settings/operation-mode.ts`), y la lista de exclusión de la
+  integración automática cubre los archivos de política además de los dominios
+  sensibles. Las dos manifestaciones y la regla de auto-cobertura están en
+  `docs/DECISIONS/adr-060-auto-merge-loop.md`.
+
 ## Sobre este documento
 
 Este archivo crece. Cada principio nuevo se añade con su contexto de origen
