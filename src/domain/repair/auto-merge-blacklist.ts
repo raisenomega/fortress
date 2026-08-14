@@ -25,7 +25,7 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
 ]
 
 /** Areas sensibles habituales. Un proyecto las sustituye declarando las suyas. */
-const COMMON_SENSITIVE_AREAS: readonly string[] = [
+export const COMMON_SENSITIVE_AREAS: readonly string[] = [
   'src/domain/auth/**',
   'src/domain/pago/**',
   '**/migrations/**',
