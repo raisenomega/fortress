@@ -327,8 +327,8 @@ proyecto para publicarse. Sin fechas de compromiso, como todo aquí.
 
 ## Referencias
 
-- [DECISIONS/](DECISIONS/README.md) — los cincuenta y nueve registros de
-  decisión arquitectónica (ADR-001 a ADR-059) que sostienen esta historia.
+- [DECISIONS/](DECISIONS/README.md) — los sesenta registros de
+  decisión arquitectónica (ADR-001 a ADR-060) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),

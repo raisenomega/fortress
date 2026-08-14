@@ -28,7 +28,7 @@ misma fecha —como el cierre documental del 2026-08-11— se registran tal cual
 sin distribuir artificialmente. Cada entrada apunta al documento donde el hito
 se narra o su decisión se registra: [HISTORY](HISTORY.md) ofrece la narrativa
 general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
-[DECISIONS/](DECISIONS/README.md) contiene las cincuenta y nueve decisiones
+[DECISIONS/](DECISIONS/README.md) contiene las sesenta decisiones
 arquitectónicas.
 
 ## 2026-08-11
@@ -143,6 +143,6 @@ Origen del proyecto.
 ## Referencias
 
 - [HISTORY](HISTORY.md) — la narrativa completa del proyecto.
-- [DECISIONS/](DECISIONS/README.md) — las cincuenta y nueve decisiones
-  arquitectónicas (ADR-001 a ADR-059).
+- [DECISIONS/](DECISIONS/README.md) — las sesenta decisiones
+  arquitectónicas (ADR-001 a ADR-060).
 - [ROADMAP](ROADMAP.md) — las direcciones próximas.
