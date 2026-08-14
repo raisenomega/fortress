@@ -1,4 +1,4 @@
-import { isSeverity, type Severity } from '../shared/severity'
+import { entero, flag, rutas, severidades } from './auto-merge-fields'
 import { AUTONOMY_RULES_FILES, COMMON_SENSITIVE_AREAS } from './auto-merge-blacklist'
 import { DEFAULT_POLICY, type AutoMergePolicy } from './auto-merge-policy'
 
@@ -14,20 +14,12 @@ export type ConfigState =
   | { readonly kind: 'invalid'; readonly reason: string }
 
 interface RawAutoMerge {
+  readonly enabled?: unknown
   readonly severities?: unknown
   readonly maxDiffLines?: unknown
   readonly maxFiles?: unknown
   readonly blacklist?: unknown
 }
-
-const severidades = (raw: unknown): readonly Severity[] | null =>
-  Array.isArray(raw) && raw.length > 0 && raw.every(isSeverity) ? (raw as Severity[]) : null
-
-const entero = (raw: unknown): number | null =>
-  typeof raw === 'number' && Number.isInteger(raw) && raw > 0 ? raw : null
-
-const rutas = (raw: unknown): readonly string[] | null =>
-  Array.isArray(raw) && raw.every((r) => typeof r === 'string') ? (raw as string[]) : null
 
 const mal = (campo: string, espera: string): ConfigState => ({ kind: 'invalid', reason: `${campo}: ${espera}` }) // prettier-ignore
 
@@ -53,6 +45,9 @@ export function parseAutoMergeConfig(texto: string): ConfigState {
     return { kind: 'invalid', reason: 'falta el bloque autoMerge' }
   }
 
+  const on = auto.enabled === undefined ? DEFAULT_POLICY.enabled : flag(auto.enabled)
+  if (on === null) return mal('enabled', 'true o false')
+
   const sev = auto.severities === undefined ? DEFAULT_POLICY.severities : severidades(auto.severities) // prettier-ignore
   if (sev === null) return mal('severities', 'lista no vacia de severidades conocidas')
 
@@ -66,6 +61,7 @@ export function parseAutoMergeConfig(texto: string): ConfigState {
   if (propia === null) return mal('blacklist', 'lista de patrones de ruta')
 
   const policy: AutoMergePolicy = {
+    enabled: on,
     severities: sev,
     maxDiffLines: lineas,
     maxFiles: archivos,
