@@ -11,7 +11,9 @@ export interface MergeDecision {
   readonly severity: Severity
   readonly files: readonly string[]
   readonly diffLines: number
-  readonly policy: PolicyEvaluation
+  /** null si NO se llego a evaluar; `configError` dice por que. */
+  readonly policy: PolicyEvaluation | null
+  readonly configError: string | null
   /** null si no se llego a correr (la politica freno antes). */
   readonly gate: GateOutcome | null
   /** El juicio de los seis ejes, o null si no se llego a el. */
@@ -20,8 +22,15 @@ export interface MergeDecision {
   readonly commitSha: string | null
 }
 
-/** Por que NO se integro sola, en orden de aparicion en la cadena. */
+/**
+ * Por que NO se integro sola, en orden de la cadena. La configuracion va
+ * primero: si no se puede leer, no hay politica que evaluar. La AUSENCIA de
+ * politica distingue ese caso, igual que gate y revisor nulos dicen que esa
+ * fase no llego a correr.
+ */
 function motivo(d: MergeDecision): string | null {
+  if (d.configError !== null) return `configuracion ilegible — ${d.configError}`
+  if (d.policy === null) return 'la politica no se llego a evaluar'
   if (d.policy.reason !== null) return `politica — ${d.policy.reason}`
   if (d.gate !== null && !d.gate.ok) return `gate — ${d.gate.reason} en ${d.gate.failedAt}`
   if (d.omega !== null && d.omega.veredicto_global === 'VETADO') {
@@ -39,7 +48,7 @@ function evidencia(d: MergeDecision): string {
     `archivos=${d.files.join(', ')}`
   ]
   if (d.commitSha !== null) partes.push(`commit=${d.commitSha.slice(0, 7)}`)
-  if (d.policy.conditionFailed !== null) partes.push(`condicion=${d.policy.conditionFailed}`)
+  if (d.policy?.conditionFailed != null) partes.push(`condicion=${d.policy.conditionFailed}`)
   return partes.join(' · ')
 }
 
