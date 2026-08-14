@@ -1,5 +1,6 @@
 import { addFindingMemory } from './add-finding-memory'
 import { addProjectColumns } from './add-project-columns'
+import { expandAgentRunsKind } from './expand-agent-runs-kind'
 import type { Db } from './database'
 
 interface ColumnRow {
@@ -29,6 +30,19 @@ const FINDING_COLUMNS: ReadonlyArray<readonly [string, string]> = [
   ['scan_id', 'ALTER TABLE findings ADD COLUMN scan_id TEXT']
 ]
 
+/**
+ * Columnas sueltas que fueron llegando. Cada default es el lado SEGURO: sin
+ * confianza no se auto-ejecuta nada, sin loop no arranca nada, y una capacidad
+ * nace propuesta porque nada asciende hasta que se apruebe el salto.
+ */
+const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
+  ['projects', 'trusted', 'ALTER TABLE projects ADD COLUMN trusted INTEGER NOT NULL DEFAULT 0'],
+  ['projects', 'loop_enabled', 'ALTER TABLE projects ADD COLUMN loop_enabled INTEGER NOT NULL DEFAULT 0'], // prettier-ignore
+  ['projects', 'general_quality', 'ALTER TABLE projects ADD COLUMN general_quality INTEGER'],
+  ['projects', 'config_state', "ALTER TABLE projects ADD COLUMN config_state TEXT NOT NULL DEFAULT 'CONFIGURADO'"], // prettier-ignore
+  ['capabilities', 'phase', "ALTER TABLE capabilities ADD COLUMN phase TEXT NOT NULL DEFAULT 'propuesta'"] // prettier-ignore
+]
+
 export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'chat_messages', 'engine')) {
     db.exec("ALTER TABLE chat_messages ADD COLUMN engine TEXT NOT NULL DEFAULT 'api'")
@@ -42,34 +56,14 @@ export function runMigrations(db: Db): void {
   // porque ademas de anadir columnas rellena la historia de las filas viejas.
   addFindingMemory(db)
 
-  // Confianza: bases anteriores no la tienen. Default 0 = no confiable, que es
-  // el lado seguro (el agente no auto-ejecuta scripts hasta que se marque).
-  if (!hasColumn(db, 'projects', 'trusted')) {
-    db.exec('ALTER TABLE projects ADD COLUMN trusted INTEGER NOT NULL DEFAULT 0')
-  }
-
-  // Loop autonomo: bases anteriores no lo tienen. Default 0 = apagado.
-  if (!hasColumn(db, 'projects', 'loop_enabled')) {
-    db.exec('ALTER TABLE projects ADD COLUMN loop_enabled INTEGER NOT NULL DEFAULT 0')
-  }
-
-  // Fase aprobada de una capacidad: bases que crearon la tabla sin ella. Default
-  // 'propuesta' = el lado seguro (nada asciende hasta que se apruebe el salto).
-  if (!hasColumn(db, 'capabilities', 'phase')) {
-    db.exec("ALTER TABLE capabilities ADD COLUMN phase TEXT NOT NULL DEFAULT 'propuesta'")
-  }
-
-  // Calidad general (todas las dimensiones). Nullable: null = sin auditoria integral.
-  if (!hasColumn(db, 'projects', 'general_quality')) {
-    db.exec('ALTER TABLE projects ADD COLUMN general_quality INTEGER')
-  }
-
-  // Ciclo de vida del marco. Default 'CONFIGURADO': todo proyecto que ya existia
-  // esta configurado; solo el alta de proyecto VACIO escribe PENDIENTE.
-  if (!hasColumn(db, 'projects', 'config_state')) {
-    db.exec("ALTER TABLE projects ADD COLUMN config_state TEXT NOT NULL DEFAULT 'CONFIGURADO'")
+  for (const [tabla, columna, statement] of SUELTAS) {
+    if (!hasColumn(db, tabla, columna)) db.exec(statement)
   }
 
   // Stats del grafo + las 6 columnas del score integral (todas nullables).
   addProjectColumns(db)
+
+  // El motor de reparacion necesita su propio `kind`. Va la ultima porque es la
+  // unica que recrea una tabla: si algo falla, lo anterior ya quedo aplicado.
+  expandAgentRunsKind(db)
 }
