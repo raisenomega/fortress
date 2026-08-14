@@ -5,6 +5,7 @@ import { DocsView } from '../docs/DocsView'
 import { ConnectorsView } from '../connectors/ConnectorsView'
 import { ConstruirView } from '../construir/ConstruirView'
 import { MultiProjectView } from '../dashboard/MultiProjectView'
+import { MotorView } from '../system/MotorView'
 import { OmegaView } from '../omega/OmegaView'
 import { PerformanceView } from '../performance/PerformanceView'
 import { PostureView } from '../posture/PostureView'
@@ -28,6 +29,7 @@ const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   conectores: () => <ConnectorsView />,
   omega: () => <OmegaView />,
   sistema: () => <SelfImprovementView />,
+  motor: () => <MotorView />,
   genesis: () => <GenesisView />,
   construir: () => <ConstruirView />,
   docs: () => <DocsView />

@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { reduceMotorStatus } from '@domain/repair/motor-status'
-import { loadMotorProposals } from '../../services/motor-service'
-import { useMotorStore } from '../../stores/motor-store'
+import { loadRepair } from '../../services/repair-service'
+import { useRepairStore } from '../../stores/repair-store'
 import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { etiqueta, ICONO, titulo, TONO } from './motor-chip-look'
@@ -20,11 +20,11 @@ export function MotorChip(): React.JSX.Element | null {
   const projectId = project?.id ?? null
   const view = useUiStore((state) => state.view)
   const setView = useUiStore((state) => state.setView)
-  const cargado = useMotorStore((state) => state.projectId)
-  const proposals = useMotorStore((state) => state.proposals)
+  const cargado = useRepairStore((state) => state.projectId)
+  const proposals = useRepairStore((state) => state.proposals)
 
   useEffect(() => {
-    if (projectId !== null) void loadMotorProposals(projectId)
+    if (projectId !== null) void loadRepair(projectId)
   }, [projectId])
 
   if (project === null || cargado !== project.id) return null
@@ -35,8 +35,8 @@ export function MotorChip(): React.JSX.Element | null {
   return (
     <button
       type="button"
-      onClick={() => setView('sistema')}
-      aria-pressed={view === 'sistema'}
+      onClick={() => setView('motor')}
+      aria-pressed={view === 'motor'}
       data-nav="Motor"
       title={titulo(status)}
       className={`tap flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${TONO[status.kind]}`} // prettier-ignore

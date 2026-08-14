@@ -12,6 +12,7 @@ export type MainView =
   | 'conectores'
   | 'omega'
   | 'sistema'
+  | 'motor'
   | 'genesis'
   | 'construir'
   | 'docs'
