@@ -1,0 +1,40 @@
+import type { EventPhase, EventType, ProposalEvent } from '@domain/repair/proposal-event'
+
+let seq = 0
+
+/** Un evento del libro con lo minimo: fase, tipo y su evidencia. */
+export function evento(
+  phase: EventPhase,
+  eventType: EventType,
+  evidence: object | null,
+  extra: Partial<ProposalEvent> = {}
+): ProposalEvent {
+  seq += 1
+  return {
+    id: `e${seq}`, proposalId: 'p-1', seq, phase, eventType, actor: 'motor', ts: seq,
+    ...(evidence === null ? {} : { evidenceJson: JSON.stringify(evidence) }), ...extra
+  } // prettier-ignore
+}
+
+export const VERDICT = {
+  resuelve_el_hallazgo: 'SI', respeta_scope: 'SI', respeta_doNotTouch: 'SI',
+  calidad_del_diff: 'BUENO', riesgo_residual: 'MENOR', veredicto_global: 'APROBADO',
+  razon: 'fix minimo'
+} as const // prettier-ignore
+
+/** La cadena completa de una propuesta que llego al veredicto aprobado. */
+export function cadenaCompleta(): ProposalEvent[] {
+  return [
+    evento('GENERATE', 'DECISION', { worktreePath: '/wt/p-1', branch: 'repair/p-1-slug', baseSha: 'base123', ok: true }), // prettier-ignore
+    evento('GENERATE', 'TRANSITION', { commitSha: 'fix9876', files: ['src/a.ts'], insertions: 6, deletions: 2 }), // prettier-ignore
+    evento('GATE', 'AGENT_RUN', { command: 'npm ci', exitCode: 0, stdoutTail: 'ok', stderrTail: '', timedOut: false }, { durationMs: 29_000 }), // prettier-ignore
+    evento('GATE', 'AGENT_RUN', { command: 'lint', exitCode: 0, stdoutTail: 'ok', stderrTail: '', timedOut: false }, { durationMs: 35_000 }), // prettier-ignore
+    evento('GATE', 'TRANSITION', { allCommandsGreen: true, totalDurationMs: 64_000 }, { toState: 'GATE' }), // prettier-ignore
+    evento('OMEGA', 'TRANSITION', { verdict: VERDICT }, { toState: 'OMEGA' })
+  ]
+}
+
+/** La cadena sin los eventos de una fase y tipo concretos. */
+export function cadenaSin(phase: EventPhase, eventType: EventType): ProposalEvent[] {
+  return cadenaCompleta().filter((e) => !(e.phase === phase && e.eventType === eventType))
+}
