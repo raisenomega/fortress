@@ -7,5 +7,7 @@ export const REPAIR_CHANNELS = {
   repairGenerate: 'repair:generate',
   repairRunGate: 'repair:run-gate',
   repairRunOmega: 'repair:run-omega',
-  repairRetry: 'repair:retry'
+  repairRetry: 'repair:retry',
+  /** Empuje al renderer: el expediente de ese proyecto cambio. Solo el id. */
+  repairChanged: 'repair:changed'
 } as const

@@ -1,10 +1,9 @@
-import { useEffect } from 'react'
 import { reduceMotorStatus } from '@domain/repair/motor-status'
-import { loadRepair } from '../../services/repair-service'
 import { useRepairStore } from '../../stores/repair-store'
 import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
 import { etiqueta, ICONO, titulo, TONO } from './motor-chip-look'
+import { useRepairFeed } from '../../hooks/useRepairFeed'
 
 /**
  * Estado del motor del proyecto ACTIVO, junto a su nombre en la barra. Habla
@@ -23,9 +22,7 @@ export function MotorChip(): React.JSX.Element | null {
   const cargado = useRepairStore((state) => state.projectId)
   const proposals = useRepairStore((state) => state.proposals)
 
-  useEffect(() => {
-    if (projectId !== null) void loadRepair(projectId)
-  }, [projectId])
+  useRepairFeed(projectId)
 
   if (project === null || cargado !== project.id) return null
 

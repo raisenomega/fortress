@@ -5,6 +5,7 @@ import type { RunOmegaResult } from '@application/repair/run-omega'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { Result } from '@domain/shared/result'
+import type { Unsubscribe } from './api-types'
 
 /** Motor de reparacion disciplinado: C1 elegir, C2 entender, C3 generar. */
 export interface RepairApi {
@@ -19,6 +20,8 @@ export interface RepairApi {
   get(id: string): Promise<Proposal | null>
   /** El libro de vida de una propuesta, en orden de seq. */
   events(proposalId: string): Promise<readonly ProposalEvent[]>
+  /** Avisa de que el expediente de ese proyecto se movio. Devuelve como desuscribirse. */
+  onChanged(listener: (projectId: string) => void): Unsubscribe
   /**
    * C3 — genera el fix en un worktree aislado (agente real, puede tardar
    * minutos). Termina en GENERADO o RECHAZADO; jamas toca el arbol vivo.
