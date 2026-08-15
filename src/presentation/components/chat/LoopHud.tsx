@@ -7,8 +7,6 @@ const PHASE_LABEL: Record<LoopPhase, string> = {
   escaneando: 'Escaneando',
   esperando: 'Esperando',
   reparando: 'Agentes trabajando',
-  verificando: 'Verificando',
-  debate: 'Debate (buscando mejor solucion)',
   standby: 'Standby (esperando al proveedor)',
   parado: 'Parado'
 }

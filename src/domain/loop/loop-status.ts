@@ -4,8 +4,7 @@ import type { LoopStopReason } from './loop-decision'
  * En que fase del ciclo esta el loop, para pintarlo en vivo. 'standby' = un
  * fallo transitorio (API/credito/red) lo tiene en pausa, esperando recuperarse.
  */
-export type LoopPhase =
-  'escaneando' | 'esperando' | 'reparando' | 'verificando' | 'debate' | 'standby' | 'parado'
+export type LoopPhase = 'escaneando' | 'esperando' | 'reparando' | 'standby' | 'parado'
 
 /** Estado del loop que el main empuja al renderer en cada transicion. */
 export interface LoopStatus {
@@ -30,8 +29,5 @@ export const STOP_LABEL: Record<LoopStopReason, string> = {
   'tope-ciclos': 'Alcanzado el maximo de propuestas',
   'pool-agotado': 'No queda hallazgo que reparar: la baraja se agoto',
   'tope-denegaciones': 'Demasiadas propuestas seguidas denegadas por la politica',
-  resuelto: 'Resuelto: 3 escaneos 100/100 seguidos',
-  'build-roto': 'Un arreglo rompio el build: revertido y detenido',
-  degradado: 'Un arreglo bajo el score: revertido y detenido',
-  'sin-solucion': 'El debate no hallo una mejora: revertido y detenido'
+  resuelto: 'Resuelto: 3 escaneos 100/100 seguidos'
 }
