@@ -24,8 +24,9 @@ export function resumeState(context: AppContext, projectId: string): ResumeState
     initial: {
       recentScores: [...prior.recentScores],
       cyclesDone: prior.cyclesDone,
-      // La racha arranca fresca: ver por que en el campo de Progress.
+      // La racha y la cadencia arrancan frescas: ver por que en Progress.
       consecutiveDenials: 0,
+      integrationsSinceScan: 0,
       score: prior.recentScores[0] ?? null
     }
   }

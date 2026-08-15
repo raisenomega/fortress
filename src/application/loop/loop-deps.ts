@@ -33,6 +33,8 @@ export interface LoopDeps {
    * corre. Congelarlo al arrancar dejaria al loop obedeciendo ajustes viejos.
    */
   readonly maxConsecutiveDenials: () => number
+  /** Integraciones que se acumulan antes de re-escanear. Tambien se relee. */
+  readonly rescanEvery: () => number
   /** El humano intervino (toggle OFF / Detener). */
   readonly isCancelled: () => boolean
   readonly wait: (ms: number) => Promise<void>

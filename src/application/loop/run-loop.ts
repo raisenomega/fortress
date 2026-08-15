@@ -2,7 +2,14 @@ import type { LoopStopReason } from '@domain/loop/loop-decision'
 import type { LoopPhase } from '@domain/loop/loop-status'
 import type { LoopConfig, LoopDeps } from './loop-deps'
 import { nextStop, statusOf } from './loop-projection'
-import { anotarDenegacion, freshProgress, recordScore, type Progress } from './loop-progress'
+import {
+  anotarDenegacion,
+  freshProgress,
+  recordScore,
+  reiniciarCadencia,
+  tocaEscanear,
+  type Progress
+} from './loop-progress'
 
 const WAIT_AFTER_SCAN = 5000
 const WAIT_AFTER_FIX = 10000
@@ -40,18 +47,20 @@ export async function runLoop(
     emit('reparando')
     const vuelta = await deps.fix()
 
-    emit('escaneando')
-    // El re-escaneo ya no juzga el arreglo: lo juzgan el gate y el revisor,
-    // dentro del worktree y antes de que nada toque este arbol. Aqui solo se
-    // anota, y el arco de los ultimos scores dice si el conjunto va a mejor.
-    const after = await deps.scan()
-
     // El tope cuenta PROPUESTAS cerradas, no vueltas. Una vuelta sin candidato
-    // no movio el expediente de nadie y no debe gastar tope; lo que la acota
-    // entonces es el freno de gasto, que el escaneo sigue consumiendo.
+    // no movio el expediente de nadie y no debe gastar tope.
     if (vuelta.kind !== 'sin-candidato') p.cyclesDone += 1
     anotarDenegacion(p, vuelta)
-    record(after)
+
+    // El re-escaneo ya no juzga el arreglo —de eso van el gate y el revisor,
+    // dentro del worktree—: mide el conjunto. Por eso se espacia hasta que hay
+    // integraciones que medir, y el arco solo crece cuando de verdad se midio.
+    if (tocaEscanear(p, vuelta, deps.rescanEvery())) {
+      emit('escaneando')
+      record(await deps.scan())
+      reiniciarCadencia(p)
+    }
+
     emit('esperando')
     await deps.wait(WAIT_AFTER_FIX)
   }
