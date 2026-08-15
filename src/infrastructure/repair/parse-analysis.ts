@@ -1,10 +1,11 @@
+import { totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 import type { Analysis } from '@domain/repair/analysis'
 import type { Candidate } from '@domain/repair/select-target'
 
-/** Lo que devuelve la corrida headless: el texto y los tokens que costo. */
+/** Lo que devuelve la corrida headless: el texto y la factura entera. */
 export interface RunOut {
   readonly result: string
-  readonly tokens: number
+  readonly usage: TokenUsage
 }
 
 /** Extrae el Analysis del JSON que el analista deja en su respuesta. */
@@ -20,6 +21,6 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
     patternToCopy: text('patternToCopy'),
     doNotTouch: text('doNotTouch'),
     risk: text('risk'),
-    tokensUsed: out.tokens
+    tokensUsed: totalTokens(out.usage)
   }
 }

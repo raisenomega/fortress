@@ -2,7 +2,7 @@ import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import type { Analyst } from '@domain/repair/analysis'
 import { toAnalysis, type RunOut } from './parse-analysis'
-import { totalTokens } from '@domain/telemetry/token-usage'
+import { EMPTY_USAGE, totalTokens } from '@domain/telemetry/token-usage'
 import { parseUsage } from '../claude-code/parse-usage'
 
 const GRAPH = JSON.stringify({
@@ -27,12 +27,12 @@ function run(bin: string, cwd: string, prompt: string): Promise<RunOut> {
       try {
         const j = JSON.parse(out) as Record<string, unknown>
         const texto = typeof j.result === 'string' ? j.result : ''
-        resolve({ result: texto, tokens: totalTokens(parseUsage(j)) })
+        resolve({ result: texto, usage: parseUsage(j) })
       } catch {
-        resolve({ result: out, tokens: 0 })
+        resolve({ result: out, usage: EMPTY_USAGE })
       }
     })
-    child.on('error', () => resolve({ result: '', tokens: 0 }))
+    child.on('error', () => resolve({ result: '', usage: EMPTY_USAGE }))
   })
 }
 
@@ -48,7 +48,8 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string): Anal
       return {
         analysis: toAnalysis(target, out),
         runMeta: {
-          tokensUsed: out.tokens > 0 ? out.tokens : undefined,
+          tokensUsed: totalTokens(out.usage) > 0 ? totalTokens(out.usage) : undefined,
+          usage: out.usage,
           durationMs: endedAt - startedAt,
           startedAt,
           endedAt

@@ -3,6 +3,7 @@ import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { parseOmegaResponse } from '@domain/repair/omega-parse'
 import { processOmegaOut } from './omega-out'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+import { EMPTY_USAGE, totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
@@ -37,8 +38,8 @@ export function createGraphOmega(claudeBin: string, timeoutMs = TIMEOUT_MS): Gra
   return {
     run: (worktreePath, prompt) => {
       const startedAt = Date.now()
-      const meta = (tokens: number): AnalystRunMeta => ({
-        tokensUsed: tokens > 0 ? tokens : undefined,
+      const meta = (usage: TokenUsage): AnalystRunMeta => ({
+        tokensUsed: totalTokens(usage) > 0 ? totalTokens(usage) : undefined, usage,
         durationMs: Date.now() - startedAt, startedAt, endedAt: Date.now()
       }) // prettier-ignore
       const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
@@ -57,15 +58,16 @@ export function createGraphOmega(claudeBin: string, timeoutMs = TIMEOUT_MS): Gra
         child.stdout.on('data', (d: Buffer) => (out += d.toString()))
         child.on('close', () => {
           clearTimeout(timer)
-          if (timedOut) return resolve({ ok: false, error: 'timeout', timedOut, runMeta: meta(0) })
-          const { tokens, text } = processOmegaOut(out)
+          if (timedOut)
+            return resolve({ ok: false, error: 'timeout', timedOut, runMeta: meta(EMPTY_USAGE) })
+          const { usage, text } = processOmegaOut(out)
           const parsed = parseOmegaResponse(text)
-          if ('error' in parsed) return resolve({ ok: false, error: 'omega_response_invalid', timedOut: false, runMeta: meta(tokens) }) // prettier-ignore
-          resolve({ ok: true, verdict: parsed.verdict, runMeta: meta(tokens) })
+          if ('error' in parsed) return resolve({ ok: false, error: 'omega_response_invalid', timedOut: false, runMeta: meta(usage) }) // prettier-ignore
+          resolve({ ok: true, verdict: parsed.verdict, runMeta: meta(usage) })
         })
         child.on('error', (error) => {
           clearTimeout(timer)
-          resolve({ ok: false, error: error.message, timedOut: false, runMeta: meta(0) })
+          resolve({ ok: false, error: error.message, timedOut: false, runMeta: meta(EMPTY_USAGE) })
         })
       })
     }
