@@ -4,7 +4,10 @@ import { spentToday } from '@application/settings/read-budget'
 import type { Project } from '@domain/project/project'
 import { gitRevert, gitSnapshot } from './loop-git'
 import { loopScan } from './loop-ops'
-import { loopRepair } from './loop-repair-op'
+import { runMotorChain } from '@application/repair/run-motor-chain'
+import { describir } from '@application/repair/motor-chain-outcome'
+import { ok } from '@domain/shared/result'
+import { buildMotorChainDeps } from '../repair/motor-chain-deps'
 import { isLoopCancelled, sendLoopChunk, sendLoopStatus, waitOrCancel } from './loop-registry'
 import { withStandby, type StandbyHooks } from './loop-standby'
 import { loopVerify } from './loop-verify'
@@ -46,11 +49,11 @@ export function buildDeps(params: EngineParams): LoopDeps {
         return loopScan(context, pid, toChat)
       }, hooks),
     fix: (attempt) =>
-      withStandby(() => {
-        toChat(
-          attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Agentes reparando —\n'
-        )
-        return loopRepair(context, pid, toChat, attempt)
+      withStandby(async () => {
+        toChat(attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Motor —\n')
+        const vuelta = await runMotorChain(context, pid, buildMotorChainDeps())
+        if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
+        return vuelta.ok ? ok(undefined) : vuelta
       }, hooks),
     verify: () => loopVerify(cwd),
     snapshot: () => {
