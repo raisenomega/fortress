@@ -8,9 +8,6 @@ function deps(over: Partial<LoopDeps> = {}): LoopDeps {
   return {
     scan: vi.fn().mockResolvedValue(50),
     fix: vi.fn().mockResolvedValue(undefined),
-    verify: vi.fn().mockResolvedValue(true),
-    snapshot: vi.fn().mockResolvedValue(undefined),
-    revert: vi.fn().mockResolvedValue(undefined),
     spentSession: () => 0,
     isCancelled: () => false,
     wait: () => Promise.resolve(),
@@ -37,13 +34,6 @@ describe('runLoop', () => {
     const reason = await runLoop(config, deps({ scan, spentSession: () => 30 }))
     expect(reason).toBe('tope-gasto')
     expect(scan).not.toHaveBeenCalled()
-  })
-
-  it('un build roto tras el arreglo revierte y detiene', async () => {
-    const revert = vi.fn().mockResolvedValue(undefined)
-    const reason = await runLoop(config, deps({ verify: vi.fn().mockResolvedValue(false), revert }))
-    expect(reason).toBe('build-roto')
-    expect(revert).toHaveBeenCalledTimes(1)
   })
 
   it('un arreglo que baja el score ya no para el loop: solo se anota', async () => {

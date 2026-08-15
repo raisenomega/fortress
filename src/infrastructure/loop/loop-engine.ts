@@ -48,7 +48,6 @@ export async function runEngine(context: AppContext, projectId: string): Promise
   const deps = buildDeps({
     context,
     config,
-    project,
     baseline,
     onStandby: () =>
       sendLoopStatus(standbyStatus(config, track, spentToday(context, new Date()) - baseline)),

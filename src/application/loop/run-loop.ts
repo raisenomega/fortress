@@ -8,8 +8,9 @@ const WAIT_AFTER_FIX = 10000
 
 /**
  * El ciclo del loop, con TODO lo real inyectado. No conoce Electron, procesos
- * ni git: por eso se prueba con dobles. loopStop es el unico que decide parar,
- * salvo el build roto, que se revierte y detiene aqui mismo.
+ * ni git: por eso se prueba con dobles. Y ya no necesita saber de git: el
+ * arreglo no toca este arbol, asi que no hay checkpoint que poner ni nada que
+ * revertir. Parar lo decide loopStop, mas la intervencion humana.
  */
 export async function runLoop(
   config: LoopConfig,
@@ -36,10 +37,7 @@ export async function runLoop(
     if (deps.isCancelled()) return halt('detenido')
 
     emit('reparando')
-    await deps.snapshot()
     await deps.fix(0)
-    emit('verificando')
-    if (!(await deps.verify())) return await deps.revert().then(() => halt('build-roto'))
 
     emit('escaneando')
     // El re-escaneo ya no juzga el arreglo: lo juzgan el gate y el revisor,

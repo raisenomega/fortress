@@ -9,9 +9,12 @@ export interface LoopConfig {
 }
 
 /**
- * Todo lo real del ciclo, inyectado: escaneo, arreglo, verificacion, git,
- * reloj de gasto, cancelacion, timers y reporte. Con dobles se prueba el ciclo
- * entero sin lanzar un solo proceso.
+ * Todo lo real del ciclo, inyectado: escaneo, arreglo, reloj de gasto,
+ * cancelacion, timers y reporte. Con dobles se prueba el ciclo entero sin
+ * lanzar un solo proceso.
+ *
+ * Ya no hay red git ni verificacion aqui: el arreglo se compila, se prueba y se
+ * juzga dentro de su worktree, y este arbol no se toca hasta que se integra.
  */
 export interface LoopDeps {
   /** Escanea y devuelve el score (0-100). */
@@ -22,12 +25,6 @@ export interface LoopDeps {
    * no se puede contar propuestas cerradas ni denegaciones seguidas.
    */
   readonly fix: (attempt: number) => Promise<ChainOutcome>
-  /** Verifica el arbol tras reparar. false = build roto. */
-  readonly verify: () => Promise<boolean>
-  /** Checkpoint (git) antes de reparar. */
-  readonly snapshot: () => Promise<void>
-  /** Revierte al ultimo checkpoint si el build quedo roto. */
-  readonly revert: () => Promise<void>
   /** Gasto acumulado de la sesion de loop, en dolares. */
   readonly spentSession: () => number
   /** El humano intervino (toggle OFF / Detener). */
