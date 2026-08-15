@@ -6,10 +6,10 @@
  * sean > 0 el loop no se puede encender (loopConfigured). Nadie decide por el
  * cuanto esta dispuesto a gastar.
  *
- * VALVULAS de comportamiento (maxConsecutiveDenials): con default razonable. No
- * limitan gasto: detienen el loop cuando un patron dice que la politica y la
- * baraja no encajan. Sin configurar hay una respuesta sensata, asi que exigirlas
- * bloquearia el loop por una pregunta que el sistema sabe contestar solo.
+ * VALVULAS de comportamiento (maxConsecutiveDenials, rescanEvery): con default
+ * razonable. No limitan gasto de forma directa: ajustan como se comporta el
+ * ciclo. Sin configurar hay una respuesta sensata, asi que exigirlas bloquearia
+ * el loop por preguntas que el sistema sabe contestar solo.
  */
 export interface LoopBudget {
   /** Tope de gasto acumulado de la sesion de loop, en dolares. */
@@ -18,10 +18,19 @@ export interface LoopBudget {
   readonly maxCycles: number
   /** Denegaciones seguidas de la politica que se toleran antes de parar. */
   readonly maxConsecutiveDenials: number
+  /**
+   * Integraciones que se acumulan antes de volver a escanear. Cero significa
+   * escanear en cada vuelta: es el valor que reproduce el comportamiento de
+   * antes de que la cadencia existiera, no una forma de apagarla.
+   */
+  readonly rescanEvery: number
 }
 
 /** Denegaciones seguidas que se toleran cuando el operador no dice otra cosa. */
 export const DEFAULT_MAX_DENIALS = 5
+
+/** Integraciones entre escaneos cuando el operador no dice otra cosa. */
+export const DEFAULT_RESCAN_EVERY = 3
 
 function parseAmount(raw: string | null): number {
   if (raw === null) return 0
@@ -47,12 +56,14 @@ function parseCount(raw: string | null): number | null {
 export function parseLoopBudget(
   costCap: string | null,
   maxCycles: string | null,
-  maxDenials: string | null
+  maxDenials: string | null,
+  rescanEvery: string | null
 ): LoopBudget {
   return {
     costCapUsd: parseAmount(costCap),
     maxCycles: parseCount(maxCycles) ?? 0,
-    maxConsecutiveDenials: parseCount(maxDenials) ?? DEFAULT_MAX_DENIALS
+    maxConsecutiveDenials: parseCount(maxDenials) ?? DEFAULT_MAX_DENIALS,
+    rescanEvery: parseCount(rescanEvery) ?? DEFAULT_RESCAN_EVERY
   }
 }
 

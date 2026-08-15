@@ -20,6 +20,9 @@ export function deps(over: Partial<LoopDeps> = {}): LoopDeps {
     fix: vi.fn().mockResolvedValue(CERRADA),
     spentSession: () => 0,
     maxConsecutiveDenials: () => 5,
+    // Cero = escanear en cada vuelta: el comportamiento previo a la cadencia,
+    // que es la base contra la que se leen los testigos que no la miden.
+    rescanEvery: () => 0,
     isCancelled: () => false,
     wait: () => Promise.resolve(),
     emit: () => {},

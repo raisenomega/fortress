@@ -33,8 +33,8 @@ export function LoopToggle({ project }: LoopToggleProps): React.JSX.Element {
     void Promise.all([
       api().settings.get(SETTINGS_KEYS.loopCostCap),
       api().settings.get(SETTINGS_KEYS.loopMaxCycles)
-      // El tercer tope no se pide: encender solo depende de los frenos duros.
-    ]).then(([cap, cycles]) => setConfigured(loopConfigured(parseLoopBudget(cap, cycles, null))))
+      // Las valvulas no se piden: encender solo depende de los frenos duros.
+    ]).then(([cap, c]) => setConfigured(loopConfigured(parseLoopBudget(cap, c, null, null))))
   }, [project.id])
 
   const on = project.loopEnabled

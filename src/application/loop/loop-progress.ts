@@ -12,12 +12,20 @@ export interface Progress {
    * margen fresco.
    */
   consecutiveDenials: number
+  /** Integraciones acumuladas desde el ultimo escaneo. Tampoco se persiste. */
+  integrationsSinceScan: number
   score: number | null
 }
 
 /** Progreso de una sesion que arranca de cero (no una que se reanuda). */
 export function freshProgress(): Progress {
-  return { recentScores: [], cyclesDone: 0, consecutiveDenials: 0, score: null }
+  return {
+    recentScores: [],
+    cyclesDone: 0,
+    consecutiveDenials: 0,
+    integrationsSinceScan: 0,
+    score: null
+  }
 }
 
 /**
@@ -31,6 +39,22 @@ export function anotarDenegacion(p: Progress, outcome: ChainOutcome): void {
   else if (outcome.kind === 'espera-firma' && esDenegacion(outcome.condition)) {
     p.consecutiveDenials += 1
   }
+}
+
+/**
+ * Si toca volver a medir. Cuenta INTEGRACIONES, no vueltas: entre dos merges el
+ * arbol es identico, y escanearlo otra vez seria pagar por leer lo mismo. Un
+ * tope de cero pide escanear siempre, que es como se comportaba antes de que
+ * hubiera cadencia.
+ */
+export function tocaEscanear(p: Progress, outcome: ChainOutcome, cada: number): boolean {
+  if (outcome.kind === 'integrada') p.integrationsSinceScan += 1
+  return p.integrationsSinceScan >= cada
+}
+
+/** Se volvio a medir: la cuenta arranca de nuevo. */
+export function reiniciarCadencia(p: Progress): void {
+  p.integrationsSinceScan = 0
 }
 
 /** Anota un score nuevo (el ultimo, y al frente del historial) y lo persiste. */

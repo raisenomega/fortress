@@ -1,23 +1,28 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_MAX_DENIALS, loopConfigured, parseLoopBudget } from './loop-budget'
+import {
+  DEFAULT_MAX_DENIALS,
+  DEFAULT_RESCAN_EVERY,
+  loopConfigured,
+  parseLoopBudget
+} from './loop-budget'
 
-const CONFIGURADO = { costCapUsd: 30, maxCycles: 5, maxConsecutiveDenials: 5 }
+const CONFIGURADO = { costCapUsd: 30, maxCycles: 5, maxConsecutiveDenials: 5, rescanEvery: 3 }
 
 describe('parseLoopBudget: frenos duros', () => {
   it('sin fijar quedan en 0 (el loop no esta listo)', () => {
-    const b = parseLoopBudget(null, null, null)
+    const b = parseLoopBudget(null, null, null, null)
     expect(b.costCapUsd).toBe(0)
     expect(b.maxCycles).toBe(0)
   })
 
   it('parsea coma decimal y numero de propuestas', () => {
-    const b = parseLoopBudget('30,5', '5', null)
+    const b = parseLoopBudget('30,5', '5', null, null)
     expect(b.costCapUsd).toBe(30.5)
     expect(b.maxCycles).toBe(5)
   })
 
   it('negativos o basura caen a 0', () => {
-    const b = parseLoopBudget('-1', 'abc', null)
+    const b = parseLoopBudget('-1', 'abc', null, null)
     expect(b.costCapUsd).toBe(0)
     expect(b.maxCycles).toBe(0)
   })
@@ -25,17 +30,29 @@ describe('parseLoopBudget: frenos duros', () => {
 
 describe('parseLoopBudget: la valvula si trae valor', () => {
   it('sin fijar hereda el default', () => {
-    expect(parseLoopBudget(null, null, null).maxConsecutiveDenials).toBe(DEFAULT_MAX_DENIALS)
+    expect(parseLoopBudget(null, null, null, null).maxConsecutiveDenials).toBe(DEFAULT_MAX_DENIALS)
   })
 
   it('basura tambien hereda el default: no hay intencion legible', () => {
-    expect(parseLoopBudget(null, null, 'abc').maxConsecutiveDenials).toBe(DEFAULT_MAX_DENIALS)
+    expect(parseLoopBudget(null, null, 'abc', null).maxConsecutiveDenials).toBe(DEFAULT_MAX_DENIALS)
   })
 
   it('un cero guardado es un cero, no una ausencia', () => {
     // Aplanar los dos en 0 haria indistinguible "no configurado" de lo que el
     // operador escribio a mano, y el default se comeria su decision.
-    expect(parseLoopBudget(null, null, '0').maxConsecutiveDenials).toBe(0)
+    expect(parseLoopBudget(null, null, '0', null).maxConsecutiveDenials).toBe(0)
+  })
+})
+
+describe('parseLoopBudget: la cadencia de re-escaneo', () => {
+  it('sin fijar hereda el default', () => {
+    expect(parseLoopBudget(null, null, null, null).rescanEvery).toBe(DEFAULT_RESCAN_EVERY)
+  })
+
+  it('un cero guardado pide escanear siempre, y sobrevive como cero', () => {
+    // No es "no escanear nunca": con cero integraciones acumuladas la condicion
+    // ya se cumple, asi que cada vuelta mide. Es el comportamiento de antes.
+    expect(parseLoopBudget(null, null, null, '0').rescanEvery).toBe(0)
   })
 })
 
