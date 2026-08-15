@@ -3,6 +3,21 @@ import type { Candidate } from './select-target'
 const KEYS = '"status", "whatToChange", "where", "patternToCopy", "doNotTouch", "risk"'
 
 /**
+ * La clave opcional va DENTRO del mismo objeto, no en un bloque aparte: la
+ * respuesta sigue siendo un solo JSON, que es lo que el prompt exige y lo que
+ * el parser sabe leer.
+ */
+const NOTES = [
+  '',
+  'Clave OPCIONAL "notes": si FORTRESS (la herramienta que te ejecuta, NO el proyecto',
+  'que analizas) te limito o te falto algo —un bug, un gap, una restriccion de entorno,',
+  'permisos o plan-mode que te impidio trabajar, o la OPORTUNIDAD de una capacidad que',
+  'te habria ayudado— anadela con la forma',
+  '[{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note":"que paso o que crear"}].',
+  'No es un hallazgo del proyecto; es para que FORTRESS madure. Si no hubo nada, omitela.'
+]
+
+/**
  * Peticion de ANALISIS (no de fix) para el analista grafo-primero. Generica: sirve
  * para cualquier hallazgo. Pide VERIFICAR contra el archivo real si sigue siendo REAL
  * u OBSOLETO (como paso con posture), y un JSON inerte con el entendimiento.
@@ -24,6 +39,7 @@ export function buildAnalysisPrompt(t: Candidate): string {
     'hallazgo: leelo.',
     '',
     'NO propongas el fix ni escribas codigo. Responde SOLO con un objeto JSON con las',
-    `claves ${KEYS}. "status" es "REAL" u "OBSOLETO"; el resto, prosa inerte en espanol.`
+    `claves ${KEYS}. "status" es "REAL" u "OBSOLETO"; el resto, prosa inerte en espanol.`,
+    ...NOTES
   ].join('\n')
 }

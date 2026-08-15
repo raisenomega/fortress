@@ -49,6 +49,11 @@ export async function planRepair(context: AppContext, projectId: string): Promis
 
   const result = await analyzeTarget(context.analystFor(project.path), selection)
   recordMotorRun(context, projectId, null, result.runMeta)
+  // Lo que el analista noto de FORTRESS se guarda pase lo que pase con el
+  // hallazgo: un limite del que se topo vale igual si el hallazgo era un fantasma.
+  for (const nota of result.analysis.notes ?? []) {
+    context.selfObservations.add({ ...nota, sourceProject: project.name })
+  }
   const verdict: AnalysisVerdict = isActionable(result.analysis) ? 'REAL' : 'OBSOLETO'
   const state: ProposalState = verdict === 'REAL' ? 'ANALIZADO' : 'CADUCADO'
   if (!canTransition(proposal.state, state)) return proposal

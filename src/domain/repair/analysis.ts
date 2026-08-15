@@ -1,3 +1,4 @@
+import type { SelfNoteDraft } from '../system/self-observation'
 import type { TokenUsage } from '../telemetry/token-usage'
 import type { Candidate } from './select-target'
 
@@ -17,6 +18,12 @@ export interface Analysis {
   readonly risk: string
   /** Tokens que costo el analisis (grafo-primero deberia ser barato). */
   readonly tokensUsed: number
+  /**
+   * Lo que el analista noto de FORTRESS MISMA mientras estudiaba el hallazgo:
+   * una herramienta que le falto, un permiso que le corto, algo que le habria
+   * ayudado. No es del proyecto auditado; es material para que FORTRESS madure.
+   */
+  readonly notes?: readonly SelfNoteDraft[]
 }
 
 /** COMPLETO (listo para C3) si todas las partes de prosa tienen contenido. */
