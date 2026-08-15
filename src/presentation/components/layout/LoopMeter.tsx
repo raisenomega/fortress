@@ -12,14 +12,14 @@ const PHASE: Record<LoopPhase, string> = {
 }
 
 /**
- * Medidor del loop en el pie: fase, ciclo y gasto, en vivo mientras corre, igual
- * que el del chat. Ciclo actual en rojo / total en verde, como en el HUD.
+ * Medidor del loop en el pie: fase, propuesta y gasto, en vivo mientras corre,
+ * igual que el del chat. La actual en rojo / el tope en verde, como en el HUD.
  */
 export function LoopMeter({ status }: { status: LoopStatus }): React.JSX.Element {
   const current = Math.min(status.cycle, status.maxCycles)
   return (
     <span className="font-mono text-primary">
-      loop · {PHASE[status.phase]} · ciclo <span className="text-critical">{current}</span>
+      loop · {PHASE[status.phase]} · propuesta <span className="text-critical">{current}</span>
       <span className="text-success">/{status.maxCycles}</span>
       {status.solvedStreak > 0 && (
         <span className="text-success font-semibold">

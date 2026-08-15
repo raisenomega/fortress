@@ -41,9 +41,9 @@ export function buildDeps(params: EngineParams): LoopDeps {
         toChat('\n\n— Escaneando el proyecto —\n')
         return loopScan(context, pid, toChat)
       }, hooks),
-    fix: (attempt) =>
+    fix: () =>
       withStandby(async () => {
-        toChat(attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Motor —\n')
+        toChat('\n\n— Motor —\n')
         const vuelta = await runMotorChain(context, pid, buildMotorChainDeps())
         if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
         return vuelta

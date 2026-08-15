@@ -14,9 +14,9 @@ const PHASE_LABEL: Record<LoopPhase, string> = {
 }
 
 /**
- * Estado del loop del proyecto activo, en vivo. El contador de ciclos va SIEMPRE
- * visible: ciclo actual en rojo / total en verde; al completar el arco (resuelto
- * o hechos todos los ciclos) se pone todo verde.
+ * Estado del loop del proyecto activo, en vivo. El contador de propuestas va
+ * SIEMPRE visible: la actual en rojo / el tope en verde; al completar el arco
+ * (resuelto o cerradas todas las propuestas) se pone todo verde.
  */
 export function LoopHud({ project }: { project: Project }): React.JSX.Element | null {
   const status = useLoopStatus(project.id)
@@ -38,7 +38,7 @@ export function LoopHud({ project }: { project: Project }): React.JSX.Element | 
 
   return (
     <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] ${border} ${base}`}>
-      Loop · {label} · ciclo{' '}
+      Loop · {label} · propuesta{' '}
       <span className={complete ? 'text-success' : 'text-critical'}>{current}</span>
       <span className="text-success">/{status.maxCycles}</span>
       {status.solvedStreak > 0 && (
