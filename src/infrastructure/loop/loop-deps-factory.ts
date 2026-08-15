@@ -1,6 +1,7 @@
 import type { AppContext } from '@application/context'
 import type { LoopConfig, LoopDeps } from '@application/loop/loop-deps'
 import { spentToday } from '@application/settings/read-budget'
+import { readLoopBudget } from '@application/settings/read-loop-budget'
 import { loopScan } from './loop-ops'
 import { runMotorChain } from '@application/repair/run-motor-chain'
 import { describir } from '@application/repair/motor-chain-outcome'
@@ -49,6 +50,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
         return vuelta
       }, hooks),
     spentSession: () => spentToday(context, new Date()) - baseline,
+    maxConsecutiveDenials: () => readLoopBudget(context).maxConsecutiveDenials,
     isCancelled: () => isLoopCancelled(pid),
     wait: (ms) => waitOrCancel(pid, ms),
     emit: sendLoopStatus,

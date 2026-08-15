@@ -7,6 +7,8 @@ const base: LoopState = {
   costCap: 30,
   cyclesDone: 0,
   maxCycles: 5,
+  consecutiveDenials: 0,
+  maxConsecutiveDenials: 5,
   recentScores: []
 }
 
@@ -29,6 +31,15 @@ describe('loopStop', () => {
 
   it('para al alcanzar el maximo de ciclos', () => {
     expect(loopStop({ ...base, cyclesDone: 5 })).toBe('tope-ciclos')
+  })
+
+  it('para al alcanzar la racha de denegaciones', () => {
+    expect(loopStop({ ...base, consecutiveDenials: 5 })).toBe('tope-denegaciones')
+  })
+
+  it('estar resuelto manda sobre la racha: el arco cerrado no es un desencaje', () => {
+    const cerrado = { ...base, consecutiveDenials: 9, recentScores: [100, 100, 100] }
+    expect(loopStop(cerrado)).toBe('resuelto')
   })
 
   it('para con 3 escaneos 100 seguidos', () => {

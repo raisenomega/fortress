@@ -1,7 +1,8 @@
 import type { LoopStopReason } from '@domain/loop/loop-decision'
 import type { LoopPhase } from '@domain/loop/loop-status'
 import type { LoopConfig, LoopDeps } from './loop-deps'
-import { freshProgress, nextStop, recordScore, statusOf, type Progress } from './loop-progress'
+import { nextStop, statusOf } from './loop-projection'
+import { anotarDenegacion, freshProgress, recordScore, type Progress } from './loop-progress'
 
 const WAIT_AFTER_SCAN = 5000
 const WAIT_AFTER_FIX = 10000
@@ -49,6 +50,7 @@ export async function runLoop(
     // no movio el expediente de nadie y no debe gastar tope; lo que la acota
     // entonces es el freno de gasto, que el escaneo sigue consumiendo.
     if (vuelta.kind !== 'sin-candidato') p.cyclesDone += 1
+    anotarDenegacion(p, vuelta)
     record(after)
     emit('esperando')
     await deps.wait(WAIT_AFTER_FIX)

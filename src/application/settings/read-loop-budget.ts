@@ -6,6 +6,7 @@ import type { AppContext } from '../context'
 export function readLoopBudget(context: AppContext): LoopBudget {
   return parseLoopBudget(
     context.settings.get(SETTINGS_KEYS.loopCostCap),
-    context.settings.get(SETTINGS_KEYS.loopMaxCycles)
+    context.settings.get(SETTINGS_KEYS.loopMaxCycles),
+    context.settings.get(SETTINGS_KEYS.loopMaxDenials)
   )
 }

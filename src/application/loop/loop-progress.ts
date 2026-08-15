@@ -1,17 +1,36 @@
-import { loopStop, solvedStreak, type LoopStopReason } from '@domain/loop/loop-decision'
-import type { LoopPhase, LoopStatus } from '@domain/loop/loop-status'
-import type { LoopConfig, LoopDeps } from './loop-deps'
+import { esDenegacion, type ChainOutcome } from '../repair/motor-chain-outcome'
+import type { LoopDeps } from './loop-deps'
 
 /** Estado mutable de una sesion de loop mientras corre el ciclo. */
 export interface Progress {
   readonly recentScores: number[]
   cyclesDone: number
+  /**
+   * Denegaciones seguidas. NO se persiste: al reanudar, la politica y la baraja
+   * pueden ser otras, y arrastrar la racha vieja seria juzgar lo nuevo con
+   * evidencia caducada. Reanudar es el operador diciendo "sigue"; se le da
+   * margen fresco.
+   */
+  consecutiveDenials: number
   score: number | null
 }
 
 /** Progreso de una sesion que arranca de cero (no una que se reanuda). */
 export function freshProgress(): Progress {
-  return { recentScores: [], cyclesDone: 0, score: null }
+  return { recentScores: [], cyclesDone: 0, consecutiveDenials: 0, score: null }
+}
+
+/**
+ * Mueve la racha segun donde acabo la vuelta. Solo suma la denegacion de una
+ * politica encendida —esDenegacion deja fuera la integracion apagada, que es el
+ * operador queriendo firmar a mano— y solo la integracion la borra: seguir
+ * esperando firma no rompe una racha de esperas.
+ */
+export function anotarDenegacion(p: Progress, outcome: ChainOutcome): void {
+  if (outcome.kind === 'integrada') p.consecutiveDenials = 0
+  else if (outcome.kind === 'espera-firma' && esDenegacion(outcome.condition)) {
+    p.consecutiveDenials += 1
+  }
 }
 
 /** Anota un score nuevo (el ultimo, y al frente del historial) y lo persiste. */
@@ -19,36 +38,4 @@ export function recordScore(deps: LoopDeps, p: Progress, score: number): void {
   p.score = score
   p.recentScores.unshift(score)
   deps.persist(p.recentScores, p.cyclesDone)
-}
-
-export function statusOf(
-  config: LoopConfig,
-  deps: LoopDeps,
-  p: Progress,
-  phase: LoopPhase,
-  stopReason: LoopStopReason | null
-): LoopStatus {
-  return {
-    projectId: config.projectId,
-    phase,
-    cycle: p.cyclesDone + 1,
-    maxCycles: config.maxCycles,
-    score: p.score,
-    spentSession: deps.spentSession(),
-    costCap: config.costCap,
-    solvedStreak: solvedStreak(p.recentScores),
-    stopReason
-  }
-}
-
-/** El motivo de parada segun el estado actual, o null si el loop puede seguir. */
-export function nextStop(config: LoopConfig, deps: LoopDeps, p: Progress): LoopStopReason | null {
-  return loopStop({
-    cancelled: deps.isCancelled(),
-    spentSession: deps.spentSession(),
-    costCap: config.costCap,
-    cyclesDone: p.cyclesDone,
-    maxCycles: config.maxCycles,
-    recentScores: p.recentScores
-  })
 }
