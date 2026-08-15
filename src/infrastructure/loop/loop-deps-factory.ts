@@ -52,6 +52,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
     spentSession: () => spentToday(context, new Date()) - baseline,
     maxConsecutiveDenials: () => readLoopBudget(context).maxConsecutiveDenials,
     rescanEvery: () => readLoopBudget(context).rescanEvery,
+    maxConsecutiveNoCandidates: () => readLoopBudget(context).maxConsecutiveNoCandidates,
     isCancelled: () => isLoopCancelled(pid),
     wait: (ms) => waitOrCancel(pid, ms),
     emit: sendLoopStatus,

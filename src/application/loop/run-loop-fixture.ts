@@ -23,6 +23,7 @@ export function deps(over: Partial<LoopDeps> = {}): LoopDeps {
     // Cero = escanear en cada vuelta: el comportamiento previo a la cadencia,
     // que es la base contra la que se leen los testigos que no la miden.
     rescanEvery: () => 0,
+    maxConsecutiveNoCandidates: () => 99,
     isCancelled: () => false,
     wait: () => Promise.resolve(),
     emit: () => {},

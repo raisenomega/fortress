@@ -35,6 +35,8 @@ export interface LoopDeps {
   readonly maxConsecutiveDenials: () => number
   /** Integraciones que se acumulan antes de re-escanear. Tambien se relee. */
   readonly rescanEvery: () => number
+  /** Vueltas en vacio que se toleran antes de dar la baraja por agotada. */
+  readonly maxConsecutiveNoCandidates: () => number
   /** El humano intervino (toggle OFF / Detener). */
   readonly isCancelled: () => boolean
   readonly wait: (ms: number) => Promise<void>

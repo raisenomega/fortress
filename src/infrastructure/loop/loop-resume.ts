@@ -27,6 +27,7 @@ export function resumeState(context: AppContext, projectId: string): ResumeState
       // La racha y la cadencia arrancan frescas: ver por que en Progress.
       consecutiveDenials: 0,
       integrationsSinceScan: 0,
+      consecutiveNoCandidates: 0,
       score: prior.recentScores[0] ?? null
     }
   }

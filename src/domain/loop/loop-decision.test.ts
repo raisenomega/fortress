@@ -9,6 +9,8 @@ const base: LoopState = {
   maxCycles: 5,
   consecutiveDenials: 0,
   maxConsecutiveDenials: 5,
+  consecutiveNoCandidates: 0,
+  maxConsecutiveNoCandidates: 10,
   recentScores: []
 }
 
@@ -35,6 +37,10 @@ describe('loopStop', () => {
 
   it('para al alcanzar la racha de denegaciones', () => {
     expect(loopStop({ ...base, consecutiveDenials: 5 })).toBe('tope-denegaciones')
+  })
+
+  it('para cuando la baraja se agota', () => {
+    expect(loopStop({ ...base, consecutiveNoCandidates: 10 })).toBe('pool-agotado')
   })
 
   it('estar resuelto manda sobre la racha: el arco cerrado no es un desencaje', () => {

@@ -8,6 +8,7 @@ export function readLoopBudget(context: AppContext): LoopBudget {
     context.settings.get(SETTINGS_KEYS.loopCostCap),
     context.settings.get(SETTINGS_KEYS.loopMaxCycles),
     context.settings.get(SETTINGS_KEYS.loopMaxDenials),
-    context.settings.get(SETTINGS_KEYS.loopRescanEvery)
+    context.settings.get(SETTINGS_KEYS.loopRescanEvery),
+    context.settings.get(SETTINGS_KEYS.loopMaxNoCandidates)
   )
 }

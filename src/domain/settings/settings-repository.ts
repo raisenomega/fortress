@@ -15,6 +15,7 @@ export const SETTINGS_KEYS = {
   loopMaxCycles: 'loop_max_cycles',
   loopMaxDenials: 'loop_max_consecutive_denials',
   loopRescanEvery: 'loop_rescan_every',
+  loopMaxNoCandidates: 'loop_max_consecutive_no_candidates',
   genesisCostCap: 'genesis_cost_cap_usd',
   genesisMaxEpisodes: 'genesis_max_episodes',
   encryptedApiKey: 'encrypted_api_key'
@@ -37,6 +38,7 @@ const PUBLIC_KEYS: ReadonlySet<string> = new Set([
   SETTINGS_KEYS.loopMaxCycles,
   SETTINGS_KEYS.loopMaxDenials,
   SETTINGS_KEYS.loopRescanEvery,
+  SETTINGS_KEYS.loopMaxNoCandidates,
   SETTINGS_KEYS.genesisCostCap,
   SETTINGS_KEYS.genesisMaxEpisodes
 ])
