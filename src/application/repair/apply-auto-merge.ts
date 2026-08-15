@@ -31,8 +31,9 @@ export async function applyAutoMerge(
   policy: PolicyEvaluation,
   base: MergeDecision
 ): Promise<AutoMergeResult> {
+  // Aqui la politica ya dijo que si: nada de lo que salga es una denegacion suya.
   const path = mergePath(caso.proposal.state)
-  if (path === null) return { applied: false, reason: 'illegal-transition' }
+  if (path === null) return { applied: false, reason: 'illegal-transition', denial: null }
 
   const outcome = await deps.mergeApplier.apply({
     projectPath: caso.project.path,
@@ -44,11 +45,11 @@ export async function applyAutoMerge(
   if (outcome.ok) {
     await advanceProposal(ctx, caso.proposal, path, 'integracion automatica', cursor, deps.now())
     recordMergeDecision(ctx, { ...base, policy, commitSha: outcome.mergeCommitSha })
-    return { applied: true, mergeCommitSha: outcome.mergeCommitSha }
+    return { applied: true, mergeCommitSha: outcome.mergeCommitSha, denial: null }
   }
 
   const detalle = detalleDe(outcome)
   await advanceProposal(ctx, caso.proposal, ['CADUCADO'], `merge fallido — ${detalle}`, cursor, deps.now()) // prettier-ignore
   recordMergeDecision(ctx, { ...base, policy, applyError: detalle })
-  return { applied: false, reason: `merge-failed-${outcome.kind}` }
+  return { applied: false, reason: `merge-failed-${outcome.kind}`, denial: null }
 }

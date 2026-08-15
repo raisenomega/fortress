@@ -6,7 +6,6 @@ import { gitRevert, gitSnapshot } from './loop-git'
 import { loopScan } from './loop-ops'
 import { runMotorChain } from '@application/repair/run-motor-chain'
 import { describir } from '@application/repair/motor-chain-outcome'
-import { ok } from '@domain/shared/result'
 import { buildMotorChainDeps } from '../repair/motor-chain-deps'
 import { isLoopCancelled, sendLoopChunk, sendLoopStatus, waitOrCancel } from './loop-registry'
 import { withStandby, type StandbyHooks } from './loop-standby'
@@ -53,7 +52,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
         toChat(attempt > 0 ? `\n\n— Debate: intento ${attempt + 1} —\n` : '\n\n— Motor —\n')
         const vuelta = await runMotorChain(context, pid, buildMotorChainDeps())
         if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
-        return vuelta.ok ? ok(undefined) : vuelta
+        return vuelta
       }, hooks),
     verify: () => loopVerify(cwd),
     snapshot: () => {

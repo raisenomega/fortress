@@ -40,7 +40,8 @@ describe('judgeAndIntegrate: el veto corta antes de mirar la politica', () => {
 
     const result = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA })
 
-    expect(result).toMatchObject({ ok: false })
+    expect(result.omega).toMatchObject({ ok: false })
+    expect(result.merge).toBeNull() // no se planteo: no hay nada que contar
     expect(consultas()).toBe(0)
   })
 
@@ -50,7 +51,8 @@ describe('judgeAndIntegrate: el veto corta antes de mirar la politica', () => {
 
     const result = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA })
 
-    expect(result).toMatchObject({ ok: true })
+    expect(result.omega).toMatchObject({ ok: true })
+    expect(result.merge).not.toBeNull() // se planteo: el informe lo cuenta
     expect(consultas()).toBe(1)
   })
 
@@ -62,6 +64,7 @@ describe('judgeAndIntegrate: el veto corta antes de mirar la politica', () => {
 
     const result = await judgeAndIntegrate(b.context, 'prop-1', { omega: b.deps, autoMerge: rota })
 
-    expect(result).toMatchObject({ ok: true })
+    expect(result.omega).toMatchObject({ ok: true })
+    expect(result.merge).toBeNull()
   })
 })

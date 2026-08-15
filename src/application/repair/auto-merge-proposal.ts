@@ -21,14 +21,14 @@ export async function autoMergeProposal(
   input: AutoMergeInput
 ): Promise<AutoMergeResult> {
   const reunido = await gatherCase(ctx, input.proposalId)
-  if (!reunido.ok) return { applied: false, reason: reunido.reason }
+  if (!reunido.ok) return { applied: false, reason: reunido.reason, denial: null }
 
   const caso = reunido.caso
   const base = decisionBase(caso)
   const config = deps.readConfig(caso.project.path)
   if (config.kind === 'invalid') {
     recordMergeDecision(ctx, { ...base, configError: config.reason })
-    return { applied: false, reason: 'config-invalid' }
+    return { applied: false, reason: 'config-invalid', denial: null }
   }
 
   const { state, severity } = caso
@@ -37,7 +37,8 @@ export async function autoMergeProposal(
   if (!policy.allowed) {
     recordMergeDecision(ctx, { ...base, policy })
     const razon = `policy-blocked-${policy.conditionFailed}`
-    return { applied: false, reason: config.kind === 'valid' ? razon : 'not-configured' }
+    const reason = config.kind === 'valid' ? razon : 'not-configured'
+    return { applied: false, reason, denial: policy.conditionFailed }
   }
 
   return applyAutoMerge(ctx, deps, caso, policy, base)

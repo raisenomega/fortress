@@ -15,6 +15,10 @@ import { IPC } from './channels'
  * repo vivo, y dejarlo fuera abriria la ventana justo donde otra corrida podria
  * empezar. Lo que DECIDE si se integra vive en la capa de aplicacion; aqui solo
  * se arman las dependencias reales y se sostiene el carril del proyecto.
+ *
+ * El caso de uso informa de las dos cosas que hace; por el puente viaja solo el
+ * juicio. La adaptacion vive aqui, en la frontera con el transporte, y no
+ * empobreciendo el retorno de dentro para que quepa en el contrato de fuera.
  */
 export function registerRepairOmegaHandler(): void {
   ipcMain.handle(
@@ -27,7 +31,7 @@ export function registerRepairOmegaHandler(): void {
       if (busy !== null) return { ok: false, reason: busy }
       try {
         const deps = { omega: buildOmegaDeps(), autoMerge: buildAutoMergeDeps() }
-        return await judgeAndIntegrate(context, proposal.id, deps)
+        return (await judgeAndIntegrate(context, proposal.id, deps)).omega
       } finally {
         endRun(proposal.projectId)
       }

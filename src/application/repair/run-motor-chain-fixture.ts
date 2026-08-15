@@ -21,9 +21,13 @@ export const compila = (r: unknown): void =>
   void vi.spyOn(compilar, 'runGate').mockResolvedValue(r as never)
 export const juzga = (r: unknown): void => void vi.spyOn(juzgar, 'judgeAndIntegrate').mockResolvedValue(r as never) // prettier-ignore
 
+/** El juicio aprueba y la politica freno con esta condicion (null: ni se miro). */
+export const frena = (denial: unknown): void =>
+  juzga({ omega: { ok: true }, merge: { applied: false, denial } })
+
 export const verde = (): void => {
   elige(PROPUESTA)
   genera({ ok: true })
   compila({ ok: true })
-  juzga({ ok: true })
+  juzga({ omega: { ok: true }, merge: null })
 }
