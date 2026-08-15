@@ -1,24 +1,20 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
-import type { Analyst } from '@domain/repair/analysis'
+import type { SelfNoteDraft } from '@domain/system/self-observation'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
 import type { AppContext } from '../context'
+import { analistaFake } from './plan-repair-analyst-fake'
 
-/** Un hallazgo ACTIVE y abierto, listo para ser candidato de C1. */
-export function hallazgo(id: string, file: string): FindingMemory {
-  return {
-    id, identity: `LOW|${file}|t-${id}`, severity: 'LOW', title: `t-${id}`, file, line: 1,
-    status: 'open', lifecycle: 'ACTIVE',
-    firstSeen: '2026-08-08T10:00:00Z', lastSeen: '2026-08-08T10:00:00Z', resolvedAt: null
-  } // prettier-ignore
-}
+export { hallazgo } from './plan-repair-analyst-fake'
 
 export interface Bench {
   readonly context: AppContext
   readonly inserted: Proposal[]
   readonly patches: Array<ProposalPatch & { id: string }>
   readonly events: ProposalEvent[]
+  /** Auto-observaciones asentadas durante la corrida. */
+  readonly observadas: unknown[]
 }
 
 interface Opciones {
@@ -31,6 +27,8 @@ interface Opciones {
   readonly sha?: string | null
   /** true: el libro de vida LANZA al asentar (probar que no revierte nada). */
   readonly eventLogThrows?: boolean
+  /** Lo que el analista fake devolvera en `notes` (sus apuntes sobre FORTRESS). */
+  readonly notes?: readonly SelfNoteDraft[]
 }
 
 /** Contexto falso completo: registra inserciones, patches y eventos. */
@@ -38,18 +36,11 @@ export function bench(opts: Opciones): Bench {
   const inserted: Proposal[] = []
   const patches: Array<ProposalPatch & { id: string }> = []
   const events: ProposalEvent[] = []
-  const analyst: Analyst = {
-    study: (target) =>
-      Promise.resolve({
-        analysis: {
-          target, status: opts.verdictStatus ?? 'REAL', whatToChange: 'w', where: 'd',
-          patternToCopy: 'p', doNotTouch: 'n', risk: 'riesgo bajo', tokensUsed: 7
-        }, // prettier-ignore
-        runMeta: { tokensUsed: 7, durationMs: 99, startedAt: 1, endedAt: 100 }
-      })
-  }
+  const observadas: unknown[] = []
+  const analyst = analistaFake(opts.verdictStatus ?? 'REAL', opts.notes)
   const context = {
-    projects: { findById: () => ({ id: 'p1', path: '/repo/p1' }) },
+    projects: { findById: () => ({ id: 'p1', path: '/repo/p1', name: 'Nucleo' }) },
+    selfObservations: { add: (o: unknown): void => void observadas.push(o) },
     scans: { listByProject: () => [{ id: 'scan-1' }] },
     findings: { listMemory: () => opts.findings },
     repairProposals: {
@@ -71,5 +62,5 @@ export function bench(opts: Opciones): Bench {
     analystFor: () => analyst,
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha)
   } as unknown as AppContext
-  return { context, inserted, patches, events }
+  return { context, inserted, patches, events, observadas }
 }

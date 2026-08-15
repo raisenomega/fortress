@@ -29,10 +29,15 @@ export interface SelfObservation {
   readonly createdAt: string
 }
 
-/** Lo que aporta el parser antes de persistir (id/fecha/estado los pone la base). */
-export interface NewSelfObservation {
-  readonly sourceProject: string
+/**
+ * La observacion tal como la deja el agente. No sabe en que proyecto trabaja
+ * —eso lo sabe quien lo lanzo—, asi que el origen se le pone despues.
+ */
+export interface SelfNoteDraft {
   readonly kind: ObservationKind
   readonly area: string
   readonly note: string
 }
+
+/** Lo que aporta el parser antes de persistir (id/fecha/estado los pone la base). */
+export type NewSelfObservation = SelfNoteDraft & { readonly sourceProject: string }
