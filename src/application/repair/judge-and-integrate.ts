@@ -1,11 +1,24 @@
 import type { AppContext } from '../context'
 import { autoMergeProposal } from './auto-merge-proposal'
-import type { AutoMergeDeps } from './auto-merge-types'
+import type { AutoMergeDeps, AutoMergeResult } from './auto-merge-types'
 import { runOmega, type OmegaDeps, type RunOmegaResult } from './run-omega'
 
 export interface JudgeDeps {
   readonly omega: OmegaDeps
   readonly autoMerge: AutoMergeDeps
+}
+
+/**
+ * Las dos cosas que hace, cada una por su nombre. Devolver solo el juicio era
+ * un informe parcial: quien llame necesita saber tambien si la integracion se
+ * planteo y con que resultado. `merge` es null cuando ni se planteo.
+ *
+ * El puente IPC sigue viajando `omega` a secas: el handler adapta. Enriquecer
+ * el retorno hacia dentro no tiene por que mover el contrato de fuera.
+ */
+export interface JudgeResult {
+  readonly omega: RunOmegaResult
+  readonly merge: AutoMergeResult | null
 }
 
 /**
@@ -28,14 +41,14 @@ export async function judgeAndIntegrate(
   ctx: AppContext,
   proposalId: string,
   deps: JudgeDeps
-): Promise<RunOmegaResult> {
-  const result = await runOmega(ctx, proposalId, deps.omega)
-  if (!result.ok || result.verdict.veredicto_global !== 'APROBADO') return result
+): Promise<JudgeResult> {
+  const omega = await runOmega(ctx, proposalId, deps.omega)
+  if (!omega.ok || omega.verdict.veredicto_global !== 'APROBADO') return { omega, merge: null }
 
   try {
-    await autoMergeProposal(ctx, deps.autoMerge, { proposalId })
+    return { omega, merge: await autoMergeProposal(ctx, deps.autoMerge, { proposalId }) }
   } catch (error) {
     console.error('[motor] fallo la integracion automatica', proposalId, error)
+    return { omega, merge: null }
   }
-  return result
 }

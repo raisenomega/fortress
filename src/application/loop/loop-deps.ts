@@ -1,4 +1,5 @@
 import type { LoopStatus } from '@domain/loop/loop-status'
+import type { ChainOutcome } from '../repair/motor-chain-outcome'
 
 /** Lo fijo de una sesion de loop. */
 export interface LoopConfig {
@@ -15,8 +16,12 @@ export interface LoopConfig {
 export interface LoopDeps {
   /** Escanea y devuelve el score (0-100). */
   readonly scan: () => Promise<number>
-  /** Fase de reparacion: el agente edita. attempt>0 es una ronda del debate. */
-  readonly fix: (attempt: number) => Promise<void>
+  /**
+   * Fase de reparacion: una vuelta del motor. attempt>0 es una ronda del debate.
+   * Devuelve DONDE acabo la vuelta; el ciclo aun no lo mira, pero sin este dato
+   * no se puede contar propuestas cerradas ni denegaciones seguidas.
+   */
+  readonly fix: (attempt: number) => Promise<ChainOutcome>
   /** Verifica el arbol tras reparar. false = build roto. */
   readonly verify: () => Promise<boolean>
   /** Checkpoint (git) antes de reparar. */

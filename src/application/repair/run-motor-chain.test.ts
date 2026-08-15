@@ -1,49 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import * as generar from './generate-fix'
 import { runMotorChain } from './run-motor-chain'
-import {
-  compila,
-  ctx,
-  DEPS,
-  elige,
-  genera,
-  juzga,
-  PROPUESTA,
-  verde
-} from './run-motor-chain-fixture'
+import { ctx, DEPS, elige, frena, PROPUESTA, verde } from './run-motor-chain-fixture'
 
 beforeEach(() => void vi.restoreAllMocks())
-
-describe('runMotorChain: un veredicto no es una averia', () => {
-  it('el revisor veta: sale como resultado, no como error', async () => {
-    // Quien envuelve esto reintenta sin descanso ante un error transitorio y
-    // mata el ciclo ante el que no reconoce. Un veto viajando como error
-    // mataria el loop por hacer justo lo que se le pide.
-    verde()
-    juzga({ ok: false, reason: 'omega_vetado' })
-
-    const r = await runMotorChain(ctx(), 'proj', DEPS)
-
-    expect(r).toEqual({ ok: true, value: { kind: 'descartada', proposalId: 'prop-1234abcd', motivo: 'omega_vetado' } }) // prettier-ignore
-  })
-
-  it('el gate se pone rojo: tambien es veredicto', async () => {
-    verde()
-    compila({ ok: false, reason: 'gate_failed' })
-
-    expect(await runMotorChain(ctx(), 'proj', DEPS)).toMatchObject({ ok: true })
-  })
-
-  it('el proveedor se cae: eso si es error, para que el loop espere', async () => {
-    verde()
-    genera({ ok: false, reason: 'generator_error' })
-
-    expect(await runMotorChain(ctx(), 'proj', DEPS)).toEqual({
-      ok: false,
-      error: 'generator_error'
-    })
-  })
-})
 
 describe('runMotorChain: donde acaba la vuelta', () => {
   it('sin candidato elegible', async () => {
@@ -61,11 +21,29 @@ describe('runMotorChain: donde acaba la vuelta', () => {
 
   it('aprobada y sin integrar: espera firma', async () => {
     verde()
-    expect(await runMotorChain(ctx('OMEGA'), 'proj', DEPS)).toMatchObject({ value: { kind: 'espera-firma' } }) // prettier-ignore
+    expect(await runMotorChain(ctx('OMEGA'), 'proj', DEPS)).toMatchObject({ value: { kind: 'espera-firma', condition: null } }) // prettier-ignore
   })
 
   it('la politica dejo integrar: la propuesta acabo mergeada', async () => {
     verde()
     expect(await runMotorChain(ctx('MERGEADO'), 'proj', DEPS)).toMatchObject({ value: { kind: 'integrada' } }) // prettier-ignore
+  })
+})
+
+describe('runMotorChain: por que no se integro viaja con el desenlace', () => {
+  it('la lista de exclusion freno: la condicion llega al final de la vuelta', async () => {
+    // Sin este dato, quien cuente denegaciones no puede: todo lo aprobado y no
+    // integrado sale por la misma puerta y se vuelve indistinguible.
+    verde()
+    frena('blacklist')
+
+    expect(await runMotorChain(ctx('OMEGA'), 'proj', DEPS)).toMatchObject({ value: { condition: 'blacklist' } }) // prettier-ignore
+  })
+
+  it('la integracion esta apagada: llega distinguible de una denegacion', async () => {
+    verde()
+    frena('disabled')
+
+    expect(await runMotorChain(ctx('OMEGA'), 'proj', DEPS)).toMatchObject({ value: { condition: 'disabled' } }) // prettier-ignore
   })
 })

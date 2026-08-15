@@ -1,3 +1,4 @@
+import type { FailedCondition } from '@domain/repair/auto-merge-policy'
 import type { RejectionReason } from '@domain/repair/repair-rejection'
 
 /**
@@ -9,7 +10,12 @@ export type ChainOutcome =
   | { readonly kind: 'sin-candidato' }
   | { readonly kind: 'obsoleto'; readonly proposalId: string }
   | { readonly kind: 'descartada'; readonly proposalId: string; readonly motivo: string }
-  | { readonly kind: 'espera-firma'; readonly proposalId: string }
+  | {
+      readonly kind: 'espera-firma'
+      readonly proposalId: string
+      /** Que freno la integracion, o null si no se llego a mirar la politica. */
+      readonly condition: FailedCondition | null
+    }
   | { readonly kind: 'integrada'; readonly proposalId: string }
 
 /**
@@ -24,6 +30,22 @@ const AVERIAS: readonly RejectionReason[] = ['generator_error', 'omega_timeout',
 
 export function esAveria(motivo: string): boolean {
   return (AVERIAS as readonly string[]).includes(motivo)
+}
+
+/**
+ * Las cuatro condiciones que son una DENEGACION: la politica estaba activa y
+ * freno por un criterio concreto. Se distinguen de la quinta, `disabled`, que
+ * es la integracion automatica apagada — el proyecto que la apago quiere que
+ * todo espere firma, y cada propuesta aprobada saliendo por esa puerta es el
+ * comportamiento pedido, no un bloqueo. Contarla seria frenar al operador por
+ * haber elegido bien.
+ *
+ * `null` tampoco cuenta: ahi ni se llego a mirar la politica.
+ */
+const DENEGACIONES: readonly FailedCondition[] = ['severity', 'diff', 'files', 'blacklist']
+
+export function esDenegacion(condition: FailedCondition | null): boolean {
+  return condition !== null && DENEGACIONES.includes(condition)
 }
 
 /** Como se cuenta la vuelta en el chat del proyecto. */

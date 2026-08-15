@@ -1,3 +1,4 @@
+import type { FailedCondition } from '@domain/repair/auto-merge-policy'
 import type { ConfigState } from '@domain/repair/auto-merge-config'
 import type { MergeApplier } from '@domain/repair/merge-applier'
 
@@ -15,6 +16,13 @@ export interface AutoMergeResult {
   /** Por que no se aplico. Ausente cuando se aplico. */
   readonly reason?: string
   readonly mergeCommitSha?: string
+  /**
+   * La condicion de politica que freno, TIPADA. `reason` la interpola en un
+   * texto y ahi deja de ser distinguible; quien decida a partir de ella —el
+   * ciclo, contando denegaciones— necesita el valor, no el relato. null cuando
+   * no se llego a evaluar la politica o cuando si se integro.
+   */
+  readonly denial: FailedCondition | null
 }
 
 export interface AutoMergeDeps {

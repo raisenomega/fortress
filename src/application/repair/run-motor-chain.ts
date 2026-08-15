@@ -48,9 +48,13 @@ export async function runMotorChain(
   if (!gate.ok) return cortar(proposal.id, gate.reason)
 
   const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge)
-  if (!juicio.ok) return cortar(proposal.id, juicio.reason)
+  if (!juicio.omega.ok) return cortar(proposal.id, juicio.omega.reason)
 
-  const estado = ctx.repairProposals.findById(proposal.id)?.state
-  const kind = estado === 'MERGEADO' ? 'integrada' : 'espera-firma'
-  return ok({ kind, proposalId: proposal.id })
+  const proposalId = proposal.id
+  if (ctx.repairProposals.findById(proposalId)?.state === 'MERGEADO') {
+    return ok({ kind: 'integrada', proposalId })
+  }
+  // La condicion viaja tipada hasta aqui: quien cuente denegaciones necesita
+  // saber CUAL freno, y `espera-firma` a secas las hacia indistinguibles.
+  return ok({ kind: 'espera-firma', proposalId, condition: juicio.merge?.denial ?? null })
 }
