@@ -2,6 +2,8 @@ import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import type { Analyst } from '@domain/repair/analysis'
 import { toAnalysis, type RunOut } from './parse-analysis'
+import { totalTokens } from '@domain/telemetry/token-usage'
+import { parseUsage } from '../claude-code/parse-usage'
 
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
@@ -23,11 +25,9 @@ function run(bin: string, cwd: string, prompt: string): Promise<RunOut> {
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.on('close', () => {
       try {
-        const j = JSON.parse(out) as { result?: string; usage?: Record<string, number> }
-        const u = j.usage ?? {}
-        const tokens =
-          (u.input_tokens ?? 0) + (u.output_tokens ?? 0) + (u.cache_read_input_tokens ?? 0)
-        resolve({ result: j.result ?? '', tokens })
+        const j = JSON.parse(out) as Record<string, unknown>
+        const texto = typeof j.result === 'string' ? j.result : ''
+        resolve({ result: texto, tokens: totalTokens(parseUsage(j)) })
       } catch {
         resolve({ result: out, tokens: 0 })
       }

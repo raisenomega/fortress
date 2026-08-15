@@ -1,5 +1,7 @@
 import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
+import { totalTokens } from '@domain/telemetry/token-usage'
+import { parseUsage } from '../claude-code/parse-usage'
 
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
@@ -50,9 +52,8 @@ export function createGraphGenerator(claudeBin: string, timeoutMs = TIMEOUT_MS):
           clearTimeout(timer)
           let tokens = 0
           try {
-            const j = JSON.parse(out) as { usage?: Record<string, number> }
-            const u = j.usage ?? {}
-            tokens = (u.input_tokens ?? 0) + (u.output_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) // prettier-ignore
+            const j = JSON.parse(out) as Record<string, unknown>
+            tokens = totalTokens(parseUsage(j))
           } catch {
             // Sin JSON no hay factura: tokensUsed queda undefined, no inventado.
           }
