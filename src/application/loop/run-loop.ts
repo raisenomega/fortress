@@ -1,6 +1,5 @@
 import type { LoopStopReason } from '@domain/loop/loop-decision'
 import type { LoopPhase } from '@domain/loop/loop-status'
-import { runDebate } from './debate'
 import type { LoopConfig, LoopDeps } from './loop-deps'
 import { freshProgress, nextStop, recordScore, statusOf, type Progress } from './loop-progress'
 
@@ -36,7 +35,6 @@ export async function runLoop(
     await deps.wait(WAIT_AFTER_SCAN)
     if (deps.isCancelled()) return halt('detenido')
 
-    const before = p.recentScores[0]
     emit('reparando')
     await deps.snapshot()
     await deps.fix(0)
@@ -44,14 +42,10 @@ export async function runLoop(
     if (!(await deps.verify())) return await deps.revert().then(() => halt('build-roto'))
 
     emit('escaneando')
-    let after = await deps.scan()
-    // El arreglo se mide por el re-escaneo. Si baja, se abre el DEBATE: prueba
-    // alternativas y se queda con la que mejore; si ninguna, se rinde y para.
-    if (after < before) {
-      const outcome = await runDebate(config, deps, p, before)
-      if (outcome.score === null) return halt(outcome.reason ?? 'sin-solucion')
-      after = outcome.score
-    }
+    // El re-escaneo ya no juzga el arreglo: lo juzgan el gate y el revisor,
+    // dentro del worktree y antes de que nada toque este arbol. Aqui solo se
+    // anota, y el arco de los ultimos scores dice si el conjunto va a mejor.
+    const after = await deps.scan()
 
     p.cyclesDone += 1
     record(after)
