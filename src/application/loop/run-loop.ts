@@ -4,12 +4,11 @@ import type { LoopConfig, LoopDeps } from './loop-deps'
 import { nextStop, statusOf } from './loop-projection'
 import {
   anotarDenegacion,
-  freshProgress,
-  recordScore,
+  anotarSinCandidato,
   reiniciarCadencia,
-  tocaEscanear,
-  type Progress
-} from './loop-progress'
+  tocaEscanear
+} from './loop-counters'
+import { freshProgress, recordScore, type Progress } from './loop-progress'
 
 const WAIT_AFTER_SCAN = 5000
 const WAIT_AFTER_FIX = 10000
@@ -51,6 +50,7 @@ export async function runLoop(
     // no movio el expediente de nadie y no debe gastar tope.
     if (vuelta.kind !== 'sin-candidato') p.cyclesDone += 1
     anotarDenegacion(p, vuelta)
+    anotarSinCandidato(p, vuelta)
 
     // El re-escaneo ya no juzga el arreglo —de eso van el gate y el revisor,
     // dentro del worktree—: mide el conjunto. Por eso se espacia hasta que hay

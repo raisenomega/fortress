@@ -34,7 +34,7 @@ export function LoopToggle({ project }: LoopToggleProps): React.JSX.Element {
       api().settings.get(SETTINGS_KEYS.loopCostCap),
       api().settings.get(SETTINGS_KEYS.loopMaxCycles)
       // Las valvulas no se piden: encender solo depende de los frenos duros.
-    ]).then(([cap, c]) => setConfigured(loopConfigured(parseLoopBudget(cap, c, null, null))))
+    ]).then(([cap, c]) => setConfigured(loopConfigured(parseLoopBudget(cap, c, null, null, null))))
   }, [project.id])
 
   const on = project.loopEnabled

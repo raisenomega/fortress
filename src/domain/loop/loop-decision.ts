@@ -8,6 +8,7 @@ export type LoopStopReason =
   | 'tope-gasto'
   | 'tope-ciclos'
   | 'tope-denegaciones'
+  | 'pool-agotado'
   | 'resuelto'
   | 'build-roto'
   | 'degradado'
@@ -25,6 +26,9 @@ export interface LoopState {
   /** Propuestas SEGUIDAS que la politica denego sin integrar. */
   readonly consecutiveDenials: number
   readonly maxConsecutiveDenials: number
+  /** Vueltas SEGUIDAS en las que no habia nada que reparar. */
+  readonly consecutiveNoCandidates: number
+  readonly maxConsecutiveNoCandidates: number
   /** Scores de los ultimos escaneos, del mas reciente al mas antiguo. */
   readonly recentScores: readonly number[]
 }
@@ -62,6 +66,7 @@ export function loopStop(state: LoopState): LoopStopReason | null {
   if (solved(state.recentScores)) return 'resuelto'
   // Va DETRAS de resuelto: llegar a 100 tres veces seguidas es haber terminado,
   // y no tiene sentido anunciar un desencaje de politica sobre un arco cerrado.
+  if (state.consecutiveNoCandidates >= state.maxConsecutiveNoCandidates) return 'pool-agotado'
   if (state.consecutiveDenials >= state.maxConsecutiveDenials) return 'tope-denegaciones'
   return null
 }

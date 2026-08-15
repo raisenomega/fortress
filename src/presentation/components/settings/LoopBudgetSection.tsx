@@ -1,4 +1,8 @@
-import { DEFAULT_MAX_DENIALS, DEFAULT_RESCAN_EVERY } from '@domain/settings/loop-budget'
+import {
+  DEFAULT_MAX_DENIALS,
+  DEFAULT_MAX_NO_CANDIDATES,
+  DEFAULT_RESCAN_EVERY
+} from '@domain/settings/loop-budget'
 import { SETTINGS_KEYS } from '@domain/settings/settings-repository'
 import { BudgetField } from './BudgetField'
 
@@ -42,6 +46,12 @@ export function LoopBudgetSection(): React.JSX.Element {
           label="Volver a escanear cada"
           fallback={DEFAULT_RESCAN_EVERY}
           unit="integraciones"
+        />
+        <BudgetField
+          settingKey={SETTINGS_KEYS.loopMaxNoCandidates}
+          label="Vueltas en vacio antes de parar"
+          fallback={DEFAULT_MAX_NO_CANDIDATES}
+          unit="vueltas"
         />
       </div>
     </section>
