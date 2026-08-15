@@ -27,6 +27,12 @@ export interface LoopDeps {
   readonly fix: () => Promise<ChainOutcome>
   /** Gasto acumulado de la sesion de loop, en dolares. */
   readonly spentSession: () => number
+  /**
+   * Denegaciones seguidas que se toleran. Se relee en cada vuelta, como el
+   * gasto: una sesion dura horas y el operador puede ajustar el tope mientras
+   * corre. Congelarlo al arrancar dejaria al loop obedeciendo ajustes viejos.
+   */
+  readonly maxConsecutiveDenials: () => number
   /** El humano intervino (toggle OFF / Detener). */
   readonly isCancelled: () => boolean
   readonly wait: (ms: number) => Promise<void>

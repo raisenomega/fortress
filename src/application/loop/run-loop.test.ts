@@ -1,35 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { LoopDeps } from './loop-deps'
 import { runLoop } from './run-loop'
-
-const config = { projectId: 'p', costCap: 30, maxCycles: 5 }
-
-/** Una vuelta que cerro una propuesta: lo normal, y lo que gasta tope. */
-const CERRADA = { kind: 'integrada', proposalId: 'prop-1' }
-const SIN_CANDIDATO = { kind: 'sin-candidato' }
-
-function deps(over: Partial<LoopDeps> = {}): LoopDeps {
-  return {
-    scan: vi.fn().mockResolvedValue(50),
-    fix: vi.fn().mockResolvedValue(CERRADA),
-    spentSession: () => 0,
-    isCancelled: () => false,
-    wait: () => Promise.resolve(),
-    emit: () => {},
-    persist: () => {},
-    ...over
-  }
-}
+import { CERRADA, config, deps, SIN_CANDIDATO } from './run-loop-fixture'
 
 describe('runLoop', () => {
   it('para en 3 escaneos 100 seguidos, sin arreglar de mas', async () => {
     const fix = vi.fn().mockResolvedValue(CERRADA)
     const reason = await runLoop(config, deps({ scan: vi.fn().mockResolvedValue(100), fix }))
     expect(reason).toBe('resuelto')
-    expect(fix).toHaveBeenCalledTimes(2) // arreglo en los dos primeros ciclos, no en el tercero
+    expect(fix).toHaveBeenCalledTimes(2) // arreglo en las dos primeras vueltas, no en la tercera
   })
 
-  it('para por tope de ciclos cuando el score no llega a 100', async () => {
+  it('para por tope de propuestas cuando el score no llega a 100', async () => {
     expect(await runLoop({ ...config, maxCycles: 2 }, deps())).toBe('tope-ciclos')
   })
 
