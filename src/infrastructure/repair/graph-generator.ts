@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
-import { totalTokens } from '@domain/telemetry/token-usage'
+import { EMPTY_USAGE, totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 import { parseUsage } from '../claude-code/parse-usage'
 
 const GRAPH = JSON.stringify({
@@ -32,8 +32,9 @@ export function createGraphGenerator(claudeBin: string, timeoutMs = TIMEOUT_MS):
   return {
     generate: (worktreePath, prompt) => {
       const startedAt = Date.now()
-      const meta = (tokens: number): AnalystRunMeta => ({
-        tokensUsed: tokens > 0 ? tokens : undefined,
+      const meta = (usage: TokenUsage): AnalystRunMeta => ({
+        tokensUsed: totalTokens(usage) > 0 ? totalTokens(usage) : undefined,
+        usage,
         durationMs: Date.now() - startedAt,
         startedAt,
         endedAt: Date.now()
@@ -45,24 +46,24 @@ export function createGraphGenerator(claudeBin: string, timeoutMs = TIMEOUT_MS):
         let out = ''
         const timer = setTimeout(() => {
           child.kill('SIGKILL')
-          resolve({ ok: false, error: `timeout tras ${Math.round(timeoutMs / 60000)} min`, runMeta: meta(0) }) // prettier-ignore
+          resolve({ ok: false, error: `timeout tras ${Math.round(timeoutMs / 60000)} min`, runMeta: meta(EMPTY_USAGE) }) // prettier-ignore
         }, timeoutMs)
         child.stdout.on('data', (d: Buffer) => (out += d.toString()))
         child.on('close', (code) => {
           clearTimeout(timer)
-          let tokens = 0
+          let usage = EMPTY_USAGE
           try {
             const j = JSON.parse(out) as Record<string, unknown>
-            tokens = totalTokens(parseUsage(j))
+            usage = parseUsage(j)
           } catch {
             // Sin JSON no hay factura: tokensUsed queda undefined, no inventado.
           }
-          if (code === 0) resolve({ ok: true, runMeta: meta(tokens) })
-          else resolve({ ok: false, error: `el generador salio con codigo ${code}`, runMeta: meta(tokens) }) // prettier-ignore
+          if (code === 0) resolve({ ok: true, runMeta: meta(usage) })
+          else resolve({ ok: false, error: `el generador salio con codigo ${code}`, runMeta: meta(usage) }) // prettier-ignore
         })
         child.on('error', (error) => {
           clearTimeout(timer)
-          resolve({ ok: false, error: error.message, runMeta: meta(0) })
+          resolve({ ok: false, error: error.message, runMeta: meta(EMPTY_USAGE) })
         })
       })
     }

@@ -9,6 +9,7 @@ import { selectTarget, type Candidate } from '@domain/repair/select-target'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
+import { recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
 
 /** Candidatos: ACTIVE y abiertos, menos los declarados OBSOLETOS bajo el
@@ -47,6 +48,7 @@ export async function planRepair(context: AppContext, projectId: string): Promis
   await recordElegido(context.eventLog, proposal, scanId)
 
   const result = await analyzeTarget(context.analystFor(project.path), selection)
+  recordMotorRun(context, projectId, null, result.runMeta)
   const verdict: AnalysisVerdict = isActionable(result.analysis) ? 'REAL' : 'OBSOLETO'
   const state: ProposalState = verdict === 'REAL' ? 'ANALIZADO' : 'CADUCADO'
   if (!canTransition(proposal.state, state)) return proposal

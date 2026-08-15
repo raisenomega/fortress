@@ -10,6 +10,7 @@ import type { FailFn } from './generate-fail'
 import { prepareWorktree } from './generate-setup'
 import { loadAnalysis } from './load-analysis'
 import { emitGeneratorRun, emitOutcome } from './record-generate-events'
+import { recordMotorRun } from './record-motor-run'
 
 /**
  * C3 — GENERAR: worktree aislado sobre base_sha, generador con cwd anclado,
@@ -31,6 +32,7 @@ export async function generateFix(
 
   const result = await deps.generator.generate(worktreePath, buildGeneratorPrompt(a.analysis))
   await emitGeneratorRun(ctx.eventLog, a.cursor, a.proposal.id, result.runMeta)
+  recordMotorRun(ctx, a.proposal.projectId, null, result.runMeta, !result.ok)
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
   if (!result.ok) return fail('generator_error', { error: result.error }, true)
 
