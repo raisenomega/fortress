@@ -1,9 +1,9 @@
-import { useEffect } from 'react'
-import { loadRepair, proposeRepair } from '../../services/repair-service'
+import { proposeRepair } from '../../services/repair-service'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
 import { Icon } from '../common/Icon'
 import { RepairProposalRow } from './RepairProposalRow'
+import { useRepairFeed } from '../../hooks/useRepairFeed'
 
 /**
  * Motor de reparacion del proyecto ACTIVO: C1 elige el hallazgo mas contenido,
@@ -23,9 +23,7 @@ export function MotorView(): React.JSX.Element {
   const findings = useRepairStore((state) => state.findings)
   const busy = useRepairStore((state) => state.busy)
 
-  useEffect(() => {
-    if (projectId !== null) void loadRepair(projectId)
-  }, [projectId])
+  useRepairFeed(projectId)
 
   const alDia = cargado === projectId
   const findingById = new Map(findings.map((finding) => [finding.id, finding]))

@@ -22,6 +22,7 @@ import { createSqliteSelfObservationRepository } from './sqlite-self-observation
 import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
 import { createSqliteQualityHistoryRepository } from './sqlite-quality-history-repository'
+import { createRepairNotifier } from '../repair/repair-notifier'
 import { createProposalEventLog } from './proposal-event-log'
 import { createSqliteProposalEventRepository } from './sqlite-proposal-event-repository'
 import { createSqliteGraphStateRepository } from './sqlite-graph-state-repository'
@@ -37,6 +38,7 @@ export function getAppContext(): AppContext {
 
   const db = getDatabase()
   const settings = createSqliteSettingsRepository(db)
+  const propuestas = createSqliteRepairProposalRepository(db)
 
   context = {
     projects: createSqliteProjectRepository(db),
@@ -44,8 +46,8 @@ export function getAppContext(): AppContext {
     fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),
     qualityHistory: createSqliteQualityHistoryRepository(db),
-    repairProposals: createSqliteRepairProposalRepository(db),
-    eventLog: createProposalEventLog(createSqliteProposalEventRepository(db)),
+    repairProposals: propuestas,
+    eventLog: createProposalEventLog(createSqliteProposalEventRepository(db), createRepairNotifier(propuestas)), // prettier-ignore
     analystFor: (projectPath) => createGraphAnalyst(CLAUDE_BIN, projectPath),
     headSha,
     graphState: createSqliteGraphStateRepository(db),
