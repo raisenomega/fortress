@@ -20,11 +20,11 @@ export interface LoopDeps {
   /** Escanea y devuelve el score (0-100). */
   readonly scan: () => Promise<number>
   /**
-   * Fase de reparacion: una vuelta del motor. attempt>0 es una ronda del debate.
-   * Devuelve DONDE acabo la vuelta; el ciclo aun no lo mira, pero sin este dato
-   * no se puede contar propuestas cerradas ni denegaciones seguidas.
+   * Fase de reparacion: una vuelta del motor. Devuelve DONDE acabo, que es lo
+   * que distingue una vuelta que cerro una propuesta de una que no encontro
+   * nada que reparar.
    */
-  readonly fix: (attempt: number) => Promise<ChainOutcome>
+  readonly fix: () => Promise<ChainOutcome>
   /** Gasto acumulado de la sesion de loop, en dolares. */
   readonly spentSession: () => number
   /** El humano intervino (toggle OFF / Detener). */

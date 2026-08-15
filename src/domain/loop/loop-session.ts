@@ -2,7 +2,7 @@
  * Estado PERSISTIDO de una sesion de loop, para que sobreviva a reinicios de la
  * app o de la sesion de la cuenta. Aislado por proyecto: una fila por proyecto.
  * Al arrancar, un proyecto con el loop encendido y sesion activa se reanuda
- * desde aqui —mismos ciclos hechos, mismos scores— asi que nada se pierde.
+ * desde aqui —mismas propuestas cerradas, mismos scores— y nada se pierde.
  */
 export interface LoopSession {
   readonly projectId: string

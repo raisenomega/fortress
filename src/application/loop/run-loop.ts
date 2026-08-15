@@ -37,7 +37,7 @@ export async function runLoop(
     if (deps.isCancelled()) return halt('detenido')
 
     emit('reparando')
-    await deps.fix(0)
+    const vuelta = await deps.fix()
 
     emit('escaneando')
     // El re-escaneo ya no juzga el arreglo: lo juzgan el gate y el revisor,
@@ -45,7 +45,10 @@ export async function runLoop(
     // anota, y el arco de los ultimos scores dice si el conjunto va a mejor.
     const after = await deps.scan()
 
-    p.cyclesDone += 1
+    // El tope cuenta PROPUESTAS cerradas, no vueltas. Una vuelta sin candidato
+    // no movio el expediente de nadie y no debe gastar tope; lo que la acota
+    // entonces es el freno de gasto, que el escaneo sigue consumiendo.
+    if (vuelta.kind !== 'sin-candidato') p.cyclesDone += 1
     record(after)
     emit('esperando')
     await deps.wait(WAIT_AFTER_FIX)
