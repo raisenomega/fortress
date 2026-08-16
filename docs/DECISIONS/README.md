@@ -99,6 +99,9 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-058](adr-058-capas-de-exclusion-explicitas.md) | Cada capa de exclusión declara su propia lista | 2026-08-12 | Aceptada | Empaquetado |
 | [ADR-059](adr-059-capas-de-estado-no-heredan.md) | Ninguna capa hereda estado de otra por proximidad conceptual | 2026-08-13 | Aceptada | Arquitectura |
 | [ADR-060](adr-060-auto-merge-loop.md) | Merge automático bajo política firmada en modo autónomo | 2026-08-13 | Aceptada | Motor autónomo |
+| [ADR-061](adr-061-modo-autonomo-con-la-disciplina-del-motor.md) | El modo autónomo repara con la disciplina del motor | 2026-08-16 | Aceptada | Motor autónomo |
+| [ADR-062](adr-062-deliberacion-multi-agente-pospuesta.md) | La deliberación entre varios agentes queda pospuesta | 2026-08-16 | Aceptada | Motor autónomo |
+| [ADR-063](adr-063-motor-proyecto-activo.md) | El motor sale del repo propio y habla del proyecto activo | 2026-08-16 | Aceptada | Motor |
 
 ## Referencias
 
