@@ -42,3 +42,4 @@ obligatoria. La generalización a otros proyectos es decisión posterior.
 
 - [FLOWS/SELF-REPAIR](../FLOWS/SELF-REPAIR.md) — el flujo completo.
 - ADR-002, ADR-007 (el otro eje del debut: severidades).
+- ADR-063 (la "decisión posterior" que este ADR reservó, ya tomada y asentada).
