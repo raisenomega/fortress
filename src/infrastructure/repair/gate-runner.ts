@@ -1,18 +1,32 @@
 import { GATE_COMMANDS, NPM_CI_TIMEOUT_MS, type GateCommand } from '@domain/repair/gate-config'
 import type { CommandOutcome, GateOutcome } from '@domain/repair/gate-result'
+import { resolveVerifyScript } from '@domain/settings/safe-commands'
+import { readProjectScripts } from '../claude-code/project-scripts'
 import { spawnCommand } from './spawn-command'
 
 export interface GateRunner {
   run(worktreePath: string): Promise<GateOutcome>
 }
 
+/** El comando con el nombre de script que ESTE repo usa, o null si no lo tiene. */
+function real(command: GateCommand, scripts: readonly string[]): GateCommand | null {
+  const script = resolveVerifyScript(command.key, scripts)
+  return script === null ? null : { ...command, args: ['run', script] }
+}
+
 /**
  * El gate HERMETICO: npm ci limpio dentro del worktree (D12 — jamas el
  * node_modules del proyecto, jamas symlinks, aunque tarde: ese es el punto) y
- * despues los tres comandos en orden, cada uno bloqueante. El npm ci no es
- * juicio sino setup: no va como GATE_COMMAND, pero su outcome queda en la
- * autopsia. Sin cache de resultados: cada corrida es fresca (la leccion del
- * eslint --cache que mintio en I1).
+ * despues los comandos en orden, cada uno bloqueante. El npm ci no es juicio
+ * sino setup: no va como GATE_COMMAND, pero su outcome queda en la autopsia.
+ * Sin cache de resultados: cada corrida es fresca (la leccion del eslint
+ * --cache que mintio en I1).
+ *
+ * Los nombres de script se resuelven contra los que el proyecto tiene de
+ * verdad: exigir `typecheck` a un repo que lo llama `type-check` rechazaba
+ * fixes correctos por una convencion del auditor, no por un defecto del fix.
+ * Lo que el proyecto no sabe verificar se salta y se dice; si no sabe verificar
+ * NADA, no hay gate que dar por pasado y la cadena se corta ahi.
  */
 export function createGateRunner(
   bin = 'npm',
@@ -29,14 +43,26 @@ export function createGateRunner(
         return { ok: false, commands: done, failedAt: 'npm ci', reason: ci.timedOut ? 'gate_timeout' : 'npm_ci_failed' } // prettier-ignore
       }
 
-      for (const command of commands) {
-        const outcome = await spawnCommand(bin, command.key, command.args, worktreePath, command.timeoutMs) // prettier-ignore
+      const scripts = readProjectScripts(worktreePath)
+      const resueltos = commands.map((command) => ({
+        key: command.key,
+        cmd: real(command, scripts)
+      }))
+      const skipped = resueltos.filter((r) => r.cmd === null).map((r) => r.key)
+
+      if (skipped.length === commands.length) {
+        return { ok: false, commands: done, failedAt: 'scripts', reason: 'gate_sin_verificacion', skipped } // prettier-ignore
+      }
+
+      for (const { key, cmd } of resueltos) {
+        if (cmd === null) continue
+        const outcome = await spawnCommand(bin, key, cmd.args, worktreePath, cmd.timeoutMs)
         done.push(outcome)
         if (outcome.exitCode !== 0 || outcome.timedOut) {
-          return { ok: false, commands: done, failedAt: command.key, reason: outcome.timedOut ? 'gate_timeout' : 'gate_failed' } // prettier-ignore
+          return { ok: false, commands: done, failedAt: key, reason: outcome.timedOut ? 'gate_timeout' : 'gate_failed', skipped } // prettier-ignore
         }
       }
-      return { ok: true, commands: done }
+      return { ok: true, commands: done, skipped }
     }
   }
 }

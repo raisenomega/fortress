@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { safeCommandRules, selfVerifyRules } from './safe-commands'
+import { resolveVerifyScript, safeCommandRules, selfVerifyRules } from './safe-commands'
 
 describe('safeCommandRules', () => {
   it('se arma de los scripts reales del repo', () => {
@@ -43,5 +43,24 @@ describe('selfVerifyRules', () => {
   it('en plan: nada, aunque sea de confianza. Auditar/proponer no edita', () => {
     expect(selfVerifyRules('plan', true, scripts)).toEqual([])
     expect(selfVerifyRules('plan', false, scripts)).toEqual([])
+  })
+})
+
+describe('resolveVerifyScript', () => {
+  it('devuelve el primer alias que el repo tenga, no el canonico', () => {
+    expect(resolveVerifyScript('typecheck', ['type-check', 'build'])).toBe('type-check')
+    expect(resolveVerifyScript('test:unit', ['test'])).toBe('test')
+  })
+
+  it('prefiere el canonico cuando el repo lo tiene', () => {
+    expect(resolveVerifyScript('typecheck', ['tsc', 'typecheck'])).toBe('typecheck')
+  })
+
+  it('null cuando el repo no cumple esa intencion con ninguno', () => {
+    expect(resolveVerifyScript('typecheck', ['build', 'dev'])).toBeNull()
+  })
+
+  it('null cuando la intencion no es ninguna de las conocidas', () => {
+    expect(resolveVerifyScript('deploy', ['deploy'])).toBeNull()
   })
 })

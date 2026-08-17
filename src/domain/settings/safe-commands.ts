@@ -13,16 +13,29 @@ const VERIFY_SCRIPTS: readonly (readonly string[])[] = [
 ]
 
 /**
+ * El script REAL con el que este repo cumple una intencion de verificacion, o
+ * null si no la cumple con ninguno. La intencion se nombra por su alias
+ * canonico (`typecheck`, `lint`, `test:unit`) y vale cualquiera de su fila: un
+ * repo que llama `type-check` a lo mismo se verifica igual.
+ */
+export function resolveVerifyScript(intent: string, scripts: readonly string[]): string | null {
+  const fila = VERIFY_SCRIPTS.find((candidates) => candidates.includes(intent))
+  if (fila === undefined) return null
+
+  const set = new Set(scripts)
+  return fila.find((name) => set.has(name)) ?? null
+}
+
+/**
  * Reglas de --allowedTools derivadas de los scripts del proyecto. Cada regla es
  * un comando EXACTO (`Bash(npm run <script>)`), sin comodines: el agente puede
  * correr `npm run lint` pero no `npm run lint && rm -rf`, ni ningun otro script.
  */
 export function safeCommandRules(scripts: readonly string[]): readonly string[] {
-  const set = new Set(scripts)
   const rules: string[] = []
   for (const candidates of VERIFY_SCRIPTS) {
-    const found = candidates.find((name) => set.has(name))
-    if (found) rules.push(`Bash(npm run ${found})`)
+    const found = resolveVerifyScript(candidates[0] ?? '', scripts)
+    if (found !== null) rules.push(`Bash(npm run ${found})`)
   }
   return rules
 }
