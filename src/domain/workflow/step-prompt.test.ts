@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import { EMPTY_CORPUS } from '../project/corpus-descriptor'
 import { buildStepPrompt } from './step-prompt'
 
 const step = { agentId: 'security-reviewer', task: 'Audita seguridad' } as const
-const base = { projectName: 'Nucleo', previous: [], known: [] }
+const base = { projectName: 'Nucleo', corpus: EMPTY_CORPUS, previous: [], known: [] }
 
 describe('buildStepPrompt y el modo', () => {
   it('le dice al agente que esta en autonomo cuando lo esta', () => {

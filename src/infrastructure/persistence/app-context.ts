@@ -7,6 +7,7 @@ import { writeScan } from '../cognition/write-cognition-log'
 import { createGitFileHistory } from '../git/file-history'
 import { headSha } from '../git/head-sha'
 import { createFsProbe } from '../omega/fs-probe'
+import { discoverCorpus } from '../project/discover-corpus'
 import { createGraphAnalyst } from '../repair/graph-analyst'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
 import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
@@ -42,6 +43,7 @@ export function getAppContext(): AppContext {
 
   context = {
     projects: createSqliteProjectRepository(db),
+    corpus: { of: discoverCorpus },
     findings: createSqliteFindingRepository(db),
     fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),

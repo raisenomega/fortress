@@ -1,6 +1,7 @@
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { parseScanOutput } from '@domain/scan/parse-scan-output'
 import { buildScanPrompt } from '@domain/scan/scan-prompt'
+import { discoverCorpus } from '../project/discover-corpus'
 import type { Scanner } from '@domain/scan/scanner'
 import { err, ok } from '@domain/shared/result'
 
@@ -23,7 +24,7 @@ export function createClaudeScanner(codeAgent: CodeAgent): Scanner {
       const reply = await codeAgent.run(
         {
           projectPath: request.projectPath,
-          prompt: buildScanPrompt(request.projectName),
+          prompt: buildScanPrompt(request.projectName, discoverCorpus(request.projectPath)),
           permissionMode: 'plan',
           // La FASE 1 es cosa del Security Reviewer, siempre el mismo agente.
           agentId: 'security-reviewer',

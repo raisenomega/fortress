@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest'
+import { buildScanPrompt } from '@domain/scan/scan-prompt'
 import { discoverCorpus } from './discover-corpus'
 import { limpiar, proyecto } from './discover-corpus-fixture'
 
@@ -62,5 +63,12 @@ describe('FORTRESS se reconoce a si misma con el mismo codigo que mira a los dem
   it('categoriza cada hallazgo por su nombre, no por donde esta', () => {
     const seguridad = propio.docs.filter((d) => d.category === 'security').map((d) => d.path)
     expect(seguridad).toEqual(['docs/SECURITY-MODEL.md'])
+  })
+})
+
+describe('el prompt que sale de todo esto', () => {
+  it('el escaneo de FORTRESS cita su modelo de amenazas por su ruta real', () => {
+    const prompt = buildScanPrompt('FORTRESS', discoverCorpus(process.cwd()))
+    expect(prompt).toContain('docs/SECURITY-MODEL.md')
   })
 })
