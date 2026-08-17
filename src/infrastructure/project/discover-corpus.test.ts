@@ -1,27 +1,14 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs'
-import { tmpdir } from 'os'
-import { dirname, join } from 'path'
+import { writeFileSync } from 'fs'
+import { join } from 'path'
 import { afterAll, describe, expect, it } from 'vitest'
 import { discoverCorpus } from './discover-corpus'
+import { limpiar, proyecto, raiz } from './discover-corpus-fixture'
 
-const raiz = mkdtempSync(join(tmpdir(), 'fortress-corpus-'))
-afterAll(() => rmSync(raiz, { recursive: true, force: true }))
-
-/** Un proyecto de prueba con exactamente los ficheros y carpetas que se le pidan. */
-function proyecto(nombre: string, docs: readonly string[], dirs: readonly string[] = []): string {
-  const dir = join(raiz, nombre)
-  mkdirSync(dir, { recursive: true })
-  for (const doc of docs) {
-    mkdirSync(dirname(join(dir, doc)), { recursive: true })
-    writeFileSync(join(dir, doc), '# contenido')
-  }
-  for (const carpeta of dirs) mkdirSync(join(dir, carpeta), { recursive: true })
-  return dir
-}
+afterAll(limpiar)
 
 const rutas = (dir: string): readonly string[] => discoverCorpus(dir).docs.map((d) => d.path)
 
-describe('discoverCorpus: solo entra lo que existe', () => {
+describe('discoverCorpus: la raiz del proyecto', () => {
   it('un proyecto sin nada no tiene corpus que citar', () => {
     expect(discoverCorpus(proyecto('vacio', []))).toEqual({ docs: [], directories: [] })
   })
@@ -36,12 +23,16 @@ describe('discoverCorpus: solo entra lo que existe', () => {
     ])
   })
 
-  it('cita la carpeta y NO enumera lo que hay dentro', () => {
-    const dir = proyecto('solo-docs', ['docs/GUIA.md', 'docs/OTRA.md'], ['docs'])
-    expect(discoverCorpus(dir)).toEqual({ docs: [], directories: ['docs/'] })
+  it('reconoce los nombres de un corpus escrito antes de conocer FORTRESS', () => {
+    const dir = proyecto('a-mano', ['CONSTITUCION.md', 'PRINCIPLES.md', 'SECURITY-MODEL.md'])
+    expect(discoverCorpus(dir).docs).toEqual([
+      { path: 'SECURITY-MODEL.md', category: 'security' },
+      { path: 'PRINCIPLES.md', category: 'structural' },
+      { path: 'CONSTITUCION.md', category: 'general' }
+    ])
   })
 
-  it('categoriza los canonicos y descarta lo que solo se les parece', () => {
+  it('descarta lo que solo se parece a un canonico', () => {
     const dir = proyecto('mezcla', ['CLAUDE.md', 'SECURITY-FIXES.md'], ['docs-nucleo'])
     expect(rutas(dir)).toEqual(['CLAUDE.md'])
     expect(discoverCorpus(dir).directories).toEqual(['docs-nucleo/'])
@@ -63,10 +54,5 @@ describe('discoverCorpus: la declaracion del proyecto', () => {
     const dir = proyecto('roto', ['README.md', '.fortress/config'])
     writeFileSync(join(dir, '.fortress', 'config'), '{ "corpus": 42 }')
     expect(rutas(dir)).toEqual(['README.md'])
-  })
-
-  it('FORTRESS se reconoce con el mismo codigo que mira a los demas', () => {
-    expect(discoverCorpus(process.cwd()).directories).toContain('docs/')
-    expect(rutas(process.cwd())).toContain('CLAUDE.md')
   })
 })

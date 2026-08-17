@@ -1,22 +1,31 @@
 import { describe, expect, it } from 'vitest'
 import { DRAFTED_DOCS } from '../chat/config-docs'
-import { CANONICAL_DOCS, CORPUS_DIRS, EMPTY_CORPUS, categoryOf } from './corpus-descriptor'
+import {
+  CANONICAL_DOCS,
+  CORPUS_DIRS,
+  EMPTY_CORPUS,
+  categoryOf,
+  categoryOfDirectory
+} from './corpus-descriptor'
 
 describe('categoryOf', () => {
-  it('manda al modelo de amenazas solo el documento que lo es', () => {
+  it('manda al modelo de amenazas los dos documentos que lo son', () => {
     expect(categoryOf('SECURITY-BASELINE.md')).toBe('security')
+    expect(categoryOf('SECURITY-MODEL.md')).toBe('security')
   })
 
-  it('manda a estructura los dos que deciden donde va un cambio', () => {
-    expect(categoryOf('ARCHITECTURE.md')).toBe('structural')
-    expect(categoryOf('DDD-RULES.md')).toBe('structural')
+  it('manda a estructura los que deciden donde va un cambio', () => {
+    for (const name of ['ARCHITECTURE.md', 'DDD-RULES.md', 'PRINCIPLES.md']) {
+      expect(categoryOf(name)).toBe('structural')
+    }
   })
 
-  it('el resto de canonicos son doctrina general', () => {
-    for (const name of ['CONSTITUTION.md', 'CLAUDE.md', 'AGENTS.md', 'PROJECT-STATE.md']) {
+  it('el resto de canonicos son doctrina general, en sus dos idiomas', () => {
+    for (const name of ['CONSTITUTION.md', 'CONSTITUCION.md', 'CLAUDE.md', 'README.md']) {
       expect(categoryOf(name)).toBe('general')
     }
-    expect(categoryOf('README.md')).toBe('general')
+    expect(categoryOf('AGENTS.md')).toBe('general')
+    expect(categoryOf('PROJECT-STATE.md')).toBe('general')
   })
 
   it('un nombre que solo se PARECE a uno canonico no se categoriza', () => {
@@ -28,16 +37,28 @@ describe('categoryOf', () => {
   })
 })
 
-describe('el catalogo de nombres', () => {
-  it('los canonicos son los de la entrevista mas el README, sin copiar la lista', () => {
-    expect(CANONICAL_DOCS).toEqual([...DRAFTED_DOCS, 'README.md'])
+describe('categoryOfDirectory', () => {
+  it('una carpeta cuyo nombre ya dice lo que guarda se categoriza', () => {
+    expect(categoryOfDirectory('DECISIONS')).toBe('structural')
   })
 
-  it('cada canonico tiene categoria: ninguno cae al vacio sin decidirse', () => {
+  it('las carpetas contenedoras no dicen nada por si mismas', () => {
+    for (const name of ['docs', 'doc', 'PAGES', 'FLOWS']) {
+      expect(categoryOfDirectory(name)).toBeNull()
+    }
+  })
+})
+
+describe('el catalogo de nombres', () => {
+  it('todo lo que redacta la entrevista de configuracion es descubrible', () => {
+    for (const doc of DRAFTED_DOCS) expect(categoryOf(doc)).not.toBeNull()
+  })
+
+  it('cada canonico buscado tiene categoria: ninguno cae al vacio sin decidirse', () => {
     for (const name of CANONICAL_DOCS) expect(categoryOf(name)).not.toBeNull()
   })
 
-  it('las carpetas se reconocen por nombre exacto y sin barra', () => {
+  it('las carpetas de documentacion se reconocen por nombre exacto y sin barra', () => {
     expect(CORPUS_DIRS).toEqual(['docs', 'docs-nucleo', 'doc', 'documentation'])
   })
 })

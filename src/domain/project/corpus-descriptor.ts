@@ -1,5 +1,3 @@
-import { DRAFTED_DOCS } from '../chat/config-docs'
-
 /** Que clase de decision sostiene un documento del corpus. */
 export type CorpusCategory = 'security' | 'structural' | 'general'
 
@@ -28,24 +26,33 @@ export const EMPTY_CORPUS: CorpusDescriptor = { docs: [], directories: [] }
  * `SECURITY-FIXES.md` es un registro de parches, no un modelo de amenazas, y
  * mandar a un revisor a leerlo como doctrina seria la misma afirmacion falsa
  * que este mecanismo existe para quitar. Lo que no esta aqui no se categoriza.
+ *
+ * Estan los nombres que redacta la entrevista de configuracion y tambien los
+ * que usa un corpus ya escrito a mano —el modelo de amenazas, los principios,
+ * la constitucion en castellano—, porque un proyecto documentado antes de
+ * conocer FORTRESS no tiene por que llamar a sus cosas como ella.
  */
 const CATEGORY: Readonly<Record<string, CorpusCategory>> = {
   'SECURITY-BASELINE.md': 'security',
+  'SECURITY-MODEL.md': 'security',
   'ARCHITECTURE.md': 'structural',
   'DDD-RULES.md': 'structural',
+  'PRINCIPLES.md': 'structural',
   'CONSTITUTION.md': 'general',
+  'CONSTITUCION.md': 'general',
   'CLAUDE.md': 'general',
   'AGENTS.md': 'general',
   'PROJECT-STATE.md': 'general',
   'README.md': 'general'
 }
 
-/**
- * Los nombres que se buscan en la raiz: los que la entrevista de configuracion
- * redacta —importados de alli, no copiados, para que anadir uno lo haga
- * descubrible sin tocar esto— mas el README que casi todo repo trae.
- */
-export const CANONICAL_DOCS: readonly string[] = [...DRAFTED_DOCS, 'README.md']
+/** Carpetas cuyo nombre ya dice que clase de doctrina guardan. */
+const CATEGORY_DIRS: Readonly<Record<string, CorpusCategory>> = {
+  DECISIONS: 'structural'
+}
+
+/** Los nombres que se buscan: los del mapa, que es donde vive la convencion. */
+export const CANONICAL_DOCS: readonly string[] = Object.keys(CATEGORY)
 
 /** Carpetas de documentacion reconocidas por nombre exacto. */
 export const CORPUS_DIRS: readonly string[] = ['docs', 'docs-nucleo', 'doc', 'documentation']
@@ -53,4 +60,9 @@ export const CORPUS_DIRS: readonly string[] = ['docs', 'docs-nucleo', 'doc', 'do
 /** La categoria de un nombre canonico, o null si no lo es. */
 export function categoryOf(name: string): CorpusCategory | null {
   return CATEGORY[name] ?? null
+}
+
+/** La categoria de una carpeta canonica, o null si su nombre no dice nada. */
+export function categoryOfDirectory(name: string): CorpusCategory | null {
+  return CATEGORY_DIRS[name] ?? null
 }
