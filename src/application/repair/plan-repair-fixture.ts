@@ -23,6 +23,8 @@ interface Opciones {
   readonly verdictStatus?: string
   readonly obsoleteIds?: readonly string[]
   readonly liveIds?: readonly string[]
+  /** Propuestas ya existentes del proyecto, de la mas reciente a la mas vieja. */
+  readonly proposals?: readonly Proposal[]
   /** HEAD del repo; null simula un proyecto sin git. */
   readonly sha?: string | null
   /** true: el libro de vida LANZA al asentar (probar que no revierte nada). */
@@ -49,7 +51,7 @@ export function bench(opts: Opciones): Bench {
       findObsoleteFindingIds: () => opts.obsoleteIds ?? [],
       findLiveFindingIds: () => opts.liveIds ?? [],
       findById: () => null,
-      listByProject: () => []
+      listByProject: () => opts.proposals ?? []
     },
     eventLog: {
       record: (event: ProposalEvent): Promise<void> => {
