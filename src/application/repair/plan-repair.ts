@@ -5,6 +5,7 @@ import {
   type Proposal,
   type ProposalState
 } from '@domain/repair/proposal'
+import { hasBlockingRejection } from '@domain/repair/retry-eligibility'
 import { selectTarget, type Candidate } from '@domain/repair/select-target'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
@@ -12,17 +13,25 @@ import { analyzeTarget } from './analyze-target'
 import { recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
 
-/** Candidatos: ACTIVE y abiertos, menos los declarados OBSOLETOS bajo el
- *  escaneo vigente (un fantasma no se re-analiza en la misma generacion) y
- *  menos los que ya tienen una propuesta VIVA: la seleccion es determinista, y
- *  sin este descuento el mismo hallazgo saldria elegido en cada ronda mientras
- *  su propuesta espera la firma (ADR-059, primera aplicacion). */
-function candidates(context: AppContext, projectId: string, scanId: string): Candidate[] {
+/** Candidatos: ACTIVE y abiertos, menos tres descuentos. Los OBSOLETOS bajo el
+ *  escaneo vigente (un fantasma no se re-analiza en la misma generacion). Los
+ *  que ya tienen propuesta VIVA: la seleccion es determinista y sin eso el mismo
+ *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
+ *  (ADR-059). Y los que fracasaron por una causa que repetir no arregla con el
+ *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. */
+function candidates(
+  context: AppContext,
+  projectId: string,
+  scanId: string,
+  headSha: string
+): Candidate[] {
   const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, scanId))
   for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
+  const previas = context.repairProposals.listByProject(projectId)
   return context.findings
     .listMemory(projectId)
     .filter((f) => f.lifecycle === 'ACTIVE' && f.status === 'open' && !excluded.has(f.id))
+    .filter((f) => !hasBlockingRejection(f.id, headSha, previas))
     .map(({ id, severity, title, file, line }) => ({ id, severity, title, file, line }))
 }
 
@@ -37,10 +46,12 @@ export async function planRepair(context: AppContext, projectId: string): Promis
   const project = context.projects.findById(projectId)
   if (!project) return null
   const scanId = context.scans.listByProject(projectId, 1)[0]?.id ?? ''
-  const selection = selectTarget(candidates(context, projectId, scanId))
-  if (!selection) return null
+  // El HEAD se ancla ANTES de elegir: saber donde esta el arbol es parte de
+  // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.
   const baseSha = context.headSha(project.path)
   if (baseSha === null) return null
+  const selection = selectTarget(candidates(context, projectId, scanId, baseSha))
+  if (!selection) return null
 
   const now = Date.now()
   const proposal: Proposal = { id: newId(), projectId, findingId: selection.target.id, baseSha, state: 'ELEGIDO', createdAt: now, updatedAt: now } // prettier-ignore
