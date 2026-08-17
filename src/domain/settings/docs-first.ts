@@ -1,12 +1,11 @@
 import type { AgentId } from '../agent/agent'
+import type { CorpusCategory } from '../project/corpus-descriptor'
 
 /**
- * Se inyecta en los prompts de agente, junto al grafo-primero. El proyecto
- * documenta su doctrina en docs/ (publica y trackeada); antes, las reglas se
- * transcribian a mano al prompt desde un archivo que ni siquiera viaja en el
- * repo. Esto NO copia doctrina: le ensena al agente QUE existe y COMO pedirlo.
- * Los .md estan indexados en el grafo, pero la busqueda por defecto los excluye:
- * sin el file_pattern explicito, el agente no los ve.
+ * Se inyecta en los prompts de agente, junto al grafo-primero: no copia
+ * doctrina, le ensena al agente QUE existe y COMO pedirla. El texto de abajo
+ * nombra el corpus de FORTRESS y por tanto solo sirve sobre FORTRESS; se
+ * compone desde el corpus real del proyecto en `docs-first-compose.ts`.
  */
 const DOCS = 'docs/'
 
@@ -51,14 +50,25 @@ const SECURITY: ReadonlySet<AgentId> = new Set([
 ])
 
 /**
- * La referencia documental segun el rol del agente. El eje NO es el mismo que
- * el del grafo: alli se clasifica por COMO se consulta el codigo; aqui, por QUE
- * documentacion necesita la decision. Por eso code-reviewer y tdd-guide, que el
- * grafo trata como estructurales, se quedan en la general: su trabajo es tactico
- * (un bug, un test) y los ADRs solo les anadirian ruido.
+ * Que documentacion necesita la decision de este agente. El eje NO es el mismo
+ * que el del grafo: alli se clasifica por COMO se consulta el codigo. Por eso
+ * code-reviewer y tdd-guide, que el grafo trata como estructurales, se quedan
+ * en la general: su trabajo es tactico y los ADRs solo les anadirian ruido.
+ *
+ * Es el mismo eje con el que se categoriza el corpus de un proyecto, asi que
+ * comparten tipo: lo que el agente necesita y lo que el proyecto documenta se
+ * cruzan sin traductor por medio.
  */
+export function categoryForAgent(agentId: AgentId): CorpusCategory {
+  if (SECURITY.has(agentId)) return 'security'
+  if (STRUCTURAL.has(agentId)) return 'structural'
+  return 'general'
+}
+
+/** Provisional: el texto fijo, hasta que los prompts pasen el corpus del proyecto. */
 export function docsFirstFor(agentId: AgentId): string {
-  if (SECURITY.has(agentId)) return DOCS_FIRST_SECURITY
-  if (STRUCTURAL.has(agentId)) return DOCS_FIRST_STRUCTURAL
+  const category = categoryForAgent(agentId)
+  if (category === 'security') return DOCS_FIRST_SECURITY
+  if (category === 'structural') return DOCS_FIRST_STRUCTURAL
   return DOCS_FIRST_GENERAL
 }

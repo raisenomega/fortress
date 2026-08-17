@@ -4,8 +4,17 @@ import {
   DOCS_FIRST_GENERAL,
   DOCS_FIRST_SECURITY,
   DOCS_FIRST_STRUCTURAL,
+  categoryForAgent,
   docsFirstFor
 } from './docs-first'
+
+describe('categoryForAgent', () => {
+  it('el eje del agente habla el mismo idioma que el corpus del proyecto', () => {
+    expect(categoryForAgent('security-reviewer')).toBe('security')
+    expect(categoryForAgent('planner')).toBe('structural')
+    expect(categoryForAgent('code-reviewer')).toBe('general')
+  })
+})
 
 describe('docsFirstFor', () => {
   it('manda a los ADRs a quien decide donde va un cambio', () => {
