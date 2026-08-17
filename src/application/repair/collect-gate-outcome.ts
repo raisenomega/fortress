@@ -29,13 +29,23 @@ function comando(event: ProposalEvent): CommandOutcome | null {
   }
 }
 
+/** Lo que el cierre dice que NO se verifico, si lo dice. Ausente significa que
+ *  ese asiento no lo contaba, no que no hubiera saltos. */
+function saltados(event: ProposalEvent): readonly string[] | undefined {
+  if (event.evidenceJson === undefined) return undefined
+  try {
+    const raw = JSON.parse(event.evidenceJson) as { skipped?: unknown }
+    const lista = Array.isArray(raw.skipped) ? raw.skipped : null
+    return lista?.every((s) => typeof s === 'string') === true ? (lista as string[]) : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /**
- * El gate NO persiste un GateOutcome: emite un AGENT_RUN por comando mientras
- * corre y una TRANSITION al cerrar con el resumen. El juicio completo se
- * REUNE de esos dos rastros.
- *
- * Se compone en vez de dejarlo en null porque null significa "no llego a
- * correr", y aqui corrio: usarlo seria afirmar en el libro algo que no paso.
+ * El gate NO persiste un GateOutcome: emite un AGENT_RUN por comando y una
+ * TRANSITION al cerrar. El juicio completo se REUNE de esos dos rastros, en vez
+ * de dejarlo en null: null significa "no llego a correr", y aqui corrio.
  */
 export function collectGateOutcome(events: readonly ProposalEvent[]): GateOutcome | null {
   const delGate = events.filter((e) => e.phase === 'GATE')
@@ -48,14 +58,18 @@ export function collectGateOutcome(events: readonly ProposalEvent[]): GateOutcom
     .filter((c): c is CommandOutcome => c !== null)
   if (commands.length === 0) return null
 
+  const skipped = saltados(cierre)
+  const salto = skipped === undefined ? {} : { skipped }
+
   // El veredicto lo dice el cierre, no se recalcula: quien juzgo ya decidio.
-  if (cierre.toState === 'GATE') return { ok: true, commands }
+  if (cierre.toState === 'GATE') return { ok: true, commands, ...salto }
 
   const roto = commands.find((c) => c.exitCode !== 0)
   return {
     ok: false,
     commands,
     failedAt: roto?.command ?? String(cierre.reason ?? 'desconocido'),
-    reason: roto?.timedOut === true ? 'gate_timeout' : 'gate_failed'
+    reason: roto?.timedOut === true ? 'gate_timeout' : 'gate_failed',
+    ...salto
   }
 }

@@ -4,6 +4,14 @@ import type { AppContext } from '../context'
 import { cursorFrom } from './book-cursor'
 import { emitGateCommand, emitGateOutcome, rejectGate } from './run-gate-emit'
 
+/**
+ * Lo que el proyecto no supo verificar entra en la evidencia solo si hubo algo:
+ * el libro no debe afirmar "no se salto nada" cuando lo que pasa es que la
+ * pregunta no aplicaba.
+ */
+const saltados = (outcome: GateOutcome): { skipped?: readonly string[] } =>
+  outcome.skipped !== undefined && outcome.skipped.length > 0 ? { skipped: outcome.skipped } : {}
+
 export interface GateDeps {
   readonly worktreeRoot: string
   readonly worktreeExists: (path: string) => boolean
@@ -49,7 +57,7 @@ export async function runGate(
       const roto = outcome.commands.at(-1)
       return rejectGate(ctx, cursor, proposal, outcome.reason, detail, {
         failedAt: outcome.failedAt, reason: outcome.reason,
-        exitCode: roto?.exitCode, timedOut: roto?.timedOut
+        exitCode: roto?.exitCode, timedOut: roto?.timedOut, ...saltados(outcome)
       }, deps.now()) // prettier-ignore
     }
     if (!canTransition(proposal.state, 'GATE')) return { ok: false, reason: 'invalid_state' }
@@ -60,7 +68,7 @@ export async function runGate(
       updatedAt: deps.now()
     })
     const total = outcome.commands.reduce((sum, c) => sum + c.durationMs, 0)
-    await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'GATE', 'gate verde', { allCommandsGreen: true, totalDurationMs: total }, deps.now()) // prettier-ignore
+    await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'GATE', 'gate verde', { allCommandsGreen: true, totalDurationMs: total, ...saltados(outcome) }, deps.now()) // prettier-ignore
     return { ok: true }
   })
 }
