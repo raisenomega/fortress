@@ -8,6 +8,7 @@ import type { CapabilityEpisodeRepository } from '@domain/system/capability-epis
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
 import type { FileHistory } from '@domain/project/file-history'
 import type { FindingRepository } from '@domain/project/finding-repository'
+import type { CorpusReader } from '@domain/project/corpus-reader'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { Analyst } from '@domain/repair/analysis'
 import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
@@ -31,6 +32,8 @@ import type { RunInTransaction } from '@domain/shared/transaction'
  */
 export interface AppContext {
   readonly projects: ProjectRepository
+  /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
+  readonly corpus: CorpusReader
   readonly findings: FindingRepository
   /** git: si el archivo de un hallazgo cambio desde que se detecto. */
   readonly fileHistory: FileHistory

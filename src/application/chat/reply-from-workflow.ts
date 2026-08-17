@@ -1,5 +1,6 @@
 import type { StepProgress } from '../workflow/step-progress'
 import type { CodeAgent } from '@domain/chat/code-agent'
+import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AgentId } from '@domain/agent/agent'
@@ -15,6 +16,8 @@ import type { ReplyOutcome } from './reply-outcome'
 export interface WorkflowReplyOptions {
   readonly codeAgent: CodeAgent
   readonly project: Project
+  /** Lo que el proyecto documenta, resuelto por el puerto del corpus. */
+  readonly corpus: CorpusDescriptor
   readonly prompt: string
   readonly mode: OperationMode
   readonly excludedAgents: readonly AgentId[]
@@ -25,15 +28,13 @@ export interface WorkflowReplyOptions {
 }
 
 /**
- * Un mensaje ya no lo atiende un agente suelto: se enruta a un workflow y se
- * ejecutan sus pasos en orden. El texto que ve el operador es el informe
- * consolidado, no la suma de cinco respuestas sueltas.
+ * Un mensaje se enruta a un workflow y sus pasos se ejecutan en orden: lo que
+ * ve el operador es el informe consolidado, no cinco respuestas sueltas.
  */
 export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<ReplyOutcome> {
   const workflow = routeWorkflow(options.prompt)
 
-  // Una pregunta libre no es un escaneo: se responde en conversacion, no con
-  // un informe de hallazgos vacio que descarta lo que el agente contesto.
+  // Una pregunta libre no es un escaneo: se responde en conversacion.
   if (workflow.id === 'libre') return replyFromChat(options)
 
   const plan = planWorkflow(workflow, options.excludedAgents)
@@ -42,6 +43,7 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
     {
       codeAgent: options.codeAgent,
       project: options.project,
+      corpus: options.corpus,
       mode: options.mode,
       onStep: options.onStep,
       onChunk: options.onChunk,

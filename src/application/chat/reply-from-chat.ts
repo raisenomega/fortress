@@ -27,6 +27,7 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
       projectPath: options.project.path,
       prompt: buildChatPrompt(options.prompt, {
         projectName: options.project.name,
+        corpus: options.corpus,
         known: options.known,
         mode: options.mode
       }),

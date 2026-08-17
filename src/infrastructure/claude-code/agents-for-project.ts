@@ -1,6 +1,7 @@
 import { AGENT_CATALOG } from '@domain/agent/agent-catalog'
 import { buildAgentsPayload, type AgentDefinition } from '@domain/agent/agent-prompt'
 import { projectAgentIds } from '../agents/project-agents'
+import { discoverCorpus } from '../project/discover-corpus'
 
 /**
  * Agentes de AUDITORIA: FORTRESS NUNCA cede su version al repo. Si el codigo
@@ -22,7 +23,8 @@ export function agentsForProject(
 ): Readonly<Record<string, AgentDefinition>> {
   const propios = projectAgentIds(projectPath)
   const builtins = buildAgentsPayload(
-    AGENT_CATALOG.filter((agent) => AUDIT_AGENTS.has(agent.id) || !propios.has(agent.id))
+    AGENT_CATALOG.filter((agent) => AUDIT_AGENTS.has(agent.id) || !propios.has(agent.id)),
+    discoverCorpus(projectPath)
   )
   // Los integrados GANAN ante cualquier choque de clave: un custom no los pisa.
   return { ...customs, ...builtins }

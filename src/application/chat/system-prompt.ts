@@ -1,6 +1,8 @@
 import type { AgentId } from '@domain/agent/agent'
 import { findAgent } from '@domain/agent/agent-catalog'
+import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { Project } from '@domain/project/project'
+import { buildDocsFirst } from '@domain/settings/docs-first-compose'
 import { MODE_INSTRUCTION, type OperationMode } from '@domain/settings/operation-mode'
 
 function describeAgents(enabled: readonly AgentId[]): string {
@@ -36,8 +38,10 @@ function describeProject(project: Project): string {
 export function buildSystemPrompt(
   project: Project,
   enabledAgents: readonly AgentId[],
-  mode: OperationMode
+  mode: OperationMode,
+  corpus: CorpusDescriptor
 ): string {
+  const docs = buildDocsFirst('general', corpus)
   return [
     'Eres el agente de seguridad, calidad y limpieza de FORTRESS Command Center.',
     'Pilares: seguridad, calidad, estabilidad y transparencia. Nada inseguro pasa.',
@@ -50,6 +54,7 @@ export function buildSystemPrompt(
     'AGENTES ACTIVOS:',
     describeAgents(enabledAgents),
     '',
+    ...(docs === '' ? [] : [docs, '']),
     MODE_INSTRUCTION[mode]
   ].join('\n')
 }

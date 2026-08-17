@@ -32,7 +32,7 @@ export async function replyFromApi(options: ApiReplyOptions): Promise<ReplyOutco
 
   const reply = await assistant.stream(
     {
-      system: buildSystemPrompt(project, enabledAgents, mode),
+      system: buildSystemPrompt(project, enabledAgents, mode, context.corpus.of(project.path)),
       turns: toTurns(context.chat.listByProject(project.id))
     },
     onChunk

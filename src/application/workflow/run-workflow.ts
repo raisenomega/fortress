@@ -1,4 +1,5 @@
 import type { CodeAgent } from '@domain/chat/code-agent'
+import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { Project } from '@domain/project/project'
 import { parseScanOutput } from '@domain/scan/parse-scan-output'
 import type { OperationMode } from '@domain/settings/operation-mode'
@@ -13,6 +14,7 @@ import type { StepProgress } from './step-progress'
 export interface WorkflowDeps {
   readonly codeAgent: CodeAgent
   readonly project: Project
+  readonly corpus: CorpusDescriptor
   readonly mode: OperationMode
   readonly onStep: (progress: StepProgress) => void
   readonly onChunk: (delta: string) => void
@@ -20,7 +22,7 @@ export interface WorkflowDeps {
   readonly isCancelled: () => boolean
 }
 
-/** Resumen de un paso para el siguiente: evita que se repitan hallazgos. */
+/** Resumen para el paso siguiente: evita que se repitan hallazgos. */
 function summarize(result: StepResult): readonly string[] {
   return result.findings.map((finding) => `${finding.severity} ${finding.file}: ${finding.title}`)
 }
@@ -33,11 +35,7 @@ function progressOf(results: readonly StepResult[]): { tokens: number; costUsd: 
   }
 }
 
-/**
- * Ejecuta los pasos en orden. Un paso con puerta que encuentre CRITICAL
- * detiene el workflow: seguir limpiando o editando encima de un agujero
- * abierto es trabajar sobre algo que hay que arreglar primero.
- */
+/** Los pasos en orden; uno con puerta que vea un CRITICAL detiene el resto. */
 export async function runWorkflow(
   deps: WorkflowDeps,
   plan: WorkflowPlan
@@ -54,6 +52,7 @@ export async function runWorkflow(
 
     const prompt = buildStepPrompt(step, {
       projectName: deps.project.name,
+      corpus: deps.corpus,
       previous,
       known: deps.known,
       mode: deps.mode

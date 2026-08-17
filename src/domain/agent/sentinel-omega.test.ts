@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { EMPTY_CORPUS } from '../project/corpus-descriptor'
 import { agentPrompt } from './agent-prompt'
 import { routeToAgent } from './agent-router'
 import { SENTINEL_OMEGA } from './sentinel-omega'
@@ -9,7 +10,7 @@ describe('SENTINEL OMEGA', () => {
   })
 
   it('su prompt usa la carta, no el generico name+purpose', () => {
-    const prompt = agentPrompt(SENTINEL_OMEGA)
+    const prompt = agentPrompt(SENTINEL_OMEGA, EMPTY_CORPUS)
     expect(prompt).toContain('meta-auditor de FORTRESS')
     expect(prompt).toContain('Testigo, no actor')
     // La honestidad no negociable: evidencia, no intencion; falible por diseno.

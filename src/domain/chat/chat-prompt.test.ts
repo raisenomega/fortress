@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
+import { EMPTY_CORPUS } from '../project/corpus-descriptor'
 import { buildChatPrompt } from './chat-prompt'
 
-const ctx = { projectName: 'Nucleo', known: [], mode: 'supervisado' as const }
+const ctx = { projectName: 'Nucleo', corpus: EMPTY_CORPUS, known: [], mode: 'supervisado' as const }
 
 describe('buildChatPrompt', () => {
   it('NO exige el bloque JSON: es una conversacion', () => {

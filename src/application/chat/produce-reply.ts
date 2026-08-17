@@ -36,6 +36,7 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
     return replyFromWorkflow({
       codeAgent,
       project,
+      corpus: options.context.corpus.of(project.path),
       prompt: input.prompt,
       mode,
       excludedAgents: options.excludedAgents,

@@ -1,4 +1,6 @@
-import { docsFirstFor } from '../settings/docs-first'
+import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { categoryForAgent } from '../settings/docs-first'
+import { buildDocsFirst } from '../settings/docs-first-compose'
 import type { Agent } from './agent'
 
 /**
@@ -21,7 +23,7 @@ const RULES = [
  * diez personalidades nuevas: la identidad de cada agente es la que el
  * operador ve en el sidebar, y las dos cosas tienen que coincidir.
  */
-export function agentPrompt(agent: Agent): string {
+export function agentPrompt(agent: Agent, corpus: CorpusDescriptor): string {
   // OMEGA (y solo agentes con carta propia) llevan una identidad que las reglas
   // comunes no capturan; el resto deriva su prompt de name + purpose.
   const cabecera =
@@ -33,7 +35,8 @@ export function agentPrompt(agent: Agent): string {
       `Tu responsabilidad: ${agent.purpose}`
     ].join('\n')
 
-  return [cabecera, '', RULES, '', docsFirstFor(agent.id)].join('\n')
+  const docs = buildDocsFirst(categoryForAgent(agent.id), corpus)
+  return [cabecera, '', RULES, ...(docs === '' ? [] : ['', docs])].join('\n')
 }
 
 export interface AgentDefinition {
@@ -43,12 +46,13 @@ export interface AgentDefinition {
 
 /** Forma exacta que espera `claude --agents`, verificada contra su --help. */
 export function buildAgentsPayload(
-  agents: readonly Agent[]
+  agents: readonly Agent[],
+  corpus: CorpusDescriptor
 ): Readonly<Record<string, AgentDefinition>> {
   const payload: Record<string, AgentDefinition> = {}
 
   for (const agent of agents) {
-    payload[agent.id] = { description: agent.purpose, prompt: agentPrompt(agent) }
+    payload[agent.id] = { description: agent.purpose, prompt: agentPrompt(agent, corpus) }
   }
 
   return payload

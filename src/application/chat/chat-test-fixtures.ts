@@ -1,4 +1,5 @@
 import type { Assistant } from '@domain/chat/assistant'
+import { EMPTY_CORPUS } from '@domain/project/corpus-descriptor'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
@@ -15,6 +16,7 @@ export function fakeContext(project: Project | null = PROJECT): {
   const added: NewChatMessage[] = []
   const context = {
     projects: { findById: () => project },
+    corpus: { of: () => EMPTY_CORPUS },
     chat: {
       add: (m: NewChatMessage): ChatMessage => {
         added.push(m)

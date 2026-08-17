@@ -1,10 +1,13 @@
-import { DOCS_FIRST_GENERAL } from '../settings/docs-first'
+import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { buildDocsFirst } from '../settings/docs-first-compose'
 import { GRAPH_FIRST } from '../settings/graph-first'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
 
 export interface ChatContext {
   readonly projectName: string
+  /** Lo que el proyecto documenta, ya mirado en su disco. */
+  readonly corpus: CorpusDescriptor
   readonly known: readonly string[]
   readonly mode: OperationMode
 }
@@ -24,6 +27,12 @@ function describeKnown(known: readonly string[]): string {
  * nada. Ve el proyecto entero (es su directorio de trabajo); responde con
  * evidencia —archivo y linea— cuando aplique.
  */
+/** El bloque documental, y la linea en blanco que lo separa, solo si hay corpus. */
+function docsFirst(ctx: ChatContext): readonly string[] {
+  const bloque = buildDocsFirst('general', ctx.corpus)
+  return bloque === '' ? [] : [bloque, '']
+}
+
 export function buildChatPrompt(question: string, ctx: ChatContext): string {
   return [
     `Proyecto "${ctx.projectName}", que es tu directorio de trabajo actual.`,
@@ -32,8 +41,7 @@ export function buildChatPrompt(question: string, ctx: ChatContext): string {
     '',
     GRAPH_FIRST,
     '',
-    DOCS_FIRST_GENERAL,
-    '',
+    ...docsFirst(ctx),
     describeKnown(ctx.known),
     '',
     'Pregunta del operador:',

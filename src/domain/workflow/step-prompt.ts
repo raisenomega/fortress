@@ -1,6 +1,8 @@
 import { REPORT_CONTRACT } from '../scan/report-contract'
 import { SCAN_RULES } from '../scan/scan-checklist'
-import { docsFirstFor } from '../settings/docs-first'
+import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { categoryForAgent } from '../settings/docs-first'
+import { buildDocsFirst } from '../settings/docs-first-compose'
 import { graphFirstFor } from '../settings/graph-first'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
@@ -8,22 +10,18 @@ import type { WorkflowStep } from './workflow'
 
 export interface StepContext {
   readonly projectName: string
+  readonly corpus: CorpusDescriptor
   /** Lo que ya han encontrado los pasos anteriores de ESTA revision. */
   readonly previous: readonly string[]
-  /**
-   * Hallazgos que FORTRESS ya tiene guardados de escaneos anteriores. Sin
-   * esto el agente empieza de cero cada vez: preguntarle "que viste en el
-   * ultimo escaneo" le hacia volver a escanear el proyecto entero.
-   */
+  /** Hallazgos guardados de escaneos anteriores: sin esto empieza de cero. */
   readonly known: readonly string[]
   /** El modo en el que trabaja. Sin esto el agente decia "supervisado" siempre. */
   readonly mode: OperationMode
 }
 
 /**
- * Cada paso recibe lo que encontraron los anteriores. Sin eso, el Code Reviewer
- * volveria a reportar la inyeccion SQL que el Security Reviewer acaba de
- * senalar, y el informe consolidado saldria con todo duplicado.
+ * Cada paso recibe lo que encontraron los anteriores: sin eso el informe
+ * consolidado saldria con la misma inyeccion SQL reportada tres veces.
  */
 function describePrevious(previous: readonly string[]): string {
   if (previous.length === 0) return 'Eres el primer agente de esta revision.'
@@ -46,6 +44,12 @@ function describeKnown(known: readonly string[]): string {
   ].join('\n')
 }
 
+/** El bloque documental, y su linea en blanco, solo si el proyecto tiene corpus. */
+function docsFirst(agentId: WorkflowStep['agentId'], context: StepContext): readonly string[] {
+  const bloque = buildDocsFirst(categoryForAgent(agentId), context.corpus)
+  return bloque === '' ? [] : [bloque, '']
+}
+
 export function buildStepPrompt(step: WorkflowStep, context: StepContext): string {
   return [
     `Proyecto "${context.projectName}", que es el directorio de trabajo actual.`,
@@ -54,8 +58,7 @@ export function buildStepPrompt(step: WorkflowStep, context: StepContext): strin
     '',
     graphFirstFor(step.agentId),
     '',
-    docsFirstFor(step.agentId),
-    '',
+    ...docsFirst(step.agentId, context),
     describeKnown(context.known),
     '',
     `Tu encargo: ${step.task}`,
