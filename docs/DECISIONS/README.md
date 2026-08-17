@@ -102,6 +102,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-061](adr-061-modo-autonomo-con-la-disciplina-del-motor.md) | El modo autónomo repara con la disciplina del motor | 2026-08-16 | Aceptada | Motor autónomo |
 | [ADR-062](adr-062-deliberacion-multi-agente-pospuesta.md) | La deliberación entre varios agentes queda pospuesta | 2026-08-16 | Aceptada | Motor autónomo |
 | [ADR-063](adr-063-motor-proyecto-activo.md) | El motor sale del repo propio y habla del proyecto activo | 2026-08-16 | Aceptada | Motor |
+| [ADR-064](adr-064-corpus-del-proyecto.md) | El corpus del proyecto se descubre, y el prompt calla si no lo hay | 2026-08-17 | Aceptada | Agentes |
 
 ## Referencias
 
