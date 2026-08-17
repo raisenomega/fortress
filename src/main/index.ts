@@ -3,6 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
 import { reconcileAllOnBoot } from '@infrastructure/graph/reconcile-service'
 import { reclaimRepairWorktrees } from '@infrastructure/repair/reclaim-service'
+import { restoreKeepAwake } from '@infrastructure/system/restore-keep-awake'
 import { resumeLoops } from '@infrastructure/loop/loop-controller'
 import { bindLoopWindow } from '@infrastructure/loop/loop-registry'
 import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
@@ -42,6 +43,9 @@ app.whenReady().then(() => {
   reconcileAllOnBoot()
   // Worktrees huerfanos de reparaciones interrumpidas: se reconcilian aqui.
   reclaimRepairWorktrees()
+  // El candado que el operador dejo pedido vuelve solo: si lo encendio para un
+  // ejercicio largo, un reinicio a media faena no debe apagarselo en silencio.
+  restoreKeepAwake()
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow()

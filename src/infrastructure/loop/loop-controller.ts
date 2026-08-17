@@ -4,14 +4,18 @@ import { loopBlocked } from '@domain/loop/loop-gate'
 import { loopConfigured } from '@domain/settings/loop-budget'
 import { getAppContext } from '../persistence/app-context'
 import { cancelRun } from '../run-control'
-import { setKeepAwake } from '../system/keep-awake'
+import { releaseKeepAwake, requestKeepAwake } from '../system/keep-awake'
 import { isFortressRepo } from '../system/self-project'
 import { runEngine } from './loop-engine'
 import { activeCount, cancelLoop, clearLoop, isRunning, markRunning } from './loop-registry'
 
-/** La pantalla se mantiene encendida mientras haya algun loop corriendo. */
+/**
+ * El loop pide el candado mientras trabaja y suelta el SUYO al terminar. Lo que
+ * haya pedido el operador no se toca: son dos peticionarios distintos.
+ */
 function refreshKeepAwake(): void {
-  setKeepAwake(activeCount() > 0)
+  if (activeCount() > 0) requestKeepAwake('loop')
+  else releaseKeepAwake('loop')
 }
 
 /** Motivo por el que el loop de ese proyecto no puede arrancar, o null. */
