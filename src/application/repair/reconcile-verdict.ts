@@ -40,10 +40,13 @@ export function mergePath(from: ProposalState): readonly ProposalState[] | null 
  * como funcion. Sesgo seguro en cada rama — sin prueba de merge se CADUCA,
  * nunca se fabrica un MERGEADO.
  *
- * null = no es asunto de esta pasada. El worktree nace en la fase GENERATE, a
- * la vez que el commit: una propuesta sin commit en su libro NO ha generado
- * todavia y no le falta ningun worktree — espera a que el operador pulse
- * Generar. Caducarla seria matar trabajo en curso.
+ * Sin commit en el libro no falta ningun worktree —nace en GENERATE, a la vez
+ * que el commit— y ahi manda el estado. ANALIZADO espera a que el operador
+ * pulse Generar, y puede esperar dias: caducarlo seria matar trabajo en curso,
+ * asi que se devuelve null. ELEGIDO no espera a nadie: su analisis es sincrono
+ * y ningun boton lo avanza, asi que sobrevivir a un arranque solo puede
+ * significar que murio a medias. Y al arrancar nada esta en vuelo: no hay duda
+ * que conceder.
  */
 export function decideOrphan(
   state: ProposalState,
@@ -52,7 +55,9 @@ export function decideOrphan(
   isMerged: (repoPath: string, commitSha: string) => boolean
 ): Verdict | null {
   const caducar = (reason: string): Verdict => ({ path: ['CADUCADO'], reason })
-  if (commitSha === null) return null
+  if (commitSha === null) {
+    return state === 'ELEGIDO' ? caducar(RECLAIM_REASONS.ANALISIS_INTERRUMPIDO) : null
+  }
   if (repoPath === null) return caducar(RECLAIM_REASONS.PROYECTO_AUSENTE)
   if (!isMerged(repoPath, commitSha)) return caducar(RECLAIM_REASONS.WORKTREE_AUSENTE)
   const path = mergePath(state)
