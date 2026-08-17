@@ -8,6 +8,8 @@
 export const RECLAIM_REASONS = {
   /** Disco -> BD: habia worktree de una propuesta a medio analizar. */
   ORPHAN_BEFORE_GENERATE: 'orphan_before_generate',
+  /** BD -> BD: el analisis nunca termino. Al arrancar nada esta en vuelo. */
+  ANALISIS_INTERRUMPIDO: 'analisis_interrumpido',
   /** BD -> git: propuesta viva sin worktree y sin merge demostrable. */
   WORKTREE_AUSENTE: 'worktree_ausente',
   /** BD -> git: el proyecto ya no esta; la ancestria no se puede consultar. */

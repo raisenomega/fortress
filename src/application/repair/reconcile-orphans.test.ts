@@ -50,6 +50,16 @@ describe('reconcileOrphanProposals: cada caducidad con su razon', () => {
     expect(b.patches).toHaveLength(0)
   })
 
+  it('ELEGIDO no espera a nadie: al arrancar se caduca como analisis interrumpido', async () => {
+    const b = banco({ state: 'ELEGIDO', commitSha: null })
+    expect(await reconcileOrphanProposals(b.context, b.deps)).toEqual({ merged: 0, expired: 1 })
+    expect(b.patches[0]).toMatchObject({
+      state: 'CADUCADO',
+      analysisReason: RECLAIM_REASONS.ANALISIS_INTERRUMPIDO
+    })
+    expect(b.events.map((e) => [e.fromState, e.toState])).toEqual([['ELEGIDO', 'CADUCADO']])
+  })
+
   it('sin commit en el libro no falta ningun worktree: no se toca', async () => {
     const b = banco({ state: 'GENERADO', commitSha: null, merged: true })
     await reconcileOrphanProposals(b.context, b.deps)
