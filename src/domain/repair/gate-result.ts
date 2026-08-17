@@ -8,16 +8,34 @@ export interface CommandOutcome {
   readonly timedOut: boolean
 }
 
-export type GateFailureReason = 'gate_failed' | 'gate_timeout' | 'npm_ci_failed'
+export type GateFailureReason =
+  | 'gate_failed'
+  | 'gate_timeout'
+  | 'npm_ci_failed'
+  /** El proyecto no tiene NINGUN script con el que verificar el fix. */
+  | 'gate_sin_verificacion'
 
-/** El juicio completo: o todo verde, o donde y por que se rompio la cadena. */
+/**
+ * El juicio completo: o todo verde, o donde y por que se rompio la cadena.
+ *
+ * `skipped` son las intenciones que el proyecto no sabe cumplir —no tiene
+ * script para ellas— y que por tanto NO se verificaron. Va aparte de `ok` a
+ * proposito: verde con algo saltado no es verde entero, y quien lea el
+ * desenlace tiene derecho a saber que se comprobo y que no. Ausente significa
+ * que no consta, no que no hubiera nada.
+ */
 export type GateOutcome =
-  | { readonly ok: true; readonly commands: readonly CommandOutcome[] }
+  | {
+      readonly ok: true
+      readonly commands: readonly CommandOutcome[]
+      readonly skipped?: readonly string[]
+    }
   | {
       readonly ok: false
       readonly commands: readonly CommandOutcome[]
       readonly failedAt: string
       readonly reason: GateFailureReason
+      readonly skipped?: readonly string[]
     }
 
 export function gatePassed(outcome: GateOutcome): outcome is Extract<GateOutcome, { ok: true }> {

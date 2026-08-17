@@ -3,7 +3,9 @@ import { GATE_COMMANDS, NPM_CI_TIMEOUT_MS, TAIL_CHARS } from './gate-config'
 import { gatePassed } from './gate-result'
 
 describe('gate-config (guarda contra cambios accidentales)', () => {
-  it('los TRES comandos, en ese orden, cada uno con 10 min', () => {
+  it('las TRES intenciones, en ese orden, cada una con 10 min', () => {
+    // `key` es la INTENCION; el nombre real del script lo resuelve el ejecutor
+    // contra el package.json del proyecto (ver gate-runner).
     expect(GATE_COMMANDS.map((c) => c.key)).toEqual(['typecheck', 'lint', 'test:unit'])
     expect(GATE_COMMANDS.every((c) => c.timeoutMs === 600_000)).toBe(true)
     expect(GATE_COMMANDS.map((c) => c.args)).toEqual([

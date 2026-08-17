@@ -10,6 +10,8 @@ export const REJECTION_REASONS = [
   'gate_failed',
   'gate_timeout',
   'npm_ci_failed',
+  /** El proyecto no declara ningun script con el que verificar el fix. */
+  'gate_sin_verificacion',
   'worktree_missing',
   'omega_vetado',
   'omega_timeout',
