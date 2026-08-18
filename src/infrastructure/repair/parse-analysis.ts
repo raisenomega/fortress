@@ -1,3 +1,4 @@
+import { tail } from '@domain/repair/tail'
 import { totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 import type { Analysis } from '@domain/repair/analysis'
 import type { Candidate } from '@domain/repair/select-target'
@@ -44,7 +45,12 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   const text = (k: string): string => (typeof j[k] === 'string' ? j[k] : '').trim()
   // `risk` es el canal: plan-repair lo persiste como analysisReason y el libro
   // lo asienta como razon de la transicion. La muestra viaja por ahi sola.
-  const ilegible = out.result.trim().slice(0, MUESTRA)
+  // La COLA, no la cabeza: el fallo tipico es "contenido extra despues del
+  // JSON", asi que lo que sobra esta al final y el principio se parece siempre
+  // al de una respuesta buena. Guardar el prefijo dejo sin diagnosticar el
+  // primer caso real (18-ago); es el mismo `tail` que el gate usa para su
+  // autopsia, que ademas corta en salto de linea para no empezar a medias.
+  const ilegible = tail(out.result.trim(), MUESTRA)
   const notes = toSelfNotes(j.notes)
   return {
     target,
