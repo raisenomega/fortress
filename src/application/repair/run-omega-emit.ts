@@ -15,7 +15,8 @@ export function emitOmegaRun(
 ): Promise<void> {
   const base = buildAgentRunEvent({
     proposalId, seq: next(cursor), phase: 'OMEGA', actor: 'omega',
-    costTokens: runMeta.tokensUsed, durationMs: runMeta.durationMs, ts: runMeta.endedAt
+    agentRunId: runMeta.agentRunId, costTokens: runMeta.tokensUsed,
+    durationMs: runMeta.durationMs, ts: runMeta.endedAt
   }) // prettier-ignore
   return safeRecord(ctx.eventLog, { ...base, evidenceJson: JSON.stringify(evidence) })
 }

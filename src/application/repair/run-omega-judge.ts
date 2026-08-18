@@ -8,7 +8,7 @@ import type { BookCursor } from './book-cursor'
 import { buildOmegaInput } from './run-omega-inputs'
 import { closeOmega, emitOmegaMismatch, emitOmegaRun } from './run-omega-emit'
 import type { OmegaDeps, RunOmegaResult } from './run-omega'
-import { recordMotorRun } from './record-motor-run'
+import { conAgentRun, recordMotorRun } from './record-motor-run'
 
 /** El juicio en si, ya dentro de la cola: inputs -> agente -> veredicto. */
 export async function judgeProposal(
@@ -31,10 +31,11 @@ export async function judgeProposal(
   }
 
   const { input, files } = await buildOmegaInput(deps, worktreePath, proposal.baseSha, analysis)
-  const result = await deps.omega.run(worktreePath, buildOmegaPrompt(input))
-  const evidence = result.ok ? { verdict: result.verdict, diffFiles: files } : { error: result.error, diffFiles: files } // prettier-ignore
+  const crudo = await deps.omega.run(worktreePath, buildOmegaPrompt(input))
+  const evidence = crudo.ok ? { verdict: crudo.verdict, diffFiles: files } : { error: crudo.error, diffFiles: files } // prettier-ignore
+  // Igual que en generate: el id existe antes de que el asiento lo cite.
+  const result = conAgentRun(crudo, recordMotorRun(ctx, proposal.projectId, 'sentinel-omega', crudo.runMeta, !crudo.ok)) // prettier-ignore
   await emitOmegaRun(ctx, cursor, proposal.id, result.runMeta, evidence)
-  recordMotorRun(ctx, proposal.projectId, 'sentinel-omega', result.runMeta, !result.ok)
 
   if (!result.ok) {
     const reason = result.error === 'omega_response_invalid' ? 'omega_response_invalid' : result.timedOut ? 'omega_timeout' : 'omega_error' // prettier-ignore

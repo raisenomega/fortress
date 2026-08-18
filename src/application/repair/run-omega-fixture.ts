@@ -1,23 +1,10 @@
 import { buildTransitionEvent, type ProposalEvent } from '@domain/repair/proposal-event'
 import { buildAgentRunEvent } from '@domain/repair/proposal-event'
-import type { OmegaVerdict } from '@domain/repair/omega-verdict'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
+import { APROBADO, ANALYSIS, META } from './run-omega-datos-fixture'
 import type { AppContext } from '../context'
 import type { OmegaAgentResult, OmegaDeps } from './run-omega'
-
-export const APROBADO: OmegaVerdict = {
-  resuelve_el_hallazgo: 'SI', respeta_scope: 'SI', respeta_doNotTouch: 'SI',
-  calidad_del_diff: 'BUENO', riesgo_residual: 'NINGUNO',
-  veredicto_global: 'APROBADO', razon: 'fix minimo y correcto'
-} // prettier-ignore
-
-const META = { tokensUsed: 120_000, durationMs: 60_000, startedAt: 1, endedAt: 2 }
-const ANALYSIS = {
-  target: { id: 'f1', severity: 'LOW', title: 't', file: 'src/a/b.ts', line: 1 },
-  status: 'REAL', whatToChange: 'w', where: 'src/a/b.ts',
-  patternToCopy: 'p', doNotTouch: 'n', risk: 'bajo', tokensUsed: 1
-} // prettier-ignore
 
 export interface Opciones {
   readonly state?: Proposal['state']
@@ -49,6 +36,8 @@ export function bench(opts: Opciones = {}): Bench {
       findById: (id: string) => (id === 'prop-1' ? proposal : null),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch })
     },
+    // Como el real: la fila vuelve con su id, que es lo que el asiento cita.
+    runs: { record: (r: object) => ({ ...r, id: 'run-omega', at: '' }) },
     eventLog: {
       list: () => Promise.resolve([...chain, ...events]),
       record: (event: ProposalEvent): Promise<void> => (events.push(event), Promise.resolve())
@@ -73,3 +62,5 @@ export function bench(opts: Opciones = {}): Bench {
   }
   return { context, deps, patches, events, calls }
 }
+
+export { APROBADO }

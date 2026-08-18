@@ -1,5 +1,6 @@
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
+import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
 import { cadenaDe, proposalDe, type Bench, type Opciones } from './generate-fix-fixture-base'
@@ -21,7 +22,7 @@ function depsDe(opts: Opciones, calls: string[], prompts: string[]): GenerateDep
       generate: (_wt: string, prompt: string) => {
         calls.push('generate')
         prompts.push(prompt)
-        const runMeta = { tokensUsed: opts.genCost ?? 50_000, durationMs: 9, startedAt: 1, endedAt: 10 } // prettier-ignore
+        const runMeta = { tokensUsed: opts.genCost ?? 50_000, durationMs: 9, startedAt: 1, endedAt: 10, usage: EMPTY_USAGE } // prettier-ignore
         return Promise.resolve(
           opts.generatorFails === true ? { ok: false as const, error: 'kaput', runMeta } : { ok: true as const, runMeta } // prettier-ignore
         )
@@ -50,6 +51,9 @@ export function bench(opts: Opciones = {}): Bench {
       findLatestAnalyzedRealByFinding: () =>
         opts.latestId === undefined ? proposal : { ...proposal, id: opts.latestId }
     },
+    // Como el repositorio real: la fila vuelve con su id, que es lo que el
+    // asiento cita para poder cruzarse con el libro mayor del gasto.
+    runs: { record: (r: object) => ({ ...r, id: 'run-gen', at: '' }) },
     eventLog: {
       list: () => Promise.resolve([...chain, ...events]),
       record: (event: ProposalEvent): Promise<void> => {
