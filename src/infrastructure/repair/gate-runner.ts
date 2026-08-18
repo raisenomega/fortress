@@ -1,7 +1,7 @@
 import { GATE_COMMANDS, NPM_CI_TIMEOUT_MS, type GateCommand } from '@domain/repair/gate-config'
 import type { CommandOutcome, GateOutcome } from '@domain/repair/gate-result'
 import { resolveVerifyScript } from '@domain/settings/safe-commands'
-import { medirHerencia } from './gate-baseline'
+import { correrComandos } from './gate-sequence'
 import { readProjectScripts } from '../claude-code/project-scripts'
 import { spawnCommand } from './spawn-command'
 
@@ -55,20 +55,7 @@ export function createGateRunner(
         return { ok: false, commands: done, failedAt: 'scripts', reason: 'gate_sin_verificacion', skipped } // prettier-ignore
       }
 
-      for (const { key, cmd } of resueltos) {
-        if (cmd === null) continue
-        const outcome = await spawnCommand(bin, key, cmd.args, worktreePath, cmd.timeoutMs)
-        done.push(outcome)
-        if (outcome.exitCode !== 0 || outcome.timedOut) {
-          const salida = outcome.stdoutTail + outcome.stderrTail
-          const medida = outcome.timedOut
-            ? { heredado: false }
-            : await medirHerencia(bin, worktreePath, baseSha, { ...cmd, key }, salida)
-          const heredado = medida.heredado ? [key] : []
-          return { ok: false, commands: done, failedAt: key, reason: outcome.timedOut ? 'gate_timeout' : 'gate_failed', skipped, heredado } // prettier-ignore
-        }
-      }
-      return { ok: true, commands: done, skipped }
+      return correrComandos({ bin, worktreePath, baseSha, done, skipped }, resueltos)
     }
   }
 }

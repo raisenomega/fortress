@@ -1,27 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { ProposalEvent } from '@domain/repair/proposal-event'
+import { cierre, corrida } from './collect-gate-fixture'
 import { collectGateOutcome } from './collect-gate-outcome'
-
-const corrida = (command: string, exitCode = 0): ProposalEvent =>
-  ({
-    proposalId: 'p1',
-    seq: 1,
-    phase: 'GATE',
-    eventType: 'AGENT_RUN',
-    durationMs: 10,
-    evidenceJson: JSON.stringify({ command, exitCode, stdoutTail: '', stderrTail: '' })
-  }) as unknown as ProposalEvent
-
-const cierre = (toState: 'GATE' | 'RECHAZADO', evidencia: object): ProposalEvent =>
-  ({
-    proposalId: 'p1',
-    seq: 9,
-    phase: 'GATE',
-    eventType: 'TRANSITION',
-    toState,
-    reason: 'gate verde',
-    evidenceJson: JSON.stringify(evidencia)
-  }) as unknown as ProposalEvent
 
 describe('collectGateOutcome: lo que el libro conserva del juicio', () => {
   it('reune los comandos y el veredicto del cierre', () => {
@@ -58,5 +37,21 @@ describe('collectGateOutcome: lo que el libro conserva del juicio', () => {
 
   it('sin cierre no hay juicio que reunir', () => {
     expect(collectGateOutcome([corrida('npm ci')])).toBeNull()
+  })
+})
+
+describe('collectGateOutcome: la herencia viaja en las dos ramas', () => {
+  it('un rojo conserva TODOS los heredados, no solo el primero', () => {
+    const eventos = [corrida('npm ci'), corrida('lint', 1), cierre('RECHAZADO', { heredado: ['lint', 'test:unit'] })] // prettier-ignore
+    expect(collectGateOutcome(eventos)?.heredado).toEqual(['lint', 'test:unit'])
+  })
+
+  it('un cierre verde que cuente herencia tambien la conserva', () => {
+    // Hoy ningun verde la trae; el dia que la traiga, reconstruirlo sin ella
+    // convertiria un verde con deuda ajena en un verde entero.
+    const eventos = [corrida('npm ci'), corrida('lint'), cierre('GATE', { heredado: ['lint'] })]
+    const outcome = collectGateOutcome(eventos)
+    expect(outcome).toMatchObject({ ok: true })
+    expect(outcome?.heredado).toEqual(['lint'])
   })
 })

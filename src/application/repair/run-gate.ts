@@ -8,7 +8,7 @@ import { emitGateCommand, emitGateOutcome, rejectGate } from './run-gate-emit'
  *  el libro no afirma "no hubo" cuando la pregunta no aplicaba. */
 const anotaciones = (o: GateOutcome): Record<string, readonly string[]> => ({
   ...(o.skipped?.length ? { skipped: o.skipped } : {}),
-  ...(!o.ok && o.heredado?.length ? { heredado: o.heredado } : {})
+  ...(o.heredado?.length ? { heredado: o.heredado } : {})
 })
 
 export interface GateDeps {
