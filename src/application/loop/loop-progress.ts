@@ -36,6 +36,20 @@ export function freshProgress(): Progress {
   }
 }
 
+/**
+ * Guarda lo que dejo la vuelta sin esperar al proximo escaneo. Se persistia
+ * solo dentro de `recordScore`, que corre al medir, y solo se vuelve a medir
+ * tras integraciones: en un proyecto donde nada se integra, el contador vivo
+ * llegaba a seis y el guardado seguia en cero. Lo delataba el motivo de parada,
+ * que anunciaba "0 de 6 propuestas cerradas" al pararse por haberlas cerrado.
+ *
+ * Persistir dos veces en la misma vuelta —esta y la de `recordScore` si toco
+ * medir— no rompe nada: es el mismo upsert con el estado mas fresco.
+ */
+export function recordCycle(deps: LoopDeps, p: Progress): void {
+  deps.persist(p.recentScores, p.cyclesDone)
+}
+
 /** Anota un score nuevo (el ultimo, y al frente del historial) y lo persiste. */
 export function recordScore(deps: LoopDeps, p: Progress, score: number): void {
   p.score = score
