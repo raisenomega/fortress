@@ -9,7 +9,7 @@ import {
   reiniciarCadencia,
   tocaEscanear
 } from './loop-counters'
-import { freshProgress, recordScore, type Progress } from './loop-progress'
+import { freshProgress, recordCycle, recordScore, type Progress } from './loop-progress'
 
 const WAIT_AFTER_SCAN = 5000
 const WAIT_AFTER_FIX = 10000
@@ -53,6 +53,7 @@ export async function runLoop(
     anotarDenegacion(p, vuelta)
     anotarSinCandidato(p, vuelta)
     anotarDescartada(p, vuelta)
+    recordCycle(deps, p)
 
     // El re-escaneo ya no juzga el arreglo —de eso van el gate y el revisor,
     // dentro del worktree—: mide el conjunto. Por eso se espacia hasta que hay
