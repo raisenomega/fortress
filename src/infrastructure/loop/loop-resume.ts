@@ -1,6 +1,6 @@
 import type { AppContext } from '@application/context'
 import type { Progress } from '@application/loop/loop-progress'
-import { spentToday } from '@application/settings/read-budget'
+import { spentTodayByProject } from '@application/settings/read-budget'
 
 export interface ResumeState {
   /** spentToday base para el tope de sesion. */
@@ -17,7 +17,7 @@ export interface ResumeState {
 export function resumeState(context: AppContext, projectId: string): ResumeState {
   const prior = context.loopSessions.get(projectId)
   if (prior?.active !== true) {
-    return { baseline: spentToday(context, new Date()), initial: undefined }
+    return { baseline: spentTodayByProject(context, new Date(), projectId), initial: undefined }
   }
   return {
     baseline: prior.spentBaseline,
