@@ -38,7 +38,8 @@ function run(bin: string, cwd: string, prompt: string): Promise<RunOut> {
 
 /** Analista real: corre claude -p GRAFO-PRIMERO (read-only) y arma el Analysis
  *  con su factura. tokensUsed va undefined si el parser no lo saco: no se
- *  inventan numeros. agentRunId queda pendiente (C2 no registra en agent_runs). */
+ *  inventan numeros. El agentRunId no se sabe aqui todavia: lo pone quien
+ *  asienta la corrida, que es quien recibe el id. */
 export function createGraphAnalyst(claudeBin: string, projectPath: string): Analyst {
   return {
     study: async (target) => {

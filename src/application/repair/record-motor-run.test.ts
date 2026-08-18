@@ -9,7 +9,9 @@ const META = { durationMs: 153_000, startedAt: 1, endedAt: 2, tokensUsed: 9000, 
 
 function banco(): { ctx: AppContext; filas: NewAgentRun[] } {
   const filas: NewAgentRun[] = []
-  const ctx = { runs: { record: (r: NewAgentRun) => void filas.push(r) } } as unknown as AppContext
+  const ctx = {
+    runs: { record: (r: NewAgentRun) => ({ ...r, id: `run-${filas.push(r)}`, at: '' }) }
+  } as unknown as AppContext
   return { ctx, filas }
 }
 

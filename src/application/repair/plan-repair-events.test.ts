@@ -13,7 +13,9 @@ describe('planRepair — libro de vida', () => {
       [3, 'ANALYZE', 'TRANSITION', 'motor']
     ])
     expect(b.events[0]).toMatchObject({ toState: 'ELEGIDO', scanId: 'scan-1' })
-    expect(b.events[1]).toMatchObject({ costTokens: 7, durationMs: 99 })
+    // El asiento cita la corrida por su id: sin el, el libro del motor y el
+    // libro mayor del gasto hablaban de lo mismo sin poder cruzarse.
+    expect(b.events[1]).toMatchObject({ costTokens: 7, durationMs: 99, agentRunId: 'run-1' })
     expect(b.events[2]).toMatchObject({ fromState: 'ELEGIDO', toState: 'ANALIZADO', reason: 'riesgo bajo' }) // prettier-ignore
     expect(JSON.parse(b.events[2].evidenceJson ?? '{}').status).toBe('REAL')
   })

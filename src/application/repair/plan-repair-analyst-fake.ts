@@ -1,4 +1,5 @@
 import type { Analyst } from '@domain/repair/analysis'
+import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { FindingMemory } from '@domain/project/finding-memory'
 import type { SelfNoteDraft } from '@domain/system/self-observation'
 
@@ -21,7 +22,9 @@ export function analistaFake(status: string, notes?: readonly SelfNoteDraft[]): 
           patternToCopy: 'p', doNotTouch: 'n', risk: 'riesgo bajo', tokensUsed: 7,
           ...(notes ? { notes } : {})
         }, // prettier-ignore
-        runMeta: { tokensUsed: 7, durationMs: 99, startedAt: 1, endedAt: 100 }
+        // Con factura, como la corrida real: sin ella no se asienta en el
+        // libro mayor y no habria id que citar en el asiento del analista.
+        runMeta: { tokensUsed: 7, durationMs: 99, startedAt: 1, endedAt: 100, usage: EMPTY_USAGE }
       })
   }
 }

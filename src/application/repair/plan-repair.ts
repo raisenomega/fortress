@@ -10,7 +10,7 @@ import { selectTarget, type Candidate } from '@domain/repair/select-target'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
-import { recordMotorRun } from './record-motor-run'
+import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
 
 /** Candidatos: ACTIVE y abiertos, menos tres descuentos. Los OBSOLETOS bajo el
@@ -58,8 +58,8 @@ export async function planRepair(context: AppContext, projectId: string): Promis
   context.repairProposals.insert(proposal)
   await recordElegido(context.eventLog, proposal, scanId)
 
-  const result = await analyzeTarget(context.analystFor(project.path), selection)
-  recordMotorRun(context, projectId, null, result.runMeta)
+  const crudo = await analyzeTarget(context.analystFor(project.path), selection)
+  const result = conAgentRun(crudo, recordMotorRun(context, projectId, null, crudo.runMeta))
   // Lo que el analista noto de FORTRESS se guarda pase lo que pase con el
   // hallazgo: un limite del que se topo vale igual si el hallazgo era un fantasma.
   for (const nota of result.analysis.notes ?? []) {

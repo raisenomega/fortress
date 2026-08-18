@@ -40,7 +40,8 @@ export function isActionable(a: Analysis): boolean {
 
 /** Metadatos de la corrida del analista: lo que costo y cuanto tardo. */
 export interface AnalystRunMeta {
-  /** Id en agent_runs, si la corrida se registro alli (hoy no: deuda anotada). */
+  /** Id de su fila en agent_runs. Ausente solo si la corrida no se pudo
+   *  asentar —factura ilegible o fallo de escritura—, nunca por no intentarlo. */
   readonly agentRunId?: string
   /** undefined si el parser no pudo extraerlo: no se inventan numeros. */
   readonly tokensUsed?: number

@@ -61,6 +61,9 @@ export function bench(opts: Opciones): Bench {
       },
       list: () => Promise.resolve(events)
     },
+    // Como el repositorio real: devuelve la fila con su id, que es lo que el
+    // asiento del analista cita para poder cruzarse con el libro mayor.
+    runs: { record: (r: object) => ({ ...r, id: 'run-1', at: '' }) },
     analystFor: () => analyst,
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha)
   } as unknown as AppContext

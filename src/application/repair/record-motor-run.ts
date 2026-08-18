@@ -19,6 +19,10 @@ import type { AppContext } from '../context'
  *
  * Nunca hace fallar la fase: perder una fila de telemetria es molesto; perder
  * el analisis que el operador acaba de pagar, no.
+ *
+ * Devuelve el id de la fila, o null si no la hubo. El repositorio siempre lo
+ * daba y aqui se tiraba, asi que el asiento del libro citaba una corrida que no
+ * podia senalar: dos registros de lo mismo sin manera de cruzarlos.
  */
 export function recordMotorRun(
   ctx: AppContext,
@@ -26,14 +30,14 @@ export function recordMotorRun(
   agentId: AgentId | null,
   runMeta: AnalystRunMeta,
   failed = false
-): void {
+): string | null {
   if (runMeta.usage === undefined) {
     console.warn('[motor] corrida sin factura legible: no se asienta', projectId)
-    return
+    return null
   }
 
   try {
-    ctx.runs.record({
+    return ctx.runs.record({
       projectId,
       agentId,
       kind: 'repair',
@@ -41,8 +45,19 @@ export function recordMotorRun(
       failed,
       usage: runMeta.usage,
       tools: []
-    })
+    }).id
   } catch (error) {
     console.error('[motor] no se pudo asentar la corrida', projectId, error)
+    return null
   }
+}
+
+/** El mismo resultado, con el id de su corrida ya dentro del runMeta. Sin id
+ *  —no se pudo asentar— se devuelve intacto: mejor sin cita que con una falsa. */
+export function conAgentRun<T extends { readonly runMeta: AnalystRunMeta }>(
+  resultado: T,
+  agentRunId: string | null
+): T {
+  if (agentRunId === null) return resultado
+  return { ...resultado, runMeta: { ...resultado.runMeta, agentRunId } }
 }
