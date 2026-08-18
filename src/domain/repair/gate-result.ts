@@ -29,6 +29,8 @@ export type GateOutcome =
       readonly ok: true
       readonly commands: readonly CommandOutcome[]
       readonly skipped?: readonly string[]
+      /** Reservado a (ii-b): hoy un verde no puede traer nada heredado. */
+      readonly heredado?: readonly string[]
     }
   | {
       readonly ok: false
@@ -39,7 +41,8 @@ export type GateOutcome =
       /**
        * Comandos que fallaron y YA fallaban sobre la base, sin que el fix
        * anadiera nada suyo. No cambia el veredicto —rojo es rojo— pero cambia
-       * de quien es: heredarlo no es haberlo roto.
+       * de quien es: heredarlo no es haberlo roto. Son TODOS los heredados que
+       * se encontraron, no solo el primero: la cadena ya no se para en ellos.
        */
       readonly heredado?: readonly string[]
     }

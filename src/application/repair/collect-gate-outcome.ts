@@ -62,7 +62,7 @@ export function collectGateOutcome(events: readonly ProposalEvent[]): GateOutcom
   const salto = { ...(skipped ? { skipped } : {}), ...(heredado ? { heredado } : {}) }
 
   // El veredicto lo dice el cierre, no se recalcula: quien juzgo ya decidio.
-  if (cierre.toState === 'GATE') return { ok: true, commands, ...(skipped ? { skipped } : {}) }
+  if (cierre.toState === 'GATE') return { ok: true, commands, ...salto }
 
   const roto = commands.find((c) => c.exitCode !== 0)
   return {
