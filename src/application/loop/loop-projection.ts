@@ -41,6 +41,8 @@ export function nextStop(config: LoopConfig, deps: LoopDeps, p: Progress): LoopS
     maxConsecutiveDenials: deps.maxConsecutiveDenials(),
     consecutiveNoCandidates: p.consecutiveNoCandidates,
     maxConsecutiveNoCandidates: deps.maxConsecutiveNoCandidates(),
+    consecutiveDiscarded: p.consecutiveDiscarded,
+    maxConsecutiveDiscarded: deps.maxConsecutiveDiscarded(),
     recentScores: p.recentScores
   })
 }

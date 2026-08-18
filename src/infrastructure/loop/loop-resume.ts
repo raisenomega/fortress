@@ -28,6 +28,7 @@ export function resumeState(context: AppContext, projectId: string): ResumeState
       consecutiveDenials: 0,
       integrationsSinceScan: 0,
       consecutiveNoCandidates: 0,
+      consecutiveDiscarded: 0,
       score: prior.recentScores[0] ?? null
     }
   }

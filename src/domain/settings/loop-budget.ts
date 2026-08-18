@@ -8,10 +8,9 @@ import { parseAmount, parseCount } from './loop-budget-fields'
  * sean > 0 el loop no se puede encender (loopConfigured). Nadie decide por el
  * cuanto esta dispuesto a gastar.
  *
- * VALVULAS de comportamiento (las tres restantes): con default razonable. No
- * limitan gasto de forma directa: ajustan como se comporta el ciclo. Sin
- * configurar hay una respuesta sensata, asi que exigirlas bloquearia el loop
- * por preguntas que el sistema sabe contestar solo.
+ * VALVULAS de comportamiento (las cuatro restantes): con default razonable.
+ * Ajustan como se comporta el ciclo, no cuanto gasta, y el sistema sabe
+ * contestarlas solo: exigirlas bloquearia el loop por nada.
  */
 export interface LoopBudget {
   /** Tope de gasto acumulado de la sesion de loop, en dolares. */
@@ -28,6 +27,8 @@ export interface LoopBudget {
   readonly rescanEvery: number
   /** Vueltas seguidas en vacio que se toleran antes de dar la baraja por agotada. */
   readonly maxConsecutiveNoCandidates: number
+  /** Fixes seguidos descartados que se toleran antes de admitir que no se avanza. */
+  readonly maxConsecutiveDiscarded: number
 }
 
 /** Denegaciones seguidas que se toleran cuando el operador no dice otra cosa. */
@@ -44,20 +45,27 @@ export const DEFAULT_RESCAN_EVERY = 3
  */
 export const DEFAULT_MAX_NO_CANDIDATES = 10
 
+/** Fixes descartados seguidos que se toleran. Bajo a proposito: cada uno costo
+ *  un analisis y una generacion, y tres bastaban para ver el patron en los
+ *  ejercicios del 17 y 18 de agosto (catorce y seis, todas por lo mismo). */
+export const DEFAULT_MAX_DISCARDED = 3
+
 /** Lee los topes de settings. Los frenos duros sin fijar -> 0 (loop no listo). */
 export function parseLoopBudget(
   costCap: string | null,
   maxCycles: string | null,
   maxDenials: string | null,
   rescanEvery: string | null,
-  maxNoCandidates: string | null
+  maxNoCandidates: string | null,
+  maxDiscarded: string | null
 ): LoopBudget {
   return {
     costCapUsd: parseAmount(costCap),
     maxCycles: parseCount(maxCycles) ?? 0,
     maxConsecutiveDenials: parseCount(maxDenials) ?? DEFAULT_MAX_DENIALS,
     rescanEvery: parseCount(rescanEvery) ?? DEFAULT_RESCAN_EVERY,
-    maxConsecutiveNoCandidates: parseCount(maxNoCandidates) ?? DEFAULT_MAX_NO_CANDIDATES
+    maxConsecutiveNoCandidates: parseCount(maxNoCandidates) ?? DEFAULT_MAX_NO_CANDIDATES,
+    maxConsecutiveDiscarded: parseCount(maxDiscarded) ?? DEFAULT_MAX_DISCARDED
   }
 }
 

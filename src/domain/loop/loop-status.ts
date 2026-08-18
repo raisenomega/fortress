@@ -30,6 +30,7 @@ export const STOP_LABEL: Record<LoopStopReason, string> = {
   'pool-agotado': 'No queda hallazgo que reparar: la baraja se agoto',
   'tope-denegaciones': 'Demasiadas propuestas seguidas denegadas por la politica',
   resuelto: 'Resuelto: 3 escaneos 100/100 seguidos',
+  'sin-avance': 'Se generaron fixes pero ninguno llego a integrarse',
   error: 'Se detuvo por un error inesperado'
 }
 
