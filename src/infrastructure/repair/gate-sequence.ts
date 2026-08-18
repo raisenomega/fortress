@@ -18,12 +18,9 @@ export interface Secuencia {
   readonly skipped: readonly string[]
 }
 
-/**
- * Si el rojo de este comando ya estaba en la base. Un timeout nunca se hereda:
- * no hay salida que comparar, y colgarse no es un defecto que se arrastre. Sin
- * base medible tampoco se hereda — medirHerencia lo dice y la duda cuenta
- * contra el fix, nunca a su favor.
- */
+/** Si el rojo de este comando ya estaba en la base. Un timeout nunca se hereda
+ *  —no hay salida que comparar—, ni un fix sin base medible: la duda cuenta
+ *  contra el, nunca a su favor. */
 async function esHeredado(
   s: Secuencia,
   key: string,
@@ -37,22 +34,21 @@ async function esHeredado(
 }
 
 /**
- * Los comandos del gate, en orden. Un rojo HEREDADO ya no corta la cadena: se
- * anota y se sigue. Pararse en el dejaba sin correr todo lo que venia detras
- * —los tests, entre otros— y despues no habia con que decidir nada: el ejercicio
- * del 18-ago cerro catorce propuestas sin ejecutar una sola vez `test:unit`.
- * Un rojo PROPIO sigue cortando en el acto: eso lo rompio el fix.
+ * Los comandos del gate, en orden. Un rojo HEREDADO no corta la cadena: se
+ * anota y se sigue, porque pararse en el dejaba sin correr lo que venia detras
+ * —los tests, entre otros—. Un rojo PROPIO corta en el acto: eso lo rompio el
+ * fix, y no hay mas que mirar.
  *
- * El veredicto NO se mueve. Si algo fallo, el gate rechaza igual, y `failedAt`
- * sigue siendo el primer rojo que se encontro. Lo que cambia es cuanto se sabe
- * al rechazar, que es lo que hara falta para decidir despues.
+ * Y si al final TODO lo que fallo era heredado, el gate pasa: exigirle a un fix
+ * que deje verde un arbol que ya estaba rojo antes de tocarlo es pedirle que
+ * arregle el proyecto entero para poder arreglar una linea.
  */
 export async function correrComandos(
   s: Secuencia,
   resueltos: readonly Resuelto[]
 ): Promise<GateOutcome> {
   const heredado: string[] = []
-  let primerFallo: string | null = null
+  let fallos = 0
 
   for (const { key, cmd } of resueltos) {
     if (cmd === null) continue
@@ -60,7 +56,7 @@ export async function correrComandos(
     s.done.push(salido)
     if (salido.exitCode === 0 && !salido.timedOut) continue
 
-    primerFallo ??= key
+    fallos += 1
     if (!(await esHeredado(s, key, cmd, salido))) {
       const reason = salido.timedOut ? 'gate_timeout' : 'gate_failed'
       return { ok: false, commands: s.done, failedAt: key, reason, skipped: s.skipped, heredado } // prettier-ignore
@@ -68,8 +64,11 @@ export async function correrComandos(
     heredado.push(key)
   }
 
-  if (primerFallo !== null) {
-    return { ok: false, commands: s.done, failedAt: primerFallo, reason: 'gate_failed', skipped: s.skipped, heredado } // prettier-ignore
+  // La cuenta se comprueba en vez de darse por hecha: hoy un rojo propio sale
+  // por el return de arriba y no puede llegar aqui, pero de esa invariante
+  // depende que no se acepte un fix que rompe el arbol, y eso se verifica.
+  if (fallos > 0 && fallos !== heredado.length) {
+    return { ok: false, commands: s.done, failedAt: heredado[0] ?? 'desconocido', reason: 'gate_failed', skipped: s.skipped, heredado } // prettier-ignore
   }
-  return { ok: true, commands: s.done, skipped: s.skipped }
+  return { ok: true, commands: s.done, skipped: s.skipped, ...(heredado.length ? { heredado } : {}) } // prettier-ignore
 }
