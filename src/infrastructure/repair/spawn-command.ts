@@ -38,7 +38,14 @@ export function spawnCommand(
 ): Promise<CommandOutcome> {
   const startedAt = Date.now()
   return new Promise((resolve) => {
-    const child = spawn(bin, args as string[], { cwd, detached: true })
+    // CI: los runners miran esa variable para correr UNA vez en lugar de
+    // vigilar ficheros. Sin ella, un proyecto que llama `vitest` a secas cuelga
+    // el gate hasta el timeout y el veredicto sale por reloj, no por juicio.
+    // Pisar la del operador es deliberado: como se verifica lo decide el
+    // auditor. Se compone AQUI y no al cargar el modulo: el entorno del proceso
+    // puede cambiar despues, y el gate tiene que correr con el de ahora.
+    const env = { ...process.env, CI: 'true' }
+    const child = spawn(bin, args as string[], { cwd, detached: true, env })
     let out = ''
     let errOut = ''
     let timedOut = false
