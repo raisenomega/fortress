@@ -8,7 +8,7 @@ import {
 
 /** Las tres valvulas leidas sin nada guardado: cada una con su default. */
 const sinNada = (): ReturnType<typeof parseLoopBudget> =>
-  parseLoopBudget(null, null, null, null, null)
+  parseLoopBudget(null, null, null, null, null, null)
 
 describe('las denegaciones seguidas que se toleran', () => {
   it('sin fijar hereda el default', () => {
@@ -16,14 +16,14 @@ describe('las denegaciones seguidas que se toleran', () => {
   })
 
   it('basura tambien hereda el default: no hay intencion legible', () => {
-    const b = parseLoopBudget(null, null, 'abc', null, null)
+    const b = parseLoopBudget(null, null, 'abc', null, null, null)
     expect(b.maxConsecutiveDenials).toBe(DEFAULT_MAX_DENIALS)
   })
 
   it('un cero guardado es un cero, no una ausencia', () => {
     // Aplanar los dos en 0 haria indistinguible "no configurado" de lo que el
     // operador escribio a mano, y el default se comeria su decision.
-    expect(parseLoopBudget(null, null, '0', null, null).maxConsecutiveDenials).toBe(0)
+    expect(parseLoopBudget(null, null, '0', null, null, null).maxConsecutiveDenials).toBe(0)
   })
 })
 
@@ -35,7 +35,7 @@ describe('la cadencia de re-escaneo', () => {
   it('un cero guardado pide escanear siempre, y sobrevive como cero', () => {
     // No es "no escanear nunca": con cero integraciones acumuladas la condicion
     // ya se cumple, asi que cada vuelta mide. Es el comportamiento de antes.
-    expect(parseLoopBudget(null, null, null, '0', null).rescanEvery).toBe(0)
+    expect(parseLoopBudget(null, null, null, '0', null, null).rescanEvery).toBe(0)
   })
 })
 
@@ -50,6 +50,6 @@ describe('las vueltas en vacio que se toleran', () => {
   })
 
   it('un cero guardado sobrevive como cero', () => {
-    expect(parseLoopBudget(null, null, null, null, '0').maxConsecutiveNoCandidates).toBe(0)
+    expect(parseLoopBudget(null, null, null, null, '0', null).maxConsecutiveNoCandidates).toBe(0)
   })
 })

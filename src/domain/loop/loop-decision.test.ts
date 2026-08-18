@@ -1,18 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { loopStop, solvedStreak, type LoopState } from './loop-decision'
-
-const base: LoopState = {
-  cancelled: false,
-  spentSession: 0,
-  costCap: 30,
-  cyclesDone: 0,
-  maxCycles: 5,
-  consecutiveDenials: 0,
-  maxConsecutiveDenials: 5,
-  consecutiveNoCandidates: 0,
-  maxConsecutiveNoCandidates: 10,
-  recentScores: []
-}
+import { loopStop } from './loop-decision'
+import { ESTADO_BASE as base } from './loop-decision-fixture'
 
 describe('loopStop', () => {
   it('sigue cuando no se cumple ninguna parada', () => {
@@ -58,18 +46,5 @@ describe('loopStop', () => {
 
   it('NO para con menos de 3 escaneos aunque sean 100', () => {
     expect(loopStop({ ...base, recentScores: [100, 100] })).toBeNull()
-  })
-})
-
-describe('solvedStreak', () => {
-  it('cuenta los 100 SEGUIDOS desde el mas reciente, tope 3', () => {
-    expect(solvedStreak([100])).toBe(1)
-    expect(solvedStreak([100, 100])).toBe(2)
-    expect(solvedStreak([100, 100, 100, 100])).toBe(3) // topado en 3
-  })
-
-  it('un score < 100 rompe la racha (deben ser seguidos, no aislados)', () => {
-    expect(solvedStreak([100, 98, 100])).toBe(1) // solo el mas reciente
-    expect(solvedStreak([90, 100, 100])).toBe(0) // el mas reciente no es 100
   })
 })

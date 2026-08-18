@@ -53,6 +53,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
     maxConsecutiveDenials: () => readLoopBudget(context).maxConsecutiveDenials,
     rescanEvery: () => readLoopBudget(context).rescanEvery,
     maxConsecutiveNoCandidates: () => readLoopBudget(context).maxConsecutiveNoCandidates,
+    maxConsecutiveDiscarded: () => readLoopBudget(context).maxConsecutiveDiscarded,
     isCancelled: () => isLoopCancelled(pid),
     wait: (ms) => waitOrCancel(pid, ms),
     emit: sendLoopStatus,

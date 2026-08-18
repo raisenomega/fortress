@@ -18,6 +18,8 @@ export interface Progress {
   integrationsSinceScan: number
   /** Vueltas seguidas en las que no habia nada que reparar. */
   consecutiveNoCandidates: number
+  /** Vueltas seguidas en las que se genero un fix y murio sin integrarse. */
+  consecutiveDiscarded: number
   score: number | null
 }
 
@@ -29,6 +31,7 @@ export function freshProgress(): Progress {
     consecutiveDenials: 0,
     integrationsSinceScan: 0,
     consecutiveNoCandidates: 0,
+    consecutiveDiscarded: 0,
     score: null
   }
 }

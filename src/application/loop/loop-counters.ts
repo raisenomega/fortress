@@ -31,6 +31,20 @@ export function anotarSinCandidato(p: Progress, outcome: ChainOutcome): void {
 }
 
 /**
+ * Mueve la racha de no-avance. Suma con cada fix descartado y la borra
+ * cualquier avance real: una integracion, o una propuesta viva esperando firma
+ * —que no se integrara sola, pero existe y es del operador—. Las vueltas sin
+ * candidato y las de hallazgo obsoleto no la tocan: no hubo fix que muriera,
+ * pero tampoco nada que celebrar, y esas ya las cuenta su propio freno.
+ */
+export function anotarDescartada(p: Progress, outcome: ChainOutcome): void {
+  if (outcome.kind === 'descartada') p.consecutiveDiscarded += 1
+  else if (outcome.kind === 'integrada' || outcome.kind === 'espera-firma') {
+    p.consecutiveDiscarded = 0
+  }
+}
+
+/**
  * Si toca volver a medir. Cuenta INTEGRACIONES, no vueltas: entre dos merges el
  * arbol es identico, y escanearlo otra vez seria pagar por leer lo mismo. Un
  * tope de cero pide escanear siempre, que es como se comportaba antes de que

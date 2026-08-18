@@ -4,6 +4,7 @@ import type { LoopConfig, LoopDeps } from './loop-deps'
 import { nextStop, statusOf } from './loop-projection'
 import {
   anotarDenegacion,
+  anotarDescartada,
   anotarSinCandidato,
   reiniciarCadencia,
   tocaEscanear
@@ -51,6 +52,7 @@ export async function runLoop(
     if (vuelta.kind !== 'sin-candidato') p.cyclesDone += 1
     anotarDenegacion(p, vuelta)
     anotarSinCandidato(p, vuelta)
+    anotarDescartada(p, vuelta)
 
     // El re-escaneo ya no juzga el arreglo —de eso van el gate y el revisor,
     // dentro del worktree—: mide el conjunto. Por eso se espacia hasta que hay

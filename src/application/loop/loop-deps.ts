@@ -37,6 +37,8 @@ export interface LoopDeps {
   readonly rescanEvery: () => number
   /** Vueltas en vacio que se toleran antes de dar la baraja por agotada. */
   readonly maxConsecutiveNoCandidates: () => number
+  /** Fixes descartados seguidos que se toleran antes de admitir el no-avance. */
+  readonly maxConsecutiveDiscarded: () => number
   /** El humano intervino (toggle OFF / Detener). */
   readonly isCancelled: () => boolean
   readonly wait: (ms: number) => Promise<void>
