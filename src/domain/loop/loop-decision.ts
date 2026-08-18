@@ -1,10 +1,16 @@
 /**
  * Por que se detuvo el loop. La UI lo traduce (ver STOP_LABEL en loop-status).
- * Todas las devuelve loopStop: desde que el arreglo vive en su worktree, el
- * ciclo no tiene ninguna parada propia que anunciar por su cuenta.
+ * Las seis primeras las decide loopStop; `error` no: lo trae el catch del
+ * envoltorio cuando el ciclo muere por una excepcion, y antes se tragaba.
  */
 export type LoopStopReason =
-  'detenido' | 'tope-gasto' | 'tope-ciclos' | 'tope-denegaciones' | 'pool-agotado' | 'resuelto'
+  | 'detenido'
+  | 'tope-gasto'
+  | 'tope-ciclos'
+  | 'tope-denegaciones'
+  | 'pool-agotado'
+  | 'resuelto'
+  | 'error'
 
 export interface LoopState {
   /** El humano intervino (toggle OFF / boton Detener). Manda sobre todo. */

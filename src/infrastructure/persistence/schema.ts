@@ -66,10 +66,10 @@ CREATE TABLE IF NOT EXISTS self_observations (
 
 CREATE TABLE IF NOT EXISTS loop_sessions (
   project_id     TEXT PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
-  active         INTEGER NOT NULL DEFAULT 0,
-  cycles_done    INTEGER NOT NULL DEFAULT 0,
+  active         INTEGER NOT NULL DEFAULT 0, cycles_done INTEGER NOT NULL DEFAULT 0,
   recent_scores  TEXT NOT NULL DEFAULT '[]',
   spent_baseline REAL NOT NULL DEFAULT 0,
-  updated_at     TEXT NOT NULL
+  updated_at     TEXT NOT NULL,
+  stopped_reason TEXT, stopped_reason_detail TEXT, stopped_at TEXT
 );
 `

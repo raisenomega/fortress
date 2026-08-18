@@ -4,6 +4,8 @@
  * Al arrancar, un proyecto con el loop encendido y sesion activa se reanuda
  * desde aqui —mismas propuestas cerradas, mismos scores— y nada se pierde.
  */
+import type { LoopStopReason } from './loop-decision'
+
 export interface LoopSession {
   readonly projectId: string
   /** Sesion viva: se reanuda al arrancar. false cuando paro por algo terminal. */
@@ -14,4 +16,11 @@ export interface LoopSession {
   /** Gasto del dia (spentToday) al arrancar la sesion: la base del tope de sesion. */
   readonly spentBaseline: number
   readonly updatedAt: string
+  /**
+   * Por que dejo de correr, y con que cifra. Ausentes en las sesiones
+   * anteriores a que esto se guardara: ausente es "no consta", no "sin motivo".
+   */
+  readonly stoppedReason?: LoopStopReason
+  readonly stoppedReasonDetail?: string
+  readonly stoppedAt?: string
 }

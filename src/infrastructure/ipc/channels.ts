@@ -21,6 +21,7 @@ export const IPC = {
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
   loopStatus: 'loop:status',
   loopChunk: 'loop:chunk',
+  loopLastSession: 'loop:last-session',
   maintenanceKeepAwake: 'maintenance:keep-awake',
   healthRun: 'health:run',
   scanRun: 'scan:run',

@@ -29,5 +29,16 @@ export const STOP_LABEL: Record<LoopStopReason, string> = {
   'tope-ciclos': 'Alcanzado el maximo de propuestas',
   'pool-agotado': 'No queda hallazgo que reparar: la baraja se agoto',
   'tope-denegaciones': 'Demasiadas propuestas seguidas denegadas por la politica',
-  resuelto: 'Resuelto: 3 escaneos 100/100 seguidos'
+  resuelto: 'Resuelto: 3 escaneos 100/100 seguidos',
+  error: 'Se detuvo por un error inesperado'
+}
+
+/**
+ * Lo leido de la base es texto hasta que se comprueba. Se pregunta contra
+ * STOP_LABEL y no contra una lista aparte: esa tabla ya es el vocabulario
+ * completo —el Record lo obliga— y una segunda lista solo sirve para
+ * desincronizarse el dia que se anada un motivo (ADR-059).
+ */
+export function isStopReason(value: string | null): value is LoopStopReason {
+  return value !== null && value in STOP_LABEL
 }

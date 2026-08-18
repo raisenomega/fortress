@@ -1,4 +1,5 @@
 import type { LoopConfig } from '@application/loop/loop-deps'
+import type { Progress } from '@application/loop/loop-progress'
 import { solvedStreak } from '@domain/loop/loop-decision'
 import type { LoopStatus } from '@domain/loop/loop-status'
 
@@ -6,6 +7,11 @@ import type { LoopStatus } from '@domain/loop/loop-status'
 export interface Track {
   recentScores: readonly number[]
   cyclesDone: number
+}
+
+/** El contador con el que arranca la sesion: lo reanudado, o de cero. */
+export function resumeTrack(initial: Progress | undefined): Track {
+  return { recentScores: initial?.recentScores ?? [], cyclesDone: initial?.cyclesDone ?? 0 }
 }
 
 /** Status "en espera" entre ciclos, para el HUD del loop. */
