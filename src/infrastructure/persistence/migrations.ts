@@ -41,11 +41,11 @@ const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   ['projects', 'general_quality', 'ALTER TABLE projects ADD COLUMN general_quality INTEGER'],
   ['projects', 'config_state', "ALTER TABLE projects ADD COLUMN config_state TEXT NOT NULL DEFAULT 'CONFIGURADO'"], // prettier-ignore
   ['capabilities', 'phase', "ALTER TABLE capabilities ADD COLUMN phase TEXT NOT NULL DEFAULT 'propuesta'"], // prettier-ignore
-  // Nullable a proposito: una sesion anterior a esto no tiene motivo que contar,
-  // y escribirle uno seria inventarselo.
+  // Nullable a proposito: una sesion anterior no tiene motivo que contar.
   ['loop_sessions', 'stopped_reason', 'ALTER TABLE loop_sessions ADD COLUMN stopped_reason TEXT'], // prettier-ignore
   ['loop_sessions', 'stopped_reason_detail', 'ALTER TABLE loop_sessions ADD COLUMN stopped_reason_detail TEXT'], // prettier-ignore
-  ['loop_sessions', 'stopped_at', 'ALTER TABLE loop_sessions ADD COLUMN stopped_at TEXT']
+  ['loop_sessions', 'stopped_at', 'ALTER TABLE loop_sessions ADD COLUMN stopped_at TEXT'],
+  ['scans', 'dossier_count', 'ALTER TABLE scans ADD COLUMN dossier_count INTEGER NOT NULL DEFAULT 0'] // prettier-ignore
 ]
 
 export function runMigrations(db: Db): void {
