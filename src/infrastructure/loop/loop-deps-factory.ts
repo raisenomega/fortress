@@ -1,6 +1,6 @@
 import type { AppContext } from '@application/context'
 import type { LoopConfig, LoopDeps } from '@application/loop/loop-deps'
-import { spentToday } from '@application/settings/read-budget'
+import { spentTodayByProject } from '@application/settings/read-budget'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
 import { loopScan } from './loop-ops'
 import { runMotorChain } from '@application/repair/run-motor-chain'
@@ -49,7 +49,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
         if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
         return vuelta
       }, hooks),
-    spentSession: () => spentToday(context, new Date()) - baseline,
+    spentSession: () => spentTodayByProject(context, new Date(), pid) - baseline,
     maxConsecutiveDenials: () => readLoopBudget(context).maxConsecutiveDenials,
     rescanEvery: () => readLoopBudget(context).rescanEvery,
     maxConsecutiveNoCandidates: () => readLoopBudget(context).maxConsecutiveNoCandidates,

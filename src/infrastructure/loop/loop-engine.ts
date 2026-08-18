@@ -1,7 +1,7 @@
 import type { AppContext } from '@application/context'
 import type { LoopConfig } from '@application/loop/loop-deps'
 import { runLoop } from '@application/loop/run-loop'
-import { spentToday } from '@application/settings/read-budget'
+import { spentTodayByProject } from '@application/settings/read-budget'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
 import { loopBlocked } from '@domain/loop/loop-gate'
 import type { Project } from '@domain/project/project'
@@ -53,7 +53,7 @@ export async function runEngine(context: AppContext, projectId: string): Promise
     config,
     baseline,
     onStandby: () =>
-      sendLoopStatus(standbyStatus(config, track, spentToday(context, new Date()) - baseline)),
+      sendLoopStatus(standbyStatus(config, track, spentTodayByProject(context, new Date(), projectId) - baseline)), // prettier-ignore
     persist: (recentScores, cyclesDone) => {
       track.recentScores = recentScores
       track.cyclesDone = cyclesDone
@@ -65,7 +65,7 @@ export async function runEngine(context: AppContext, projectId: string): Promise
   let parada: Parada | null = null
   try {
     const motivo = await runLoop(config, deps, initial)
-    parada = paradaLimpia(motivo, hechosDeParada(context, budget, track.cyclesDone, baseline))
+    parada = paradaLimpia(motivo, hechosDeParada(context, projectId, budget, track.cyclesDone, baseline)) // prettier-ignore
   } catch (error) {
     parada = paradaPorFallo(error)
   } finally {

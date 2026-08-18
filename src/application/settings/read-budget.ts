@@ -19,3 +19,16 @@ export function readBudget(context: AppContext): Budget {
 export function spentToday(context: AppContext, now: Date): number {
   return context.runs.usageSince(windowStart(now, 'hoy')).costUsd
 }
+
+/**
+ * Lo mismo, pero de UN proyecto. El tope de sesion del loop es suyo y de nadie
+ * mas: chatear o escanear en otro proyecto mientras corre no puede comerselo,
+ * y hasta hoy se lo comia. Sin fila para el proyecto es cero gastado, no un
+ * hueco: la ausencia de ejecuciones es una medida, no una falta de dato.
+ *
+ * El tope DIARIO sigue leyendose con `spentToday`, global a proposito: ese es
+ * el techo del operador sobre la herramienta entera, no sobre un proyecto.
+ */
+export function spentTodayByProject(context: AppContext, now: Date, projectId: string): number {
+  return context.runs.usageByProjectSince(windowStart(now, 'hoy'))[projectId]?.costUsd ?? 0
+}

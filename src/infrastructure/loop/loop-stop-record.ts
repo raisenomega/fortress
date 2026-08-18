@@ -1,5 +1,5 @@
 import type { AppContext } from '@application/context'
-import { spentToday } from '@application/settings/read-budget'
+import { spentTodayByProject } from '@application/settings/read-budget'
 import type { LoopStopReason } from '@domain/loop/loop-decision'
 import { detalleDeParada, type StopFacts } from '@domain/loop/stop-detail'
 import type { LoopBudget } from '@domain/settings/loop-budget'
@@ -24,12 +24,13 @@ const con = (reason: LoopStopReason, detalle: string | null): Parada => ({
  */
 export function hechosDeParada(
   context: AppContext,
+  projectId: string,
   budget: LoopBudget,
   cyclesDone: number,
   baseline: number
 ): StopFacts {
   return {
-    spentSession: spentToday(context, new Date()) - baseline,
+    spentSession: spentTodayByProject(context, new Date(), projectId) - baseline,
     costCap: budget.costCapUsd,
     cyclesDone,
     maxCycles: budget.maxCycles,
