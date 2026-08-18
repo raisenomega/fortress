@@ -36,6 +36,12 @@ export type GateOutcome =
       readonly failedAt: string
       readonly reason: GateFailureReason
       readonly skipped?: readonly string[]
+      /**
+       * Comandos que fallaron y YA fallaban sobre la base, sin que el fix
+       * anadiera nada suyo. No cambia el veredicto —rojo es rojo— pero cambia
+       * de quien es: heredarlo no es haberlo roto.
+       */
+      readonly heredado?: readonly string[]
     }
 
 export function gatePassed(outcome: GateOutcome): outcome is Extract<GateOutcome, { ok: true }> {
