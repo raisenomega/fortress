@@ -4,19 +4,18 @@ import type { AppContext } from '../context'
 import { cursorFrom } from './book-cursor'
 import { emitGateCommand, emitGateOutcome, rejectGate } from './run-gate-emit'
 
-/**
- * Lo que el proyecto no supo verificar entra en la evidencia solo si hubo algo:
- * el libro no debe afirmar "no se salto nada" cuando lo que pasa es que la
- * pregunta no aplicaba.
- */
-const saltados = (outcome: GateOutcome): { skipped?: readonly string[] } =>
-  outcome.skipped !== undefined && outcome.skipped.length > 0 ? { skipped: outcome.skipped } : {}
+/** Lo no verificado y lo que ya venia roto, en la evidencia y solo si los hubo:
+ *  el libro no afirma "no hubo" cuando la pregunta no aplicaba. */
+const anotaciones = (o: GateOutcome): Record<string, readonly string[]> => ({
+  ...(o.skipped?.length ? { skipped: o.skipped } : {}),
+  ...(!o.ok && o.heredado?.length ? { heredado: o.heredado } : {})
+})
 
 export interface GateDeps {
   readonly worktreeRoot: string
   readonly worktreeExists: (path: string) => boolean
   readonly isClean: (path: string) => Promise<boolean>
-  readonly runner: { run(worktreePath: string): Promise<GateOutcome> }
+  readonly runner: { run(worktreePath: string, baseSha: string): Promise<GateOutcome> }
   /** D16 — cola serial de UN gate a la vez a nivel de proceso. */
   readonly enqueue: (job: () => Promise<RunGateResult>) => Promise<RunGateResult>
   readonly now: () => number
@@ -25,9 +24,9 @@ export interface GateDeps {
 export type RunGateResult = { ok: true } | { ok: false; reason: string }
 
 /**
- * I3 — el juicio hermetico del fix generado: npm ci + typecheck + lint +
- * test:unit DENTRO del worktree. Verde total -> GATE (esperando OMEGA). Rojo o
- * timeout -> RECHAZADO con autopsia; el worktree se CONSERVA siempre.
+ * I3 — el juicio hermetico del fix DENTRO del worktree. Verde total -> GATE
+ * (esperando OMEGA); rojo o timeout -> RECHAZADO con autopsia y el worktree se
+ * CONSERVA siempre.
  */
 export async function runGate(
   ctx: AppContext,
@@ -48,7 +47,7 @@ export async function runGate(
   }
 
   return deps.enqueue(async () => {
-    const outcome = await deps.runner.run(worktreePath)
+    const outcome = await deps.runner.run(worktreePath, proposal.baseSha)
     for (const command of outcome.commands) {
       await emitGateCommand(ctx.eventLog, cursor, proposal.id, command, deps.now())
     }
@@ -57,7 +56,7 @@ export async function runGate(
       const roto = outcome.commands.at(-1)
       return rejectGate(ctx, cursor, proposal, outcome.reason, detail, {
         failedAt: outcome.failedAt, reason: outcome.reason,
-        exitCode: roto?.exitCode, timedOut: roto?.timedOut, ...saltados(outcome)
+        exitCode: roto?.exitCode, timedOut: roto?.timedOut, ...anotaciones(outcome)
       }, deps.now()) // prettier-ignore
     }
     if (!canTransition(proposal.state, 'GATE')) return { ok: false, reason: 'invalid_state' }
@@ -68,7 +67,7 @@ export async function runGate(
       updatedAt: deps.now()
     })
     const total = outcome.commands.reduce((sum, c) => sum + c.durationMs, 0)
-    await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'GATE', 'gate verde', { allCommandsGreen: true, totalDurationMs: total, ...saltados(outcome) }, deps.now()) // prettier-ignore
+    await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'GATE', 'gate verde', { allCommandsGreen: true, totalDurationMs: total, ...anotaciones(outcome) }, deps.now()) // prettier-ignore
     return { ok: true }
   })
 }
