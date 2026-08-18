@@ -10,7 +10,7 @@ import type { FailFn } from './generate-fail'
 import { prepareWorktree } from './generate-setup'
 import { loadAnalysis } from './load-analysis'
 import { emitGeneratorRun, emitOutcome } from './record-generate-events'
-import { recordMotorRun } from './record-motor-run'
+import { conAgentRun, recordMotorRun } from './record-motor-run'
 
 /**
  * C3 — GENERAR: worktree aislado sobre base_sha, generador con cwd anclado,
@@ -30,9 +30,12 @@ export async function generateFix(
   if ('failed' in prepared) return prepared.failed
   const { worktreePath, allowed, fail } = prepared
 
-  const result = await deps.generator.generate(worktreePath, buildGeneratorPrompt(a.analysis))
+  const crudo = await deps.generator.generate(worktreePath, buildGeneratorPrompt(a.analysis))
+  // Registrar ANTES de asentar: el id nace en el libro mayor y el asiento lo
+  // cita. Al reves —como estaba— el asiento se escribia cuando ese id todavia
+  // no existia, y la cita quedaba vacia para siempre.
+  const result = conAgentRun(crudo, recordMotorRun(ctx, a.proposal.projectId, null, crudo.runMeta, !crudo.ok)) // prettier-ignore
   await emitGeneratorRun(ctx.eventLog, a.cursor, a.proposal.id, result.runMeta)
-  recordMotorRun(ctx, a.proposal.projectId, null, result.runMeta, !result.ok)
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
   if (!result.ok) return fail('generator_error', { error: result.error }, true)
 
