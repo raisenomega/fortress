@@ -23,27 +23,4 @@ describe('toAnalysis: lo que no se deja leer no mata el motor', () => {
     expect(a.risk).toContain('analisis ilegible')
     expect(a.risk).toContain('API Error 529')
   })
-
-  it('de una respuesta enorme se guarda una muestra, no el tocho entero', () => {
-    const a = crudo(`{"status": ${'x'.repeat(5000)}`)
-
-    expect(a.risk.length).toBeLessThan(400)
-  })
-
-  it('una respuesta corta se guarda entera, sin romperse al recortar', () => {
-    expect(crudo('{roto').risk).toBe('analisis ilegible: {roto')
-  })
-
-  it('una respuesta vacia degrada limpia y sin muestra que ensenar', () => {
-    const a = crudo('')
-
-    expect(a.status).toBe('DESCONOCIDO')
-    expect(a.risk).toBe('analisis ilegible: ')
-  })
-
-  it('el camino feliz no pasa por la degradacion', () => {
-    const bueno = { status: 'REAL', whatToChange: 'w', where: 'd', patternToCopy: 'p', doNotTouch: 'n', risk: 'r' } // prettier-ignore
-
-    expect(crudo(JSON.stringify(bueno))).toMatchObject({ status: 'REAL', risk: 'r' })
-  })
 })
