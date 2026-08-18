@@ -29,6 +29,12 @@ CREATE TABLE chat_messages (
   role TEXT NOT NULL, content TEXT NOT NULL, agent_id TEXT, mode TEXT NOT NULL,
   created_at TEXT NOT NULL);
 
+CREATE TABLE loop_sessions (
+  project_id TEXT PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
+  active INTEGER NOT NULL DEFAULT 0, cycles_done INTEGER NOT NULL DEFAULT 0,
+  recent_scores TEXT NOT NULL DEFAULT '[]', spent_baseline REAL NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL);
+
 CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 `
 
@@ -49,6 +55,11 @@ function writeLegacyDatabase() {
     db.prepare(
       `INSERT INTO findings (id, project_id, severity, title, file, line, created_at)
        VALUES ('h1', 'viejo', 'CRITICAL', 'SQL injection', 'api.js', 42, ?)`
+    ).run(AT)
+
+    db.prepare(
+      `INSERT INTO loop_sessions (project_id, active, cycles_done, recent_scores,
+       spent_baseline, updated_at) VALUES ('viejo', 0, 2, '[100, 88]', 1.5, ?)`
     ).run(AT)
 
     db.prepare(

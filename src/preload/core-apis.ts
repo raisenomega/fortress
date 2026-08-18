@@ -1,6 +1,7 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
+import type { LoopSession } from '@domain/loop/loop-session'
 import type { LoopStatus } from '@domain/loop/loop-status'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
@@ -26,6 +27,8 @@ export interface ChatApi {
   stop(projectId: string): Promise<number>
   onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
   onProgress(listener: (p: ChatProgress) => void): Unsubscribe
+  /** La sesion de loop guardada del proyecto: dice por que paro la ultima. */
+  lastLoopSession(projectId: string): Promise<LoopSession | null>
   onLoopStatus(listener: (status: LoopStatus) => void): Unsubscribe
   onLoopChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
 }

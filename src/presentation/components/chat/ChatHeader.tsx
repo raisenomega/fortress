@@ -2,6 +2,7 @@ import type { Project } from '@domain/project/project'
 import { scanStatus } from '@domain/project/scan-status'
 import { GraphChip } from './GraphChip'
 import { LoopHud } from './LoopHud'
+import { LoopLastStop } from './LoopLastStop'
 import { LoopToggle } from './LoopToggle'
 import { TrustToggle } from './TrustToggle'
 
@@ -34,6 +35,7 @@ export function ChatHeader({ project }: ChatHeaderProps): React.JSX.Element {
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <GraphChip projectId={project.id} />
         <LoopHud project={project} />
+        <LoopLastStop project={project} />
         <TrustToggle project={project} />
         <LoopToggle project={project} />
       </div>

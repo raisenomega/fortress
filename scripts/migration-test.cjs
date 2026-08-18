@@ -31,6 +31,12 @@ async function verify(window) {
   check('conserva el historial de chat', historial.length === 1, JSON.stringify(historial))
   check('rellena el motor por defecto', historial[0]?.engine === 'api')
 
+  // La sesion de loop es anterior a que se guardara el motivo: se conserva
+  // entera y sus campos nuevos quedan ausentes, que es "no consta".
+  const sesion = await run("window.api.chat.lastLoopSession('viejo')")
+  check('conserva la sesion de loop', sesion?.cyclesDone === 2, JSON.stringify(sesion))
+  check('la sesion vieja no consta con motivo', sesion?.stoppedReason === undefined)
+
   const hallazgos = await run("window.api.scan.findings('viejo')")
   check('conserva los hallazgos', hallazgos.length === 1, JSON.stringify(hallazgos))
   check('el hallazgo viejo queda abierto', hallazgos[0]?.status === 'open')
