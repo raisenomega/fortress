@@ -42,3 +42,18 @@ export function shortstat(out: string): { insertions: number; deletions: number 
     deletions: Number(/(\d+) deletion/.exec(out)?.[1] ?? 0)
   }
 }
+
+/**
+ * La rama del worktree, preguntada al propio worktree: una llamada, sin parsear
+ * la lista global. Hay que leerla ANTES de borrarlo, que despues ya no existe.
+ *
+ * Solo se devuelve si es del motor. Un worktree en HEAD suelto responde `HEAD`,
+ * y el checkout vivo responderia `main`: pasar cualquiera de los dos a un
+ * `branch -D` seria borrar la rama de trabajo de otro. Vacio significa "esta no
+ * es mia y no se toca".
+ */
+export async function ramaDelMotor(worktreePath: string): Promise<string> {
+  const { code, out } = await git(worktreePath, ['rev-parse', '--abbrev-ref', 'HEAD'])
+  const rama = out.trim()
+  return code === 0 && rama.startsWith('repair/') ? rama : ''
+}

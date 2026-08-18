@@ -4,6 +4,7 @@ import { join } from 'path'
 import type { ReclaimDeps } from '@application/repair/reclaim-worktrees'
 import type { ReconcileDeps } from '@application/repair/reconcile-orphans'
 import { isAncestor } from '../git/is-ancestor'
+import { ramaDelMotor } from './repair-git'
 import { createWorktreeManager } from './worktree-manager'
 
 /** Deps reales del reclaim de arranque. Separado de repair-deps por el 75. */
@@ -13,8 +14,12 @@ export function buildReclaimDeps(): ReclaimDeps {
   return {
     listWorktreeDirs: () => (existsSync(root) ? readdirSync(root) : []),
     pathOf: (proposalId) => join(root, proposalId),
-    removeWorktree: (worktreePath, projectRepoPath) =>
-      manager.remove(worktreePath, '', projectRepoPath),
+    // La rama va con su worktree. Se pedia el borrado con el nombre en blanco,
+    // y `remove` solo borra rama cuando se le da una: el worktree desaparecia y
+    // la rama se quedaba. Veintisiete ramas para seis worktrees, en un repo
+    // ajeno que el motor solo deberia dejar como lo encontro.
+    removeWorktree: async (worktreePath, projectRepoPath) =>
+      manager.remove(worktreePath, await ramaDelMotor(worktreePath), projectRepoPath),
     rmDir: (path) => rmSync(path, { recursive: true, force: true }),
     now: Date.now
   }
