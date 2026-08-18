@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS scans (
   project_id     TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   score          INTEGER NOT NULL,
   finding_count  INTEGER NOT NULL DEFAULT 0,
+  dossier_count  INTEGER NOT NULL DEFAULT 0,
   critical_count INTEGER NOT NULL DEFAULT 0,
   duration_ms    INTEGER NOT NULL DEFAULT 0,
   at             TEXT NOT NULL

@@ -9,6 +9,8 @@ const SCANNER_AGENT = 'security-reviewer' as const
 
 export interface ScanCommit {
   readonly score: number
+  /** Cuantos hallazgos puntuo ese score: la corrida MAS los que siguen vivos. */
+  readonly dossierCount: number
   readonly counts: SeverityCounts
   readonly scannedAt: string
   /** Ids de los hallazgos que ya reunieron la evidencia para extinguirse. */
@@ -35,6 +37,7 @@ export function commitScanRows(
       projectId: project.id,
       score,
       findingCount: findings.length,
+      dossierCount: commit.dossierCount,
       criticalCount: counts.CRITICAL,
       durationMs,
       at: scannedAt

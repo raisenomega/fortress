@@ -42,6 +42,7 @@ export async function persistScan(
 
   commitScanRows(context, project, outcome, {
     score,
+    dossierCount: expediente.length,
     counts,
     scannedAt,
     extinct: extinct.map((f) => f.id)
