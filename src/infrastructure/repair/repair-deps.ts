@@ -3,6 +3,7 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import type { AutoMergeDeps } from '@application/repair/auto-merge-types'
 import type { GateDeps } from '@application/repair/run-gate'
+import { readScopeGroups } from '../project/fortress-config'
 import type { OmegaDeps } from '@application/repair/run-omega'
 import type { GenerateDeps } from '@application/repair/generate-types'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
@@ -28,6 +29,7 @@ export function buildGenerateDeps(): GenerateDeps {
     worktreeRoot: root,
     worktrees: createWorktreeManager(),
     generator: createGraphGenerator(CLAUDE_BIN),
+    scopeGroups: readScopeGroups,
     sandbox: (worktreePath, proposalId, liveRepoPath) =>
       assertRepairSandbox(worktreePath, proposalId, root, liveRepoPath),
     now: Date.now

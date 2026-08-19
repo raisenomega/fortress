@@ -28,9 +28,11 @@ export async function generateFix(
 
   const prepared = await prepareWorktree(ctx, a, deps)
   if ('failed' in prepared) return prepared.failed
-  const { worktreePath, allowed, fail } = prepared
+  const { worktreePath, allowed, allows, fail } = prepared
 
-  const prompt = buildGeneratorPrompt(a.analysis, ctx.corpus.of(a.project.path))
+  // Al generador se le dice EXACTAMENTE lo que el juez le va a exigir: los dos
+  // salen de `prepared`, no de dos calculos que podrian separarse con el tiempo.
+  const prompt = buildGeneratorPrompt(a.analysis, ctx.corpus.of(a.project.path), allowed, allows)
   const crudo = await deps.generator.generate(worktreePath, prompt)
   // Registrar ANTES de asentar: el id nace en el libro mayor y el asiento lo
   // cita. Al reves —como estaba— el asiento se escribia cuando ese id todavia
@@ -40,7 +42,7 @@ export async function generateFix(
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
   if (!result.ok) return fail('generator_error', { error: result.error }, true)
 
-  return verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
+  return verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, allows, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
 }
 
 /** Post-generacion: diff real, correa de scope, presupuesto final y commit. */
@@ -54,7 +56,7 @@ async function verifyAndCommit(
   // Se limpia: termino sin diff, no hay nada que preservar.
   if (!(await deps.worktrees.hasChanges(p.worktreePath))) return fail('no_diff_produced', {}, false)
   const changed = await deps.worktrees.changedFiles(p.worktreePath)
-  const scope = checkScope(changed, p.allowed)
+  const scope = checkScope(changed, p.allowed, p.allows)
   // CONSERVADO para autopsia: el generador produjo cambios FUERA de scope.
   if (!scope.ok) return fail('scope_violation', { violations: scope.violations }, true)
   // CONSERVADO: el commit del fix existiria pero el coste excedio; autopsia posible.

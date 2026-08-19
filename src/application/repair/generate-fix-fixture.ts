@@ -29,6 +29,8 @@ function depsDe(opts: Opciones, calls: string[], prompts: string[]): GenerateDep
         )
       }
     },
+    // Proyecto sin `.fortress/config`: manda la correa universal.
+    scopeGroups: () => opts.scopeGroups ?? [],
     sandbox: () =>
       opts.sandboxError === undefined ? { ok: true } : { ok: false, error: opts.sandboxError },
     now: () => 99

@@ -1,4 +1,5 @@
 import { computeAllowedFiles } from '@domain/repair/allowed-files'
+import { allowsFor } from '@domain/repair/scope-check'
 import { toSlug } from '@domain/repair/slug'
 import type { AppContext } from '../context'
 import type { GenerateDeps, GenerateResult } from './generate-types'
@@ -10,6 +11,8 @@ export interface Prepared {
   readonly worktreePath: string
   readonly branch: string
   readonly allowed: string[]
+  /** Globs que el proyecto abrio para un fix anclado aqui. Vacio si no declaro. */
+  readonly allows: readonly string[]
   readonly fail: FailFn
 }
 
@@ -42,5 +45,8 @@ export async function prepareWorktree(
   // Se limpia: no hay nada que autopsiar, el generador nunca corrio.
   if (allowed.length === 0) return { failed: await fail('scope_violation', { where: a.analysis.where }, false) } // prettier-ignore
 
-  return { worktreePath, branch, allowed, fail }
+  // Los grupos se leen del worktree —el arbol del ancla— y solo cuentan los
+  // que ESTE hallazgo activa: declarar terreno no lo abre para cualquier fix.
+  const allows = allowsFor(primary, deps.scopeGroups(worktreePath))
+  return { worktreePath, branch, allowed, allows, fail }
 }
