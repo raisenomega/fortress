@@ -42,11 +42,18 @@ export async function prepareWorktree(
   // Sin ancla no hay correa: fallar honesto, jamas caer a la prosa (se limpia).
   if (primary === '') return { failed: await fail('scope_violation', { error: 'no_primary_file' }, false) } // prettier-ignore
   const allowed = computeAllowedFiles({ primaryFile: primary, hint: a.analysis.where })
-  // Se limpia: no hay nada que autopsiar, el generador nunca corrio.
-  if (allowed.length === 0) return { failed: await fail('scope_violation', { where: a.analysis.where }, false) } // prettier-ignore
-
   // Los grupos se leen del worktree —el arbol del ancla— y solo cuentan los
   // que ESTE hallazgo activa: declarar terreno no lo abre para cualquier fix.
+  //
+  // Se resuelven ANTES de decidir que no hay terreno. La correa universal exige
+  // que el archivo tenga extension, asi que para un `Dockerfile`, un `_headers`
+  // o un `.env` sale siempre vacia — y son justo los casos donde el grupo
+  // declarado era la unica via. Cortar antes de mirarlo lo hacia inalcanzable
+  // para una clase entera de archivos.
   const allows = allowsFor(primary, deps.scopeGroups(worktreePath))
+  // Sin correa Y sin grupo no hay terreno que darle al generador. Se limpia: no
+  // hay nada que autopsiar, porque nunca llego a correr.
+  if (allowed.length === 0 && allows.length === 0) return { failed: await fail('scope_violation', { where: a.analysis.where }, false) } // prettier-ignore
+
   return { worktreePath, branch, allowed, allows, fail }
 }
