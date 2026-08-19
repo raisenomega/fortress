@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
+import { discoverCorpus } from '../project/discover-corpus'
 import type { Analyst } from '@domain/repair/analysis'
 import { toAnalysis, type RunOut } from './parse-analysis'
 import { EMPTY_USAGE, totalTokens } from '@domain/telemetry/token-usage'
@@ -44,7 +45,10 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string): Anal
   return {
     study: async (target) => {
       const startedAt = Date.now()
-      const out = await run(claudeBin, projectPath, buildAnalysisPrompt(target))
+      // El corpus se lee en cada estudio, no al crear el analista: entre dos
+      // propuestas el proyecto puede haber ganado un ADR.
+      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath))
+      const out = await run(claudeBin, projectPath, prompt)
       const endedAt = Date.now()
       return {
         analysis: toAnalysis(target, out),

@@ -1,4 +1,6 @@
 import type { Analysis } from './analysis'
+import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { buildDocsFirst } from '../settings/docs-first-compose'
 import { computeAllowedFiles } from './allowed-files'
 
 /** El texto del analisis es dato, no ordenes: se neutraliza lo que rompe marcas. */
@@ -20,7 +22,10 @@ const RULES = [
  * entendimiento de C2. Los campos del analisis van delimitados y neutralizados:
  * describen el problema, jamas instruyen al generador.
  */
-export function buildGeneratorPrompt(analysis: Analysis): string {
+export function buildGeneratorPrompt(analysis: Analysis, corpus: CorpusDescriptor): string {
+  // Escribir el fix es decidir DONDE va y que patron copiar: eso es estructural
+  // (ver docs-first), y las decisiones ya firmadas del proyecto mandan sobre el.
+  const docs = buildDocsFirst('structural', corpus)
   const allowed = computeAllowedFiles({ primaryFile: analysis.target.file, hint: analysis.where })
   return [
     'Modo REPARACION (C3). Trabajas en una COPIA aislada del repo: genera el fix.',
@@ -40,6 +45,7 @@ export function buildGeneratorPrompt(analysis: Analysis): string {
     ...allowed.map((file) => `- ${file}`),
     '</permitidos>',
     '',
+    ...(docs === '' ? [] : [docs, '']),
     'Reglas:',
     RULES
   ].join('\n')

@@ -1,4 +1,5 @@
 import type { Analysis } from '@domain/repair/analysis'
+import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { OmegaPromptInput } from '@domain/repair/omega-prompt'
 
 /** Lecturas que la infraestructura provee para armar el juicio. */
@@ -18,7 +19,8 @@ export async function buildOmegaInput(
   reads: OmegaReads,
   worktreePath: string,
   baseSha: string,
-  analysis: Analysis
+  analysis: Analysis,
+  corpus: CorpusDescriptor
 ): Promise<{ input: OmegaPromptInput; files: readonly string[] }> {
   const files = await reads.changedFiles(worktreePath, baseSha)
   const diffText = await reads.diffText(worktreePath)
@@ -26,5 +28,5 @@ export async function buildOmegaInput(
   const filesPre = await Promise.all(
     files.map(async (path) => ({ path, content: await reads.readPre(worktreePath, baseSha, path) })) // prettier-ignore
   )
-  return { input: { analysis, diffText, filesPost, filesPre }, files }
+  return { input: { analysis, corpus, diffText, filesPost, filesPre }, files }
 }
