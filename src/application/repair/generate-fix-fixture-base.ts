@@ -17,6 +17,8 @@ export interface Opciones {
   readonly sandboxError?: string
   readonly conAnalisis?: boolean
   readonly sinPrimary?: boolean
+  /** El ancla del hallazgo, para probar archivos sin extension. */
+  readonly ancla?: string
 }
 
 export interface Bench {
@@ -43,7 +45,8 @@ export function cadenaDe(opts: Opciones): ProposalEvent[] {
     buildAgentRunEvent({ proposalId: 'prop-1', seq: 1, phase: 'ANALYZE', actor: 'claude-analyst', costTokens: opts.spentPrevio ?? 1000, ts: 1 }) // prettier-ignore
   ]
   if (opts.conAnalisis !== false) {
-    const analysis = opts.sinPrimary === true ? { ...ANALYSIS, target: { ...ANALYSIS.target, file: '' } } : ANALYSIS // prettier-ignore
+    const file = opts.sinPrimary === true ? '' : (opts.ancla ?? ANALYSIS.target.file)
+    const analysis = { ...ANALYSIS, target: { ...ANALYSIS.target, file } }
     chain.push(buildTransitionEvent({ proposalId: 'prop-1', seq: 2, phase: 'ANALYZE', toState: 'ANALIZADO', evidenceJson: JSON.stringify(analysis), ts: 2 })) // prettier-ignore
   }
   return chain
