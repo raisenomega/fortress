@@ -38,7 +38,7 @@ describe('las tres fases del motor citan la doctrina del proyecto', () => {
   })
 
   it('el generador mira lo que el proyecto dejo firmado sobre su estructura', () => {
-    const prompt = buildGeneratorPrompt(ANALYSIS, CORPUS)
+    const prompt = buildGeneratorPrompt(ANALYSIS, CORPUS, ['src/a.ts'])
 
     expect(prompt).toContain('DOCS FIRST (estructural)')
     expect(prompt).toContain('docs/PRINCIPLES.md')
@@ -54,7 +54,7 @@ describe('un proyecto sin doctrina no recibe una seccion vacia', () => {
   it('los tres prompts se construyen sin la seccion y sin romperse', () => {
     for (const prompt of [
       buildAnalysisPrompt(TARGET, EMPTY_CORPUS),
-      buildGeneratorPrompt(ANALYSIS, EMPTY_CORPUS),
+      buildGeneratorPrompt(ANALYSIS, EMPTY_CORPUS, ['src/a.ts']),
       omega(EMPTY_CORPUS)
     ]) {
       expect(prompt).not.toContain('DOCS FIRST')
@@ -64,7 +64,7 @@ describe('un proyecto sin doctrina no recibe una seccion vacia', () => {
 
   it('y el resto del prompt sigue entero: no se perdio nada por el camino', () => {
     expect(buildAnalysisPrompt(TARGET, EMPTY_CORPUS)).toContain('GRAFO PRIMERO')
-    expect(buildGeneratorPrompt(ANALYSIS, EMPTY_CORPUS)).toContain('<permitidos>')
+    expect(buildGeneratorPrompt(ANALYSIS, EMPTY_CORPUS, ['src/a.ts'])).toContain('<permitidos>')
     expect(omega(EMPTY_CORPUS)).toContain('VERDICT')
   })
 })

@@ -1,3 +1,4 @@
+import type { ScopeGroup } from '@domain/repair/scope-groups'
 import type { Proposal } from '@domain/repair/proposal'
 import { buildAgentRunEvent, buildTransitionEvent, type ProposalEvent } from '@domain/repair/proposal-event' // prettier-ignore
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
@@ -5,6 +6,7 @@ import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
 
 export interface Opciones {
+  readonly scopeGroups?: readonly ScopeGroup[]
   readonly state?: Proposal['state']
   readonly latestId?: string
   readonly spentPrevio?: number

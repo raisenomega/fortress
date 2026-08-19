@@ -1,3 +1,4 @@
+import type { ScopeGroup } from '@domain/repair/scope-groups'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import type { RejectionReason } from '@domain/repair/repair-rejection'
 
@@ -30,12 +31,15 @@ export interface GenerateDeps {
   readonly generator: GeneratorPort
   /** assertRepairSandbox: el cwd de escritura es el worktree de ESA propuesta. */
   readonly sandbox: (worktreePath: string, proposalId: string, liveRepoPath: string) => { ok: true } | { ok: false; error: string } // prettier-ignore
+  /** Los grupos que el proyecto declara, leidos del worktree (su ancla). */
+  readonly scopeGroups: (worktreePath: string) => readonly ScopeGroup[]
   readonly now: () => number
 }
 
 export interface Produced {
   readonly worktreePath: string
   readonly allowed: string[]
+  readonly allows: readonly string[]
   readonly cost: number
 }
 
