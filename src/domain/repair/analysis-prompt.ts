@@ -1,3 +1,5 @@
+import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { buildDocsFirst } from '../settings/docs-first-compose'
 import type { Candidate } from './select-target'
 
 const KEYS = '"status", "whatToChange", "where", "patternToCopy", "doNotTouch", "risk"'
@@ -22,11 +24,15 @@ const NOTES = [
  * para cualquier hallazgo. Pide VERIFICAR contra el archivo real si sigue siendo REAL
  * u OBSOLETO (como paso con posture), y un JSON inerte con el entendimiento.
  */
-export function buildAnalysisPrompt(t: Candidate): string {
+export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor): string {
+  // El analista juzga si un hallazgo de seguridad sigue vivo: lo que el proyecto
+  // haya escrito sobre lo que protege es parte de esa respuesta.
+  const docs = buildDocsFirst('security', corpus)
   return [
     `Eres el analista de FORTRESS. ANALIZA (no arregles) este hallazgo ${t.severity}:`,
     `"${t.title}" en ${t.file}:${t.line}.`,
     '',
+    ...(docs === '' ? [] : [docs, '']),
     'GRAFO PRIMERO: usa get_architecture, search_graph, trace_path y get_code_snippet',
     'del servidor codebase-memory ANTES de leer archivos. Lee un archivo solo si el',
     'grafo no basta. Entender BARATO.',

@@ -30,7 +30,8 @@ export async function generateFix(
   if ('failed' in prepared) return prepared.failed
   const { worktreePath, allowed, fail } = prepared
 
-  const crudo = await deps.generator.generate(worktreePath, buildGeneratorPrompt(a.analysis))
+  const prompt = buildGeneratorPrompt(a.analysis, ctx.corpus.of(a.project.path))
+  const crudo = await deps.generator.generate(worktreePath, prompt)
   // Registrar ANTES de asentar: el id nace en el libro mayor y el asiento lo
   // cita. Al reves —como estaba— el asiento se escribia cuando ese id todavia
   // no existia, y la cita quedaba vacia para siempre.

@@ -30,7 +30,11 @@ export async function judgeProposal(
     return { ok: false, reason }
   }
 
-  const { input, files } = await buildOmegaInput(deps, worktreePath, proposal.baseSha, analysis)
+  // La doctrina se lee del WORKTREE, que es el arbol que OMEGA esta juzgando:
+  // asi el fix se mide contra las decisiones vigentes en su ancla y no contra
+  // las de un repo vivo que pudo moverse mientras la propuesta esperaba.
+  const corpus = ctx.corpus.of(worktreePath)
+  const { input, files } = await buildOmegaInput(deps, worktreePath, proposal.baseSha, analysis, corpus) // prettier-ignore
   const crudo = await deps.omega.run(worktreePath, buildOmegaPrompt(input))
   const evidence = crudo.ok ? { verdict: crudo.verdict, diffFiles: files } : { error: crudo.error, diffFiles: files } // prettier-ignore
   // Igual que en generate: el id existe antes de que el asiento lo cite.

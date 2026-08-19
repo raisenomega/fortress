@@ -2,6 +2,7 @@ import { buildTransitionEvent, type ProposalEvent } from '@domain/repair/proposa
 import { buildAgentRunEvent } from '@domain/repair/proposal-event'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
+import { EMPTY_CORPUS } from '@domain/project/corpus-descriptor'
 import { APROBADO, ANALYSIS, META } from './run-omega-datos-fixture'
 import type { AppContext } from '../context'
 import type { OmegaAgentResult, OmegaDeps } from './run-omega'
@@ -32,6 +33,8 @@ export function bench(opts: Opciones = {}): Bench {
     buildTransitionEvent({ proposalId: 'prop-1', seq: 2, phase: 'ANALYZE', toState: 'ANALIZADO', evidenceJson: JSON.stringify(ANALYSIS), ts: 2 }) // prettier-ignore
   ]
   const context = {
+    // Sin corpus: OMEGA juzga igual, solo sin la seccion de doctrina.
+    corpus: { of: () => EMPTY_CORPUS },
     repairProposals: {
       findById: (id: string) => (id === 'prop-1' ? proposal : null),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch })

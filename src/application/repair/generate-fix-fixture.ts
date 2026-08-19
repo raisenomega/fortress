@@ -1,5 +1,6 @@
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
+import { EMPTY_CORPUS } from '@domain/project/corpus-descriptor'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
@@ -45,6 +46,8 @@ export function bench(opts: Opciones = {}): Bench {
 
   const context = {
     projects: { findById: () => ({ id: 'p1', path: '/repo/vivo' }) },
+    // El proyecto de prueba no tiene corpus: el prompt sale sin doctrina.
+    corpus: { of: () => EMPTY_CORPUS },
     repairProposals: {
       findById: (id: string) => (id === 'prop-1' ? proposal : null),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch }),

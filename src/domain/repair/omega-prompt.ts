@@ -1,3 +1,6 @@
+import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { categoryForAgent } from '../settings/docs-first'
+import { buildDocsFirst } from '../settings/docs-first-compose'
 import type { Analysis } from './analysis'
 
 export interface OmegaFile {
@@ -6,6 +9,8 @@ export interface OmegaFile {
 }
 
 export interface OmegaPromptInput {
+  /** La doctrina del proyecto auditado, para juzgar con lo que el ya firmo. */
+  readonly corpus: CorpusDescriptor
   readonly analysis: Analysis
   readonly diffText: string
   readonly filesPost: readonly OmegaFile[]
@@ -29,11 +34,15 @@ function files(tag: string, list: readonly OmegaFile[]): string[] {
  */
 export function buildOmegaPrompt(input: OmegaPromptInput): string {
   const a = input.analysis
+  // Su categoria no se elige aqui: OMEGA ya esta en el catalogo de agentes y
+  // categoryForAgent dice cual le toca. Inventarle una seria una segunda tabla.
+  const docs = buildDocsFirst(categoryForAgent('sentinel-omega'), input.corpus)
   return [
     'Eres OMEGA, revisor semantico INDEPENDIENTE del motor de reparacion.',
     'Juzgas si el fix resuelve el hallazgo sin dano colateral. No editas, no',
     'ejecutas: SOLO el veredicto.',
     '',
+    ...(docs === '' ? [] : [docs, '']),
     '<hallazgo>',
     `titulo: ${safe(a.target.title)}`,
     `archivo: ${safe(a.target.file)}:${a.target.line ?? ''}`,

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { EMPTY_CORPUS } from '../project/corpus-descriptor'
 import type { Analysis } from './analysis'
 import { buildOmegaPrompt } from './omega-prompt'
 
@@ -15,6 +16,7 @@ const ANALYSIS: Analysis = {
 
 const INPUT = {
   analysis: ANALYSIS,
+  corpus: EMPTY_CORPUS,
   diffText: 'diff --git a/src/a/b.ts ...',
   filesPost: [{ path: 'src/a/b.ts', content: 'post <codigo> tal cual' }],
   filesPre: [{ path: 'src/a/b.ts', content: 'pre' }]
