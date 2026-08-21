@@ -10,15 +10,20 @@ import { IPC } from './channels'
 export function registerRepairHandlers(): void {
   // C2 spawnea un agente real (read-only): pasa por la misma guardia que
   // cualquier corrida — busy, tope diario y circuit breaker de contaminacion.
+  //
+  // El segundo argumento es OPCIONAL y cambia quien elige: con el, el operador
+  // ya senalo el hallazgo y el motor lo atiende; sin el, elige la cola. Un
+  // llamador que no lo pase recibe el comportamiento de siempre.
   ipcMain.handle(
     IPC.repairPropose,
-    async (_event, projectId: string): Promise<Result<Proposal | null>> => {
+    async (_event, projectId: string, findingId?: string): Promise<Result<Proposal | null>> => {
       const context = getAppContext()
       const id = String(projectId)
+      const dirigido = findingId === undefined ? undefined : String(findingId)
       const busy = guardRun(context, id)
       if (busy !== null) return err(busy)
       try {
-        return ok(await planRepair(context, id))
+        return ok(await planRepair(context, id, dirigido))
       } catch (error) {
         return err(error instanceof Error ? error.message : 'Fallo al proponer la reparacion')
       } finally {

@@ -4,6 +4,7 @@ import { useProjectFindings, useScanError } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
 // prettier-ignore
 import { dismissFinding, mitigateFinding, reopenFinding, unmitigateFinding } from '../../services/dismiss-service'
+import { proposeRepair } from '../../services/repair-service'
 import { EmptyState } from '../common/EmptyState'
 import { Notice } from '../common/Notice'
 import { FindingsTable } from './FindingsTable'
@@ -45,6 +46,7 @@ export function ScanView(): React.JSX.Element {
           onReopen={(id) => void reopenFinding(project.id, id)}
           onMitigate={(id, nota) => void mitigateFinding(project.id, id, nota)}
           onUnmitigate={(id) => void unmitigateFinding(project.id, id)}
+          onRepair={(id) => void proposeRepair(project.id, id)}
         />
       </div>
     </div>

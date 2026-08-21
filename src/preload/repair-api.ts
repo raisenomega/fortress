@@ -13,8 +13,12 @@ export interface RepairApi {
    * C1 elige el hallazgo mas contenido y C2 lo analiza con un agente real
    * (solo lectura, puede tardar). null si no hay candidato elegible. NO
    * genera fix ni toca el arbol.
+   *
+   * Con `findingId` no elige: atiende ESE hallazgo, quepa o no en el cerco de
+   * integracion automatica. null si ya tiene propuesta viva, si no esta activo
+   * o si su severidad cae fuera del estreno del motor.
    */
-  propose(projectId: string): Promise<Result<Proposal | null>>
+  propose(projectId: string, findingId?: string): Promise<Result<Proposal | null>>
   /** Expediente del proyecto, del mas reciente al mas antiguo. */
   list(projectId: string): Promise<readonly Proposal[]>
   get(id: string): Promise<Proposal | null>
