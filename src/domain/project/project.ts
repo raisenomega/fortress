@@ -1,17 +1,6 @@
 import type { DimensionScores } from '../score/dimension'
-import type { Severity } from '../shared/severity'
 import type { ConfigState } from './config-state'
-import type { FindingStatus } from './finding-status'
-
-export interface Finding {
-  readonly id: string
-  readonly severity: Severity
-  readonly title: string
-  readonly file: string
-  readonly line: number | null
-  /** Descartado por el operador o abierto. Solo lo abierto bloquea un push. */
-  readonly status: FindingStatus
-}
+export type { Finding } from './finding'
 
 export interface Project {
   readonly id: string

@@ -1,5 +1,7 @@
 /** Consultas de findings y dismissals. Todas parametrizadas. */
-const COLUMNS = 'id, project_id, severity, title, file, line, status'
+// `lifecycle` y la nota cruzan al tablero: sin ellos un hallazgo mitigado seria
+// indistinguible de uno vivo, y marcarlo no se veria en ningun sitio.
+const COLUMNS = 'id, project_id, severity, title, file, line, status, lifecycle, mitigated_note'
 
 /** Lo urgente arriba, y lo descartado al final: ya no requiere accion. */
 const BY_URGENCY = `CASE status WHEN 'open' THEN 0 ELSE 1 END,
@@ -54,9 +56,7 @@ export const SELECT_FINDING = `SELECT project_id, fingerprint FROM findings WHER
 
 export const SET_STATUS = 'UPDATE findings SET status = ? WHERE id = ?'
 
-/** La transicion a extinto deja fecha: sin ella no habria como auditarla. */
-export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved_at = @at
-  WHERE id = @id AND lifecycle = 'ACTIVE'`
+export { MARK_EXTINCT, MARK_MITIGATED } from './finding-lifecycle-sql'
 
 export const INSERT_DISMISSAL = `INSERT OR REPLACE INTO dismissals
   (project_id, fingerprint, at) VALUES (?, ?, ?)`

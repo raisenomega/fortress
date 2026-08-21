@@ -8,6 +8,7 @@ interface FindingsTableProps {
   readonly findings: readonly Finding[]
   readonly onDismiss: (id: string) => void
   readonly onReopen: (id: string) => void
+  readonly onMitigate: (id: string, nota: string) => void
 }
 
 const HEAD_CLASS = 'pb-2 text-left text-[11px] font-semibold tracking-widest uppercase'
@@ -16,7 +17,8 @@ export function FindingsTable({
   project,
   findings,
   onDismiss,
-  onReopen
+  onReopen,
+  onMitigate
 }: FindingsTableProps): React.JSX.Element {
   if (findings.length === 0) {
     // Un proyecto sin escanear y uno limpio se ven igual en la tabla vacia; el
@@ -53,6 +55,7 @@ export function FindingsTable({
             finding={finding}
             onDismiss={onDismiss}
             onReopen={onReopen}
+            onMitigate={onMitigate}
           />
         ))}
       </tbody>
