@@ -41,8 +41,8 @@ export function createSqliteRepairProposalRepository(db: Db): RepairProposalRepo
       return row === undefined ? null : toProposal(row)
     },
     listByProject: (projectId) => (byProject.all(projectId) as Row[]).map(toProposal),
-    findObsoleteFindingIds: (projectId, currentScanId) =>
-      (obsoletos.all({ projectId, scanId: currentScanId }) as Row[]).map((r) => r.finding_id),
+    findObsoleteFindingIds: (projectId, headSha) =>
+      (obsoletos.all({ projectId, headSha }) as Row[]).map((r) => r.finding_id),
     findLiveFindingIds: (projectId) =>
       (vivas.all(projectId, ...TERMINAL_STATES) as Row[]).map((r) => r.finding_id),
     listLive: () => (propuestasVivas.all(...TERMINAL_STATES) as Row[]).map(toProposal),

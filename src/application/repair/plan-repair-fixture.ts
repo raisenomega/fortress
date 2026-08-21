@@ -15,6 +15,8 @@ export interface Bench {
   readonly events: ProposalEvent[]
   /** Auto-observaciones asentadas durante la corrida. */
   readonly observadas: unknown[]
+  /** Con que se pidio el descuento por obsoleto: debe ser el HEAD, no el escaneo. */
+  readonly anclaDelDescuento: string[]
 }
 
 interface Opciones {
@@ -39,6 +41,7 @@ export function bench(opts: Opciones): Bench {
   const patches: Array<ProposalPatch & { id: string }> = []
   const events: ProposalEvent[] = []
   const observadas: unknown[] = []
+  const anclaDelDescuento: string[] = []
   const analyst = analistaFake(opts.verdictStatus ?? 'REAL', opts.notes)
   const context = {
     projects: { findById: () => ({ id: 'p1', path: '/repo/p1', name: 'Nucleo' }) },
@@ -48,7 +51,8 @@ export function bench(opts: Opciones): Bench {
     repairProposals: {
       insert: (p: Proposal): void => void inserted.push(p),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch }),
-      findObsoleteFindingIds: () => opts.obsoleteIds ?? [],
+      // prettier-ignore
+      findObsoleteFindingIds: (_p: string, ancla: string) => (anclaDelDescuento.push(ancla), opts.obsoleteIds ?? []),
       findLiveFindingIds: () => opts.liveIds ?? [],
       findById: () => null,
       listByProject: () => opts.proposals ?? []
@@ -67,5 +71,5 @@ export function bench(opts: Opciones): Bench {
     analystFor: () => analyst,
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha)
   } as unknown as AppContext
-  return { context, inserted, patches, events, observadas }
+  return { context, inserted, patches, events, observadas, anclaDelDescuento }
 }
