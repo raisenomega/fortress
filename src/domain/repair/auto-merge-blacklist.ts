@@ -23,6 +23,13 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/newproject/target-path.ts',
   'src/domain/connectors/graph-mcp.ts',
   'src/domain/posture/private-host.ts',
+  // Las URLs tambien entran de fuera. `target-url` es la mitad llamadora de
+  // `private-host` —valida el destino del escaneo y le pregunta a el—, y
+  // `connector-url` exige https a un MCP que viajara con las credenciales del
+  // operador. `create-folder` decide que se le cuenta al renderer de una carpeta.
+  'src/domain/posture/target-url.ts',
+  'src/domain/connectors/connector-url.ts',
+  'src/infrastructure/newproject/create-folder.ts',
   // Quien deja pasar una integracion. `auto-merge-policy` declara la politica;
   // `evaluation` es quien la COMPRUEBA y `config` quien la lee y fusiona esta
   // misma lista: proteger solo el primero dejaba fuera a los dos que deciden.
