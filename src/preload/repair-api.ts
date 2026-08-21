@@ -1,6 +1,7 @@
 import type { GenerateResult } from '@application/repair/generate-types'
 import type { RetryResult } from '@application/repair/retry-repair'
 import type { RunGateResult } from '@application/repair/run-gate'
+import type { ResumenCerco } from '@application/repair/resumen-cerco'
 import type { RunOmegaResult } from '@application/repair/run-omega'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
@@ -21,6 +22,8 @@ export interface RepairApi {
   propose(projectId: string, findingId?: string): Promise<Result<Proposal | null>>
   /** Expediente del proyecto, del mas reciente al mas antiguo. */
   list(projectId: string): Promise<readonly Proposal[]>
+  /** Cuantos hallazgos vivos quedan fuera del cerco: la cola no los elige sola. */
+  cerco(projectId: string): Promise<ResumenCerco>
   get(id: string): Promise<Proposal | null>
   /** El libro de vida de una propuesta, en orden de seq. */
   events(proposalId: string): Promise<readonly ProposalEvent[]>

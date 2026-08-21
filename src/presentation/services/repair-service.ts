@@ -17,11 +17,12 @@ const SIN_DIRIGIDO =
  */
 export async function loadRepair(projectId: string): Promise<void> {
   try {
-    const [proposals, findings] = await Promise.all([
+    const [proposals, findings, cerco] = await Promise.all([
       api().repair.list(projectId),
-      api().scan.findings(projectId)
+      api().scan.findings(projectId),
+      api().repair.cerco(projectId)
     ])
-    useRepairStore.getState().setData(projectId, proposals, findings)
+    useRepairStore.getState().setData(projectId, proposals, findings, cerco)
   } catch (error) {
     console.error('[motor] no se pudo leer el expediente', projectId, error)
   }

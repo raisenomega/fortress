@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
 import { planRepair } from '@application/repair/plan-repair'
+import { resumenCerco } from '@application/repair/resumen-cerco'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { Proposal } from '@domain/repair/proposal'
 import { getAppContext } from '../persistence/app-context'
@@ -34,6 +35,10 @@ export function registerRepairHandlers(): void {
 
   ipcMain.handle(IPC.repairList, (_event, projectId: string) =>
     getAppContext().repairProposals.listByProject(String(projectId))
+  )
+
+  ipcMain.handle(IPC.repairCerco, (_event, projectId: string) =>
+    resumenCerco(getAppContext(), String(projectId))
   )
 
   ipcMain.handle(IPC.repairGet, (_event, id: string) =>

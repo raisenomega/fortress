@@ -7,12 +7,16 @@ import { loadRepair, proposeRepair } from './repair-service'
 /** Doble del puente: fuera de Electron no existe `window.api`. */
 function stubRepair(
   propose: () => Promise<unknown>,
-  list = (): Promise<unknown> => Promise.resolve([])
+  findings = (): Promise<unknown> => Promise.resolve([])
 ): void {
+  const cerco = (): Promise<unknown> => Promise.resolve({ total: 0, fuera: 0 })
   // prettier-ignore
   Object.assign(globalThis, {
     window: {
-      api: { repair: { propose, list }, scan: { findings: () => Promise.resolve([]) } }
+      api: {
+        repair: { propose, cerco, list: () => Promise.resolve([]) },
+        scan: { findings }
+      }
     }
   })
 }
@@ -22,7 +26,9 @@ const avisos = (): readonly string[] => useToastStore.getState().toasts.map((t) 
 
 beforeEach(() => {
   useToastStore.setState({ toasts: [] })
-  useRepairStore.setState({ busy: false, projectId: null, proposals: [], findings: [] })
+  useRepairStore.setState({
+    busy: false, projectId: null, proposals: [], findings: [], cerco: { total: 0, fuera: 0 }
+  }) // prettier-ignore
 })
 
 describe('proposeRepair: un clic que no produce nada tiene que decirlo', () => {
