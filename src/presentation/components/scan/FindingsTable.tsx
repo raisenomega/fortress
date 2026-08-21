@@ -10,6 +10,7 @@ interface FindingsTableProps {
   readonly onReopen: (id: string) => void
   readonly onMitigate: (id: string, nota: string) => void
   readonly onUnmitigate: (id: string) => void
+  readonly onRepair: (id: string) => void
 }
 
 const HEAD_CLASS = 'pb-2 text-left text-[11px] font-semibold tracking-widest uppercase'
@@ -20,7 +21,8 @@ export function FindingsTable({
   onDismiss,
   onReopen,
   onMitigate,
-  onUnmitigate
+  onUnmitigate,
+  onRepair
 }: FindingsTableProps): React.JSX.Element {
   if (findings.length === 0) return <FindingsEmpty project={project} />
 
@@ -43,6 +45,7 @@ export function FindingsTable({
             onReopen={onReopen}
             onMitigate={onMitigate}
             onUnmitigate={onUnmitigate}
+            onRepair={onRepair}
           />
         ))}
       </tbody>

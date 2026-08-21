@@ -5,30 +5,12 @@ import {
   type Proposal,
   type ProposalState
 } from '@domain/repair/proposal'
-import { hasBlockingRejection } from '@domain/repair/retry-eligibility'
-import { selectTarget, type Candidate } from '@domain/repair/select-target'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
+import { elegirObjetivo } from './elegir-objetivo'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
-
-/** Candidatos: ACTIVE y abiertos, menos tres descuentos. Los OBSOLETOS bajo el
- *  escaneo vigente (un fantasma no se re-analiza en la misma generacion). Los
- *  que ya tienen propuesta VIVA: la seleccion es determinista y sin eso el mismo
- *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
- *  (ADR-059). Y los que fracasaron por una causa que repetir no arregla con el
- *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. */
-function candidates(context: AppContext, projectId: string, headSha: string): Candidate[] {
-  const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, headSha))
-  for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
-  const previas = context.repairProposals.listByProject(projectId)
-  return context.findings
-    .listMemory(projectId)
-    .filter((f) => f.lifecycle === 'ACTIVE' && f.status === 'open' && !excluded.has(f.id))
-    .filter((f) => !hasBlockingRejection(f.id, headSha, previas))
-    .map(({ id, severity, title, file, line, firstSeen }) => ({ id, severity, title, file, line, firstSeen })) // prettier-ignore
-}
 
 /**
  * C1 -> C2 desde la app: ELIGE un hallazgo (determinista), ancla el HEAD del
@@ -36,8 +18,17 @@ function candidates(context: AppContext, projectId: string, headSha: string): Ca
  * veredicto: REAL deja la propuesta en ANALIZADO (lista para C3); OBSOLETO la
  * CADUCA y excluye al hallazgo hasta el proximo escaneo. La extincion del
  * hallazgo NO se toca: eso es del escaneo, con evidencia. NO genera fix.
+ *
+ * `findingId` invierte el primer paso: con el, quien eligio fue el operador y el
+ * motor atiende ESE hallazgo sin mirar la cola ni el cerco de integracion
+ * automatica —si no cabe, su fix acabara pidiendo firma humana—. Sin el, todo
+ * ocurre como siempre: elige el orden.
  */
-export async function planRepair(context: AppContext, projectId: string): Promise<Proposal | null> {
+export async function planRepair(
+  context: AppContext,
+  projectId: string,
+  findingId?: string
+): Promise<Proposal | null> {
   const project = context.projects.findById(projectId)
   if (!project) return null
   const scanId = context.scans.listByProject(projectId, 1)[0]?.id ?? ''
@@ -45,7 +36,7 @@ export async function planRepair(context: AppContext, projectId: string): Promis
   // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.
   const baseSha = context.headSha(project.path)
   if (baseSha === null) return null
-  const selection = selectTarget(candidates(context, projectId, baseSha))
+  const selection = elegirObjetivo(context, projectId, baseSha, findingId)
   if (!selection) return null
 
   const now = Date.now()

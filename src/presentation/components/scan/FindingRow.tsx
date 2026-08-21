@@ -1,5 +1,6 @@
 import type { Finding } from '@domain/project/finding'
 import { FindingActions } from './FindingActions'
+import { FindingRepairAction } from './FindingRepairAction'
 import { FindingMarks } from './FindingMarks'
 import { SeverityBadge } from './SeverityBadge'
 
@@ -9,6 +10,7 @@ interface FindingRowProps {
   readonly onReopen: (id: string) => void
   readonly onMitigate: (id: string, nota: string) => void
   readonly onUnmitigate: (id: string) => void
+  readonly onRepair: (id: string) => void
 }
 
 /** Sin archivo ni linea un hallazgo no es accionable, pero se muestra igual. */
@@ -22,7 +24,8 @@ export function FindingRow({
   onDismiss,
   onReopen,
   onMitigate,
-  onUnmitigate
+  onUnmitigate,
+  onRepair
 }: FindingRowProps): React.JSX.Element {
   // Descartado se atenua pero NO se esconde: sigue estando ahi, y el operador
   // tiene que poder ver que decidio ignorarlo y por que ya no bloquea.
@@ -48,6 +51,9 @@ export function FindingRow({
         {location(finding)}
       </td>
       <td className="py-2 align-top text-right whitespace-nowrap">
+        {!dismissed && !mitigado ? (
+          <FindingRepairAction onRepair={() => onRepair(finding.id)} />
+        ) : null}
         <FindingActions
           dismissed={dismissed}
           mitigado={mitigado}
