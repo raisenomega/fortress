@@ -2,6 +2,7 @@ import { spawn, type ChildProcess } from 'child_process'
 import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
 import { tail } from '@domain/repair/tail'
+import { buildGateEnv } from './gate-env'
 
 /** Mata el GRUPO entero (npm run spawnea hijos: tsc, eslint, vitest). Matar
  *  solo al padre deja nietos vivos sosteniendo los pipes y `close` no llega. */
@@ -38,13 +39,12 @@ export function spawnCommand(
 ): Promise<CommandOutcome> {
   const startedAt = Date.now()
   return new Promise((resolve) => {
-    // CI: los runners miran esa variable para correr UNA vez en lugar de
-    // vigilar ficheros. Sin ella, un proyecto que llama `vitest` a secas cuelga
-    // el gate hasta el timeout y el veredicto sale por reloj, no por juicio.
-    // Pisar la del operador es deliberado: como se verifica lo decide el
-    // auditor. Se compone AQUI y no al cargar el modulo: el entorno del proceso
-    // puede cambiar despues, y el gate tiene que correr con el de ahora.
-    const env = { ...process.env, CI: 'true' }
+    // Lista blanca, no herencia: aqui corren los scripts del repo AUDITADO.
+    // `CI` va dentro porque sin ella un proyecto que llama `vitest` a secas
+    // vigila ficheros y cuelga el gate hasta el timeout. Se compone AQUI y no al
+    // cargar el modulo: `augmentPath()` completa el PATH en el arranque mutando
+    // `process.env`, y el gate tiene que correr con el de ahora.
+    const env = buildGateEnv(process.env)
     const child = spawn(bin, args as string[], { cwd, detached: true, env })
     let out = ''
     let errOut = ''
