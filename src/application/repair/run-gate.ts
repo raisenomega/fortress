@@ -3,6 +3,7 @@ import { canTransition } from '@domain/repair/proposal'
 import type { AppContext } from '../context'
 import { cursorFrom } from './book-cursor'
 import { emitGateCommand, emitGateOutcome, rejectGate } from './run-gate-emit'
+import { gateBlocked } from './gate-guards'
 
 /** Lo no verificado y lo que ya venia roto, en la evidencia y solo si los hubo:
  *  el libro no afirma "no hubo" cuando la pregunta no aplicaba. */
@@ -38,13 +39,8 @@ export async function runGate(
   const worktreePath = `${deps.worktreeRoot}/${proposal.id}`
   const cursor = cursorFrom(await ctx.eventLog.list(proposalId))
 
-  if (!deps.worktreeExists(worktreePath)) {
-    return rejectGate(ctx, cursor, proposal, 'worktree_missing', 'worktree_missing', { worktreePath }, deps.now()) // prettier-ignore
-  }
-  if (!(await deps.isClean(worktreePath))) {
-    // Cambios sin commit despues de GENERADO: alguien (o algo) toco el worktree.
-    return rejectGate(ctx, cursor, proposal, 'worktree_contaminated', 'worktree_contaminated', {}, deps.now()) // prettier-ignore
-  }
+  const bloqueo = await gateBlocked(ctx, proposal, worktreePath, cursor, deps)
+  if (bloqueo !== null) return bloqueo
 
   return deps.enqueue(async () => {
     const outcome = await deps.runner.run(worktreePath, proposal.baseSha)

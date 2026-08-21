@@ -14,6 +14,8 @@ export interface Opciones {
   readonly outcome?: GateOutcome
   readonly worktreeExists?: boolean
   readonly clean?: boolean
+  /** El proyecto es de confianza. Los reales lo son; el gate no corre sin ella. */
+  readonly trusted?: boolean
 }
 
 export interface Bench {
@@ -35,6 +37,7 @@ export function bench(opts: Opciones = {}): Bench {
   const proposal: Proposal = { id: 'prop-1', projectId: 'p1', findingId: 'f1', baseSha: 'base', state: opts.state ?? 'GENERADO', analysisVerdict: 'REAL', createdAt: 1, updatedAt: 1 } // prettier-ignore
 
   const context = {
+    projects: { findById: () => ({ id: 'p1', path: '/repo/p1', trusted: opts.trusted ?? true }) },
     repairProposals: {
       findById: (id: string) => (id === 'prop-1' ? proposal : null),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch })
