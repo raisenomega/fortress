@@ -8,6 +8,8 @@ import { createGitFileHistory } from '../git/file-history'
 import { headSha } from '../git/head-sha'
 import { createFsProbe } from '../omega/fs-probe'
 import { discoverCorpus } from '../project/discover-corpus'
+import { readFortressConfig } from '../project/fortress-config'
+import { puertosDeAutoMejora } from './app-context-automejora'
 import { createGraphAnalyst } from '../repair/graph-analyst'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
 import { createSqliteAgentRunRepository } from './sqlite-agent-run-repository'
@@ -15,11 +17,6 @@ import { createSqliteChatRepository } from './sqlite-chat-repository'
 import { createSqliteConnectorRepository } from './sqlite-connector-repository'
 import { createSqliteFindingRepository } from './sqlite-finding-repository'
 import { createSqliteLoopSessionRepository } from './sqlite-loop-session-repository'
-import { createSqliteCapabilityRepository } from './sqlite-capability-repository'
-import { createSqliteCapabilityNoteRepository } from './sqlite-capability-note-repository'
-import { createSqliteAgentDraftRepository } from './sqlite-agent-draft-repository'
-import { createSqliteCapabilityEpisodeRepository } from './sqlite-capability-episode-repository'
-import { createSqliteSelfObservationRepository } from './sqlite-self-observation-repository'
 import { createSqliteOmegaLog } from './sqlite-omega-log'
 import { createSqliteProjectRepository } from './sqlite-project-repository'
 import { createSqliteQualityHistoryRepository } from './sqlite-quality-history-repository'
@@ -44,6 +41,7 @@ export function getAppContext(): AppContext {
   context = {
     projects: createSqliteProjectRepository(db),
     corpus: { of: discoverCorpus },
+    fortressConfig: readFortressConfig,
     findings: createSqliteFindingRepository(db),
     fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),
@@ -61,11 +59,7 @@ export function getAppContext(): AppContext {
     filesystemProbe: createFsProbe(),
     connectors: createSqliteConnectorRepository(db),
     loopSessions: createSqliteLoopSessionRepository(db),
-    selfObservations: createSqliteSelfObservationRepository(db),
-    capabilities: createSqliteCapabilityRepository(db),
-    capabilityNotes: createSqliteCapabilityNoteRepository(db),
-    agentDrafts: createSqliteAgentDraftRepository(db),
-    capabilityEpisodes: createSqliteCapabilityEpisodeRepository(db),
+    ...puertosDeAutoMejora(db),
     transaction: (work) => db.transaction(work)(),
     settings,
     apiKeys: createSafeStorageApiKeyStore(settings),

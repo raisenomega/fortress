@@ -1,4 +1,5 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
+import { puedeAspirar } from '@domain/repair/puede-aspirar'
 import { hasBlockingRejection } from '@domain/repair/retry-eligibility'
 import { selectTarget, type Candidate, type Selection } from '@domain/repair/select-target'
 import { dirigirA } from '@domain/repair/target-dirigido'
@@ -6,22 +7,31 @@ import type { AppContext } from '../context'
 
 const aCandidato = ({ id, severity, title, file, line, firstSeen }: FindingMemory): Candidate => ({ id, severity, title, file, line, firstSeen }) // prettier-ignore
 
-const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f.status === 'open'
+export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f.status === 'open'
 
 /** Candidatos: ACTIVE y abiertos, menos tres descuentos. Los OBSOLETOS bajo el
  *  escaneo vigente (un fantasma no se re-analiza en la misma generacion). Los
  *  que ya tienen propuesta VIVA: la seleccion es determinista y sin eso el mismo
  *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
- *  (ADR-059). Y los que fracasaron por una causa que repetir no arregla con el
- *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. */
-function candidates(context: AppContext, projectId: string, headSha: string): Candidate[] {
+ *  (ADR-059). Los que fracasaron por una causa que repetir no arregla con el
+ *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. Y
+ *  los que el cerco va a denegar por severidad o por ruta: elegirlos cuesta el
+ *  analista y el generador enteros para que la politica los rechace al final. */
+function candidates(
+  context: AppContext,
+  projectId: string,
+  headSha: string,
+  projectPath: string
+): Candidate[] {
   const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, headSha))
   for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
   const previas = context.repairProposals.listByProject(projectId)
+  const config = context.fortressConfig(projectPath)
   return context.findings
     .listMemory(projectId)
     .filter((f) => vivo(f) && !excluded.has(f.id))
     .filter((f) => !hasBlockingRejection(f.id, headSha, previas))
+    .filter((f) => puedeAspirar(f.severity, f.file, config))
     .map(aCandidato)
 }
 
@@ -29,20 +39,27 @@ function candidates(context: AppContext, projectId: string, headSha: string): Ca
  * Las dos maneras de llegar a un objetivo, y son distintas de raiz: ELEGIR de la
  * cola —el motor decide, con su orden— o ATENDER lo que el operador senalo.
  *
- * De los tres descuentos de la cola, el dirigido solo conserva el de la
- * propuesta VIVA, y no por disciplina sino por dinero: analizar de nuevo lo que
- * ya se esta trabajando cuesta una corrida entera de agente y no aporta nada.
- * Los otros dos —el fantasma del escaneo vigente, el fracaso que no se repite—
+ * De los descuentos de la cola, el dirigido solo conserva el de la propuesta
+ * VIVA, y no por disciplina sino por dinero: analizar de nuevo lo que ya se esta
+ * trabajando cuesta una corrida entera de agente y no aporta nada. Los demas
  * existen para que el motor no compre lo mismo cada ronda; un humano que
  * pregunta dos veces esta preguntando dos veces, y esa es su decision.
+ *
+ * El cerco es el caso claro: la cola no elige lo que la politica va a denegar,
+ * pero dirigido SI se trabaja, porque pedirlo a mano es justamente pedir un fix
+ * para firma humana. Ese escape no necesita bandera: el camino dirigido no pasa
+ * por la cola, asi que tampoco por su filtro.
  */
 export function elegirObjetivo(
   context: AppContext,
   projectId: string,
   headSha: string,
+  projectPath: string,
   findingId?: string
 ): Selection | null {
-  if (findingId === undefined) return selectTarget(candidates(context, projectId, headSha))
+  if (findingId === undefined) {
+    return selectTarget(candidates(context, projectId, headSha, projectPath))
+  }
 
   const conPropuesta = new Set(context.repairProposals.findLiveFindingIds(projectId))
   const senalado = context.findings.listMemory(projectId).find((f) => f.id === findingId && vivo(f))

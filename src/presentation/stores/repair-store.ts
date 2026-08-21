@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Finding } from '@domain/project/project'
+import type { ResumenCerco } from '@application/repair/resumen-cerco'
 import type { Proposal } from '@domain/repair/proposal'
 
 interface RepairState {
@@ -13,7 +14,14 @@ interface RepairState {
   readonly proposals: readonly Proposal[]
   readonly findings: readonly Finding[]
   readonly busy: boolean
-  setData: (projectId: string, proposals: readonly Proposal[], findings: readonly Finding[]) => void
+  /** Cuantos hallazgos vivos no puede elegir la cola por si sola. */
+  readonly cerco: ResumenCerco
+  setData: (
+    projectId: string,
+    proposals: readonly Proposal[],
+    findings: readonly Finding[],
+    cerco: ResumenCerco
+  ) => void
   setBusy: (busy: boolean) => void
 }
 
@@ -22,6 +30,8 @@ export const useRepairStore = create<RepairState>((set) => ({
   proposals: [],
   findings: [],
   busy: false,
-  setData: (projectId, proposals, findings) => set({ projectId, proposals, findings }),
+  cerco: { total: 0, fuera: 0 },
+  setData: (projectId, proposals, findings, cerco) =>
+    set({ projectId, proposals, findings, cerco }),
   setBusy: (busy) => set({ busy })
 }))

@@ -9,6 +9,7 @@ import type { SelfObservationRepository } from '@domain/system/self-observation-
 import type { FileHistory } from '@domain/project/file-history'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { CorpusReader } from '@domain/project/corpus-reader'
+import type { ConfigState } from '@domain/repair/auto-merge-config'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { Analyst } from '@domain/repair/analysis'
 import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
@@ -34,6 +35,9 @@ export interface AppContext {
   readonly projects: ProjectRepository
   /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
   readonly corpus: CorpusReader
+  /** Que cerco de integracion automatica declara un proyecto en su disco. Tres
+   *  estados: no lo declara, lo declara bien, o lo declara y no se entiende. */
+  readonly fortressConfig: (projectPath: string) => ConfigState
   readonly findings: FindingRepository
   /** git: si el archivo de un hallazgo cambio desde que se detecto. */
   readonly fileHistory: FileHistory

@@ -36,7 +36,7 @@ export async function planRepair(
   // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.
   const baseSha = context.headSha(project.path)
   if (baseSha === null) return null
-  const selection = elegirObjetivo(context, projectId, baseSha, findingId)
+  const selection = elegirObjetivo(context, projectId, baseSha, project.path, findingId)
   if (!selection) return null
 
   const now = Date.now()

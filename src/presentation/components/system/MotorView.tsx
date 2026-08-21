@@ -1,6 +1,7 @@
 import { proposeRepair } from '../../services/repair-service'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
+import { CercoNotice } from './CercoNotice'
 import { Icon } from '../common/Icon'
 import { RepairProposalRow } from './RepairProposalRow'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
@@ -22,6 +23,7 @@ export function MotorView(): React.JSX.Element {
   const proposals = useRepairStore((state) => state.proposals)
   const findings = useRepairStore((state) => state.findings)
   const busy = useRepairStore((state) => state.busy)
+  const cerco = useRepairStore((state) => state.cerco)
 
   useRepairFeed(projectId)
 
@@ -39,6 +41,8 @@ export function MotorView(): React.JSX.Element {
             : `Expediente de ${project.name}. Nada se integra sin pasar el gate y el revisor.`}
         </p>
       </header>
+
+      {alDia ? <CercoNotice cerco={cerco} /> : null}
 
       <button
         type="button"
