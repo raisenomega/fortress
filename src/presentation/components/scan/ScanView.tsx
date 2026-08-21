@@ -2,7 +2,7 @@ import { useActiveProject } from '../../stores/project-store'
 import { usePushResult } from '../../stores/push-store'
 import { useProjectFindings, useScanError } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
-import { dismissFinding, reopenFinding } from '../../services/dismiss-service'
+import { dismissFinding, mitigateFinding, reopenFinding } from '../../services/dismiss-service'
 import { EmptyState } from '../common/EmptyState'
 import { Notice } from '../common/Notice'
 import { FindingsTable } from './FindingsTable'
@@ -42,6 +42,7 @@ export function ScanView(): React.JSX.Element {
           findings={findings}
           onDismiss={(id) => void dismissFinding(project.id, id)}
           onReopen={(id) => void reopenFinding(project.id, id)}
+          onMitigate={(id, nota) => void mitigateFinding(project.id, id, nota)}
         />
       </div>
     </div>

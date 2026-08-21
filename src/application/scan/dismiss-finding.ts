@@ -17,3 +17,22 @@ export function dismissFinding(context: AppContext, findingId: string): Result<n
 export function reopenFinding(context: AppContext, findingId: string): Result<null> {
   return context.findings.reopen(findingId) ? ok(null) : err('Ese hallazgo ya no existe')
 }
+
+/**
+ * El operador marca un hallazgo como YA ARREGLADO. Es lifecycle, no status:
+ * descartar dice "esto no era un problema"; mitigar dice "lo era y lo arregle".
+ * Mezclarlos haria que descartar pareciera arreglar.
+ *
+ * La nota es texto libre a proposito — normalmente el sha del arreglo. No se
+ * valida ni se parsea: quien la lea es un humano, y exigirle formato solo
+ * conseguiria que no la escribiera.
+ */
+export function markMitigatedFinding(
+  context: AppContext,
+  findingId: string,
+  note: string
+): Result<null> {
+  return context.findings.markMitigated(findingId, note.trim(), new Date().toISOString())
+    ? ok(null)
+    : err('Ese hallazgo ya no estaba vivo: puede que un escaneo posterior lo cerrara')
+}

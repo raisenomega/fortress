@@ -1,5 +1,4 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
-import { dismissFinding, reopenFinding } from '@application/scan/dismiss-finding'
 import { runScan } from '@application/scan/run-scan'
 import type { ScanSummary } from '@application/scan/scan-types'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
@@ -12,6 +11,7 @@ import { guardRun } from '../run-guard'
 import { endRun } from '../run-control'
 import { createClaudeScanner } from '../scan/claude-scanner'
 import { IPC } from './channels'
+import { registerFindingDecisionHandlers } from './finding-decision-handlers'
 
 /** Emite progreso solo si la ventana sigue viva: un scan dura minutos. */
 function progressSender(event: IpcMainInvokeEvent, projectId: string) {
@@ -61,11 +61,5 @@ export function registerScanHandlers(): void {
     getAppContext().scans.listSince(since)
   )
 
-  ipcMain.handle(IPC.scanDismiss, (_event, findingId: string) =>
-    dismissFinding(getAppContext(), findingId)
-  )
-
-  ipcMain.handle(IPC.scanReopen, (_event, findingId: string) =>
-    reopenFinding(getAppContext(), findingId)
-  )
+  registerFindingDecisionHandlers()
 }

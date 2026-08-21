@@ -24,6 +24,8 @@ export interface ScanApi {
   /** Marca un hallazgo como falso positivo: deja de contar y de bloquear. */
   dismiss(findingId: string): Promise<Result<null>>
   reopen(findingId: string): Promise<Result<null>>
+  /** El operador declara que ya lo arreglo, con una nota (normalmente el sha). */
+  mitigate(findingId: string, note: string): Promise<Result<null>>
 }
 
 export interface ActivityApi {

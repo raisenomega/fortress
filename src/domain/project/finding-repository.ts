@@ -43,6 +43,14 @@ export interface FindingRepository {
    */
   markExtinct(ids: readonly string[], at: string): void
 
+  /**
+   * El operador declara que un hallazgo ya esta ARREGLADO, con una nota que
+   * dice donde. No afirma que haya desaparecido —eso lo confirma el escaneo con
+   * su doble prueba—, asi que el hallazgo sigue en el tablero; lo que deja es de
+   * pedirle trabajo al motor. false si ya no estaba ACTIVE.
+   */
+  markMitigated(findingId: string, note: string, at: string): boolean
+
   /** Marca un hallazgo como falso positivo y recuerda la decision. */
   dismiss(findingId: string): boolean
 

@@ -18,3 +18,16 @@ export function dismissFinding(projectId: string, findingId: string): Promise<vo
 export function reopenFinding(projectId: string, findingId: string): Promise<void> {
   return setDismissed(projectId, findingId, false)
 }
+
+/**
+ * Marcar como arreglado saca el hallazgo de la cola del motor pero lo deja en el
+ * tablero, asi que hay que releer igual: la fila cambia de aspecto.
+ */
+export async function mitigateFinding(
+  projectId: string,
+  findingId: string,
+  note: string
+): Promise<void> {
+  await api().scan.mitigate(findingId, note)
+  await reloadAfterScan(projectId)
+}

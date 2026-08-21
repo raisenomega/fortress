@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { checkFinding } from './finding-check'
 
-const base = { id: 'f1', severity: 'MEDIUM', title: 'algo', status: 'open' } as const
+const base = {
+  id: 'f1',
+  severity: 'MEDIUM',
+  title: 'algo',
+  status: 'open',
+  lifecycle: 'ACTIVE' as const,
+  mitigatedNote: null
+} as const
 
 describe('checkFinding', () => {
   it('archivo y linea existen: verificado (ok)', () => {

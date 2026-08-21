@@ -17,9 +17,18 @@ const open: Finding = {
   title: 'Fuga',
   file: 'src/a.ts',
   line: 9,
-  status: 'open'
+  status: 'open',
+  lifecycle: 'ACTIVE' as const,
+  mitigatedNote: null
 }
-const descartado: Finding = { ...open, id: 'f2', title: 'Falso', status: 'false_positive' }
+const descartado: Finding = {
+  ...open,
+  id: 'f2',
+  title: 'Falso',
+  status: 'false_positive',
+  lifecycle: 'ACTIVE' as const,
+  mitigatedNote: null
+}
 
 describe('buildProjectRecord', () => {
   it('resume score, escaneos y hallazgos ABIERTOS (no los descartados)', () => {
