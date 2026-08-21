@@ -13,7 +13,8 @@ const CORPUS: CorpusDescriptor = {
   directories: ['docs/DECISIONS']
 }
 
-const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1 }
+// prettier-ignore
+const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z' }
 
 const ANALYSIS: Analysis = {
   target: TARGET,

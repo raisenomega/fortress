@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { isDebutEligible, selectTarget, surface, type Candidate } from './select-target'
+import { selectTarget, surface, type Candidate } from './select-target'
+import { isDebutEligible } from './debut'
 import { SEVERITIES, type Severity } from '../shared/severity'
 
 const candidate = (severity: Severity, title: string, file: string): Candidate => ({
@@ -7,7 +8,8 @@ const candidate = (severity: Severity, title: string, file: string): Candidate =
   severity,
   title,
   file,
-  line: 1
+  line: 1,
+  firstSeen: '2026-01-01T00:00:00.000Z'
 })
 
 /** El hallazgo real que motivo la ampliacion: MEDIUM, aditivo, superficie 1. */

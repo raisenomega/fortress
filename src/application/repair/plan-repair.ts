@@ -32,7 +32,7 @@ function candidates(
     .listMemory(projectId)
     .filter((f) => f.lifecycle === 'ACTIVE' && f.status === 'open' && !excluded.has(f.id))
     .filter((f) => !hasBlockingRejection(f.id, headSha, previas))
-    .map(({ id, severity, title, file, line }) => ({ id, severity, title, file, line }))
+    .map(({ id, severity, title, file, line, firstSeen }) => ({ id, severity, title, file, line, firstSeen })) // prettier-ignore
 }
 
 /**

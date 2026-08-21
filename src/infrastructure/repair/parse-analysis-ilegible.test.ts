@@ -3,7 +3,14 @@ import { isActionable } from '@domain/repair/analysis'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import { toAnalysis } from './parse-analysis'
 
-const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'a.ts', line: 1 }
+const TARGET = {
+  id: 'f1',
+  severity: 'LOW' as const,
+  title: 't',
+  file: 'a.ts',
+  line: 1,
+  firstSeen: '2026-01-01T00:00:00.000Z'
+}
 
 const crudo = (result: string): ReturnType<typeof toAnalysis> =>
   toAnalysis(TARGET, { result, usage: EMPTY_USAGE })
