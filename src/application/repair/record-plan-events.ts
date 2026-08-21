@@ -42,15 +42,16 @@ export async function recordAnalyzed(
   result: AnalystResult,
   toState: ProposalState
 ): Promise<void> {
-  const { analysis, runMeta } = result
-  await safeRecord(
-    log,
-    buildAgentRunEvent({
-      proposalId: proposal.id, seq: 2, phase: 'ANALYZE', actor: 'claude-analyst',
-      agentRunId: runMeta.agentRunId, costTokens: runMeta.tokensUsed,
-      durationMs: runMeta.durationMs, ts: runMeta.endedAt
-    }) // prettier-ignore
-  )
+  const { analysis, runMeta, raw } = result
+  const corrida = buildAgentRunEvent({
+    proposalId: proposal.id, seq: 2, phase: 'ANALYZE', actor: 'claude-analyst',
+    agentRunId: runMeta.agentRunId, costTokens: runMeta.tokensUsed,
+    durationMs: runMeta.durationMs, ts: runMeta.endedAt
+  }) // prettier-ignore
+  // El crudo ENTERO por el mismo canal que la autopsia de OMEGA: la evidencia
+  // del evento de la corrida. La razon del asiento sigue siendo la muestra.
+  const evidenceJson = raw === undefined ? undefined : JSON.stringify({ raw })
+  await safeRecord(log, evidenceJson === undefined ? corrida : { ...corrida, evidenceJson })
   await safeRecord(
     log,
     buildTransitionEvent({

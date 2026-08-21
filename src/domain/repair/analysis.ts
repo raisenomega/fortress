@@ -62,6 +62,9 @@ export interface AnalystRunMeta {
 export interface AnalystResult {
   readonly analysis: Analysis
   readonly runMeta: AnalystRunMeta
+  /** El texto ENTERO del analista, solo cuando no se dejo leer: la muestra del
+   *  asiento es legible, pero con ella no se reproduce el fallo. */
+  readonly raw?: string
 }
 
 /** Puerto: el analista grafo-primero que ESTUDIA el hallazgo. Infra lo implementa. */
