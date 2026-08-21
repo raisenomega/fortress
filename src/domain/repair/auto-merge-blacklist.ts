@@ -22,14 +22,23 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/project/project-path.ts',
   'src/domain/newproject/target-path.ts',
   'src/domain/connectors/graph-mcp.ts',
-  'src/domain/posture/private-host.ts',
-  // Las URLs tambien entran de fuera. `target-url` es la mitad llamadora de
-  // `private-host` —valida el destino del escaneo y le pregunta a el—, y
-  // `connector-url` exige https a un MCP que viajara con las credenciales del
-  // operador. `create-folder` decide que se le cuenta al renderer de una carpeta.
-  'src/domain/posture/target-url.ts',
+  'src/infrastructure/claude-code/build-allowed-tools.ts',
+  // Las URLs tambien entran de fuera. `connector-url` exige https a un MCP que
+  // viajara con las credenciales del operador; `safe-url` decide que enlaces se
+  // abren fuera de la app —hoy los escribe FORTRESS, manana un agente—; y
+  // `create-folder` decide que se le cuenta al renderer de una carpeta ajena.
   'src/domain/connectors/connector-url.ts',
+  'src/domain/shared/safe-url.ts',
   'src/infrastructure/newproject/create-folder.ts',
+  // POR CARPETA, no por fichero: posture ENTERA es la defensa anti-SSRF, con
+  // tres HIGH a su espalda. Enumerar sus mitades fallo cuatro veces seguidas —
+  // se protegia quien clasifica y no quien pregunta— porque la lista solo cubre
+  // lo que alguien recuerda escribir. Un glob cubre tambien lo que aun no
+  // existe: un archivo nuevo ahi nace protegido sin que nadie se acuerde.
+  // El precio es que 22 archivos dejan de poder integrarse solos, y para este
+  // subsistema es el precio correcto.
+  'src/domain/posture/**',
+  'src/infrastructure/posture/**',
   // Quien deja pasar una integracion. `auto-merge-policy` declara la politica;
   // `evaluation` es quien la COMPRUEBA y `config` quien la lee y fusiona esta
   // misma lista: proteger solo el primero dejaba fuera a los dos que deciden.
