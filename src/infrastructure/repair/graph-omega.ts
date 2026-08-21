@@ -1,9 +1,9 @@
 import { spawn, type ChildProcess } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
-import { parseOmegaResponse } from '@domain/repair/omega-parse'
-import { processOmegaOut } from './omega-out'
-import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+import { toOmegaOutcome, type OmegaRunResult } from './omega-outcome'
 import { EMPTY_USAGE, totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
+
+export type { OmegaRunResult }
 
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
@@ -14,10 +14,6 @@ const TOOLS =
   'mcp__codebase-memory__trace_path,mcp__codebase-memory__get_code_snippet,' +
   'mcp__codebase-memory__search_code,Read,Grep,Glob'
 const TIMEOUT_MS = 900_000
-
-export type OmegaRunResult =
-  | { ok: true; verdict: OmegaVerdict; runMeta: AnalystRunMeta }
-  | { ok: false; error: string; timedOut: boolean; runMeta: AnalystRunMeta }
 
 export interface GraphOmega {
   run(worktreePath: string, prompt: string): Promise<OmegaRunResult>
@@ -60,10 +56,8 @@ export function createGraphOmega(claudeBin: string, timeoutMs = TIMEOUT_MS): Gra
           clearTimeout(timer)
           if (timedOut)
             return resolve({ ok: false, error: 'timeout', timedOut, runMeta: meta(EMPTY_USAGE) })
-          const { usage, text } = processOmegaOut(out)
-          const parsed = parseOmegaResponse(text)
-          if ('error' in parsed) return resolve({ ok: false, error: 'omega_response_invalid', timedOut: false, runMeta: meta(usage) }) // prettier-ignore
-          resolve({ ok: true, verdict: parsed.verdict, runMeta: meta(usage) })
+          // La lectura de la salida vive aparte: aqui solo el ciclo del proceso.
+          resolve(toOmegaOutcome(out, meta))
         })
         child.on('error', (error) => {
           clearTimeout(timer)

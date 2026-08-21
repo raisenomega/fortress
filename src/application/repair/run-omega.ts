@@ -10,7 +10,15 @@ import { judgeProposal } from './run-omega-judge'
 
 export type OmegaAgentResult =
   | { ok: true; verdict: OmegaVerdict; runMeta: AnalystRunMeta }
-  | { ok: false; error: string; timedOut: boolean; runMeta: AnalystRunMeta }
+  /** `error` clasifica (razon cerrada); `detail` y `raw` son la autopsia. */
+  | {
+      ok: false
+      error: string
+      timedOut: boolean
+      runMeta: AnalystRunMeta
+      detail?: string
+      raw?: string
+    }
 
 export interface OmegaDeps extends OmegaReads {
   readonly worktreeRoot: string

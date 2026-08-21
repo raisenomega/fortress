@@ -9,6 +9,7 @@ import { buildOmegaInput } from './run-omega-inputs'
 import { closeOmega, emitOmegaMismatch, emitOmegaRun } from './run-omega-emit'
 import type { OmegaDeps, RunOmegaResult } from './run-omega'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
+import { evidenciaOmega, falloDeOmega } from './omega-autopsia'
 
 /** El juicio en si, ya dentro de la cola: inputs -> agente -> veredicto. */
 export async function judgeProposal(
@@ -36,14 +37,14 @@ export async function judgeProposal(
   const corpus = ctx.corpus.of(worktreePath)
   const { input, files } = await buildOmegaInput(deps, worktreePath, proposal.baseSha, analysis, corpus) // prettier-ignore
   const crudo = await deps.omega.run(worktreePath, buildOmegaPrompt(input))
-  const evidence = crudo.ok ? { verdict: crudo.verdict, diffFiles: files } : { error: crudo.error, diffFiles: files } // prettier-ignore
+  const evidence = evidenciaOmega(crudo, files)
   // Igual que en generate: el id existe antes de que el asiento lo cite.
   const result = conAgentRun(crudo, recordMotorRun(ctx, proposal.projectId, 'sentinel-omega', crudo.runMeta, !crudo.ok)) // prettier-ignore
   await emitOmegaRun(ctx, cursor, proposal.id, result.runMeta, evidence)
 
   if (!result.ok) {
-    const reason = result.error === 'omega_response_invalid' ? 'omega_response_invalid' : result.timedOut ? 'omega_timeout' : 'omega_error' // prettier-ignore
-    return veto(reason, reason, { error: result.error })
+    const fallo = falloDeOmega(result)
+    return veto(fallo.reason, fallo.detalle, fallo.evidencia)
   }
   // D19 — el motor recomputa: los ejes son evidencia, la regla es codigo.
   const computed = computeGlobalVerdict(result.verdict)
