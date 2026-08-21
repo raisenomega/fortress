@@ -5,9 +5,10 @@ import * as SQL from './finding-sql'
 import { toTouch } from './finding-touch'
 
 export interface FindingWrites extends DismissalWrites {
-  sync(projectId: string, rows: readonly FindingInsert[]): void
+  sync(projectId: string, rows: readonly FindingInsert[], conservados?: ReadonlySet<string>): void
   markExtinct(ids: readonly string[], at: string): void
   markMitigated(findingId: string, note: string, at: string): boolean
+  markActive(findingId: string): boolean
 }
 
 /** Escrituras de findings. Cada una es indivisible por su cuenta. */
@@ -17,16 +18,22 @@ export function createFindingWrites(db: Db): FindingWrites {
   const extinguish = db.prepare(SQL.MARK_EXTINCT)
   const byIdentity = db.prepare(SQL.SELECT_BY_IDENTITY)
   const mitigate = db.prepare(SQL.MARK_MITIGATED)
+  const activate = db.prepare(SQL.MARK_ACTIVE)
+  const touchKeep = db.prepare(SQL.TOUCH_CONSERVANDO)
 
   // Indivisible: a medio camino el proyecto contaria una mezcla de dos escaneos.
   // Lo que este escaneo NO nombro no se toca — se queda con su lastSeen viejo.
-  const sync = db.transaction((projectId: string, rows: readonly FindingInsert[]) => {
-    for (const row of rows) {
-      const existing = byIdentity.get(projectId, row.identity) as { id: string } | undefined
-      if (existing) touch.run(toTouch(row, existing.id))
-      else insert.run(row)
+  const sync = db.transaction(
+    (projectId: string, rows: readonly FindingInsert[], conservados: ReadonlySet<string>) => {
+      for (const row of rows) {
+        const existing = byIdentity.get(projectId, row.identity) as { id: string } | undefined
+        if (!existing) insert.run(row)
+        // La UNICA linea de esta pieza dentro de la transaccion: quien conserva
+        // su marca se decidio antes, con git delante.
+        else (conservados.has(existing.id) ? touchKeep : touch).run(toTouch(row, existing.id))
+      }
     }
-  })
+  )
 
   // Todas las extinciones de un escaneo entran juntas: media tanda dejaria el
   // registro diciendo que unos problemas se cerraron y otros no, sin motivo.
@@ -40,5 +47,13 @@ export function createFindingWrites(db: Db): FindingWrites {
   const markMitigated = (findingId: string, note: string, at: string): boolean =>
     mitigate.run({ id: findingId, note, at }).changes > 0
 
-  return { sync, markExtinct, markMitigated, ...createDismissalWrites(db) }
+  const markActive = (findingId: string): boolean => activate.run({ id: findingId }).changes > 0
+
+  return {
+    sync: (projectId, rows, conservados) => sync(projectId, rows, conservados ?? new Set()),
+    markExtinct,
+    markMitigated,
+    markActive,
+    ...createDismissalWrites(db)
+  }
 }

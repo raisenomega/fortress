@@ -6,6 +6,7 @@ interface FindingActionsProps {
   readonly onDismiss: () => void
   readonly onReopen: () => void
   readonly onMitigate: () => void
+  readonly onUnmitigate: () => void
 }
 
 /** Las dos decisiones que el operador puede tomar sobre un hallazgo, y que son
@@ -17,7 +18,8 @@ export function FindingActions({
   mitigado,
   onDismiss,
   onReopen,
-  onMitigate
+  onMitigate,
+  onUnmitigate
 }: FindingActionsProps): React.JSX.Element {
   return (
     <>
@@ -29,6 +31,16 @@ export function FindingActions({
           className="tap mr-2 text-muted-foreground hover:text-foreground"
         >
           <Wrench size={13} aria-hidden />
+        </button>
+      ) : null}
+      {mitigado ? (
+        <button
+          type="button"
+          onClick={onUnmitigate}
+          title="Deshacer: vuelve a la cola del motor"
+          className="tap mr-2 text-muted-foreground hover:text-foreground"
+        >
+          <RotateCcw size={13} aria-hidden />
         </button>
       ) : null}
       <button

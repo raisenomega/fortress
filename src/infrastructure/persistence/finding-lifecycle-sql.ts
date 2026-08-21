@@ -30,3 +30,27 @@ export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved
  */
 export const MARK_MITIGATED = `UPDATE findings SET lifecycle = 'MITIGATED',
   mitigated_at = @at, mitigated_note = @note WHERE id = @id AND lifecycle = 'ACTIVE'`
+
+/**
+ * El mismo refresco que `TOUCH_FINDING` pero SIN tocar el ciclo de vida: se
+ * actualiza lo que pudo cambiar —severidad, texto, linea, ultimo visto— y se
+ * respeta el MITIGATED que el operador puso.
+ *
+ * Son dos sentencias y no una condicional a proposito: la decision de cual usar
+ * se toma FUERA, con git delante y fuera de la transaccion, y aqui solo queda
+ * elegir. Meter la condicion en el SQL habria escondido en la base una regla que
+ * se lee mejor donde se decide.
+ */
+export const TOUCH_CONSERVANDO = `UPDATE findings SET severity = @severity, title = @title,
+  file = @file, line = @line, fingerprint = @fingerprint, scan_id = @scanId,
+  last_seen = @at WHERE id = @id`
+
+/**
+ * El operador deshace su propia marca: vuelve a ACTIVE y se borra la nota.
+ *
+ * Sin esta salida el estado seria una trampa — un hallazgo marcado por error, o
+ * cuyo arreglo resulto malo, se quedaria fuera de la cola mientras su archivo no
+ * cambiase, que puede ser para siempre.
+ */
+export const MARK_ACTIVE = `UPDATE findings SET lifecycle = 'ACTIVE',
+  mitigated_at = NULL, mitigated_note = NULL WHERE id = @id AND lifecycle = 'MITIGATED'`

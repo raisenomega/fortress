@@ -31,3 +31,9 @@ export async function mitigateFinding(
   await api().scan.mitigate(findingId, note)
   await reloadAfterScan(projectId)
 }
+
+/** Deshacer la marca la devuelve a la cola: hay que releer igual. */
+export async function unmitigateFinding(projectId: string, findingId: string): Promise<void> {
+  await api().scan.unmitigate(findingId)
+  await reloadAfterScan(projectId)
+}

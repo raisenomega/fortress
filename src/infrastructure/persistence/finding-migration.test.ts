@@ -38,7 +38,7 @@ describe('migracion de las filas que ya existen', () => {
     insertLegacy('MEDIUM', SSRF.title, SSRF.file)
     runMigrations(bench.db)
 
-    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z')
+    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z', new Set())
 
     expect(bench.rows()).toBe(1)
     expect(bench.memoryOf(SSRF.title)?.id).toBe('vieja')

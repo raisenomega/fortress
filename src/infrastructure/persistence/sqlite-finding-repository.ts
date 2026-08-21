@@ -35,17 +35,19 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
       return totals as Readonly<Record<string, SeverityCounts>>
     },
 
-    syncFromScan: (projectId, scanId, findings, at) => {
+    syncFromScan: (projectId, scanId, findings, at, conservados) => {
       const dismissed = writes.dismissedFingerprints(projectId)
 
       writes.sync(
         projectId,
-        findings.map((finding) => toInsert(projectId, scanId, finding, dismissed, at))
+        findings.map((finding) => toInsert(projectId, scanId, finding, dismissed, at)),
+        conservados ?? new Set()
       )
     },
 
     markExtinct: (ids, at) => writes.markExtinct(ids, at),
     markMitigated: (id, note, at) => writes.markMitigated(id, note, at),
+    markActive: (id) => writes.markActive(id),
 
     dismiss: (findingId) => writes.changeStatus(findingId, true),
     reopen: (findingId) => writes.changeStatus(findingId, false)
