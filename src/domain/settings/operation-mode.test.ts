@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { effectiveMode, isProtectedArea, parseOperationMode } from './operation-mode'
+import { isProtectedArea, parseOperationMode } from './operation-mode'
+import { effectiveMode } from './modo-efectivo'
+import type { OperationMode } from './operation-mode'
+import type { Project } from '../project/project'
+
+const CONFIABLE = { id: 'p1', trusted: true } as Project
+
+/** Atajo del banco: el objeto entero en cada llamada tapaba lo que se prueba. */
+const modo = (mode: OperationMode, request: string, selfRepo = false): OperationMode =>
+  effectiveMode({ mode, request, selfRepo, project: CONFIABLE })
 
 describe('parseOperationMode', () => {
   it('acepta los modos validos', () => {
@@ -41,18 +50,18 @@ describe('isProtectedArea', () => {
 
 describe('effectiveMode', () => {
   it('degrada a supervisado si la peticion toca un area protegida', () => {
-    expect(effectiveMode('autonomo', 'refactoriza el modulo de auth')).toBe('supervisado')
+    expect(modo('autonomo', 'refactoriza el modulo de auth', false)).toBe('supervisado')
   })
 
   it('degrada tambien con la peticion en espanol', () => {
-    expect(effectiveMode('autonomo', 'refactoriza la autenticación')).toBe('supervisado')
+    expect(modo('autonomo', 'refactoriza la autenticación', false)).toBe('supervisado')
   })
 
   it('mantiene autonomo en trabajo rutinario', () => {
-    expect(effectiveMode('autonomo', 'formatea los archivos')).toBe('autonomo')
+    expect(modo('autonomo', 'formatea los archivos', false)).toBe('autonomo')
   })
 
   it('nunca escala de supervisado a autonomo', () => {
-    expect(effectiveMode('supervisado', 'formatea los archivos')).toBe('supervisado')
+    expect(modo('supervisado', 'formatea los archivos', false)).toBe('supervisado')
   })
 })
