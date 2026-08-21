@@ -19,13 +19,8 @@ import { recordAnalyzed, recordElegido } from './record-plan-events'
  *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
  *  (ADR-059). Y los que fracasaron por una causa que repetir no arregla con el
  *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. */
-function candidates(
-  context: AppContext,
-  projectId: string,
-  scanId: string,
-  headSha: string
-): Candidate[] {
-  const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, scanId))
+function candidates(context: AppContext, projectId: string, headSha: string): Candidate[] {
+  const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, headSha))
   for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
   const previas = context.repairProposals.listByProject(projectId)
   return context.findings
@@ -50,7 +45,7 @@ export async function planRepair(context: AppContext, projectId: string): Promis
   // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.
   const baseSha = context.headSha(project.path)
   if (baseSha === null) return null
-  const selection = selectTarget(candidates(context, projectId, scanId, baseSha))
+  const selection = selectTarget(candidates(context, projectId, baseSha))
   if (!selection) return null
 
   const now = Date.now()

@@ -16,11 +16,12 @@ export interface RepairProposalRepository {
   /** Del mas reciente al mas antiguo (por updated_at). */
   listByProject(projectId: string): readonly Proposal[]
   /**
-   * Hallazgos que NO deben re-proponerse bajo el escaneo vigente: su propuesta
-   * mas reciente quedo CADUCADO con veredicto OBSOLETO y el hallazgo sigue
-   * anclado a ese mismo escaneo. Un escaneo nuevo levanta la exclusion.
+   * Hallazgos que NO deben re-proponerse sobre el arbol actual: su propuesta
+   * mas reciente quedo CADUCADO con veredicto OBSOLETO y se juzgo sobre este
+   * mismo HEAD. Un HEAD nuevo levanta la pausa — el codigo ya no es el que se
+   * miro, asi que el dictamen caduca con el.
    */
-  findObsoleteFindingIds(projectId: string, currentScanId: string): readonly string[]
+  findObsoleteFindingIds(projectId: string, headSha: string): readonly string[]
   /**
    * Hallazgos con una propuesta VIVA: en cualquier estado no terminal, desde
    * ELEGIDO hasta APROBADO. No se re-eligen mientras esa propuesta siga en

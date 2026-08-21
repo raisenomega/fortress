@@ -4,8 +4,8 @@ import { createMemoryDb, seedProject } from './memory-db'
 import { createSqliteRepairProposalRepository } from './sqlite-repair-proposal-repository'
 import type { Db } from './database'
 
-function propuesta(id: string, findingId: string, createdAt: number): Proposal {
-  return { id, projectId: 'p1', findingId, baseSha: 'sha', state: 'ELEGIDO', createdAt, updatedAt: createdAt } // prettier-ignore
+function propuesta(id: string, findingId: string, createdAt: number, baseSha = 'sha'): Proposal {
+  return { id, projectId: 'p1', findingId, baseSha, state: 'ELEGIDO', createdAt, updatedAt: createdAt } // prettier-ignore
 }
 
 /** Un hallazgo real en la base, anclado a un escaneo. */
@@ -28,22 +28,22 @@ describe('createSqliteRepairProposalRepository', () => {
     expect(repo.listByProject('p1').map((p) => p.id)).toEqual(['r1', 'r2'])
   })
 
-  it('findObsoleteFindingIds: solo la propuesta MAS RECIENTE cuenta, y solo bajo su escaneo', () => {
+  it('findObsoleteFindingIds: solo la propuesta MAS RECIENTE cuenta, y solo sobre su HEAD', () => {
     const db = createMemoryDb()
     seedProject(db, 'p1')
     seedFinding(db, 'f1', 'S1')
     const repo = createSqliteRepairProposalRepository(db)
 
-    repo.insert(propuesta('r1', 'f1', 10))
+    repo.insert(propuesta('r1', 'f1', 10, 'head-1'))
     repo.update('r1', { state: 'CADUCADO', analysisVerdict: 'OBSOLETO', analysisReason: 'ya no existe', updatedAt: 11 }) // prettier-ignore
 
-    expect(repo.findObsoleteFindingIds('p1', 'S1')).toEqual(['f1'])
-    // Un escaneo nuevo (S2) levanta la exclusion: el hallazgo sigue en S1.
-    expect(repo.findObsoleteFindingIds('p1', 'S2')).toEqual([])
+    expect(repo.findObsoleteFindingIds('p1', 'head-1')).toEqual(['f1'])
+    // El arbol avanzo: el dictamen se juzgo sobre codigo que ya no es este.
+    expect(repo.findObsoleteFindingIds('p1', 'head-2')).toEqual([])
 
     // Una propuesta POSTERIOR no-obsoleta gana: el hallazgo vuelve a ser elegible.
-    repo.insert(propuesta('r2', 'f1', 20))
+    repo.insert(propuesta('r2', 'f1', 20, 'head-1'))
     repo.update('r2', { state: 'ANALIZADO', analysisVerdict: 'REAL', analysisReason: 'vive', updatedAt: 21 }) // prettier-ignore
-    expect(repo.findObsoleteFindingIds('p1', 'S1')).toEqual([])
+    expect(repo.findObsoleteFindingIds('p1', 'head-1')).toEqual([])
   })
 })
