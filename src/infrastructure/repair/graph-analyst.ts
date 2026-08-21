@@ -2,6 +2,7 @@ import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import { discoverCorpus } from '../project/discover-corpus'
 import type { Analyst } from '@domain/repair/analysis'
+import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
 import { toAnalysis, type RunOut } from './parse-analysis'
 import { EMPTY_USAGE, totalTokens } from '@domain/telemetry/token-usage'
 import { parseUsage } from '../claude-code/parse-usage'
@@ -50,8 +51,12 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string): Anal
       const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath))
       const out = await run(claudeBin, projectPath, prompt)
       const endedAt = Date.now()
+      const analysis = toAnalysis(target, out)
       return {
-        analysis: toAnalysis(target, out),
+        analysis,
+        // El crudo ENTERO solo cuando no se dejo leer: es lo unico con lo que
+        // se puede reproducir el fallo, y el asiento guarda solo una muestra.
+        ...(noSeDejoLeer(analysis) ? { raw: out.result } : {}),
         runMeta: {
           tokensUsed: totalTokens(out.usage) > 0 ? totalTokens(out.usage) : undefined,
           usage: out.usage,

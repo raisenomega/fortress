@@ -1,3 +1,4 @@
+import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
 import { tail } from '@domain/repair/tail'
 import { totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 import type { Analysis } from '@domain/repair/analysis'
@@ -59,7 +60,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
     where: text('where'),
     patternToCopy: text('patternToCopy'),
     doNotTouch: text('doNotTouch'),
-    risk: leido === null ? `analisis ilegible: ${ilegible}` : text('risk'),
+    risk: leido === null ? `${ILEGIBLE}${ilegible}` : text('risk'),
     tokensUsed: totalTokens(out.usage),
     ...(notes.length > 0 ? { notes } : {})
   }
