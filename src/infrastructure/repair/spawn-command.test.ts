@@ -27,12 +27,14 @@ describe('el entorno con el que corre un comando del gate', () => {
     expect(await correr()).toContain('CI=[true]')
   })
 
-  it('el resto del entorno del operador sigue intacto', async () => {
+  it('el resto del entorno del operador NO llega al repo auditado', async () => {
+    // Antes se heredaba entero, y con el viajaban las llaves de la sesion viva
+    // del operador a un `preinstall` ajeno. Ahora solo pasa la lista blanca.
     process.env.FCC_MARCA = 'vale'
 
     const salida = await correr()
-    expect(salida).toContain('MARCA=[vale]')
-    // Sin PATH heredado, `npm` ni siquiera se encontraria.
+    expect(salida).toContain('MARCA=[]')
+    // Pero el PATH si viaja: sin el, `npm` ni siquiera se encontraria.
     expect(salida).not.toContain('PATH=[]')
   })
 
