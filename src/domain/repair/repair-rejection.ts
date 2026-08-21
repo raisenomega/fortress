@@ -16,7 +16,9 @@ export const REJECTION_REASONS = [
   'omega_vetado',
   'omega_timeout',
   'omega_error',
-  'omega_response_invalid'
+  'omega_response_invalid',
+  /** El proyecto no es de confianza: el gate no ejecuta su codigo. */
+  'proyecto_sin_confianza'
 ] as const
 
 export type RejectionReason = (typeof REJECTION_REASONS)[number]
