@@ -1,22 +1,4 @@
-/**
- * Archivos que implementan la politica de autonomia del propio proyecto.
- *
- * Principio 21: un sistema no aplica por su cuenta un cambio a las reglas que
- * gobiernan lo que puede aplicar por su cuenta. El motor SI puede proponer
- * cambios sobre estos archivos —son codigo como cualquier otro y pueden tener
- * defectos—; lo que no puede es integrarlos sin que un humano los mire.
- *
- * Esta lista NO es configurable. Un proyecto puede anadir entradas a su
- * blacklist, nunca quitar estas: si la proteccion fuese declarativa seria
- * eliminable por declaracion, y bastaria una propuesta que la borrase para
- * abrir todo lo demas.
- *
- * El criterio para entrar: si cambiar ese archivo DEBILITA una defensa, entra.
- * La lista se quedo corta dos veces por el mismo motivo — la proteccion seguia
- * al NOMBRE del archivo y no a la responsabilidad, asi que al partir un modulo
- * la mitad que decidia se quedaba fuera. Al mover codigo que gobierna autonomia,
- * mirar aqui antes de cerrar la pieza.
- */
+/** Ver `criterio-innegociable.ts`: que entra en esta lista, y por que. */
 export const AUTONOMY_RULES_FILES: readonly string[] = [
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
@@ -32,6 +14,15 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/infrastructure/system/self-project.ts',
   // El perimetro del generador: hasta donde llega un fix.
   'src/domain/repair/scope-check.ts',
+  // Lo que ENTRA al sistema y no es fuente de confianza. `project-path` decide
+  // que ruta puede ser raiz de proyecto y `target-path` es la otra mitad de esa
+  // misma guarda —la que rechaza el ".."—: proteger una sola repetiria el error
+  // que hizo falta esta lista. `graph-mcp` decide que herramientas recibe el
+  // agente, y `private-host` es el filtro anti-SSRF, con dos HIGH a su espalda.
+  'src/domain/project/project-path.ts',
+  'src/domain/newproject/target-path.ts',
+  'src/domain/connectors/graph-mcp.ts',
+  'src/domain/posture/private-host.ts',
   // Quien deja pasar una integracion. `auto-merge-policy` declara la politica;
   // `evaluation` es quien la COMPRUEBA y `config` quien la lee y fusiona esta
   // misma lista: proteger solo el primero dejaba fuera a los dos que deciden.

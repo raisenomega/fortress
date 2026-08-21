@@ -11,6 +11,10 @@ const fix = (file: string): Parameters<typeof evaluate>[0] => ({
 
 /** Las defensas que las piezas de la raiz A y del entorno del gate crearon. */
 const NUEVAS: readonly string[] = [
+  'src/domain/project/project-path.ts',
+  'src/domain/newproject/target-path.ts',
+  'src/domain/connectors/graph-mcp.ts',
+  'src/domain/posture/private-host.ts',
   'src/domain/repair/confianza.ts',
   'src/domain/settings/modo-efectivo.ts',
   'src/application/repair/gate-guards.ts',
@@ -45,5 +49,23 @@ describe('la lista innegociable cubre las defensas nuevas', () => {
 
   it('no-regresion: el cerco normal sigue dejando pasar un fichero corriente', () => {
     expect(evaluate(fix('src/domain/project/finding-identity.ts'), ACTIVA).allowed).toBe(true)
+  })
+
+  it('las dos mitades de una misma guarda entran juntas o no entra ninguna', () => {
+    // `project-path` decide que ruta vale y `target-path` es quien rechaza el
+    // "..": proteger una sola dejaria la defensa abierta por el otro lado, que
+    // es como este hueco aparecio las tres veces.
+    expect(evaluate(fix('src/domain/project/project-path.ts'), ACTIVA).allowed).toBe(false)
+    expect(evaluate(fix('src/domain/newproject/target-path.ts'), ACTIVA).allowed).toBe(false)
+  })
+})
+
+describe('el candidato de la primera auto-reparacion sigue siendo integrable', () => {
+  it('run-accumulator NO quedo bloqueado por ampliar la lista', () => {
+    // Ampliar las defensas no puede cerrar de paso lo que si debe poder
+    // integrarse solo: si esto se pusiera en rojo, la primera auto-reparacion
+    // se habria bloqueado sin que nadie lo decidiera.
+    const r = evaluate(fix('src/infrastructure/claude-code/run-accumulator.ts'), ACTIVA)
+    expect(r.allowed).toBe(true)
   })
 })
