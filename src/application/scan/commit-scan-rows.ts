@@ -15,6 +15,8 @@ export interface ScanCommit {
   readonly scannedAt: string
   /** Ids de los hallazgos que ya reunieron la evidencia para extinguirse. */
   readonly extinct: readonly string[]
+  /** Ids que conservan su marca de mitigado en vez de volver a ACTIVE. */
+  readonly conservados: ReadonlySet<string>
 }
 
 /**
@@ -30,7 +32,7 @@ export function commitScanRows(
   commit: ScanCommit
 ): void {
   const { findings, durationMs, usage, tools, edits } = outcome
-  const { score, counts, scannedAt, extinct } = commit
+  const { score, counts, scannedAt, extinct, conservados } = commit
 
   context.transaction(() => {
     const scan = context.scans.record({
@@ -42,7 +44,7 @@ export function commitScanRows(
       durationMs,
       at: scannedAt
     })
-    context.findings.syncFromScan(project.id, scan.id, findings, scannedAt)
+    context.findings.syncFromScan(project.id, scan.id, findings, scannedAt, conservados)
     context.findings.markExtinct(extinct, scannedAt)
     context.projects.updateScan(project.id, score, scannedAt)
     context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs, failed: false, usage, tools }) // prettier-ignore

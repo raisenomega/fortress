@@ -36,3 +36,10 @@ export function markMitigatedFinding(
     ? ok(null)
     : err('Ese hallazgo ya no estaba vivo: puede que un escaneo posterior lo cerrara')
 }
+
+/** Deshace la marca de mitigado: el hallazgo vuelve a la cola del motor. */
+export function markActiveFinding(context: AppContext, findingId: string): Result<null> {
+  return context.findings.markActive(findingId)
+    ? ok(null)
+    : err('Ese hallazgo no estaba marcado como arreglado')
+}

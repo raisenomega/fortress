@@ -16,6 +16,7 @@ export interface MemoryRow {
   readonly first_seen: string
   readonly last_seen: string
   readonly resolved_at: string | null
+  readonly mitigated_at: string | null
 }
 
 /**
@@ -35,6 +36,7 @@ export function toMemory(row: MemoryRow): FindingMemory {
     lifecycle: isFindingLifecycle(row.lifecycle) ? row.lifecycle : 'ACTIVE',
     firstSeen: row.first_seen,
     lastSeen: row.last_seen,
-    resolvedAt: row.resolved_at
+    resolvedAt: row.resolved_at,
+    mitigatedAt: row.mitigated_at ?? null
   }
 }

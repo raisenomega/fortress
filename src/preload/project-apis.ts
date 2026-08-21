@@ -29,7 +29,8 @@ export const projectApis: Pick<
     historySince: (iso) => ipcRenderer.invoke(IPC.scanHistorySince, iso),
     dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
     reopen: (findingId) => ipcRenderer.invoke(IPC.scanReopen, findingId),
-    mitigate: (findingId, note) => ipcRenderer.invoke(IPC.scanMitigate, findingId, note)
+    mitigate: (findingId, note) => ipcRenderer.invoke(IPC.scanMitigate, findingId, note),
+    unmitigate: (findingId) => ipcRenderer.invoke(IPC.scanUnmitigate, findingId)
   },
   quality: { run: (projectId) => ipcRenderer.invoke(IPC.qualityRun, projectId) },
   push: { run: (projectId) => ipcRenderer.invoke(IPC.pushRun, projectId) },

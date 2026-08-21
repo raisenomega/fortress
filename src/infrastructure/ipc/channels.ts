@@ -31,6 +31,7 @@ export const IPC = {
   scanHistorySince: 'scan:history-since',
   scanDismiss: 'scan:dismiss',
   scanMitigate: 'scan:mitigate',
+  scanUnmitigate: 'scan:unmitigate',
   scanReopen: 'scan:reopen',
   scanProgress: 'scan:progress',
   qualityRun: 'quality:run',

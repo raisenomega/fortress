@@ -8,6 +8,7 @@ interface FindingRowProps {
   readonly onDismiss: (id: string) => void
   readonly onReopen: (id: string) => void
   readonly onMitigate: (id: string, nota: string) => void
+  readonly onUnmitigate: (id: string) => void
 }
 
 /** Sin archivo ni linea un hallazgo no es accionable, pero se muestra igual. */
@@ -20,7 +21,8 @@ export function FindingRow({
   finding,
   onDismiss,
   onReopen,
-  onMitigate
+  onMitigate,
+  onUnmitigate
 }: FindingRowProps): React.JSX.Element {
   // Descartado se atenua pero NO se esconde: sigue estando ahi, y el operador
   // tiene que poder ver que decidio ignorarlo y por que ya no bloquea.
@@ -52,6 +54,7 @@ export function FindingRow({
           onDismiss={() => onDismiss(finding.id)}
           onReopen={() => onReopen(finding.id)}
           onMitigate={marcar}
+          onUnmitigate={() => onUnmitigate(finding.id)}
         />
       </td>
     </tr>

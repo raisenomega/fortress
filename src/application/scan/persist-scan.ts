@@ -5,7 +5,8 @@ import { scoreFromFindings } from '@domain/scan/score-from-findings'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { commitScanRows } from './commit-scan-rows'
-import { asDetected, decideExtinctions } from './extinguish'
+import { asDetected } from './extinguish'
+import { pesarEvidencia } from './pesar-evidencia'
 import type { ScanSummary } from './scan-types'
 
 /**
@@ -23,13 +24,7 @@ export async function persistScan(
 ): Promise<ScanSummary> {
   const { findings, durationMs } = outcome
   const scannedAt = nowIso()
-
-  const { extinct, stillAlive } = await decideExtinctions(
-    context.fileHistory,
-    project.path,
-    context.findings.listMemory(project.id),
-    findings
-  )
+  const { extinct, stillAlive, conservados } = await pesarEvidencia(context, project, findings)
 
   // El score puntua el EXPEDIENTE, no la corrida: lo reportado hoy MAS los
   // ACTIVE que este escaneo no nombro y nadie arreglo. Puntuar solo la corrida
@@ -45,7 +40,8 @@ export async function persistScan(
     dossierCount: expediente.length,
     counts,
     scannedAt,
-    extinct: extinct.map((f) => f.id)
+    extinct: extinct.map((f) => f.id),
+    conservados
   })
 
   // Cognition registra lo aprendido en la memoria del proyecto. Fuera de la

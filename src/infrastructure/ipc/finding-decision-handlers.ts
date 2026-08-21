@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron'
-import { dismissFinding, markMitigatedFinding, reopenFinding } from '@application/scan/dismiss-finding' // prettier-ignore
+// prettier-ignore
+import { dismissFinding, markActiveFinding, markMitigatedFinding, reopenFinding } from '@application/scan/dismiss-finding'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -20,5 +21,9 @@ export function registerFindingDecisionHandlers(): void {
 
   ipcMain.handle(IPC.scanMitigate, (_event, findingId: string, note: string) =>
     markMitigatedFinding(getAppContext(), String(findingId), String(note))
+  )
+
+  ipcMain.handle(IPC.scanUnmitigate, (_event, findingId: string) =>
+    markActiveFinding(getAppContext(), String(findingId))
   )
 }

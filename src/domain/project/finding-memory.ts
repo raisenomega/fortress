@@ -25,4 +25,7 @@ export interface FindingMemory {
    *  proyecto, estuvo AUSENTE en esa corrida — que no es lo mismo que resuelto. */
   readonly lastSeen: string
   readonly resolvedAt: string | null
+  /** Cuando el operador declaro que ya estaba arreglado, o null. Es la fecha
+   *  desde la que se mira si su archivo volvio a cambiar. */
+  readonly mitigatedAt: string | null
 }

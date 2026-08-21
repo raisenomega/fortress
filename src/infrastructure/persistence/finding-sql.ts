@@ -30,7 +30,7 @@ export const COUNTS_BY_PROJECT = `SELECT project_id, severity, COUNT(*) AS total
 
 /** El expediente completo: TODO lo que la base recuerda, extintos incluidos. */
 export const SELECT_MEMORY = `SELECT id, identity, severity, title, file, line, status,
-  lifecycle, first_seen, last_seen, resolved_at FROM findings
+  lifecycle, first_seen, last_seen, resolved_at, mitigated_at FROM findings
   WHERE project_id = ? ORDER BY ${BY_URGENCY}`
 
 /** La fila que ya representa a este hallazgo, si la hay. Clave estable. */
@@ -56,7 +56,7 @@ export const SELECT_FINDING = `SELECT project_id, fingerprint FROM findings WHER
 
 export const SET_STATUS = 'UPDATE findings SET status = ? WHERE id = ?'
 
-export { MARK_EXTINCT, MARK_MITIGATED } from './finding-lifecycle-sql'
+export { MARK_ACTIVE, MARK_EXTINCT, MARK_MITIGATED, TOUCH_CONSERVANDO } from './finding-lifecycle-sql' // prettier-ignore
 
 export const INSERT_DISMISSAL = `INSERT OR REPLACE INTO dismissals
   (project_id, fingerprint, at) VALUES (?, ?, ?)`

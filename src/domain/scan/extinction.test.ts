@@ -13,7 +13,8 @@ const memory = (title: string, file: string): FindingMemory => ({
   lifecycle: 'ACTIVE',
   firstSeen: '2026-08-08T00:00:00Z',
   lastSeen: '2026-08-08T19:32:00Z',
-  resolvedAt: null
+  resolvedAt: null,
+  mitigatedAt: null
 })
 
 /** Los CUATRO que el escaneo de las 21:54 extinguio sin que nadie los tocara. */

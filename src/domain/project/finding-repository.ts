@@ -33,7 +33,12 @@ export interface FindingRepository {
     projectId: string,
     scanId: string,
     findings: readonly DetectedFinding[],
-    at: string
+    at: string,
+    /** Los que conservan su marca de mitigado en vez de volver a ACTIVE.
+     *  Omitirlo es el comportamiento de siempre: todo lo re-visto vuelve a
+     *  ACTIVE. El unico que lo calcula es el escaneo, que es quien pregunta a
+     *  git; a nadie mas le consta que haya nada que conservar. */
+    conservados?: ReadonlySet<string>
   ): void
 
   /**
@@ -50,6 +55,10 @@ export interface FindingRepository {
    * pedirle trabajo al motor. false si ya no estaba ACTIVE.
    */
   markMitigated(findingId: string, note: string, at: string): boolean
+
+  /** El operador deshace su marca: el hallazgo vuelve a la cola. false si no
+   *  estaba mitigado. */
+  markActive(findingId: string): boolean
 
   /** Marca un hallazgo como falso positivo y recuerda la decision. */
   dismiss(findingId: string): boolean

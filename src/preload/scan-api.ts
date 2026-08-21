@@ -26,6 +26,8 @@ export interface ScanApi {
   reopen(findingId: string): Promise<Result<null>>
   /** El operador declara que ya lo arreglo, con una nota (normalmente el sha). */
   mitigate(findingId: string, note: string): Promise<Result<null>>
+  /** Deshace la marca de arreglado: vuelve a la cola. */
+  unmitigate(findingId: string): Promise<Result<null>>
 }
 
 export interface ActivityApi {

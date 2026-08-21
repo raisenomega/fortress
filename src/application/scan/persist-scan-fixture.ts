@@ -12,8 +12,8 @@ export function memoria(): FindingMemory[] {
   const base = { line: 1, status: 'open' as const, lifecycle: 'ACTIVE' as const }
   const fechas = { firstSeen: '2026-08-08T10:00:00Z', lastSeen: '2026-08-08T10:00:00Z' }
   return [
-    { ...base, ...fechas, id: 'f1', identity: 'HIGH|vivo.ts|sigue vivo', severity: 'HIGH', title: 'sigue vivo', file: 'vivo.ts', resolvedAt: null }, // prettier-ignore
-    { ...base, ...fechas, id: 'f2', identity: 'HIGH|tocado.ts|arreglado', severity: 'HIGH', title: 'arreglado', file: 'tocado.ts', resolvedAt: null } // prettier-ignore
+    { ...base, ...fechas, id: 'f1', identity: 'HIGH|vivo.ts|sigue vivo', severity: 'HIGH', title: 'sigue vivo', file: 'vivo.ts', resolvedAt: null, mitigatedAt: null }, // prettier-ignore
+    { ...base, ...fechas, id: 'f2', identity: 'HIGH|tocado.ts|arreglado', severity: 'HIGH', title: 'arreglado', file: 'tocado.ts', resolvedAt: null, mitigatedAt: null } // prettier-ignore
   ]
 }
 
