@@ -28,9 +28,14 @@ describe('createGraphOmega (binario fake)', () => {
     expect(result.runMeta.tokensUsed).toBe(100)
   })
 
-  it('respuesta sin bloque VERDICT: omega_response_invalid', async () => {
+  it('respuesta sin bloque VERDICT: la constante clasifica y la autopsia viaja', async () => {
     const result = await createGraphOmega(fakeBin('echo "se ve bien"')).run(tmpdir(), 'p')
+    // Extremo a extremo por el sobre real del CLI: el diagnostico del parser y
+    // el crudo sobreviven al camino, no solo dentro de toOmegaOutcome.
     expect(result).toMatchObject({ ok: false, error: 'omega_response_invalid' })
+    if (result.ok) return
+    expect(result.detail).toBe('sin bloque VERDICT en la respuesta')
+    expect(result.raw).toContain('se ve bien')
   })
 
   it('timeout: lo mata y reporta timedOut', async () => {
