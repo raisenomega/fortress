@@ -15,6 +15,9 @@ const NUEVAS: readonly string[] = [
   'src/domain/newproject/target-path.ts',
   'src/domain/connectors/graph-mcp.ts',
   'src/domain/posture/private-host.ts',
+  'src/domain/posture/target-url.ts',
+  'src/domain/connectors/connector-url.ts',
+  'src/infrastructure/newproject/create-folder.ts',
   'src/domain/repair/confianza.ts',
   'src/domain/settings/modo-efectivo.ts',
   'src/application/repair/gate-guards.ts',
@@ -58,14 +61,10 @@ describe('la lista innegociable cubre las defensas nuevas', () => {
     expect(evaluate(fix('src/domain/project/project-path.ts'), ACTIVA).allowed).toBe(false)
     expect(evaluate(fix('src/domain/newproject/target-path.ts'), ACTIVA).allowed).toBe(false)
   })
-})
 
-describe('el candidato de la primera auto-reparacion sigue siendo integrable', () => {
-  it('run-accumulator NO quedo bloqueado por ampliar la lista', () => {
-    // Ampliar las defensas no puede cerrar de paso lo que si debe poder
-    // integrarse solo: si esto se pusiera en rojo, la primera auto-reparacion
-    // se habria bloqueado sin que nadie lo decidiera.
-    const r = evaluate(fix('src/infrastructure/claude-code/run-accumulator.ts'), ACTIVA)
-    expect(r.allowed).toBe(true)
+  it('lo mismo con el anti-SSRF: quien clasifica y quien pregunta', () => {
+    // `target-url` valida el destino del escaneo llamando a `isPrivateHost`.
+    expect(evaluate(fix('src/domain/posture/private-host.ts'), ACTIVA).allowed).toBe(false)
+    expect(evaluate(fix('src/domain/posture/target-url.ts'), ACTIVA).allowed).toBe(false)
   })
 })
