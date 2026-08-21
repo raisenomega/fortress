@@ -54,9 +54,9 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
   ctx.repairProposals.insert(proposal)
   await recordRetryElegido(ctx, proposal, old.id)
 
-  const { id, severity, title, file, line } = finding
+  const { id, severity, title, file, line, firstSeen } = finding
   const selection: Selection = {
-    target: { id, severity, title, file, line },
+    target: { id, severity, title, file, line, firstSeen },
     reason: `${retryOf} — reintento explicito del operador sobre el mismo hallazgo`
   }
   const result = await analyzeTarget(ctx.analystFor(project.path), selection)

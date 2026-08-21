@@ -1,5 +1,7 @@
 import { isAdditive } from './additive'
+import { DEBUT, isDebutEligible } from './debut'
 import type { Severity } from '../shared/severity'
+import { cargaPorDirectorio, directorio } from './orden-candidatos'
 
 /** Subconjunto puro de un hallazgo, suficiente para ELEGIR cual reparar. */
 export interface Candidate {
@@ -8,31 +10,14 @@ export interface Candidate {
   readonly title: string
   readonly file: string
   readonly line: number | null
+  /** Cuando se vio por primera vez. Es lo que hace que quien espera suba. */
+  readonly firstSeen: string
 }
 
 export interface Selection {
   readonly target: Candidate
   /** Justificacion trazable: que, por que ese, y por que es seguro estrenar. */
   readonly reason: string
-}
-
-/**
- * Severidades que el motor puede tocar en modo ESTRENO.
- *
- * Empezo en solo-LOW. Subio a MEDIUM el 2026-08-08, despues de que el motor
- * completara una ejecucion auditada de punta a punta sobre un LOW
- * (claude-account): eligio por superficie, VERIFICO antes de proponer —
- * atrapando un hallazgo obsoleto— y paso por worktree + gate + OMEGA + firma
- * humana. HIGH y CRITICAL siguen fuera: piden mas confianza acumulada.
- *
- * Ampliar el estreno NO relaja ninguna red: el elegido sigue pasando por las
- * tres zonas y la firma. Solo cambia sobre que puede trabajar el motor.
- */
-const DEBUT: readonly Severity[] = ['LOW', 'MEDIUM']
-
-/** true si el hallazgo cae en el terreno que el motor tiene permitido estrenar. */
-export function isDebutEligible(c: Candidate): boolean {
-  return DEBUT.includes(c.severity)
 }
 
 /** Cuantos controles debe agregar el fix (cada "ni" suma uno). */
@@ -46,14 +31,17 @@ export function surface(c: Candidate): number {
   return (isAdditive(c.title) ? 0 : 10) + concerns(c.title)
 }
 
-/** Orden total DETERMINISTA: menor superficie; empata por archivo, linea, id. */
-function order(a: Candidate, b: Candidate): number {
-  return (
+/** Orden total DETERMINISTA: menor superficie; luego el mas viejo; luego el de
+ *  la carpeta menos cargada; y linea e id para cerrar el orden. */
+function order(carga: ReadonlyMap<string, number>) {
+  const pendientes = (c: Candidate): number => carga.get(directorio(c.file)) ?? 0
+  return (a: Candidate, b: Candidate): number =>
     surface(a) - surface(b) ||
-    a.file.localeCompare(b.file) ||
+    a.firstSeen.localeCompare(b.firstSeen) ||
+    pendientes(a) - pendientes(b) ||
+    directorio(a.file).localeCompare(directorio(b.file)) ||
     (a.line ?? 0) - (b.line ?? 0) ||
     a.id.localeCompare(b.id)
-  )
 }
 
 /**
@@ -64,10 +52,13 @@ function order(a: Candidate, b: Candidate): number {
 export function selectTarget(candidates: readonly Candidate[]): Selection | null {
   const eligible = candidates.filter(isDebutEligible)
   if (eligible.length === 0) return null
-  const target = [...eligible].sort(order)[0]
+  // La carga se cuenta sobre los candidatos PRESENTES, no sobre historial: el
+  // selector sigue siendo una funcion pura de su entrada, y la cuenta cambia
+  // sola conforme el pozo se vacia.
+  const target = [...eligible].sort(order(cargaPorDirectorio(eligible)))[0]
   const reason =
     `${target.title} (${target.file}:${target.line}, ${target.severity}). Elegido: MENOR ` +
-    `superficie (${surface(target)}) entre los elegibles (${DEBUT.join('/')}) — fix ADITIVO de ` +
-    `un control ya establecido en el repo, no reescritura de logica. Contenido y verificable.`
+    `superficie (${surface(target)}) entre los elegibles (${DEBUT.join('/')}), y el mas antiguo ` +
+    `sin atender (${target.firstSeen}), de la carpeta menos cargada. Contenido y verificable.`
   return { target, reason }
 }

@@ -6,7 +6,8 @@ const at = (title: string, file: string): Candidate => ({
   severity: 'MEDIUM',
   title,
   file,
-  line: 1
+  line: 1,
+  firstSeen: '2026-01-01T00:00:00.000Z'
 })
 
 /** Los dos que la heuristica vieja penalizaba con superficie 11. */
