@@ -1,7 +1,8 @@
 import type { StepProgress } from '../workflow/step-progress'
 import type { Assistant } from '@domain/chat/assistant'
 import type { CodeAgent } from '@domain/chat/code-agent'
-import { effectiveMode, SELF_REPO_SUPERVISED } from '@domain/settings/operation-mode'
+import { SELF_REPO_SUPERVISED } from '@domain/settings/operation-mode'
+import { effectiveMode } from '@domain/settings/modo-efectivo'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
@@ -34,7 +35,7 @@ export async function sendMessage(
   // Degrada a supervisado si la peticion toca un area protegida O si el
   // objetivo es el propio repo: el codigo propio no se aplica sin revision.
   const selfRepo = isSelfRepo(project.path)
-  const mode = effectiveMode(input.mode, input.prompt, selfRepo)
+  const mode = effectiveMode({ mode: input.mode, request: input.prompt, selfRepo, project })
   const aviso = selfRepo && input.mode === 'autonomo' ? SELF_REPO_SUPERVISED : ''
 
   const chosen = chooseEngine(codeAgent, assistant, project)
