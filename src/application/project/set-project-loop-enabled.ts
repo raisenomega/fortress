@@ -1,4 +1,4 @@
-import { loopBlocked } from '@domain/loop/loop-gate'
+import { esHastaGate, loopBlocked } from '@domain/loop/loop-gate'
 import { loopConfigured } from '@domain/settings/loop-budget'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
@@ -21,10 +21,12 @@ export function setProjectLoopEnabled(
   if (!project) return err('Ese proyecto ya no existe')
 
   if (enabled) {
+    const selfRepo = isSelfRepo(project.path)
     const blocked = loopBlocked({
       trusted: project.trusted,
-      selfRepo: isSelfRepo(project.path),
-      configured: loopConfigured(readLoopBudget(context))
+      selfRepo,
+      configured: loopConfigured(readLoopBudget(context)),
+      hastaGate: esHastaGate(selfRepo)
     })
     if (blocked !== null) return err(blocked)
   }

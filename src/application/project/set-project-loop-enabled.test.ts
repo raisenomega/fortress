@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { LOOP_SELF_REPO_BLOCK } from '@domain/loop/loop-gate'
 import type { AppContext } from '../context'
 import { setProjectLoopEnabled } from './set-project-loop-enabled'
 
@@ -31,11 +30,24 @@ describe('setProjectLoopEnabled', () => {
     expect(state.flag).toBe(true)
   })
 
-  it('el repo propio se RECHAZA y el flag no se toca', () => {
+  it('el repo propio ya se puede encender: correra hasta el gate, sin integrar', () => {
+    // El rechazo incondicional protegia de un loop que editaba el arbol vivo.
+    // Ese loop ya no existe. Ahora la garantia es el MODO —que `esHastaGate`
+    // fuerza en el repo propio y nadie elige— y no la prohibicion de encender.
     const { context, state } = fixture()
-    const result = setProjectLoopEnabled(context, 'p1', true, propio)
-    expect(result.ok ? null : result.error).toBe(LOOP_SELF_REPO_BLOCK)
-    expect(state.flag).toBeNull()
+    expect(setProjectLoopEnabled(context, 'p1', true, propio).ok).toBe(true)
+    expect(state.flag).toBe(true)
+  })
+
+  it('y al repo propio se le exige lo mismo que a cualquiera', () => {
+    // Que el modo lo proteja de integrar no lo exime de la confianza ni de los
+    // topes: son frenos distintos y ninguno cubre al otro.
+    const sinConfianza = fixture({ trusted: false })
+    expect(setProjectLoopEnabled(sinConfianza.context, 'p1', true, propio).ok).toBe(false)
+    expect(sinConfianza.state.flag).toBeNull()
+
+    const sinTopes = fixture({ caps: false })
+    expect(setProjectLoopEnabled(sinTopes.context, 'p1', true, propio).ok).toBe(false)
   })
 
   it('sin confianza se rechaza en el main, no en la UI', () => {
