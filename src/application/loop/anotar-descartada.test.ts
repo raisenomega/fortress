@@ -6,6 +6,7 @@ import { freshProgress } from './loop-progress'
 const descartada: ChainOutcome = { kind: 'descartada', proposalId: 'p', motivo: 'gate_failed' }
 const integrada: ChainOutcome = { kind: 'integrada', proposalId: 'p' }
 const esperaFirma: ChainOutcome = { kind: 'espera-firma', proposalId: 'p', condition: null }
+const esperaOmega: ChainOutcome = { kind: 'espera-omega', proposalId: 'p' }
 
 /** Cuenta la racha tras la secuencia de vueltas dada. */
 function racha(...vueltas: readonly ChainOutcome[]): number {
@@ -26,6 +27,14 @@ describe('la racha de no-avance', () => {
   it('una propuesta esperando firma tambien la borra', () => {
     // No se integro, pero existe y es del operador: el motor hizo su trabajo.
     expect(racha(descartada, descartada, esperaFirma)).toBe(0)
+  })
+
+  it('una parada en el gate tambien la borra: en modo hasta-gate son TODAS', () => {
+    // De este test depende que el loop no se mate trabajando bien: si
+    // `espera-omega` no borrase la racha, tres vueltas buenas seguidas lo
+    // pararian con `sin-avance`, que es justo lo contrario de lo que paso.
+    expect(racha(descartada, descartada, esperaOmega)).toBe(0)
+    expect(racha(esperaOmega, esperaOmega, esperaOmega)).toBe(0)
   })
 
   it('una vuelta sin candidato no la toca: no hubo fix que muriera', () => {

@@ -31,11 +31,19 @@ const cortar = (proposalId: string, motivo: string): Result<ChainOutcome> =>
  * resultado: quien envuelve esto reintenta sin descanso ante un error y se muere
  * ante el que no reconoce, asi que un veredicto viajando como error mataria el
  * ciclo por hacer exactamente lo que se le pide.
+ *
+ * `stopAtGate` parte la vuelta en dos mitades que no son iguales de peligrosas:
+ * TRABAJAR —elegir, entender, generar, compilar— ocurre entero dentro de un
+ * worktree y no toca el arbol vivo; INTEGRAR si lo toca. Con la bandera puesta
+ * el motor hace la primera mitad y se detiene con el fix guardado y el gate en
+ * verde, a la espera de que un humano autorice el juicio. Sin ella, la conducta
+ * es la de siempre.
  */
 export async function runMotorChain(
   ctx: AppContext,
   projectId: string,
-  deps: MotorChainDeps
+  deps: MotorChainDeps,
+  stopAtGate = false
 ): Promise<Result<ChainOutcome>> {
   const proposal = await planRepair(ctx, projectId)
   if (proposal === null) return ok({ kind: 'sin-candidato' })
@@ -46,6 +54,10 @@ export async function runMotorChain(
 
   const gate = await runGate(ctx, proposal.id, deps.gate)
   if (!gate.ok) return cortar(proposal.id, gate.reason)
+  // Hasta aqui nada salio del worktree. OMEGA no se ha llamado: la propuesta
+  // queda en GATE, que no es terminal, asi que cuenta como viva y su hallazgo
+  // no vuelve a salir elegido. Las siguientes vueltas atacan otros y se apilan.
+  if (stopAtGate) return ok({ kind: 'espera-omega', proposalId: proposal.id })
 
   const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge)
   if (!juicio.omega.ok) return cortar(proposal.id, juicio.omega.reason)

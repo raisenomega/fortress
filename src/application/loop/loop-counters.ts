@@ -30,18 +30,24 @@ export function anotarSinCandidato(p: Progress, outcome: ChainOutcome): void {
   else p.consecutiveNoCandidates = 0
 }
 
+/** Los tres finales que son AVANCE: hay un fix vivo que el operador tiene. */
+const AVANCE: readonly ChainOutcome['kind'][] = ['integrada', 'espera-firma', 'espera-omega']
+
 /**
  * Mueve la racha de no-avance. Suma con cada fix descartado y la borra
  * cualquier avance real: una integracion, o una propuesta viva esperando firma
  * —que no se integrara sola, pero existe y es del operador—. Las vueltas sin
  * candidato y las de hallazgo obsoleto no la tocan: no hubo fix que muriera,
  * pero tampoco nada que celebrar, y esas ya las cuenta su propio freno.
+ *
+ * `espera-omega` cuenta como avance, y es la que mas importa acertar: en modo
+ * hasta-gate TODAS las vueltas buenas acaban ahi. Si no borrase la racha, el
+ * loop se mataria con `sin-avance` justo mientras trabaja bien, y el freno
+ * pareceria un fallo del motor en vez de un contador mal cableado.
  */
 export function anotarDescartada(p: Progress, outcome: ChainOutcome): void {
   if (outcome.kind === 'descartada') p.consecutiveDiscarded += 1
-  else if (outcome.kind === 'integrada' || outcome.kind === 'espera-firma') {
-    p.consecutiveDiscarded = 0
-  }
+  else if (AVANCE.includes(outcome.kind)) p.consecutiveDiscarded = 0
 }
 
 /**
@@ -49,6 +55,11 @@ export function anotarDescartada(p: Progress, outcome: ChainOutcome): void {
  * arbol es identico, y escanearlo otra vez seria pagar por leer lo mismo. Un
  * tope de cero pide escanear siempre, que es como se comportaba antes de que
  * hubiera cadencia.
+ *
+ * `espera-omega` NO cuenta, y es una decision, no un olvido: un fix parado en
+ * su worktree no ha cambiado este arbol, asi que medirlo daria el mismo score.
+ * En modo hasta-gate eso significa que no se re-escanea en toda la sesion —
+ * correcto, porque no hay nada nuevo que medir hasta que se firme algo.
  */
 export function tocaEscanear(p: Progress, outcome: ChainOutcome, cada: number): boolean {
   if (outcome.kind === 'integrada') p.integrationsSinceScan += 1

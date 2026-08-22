@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { esAveria, esDenegacion } from './motor-chain-outcome'
+import { describir, esAveria, esDenegacion } from './motor-chain-outcome'
 
 describe('esDenegacion: apagar la integracion no es que te la denieguen', () => {
   it('las cuatro condiciones con la politica activa cuentan', () => {
@@ -34,5 +34,18 @@ describe('esAveria: solo lo que se arregla esperando', () => {
     expect(esAveria('omega_vetado')).toBe(false)
     expect(esAveria('gate_failed')).toBe(false)
     expect(esAveria('scope_violation')).toBe(false)
+  })
+})
+
+describe('describir: una parada en el gate no se anuncia como integrada', () => {
+  it('el kind nuevo tiene su propia frase, sin caer en la de integrada', () => {
+    // El `return` final del describir se tragaba cualquier kind no cubierto.
+    // Contar como integrada algo que solo llego al gate seria la peor linea
+    // posible en el chat: el operador creeria que su repo ya cambio.
+    const texto = describir({ kind: 'espera-omega', proposalId: 'prop-1234abcd' })
+
+    expect(texto).toContain('gate verde')
+    expect(texto).not.toContain('integrada')
+    expect(texto).toContain('prop-123')
   })
 })
