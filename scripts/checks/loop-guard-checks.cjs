@@ -1,21 +1,24 @@
 /**
- * D0.b — el loop autonomo JAMAS corre sobre el propio repo de FORTRESS, y su
- * gate vive en el MAIN. Se intenta encender por el stack real (renderer ->
- * preload -> IPC -> caso de uso) y se comprueba que cada red lo para. Ninguna
- * via arranca un loop de verdad: todas deben morir en el gate.
+ * D0.b — el gate del loop vive en el MAIN. Se intenta encender por el stack
+ * real (renderer -> preload -> IPC -> caso de uso) y se comprueba que cada red
+ * lo para. Ninguna via arranca un loop de verdad.
+ *
+ * Sobre el repo propio la garantia cambio de sitio: no es que no se pueda
+ * encender, es que corre en modo HASTA-GATE y acumula propuestas que esperan
+ * firma. Lo que ninguna via debe conseguir es que se integre solo.
  */
 const { app } = require('electron')
 const { join } = require('path')
 const Database = require('better-sqlite3')
 const { addProject, createRecorder } = require('../lib/renderer-checks.cjs')
 
+const FLAG = 'SELECT loop_enabled FROM projects WHERE id = ?'
+
 function withDb(work) {
   const db = new Database(join(app.getPath('userData'), 'fortress.db'))
   try {
     return work(db)
-  } finally {
-    db.close()
-  }
+  } finally { db.close() } // prettier-ignore
 }
 
 module.exports = async function loopGuardChecks(window) {
@@ -35,7 +38,7 @@ module.exports = async function loopGuardChecks(window) {
   const sinConfianza = await run(`window.api.projects.setLoopEnabled('${crudo.value.id}', true)`)
   check('sin confianza el main RECHAZA', !sinConfianza.ok && /confianza/.test(sinConfianza.error))
 
-  // El PROPIO repo, con confianza Y topes en regla: la pared incondicional.
+  // El PROPIO repo: se enciende, y lo que lo protege es el modo.
   const self = await run('window.api.projects.self()')
   check('la app reconoce su propio repo', self !== null && typeof self.path === 'string')
   const propio = await run(
@@ -44,12 +47,15 @@ module.exports = async function loopGuardChecks(window) {
   )
   await run(`window.api.projects.setTrusted('${propio.value.id}', true)`)
   const encendido = await run(`window.api.projects.setLoopEnabled('${propio.value.id}', true)`)
-  check('el repo PROPIO se RECHAZA aunque todo este en regla', !encendido.ok && /propio repo/.test(encendido.error)) // prettier-ignore
+  check('el repo PROPIO se enciende: correra hasta el gate', encendido.ok)
 
-  const fila = withDb((db) =>
-    db.prepare('SELECT loop_enabled FROM projects WHERE id = ?').get(propio.value.id)
-  )
-  check('el flag del repo propio NO quedo encendido', fila.loop_enabled === 0)
+  const flagPropio = withDb((db) => db.prepare(FLAG).get(propio.value.id)) // prettier-ignore
+  check('el flag del repo propio quedo encendido', flagPropio.loop_enabled === 1)
+
+  // Sigue respondiendo a los frenos que el modo no cubre.
+  await run(`window.api.projects.setTrusted('${propio.value.id}', false)`)
+  const sinConfianzaPropio = await run(`window.api.projects.setLoopEnabled('${propio.value.id}', true)`) // prettier-ignore
+  check('el repo propio sin confianza sigue RECHAZADO', !sinConfianzaPropio.ok && /confianza/.test(sinConfianzaPropio.error)) // prettier-ignore
 
   // Revocar la confianza APAGA el loop: se fuerza el flag en la base (como si
   // un loop hubiera quedado habilitado de antes) y se revoca por el canal real.
@@ -57,9 +63,7 @@ module.exports = async function loopGuardChecks(window) {
     db.prepare('UPDATE projects SET loop_enabled = 1 WHERE id = ?').run(ajeno.value.id)
   )
   await run(`window.api.projects.setTrusted('${ajeno.value.id}', false)`)
-  const trasRevocar = withDb((db) =>
-    db.prepare('SELECT loop_enabled FROM projects WHERE id = ?').get(ajeno.value.id)
-  )
+  const trasRevocar = withDb((db) => db.prepare(FLAG).get(ajeno.value.id)) // prettier-ignore
   check('revocar la confianza apaga el flag del loop', trasRevocar.loop_enabled === 0)
 
   // Detener es total e idempotente: responde el conteo aunque no corra nada.

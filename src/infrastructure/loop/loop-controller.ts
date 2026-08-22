@@ -1,6 +1,6 @@
 import type { AppContext } from '@application/context'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
-import { loopBlocked } from '@domain/loop/loop-gate'
+import { esHastaGate, loopBlocked } from '@domain/loop/loop-gate'
 import { loopConfigured } from '@domain/settings/loop-budget'
 import { getAppContext } from '../persistence/app-context'
 import { cancelRun } from '../run-control'
@@ -22,10 +22,12 @@ function refreshKeepAwake(): void {
 function blocked(context: AppContext, projectId: string): string | null {
   const project = context.projects.findById(projectId)
   if (!project) return 'Ese proyecto ya no existe'
+  const selfRepo = isFortressRepo(project.path)
   return loopBlocked({
     trusted: project.trusted,
-    selfRepo: isFortressRepo(project.path),
-    configured: loopConfigured(readLoopBudget(context))
+    selfRepo,
+    configured: loopConfigured(readLoopBudget(context)),
+    hastaGate: esHastaGate(selfRepo)
   })
 }
 

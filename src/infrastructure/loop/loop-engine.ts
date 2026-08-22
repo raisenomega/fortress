@@ -3,7 +3,7 @@ import type { LoopConfig } from '@application/loop/loop-deps'
 import { runLoop } from '@application/loop/run-loop'
 import { spentTodayByProject } from '@application/settings/read-budget'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
-import { loopBlocked } from '@domain/loop/loop-gate'
+import { esHastaGate, loopBlocked, type LoopGateInput } from '@domain/loop/loop-gate'
 import type { Project } from '@domain/project/project'
 import { loopConfigured, type LoopBudget } from '@domain/settings/loop-budget'
 import { isFortressRepo } from '../system/self-project'
@@ -13,15 +13,12 @@ import { resumeState } from './loop-resume'
 import { hechosDeParada, paradaLimpia, paradaPorFallo, type Parada } from './loop-stop-record'
 import { resumeTrack, standbyStatus } from './loop-track'
 
-/** Re-aplica el gate aunque startLoop ya lo hizo: cinturon y tirantes. Un
- *  caller que se salte el controller se topa aqui con la misma pared. */
-function bloqueado(project: Project, budget: LoopBudget): boolean {
-  const gate = {
-    trusted: project.trusted,
-    selfRepo: isFortressRepo(project.path),
-    configured: loopConfigured(budget)
-  }
-  return loopBlocked(gate) !== null
+/** La entrada del gate, de la que sale tambien el modo: una sola lectura del
+ *  proyecto decide si puede correr y como, sin que las dos puedan discrepar. */
+function gateDe(project: Project, budget: LoopBudget): LoopGateInput {
+  const selfRepo = isFortressRepo(project.path)
+  // prettier-ignore
+  return { trusted: project.trusted, selfRepo, configured: loopConfigured(budget), hastaGate: esHastaGate(selfRepo) }
 }
 
 /**
@@ -32,7 +29,10 @@ export async function runEngine(context: AppContext, projectId: string): Promise
   const budget = readLoopBudget(context)
   const project = context.projects.findById(projectId)
   if (!project) return
-  if (bloqueado(project, budget)) return
+  // Re-aplica el gate aunque startLoop ya lo hizo: cinturon y tirantes. Un
+  // caller que se salte el controller se topa aqui con la misma pared.
+  const gate = gateDe(project, budget)
+  if (loopBlocked(gate) !== null) return
 
   const { baseline, initial } = resumeState(context, projectId)
   const config: LoopConfig = { projectId, costCap: budget.costCapUsd, maxCycles: budget.maxCycles }
@@ -52,6 +52,7 @@ export async function runEngine(context: AppContext, projectId: string): Promise
     context,
     config,
     baseline,
+    hastaGate: gate.hastaGate,
     onStandby: () =>
       sendLoopStatus(standbyStatus(config, track, spentTodayByProject(context, new Date(), projectId) - baseline)), // prettier-ignore
     persist: (recentScores, cyclesDone) => {

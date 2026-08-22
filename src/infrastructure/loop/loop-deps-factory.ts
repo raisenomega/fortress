@@ -14,6 +14,9 @@ export interface EngineParams {
   readonly config: LoopConfig
   /** spentToday cuando arranco la sesion: la base del tope de sesion. */
   readonly baseline: number
+  /** Modo hasta-gate: el motor recorre y acumula, pero no integra. Lo decide
+   *  `esHastaGate` en el dominio, no este arranque. */
+  readonly hastaGate: boolean
   readonly onStandby: (error: string) => void
   readonly persist: (recentScores: readonly number[], cyclesDone: number) => void
 }
@@ -45,7 +48,7 @@ export function buildDeps(params: EngineParams): LoopDeps {
     fix: () =>
       withStandby(async () => {
         toChat('\n\n— Motor —\n')
-        const vuelta = await runMotorChain(context, pid, buildMotorChainDeps())
+        const vuelta = await runMotorChain(context, pid, buildMotorChainDeps(), params.hastaGate)
         if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
         return vuelta
       }, hooks),
