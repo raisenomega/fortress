@@ -16,6 +16,15 @@ export type ChainOutcome =
       /** Que freno la integracion, o null si no se llego a mirar la politica. */
       readonly condition: FailedCondition | null
     }
+  /**
+   * Gate verde y OMEGA SIN CORRER: el motor paro por encargo, no por un juicio.
+   *
+   * Es un final distinto de `espera-firma`, y confundirlos seria caro. Alli el
+   * revisor ya aprobo y quien freno fue la politica de integracion; aqui nadie
+   * ha juzgado todavia. El trabajo esta hecho y guardado en su worktree, y lo
+   * que espera es que un humano autorice el juicio.
+   */
+  | { readonly kind: 'espera-omega'; readonly proposalId: string }
   | { readonly kind: 'integrada'; readonly proposalId: string }
 
 /**
@@ -55,5 +64,9 @@ export function describir(outcome: ChainOutcome): string {
   if (outcome.kind === 'obsoleto') return `${corto}: el hallazgo ya no existe en el codigo.`
   if (outcome.kind === 'descartada') return `${corto}: descartada — ${outcome.motivo}.`
   if (outcome.kind === 'espera-firma') return `${corto}: aprobada, esperando firma humana.`
+  // Antes de este caso el `return` final se tragaba cualquier kind nuevo y lo
+  // anunciaba como integrada. Una propuesta parada en el gate contada como
+  // integrada es la peor linea posible en el chat del operador.
+  if (outcome.kind === 'espera-omega') return `${corto}: gate verde, esperando firma para juzgarla.`
   return `${corto}: integrada.`
 }
