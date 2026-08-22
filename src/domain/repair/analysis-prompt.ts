@@ -2,21 +2,40 @@ import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import type { Candidate } from './select-target'
 
-const KEYS = '"status", "whatToChange", "where", "patternToCopy", "doNotTouch", "risk"'
+const NOTA = '{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note":"que paso"}'
 
 /**
- * La clave opcional va DENTRO del mismo objeto, no en un bloque aparte: la
- * respuesta sigue siendo un solo JSON, que es lo que el prompt exige y lo que
- * el parser sabe leer.
+ * El contrato de formato, DICHO AL MODELO y no solo sabido por el codigo.
+ *
+ * Esta regla vivia unicamente en un comentario, y el prompt hacia lo contrario
+ * de lo que el comentario pedia: anunciaba "notes" en un parrafo aparte, tras
+ * una linea en blanco, con un array suelto por ejemplo. El analista lo leyo como
+ * una seccion independiente —lectura razonable— y respondio en dos bloques. El
+ * parser barre del primer `{` al ultimo `}`, se trago los dos, y un analisis
+ * correcto y entero se perdio por la forma.
+ *
+ * Por eso el prompt explica ademas POR QUE: una restriccion con motivo se
+ * respeta mejor que una arbitraria, y aqui el motivo cabe en una linea.
  */
-const NOTES = [
+const FORMATO = [
+  '',
+  'FORMATO — responde con UN UNICO objeto JSON y NADA mas: ni un segundo bloque,',
+  'ni texto fuera del objeto. Tu respuesta se lee barriendo del primer { al ultimo },',
+  'asi que cualquier otro JSON en el mensaje se mezcla con este y se pierde el',
+  'analisis entero.',
+  '',
+  'Claves: "status" ("REAL" u "OBSOLETO"), y "whatToChange", "where", "patternToCopy",',
+  '"doNotTouch", "risk" en prosa inerte en espanol.',
   '',
   'Clave OPCIONAL "notes": si FORTRESS (la herramienta que te ejecuta, NO el proyecto',
   'que analizas) te limito o te falto algo —un bug, un gap, una restriccion de entorno,',
   'permisos o plan-mode que te impidio trabajar, o la OPORTUNIDAD de una capacidad que',
-  'te habria ayudado— anadela con la forma',
-  '[{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note":"que paso o que crear"}].',
-  'No es un hallazgo del proyecto; es para que FORTRESS madure. Si no hubo nada, omitela.'
+  'te habria ayudado—, anotalo ahi. No es un hallazgo del proyecto; es para que FORTRESS',
+  'madure. Si no hubo nada, omite la clave.',
+  '',
+  '"notes" va DENTRO del objeto, como una clave mas. NUNCA en un bloque aparte:',
+  '{"status":"REAL","whatToChange":"...","where":"...","patternToCopy":"...",',
+  ` "doNotTouch":"...","risk":"...","notes":[${NOTA}]}`
 ]
 
 /**
@@ -44,8 +63,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor): str
     'el hallazgo SIGUE siendo REAL o ya esta RESUELTO (OBSOLETO). No te creas el',
     'hallazgo: leelo.',
     '',
-    'NO propongas el fix ni escribas codigo. Responde SOLO con un objeto JSON con las',
-    `claves ${KEYS}. "status" es "REAL" u "OBSOLETO"; el resto, prosa inerte en espanol.`,
-    ...NOTES
+    'NO propongas el fix ni escribas codigo.',
+    ...FORMATO
   ].join('\n')
 }
