@@ -1,7 +1,10 @@
+import type { Project } from '@domain/project/project'
 import { proposeRepair } from '../../services/repair-service'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
 import { CercoNotice } from './CercoNotice'
+import { colaDeFirma } from './cola-de-firma'
+import { ColaDeFirma } from './ColaDeFirma'
 import { Icon } from '../common/Icon'
 import { RepairProposalRow } from './RepairProposalRow'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
@@ -16,6 +19,11 @@ import { useRepairFeed } from '../../hooks/useRepairFeed'
  * proyecto registrado. La integracion automatica sigue apagada en todos hasta
  * que cada uno la declare en su `.fortress/config`.
  */
+const subtitulo = (project: Project | null): string =>
+  project === null
+    ? 'Selecciona un proyecto para ver su expediente.'
+    : `Expediente de ${project.name}. Nada se integra sin pasar el gate y el revisor.`
+
 export function MotorView(): React.JSX.Element {
   const project = useActiveProject()
   const projectId = project?.id ?? null
@@ -30,19 +38,17 @@ export function MotorView(): React.JSX.Element {
   const alDia = cargado === projectId
   const findingById = new Map(findings.map((finding) => [finding.id, finding]))
   const ordered = alDia ? [...proposals].sort((a, b) => b.updatedAt - a.updatedAt) : []
+  const cola = alDia ? colaDeFirma(proposals, findings) : []
 
   return (
     <div className="h-full space-y-3 overflow-y-auto px-4 py-4">
       <header>
         <h2 className="text-base text-foreground">Motor de reparacion</h2>
-        <p className="text-xs text-muted-foreground">
-          {project === null
-            ? 'Selecciona un proyecto para ver su expediente.'
-            : `Expediente de ${project.name}. Nada se integra sin pasar el gate y el revisor.`}
-        </p>
+        <p className="text-xs text-muted-foreground">{subtitulo(project ?? null)}</p>
       </header>
 
       {alDia ? <CercoNotice cerco={cerco} /> : null}
+      <ColaDeFirma cola={cola} />
 
       <button
         type="button"
