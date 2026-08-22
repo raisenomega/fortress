@@ -19,11 +19,17 @@ export interface ReconcileDeps {
  * Alinea el grafo con el HEAD vivo SI hace falta, y siempre en background: el
  * caller recibe la decision en cuanto el trabajo queda encolado, nunca espera
  * el indexado. planRepair no conoce esto: C2 sigue vivo-primero de todas formas.
+ *
+ * `onBoot` lo pone SOLO la reconciliacion del arranque, y cambia una cosa: alli
+ * una marca RUNNING es huerfana por definicion y se reclama sin esperar. Quien
+ * llega por el foco de proyecto o por el chip no lo pasa, porque en pleno vuelo
+ * ese RUNNING puede ser una corrida viva de esta misma instancia.
  */
 export async function reconcileGraph(
   context: AppContext,
   projectId: string,
-  deps: ReconcileDeps
+  deps: ReconcileDeps,
+  onBoot = false
 ): Promise<ReconcileOutcome> {
   const project = context.projects.findById(projectId)
   if (!project) return 'SKIPPED'
@@ -39,6 +45,7 @@ export async function reconcileGraph(
     indexedSha: state.indexedSha,
     status: state.status,
     runningSince: state.startedAt ?? undefined,
+    onBoot,
     now: deps.now()
   })
   console.info('[graph-reindex]', project.name, decision.action, '—', decision.reason)

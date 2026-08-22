@@ -55,3 +55,13 @@ describe('reconcileGraph', () => {
     expect(await reconcileGraph(b.context, 'nope', b.deps)).toBe('SKIPPED')
   })
 })
+
+describe('reconcileGraph en el arranque', () => {
+  it('EN EL ARRANQUE ese mismo RUNNING reciente arranca: la corrida murio', async () => {
+    // El grafo se quedo colgado justo aqui: cierre y relanzamiento, y la marca
+    // de hacia 25 segundos se respeto durante 15 minutos sin nadie indexando.
+    const b = bench({ state: { status: 'RUNNING', startedAt: 999_000 }, now: 1_000_000 })
+    expect(await reconcileGraph(b.context, 'p1', b.deps, true)).toBe('STARTED')
+    expect(b.marks).toEqual(['running'])
+  })
+})
