@@ -17,10 +17,13 @@ function verdictDe(evidenceJson: string): OmegaVerdict | null {
   }
 }
 
-/** Coste del eslabon, solo con lo que se sepa: nada se inventa. */
+/**
+ * Coste del eslabon, con lo que se sepa: nada se inventa. "de trabajo" no es
+ * adorno — es la unidad del tope, que no cuadra con el total del pie.
+ */
 function costeDe(event: ProposalEvent): string {
   const partes: string[] = []
-  if (event.costTokens !== undefined) partes.push(`${event.costTokens} tok`)
+  if (event.costTokens !== undefined) partes.push(`${event.costTokens} tok de trabajo`)
   if (event.durationMs !== undefined) partes.push(`${Math.round(event.durationMs / 1000)}s`)
   return partes.join(' · ')
 }

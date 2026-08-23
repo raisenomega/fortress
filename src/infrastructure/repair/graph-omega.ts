@@ -3,7 +3,8 @@ import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { toOmegaOutcome, type OmegaRunResult } from './omega-outcome'
-import { EMPTY_USAGE, totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
+import { trabajoReal } from '@domain/repair/budget'
+import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
 
 export type { OmegaRunResult }
 
@@ -29,7 +30,7 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
     run: (worktreePath, prompt) => {
       const startedAt = Date.now()
       const meta = (usage: TokenUsage): AnalystRunMeta => ({
-        tokensUsed: totalTokens(usage) > 0 ? totalTokens(usage) : undefined, usage,
+        tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined, usage,
         durationMs: Date.now() - startedAt, startedAt, endedAt: Date.now()
       }) // prettier-ignore
       const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
