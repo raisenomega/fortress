@@ -39,9 +39,9 @@ export const SELECT_MEMORY = `SELECT id, identity, severity, title, file, line, 
 export const SELECT_BY_IDENTITY = 'SELECT id FROM findings WHERE project_id = ? AND identity = ?'
 
 export const INSERT_FINDING = `INSERT INTO findings
-  (id, project_id, severity, title, file, line, fingerprint, identity, status, lifecycle,
+  (id, project_id, severity, title, file, line, fingerprint, identity, tipo, simbolo, status, lifecycle,
    scan_id, created_at, first_seen, last_seen)
-  VALUES (@id, @projectId, @severity, @title, @file, @line, @fingerprint, @identity, @status,
+  VALUES (@id, @projectId, @severity, @title, @file, @line, @fingerprint, @identity, @tipo, @simbolo, @status,
   'ACTIVE', @scanId, @at, @at, @at)`
 
 /**
@@ -51,8 +51,8 @@ export const INSERT_FINDING = `INSERT INTO findings
  * parecer recien nacido a un problema que lleva meses.
  */
 export const TOUCH_FINDING = `UPDATE findings SET severity = @severity, title = @title,
-  file = @file, line = @line, fingerprint = @fingerprint, scan_id = @scanId,
-  last_seen = @at, lifecycle = 'ACTIVE', resolved_at = NULL WHERE id = @id`
+  file = @file, line = @line, fingerprint = @fingerprint, tipo = @tipo, simbolo = @simbolo,
+  scan_id = @scanId, last_seen = @at, lifecycle = 'ACTIVE', resolved_at = NULL WHERE id = @id`
 
 export const SELECT_FINDING = `SELECT project_id, fingerprint FROM findings WHERE id = ?`
 

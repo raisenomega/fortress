@@ -1,6 +1,7 @@
 import { err, ok, type Result } from '../shared/result'
 import { isSeverity } from '../shared/severity'
 import type { DetectedFinding } from './detected-finding'
+import { aTipoDeDefecto } from './tipo-de-defecto'
 
 const JSON_FENCE = /```json\s*([\s\S]*?)```/g
 
@@ -29,11 +30,15 @@ function toFinding(entry: unknown): DetectedFinding | null {
 
   const line = typeof raw.line === 'number' && Number.isFinite(raw.line) ? raw.line : null
 
+  // Un tipo fuera del vocabulario cae a `otro` y un simbolo ausente queda
+  // vacio: no se inventa ninguno de los dos, y el escaneo no se tira por eso.
   return {
     severity: raw.severity,
     title: raw.title.trim(),
     file: typeof raw.file === 'string' ? raw.file : '',
-    line: line === null ? null : Math.trunc(line)
+    line: line === null ? null : Math.trunc(line),
+    tipo: aTipoDeDefecto(raw.tipo),
+    simbolo: typeof raw.simbolo === 'string' ? raw.simbolo.trim() : ''
   }
 }
 

@@ -6,10 +6,12 @@ const report = (body: string): string => `Analisis del proyecto.\n\n\`\`\`json\n
 describe('parseScanOutput', () => {
   it('extrae los hallazgos del bloque JSON', () => {
     const result = parseScanOutput(
-      report('{"findings":[{"severity":"CRITICAL","title":"Secret","file":"a.js","line":3}]}')
+      report(
+        '{"findings":[{"severity":"CRITICAL","title":"Secret","file":"a.js","line":3,"tipo":"secret-in-env","simbolo":"buildEnv"}]}'
+      )
     )
     expect(result.ok && result.value).toEqual([
-      { severity: 'CRITICAL', title: 'Secret', file: 'a.js', line: 3 }
+      { severity: 'CRITICAL', title: 'Secret', file: 'a.js', line: 3, tipo: 'secret-in-env', simbolo: 'buildEnv' } // prettier-ignore
     ])
   })
 
@@ -33,7 +35,9 @@ ${report('{"findings":[{"severity":"HIGH","title":"nuevo","file":"b.ts","line":9
       severity: 'LOW',
       title: 'x',
       file: '',
-      line: null
+      line: null,
+      tipo: 'otro',
+      simbolo: ''
     })
   })
 })
