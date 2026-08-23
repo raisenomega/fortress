@@ -1,32 +1,22 @@
-import { CircleCheck, CircleDot, OctagonAlert, type LucideIcon } from 'lucide-react'
 import type { MotorStatus } from '@domain/repair/motor-status'
 
-type Kind = MotorStatus['kind']
-
-/** El color dice la urgencia; el texto dice el numero. Ninguno de los dos solo. */
-export const TONO: Record<Kind, string> = {
-  'stopped-critical': 'border-critical/50 text-critical hover:bg-critical/10',
-  'awaiting-review': 'border-medium/50 text-medium hover:bg-medium/10',
-  clean: 'border-border text-muted-foreground hover:text-foreground'
+/**
+ * Lo unico que este chip tiene que decir: que el motor esta PARADO.
+ *
+ * Contaba propuestas vivas —"Pendientes: N"— y ese numero resulto ser el mismo
+ * que el del chip de firma siempre que el motor no esta corriendo: en reposo,
+ * toda propuesta viva es una que espera firma. Dos chips con la misma cifra al
+ * lado se leen como dos cosas distintas que no lo son.
+ *
+ * La contaminacion, en cambio, no la dice nadie mas, y es la que importa:
+ * `guardRun` bloquea el proyecto entero hasta que alguien lo revise, asi que
+ * mientras este encendido el motor no avanza por mucho que se le pida.
+ */
+export function detenido(status: MotorStatus): { readonly razon: string } | null {
+  return status.kind === 'stopped-critical' ? { razon: status.reason } : null
 }
 
-export const ICONO: Record<Kind, LucideIcon> = {
-  'stopped-critical': OctagonAlert,
-  'awaiting-review': CircleDot,
-  clean: CircleCheck
-}
-
-/** Corto: cabe en la barra. Lo que no cabe va al titulo. */
-export function etiqueta(status: MotorStatus): string {
-  if (status.kind === 'stopped-critical') return 'Detenido'
-  return status.kind === 'awaiting-review' ? `Pendientes: ${status.count}` : 'Motor'
-}
-
-/** Lo que el color no puede decir: por que, y cuantas. */
-export function titulo(status: MotorStatus): string {
-  if (status.kind === 'stopped-critical') return `Motor detenido — ${status.reason}`
-  if (status.kind === 'awaiting-review') {
-    return `${status.count} propuesta(s) del motor esperan que hagas algo`
-  }
-  return 'El motor no tiene nada pendiente en este proyecto'
+/** Lo que el chip no cabe a decir: por que esta parado. */
+export function tituloDetenido(razon: string): string {
+  return `Motor detenido — ${razon}. No avanzara hasta que alguien lo revise`
 }

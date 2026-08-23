@@ -1,9 +1,5 @@
-import { useState } from 'react'
-import { drenar, pararDrenaje } from '../../services/drenaje-service'
 import { useRepairStore } from '../../stores/repair-store'
-import { useTopesDelDrenaje } from '../../hooks/useTopesDelDrenaje'
-import { notify } from '../../stores/toast-store'
-import { actoDeDrenar } from './acto-de-drenar'
+import { useConfirmarDrenaje } from '../../hooks/useConfirmarDrenaje'
 import { ConfirmDrenaje } from './ConfirmDrenaje'
 import { Icon } from '../common/Icon'
 
@@ -14,8 +10,8 @@ interface BotonDrenarProps {
 }
 
 /**
- * Arranca el drenaje, o lo para si ya corre. La confirmacion vive AQUI y no en
- * el panel porque es de este boton: quien pregunta es quien va a gastar.
+ * Arranca el drenaje, o lo para si ya corre. La confirmacion cuelga de AQUI y
+ * no del panel porque es de este boton: quien pregunta es quien va a gastar.
  */
 export function BotonDrenar({
   projectId,
@@ -23,26 +19,15 @@ export function BotonDrenar({
   disabled
 }: BotonDrenarProps): React.JSX.Element {
   const drenando = useRepairStore((state) => state.drenando)
-  const elegibles = useRepairStore((state) => state.cerco.elegibles)
-  const [preguntando, setPreguntando] = useState(false)
-  const topes = useTopesDelDrenaje(preguntando)
-
-  const alPulsar = (): void => {
-    if (projectId === null) return
-    const acto = actoDeDrenar(drenando, elegibles)
-    if (acto === 'parar') return void pararDrenaje(projectId)
-    if (acto === 'nada-que-drenar') {
-      return notify('No hay nada que drenar: ningun hallazgo elegible.')
-    }
-    setPreguntando(true)
-  }
+  const cerco = useRepairStore((state) => state.cerco)
+  const confirmar = useConfirmarDrenaje(projectId, drenando, cerco.elegibles)
 
   return (
     <>
       <button
         type="button"
         disabled={disabled}
-        onClick={alPulsar}
+        onClick={confirmar.alPulsar}
         title="Recorre los hallazgos elegibles y deja cada fix esperando firma"
         className={className}
       >
@@ -52,16 +37,12 @@ export function BotonDrenar({
         {drenando ? 'Drenando... (parar)' : 'Drenar los elegibles'}
       </button>
 
-      {preguntando && projectId !== null ? (
+      {confirmar.preguntando ? (
         <ConfirmDrenaje
-          elegibles={elegibles}
-          costCapUsd={topes.costCapUsd}
-          maxVueltas={topes.maxVueltas}
-          onCancel={() => setPreguntando(false)}
-          onConfirm={() => {
-            setPreguntando(false)
-            void drenar(projectId)
-          }}
+          cerco={cerco}
+          topes={confirmar.topes}
+          onCancel={confirmar.cerrar}
+          onConfirm={confirmar.arrancar}
         />
       ) : null}
     </>

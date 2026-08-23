@@ -1,7 +1,12 @@
-import { avisosDelDrenaje, type TopesDelDrenaje } from './acto-de-drenar'
+import type { ResumenCerco } from '@application/repair/resumen-cerco'
+import type { Topes } from '../../hooks/useTopesDelDrenaje'
+import { avisosDelDrenaje } from './acto-de-drenar'
+import { CercoNotice } from './CercoNotice'
 import { Modal } from '../common/Modal'
 
-interface ConfirmDrenajeProps extends TopesDelDrenaje {
+interface ConfirmDrenajeProps {
+  readonly cerco: ResumenCerco
+  readonly topes: Topes
   readonly onCancel: () => void
   readonly onConfirm: () => void
 }
@@ -13,15 +18,22 @@ interface ConfirmDrenajeProps extends TopesDelDrenaje {
  *
  * Los numeros son los REALES: los elegibles salen del mismo calculo que usa la
  * seleccion y los topes se leen de los ajustes al abrir, no son una estimacion.
+ *
+ * El reparto del cerco vive AQUI y ya no en el panel del motor, donde ocupaba
+ * cuatro lineas que nadie estaba leyendo en ese momento. Es la respuesta a "¿y
+ * por que no los toca todos?", y esa pregunta se hace justo antes de autorizar,
+ * no mirando el expediente.
  */
 export function ConfirmDrenaje(props: ConfirmDrenajeProps): React.JSX.Element {
-  const { elegibles, costCapUsd, maxVueltas, onCancel, onConfirm } = props
-  const avisos = avisosDelDrenaje({ elegibles, costCapUsd, maxVueltas })
+  const { cerco, topes, onCancel, onConfirm } = props
+  const elegibles = cerco.elegibles
+  const avisos = avisosDelDrenaje({ elegibles, ...topes })
 
   return (
     <Modal title="Drenar los elegibles" onClose={onCancel}>
       <div className="space-y-3">
         <p className="text-foreground text-sm">{avisos.trabajo}</p>
+        <CercoNotice cerco={cerco} />
         <p className="text-muted-foreground text-xs">{avisos.topes}</p>
         <p className="text-success/80 text-xs">{avisos.garantia}</p>
         <p className="text-medium text-xs">{avisos.orden}</p>

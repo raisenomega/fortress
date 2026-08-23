@@ -1,5 +1,6 @@
 import {
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   ChevronUp,
   GitBranch,
@@ -14,6 +15,7 @@ type FlowIconName =
   | 'chevron-up'
   | 'chevron-down'
   | 'chevron-right'
+  | 'chevron-left'
   | 'git-branch'
   | 'git-merge'
   | 'refresh-cw'
@@ -24,6 +26,7 @@ export const FLOW_ICONS: Pick<Record<IconName, LucideIcon>, FlowIconName> = {
   'chevron-up': ChevronUp,
   'chevron-down': ChevronDown,
   'chevron-right': ChevronRight,
+  'chevron-left': ChevronLeft,
   'git-branch': GitBranch,
   'git-merge': GitMerge,
   'refresh-cw': RefreshCw,

@@ -15,9 +15,8 @@ const BOTON =
  * controles que no llevan a ningun sitio son ruido que hay que leer para
  * descubrir que no hacia falta leerlo.
  *
- * Arriba/abajo y no izquierda/derecha porque la cola es una fila vertical —y
- * porque `chevron-left` no esta en la lista de iconos del dominio, que esta
- * pieza no tiene por que tocar.
+ * Izquierda/derecha, como se pagina en todas partes. Nacio vertical solo porque
+ * `chevron-left` no estaba en la lista de iconos del dominio; ya esta.
  */
 export function Paginador({ pagina, onPagina }: PaginadorProps): React.JSX.Element | null {
   if (pagina.paginas <= 1) return null
@@ -30,7 +29,7 @@ export function Paginador({ pagina, onPagina }: PaginadorProps): React.JSX.Eleme
         onClick={() => onPagina(pagina.pagina - 1)}
         className={BOTON}
       >
-        <Icon name="chevron-up" size={11} />
+        <Icon name="chevron-left" size={11} />
       </button>
       <span>
         {pagina.desde + 1}-{pagina.hasta} · pagina {pagina.pagina} de {pagina.paginas}
@@ -41,7 +40,7 @@ export function Paginador({ pagina, onPagina }: PaginadorProps): React.JSX.Eleme
         onClick={() => onPagina(pagina.pagina + 1)}
         className={BOTON}
       >
-        <Icon name="chevron-down" size={11} />
+        <Icon name="chevron-right" size={11} />
       </button>
     </div>
   )
