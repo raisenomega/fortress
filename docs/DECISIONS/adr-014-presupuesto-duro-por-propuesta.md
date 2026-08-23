@@ -21,7 +21,13 @@ ni global: el problema es la propuesta desbocada, no el uso legítimo.
 ## Decisión
 
 Techo duro de 2.000.000 de tokens por propuesta, computado desde la factura
-real asentada en el libro de vida. Con reservas mínimas para que ningún
+real asentada en el libro de vida.
+
+> **Refinado el 2026-08-23:** la factura incluía la re-lectura del contexto
+> (`cache_read`), que resultó ser el 93-96% de lo que reventaba el tope. Ahora
+> cuenta solo trabajo real —input, salida y creación de caché— y el generador
+> lleva techo de turnos. Ver
+> [ADR-068](adr-068-tope-mide-trabajo-y-techo-de-turnos.md). Con reservas mínimas para que ningún
 eslabón deje sin combustible al siguiente: 200.000 para el generador y
 300.000 para el revisor (ADR-025). Superar el techo rechaza la propuesta.
 

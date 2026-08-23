@@ -103,6 +103,10 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-062](adr-062-deliberacion-multi-agente-pospuesta.md) | La deliberación entre varios agentes queda pospuesta | 2026-08-16 | Aceptada | Motor autónomo |
 | [ADR-063](adr-063-motor-proyecto-activo.md) | El motor sale del repo propio y habla del proyecto activo | 2026-08-16 | Aceptada | Motor |
 | [ADR-064](adr-064-corpus-del-proyecto.md) | El corpus del proyecto se descubre, y el prompt calla si no lo hay | 2026-08-17 | Aceptada | Agentes |
+| [ADR-065](adr-065-nada-muere-sin-juicio.md) | Ningún hallazgo se extingue por ausencia en un escaneo | 2026-08-23 | Aceptada | Escaneo |
+| [ADR-066](adr-066-analisis-ilegible-no-es-obsoleto.md) | Un análisis que no se deja leer no es un hallazgo obsoleto | 2026-08-23 | Aceptada | Motor |
+| [ADR-067](adr-067-identidad-fichero-tipo-simbolo.md) | La identidad de un hallazgo es fichero │ tipo │ símbolo | 2026-08-23 | Aceptada | Escaneo |
+| [ADR-068](adr-068-tope-mide-trabajo-y-techo-de-turnos.md) | El tope por propuesta mide trabajo, no contexto releído | 2026-08-23 | Aceptada | Motor |
 
 ## Referencias
 

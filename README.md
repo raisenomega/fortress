@@ -10,7 +10,13 @@ local: no hay servidores propios ni telemetría.
 
 - **Versión:** 1.0.0 (`fortress-command-center`)
 - **Estado:** desarrollo activo (pre-producción)
-- **Última actualización:** 2026-08-11
+- **Última actualización:** 2026-08-23
+
+El motor de auto-reparación corre sobre el propio repositorio y ha cerrado
+agujeros de seguridad reales, siempre con firma humana antes del merge. Dos
+garantías gobiernan el tablero: **nada se integra sin tu firma** y **nada
+desaparece sin que alguien lo haya mirado** — un escaneo no cierra hallazgos,
+solo el juicio de un agente lo hace.
 
 ## Documentación
 

@@ -105,6 +105,14 @@ Escaneo de seguridad con agentes reales.
 | `scan:reopen` | R/R | findingId → Result<null> | — |
 | `scan:progress` | PUSH | ScanChunk (avance del escaneo) | — |
 
+> **El informe que devuelven los agentes** no cruza el IPC como tal: llega en el
+> bloque JSON final de su salida, definido por `REPORT_CONTRACT`. Pide
+> `severity`, `title`, `file`, `line`, **`tipo`** y **`simbolo`**. Los dos
+> últimos son la identidad estable del hallazgo: el tipo se ELIGE de un
+> [vocabulario cerrado](TAXONOMIA-DE-DEFECTOS.md) y el símbolo es la función que
+> contiene el defecto. Fuera del vocabulario cae a `otro` sin tumbar el escaneo.
+> Ver [ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md).
+
 ### repair (motor de auto-reparación)
 
 Los canales del flujo [SELF-REPAIR](FLOWS/SELF-REPAIR.md).

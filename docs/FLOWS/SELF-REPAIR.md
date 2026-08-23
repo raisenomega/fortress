@@ -80,10 +80,21 @@ consulta el Knowledge Graph primero — es dos órdenes de magnitud más barato
 que leer archivos — pero el veredicto final se verifica contra el archivo
 real: si el grafo está desactualizado, el código vivo prevalece.
 
-Salidas: **REAL** (procede a generar) u **OBSOLETO** (la propuesta CADUCA y
-el hallazgo se excluye hasta el próximo escaneo — reparar fantasmas gasta
-presupuesto y ensucia historia). Este eslabón ya evitó en producción un fix
-que habría duplicado un guard existente.
+Salidas: **TRES**, y el reparto vive en `veredictoDelAnalisis`:
+
+| lo que pasó | veredicto | estado | efecto en el hallazgo |
+|---|---|---|---|
+| existe y es accionable | `REAL` | `ANALIZADO` | sigue vivo, procede a generar |
+| ya no está | `OBSOLETO` | `CADUCADO` | **se EXTINGUE**, con motivo `juicio_obsoleto` |
+| no se pudo leer la respuesta | `ILEGIBLE` | `RECHAZADO` | sigue vivo; un reintento |
+
+`OBSOLETO` es la **única** vía por la que un hallazgo muere: el escaneo ya no
+extingue por ausencia ([ADR-065](../DECISIONS/adr-065-nada-muere-sin-juicio.md)).
+Y lo ilegible se mira **primero**, porque no es una tercera opinión sino la
+ausencia de una legible ([ADR-066](../DECISIONS/adr-066-analisis-ilegible-no-es-obsoleto.md)).
+
+Este eslabón ya evitó en producción un fix que habría duplicado un guard
+existente.
 
 Emisión: AGENT_RUN con coste real de tokens y duración, más la transición
 con el análisis completo como evidencia. Coste típico: decenas de segundos a
@@ -102,14 +113,22 @@ Dos frenos activos durante la generación:
   calculados desde el archivo estructurado del hallazgo más sus tests
   hermanos. Un diff que se sale de la correa rechaza la propuesta.
 - **Presupuesto:** si el gasto acumulado más el coste del generador supera
-  `MAX_TOKENS_PER_PROPOSAL` (2.000.000 de tokens por propuesta), la
-  propuesta se rechaza por presupuesto. El diseño reserva mínimos para que
-  ningún eslabón deje al siguiente sin combustible: 200.000 para el
-  generador y 300.000 para el revisor.
+  `MAX_TOKENS_PER_PROPOSAL` (2.000.000 por propuesta), se rechaza. El tope
+  mide **trabajo real** —input, salida y creación de caché— y NO la
+  re-lectura del contexto: contarla hacía que el tope midiera «contexto ×
+  turnos» y llegó a tirar cuatro fixes ya escritos y dentro de su perímetro.
+  Ver [ADR-068](../DECISIONS/adr-068-tope-mide-trabajo-y-techo-de-turnos.md).
+  El diseño reserva mínimos para que ningún eslabón deje al siguiente sin
+  combustible: 200.000 para el generador y 300.000 para el revisor.
+- **Techo de turnos:** el generador se lanza con `--max-turns 30`, que es lo
+  que inflaba la re-lectura. El analista NO lo lleva: truncar su salida
+  fabricaría el `ILEGIBLE` que el eslabón anterior existe para no inventar.
 
 Salidas: fix commiteado en la rama de reparación, o RECHAZADO (fuera de
-correa, sin diff producido, o error del generador). En los rechazos
-posteriores a la generación el worktree se CONSERVA para autopsia.
+correa, sin diff producido, error del generador, o `turnos_agotados` — «no
+completó en 30 turnos», que es su propio desenlace y no se disfraza de
+presupuesto). En los rechazos posteriores a la generación el worktree se
+CONSERVA para autopsia.
 
 ### 4. Gate hermético
 
@@ -190,7 +209,10 @@ arbitrarias y filtrar listados (severidad LOW). Cadena completa real:
 | Gate | npm ci (29 s) + typecheck (19 s) + lint (35 s) + test:unit (33 s) — todo verde | 116 s totales |
 | Revisor | resuelve=SÍ · alcance=SÍ · intocable=SÍ · calidad=BUENO · riesgo=MENOR → APROBADO | 203.803 tokens · 86 s |
 
-Coste total: **1.224.580 de 2.000.000 tokens permitidos** — cabe con margen.
+Coste total: **1.224.580 tokens facturados** de 2.000.000 permitidos. Nota: esa
+cifra es de agosto y suma la re-lectura del contexto; desde
+[ADR-068](../DECISIONS/adr-068-tope-mide-trabajo-y-techo-de-turnos.md) el tope
+cuenta solo trabajo real, que en corridas comparables ronda los 130-215k.
 El revisor dejó además un riesgo residual honesto documentado (un padre
 absoluto pero ajeno sigue revelando existencia y permitiendo crear un nivel;
 acotarlo es otro control y una decisión de producto), exactamente el tipo de
