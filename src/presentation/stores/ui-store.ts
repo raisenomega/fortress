@@ -13,6 +13,7 @@ export type MainView =
   | 'omega'
   | 'sistema'
   | 'motor'
+  | 'firma'
   | 'genesis'
   | 'construir'
   | 'docs'
