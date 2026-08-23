@@ -7,7 +7,7 @@ import { ExpandableText } from '../common/ExpandableText'
 import { ProposalEventList } from './ProposalEventList'
 import { RepairGateButton } from './RepairGateButton'
 import { RepairGenerateButton } from './RepairGenerateButton'
-import { RepairOmegaButton } from './RepairOmegaButton'
+import { RepairFirmaButton } from './RepairFirmaButton'
 import { RepairProposalHeader } from './RepairProposalHeader'
 import { reasonBody } from './repair-proposal-badges'
 import { RepairRetryButton } from './RepairRetryButton'
@@ -51,7 +51,7 @@ export function RepairProposalRow({
       <RepairGenerateButton proposal={proposal} onDone={() => open && void loadEvents()} />
       <RepairGateButton proposal={proposal} onDone={() => open && void loadEvents()} />
       {/* Refetch incondicional: sin stale closure (leccion I3.1). */}
-      <RepairOmegaButton proposal={proposal} onDone={() => void loadEvents()} />
+      <RepairFirmaButton proposal={proposal} onDone={() => void loadEvents()} />
       <RepairRetryButton proposal={proposal} onDone={() => void loadEvents()} />
       {open ? <ProposalEventList events={events} /> : null}
     </div>

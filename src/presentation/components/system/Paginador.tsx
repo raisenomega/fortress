@@ -1,7 +1,7 @@
 import { Icon } from '../common/Icon'
 import type { Pagina } from './paginacion'
 
-interface PaginadorFirmaProps {
+interface PaginadorProps {
   readonly pagina: Pagina
   readonly onPagina: (numero: number) => void
 }
@@ -10,7 +10,8 @@ const BOTON =
   'tap border-border text-muted-foreground hover:text-foreground rounded border px-2 py-0.5 disabled:opacity-40'
 
 /**
- * Subir y bajar entre paginas de la cola. Con una sola pagina no se pinta: unos
+ * Subir y bajar entre paginas de una lista larga: la cola de firma y el
+ * expediente del motor usan el mismo. Con una sola pagina no se pinta: unos
  * controles que no llevan a ningun sitio son ruido que hay que leer para
  * descubrir que no hacia falta leerlo.
  *
@@ -18,10 +19,7 @@ const BOTON =
  * porque `chevron-left` no esta en la lista de iconos del dominio, que esta
  * pieza no tiene por que tocar.
  */
-export function PaginadorFirma({
-  pagina,
-  onPagina
-}: PaginadorFirmaProps): React.JSX.Element | null {
+export function Paginador({ pagina, onPagina }: PaginadorProps): React.JSX.Element | null {
   if (pagina.paginas <= 1) return null
 
   return (

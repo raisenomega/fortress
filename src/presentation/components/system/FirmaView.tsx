@@ -1,12 +1,11 @@
-import { useState } from 'react'
 import type { Project } from '@domain/project/project'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
+import { usePaginado } from '../../hooks/usePaginado'
 import { colaDeFirma } from './cola-de-firma'
-import { ColaDeFirma } from './ColaDeFirma'
-import { paginar } from './paginacion'
-import { PaginadorFirma } from './PaginadorFirma'
+import { Paginador } from './Paginador'
+import { RepairProposalRow } from './RepairProposalRow'
 
 const subtitulo = (project: Project | null): string =>
   project === null
@@ -14,12 +13,14 @@ const subtitulo = (project: Project | null): string =>
     : `Propuestas de ${project.name} que ya pasaron el gate. Firmar es lo unico que integra.`
 
 /**
- * La cola de firma en su propia pagina.
+ * La cola de firma en su propia pagina, una fila por propuesta.
  *
- * Vivia embebida arriba del expediente del motor, y ahi competia por el sitio
- * con la lista entera de propuestas: firmar es un acto distinto de mirar como
- * va el motor, y mezclarlos obligaba a buscar la cola entre lo demas. Aqui solo
- * se firma, y se llega desde el chip de la barra sin perder el contexto.
+ * Era un rectangulo con un solo boton que firmaba siempre la cabeza, y debajo
+ * filas de texto que no se podian ni abrir ni firmar: para saber que decia un
+ * fix habia que ir a buscarlo al expediente del motor, y para firmar el tercero
+ * habia que firmar antes los dos de arriba. Ahora cada fila es la MISMA del
+ * motor —chevron, razon del analisis, libro de vida al desplegar— con su propio
+ * boton, asi que cada una se resuelve sola y en el orden que el operador quiera.
  */
 export function FirmaView(): React.JSX.Element {
   const project = useActiveProject()
@@ -27,12 +28,11 @@ export function FirmaView(): React.JSX.Element {
   const cargado = useRepairStore((state) => state.projectId)
   const proposals = useRepairStore((state) => state.proposals)
   const findings = useRepairStore((state) => state.findings)
-  const [pedida, setPedida] = useState(1)
 
   useRepairFeed(projectId)
 
   const cola = cargado === projectId ? colaDeFirma(proposals, findings) : []
-  const pagina = paginar(cola.length, pedida)
+  const { visibles, pagina, irA } = usePaginado(cola)
 
   return (
     <div className="h-full space-y-3 overflow-y-auto px-4 py-4">
@@ -47,8 +47,19 @@ export function FirmaView(): React.JSX.Element {
         </p>
       ) : (
         <>
-          <ColaDeFirma cola={cola} visibles={cola.slice(pagina.desde, pagina.hasta)} />
-          <PaginadorFirma pagina={pagina} onPagina={setPedida} />
+          <p className="text-primary text-xs">
+            {cola.length} {cola.length === 1 ? 'propuesta espera' : 'propuestas esperan'} firma
+          </p>
+          <div className="space-y-1">
+            {visibles.map((item) => (
+              <RepairProposalRow
+                key={item.proposal.id}
+                proposal={item.proposal}
+                finding={item.finding}
+              />
+            ))}
+          </div>
+          <Paginador pagina={pagina} onPagina={irA} />
         </>
       )}
     </div>

@@ -7,6 +7,8 @@ import { MotorAcciones } from './MotorAcciones'
 import { colaDeFirma } from './cola-de-firma'
 import { RepairProposalRow } from './RepairProposalRow'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
+import { usePaginado } from '../../hooks/usePaginado'
+import { Paginador } from './Paginador'
 
 /**
  * Motor de reparacion del proyecto ACTIVO: C1 elige el hallazgo mas contenido,
@@ -38,6 +40,7 @@ export function MotorView(): React.JSX.Element {
   const findingById = new Map(findings.map((finding) => [finding.id, finding]))
   const ordered = alDia ? [...proposals].sort((a, b) => b.updatedAt - a.updatedAt) : []
   const cola = alDia ? colaDeFirma(proposals, findings) : []
+  const { visibles, pagina, irA } = usePaginado(ordered)
 
   return (
     <div className="h-full space-y-3 overflow-y-auto px-4 py-4">
@@ -52,7 +55,7 @@ export function MotorView(): React.JSX.Element {
       <MotorAcciones projectId={projectId} />
 
       <div className="space-y-1">
-        {ordered.map((proposal) => (
+        {visibles.map((proposal) => (
           <RepairProposalRow
             key={proposal.id}
             proposal={proposal}
@@ -60,6 +63,7 @@ export function MotorView(): React.JSX.Element {
           />
         ))}
       </div>
+      <Paginador pagina={pagina} onPagina={irA} />
     </div>
   )
 }
