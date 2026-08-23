@@ -12,7 +12,11 @@ import { loadProjects } from '../services/project-service'
 import { loadCounts, loadFindings } from '../services/scan-service'
 import { loadOperationMode, refreshApiKeyStatus } from '../services/settings-service'
 import { loadAccount } from '../services/account-service'
-import { loadBilling, refreshSessionUsage } from '../services/telemetry-service'
+import {
+  loadBilling,
+  refreshSessionUsage,
+  subscribeMotorUsage
+} from '../services/telemetry-service'
 import { useProjectStore } from '../stores/project-store'
 
 /**
@@ -37,10 +41,13 @@ export function useBootstrap(): void {
     const offLoop = subscribeLoop()
     const offChat = subscribeLoopChat()
     const offGenesis = subscribeGenesis()
+    // El motor tambien gasta: sin esto el pie se queda en la cifra de arranque.
+    const offMotor = subscribeMotorUsage()
     return () => {
       offLoop()
       offChat()
       offGenesis()
+      offMotor()
     }
   }, [])
 
