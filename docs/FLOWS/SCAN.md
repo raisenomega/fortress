@@ -35,10 +35,10 @@ Las tablas de ambos historiales están en [DATA-MODEL](../DATA-MODEL.md).
       v
  [Post-procesamiento del motor (determinista):]
       |
-      +--- calcular identity y fingerprint por hallazgo
+      +--- calcular identity (fichero|tipo|simbolo) y fingerprint
       +--- nuevos: primera aparicion, ciclo de vida ACTIVE
       +--- re-vistos: se refresca lo que pudo cambiar; first_seen NO se toca
-      +--- ausentes: decidir extincion con DOBLE evidencia (ver abajo)
+      +--- ausentes: SIGUEN VIVOS. El escaneo no extingue (ver abajo)
       |
       v
  [Score del EXPEDIENTE: reportados hoy + ACTIVE no nombrados]
@@ -113,25 +113,40 @@ arreglar.
   si está en el debut.
 - **MITIGATED** — hay un fix APLICADO y falta confirmar que ya no aparece.
   No significa "ausente sin evidencia".
-- **EXTINCT** — ausencia confirmada con evidencia dura, no por una sola
-  corrida. Queda como historia con su fecha de resolución; jamás se borra.
+- **EXTINCT** — un agente lo miró y dictaminó que el problema ya no está.
+  Queda como historia con su fecha y su motivo; jamás se borra.
 
-### La regla de extinción honesta (doble evidencia)
+### El escaneo NO extingue
 
-Para pasar a EXTINCT, un hallazgo ACTIVE debe cumplir LAS DOS:
+Un hallazgo que este escaneo no nombra **sigue ACTIVE**: en el tablero y
+puntuando. Sin excepciones, sin preguntarle a git.
 
-1. **Ausente** del escaneo nuevo (por identity).
-2. **Su archivo cambió** según git desde el first_seen del hallazgo.
+El escáner es un modelo leyendo código, no una función determinista. No
+nombrar algo no es afirmar que no está, y ni siquiera repite la misma
+redacción entre corridas.
 
-A git solo se le pregunta por los ausentes — los reportados no piden
-prueba. Y el ausente cuyo archivo NO cambió **sigue ACTIVE** (no baja ni a
-MITIGATED): solo significa que el escáner no lo nombró esta vez.
+Hubo aquí una regla de doble evidencia —ausente **y** con su archivo
+cambiado según git— que nació de un incidente real: el 2026-08-08 cuatro
+hallazgos murieron en falso sin que sus archivos cambiaran un byte. La
+segunda prueba parecía suficiente y no lo era. Preguntaba por el **archivo**,
+no por la línea, y en un repositorio activo casi todo archivo cambia cada
+pocos días, así que se cumplía por defecto y la regla degeneraba en «la
+ausencia extingue». El 2026-08-23 mató dos hallazgos de la CSP porque un
+commit añadió un **comentario** al archivo; la relajación que denunciaban
+seguía en `main`.
 
-Esta regla existe por evidencia dura, no por prevención abstracta: en una
-corrida temprana (2026-08-08), cuatro hallazgos se extinguieron en falso
-sin que sus archivos cambiaran un byte entre escaneos. Sin la doble
-evidencia, el sistema tiende a matar hallazgos en falso — y un score que
-mejora solo es la peor clase de bug.
+**La única vía de extinción es el juicio de un agente.** Al drenar, C2
+dictamina: `OBSOLETO` cierra el hallazgo con su motivo (`juicio_obsoleto`),
+`REAL` lo deja vivo para repararse e `ILEGIBLE` tampoco lo mata — ver
+[ADR-065](../DECISIONS/adr-065-nada-muere-sin-juicio.md) y
+[ADR-066](../DECISIONS/adr-066-analisis-ilegible-no-es-obsoleto.md).
+
+### La marca «sin reconfirmar»
+
+El tablero distingue el hallazgo que el último escaneo volvió a nombrar del
+que no, comparando su `last_seen` con la fecha del último escaneo del
+proyecto. Es **derivado**: no cambia el estado, no saca al hallazgo de la
+cola del motor y no es un cuarto valor de `lifecycle`.
 
 ## El score puntúa el EXPEDIENTE, no la corrida
 

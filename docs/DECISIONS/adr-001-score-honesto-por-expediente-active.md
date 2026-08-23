@@ -23,8 +23,14 @@ honesto, un score que mejora solo es la peor clase de bug.
 
 El score se computa desde el expediente ACTIVE completo del proyecto (la
 memoria conservadora de hallazgos), no desde el snapshot del último escaneo.
-Un hallazgo solo deja de contar cuando se extingue con evidencia o cuando el
-operador lo descarta explícitamente.
+Un hallazgo solo deja de contar cuando se extingue o cuando el operador lo
+descarta explícitamente.
+
+> **Refinado el 2026-08-23:** «extinguirse» significaba entonces reunir la
+> doble evidencia del escaneo. Esa regla se retiró — un escaneo ya no cierra
+> nada y la extinción exige el juicio de un agente. El principio del score no
+> cambia: puntúa el expediente vivo. Ver
+> [ADR-065](adr-065-nada-muere-sin-juicio.md).
 
 ## Consecuencias
 

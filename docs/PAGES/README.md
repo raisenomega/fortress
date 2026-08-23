@@ -26,6 +26,9 @@ sidebar) con un mapeo interno al nombre del store y el componente principal.
 
 - [Auto-mejora FORTRESS](auto-mejora.md) — backlog + capacidades + motor de
   auto-reparación.
+- [Motor de reparación](motor.md) — expediente de propuestas, drenaje y
+  confirmación de gasto.
+- [Firma](firma.md) — la cola de lo firmable; lo único que integra.
 - [Génesis de agentes](genesis-agentes.md) — HUD del bucle de génesis.
 - [Cognition](cognition.md) — lector del COGNITION-LOG del proyecto.
 

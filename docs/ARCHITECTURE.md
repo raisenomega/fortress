@@ -40,6 +40,19 @@ por puertos (interfaces) definidos en el nucleo.
   `domain/shared/icon-name.ts` (nombres semanticos de icono: el dominio
   nombra la idea, no el componente).
 
+**El ciclo de vida de un hallazgo vive aqui entero.** `ACTIVE` (el problema
+esta ahi, lo haya nombrado o no el ultimo escaneo), `MITIGATED` (hay un fix
+aplicado, falta confirmarlo) y `EXTINCT` (un agente lo miro y dictamino que ya
+no esta). Un escaneo **no** cierra hallazgos: `domain/scan/ausencia.ts` solo
+sabe decir cuales no se nombraron, y todos siguen vivos. Cerrar es del motor,
+con juicio, y deja escrito el motivo. Ver
+[ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
+
+La identidad de un hallazgo —`fichero | tipo | simbolo`— tambien es de dominio
+(`domain/project/finding-identity.ts`), y NO comparte formula con el `patternId`
+de COGNITION ni con la huella de los descartes: tres claves para tres preguntas,
+tabuladas en [DATA-MODEL](DATA-MODEL.md).
+
 ### 2. application (casos de uso)
 
 - Orquesta el dominio: cada caso de uso es una operacion de negocio completa

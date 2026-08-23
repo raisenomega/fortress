@@ -30,6 +30,7 @@ Según el objetivo del lector:
 - **Entender los principios de trabajo:** [PRINCIPLES](PRINCIPLES.md)
 - **Consultar un término desconocido:** [GLOSSARY](GLOSSARY.md)
 - **Entender el modelo de seguridad:** [SECURITY-MODEL](SECURITY-MODEL.md)
+- **Saber qué tipos de defecto existen:** [TAXONOMIA-DE-DEFECTOS](TAXONOMIA-DE-DEFECTOS.md)
 
 ## Referencia
 
@@ -42,10 +43,13 @@ Documentos listos:
   reales del código, las reglas duras verificadas por ESLint, base de datos,
   IPC, distribución, testing y qué documentos consume el runtime (y por qué
   viven donde viven).
-- **[PRINCIPLES.md](PRINCIPLES.md)** — 21 principios de método, cada uno
+- **[PRINCIPLES.md](PRINCIPLES.md)** — 24 principios de método, cada uno
   nacido de un error real, con contexto, regla y ejemplo. El documento crece
   y nunca borra un principio.
-- **[GLOSSARY.md](GLOSSARY.md)** — 61 términos en orden alfabético con
+- **[TAXONOMIA-DE-DEFECTOS.md](TAXONOMIA-DE-DEFECTOS.md)** — el vocabulario
+  cerrado con el que el escáner clasifica cada hallazgo, derivado de los
+  defectos reales del repositorio, y la regla de `otro`.
+- **[GLOSSARY.md](GLOSSARY.md)** — términos en orden alfabético con
   referencias cruzadas: la máquina de estados del motor completa, los guards
   de seguridad, la infraestructura y la doctrina.
 - **[SECURITY-MODEL.md](SECURITY-MODEL.md)** — Activos, actores y

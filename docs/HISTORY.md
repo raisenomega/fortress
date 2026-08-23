@@ -315,11 +315,57 @@ su propia lista y ninguna hereda de otra. Ver
 [DECISIONS/](DECISIONS/adr-058-capas-de-exclusion-explicitas.md) y
 [RELEASE](RELEASE.md).
 
+## Acto 4 — El motor trabajando de verdad, y lo que enseñó (2026-08-19 a 2026-08-23)
+
+El motor dejó de ser un diseño y pasó a correr sobre el propio repositorio en
+tandas largas. Casi todo lo que se aprendió vino de mirar sus facturas y sus
+muertes, no de razonar sobre el diseño.
+
+**El modo autónomo por fases.** Una vuelta puede parar antes del juicio, después
+del juicio, o llegar hasta el final ([ADR-061](DECISIONS/adr-061-modo-autonomo-con-la-disciplina-del-motor.md)).
+Sobre eso se construyó el drenaje —recorrer todos los elegibles y dejar cada fix
+esperando firma— con su confirmación de gasto y la cola de firma en
+[su propia página](PAGES/firma.md). Faltaba la puerta: la doctrina prometía que
+nada entraba sin firma humana y no existía ningún camino de código que la
+ejecutara. Dieciséis propuestas aprobadas llevaban días atascadas sin poder
+integrarse.
+
+**El contador que tiraba el trabajo pagado.** Cuatro fixes terminados, con sus
+tests y dentro de su perímetro, se descartaron por exceder un tope de dos
+millones de tokens. Al desglosar la factura, entre el 93% y el 96% de lo que
+reventaba el tope era contexto releído, el token más barato que existe. El
+trabajo real de los cuatro estaba entre 128k y 213k. El tope no medía trabajo:
+medía contexto por turnos ([ADR-068](DECISIONS/adr-068-tope-mide-trabajo-y-techo-de-turnos.md)).
+
+**Tres agujeros de seguridad cerrados por el propio motor**, firmados uno a uno
+por el operador. El primero costó seis intentos — tres murieron por ese contador
+mal medido. Están en [SECURITY-MODEL](SECURITY-MODEL.md).
+
+**Y la lección más cara: nada muere sin juicio.** Un escaneo que no volvía a
+nombrar un hallazgo lo daba por resuelto si git veía que su archivo había
+cambiado. La segunda prueba nació de un incidente real y parecía suficiente,
+pero preguntaba por el archivo y no por la línea: en un repositorio activo se
+cumple sola. Mató dos hallazgos de la CSP porque un commit añadió un comentario;
+la relajación que denunciaban seguía en `main`. Desde entonces el escaneo no
+cierra nada y la única vía de muerte es que un agente lo mire
+([ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md)).
+
+Eso destapó lo siguiente: si nada muere, el mismo defecto no puede seguir
+abriendo fila nueva cada vez. La identidad dependía del título, que el escáner
+redacta distinto en cada corrida —y al medirlo, la severidad y la línea
+resultaron igual de inestables—. Ahora es fichero, tipo y símbolo, con un
+[vocabulario cerrado](TAXONOMIA-DE-DEFECTOS.md) derivado de los defectos reales
+del repositorio ([ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md)).
+
 ## Presente
 
 El plan documental está completo y los agentes conocen la documentación que
 explica el sistema en el que trabajan. Las deudas que la integración destapó
 quedaron saldadas.
+
+El motor repara, el operador firma y nada desaparece del tablero sin que alguien
+lo haya visto. Queda la Fase B de la identidad: reconciliar las filas anteriores
+al cambio y revivir los tres hallazgos que murieron mal.
 
 Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
 convertir el auditor en un entorno de desarrollo asistido completo, y preparar el
@@ -327,8 +373,8 @@ proyecto para publicarse. Sin fechas de compromiso, como todo aquí.
 
 ## Referencias
 
-- [DECISIONS/](DECISIONS/README.md) — los sesenta registros de
-  decisión arquitectónica (ADR-001 a ADR-060) que sostienen esta historia.
+- [DECISIONS/](DECISIONS/README.md) — los registros de decisión
+  arquitectónica (ADR-001 a ADR-068) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),

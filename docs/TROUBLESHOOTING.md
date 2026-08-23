@@ -123,6 +123,44 @@ Cuando el detalle vive en otro documento, la entrada apunta allí.
 - **Solución:** se pueden ignorar; no afectan a tus proyectos. Es una deuda
   conocida del reindexado, sin impacto funcional.
 
+### El chip dice «grafo desactualizado»
+
+**Es correcto, no es un fallo.** El índice se alineó con un `HEAD` que después
+avanzó. Se reindexa solo al **relanzar la app** (reconciliación de arranque) y
+también al enfocar el proyecto; el chip lo dispara a mano si se pulsa. Mientras
+corre dice «grafo alineándose».
+
+El motor sigue funcionando con un grafo viejo: da pistas, no la verdad. C2
+verifica contra el archivo vivo y C3 genera en un worktree cortado del `HEAD`
+actual.
+
+## Escaneo: la taxonomía
+
+### Muchos hallazgos salen con tipo `otro`
+
+`otro` es un destino legítimo —forzar un tipo que no es sería peor—, pero si
+supera aproximadamente el **15%** de los hallazgos de un escaneo es la señal de
+que **falta un tipo** en el vocabulario. Ver
+[TAXONOMIA-DE-DEFECTOS](TAXONOMIA-DE-DEFECTOS.md).
+
+Los hallazgos deterministas (dependencias vulnerables, archivos largos, deuda
+TODO) caen a `otro` por diseño: nadie los ha clasificado. No cuentan para esa
+señal.
+
+### El escaneo muestra MÁS filas que antes, no menos
+
+Esperado tras el cambio de identidad. Las filas anteriores conservan su clave
+vieja y las nuevas usan `fichero │ tipo │ símbolo`, así que un mismo defecto
+puede aparecer dos veces —una por cada esquema— hasta que se reconcilien. Ver
+[ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md).
+
+### Un hallazgo que creía arreglado sigue en el tablero
+
+El escaneo **ya no extingue nada**. Un hallazgo solo desaparece cuando un agente
+lo juzga obsoleto al drenar. Si el problema está arreglado de verdad, drenarlo
+lo cierra con su motivo; también se puede marcar como mitigado a mano. Ver
+[ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
+
 ## Base de datos
 
 ### La base de datos parece bloqueada

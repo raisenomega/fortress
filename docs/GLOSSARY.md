@@ -26,6 +26,12 @@ Estructura que devuelve [C2](#c2-analyzetarget): objetivo, veredicto
 (REAL/OBSOLETO), qué cambiar, dónde, patrón a copiar, qué no tocar, riesgo y
 tokens usados. Es el contrato de entrada de [C3](#c3-generate-fix).
 
+### ausencia (no es veredicto)
+
+Principio del escaneo: que una corrida no nombre un hallazgo no afirma que el
+problema no esté. El escáner es un modelo leyendo código y ni siquiera repite la
+misma redacción entre corridas.
+
 ### ANALIZADO
 Estado de una propuesta cuyo análisis C2 dictaminó REAL: el hallazgo existe y
 es accionable. Lista para generar fix.
@@ -51,6 +57,12 @@ nombres de archivo se disuelven en el bundle).
 
 ## B
 
+### ausentes
+
+Los hallazgos vivos que un escaneo no volvió a nombrar. **Siguen vivos**: en el
+tablero y puntuando. La ausencia no extingue — ver
+[ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
+
 ### base_sha
 SHA del HEAD del repo anclado en el momento en que nace una propuesta del
 motor. Es la base exacta del [worktree](#worktree): reproducibilidad
@@ -66,7 +78,7 @@ mismo elegido. No genera fix ni toca código.
 ### C2 (analyzeTarget)
 Segundo eslabón: ENTENDER. Agente de solo lectura, grafo-primero, que
 verifica el hallazgo contra el código real y dictamina REAL u OBSOLETO
-(un hallazgo ya resuelto se extingue, no se repara).
+(un hallazgo que un agente juzga obsoleto se extingue, no se repara).
 
 ### C3 (generate-fix)
 Tercer eslabón: GENERAR. Produce el fix en un [worktree](#worktree) aislado,
@@ -180,6 +192,13 @@ Ver [finding](#finding).
 
 ## I
 
+### identidad de un hallazgo
+
+`fichero │ tipo │ símbolo`. La clave que decide si un hallazgo reportado es una
+fila nueva o una que ya existía. **No** es la del `PTN-` de COGNITION ni la de
+los descartes: tres claves distintas para tres preguntas distintas, tabuladas en
+[DATA-MODEL](DATA-MODEL.md).
+
 ### isAbsoluteProjectPath
 Guard de dominio: las rutas de proyecto deben ser absolutas y normalizadas.
 Cierra rutas relativas hostiles al registrar u operar proyectos.
@@ -267,6 +286,18 @@ Carpeta en los datos de la aplicación donde viven los
 
 ## S
 
+### símbolo (de un hallazgo)
+
+La función o bloque que contiene el defecto (`handleVerify`, `buildEnv`). Es lo
+único de la ubicación que sobrevive a que el código de arriba crezca — la línea
+del mismo agujero viajó de la 43 a la 59 en tres escaneos. Separa dos defectos
+del mismo tipo en el mismo fichero.
+
+### sin reconfirmar
+
+Marca **derivada** del tablero: el último escaneo no volvió a nombrar ese
+hallazgo. No cambia su estado ni lo saca de la cola del motor.
+
 ### safeStorage
 Cifrado del sistema operativo (keychain) para la API key. Solo el proceso
 main la descifra; el renderer únicamente puede preguntar si existe.
@@ -300,6 +331,13 @@ Una propuesta nueva sobre el mismo hallazgo deja obsoleta a la anterior. Lo
 reemplazado no se reintenta: el reintento choca con la propuesta posterior.
 
 ## T
+
+### tipo (de defecto)
+
+La clase de defecto, elegida de un **vocabulario cerrado** por el escáner —
+clasificar, no redactar. Es una de las tres piezas de la identidad. La lista
+completa, con su regla de `otro`, en
+[TAXONOMIA-DE-DEFECTOS](TAXONOMIA-DE-DEFECTOS.md).
 
 ### Testigo-no-actor
 Principio de OMEGA: observa, verifica y puede VETAR; nunca ejecuta,

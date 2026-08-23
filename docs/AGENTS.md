@@ -68,7 +68,14 @@ veredicto global del revisor lo recomputa el motor desde los ejes.
 - **Salida esperada:** ediciones en el worktree; el motor las lee con git
   como diff contra el `base_sha`.
 - **Timeout:** 15 minutos.
-- **Presupuesto:** spawn condicionado a una reserva de 200.000 tokens.
+- **Techo de turnos:** `--max-turns 30`. Sale de los datos: las corridas que
+  completaron el fix dieron 4-25 vueltas y las que reventaron el presupuesto
+  dieron 32-50. Al agotarlo, desenlace propio (`turnos_agotados`), no un
+  exceso de presupuesto disfrazado. **El analista no lo lleva** — truncar su
+  salida fabricaría un análisis ilegible. Ver
+  [ADR-068](DECISIONS/adr-068-tope-mide-trabajo-y-techo-de-turnos.md).
+- **Presupuesto:** spawn condicionado a una reserva de 200.000 tokens. El tope
+  por propuesta mide trabajo real, sin la re-lectura del contexto.
 - **Registro en el libro:** AGENT_RUN con actor `claude-generator`.
 - **Prompt base:** no se reproduce. Intención: fix mínimo según el
   análisis, solo dentro de la correa, sin ampliar alcance.

@@ -283,6 +283,54 @@ Formato uniforme: **Contexto** (el error que lo parió) / **Regla** /
   sensibles. Las dos manifestaciones y la regla de auto-cobertura están en
   `docs/DECISIONS/adr-060-auto-merge-loop.md`.
 
+## 22. Nada muere sin ser visto
+
+Un dato solo desaparece del tablero cuando **alguien lo ha mirado** y ha
+dictaminado que ya no aplica. La ausencia no es un veredicto: que una corrida no
+vuelva a nombrar algo no afirma que no esté, sobre todo cuando quien nombra es
+un modelo y ni siquiera repite las mismas palabras entre corridas.
+
+Esto costó dos hallazgos de seguridad reales, muertos porque un commit añadió un
+comentario a su archivo. La defensa que existía —exigir que el archivo hubiera
+cambiado— preguntaba por el archivo y no por la línea, así que en un repositorio
+activo se cumplía sola y la regla degeneró en lo que existía para impedir.
+
+**Corolario:** una defensa que se cumple casi siempre no es una defensa. Medirla
+contra los datos reales es la única forma de saberlo; razonar sobre ella no
+basta. Ver [ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
+
+## 23. A un modelo se le pide clasificar, no redactar, cuando el resultado es una clave
+
+La prosa de un modelo no es estable: el mismo defecto sale con cinco redacciones,
+dos severidades y tres líneas en cinco corridas. Cualquier identidad construida
+sobre lo que redacta se fragmenta.
+
+Cuando lo que se necesita es una **clave** —algo que tiene que coincidir consigo
+mismo entre ejecuciones— la petición se convierte en elección sobre una lista
+cerrada. Un vocabulario enumerado en el prompt es estable por construcción;
+pedir «un identificador estable» en abierto reproduce el problema un nivel más
+abajo.
+
+Y la lista se **deriva de los datos reales**, no de un catálogo genérico: cada
+entrada existe porque había al menos un caso que la pedía. Ver
+[ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md) y
+[TAXONOMIA-DE-DEFECTOS](TAXONOMIA-DE-DEFECTOS.md).
+
+## 24. Un estado que no puede expresar el fallo hace que el fallo parezca otra cosa
+
+Cuando un camino tiene menos desenlaces que causas, las causas sobrantes salen
+disfrazadas de la que más se le parece — y el registro miente sin que nadie
+mienta.
+
+Tres casos del mismo patrón: una parada humana que se asentaba como error del
+agente; un merge firmado por el operador que el historial escribía como
+automático; y un JSON truncado del analista que se archivaba como «el hallazgo
+ya no existe», silenciando además el hallazgo en la cola.
+
+El arreglo es siempre el mismo: darle al fallo **su propio desenlace**, con su
+nombre, aunque sea un valor más en una unión. Ver
+[ADR-066](DECISIONS/adr-066-analisis-ilegible-no-es-obsoleto.md).
+
 ## Sobre este documento
 
 Este archivo crece. Cada principio nuevo se añade con su contexto de origen

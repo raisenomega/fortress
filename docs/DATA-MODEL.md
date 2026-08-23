@@ -153,7 +153,7 @@ claves).
 
 **Propósito:** el expediente de hallazgos por proyecto, con identidad
 estable y ciclo de vida (memoria conservadora: los hallazgos no se borran,
-se extinguen con evidencia).
+y solo se extinguen cuando un agente los juzga).
 
 | Columna | Tipo | Constraints / Default |
 |---|---|---|
@@ -164,12 +164,15 @@ se extinguen con evidencia).
 | file | TEXT | NOT NULL DEFAULT '' |
 | line | INTEGER | — |
 | fingerprint | TEXT | NOT NULL DEFAULT '' |
-| identity | TEXT | NOT NULL DEFAULT '' (clave estable) |
+| identity | TEXT | NOT NULL DEFAULT '' (clave estable: fichero\|tipo\|símbolo) |
+| tipo | TEXT | NOT NULL DEFAULT 'otro' (vocabulario cerrado) |
+| simbolo | TEXT | NOT NULL DEFAULT '' (la función que contiene el defecto) |
 | status | TEXT | NOT NULL DEFAULT 'open' |
-| lifecycle | TEXT | NOT NULL DEFAULT 'ACTIVE' (ACTIVE/EXTINCT) |
+| lifecycle | TEXT | NOT NULL DEFAULT 'ACTIVE' (ACTIVE/MITIGATED/EXTINCT) |
 | scan_id | TEXT | escaneo que lo vio por última vez |
 | first_seen / last_seen | TEXT | NOT NULL DEFAULT '' (ISO) |
 | resolved_at | TEXT | fecha de extinción, null si vivo |
+| extinct_reason | TEXT | por qué murió; null si vivo |
 | created_at | TEXT | NOT NULL |
 
 **Índices:** idx_findings_project (project_id).
@@ -180,11 +183,30 @@ esquema para la memoria conservadora del ciclo de vida añadió `fingerprint`,
 `status`, `scan_id` y después `identity`, `lifecycle`, `first_seen`,
 `last_seen`, `resolved_at` — con BACKFILL de las filas existentes: la clave
 estable se calcula y las fechas salen del `created_at` original (no se
-inventa una fecha reciente que haría parecer nuevo algo viejo). Un hallazgo
-solo pasa a EXTINCT con evidencia. Las columnas migradas van sin CHECK
-(SQLite no lo admite en ALTER); valida el dominio al leer.
+inventa una fecha reciente que haría parecer nuevo algo viejo). Después
+llegaron `extinct_reason` (por qué murió) y `tipo` / `simbolo` (las dos
+piezas de la identidad estable). Las columnas migradas van sin CHECK (SQLite
+no lo admite en ALTER); valida el dominio al leer.
+
+**Un hallazgo solo pasa a EXTINCT cuando un agente lo juzga** — el escaneo no
+extingue por ausencia. Ver
+[ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
 
 **Repositorio principal:** sqlite-finding-repository.
+
+### Las TRES identidades de un hallazgo, y por qué no son una
+
+Se parecen y responden a preguntas distintas. Confundirlas costó filas
+duplicadas y una renumeración evitada del historial:
+
+| función | fórmula | para qué |
+|---|---|---|
+| `findingIdentity` | fichero \| tipo \| símbolo | **la fila de la base**: decide si esto es nuevo o algo que ya existía |
+| `patternId` | severidad \| fichero \| título | **el `PTN-` del COGNITION-LOG**. Congelado sobre la fórmula vieja: el log solo persiste severidad y título, así que la clave nueva le sería inservible, y cambiarla dejaría huérfana cada entrada escrita |
+| `fingerprintOf` | severidad \| fichero \| línea \| título | **los descartes del operador**. Estricta a propósito: un descarte no debe heredarse a otro problema de la misma zona |
+
+`findingIdentity` y `patternId` compartieron fórmula por comodidad hasta el
+2026-08-23. Ver [ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md).
 
 ### dismissals
 

@@ -94,10 +94,19 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
   dentro del worktree antes de cualquier firma.
 - Revisor semántico independiente con veredicto de 6 ejes; el motor
   recomputa la conclusión (veredicto sintético).
-- Firma humana obligatoria antes del merge local.
+- Firma humana antes del merge local, **salvo** el cerco de integración
+  automática que el proyecto declare en su `.fortress/config`. En este
+  repositorio el cerco está encendido y es estrecho a propósito: solo `LOW`,
+  un archivo, hasta diez líneas de diff, y una lista negra que excluye
+  migraciones, secretos, workflows, IPC, preload y el empaquetado. Todo lo
+  demás espera firma. Ver [ADR-060](DECISIONS/adr-060-auto-merge-loop.md).
 - Push a origin: siempre humano. El motor jamás toca el remoto.
 - Correa de alcance: el fix solo puede tocar los archivos permitidos;
   salirse rechaza la propuesta.
+- Los hallazgos **no mueren solos**: el escaneo no extingue por ausencia, así
+  que un problema de seguridad no puede desaparecer del tablero porque el
+  escáner no lo nombrara una vez. Ver
+  [ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
 - Presupuesto de tokens por propuesta con techo duro.
 
 ### Supply chain
@@ -120,6 +129,25 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
   mitigado / extinto).
 - La extinción de un patrón exige evidencia, no fe: ausente del escaneo Y
   con el archivo modificado.
+
+## Agujeros cerrados por el propio motor (2026-08-23)
+
+Tres hallazgos del escáner sobre FORTRESS misma, reparados por el motor de
+auto-reparación y **firmados por el operador** antes de integrarse:
+
+| defecto | dónde | fix |
+|---|---|---|
+| `graph:verify` lanzaba el CLI con la API key sin pasar por `guardRun`, evadiendo el tope diario y el carril de concurrencia | `ipc/graph-action-handlers.ts` · `handleVerify` | `guardRun` + `endRun` en `finally`, como sus hermanos, y un `logger` para que el freno no sea mudo |
+| Comandos bloqueados se persistían sin pasar por `redactSecrets` | `claude-code/stream-events.ts` | redacción antes de persistir |
+| `configState` del renderer se insertaba sin validar (validado al leer, no al escribir) | `persistence/sqlite-project-repository.ts` | validación simétrica |
+
+Costó seis intentos llegar al primero: tres murieron por el contador de
+presupuesto mal medido ([ADR-068](DECISIONS/adr-068-tope-mide-trabajo-y-techo-de-turnos.md)),
+uno por techo de turnos y uno lo vetó el revisor.
+
+En el mismo arco se cerraron por vía manual el entorno heredado del verify del
+loop (`buildGateEnv`) y el alcance de `cancelRun`, que mataba los procesos de
+todos los proyectos.
 
 ## Lo que NO cubre este modelo
 

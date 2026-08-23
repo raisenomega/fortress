@@ -31,6 +31,38 @@ general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
 [DECISIONS/](DECISIONS/README.md) contiene las sesenta decisiones
 arquitectónicas.
 
+## 2026-08-23
+
+**[Escaneo]** Un escaneo deja de extinguir hallazgos por ausencia. Lo que no
+reconfirma sigue vivo y puntuando; la única vía de muerte es que un agente lo
+juzgue obsoleto al drenar, y cada extinción registra su motivo. Nació de dos
+hallazgos de la CSP que murieron porque un commit añadió un comentario a su
+archivo ([ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md)).
+
+**[Escaneo]** La identidad de un hallazgo pasa a `fichero │ tipo │ símbolo`. El
+escáner clasifica sobre un [vocabulario cerrado](TAXONOMIA-DE-DEFECTOS.md)
+derivado de los defectos reales del repositorio, en vez de que la clave dependa
+del título que redacta distinto cada vez. Aplica hacia adelante
+([ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md)).
+
+**[Motor]** El tope por propuesta mide trabajo real —sin la re-lectura del
+contexto, que era el 93-96% de lo que lo reventaba— y el generador lleva techo
+de 30 turnos con desenlace propio al agotarlo
+([ADR-068](DECISIONS/adr-068-tope-mide-trabajo-y-techo-de-turnos.md)).
+
+**[Motor]** Un análisis que no se deja leer se registra como tal y ya no se
+disfraza de hallazgo obsoleto
+([ADR-066](DECISIONS/adr-066-analisis-ilegible-no-es-obsoleto.md)).
+
+**[Seguridad]** Tres agujeros cerrados por el propio motor y firmados por el
+operador, entre ellos `graph:verify` lanzando el CLI sin `guardRun`. Detalle en
+[SECURITY-MODEL](SECURITY-MODEL.md).
+
+**[UI]** El modo autónomo por fases completo: drenaje con confirmación de gasto,
+[cola de firma en su página](PAGES/firma.md) con filas desplegables, y el
+[expediente del motor](PAGES/motor.md) paginado. «Firmar» queda reservado para
+lo que integra; en el gate el botón dice «Pedir revisión».
+
 ## 2026-08-11
 
 El día más denso del proyecto: el último eslabón del motor y la totalidad del
