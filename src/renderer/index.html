@@ -9,7 +9,7 @@
          base-uri y form-action NO heredan de default-src y hay que declararlas
          aparte: sin ellas, un HTML inyectado podria reescribir de donde cuelgan
          las rutas relativas o enviar un formulario fuera de la app.
-         style-src lleva 'unsafe-inline' por el modo desarrollo: en `npm run dev`
+         style-src lleva 'unsafe-inline' SOLO en desarrollo: en `npm run dev`
          electron-vite inyecta las hojas con recarga en caliente como etiquetas
          style dentro del documento, y sin esa relajacion la interfaz de dev se
          queda sin estilos (error de CSP en consola, no fallo de compilacion, asi
@@ -18,17 +18,29 @@
          desde head, que ya cubre 'self', y las medidas calculadas de los
          componentes se aplican por el objeto style de React, via programatica
          que style-src no intercepta. Este archivo es unico para los dos
-         entornos, de modo que la relajacion viaja intacta al binario del
-         operador: se acepta el riesgo residual porque solo afecta a estilos
-         —nunca a script-src— y el vector que la haria peligrosa, inyeccion de
-         marcado en el renderer, sigue contenido por script-src 'self', por
-         contextIsolation y por las guardas de navegacion de la ventana. Si algun
-         dia la CSP se separa por entorno, esta relajacion sale de la de
-         produccion; hasta entonces queda registrada aqui. -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"
-    />
+         entornos, asi que la politica se elige aqui copiando la guarda de
+         loadRenderer (main-window.ts): el servidor de electron-vite sirve por
+         http(s) y el binario del operador entra siempre por loadFile, o sea por
+         file://. Produccion es la rama por defecto y desarrollo la excepcion, de
+         modo que ninguna variable de entorno puede colar la relajacion dentro
+         del paquete. Se emite con document.write para que la meta la inserte el
+         parser, igual que si estuviera escrita a mano, antes de que cargue nada
+         mas; el script en linea corre cuando todavia no hay politica, por eso
+         script-src 'self' no le afecta. -->
+    <script>
+      const devServer = location.protocol === 'http:' || location.protocol === 'https:'
+      const styleSrc = devServer ? "style-src 'self' 'unsafe-inline'" : "style-src 'self'"
+      const policy = [
+        "default-src 'self'",
+        "script-src 'self'",
+        styleSrc,
+        "img-src 'self' data:",
+        "font-src 'self' data:",
+        "base-uri 'none'",
+        "form-action 'none'"
+      ].join('; ')
+      document.write('<meta http-equiv="Content-Security-Policy" content="' + policy + '">')
+    </script>
   </head>
 
   <body>
