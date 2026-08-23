@@ -22,14 +22,14 @@ describe('createGraphOmega (binario fake)', () => {
     const bin = fakeBin(
       `echo '{"result":"${VERDICT.replace(/"/g, '\\"')}","usage":{"input_tokens":90,"output_tokens":10}}'` // prettier-ignore
     )
-    const result = await createGraphOmega(bin).run(tmpdir(), 'prompt')
+    const result = await createGraphOmega(bin, 'p1').run(tmpdir(), 'prompt')
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.verdict.veredicto_global).toBe('APROBADO')
     expect(result.runMeta.tokensUsed).toBe(100)
   })
 
   it('respuesta sin bloque VERDICT: la constante clasifica y la autopsia viaja', async () => {
-    const result = await createGraphOmega(fakeBin('echo "se ve bien"')).run(tmpdir(), 'p')
+    const result = await createGraphOmega(fakeBin('echo "se ve bien"'), 'p1').run(tmpdir(), 'p')
     // Extremo a extremo por el sobre real del CLI: el diagnostico del parser y
     // el crudo sobreviven al camino, no solo dentro de toOmegaOutcome.
     expect(result).toMatchObject({ ok: false, error: 'omega_response_invalid' })
@@ -39,12 +39,12 @@ describe('createGraphOmega (binario fake)', () => {
   })
 
   it('timeout: lo mata y reporta timedOut', async () => {
-    const result = await createGraphOmega(fakeBin('sleep 30'), 150).run(tmpdir(), 'p')
+    const result = await createGraphOmega(fakeBin('sleep 30'), 'p1', 150).run(tmpdir(), 'p')
     expect(result).toMatchObject({ ok: false, timedOut: true })
   })
 
   it('spawn roto: error con mensaje, sin lanzar', async () => {
-    const result = await createGraphOmega('/no/existe').run(tmpdir(), 'p')
+    const result = await createGraphOmega('/no/existe', 'p1').run(tmpdir(), 'p')
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.timedOut).toBe(false)
   })

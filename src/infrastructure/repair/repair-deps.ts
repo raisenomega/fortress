@@ -37,20 +37,20 @@ export function buildGenerateDeps(projectId: string): GenerateDeps {
 }
 
 /** Deps reales del gate hermetico (I3): npm ci + 3 comandos, cola de 1. */
-export function buildGateDeps(): GateDeps {
+export function buildGateDeps(projectId: string): GateDeps {
   const manager = createWorktreeManager()
   return {
     worktreeRoot: worktreeRoot(),
     worktreeExists: (path) => existsSync(path),
     isClean: (path) => manager.isClean(path),
-    runner: createGateRunner(),
+    runner: createGateRunner(projectId),
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }
 }
 
 /** Deps reales de OMEGA (I4): lectura estricta, cola compartida con el gate. */
-export function buildOmegaDeps(): OmegaDeps {
+export function buildOmegaDeps(projectId: string): OmegaDeps {
   const manager = createWorktreeManager()
   return {
     worktreeRoot: worktreeRoot(),
@@ -60,7 +60,7 @@ export function buildOmegaDeps(): OmegaDeps {
     diffText: (worktreePath) => showHead(worktreePath),
     readPost: (worktreePath, relPath) => readAtHead(worktreePath, relPath),
     readPre: (worktreePath, baseSha, relPath) => readAtSha(worktreePath, baseSha, relPath),
-    omega: createGraphOmega(CLAUDE_BIN),
+    omega: createGraphOmega(CLAUDE_BIN, projectId),
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }

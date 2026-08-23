@@ -41,7 +41,7 @@ const base = (dir: string): string => git(dir, 'rev-parse', 'main').trim()
 const CMD = { key: 'lint', args: ['run', 'lint'], timeoutMs: 5000 }
 
 const medir = (dir: string, salidaFix: string): ReturnType<typeof medirHerencia> =>
-  medirHerencia(linter(), dir, base(dir), CMD, salidaFix)
+  medirHerencia('p1', linter(), dir, base(dir), CMD, salidaFix)
 
 describe('medirHerencia: de quien es el rojo', () => {
   it('el ruido propio son las quejas que nombran un fichero del fix', () => {

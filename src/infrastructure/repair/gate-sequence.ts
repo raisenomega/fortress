@@ -13,6 +13,8 @@ export interface Secuencia {
   readonly bin: string
   readonly worktreePath: string
   readonly baseSha: string
+  /** De quien son estos comandos: sin dueno, Detener no los alcanza. */
+  readonly owner: string
   /** Lo ya corrido (el npm ci del setup). Se sigue llenando aqui. */
   readonly done: CommandOutcome[]
   readonly skipped: readonly string[]
@@ -21,15 +23,12 @@ export interface Secuencia {
 /** Si el rojo de este comando ya estaba en la base. Un timeout nunca se hereda
  *  —no hay salida que comparar—, ni un fix sin base medible: la duda cuenta
  *  contra el, nunca a su favor. */
-async function esHeredado(
-  s: Secuencia,
-  key: string,
-  cmd: GateCommand,
-  salido: CommandOutcome
-): Promise<boolean> {
+// prettier-ignore
+async function esHeredado(s: Secuencia, key: string, cmd: GateCommand, salido: CommandOutcome): Promise<boolean> {
   if (salido.timedOut) return false
   const salida = salido.stdoutTail + salido.stderrTail
-  const medida = await medirHerencia(s.bin, s.worktreePath, s.baseSha, { ...cmd, key }, salida)
+  // prettier-ignore
+  const medida = await medirHerencia(s.owner, s.bin, s.worktreePath, s.baseSha, { ...cmd, key }, salida)
   return medida.heredado
 }
 
@@ -52,7 +51,7 @@ export async function correrComandos(
 
   for (const { key, cmd } of resueltos) {
     if (cmd === null) continue
-    const salido = await spawnCommand(s.bin, key, cmd.args, s.worktreePath, cmd.timeoutMs)
+    const salido = await spawnCommand(s.bin, key, cmd.args, s.worktreePath, cmd.timeoutMs, s.owner) // prettier-ignore
     s.done.push(salido)
     if (salido.exitCode === 0 && !salido.timedOut) continue
 

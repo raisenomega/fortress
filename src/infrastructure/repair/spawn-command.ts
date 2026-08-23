@@ -3,23 +3,17 @@ import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
 import { tail } from '@domain/repair/tail'
 import { buildGateEnv } from './gate-env'
+import { trackChild } from '../claude-code/child-registry'
+import { senalAl } from '../claude-code/kill-signal'
 
 /** Mata el GRUPO entero (npm run spawnea hijos: tsc, eslint, vitest). Matar
  *  solo al padre deja nietos vivos sosteniendo los pipes y `close` no llega. */
-function killGroup(child: ChildProcess, signal: NodeJS.Signals): void {
-  try {
-    if (child.pid !== undefined) process.kill(-child.pid, signal)
-  } catch {
-    // Grupo ya muerto: nada que hacer.
-  }
-}
-
 /** SIGTERM al grupo; a los 3s, SIGKILL — la leccion del boton Detener. */
 function armTimeout(child: ChildProcess, timeoutMs: number, onFire: () => void): NodeJS.Timeout {
   return setTimeout(() => {
     onFire()
-    killGroup(child, 'SIGTERM')
-    const escalation = setTimeout(() => killGroup(child, 'SIGKILL'), 3000)
+    senalAl(child, 'SIGTERM', 'grupo')
+    const escalation = setTimeout(() => senalAl(child, 'SIGKILL', 'grupo'), 3000)
     escalation.unref()
     child.once('close', () => clearTimeout(escalation))
   }, timeoutMs)
@@ -35,7 +29,8 @@ export function spawnCommand(
   key: string,
   args: readonly string[],
   cwd: string,
-  timeoutMs: number
+  timeoutMs: number,
+  owner: string | null = null
 ): Promise<CommandOutcome> {
   const startedAt = Date.now()
   return new Promise((resolve) => {
@@ -46,6 +41,7 @@ export function spawnCommand(
     // `process.env`, y el gate tiene que correr con el de ahora.
     const env = buildGateEnv(process.env)
     const child = spawn(bin, args as string[], { cwd, detached: true, env })
+    trackChild(child, owner, 'grupo')
     let out = ''
     let errOut = ''
     let timedOut = false
