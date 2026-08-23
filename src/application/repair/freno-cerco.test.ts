@@ -1,21 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import type { ConfigState } from '@domain/repair/auto-merge-config'
-import { DEFAULT_POLICY } from '@domain/repair/auto-merge-policy'
-import { bench, hallazgo } from './plan-repair-fixture'
+import { CERCO, LIBRE, MEDIO, SIN_CERCO, VETADO } from './freno-cerco-fixture'
+import { bench } from './plan-repair-fixture'
 import { planRepair } from './plan-repair'
-import { resumenCerco } from './resumen-cerco'
-
-/** El cerco real de FORTRESS: solo LOW y con `ipc/**` excluido. */
-const CERCO: ConfigState = {
-  kind: 'valid',
-  policy: { ...DEFAULT_POLICY, enabled: true, severities: ['LOW'], blacklist: ['src/infrastructure/ipc/**'] } // prettier-ignore
-}
-/** mailbd: declara `.fortress/config` pero sin bloque autoMerge. */
-const SIN_CERCO: ConfigState = { kind: 'invalid', reason: 'falta el bloque autoMerge' }
-
-const LIBRE = hallazgo('f-libre', 'src/infrastructure/claude-code/run-accumulator.ts')
-const VETADO = hallazgo('f-vetado', 'src/infrastructure/ipc/graph-action-handlers.ts')
-const MEDIO = { ...hallazgo('f-medio', 'src/application/a.ts'), severity: 'MEDIUM' as const }
 
 describe('la cola no elige lo que el cerco va a denegar', () => {
   it('un hallazgo cuyo fichero esta excluido no se elige, y no paga analista', async () => {
@@ -58,17 +44,5 @@ describe('el operador alcanza a mano lo que la cola descarta', () => {
   it('un dirigido que el cerco denegaria se trabaja igual: nace para firma humana', async () => {
     const b = bench({ findings: [VETADO, LIBRE], cerco: CERCO })
     expect((await planRepair(b.context, 'p1', 'f-vetado'))?.state).toBe('ANALIZADO')
-  })
-})
-
-describe('el freno dice en voz alta lo que deja fuera', () => {
-  it('cuenta los que la cola no puede elegir, sobre el total vivo', () => {
-    const b = bench({ findings: [VETADO, LIBRE, MEDIO], cerco: CERCO })
-    expect(resumenCerco(b.context, 'p1')).toEqual({ total: 3, fuera: 2 })
-  })
-
-  it('sin cerco no hay nadie fuera, y la linea no se pinta', () => {
-    const b = bench({ findings: [VETADO, MEDIO], cerco: SIN_CERCO })
-    expect(resumenCerco(b.context, 'p1')).toEqual({ total: 2, fuera: 0 })
   })
 })

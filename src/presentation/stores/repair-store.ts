@@ -34,7 +34,7 @@ export const useRepairStore = create<RepairState>((set) => ({
   findings: [],
   busy: false,
   drenando: false,
-  cerco: { total: 0, fuera: 0 },
+  cerco: { total: 0, trabajables: 0, autoIntegrables: 0 },
   setData: (projectId, proposals, findings, cerco) =>
     set({ projectId, proposals, findings, cerco }),
   setBusy: (busy) => set({ busy }),

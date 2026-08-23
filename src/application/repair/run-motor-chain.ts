@@ -44,7 +44,8 @@ export async function runMotorChain(
   deps: MotorChainDeps,
   modo: ModoDeVuelta = 'completo'
 ): Promise<Result<ChainOutcome>> {
-  const proposal = await planRepair(ctx, projectId)
+  // Sin hallazgo dirigido: la cola elige, y el modo le dice con que alcance.
+  const proposal = await planRepair(ctx, projectId, undefined, modo)
   if (proposal === null) return ok({ kind: 'sin-candidato' })
   if (proposal.state !== 'ANALIZADO') return ok({ kind: 'obsoleto', proposalId: proposal.id })
 

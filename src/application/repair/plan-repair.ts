@@ -1,4 +1,5 @@
 import { isActionable } from '@domain/repair/analysis'
+import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import {
   canTransition,
   type AnalysisVerdict,
@@ -23,11 +24,15 @@ import { recordAnalyzed, recordElegido } from './record-plan-events'
  * motor atiende ESE hallazgo sin mirar la cola ni el cerco de integracion
  * automatica —si no cabe, su fix acabara pidiendo firma humana—. Sin el, todo
  * ocurre como siempre: elige el orden.
+ *
+ * `modo` viaja hasta la seleccion porque decide su ALCANCE: hasta donde llegue
+ * la vuelta es lo que dice que hallazgos vale la pena elegir.
  */
 export async function planRepair(
   context: AppContext,
   projectId: string,
-  findingId?: string
+  findingId?: string,
+  modo: ModoDeVuelta = 'completo'
 ): Promise<Proposal | null> {
   const project = context.projects.findById(projectId)
   if (!project) return null
@@ -36,7 +41,7 @@ export async function planRepair(
   // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.
   const baseSha = context.headSha(project.path)
   if (baseSha === null) return null
-  const selection = elegirObjetivo(context, projectId, baseSha, project.path, findingId)
+  const selection = elegirObjetivo(context, projectId, baseSha, project.path, modo, findingId)
   if (!selection) return null
 
   const now = Date.now()

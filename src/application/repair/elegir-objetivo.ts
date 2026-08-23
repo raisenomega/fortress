@@ -1,5 +1,6 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
-import { puedeAspirar } from '@domain/repair/puede-aspirar'
+import { dentroDelAlcance } from '@domain/repair/alcance'
+import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { hasBlockingRejection } from '@domain/repair/retry-eligibility'
 import { selectTarget, type Candidate, type Selection } from '@domain/repair/select-target'
 import { dirigirA } from '@domain/repair/target-dirigido'
@@ -15,13 +16,15 @@ export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f
  *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
  *  (ADR-059). Los que fracasaron por una causa que repetir no arregla con el
  *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. Y
- *  los que el cerco va a denegar por severidad o por ruta: elegirlos cuesta el
- *  analista y el generador enteros para que la politica los rechace al final. */
+ *  los que quedan fuera del alcance de ESTA vuelta, que depende de hasta donde
+ *  vaya a llegar: si puede integrar sola, solo lo que el cerco admitiria; si
+ *  para antes del merge, todo menos las defensas del motor. */
 function candidates(
   context: AppContext,
   projectId: string,
   headSha: string,
-  projectPath: string
+  projectPath: string,
+  modo: ModoDeVuelta
 ): Candidate[] {
   const excluded = new Set(context.repairProposals.findObsoleteFindingIds(projectId, headSha))
   for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
@@ -31,7 +34,7 @@ function candidates(
     .listMemory(projectId)
     .filter((f) => vivo(f) && !excluded.has(f.id))
     .filter((f) => !hasBlockingRejection(f.id, headSha, previas))
-    .filter((f) => puedeAspirar(f.severity, f.file, config))
+    .filter((f) => dentroDelAlcance(modo, f.severity, f.file, config))
     .map(aCandidato)
 }
 
@@ -45,20 +48,21 @@ function candidates(
  * existen para que el motor no compre lo mismo cada ronda; un humano que
  * pregunta dos veces esta preguntando dos veces, y esa es su decision.
  *
- * El cerco es el caso claro: la cola no elige lo que la politica va a denegar,
- * pero dirigido SI se trabaja, porque pedirlo a mano es justamente pedir un fix
- * para firma humana. Ese escape no necesita bandera: el camino dirigido no pasa
- * por la cola, asi que tampoco por su filtro.
+ * El alcance es el caso claro: la cola no elige lo que esta vuelta no puede
+ * llevar a ningun sitio, pero dirigido SI se trabaja, porque pedirlo a mano es
+ * justamente pedir un fix para firma humana. Ese escape no necesita bandera: el
+ * camino dirigido no pasa por la cola, asi que tampoco por su filtro.
  */
 export function elegirObjetivo(
   context: AppContext,
   projectId: string,
   headSha: string,
   projectPath: string,
+  modo: ModoDeVuelta,
   findingId?: string
 ): Selection | null {
   if (findingId === undefined) {
-    return selectTarget(candidates(context, projectId, headSha, projectPath))
+    return selectTarget(candidates(context, projectId, headSha, projectPath, modo))
   }
 
   const conPropuesta = new Set(context.repairProposals.findLiveFindingIds(projectId))
