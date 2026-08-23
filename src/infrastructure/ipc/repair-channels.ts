@@ -8,6 +8,8 @@ export const REPAIR_CHANNELS = {
   repairRunGate: 'repair:run-gate',
   repairRunOmega: 'repair:run-omega',
   repairRetry: 'repair:retry',
+  /** La firma humana: integrar una propuesta que OMEGA ya aprobo. */
+  repairSign: 'repair:sign',
   /** Cuantos hallazgos vivos no puede elegir la cola por si sola. */
   repairCerco: 'repair:cerco',
   /** Empuje al renderer: el expediente de ese proyecto cambio. Solo el id. */
