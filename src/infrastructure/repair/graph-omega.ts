@@ -1,5 +1,7 @@
-import { spawn, type ChildProcess } from 'child_process'
+import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
+import { trackChild } from '../claude-code/child-registry'
+import { senalAl } from '../claude-code/kill-signal'
 import { toOmegaOutcome, type OmegaRunResult } from './omega-outcome'
 import { EMPTY_USAGE, totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 
@@ -19,18 +21,10 @@ export interface GraphOmega {
   run(worktreePath: string, prompt: string): Promise<OmegaRunResult>
 }
 
-/** Grupo entero (principio I3): matar solo al padre deja el MCP vivo. */
-function killGroup(child: ChildProcess, signal: NodeJS.Signals): void {
-  try {
-    if (child.pid !== undefined) process.kill(-child.pid, signal)
-  } catch {
-    // Grupo ya muerto.
-  }
-}
-
 /** OMEGA real: claude -p en modo lectura, cwd anclado al worktree. Replica el
  *  patron del generador a proposito — juez y ejecutor no comparten codigo. */
-export function createGraphOmega(claudeBin: string, timeoutMs = TIMEOUT_MS): GraphOmega {
+// prettier-ignore
+export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS): GraphOmega {
   return {
     run: (worktreePath, prompt) => {
       const startedAt = Date.now()
@@ -42,12 +36,14 @@ export function createGraphOmega(claudeBin: string, timeoutMs = TIMEOUT_MS): Gra
         '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS] // prettier-ignore
       return new Promise((resolve) => {
         const child = spawn(claudeBin, args, { cwd: worktreePath, detached: true })
+        // Detached: el registro tiene que matarlo por GRUPO o solo cae el lider.
+        trackChild(child, projectId, 'grupo')
         let out = ''
         let timedOut = false
         const timer = setTimeout(() => {
           timedOut = true
-          killGroup(child, 'SIGTERM')
-          const escalation = setTimeout(() => killGroup(child, 'SIGKILL'), 3000)
+          senalAl(child, 'SIGTERM', 'grupo')
+          const escalation = setTimeout(() => senalAl(child, 'SIGKILL', 'grupo'), 3000)
           escalation.unref()
           child.once('close', () => clearTimeout(escalation))
         }, timeoutMs)

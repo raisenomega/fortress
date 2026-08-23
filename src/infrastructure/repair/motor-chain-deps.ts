@@ -15,7 +15,7 @@ import { buildAutoMergeDeps, buildGateDeps, buildGenerateDeps, buildOmegaDeps } 
 export function buildMotorChainDeps(projectId: string): MotorChainDeps {
   return {
     generate: buildGenerateDeps(projectId),
-    gate: buildGateDeps(),
-    judge: { omega: buildOmegaDeps(), autoMerge: buildAutoMergeDeps() }
+    gate: buildGateDeps(projectId),
+    judge: { omega: buildOmegaDeps(projectId), autoMerge: buildAutoMergeDeps() }
   }
 }

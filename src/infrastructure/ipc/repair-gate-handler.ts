@@ -19,7 +19,7 @@ export function registerRepairGateHandler(): void {
     const busy = guardRun(context, proposal.projectId)
     if (busy !== null) return { ok: false, reason: busy }
     try {
-      return await runGate(context, proposal.id, buildGateDeps())
+      return await runGate(context, proposal.id, buildGateDeps(proposal.projectId))
     } finally {
       endRun(proposal.projectId)
     }

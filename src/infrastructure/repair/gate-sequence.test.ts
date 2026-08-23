@@ -13,7 +13,7 @@ const CMDS: readonly GateCommand[] = [
 /** El gate entero contra un repo de verdad: base, fix y git por medio. */
 const correr = async (base: string, fix: string): Promise<GateOutcome> => {
   const { dir, baseSha } = repoConBase(base, fix)
-  return createGateRunner(npmSegunContenido(), CMDS, 10_000).run(dir, baseSha)
+  return createGateRunner('p1', npmSegunContenido(), CMDS, 10_000).run(dir, baseSha)
 }
 
 const corridos = (o: GateOutcome): readonly string[] => o.commands.map((c) => c.command)

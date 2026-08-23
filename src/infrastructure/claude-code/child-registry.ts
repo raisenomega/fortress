@@ -1,4 +1,5 @@
 import type { ChildProcess } from 'child_process'
+import { senalAl, type ModoDeMuerte } from './kill-signal'
 
 /**
  * Procesos `claude` vivos, CON el proyecto al que pertenecen. Existe porque un
@@ -10,10 +11,21 @@ import type { ChildProcess } from 'child_process'
  * que no es de ningun proyecto —el login, un sandbox de aprendizaje— y a esos
  * no los alcanza la parada de nadie; solo el boton de mantenimiento.
  */
-const alive = new Map<ChildProcess, string | null>()
+interface Ficha {
+  readonly owner: string | null
+  /** Un detached hay que matarlo por grupo o no muere. Lo declara quien lo
+   *  spawneo, que es el unico que sabe como lo lanzo. */
+  readonly modo: ModoDeMuerte
+}
 
-export function trackChild(child: ChildProcess, owner: string | null = null): void {
-  alive.set(child, owner)
+const alive = new Map<ChildProcess, Ficha>()
+
+export function trackChild(
+  child: ChildProcess,
+  owner: string | null = null,
+  modo: ModoDeMuerte = 'proceso'
+): void {
+  alive.set(child, { owner, modo })
   // Se descuenta solo: un proceso que ya termino no hay que matarlo.
   child.once('close', () => alive.delete(child))
   child.once('error', () => alive.delete(child))
@@ -23,21 +35,14 @@ export function liveChildCount(): number {
   return alive.size
 }
 
-/** Cuanto se le concede a un proceso para morir por las buenas tras SIGTERM. */
-const GRACE_MS = 3000
-
 /** SIGTERM y, a los 3s, SIGKILL. SIGTERM es una PETICION y claude puede
  *  ignorarla — paso en vivo (2026-08-09): Detener "no funcionaba" porque el run
  *  seguia streameando tras recibirla. */
-function terminar(child: ChildProcess): void {
-  child.kill('SIGTERM')
-  const escalation = setTimeout(() => {
-    try {
-      child.kill('SIGKILL')
-    } catch {
-      // Murio entre el timer y la senal: perfecto.
-    }
-  }, GRACE_MS)
+const GRACE_MS = 3000
+
+function terminar(child: ChildProcess, modo: ModoDeMuerte): void {
+  senalAl(child, 'SIGTERM', modo)
+  const escalation = setTimeout(() => senalAl(child, 'SIGKILL', modo), GRACE_MS)
   escalation.unref()
   child.once('close', () => clearTimeout(escalation))
 }
@@ -47,15 +52,11 @@ function terminar(child: ChildProcess): void {
  *  close y se quedaria contado para siempre. */
 function matar(cumple: (owner: string | null) => boolean): number {
   let total = 0
-  for (const [child, owner] of [...alive]) {
-    if (!cumple(owner)) continue
+  for (const [child, ficha] of [...alive]) {
+    if (!cumple(ficha.owner)) continue
     total += 1
     alive.delete(child)
-    try {
-      terminar(child)
-    } catch {
-      continue // Ya estaba muerto: no hay nada que escalar.
-    }
+    terminar(child, ficha.modo)
   }
   return total
 }

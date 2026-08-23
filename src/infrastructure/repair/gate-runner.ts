@@ -30,6 +30,7 @@ function real(command: GateCommand, scripts: readonly string[]): GateCommand | n
  * NADA, no hay gate que dar por pasado y la cadena se corta ahi.
  */
 export function createGateRunner(
+  owner: string,
   bin = 'npm',
   commands: readonly GateCommand[] = GATE_COMMANDS,
   npmCiTimeoutMs = NPM_CI_TIMEOUT_MS
@@ -38,7 +39,7 @@ export function createGateRunner(
     run: async (worktreePath, baseSha) => {
       const done: CommandOutcome[] = []
 
-      const ci = await spawnCommand(bin, 'npm ci', ['ci'], worktreePath, npmCiTimeoutMs)
+      const ci = await spawnCommand(bin, 'npm ci', ['ci'], worktreePath, npmCiTimeoutMs, owner)
       done.push(ci)
       if (ci.exitCode !== 0 || ci.timedOut) {
         return { ok: false, commands: done, failedAt: 'npm ci', reason: ci.timedOut ? 'gate_timeout' : 'npm_ci_failed' } // prettier-ignore
@@ -55,7 +56,7 @@ export function createGateRunner(
         return { ok: false, commands: done, failedAt: 'scripts', reason: 'gate_sin_verificacion', skipped } // prettier-ignore
       }
 
-      return correrComandos({ bin, worktreePath, baseSha, done, skipped }, resueltos)
+      return correrComandos({ bin, worktreePath, baseSha, done, skipped, owner }, resueltos)
     }
   }
 }

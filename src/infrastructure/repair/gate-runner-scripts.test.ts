@@ -13,7 +13,7 @@ const CMDS: readonly GateCommand[] = [
 describe('createGateRunner: los scripts REALES del proyecto', () => {
   it('un repo que llama type-check a lo mismo se verifica igual', async () => {
     const { bin, llamadas } = fakeNpm()
-    const outcome = await createGateRunner(bin, CMDS, 5000).run(
+    const outcome = await createGateRunner('p1', bin, CMDS, 5000).run(
       repo('type-check', 'lint', 'test'),
       'base-sha'
     )
@@ -27,14 +27,17 @@ describe('createGateRunner: los scripts REALES del proyecto', () => {
   })
 
   it('lo que el proyecto no sabe verificar se salta, y se dice', async () => {
-    const outcome = await createGateRunner(fakeNpm().bin, CMDS, 5000).run(repo('lint'), 'base-sha')
+    const outcome = await createGateRunner('p1', fakeNpm().bin, CMDS, 5000).run(
+      repo('lint'),
+      'base-sha'
+    )
     expect(outcome.ok).toBe(true)
     expect(outcome.skipped).toEqual(['typecheck', 'test:unit'])
     expect(outcome.commands.map((c) => c.command)).toEqual(['npm ci', 'lint'])
   })
 
   it('sin ningun script del gate no hay gate que dar por pasado', async () => {
-    const outcome = await createGateRunner(fakeNpm().bin, CMDS, 5000).run(
+    const outcome = await createGateRunner('p1', fakeNpm().bin, CMDS, 5000).run(
       repo('build', 'dev'),
       'base-sha'
     )
@@ -45,7 +48,10 @@ describe('createGateRunner: los scripts REALES del proyecto', () => {
   })
 
   it('un proyecto sin package.json tampoco se da por verificado', async () => {
-    const outcome = await createGateRunner(fakeNpm().bin, CMDS, 5000).run(repoVacio(), 'base-sha')
+    const outcome = await createGateRunner('p1', fakeNpm().bin, CMDS, 5000).run(
+      repoVacio(),
+      'base-sha'
+    )
     expect(outcome).toMatchObject({ ok: false, reason: 'gate_sin_verificacion' })
   })
 })

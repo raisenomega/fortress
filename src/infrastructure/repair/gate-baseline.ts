@@ -37,6 +37,7 @@ export function ruidoPropio(salida: string, ficheros: readonly string[]): number
  * dos salidas, y se vuelve a la rama del fix al terminar.
  */
 export async function medirHerencia(
+  owner: string,
   bin: string,
   worktreePath: string,
   baseSha: string,
@@ -52,7 +53,7 @@ export async function medirHerencia(
   const ida = await git(worktreePath, ['checkout', '--quiet', baseSha])
   if (ida.code !== 0) return { heredado: false, sinMedir: 'no se pudo visitar la base' }
 
-  const enLaBase = await spawnCommand(bin, comando.key, comando.args, worktreePath, comando.timeoutMs) // prettier-ignore
+  const enLaBase = await spawnCommand(bin, comando.key, comando.args, worktreePath, comando.timeoutMs, owner) // prettier-ignore
   await git(worktreePath, ['checkout', '--quiet', rama])
 
   // A: si en la base ya estaba rojo, el rojo no nace con el fix.

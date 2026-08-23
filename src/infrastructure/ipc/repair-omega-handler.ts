@@ -30,7 +30,7 @@ export function registerRepairOmegaHandler(): void {
       const busy = guardRun(context, proposal.projectId)
       if (busy !== null) return { ok: false, reason: busy }
       try {
-        const deps = { omega: buildOmegaDeps(), autoMerge: buildAutoMergeDeps() }
+        const deps = { omega: buildOmegaDeps(proposal.projectId), autoMerge: buildAutoMergeDeps() }
         return (await judgeAndIntegrate(context, proposal.id, deps)).omega
       } finally {
         endRun(proposal.projectId)
