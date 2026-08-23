@@ -5,7 +5,6 @@ import { CercoNotice } from './CercoNotice'
 import { DrenajeEnVivo } from './DrenajeEnVivo'
 import { MotorAcciones } from './MotorAcciones'
 import { colaDeFirma } from './cola-de-firma'
-import { ColaDeFirma } from './ColaDeFirma'
 import { RepairProposalRow } from './RepairProposalRow'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
 
@@ -22,7 +21,7 @@ import { useRepairFeed } from '../../hooks/useRepairFeed'
 const subtitulo = (project: Project | null): string =>
   project === null
     ? 'Selecciona un proyecto para ver su expediente.'
-    : `Expediente de ${project.name}. Nada se integra sin pasar el gate y el revisor.`
+    : `Expediente de ${project.name}. Lo que espera firma vive en su propia pagina.`
 
 export function MotorView(): React.JSX.Element {
   const project = useActiveProject()
@@ -49,7 +48,6 @@ export function MotorView(): React.JSX.Element {
 
       {alDia && drenando ? <DrenajeEnVivo cerco={cerco} esperandoFirma={cola.length} /> : null}
       {alDia && !drenando ? <CercoNotice cerco={cerco} /> : null}
-      <ColaDeFirma cola={cola} />
 
       <MotorAcciones projectId={projectId} />
 

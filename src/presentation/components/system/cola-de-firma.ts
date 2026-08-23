@@ -13,6 +13,13 @@ const ESPERAN: ReadonlySet<ProposalState> = new Set(['GATE', 'OMEGA'])
 /** Donde vive el fix, para agrupar: el fichero del hallazgo, o su id si no hay. */
 const donde = (item: EnCola): string => item.finding?.file ?? item.proposal.findingId
 
+/** Donde vive el fix, en una linea: lo que el operador necesita para decidir. */
+export function sitio(item: EnCola): string {
+  const f = item.finding
+  if (!f) return `hallazgo ${item.proposal.findingId.slice(0, 6)}`
+  return `${f.severity} ${f.file}${f.line === null ? '' : `:${f.line}`}`
+}
+
 /**
  * Las propuestas que esperan firma: gate verde y nadie las ha juzgado todavia.
  *
