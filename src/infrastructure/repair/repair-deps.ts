@@ -23,12 +23,12 @@ export function worktreeRoot(): string {
 }
 
 /** Deps reales de generateFix: git, generador claude y sandbox del plan. */
-export function buildGenerateDeps(): GenerateDeps {
+export function buildGenerateDeps(projectId: string): GenerateDeps {
   const root = worktreeRoot()
   return {
     worktreeRoot: root,
     worktrees: createWorktreeManager(),
-    generator: createGraphGenerator(CLAUDE_BIN),
+    generator: createGraphGenerator(CLAUDE_BIN, projectId),
     scopeGroups: readScopeGroups,
     sandbox: (worktreePath, proposalId, liveRepoPath) =>
       assertRepairSandbox(worktreePath, proposalId, root, liveRepoPath),

@@ -2,6 +2,7 @@ import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { EMPTY_USAGE, totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
 import { parseUsage } from '../claude-code/parse-usage'
+import { trackChild } from '../claude-code/child-registry'
 
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
@@ -28,7 +29,8 @@ export interface GraphGenerator {
  * duplicacion controlada a acoplar el analista al generador. Los archivos
  * tocados NO se le creen al agente: los lee el motor con git, despues.
  */
-export function createGraphGenerator(claudeBin: string, timeoutMs = TIMEOUT_MS): GraphGenerator {
+// prettier-ignore
+export function createGraphGenerator(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS): GraphGenerator {
   return {
     generate: (worktreePath, prompt) => {
       const startedAt = Date.now()
@@ -43,6 +45,7 @@ export function createGraphGenerator(claudeBin: string, timeoutMs = TIMEOUT_MS):
         '--strict-mcp-config', '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS] // prettier-ignore
       return new Promise((resolve) => {
         const child = spawn(claudeBin, args, { cwd: worktreePath })
+        trackChild(child, projectId)
         let out = ''
         const timer = setTimeout(() => {
           child.kill('SIGKILL')

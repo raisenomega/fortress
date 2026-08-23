@@ -59,7 +59,7 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
     target: { id, severity, title, file, line, firstSeen },
     reason: `${retryOf} — reintento explicito del operador sobre el mismo hallazgo`
   }
-  const result = await analyzeTarget(ctx.analystFor(project.path), selection)
+  const result = await analyzeTarget(ctx.analystFor(project.path, project.id), selection)
   const verdict: AnalysisVerdict = isActionable(result.analysis) ? 'REAL' : 'OBSOLETO'
   const state: ProposalState = verdict === 'REAL' ? 'ANALIZADO' : 'CADUCADO'
   if (!canTransition(proposal.state, state)) return { ok: true, newProposalId: proposal.id }

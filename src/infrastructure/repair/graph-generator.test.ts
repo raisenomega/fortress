@@ -16,27 +16,30 @@ function fakeBin(script: string): string {
 describe('createGraphGenerator', () => {
   it('exit 0 con usage devuelve ok y la factura', async () => {
     const bin = fakeBin(`echo '{"result":"listo","usage":{"input_tokens":100,"output_tokens":50}}'`)
-    const result = await createGraphGenerator(bin).generate(tmpdir(), 'prompt')
+    const result = await createGraphGenerator(bin, 'p1').generate(tmpdir(), 'prompt')
     expect(result.ok).toBe(true)
     expect(result.runMeta.tokensUsed).toBe(150)
     expect(result.runMeta.durationMs).toBeGreaterThanOrEqual(0)
   })
 
   it('exit != 0 devuelve error con codigo, y la duracion igual', async () => {
-    const result = await createGraphGenerator(fakeBin('exit 7')).generate(tmpdir(), 'p')
+    const result = await createGraphGenerator(fakeBin('exit 7'), 'p1').generate(tmpdir(), 'p')
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toMatch(/codigo 7/)
     expect(result.runMeta.tokensUsed).toBeUndefined()
   })
 
   it('el timeout mata el proceso y reporta', async () => {
-    const result = await createGraphGenerator(fakeBin('sleep 30'), 150).generate(tmpdir(), 'p')
+    const result = await createGraphGenerator(fakeBin('sleep 30'), 'p1', 150).generate(
+      tmpdir(),
+      'p'
+    )
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toMatch(/timeout/)
   })
 
   it('sin JSON en stdout no se inventa factura: undefined', async () => {
-    const result = await createGraphGenerator(fakeBin('echo hola')).generate(tmpdir(), 'p')
+    const result = await createGraphGenerator(fakeBin('echo hola'), 'p1').generate(tmpdir(), 'p')
     expect(result.ok).toBe(true)
     expect(result.runMeta.tokensUsed).toBeUndefined()
   })

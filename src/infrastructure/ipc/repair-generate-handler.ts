@@ -22,7 +22,7 @@ export function registerRepairGenerateHandler(): void {
       const busy = guardRun(context, proposal.projectId)
       if (busy !== null) return { ok: false, reason: 'invalid_state', detail: busy }
       try {
-        return await generateFix(context, proposal.id, buildGenerateDeps())
+        return await generateFix(context, proposal.id, buildGenerateDeps(proposal.projectId))
       } finally {
         endRun(proposal.projectId)
       }
