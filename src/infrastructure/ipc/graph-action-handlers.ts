@@ -46,16 +46,30 @@ async function handleAb(id: string, question: string): Promise<Result<GraphAb>> 
   }
 }
 
-function handleVerify(id: string): Promise<GraphVerify> {
+/**
+ * Verificar tambien spawnea el CLI con la key, y el breaker de contaminacion
+ * vale aunque casi no gaste. El motivo del rechazo sale por graph:progress:
+ * GraphVerify es plano, y devolverlo mudo confunde bloqueado con "no conecta".
+ */
+async function handleVerify(event: IpcMainInvokeEvent, id: string): Promise<GraphVerify> {
   const context = getAppContext()
   const project = context.projects.findById(id)
-  if (!project) return Promise.resolve(NO_GRAPH)
-  return verifyGraph(project.path, usesApiKey(context) ? context.apiKeys.read() : null)
+  if (!project) return NO_GRAPH
+  const busy = guardRun(context, id)
+  if (busy !== null) {
+    logger(event, id)(busy)
+    return NO_GRAPH
+  }
+  try {
+    return await verifyGraph(project.path, usesApiKey(context) ? context.apiKeys.read() : null)
+  } finally {
+    endRun(id)
+  }
 }
 
-/** IPC de las acciones del grafo. La instalacion y el A/B ocupan el carril del proyecto. */
+/** IPC de las acciones del grafo. Las tres ocupan el carril del proyecto. */
 export function registerGraphActionHandlers(): void {
   ipcMain.handle(IPC.graphInstall, (event, id: string) => handleInstall(event, id))
-  ipcMain.handle(IPC.graphVerify, (_event, id: string) => handleVerify(id))
+  ipcMain.handle(IPC.graphVerify, (event, id: string) => handleVerify(event, id))
   ipcMain.handle(IPC.graphAb, (_event, id: string, question: string) => handleAb(id, question))
 }
