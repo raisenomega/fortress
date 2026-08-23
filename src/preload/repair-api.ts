@@ -2,6 +2,7 @@ import type { GenerateResult } from '@application/repair/generate-types'
 import type { RetryResult } from '@application/repair/retry-repair'
 import type { RunGateResult } from '@application/repair/run-gate'
 import type { AutoMergeResult } from '@application/repair/auto-merge-types'
+import type { DrenajeResultado } from '@application/repair/drenar-hasta-omega'
 import type { ResumenCerco } from '@application/repair/resumen-cerco'
 import type { RunOmegaResult } from '@application/repair/run-omega'
 import type { Proposal } from '@domain/repair/proposal'
@@ -48,6 +49,13 @@ export interface RepairApi {
    * gobiernan la autonomia.
    */
   sign(proposalId: string): Promise<AutoMergeResult>
+  /**
+   * Recorre los hallazgos elegibles dejando cada fix juzgado y esperando firma.
+   * Tarda minutos y no escribe al chat: el avance se ve en la cola de firma.
+   */
+  drain(projectId: string): Promise<DrenajeResultado>
+  /** Detiene el drenaje en curso. Una parada no es un fallo. */
+  drainStop(projectId: string): Promise<number>
   /**
    * I4.2 — reintento explicito de un RECHAZADO de razonamiento (D24):
    * propuesta NUEVA sobre el HEAD actual con C2 fresco; la vieja no se muta.

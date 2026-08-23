@@ -32,6 +32,13 @@ export async function withStandby<T>(
 
     const result = await op()
     if (result.ok) return result.value
+    // La cancelacion se comprueba OTRA VEZ aqui, y no sobra. Parar mata el
+    // proceso hijo, el hijo muere con SIGTERM y el paso devuelve "termino con
+    // codigo 143": clasificado a ciegas, eso es una averia del proveedor, y el
+    // loop quedaba registrado como roto cuando lo unico que paso es que el
+    // operador dijo basta. La comprobacion de arriba no alcanza porque se
+    // cancela DURANTE la operacion, nunca entre dos.
+    if (hooks.isCancelled()) throw new LoopCancelled()
     if (classifyFailure(result.error) === 'terminal') throw new LoopTerminal(result.error)
 
     hooks.onStandby(result.error)

@@ -48,7 +48,12 @@ export function buildDeps(params: EngineParams): LoopDeps {
     fix: () =>
       withStandby(async () => {
         toChat('\n\n— Motor —\n')
-        const vuelta = await runMotorChain(context, pid, buildMotorChainDeps(), params.hastaGate)
+        const vuelta = await runMotorChain(
+          context,
+          pid,
+          buildMotorChainDeps(),
+          params.hastaGate ? 'hasta-gate' : 'completo'
+        )
         if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
         return vuelta
       }, hooks),

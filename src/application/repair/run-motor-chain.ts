@@ -1,3 +1,4 @@
+import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
@@ -32,18 +33,16 @@ const cortar = (proposalId: string, motivo: string): Result<ChainOutcome> =>
  * ante el que no reconoce, asi que un veredicto viajando como error mataria el
  * ciclo por hacer exactamente lo que se le pide.
  *
- * `stopAtGate` parte la vuelta en dos mitades que no son iguales de peligrosas:
- * TRABAJAR —elegir, entender, generar, compilar— ocurre entero dentro de un
- * worktree y no toca el arbol vivo; INTEGRAR si lo toca. Con la bandera puesta
- * el motor hace la primera mitad y se detiene con el fix guardado y el gate en
- * verde, a la espera de que un humano autorice el juicio. Sin ella, la conducta
- * es la de siempre.
+ * `modo` parte la vuelta por donde el riesgo cambia de naturaleza: TRABAJAR
+ * —elegir, entender, generar, compilar— ocurre entero dentro de un worktree y
+ * no toca el arbol vivo; JUZGAR cuesta un revisor pero tampoco lo toca; INTEGRAR
+ * si. Ver `ModoDeVuelta`. Por defecto, la conducta de siempre.
  */
 export async function runMotorChain(
   ctx: AppContext,
   projectId: string,
   deps: MotorChainDeps,
-  stopAtGate = false
+  modo: ModoDeVuelta = 'completo'
 ): Promise<Result<ChainOutcome>> {
   const proposal = await planRepair(ctx, projectId)
   if (proposal === null) return ok({ kind: 'sin-candidato' })
@@ -57,9 +56,12 @@ export async function runMotorChain(
   // Hasta aqui nada salio del worktree. OMEGA no se ha llamado: la propuesta
   // queda en GATE, que no es terminal, asi que cuenta como viva y su hallazgo
   // no vuelve a salir elegido. Las siguientes vueltas atacan otros y se apilan.
-  if (stopAtGate) return ok({ kind: 'espera-omega', proposalId: proposal.id })
+  if (modo === 'hasta-gate') return ok({ kind: 'espera-omega', proposalId: proposal.id })
 
-  const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge)
+  // En hasta-omega el revisor juzga y ahi se para: un veto cierra en RECHAZADO
+  // y no llega a la cola de firma; una aprobacion sale por `espera-firma` con
+  // condicion nula, que es justo "aprobada sin que la politica llegara a mirar".
+  const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge, modo === 'completo')
   if (!juicio.omega.ok) return cortar(proposal.id, juicio.omega.reason)
 
   const proposalId = proposal.id

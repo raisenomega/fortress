@@ -1,11 +1,10 @@
 import type { Project } from '@domain/project/project'
-import { proposeRepair } from '../../services/repair-service'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
 import { CercoNotice } from './CercoNotice'
+import { MotorAcciones } from './MotorAcciones'
 import { colaDeFirma } from './cola-de-firma'
 import { ColaDeFirma } from './ColaDeFirma'
-import { Icon } from '../common/Icon'
 import { RepairProposalRow } from './RepairProposalRow'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
 
@@ -30,7 +29,6 @@ export function MotorView(): React.JSX.Element {
   const cargado = useRepairStore((state) => state.projectId)
   const proposals = useRepairStore((state) => state.proposals)
   const findings = useRepairStore((state) => state.findings)
-  const busy = useRepairStore((state) => state.busy)
   const cerco = useRepairStore((state) => state.cerco)
 
   useRepairFeed(projectId)
@@ -50,15 +48,7 @@ export function MotorView(): React.JSX.Element {
       {alDia ? <CercoNotice cerco={cerco} /> : null}
       <ColaDeFirma cola={cola} />
 
-      <button
-        type="button"
-        disabled={busy || projectId === null}
-        onClick={() => projectId !== null && void proposeRepair(projectId)}
-        className="flex items-center gap-1.5 rounded border border-border px-2 py-1 text-xs text-foreground hover:border-primary/50 disabled:opacity-50"
-      >
-        <Icon name="wrench" size={12} />
-        {busy ? 'Analizando...' : 'Proponer reparacion'}
-      </button>
+      <MotorAcciones projectId={projectId} />
 
       <div className="space-y-1">
         {ordered.map((proposal) => (

@@ -10,6 +10,9 @@ export const REPAIR_CHANNELS = {
   repairRetry: 'repair:retry',
   /** La firma humana: integrar una propuesta que OMEGA ya aprobo. */
   repairSign: 'repair:sign',
+  /** Drenar los elegibles dejandolos juzgados y esperando firma. */
+  repairDrain: 'repair:drain',
+  repairDrainStop: 'repair:drain:stop',
   /** Cuantos hallazgos vivos no puede elegir la cola por si sola. */
   repairCerco: 'repair:cerco',
   /** Empuje al renderer: el expediente de ese proyecto cambio. Solo el id. */

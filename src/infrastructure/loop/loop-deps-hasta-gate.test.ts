@@ -26,7 +26,7 @@ const params = (hastaGate: boolean): EngineParams => ({
 
 afterEach(() => vi.restoreAllMocks())
 
-/** Con que bandera llamo el loop al motor en esa vuelta. */
+/** Con que MODO llamo el loop al motor en esa vuelta. */
 async function banderaDeLaVuelta(hastaGate: boolean): Promise<unknown> {
   const espia = vi.spyOn(motor, 'runMotorChain').mockResolvedValue({ ok: true, value: { kind: 'sin-candidato' } }) // prettier-ignore
   await buildDeps(params(hastaGate)).fix()
@@ -34,13 +34,13 @@ async function banderaDeLaVuelta(hastaGate: boolean): Promise<unknown> {
 }
 
 describe('la bandera hasta-gate llega hasta el motor, no se queda en el gate', () => {
-  it('el repo propio corre con stopAtGate: nunca integra sin firma', async () => {
-    // El gate del loop lo permite POR estar en este modo. Si la bandera se
+  it('el repo propio corre en hasta-gate: nunca integra sin firma', async () => {
+    // El gate del loop lo permite POR estar en este modo. Si el modo se
     // perdiera por el camino, el permiso quedaria concedido y la garantia no.
-    expect(await banderaDeLaVuelta(true)).toBe(true)
+    expect(await banderaDeLaVuelta(true)).toBe('hasta-gate')
   })
 
   it('cualquier otro proyecto corre la vuelta entera, como hasta hoy', async () => {
-    expect(await banderaDeLaVuelta(false)).toBe(false)
+    expect(await banderaDeLaVuelta(false)).toBe('completo')
   })
 })

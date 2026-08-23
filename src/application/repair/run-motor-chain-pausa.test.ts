@@ -16,7 +16,7 @@ function hastaElGate(): void {
 describe('el motor puede parar tras el gate sin correr OMEGA', () => {
   it('con stopAtGate corta ahi y devuelve espera-omega', async () => {
     hastaElGate()
-    const vuelta = await runMotorChain(ctx('GATE'), 'p1', DEPS, true)
+    const vuelta = await runMotorChain(ctx('GATE'), 'p1', DEPS, 'hasta-gate')
 
     expect(vuelta.ok && vuelta.value).toEqual({
       kind: 'espera-omega',
@@ -28,7 +28,7 @@ describe('el motor puede parar tras el gate sin correr OMEGA', () => {
     hastaElGate()
     const espia = vi.spyOn(juzgar, 'judgeAndIntegrate')
 
-    await runMotorChain(ctx('GATE'), 'p1', DEPS, true)
+    await runMotorChain(ctx('GATE'), 'p1', DEPS, 'hasta-gate')
 
     expect(espia).not.toHaveBeenCalled()
   })
@@ -48,7 +48,7 @@ describe('el motor puede parar tras el gate sin correr OMEGA', () => {
     genera({ ok: true })
     compila({ ok: false, reason: 'gate_failed' })
 
-    const vuelta = await runMotorChain(ctx('GATE'), 'p1', DEPS, true)
+    const vuelta = await runMotorChain(ctx('GATE'), 'p1', DEPS, 'hasta-gate')
     expect(vuelta.ok && vuelta.value.kind).toBe('descartada')
   })
 })

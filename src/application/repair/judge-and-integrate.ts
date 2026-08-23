@@ -40,10 +40,14 @@ export interface JudgeResult {
 export async function judgeAndIntegrate(
   ctx: AppContext,
   proposalId: string,
-  deps: JudgeDeps
+  deps: JudgeDeps,
+  integrar = true
 ): Promise<JudgeResult> {
   const omega = await runOmega(ctx, proposalId, deps.omega)
   if (!omega.ok || omega.verdict.veredicto_global !== 'APROBADO') return { omega, merge: null }
+  // Juzgar sin integrar: el fix queda aprobado esperando la firma humana. El
+  // merge no se "salta", es que en ese modo no es de esta funcion.
+  if (!integrar) return { omega, merge: null }
 
   try {
     return { omega, merge: await autoMergeProposal(ctx, deps.autoMerge, { proposalId }) }

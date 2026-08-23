@@ -15,5 +15,7 @@ export const repairApi: FortressApi['repair'] = {
   runGate: (proposalId) => ipcRenderer.invoke(IPC.repairRunGate, proposalId),
   runOmega: (proposalId) => ipcRenderer.invoke(IPC.repairRunOmega, proposalId),
   sign: (proposalId) => ipcRenderer.invoke(IPC.repairSign, proposalId),
+  drain: (projectId) => ipcRenderer.invoke(IPC.repairDrain, projectId),
+  drainStop: (projectId) => ipcRenderer.invoke(IPC.repairDrainStop, projectId),
   retry: (proposalId) => ipcRenderer.invoke(IPC.repairRetry, proposalId)
 }
