@@ -5,22 +5,26 @@ interface CercoNoticeProps {
 }
 
 /**
- * Lo que la cola NO va a elegir, dicho en voz alta.
+ * Cuanto de su tablero puede tocar el motor, dicho en voz alta.
  *
- * El freno de la seleccion es mudo por naturaleza: descarta un hallazgo no
- * eligiendolo, y eso no deja rastro en ninguna parte. Sin esta linea el
- * operador ve un motor que ignora casi todo su tablero y no puede distinguir
- * "no quiere" de "esta roto". Dice tambien la salida, porque saber que estan
- * fuera no sirve de nada si no se sabe como alcanzarlos.
+ * Son DOS numeros porque son dos preguntas, y mezclarlas hizo entender mal el
+ * sistema durante un tiempo: cuantos hallazgos puede TRABAJAR dejandolos a
+ * firma, y cuantos ademas podrian integrarse SOLOS dentro del cerco. Con un
+ * solo numero el panel decia "25 fuera del cerco" cuando el motor podia con 20.
+ *
+ * Lo que ni siquiera trabaja son las defensas del propio motor, y esas no las
+ * toca nadie: ni el, ni una firma. Decirlo evita la pregunta obvia de por que
+ * las cuentas no cuadran.
  */
 export function CercoNotice({ cerco }: CercoNoticeProps): React.JSX.Element | null {
-  if (cerco.fuera === 0) return null
+  if (cerco.total === 0) return null
+  const defensas = cerco.total - cerco.trabajables
 
   return (
-    <p className="text-xs text-muted-foreground">
-      {cerco.fuera} de {cerco.total} hallazgos quedan fuera del cerco de integracion automatica —por
-      severidad o por ruta— y la cola no los elige sola: su fix nunca se auto-integraria. Manda al
-      motor los que quieras desde su propia fila, y llegaran pidiendo firma humana.
+    <p className="text-muted-foreground text-xs">
+      De {cerco.total} hallazgos vivos, el motor puede trabajar {cerco.trabajables} y dejarlos
+      esperando tu firma; {cerco.autoIntegrables} podrian ademas integrarse solos dentro del cerco.
+      {defensas > 0 ? ` Los ${defensas} restantes son defensas del propio motor: no las toca.` : ''}
     </p>
   )
 }
