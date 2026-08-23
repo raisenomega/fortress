@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { cancelRun, endRun, isCancelled, isRunning, tryBeginRun } from './run-control'
+import { cancelRun, endMerge, endRun, isCancelled, isRunning, tryBeginMerge, tryBeginRun } from './run-control' // prettier-ignore
 
 beforeEach(() => {
   endRun('p1')
@@ -45,5 +45,28 @@ describe('cancelRun', () => {
     tryBeginRun('p1')
     cancelRun('p1')
     expect(isCancelled('p1')).toBe(true)
+  })
+})
+
+describe('tryBeginMerge: el turno del merge es otro turno', () => {
+  it('el motor corriendo no impide empezar un merge', () => {
+    tryBeginRun('p1')
+    expect(tryBeginMerge('p1')).toBe(true)
+    endMerge('p1')
+  })
+
+  it('pero dos merges del mismo proyecto no caben', () => {
+    expect(tryBeginMerge('p1')).toBe(true)
+    expect(tryBeginMerge('p1')).toBe(false)
+    endMerge('p1')
+  })
+
+  it('empezar un merge no borra la cancelacion del motor', () => {
+    tryBeginRun('p1')
+    cancelRun('p1')
+    tryBeginMerge('p1')
+    endMerge('p1')
+    expect(isCancelled('p1')).toBe(true)
+    expect(isRunning('p1')).toBe(true)
   })
 })
