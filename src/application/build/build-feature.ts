@@ -42,6 +42,7 @@ export async function buildFeature(
   const reply = await agent.run(
     {
       projectPath: project.path,
+      projectId: project.id,
       prompt,
       permissionMode: 'acceptEdits',
       agentId: null,

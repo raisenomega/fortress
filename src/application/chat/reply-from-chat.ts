@@ -25,6 +25,7 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
   const reply = await options.codeAgent.run(
     {
       projectPath: options.project.path,
+      projectId: options.project.id,
       prompt: buildChatPrompt(options.prompt, {
         projectName: options.project.name,
         corpus: options.corpus,

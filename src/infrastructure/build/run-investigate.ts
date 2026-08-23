@@ -14,6 +14,7 @@ export async function runInvestigate(
   const reply = await agentFor(context).run(
     {
       projectPath: target.value.path,
+      projectId: target.value.id,
       prompt: investigatePrompt(target.value.name, intent),
       // 'lectura', no 'plan': plan bloquea TODO el MCP, asi que el grafo nunca
       // respondia. En 'lectura' (default) el grafo ejecuta y no se puede escribir.

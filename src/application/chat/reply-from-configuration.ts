@@ -28,6 +28,7 @@ export async function replyFromConfiguration(options: ConfigReplyOptions): Promi
   const reply = await options.codeAgent.run(
     {
       projectPath: options.project.path,
+      projectId: options.project.id,
       prompt: buildConfigurationPrompt(options.history, options.project.name),
       permissionMode: 'plan',
       agentId: null,

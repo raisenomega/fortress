@@ -8,6 +8,13 @@ export type ChatEngine = 'claude-code' | 'api'
 export interface CodeAgentRequest {
   /** Carpeta del proyecto: es el directorio de trabajo del agente. */
   readonly projectPath: string
+  /**
+   * De quien es este proceso, para que una parada alcance solo lo suyo. Es el
+   * MISMO id que el candado de ejecucion, no la ruta: dos claves para la misma
+   * cosa acaban discrepando. Ausente = de nadie (un sandbox de aprendizaje, un
+   * borrador de agente), y a esos no los para ningun proyecto.
+   */
+  readonly projectId?: string
   readonly prompt: string
   readonly permissionMode: ClaudePermissionMode
   /** Agente que se hace cargo. Null deja que Claude Code decida por su cuenta. */

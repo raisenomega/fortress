@@ -6,6 +6,9 @@ export interface ScanRequest {
   /** Carpeta del proyecto: el escaneo se ejecuta dentro de ella. */
   readonly projectPath: string
   readonly projectName: string
+  /** De quien es el proceso que se va a lanzar, para que una parada de OTRO
+   *  proyecto no se lo lleve por delante. */
+  readonly projectId: string
 }
 
 export interface ScanOutcome {

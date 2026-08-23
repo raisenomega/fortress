@@ -1,4 +1,4 @@
-import { killAllChildren } from './claude-code/child-registry'
+import { killChildrenOf } from './claude-code/child-registry'
 
 /**
  * Control de las ejecuciones en marcha. Hace dos cosas:
@@ -40,13 +40,16 @@ export function isCancelled(projectId: string): boolean {
 }
 
 /**
- * Marca la cancelacion y corta el paso que este corriendo ahora mismo. Las dos
- * cosas hacen falta: la marca evita que arranquen los pasos siguientes, y
- * matar el proceso termina el actual sin esperar sus minutos.
+ * Marca la cancelacion y corta el paso que corre ahora mismo: la marca evita
+ * que arranquen los siguientes, y matar el proceso termina el actual.
+ *
+ * Mata SOLO los hijos de este proyecto. Antes los mataba todos, asi que parar
+ * uno interrumpia a los demas y encima se lo apuntaba como averia: lo que
+ * distingue una parada de un fallo mira `cancelled`, y el atropellado no estaba.
  */
 export function cancelRun(projectId: string): number {
   cancelled.add(projectId)
-  return killAllChildren()
+  return killChildrenOf(projectId)
 }
 
 export function endRun(projectId: string): void {
@@ -64,10 +67,9 @@ export function tryBeginMerge(projectId: string): boolean {
 }
 
 /**
- * Suelta el turno del merge y NADA mas. No toca `cancelled` a proposito: esa
- * marca es del motor, y borrarla al terminar una firma le quitaria al drenaje
- * la razon por la que estaba parando.
- */
+ * Suelta el turno del merge y NADA mas. No toca `cancelled`: esa marca es del
+ * motor, y borrarla al terminar una firma le quitaria al drenaje su orden de
+ * parar. */
 export function endMerge(projectId: string): void {
   merging.delete(projectId)
 }
