@@ -1,11 +1,19 @@
 import type { IconName } from '@domain/shared/icon-name'
 import { Icon } from './Icon'
 
-export type NoticeTone = 'error' | 'ok'
+/**
+ * Tres y no dos. Con solo error/ok, todo lo que no era un exito tenia que
+ * pintarse como un fallo, y hay mensajes que no son ninguna de las dos cosas:
+ * "no queda nada que reparar" no es un problema, pero verde con un checkmark
+ * afirmaria que todo salio bien. El neutro existe para no tener que mentir en
+ * una direccion o en la otra.
+ */
+export type NoticeTone = 'error' | 'ok' | 'aviso'
 
 const TONE: Record<NoticeTone, { className: string; iconName: IconName }> = {
   error: { className: 'border-critical/30 bg-critical/10', iconName: 'alert-triangle' },
-  ok: { className: 'border-success/30 bg-success/10', iconName: 'check-circle' }
+  ok: { className: 'border-success/30 bg-success/10', iconName: 'check-circle' },
+  aviso: { className: 'border-border bg-card', iconName: 'circle' }
 }
 
 interface NoticeProps {
