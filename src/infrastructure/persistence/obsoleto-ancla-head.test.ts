@@ -31,6 +31,21 @@ describe('findObsoleteFindingIds — el ancla es el arbol, no el escaneo', () =>
     expect(repo.findObsoleteFindingIds('p1', 'head-actual')).toEqual(['f1'])
   })
 
+  it('un analisis ILEGIBLE no descuenta: el hallazgo sigue en la cola', () => {
+    // El descuento silencia al hallazgo, y solo debe hacerlo cuando el analista
+    // dijo de verdad que ya no existe. Si no se pudo leer su respuesta, nadie
+    // llego a saberlo: sacarlo de la cola lo daria por resuelto sin resolverlo.
+    const db = createMemoryDb()
+    seedProject(db, 'p1')
+    seedFinding(db, 'f1', 'S1')
+    const repo = createSqliteRepairProposalRepository(db)
+
+    repo.insert(propuesta('r1', 'f1', 10, 'head-actual'))
+    repo.update('r1', { state: 'RECHAZADO', analysisVerdict: 'ILEGIBLE', analysisReason: 'analisis_ilegible: ]', updatedAt: 11 }) // prettier-ignore
+
+    expect(repo.findObsoleteFindingIds('p1', 'head-actual')).toEqual([])
+  })
+
   it('sin propuesta obsoleta no se descuenta nada', () => {
     const db = createMemoryDb()
     seedProject(db, 'p1')

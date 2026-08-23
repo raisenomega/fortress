@@ -15,8 +15,16 @@ export type ProposalState =
   | 'MERGEADO'
   | 'CADUCADO'
 
-/** Veredicto de C2: REAL (accionable) u OBSOLETO (el problema ya no existe). */
-export type AnalysisVerdict = 'REAL' | 'OBSOLETO'
+/**
+ * Veredicto de C2. Tres, no dos: REAL (accionable), OBSOLETO (el problema ya no
+ * existe) e ILEGIBLE (el analista dictamino, pero su salida no se dejo leer).
+ *
+ * ILEGIBLE existe porque sin el, un fallo de lectura caia por el lado de
+ * OBSOLETO y el motor afirmaba que el hallazgo no existia sin haber llegado a
+ * saberlo. Ademas es lo que mira el descuento por base_sha, que solo silencia
+ * al hallazgo cuando el veredicto es OBSOLETO de verdad.
+ */
+export type AnalysisVerdict = 'REAL' | 'OBSOLETO' | 'ILEGIBLE'
 
 export interface Proposal {
   readonly id: string
@@ -32,9 +40,11 @@ export interface Proposal {
 }
 
 /** A donde puede ir cada estado. CADUCADO es la salida de emergencia de todos
- *  los vivos: base movida, analisis obsoleto o re-validacion fallida. */
+ *  los vivos: base movida, analisis obsoleto o re-validacion fallida. ELEGIDO
+ *  puede acabar en RECHAZADO sin pasar por ANALIZADO: el analista corrio y su
+ *  salida no se dejo leer, que no es caducar. */
 const NEXT: Readonly<Record<ProposalState, readonly ProposalState[]>> = {
-  ELEGIDO: ['ANALIZADO', 'CADUCADO'],
+  ELEGIDO: ['ANALIZADO', 'RECHAZADO', 'CADUCADO'],
   ANALIZADO: ['GENERADO', 'RECHAZADO', 'CADUCADO'],
   GENERADO: ['GATE', 'RECHAZADO', 'CADUCADO'],
   GATE: ['OMEGA', 'RECHAZADO', 'CADUCADO'],

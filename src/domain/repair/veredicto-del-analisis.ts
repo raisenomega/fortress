@@ -1,0 +1,42 @@
+import { isActionable, type Analysis } from './analysis'
+import { ILEGIBLE, noSeDejoLeer } from './analysis-ilegible'
+import type { AnalysisVerdict, ProposalState } from './proposal'
+
+export interface Veredicto {
+  readonly verdict: AnalysisVerdict
+  readonly state: ProposalState
+  /** Lo que se persiste y lo que el Libro asienta como razon. */
+  readonly reason: string
+}
+
+/**
+ * En que queda la propuesta segun lo que dijo el analista. TRES desenlaces, no
+ * dos, y el tercero es el que faltaba.
+ *
+ * Un analisis que no se deja leer no es accionable, asi que caia por el lado de
+ * OBSOLETO y la propuesta CADUCABA: el Libro escribia "el hallazgo ya no
+ * existe" cuando la verdad era "no se pudo leer el veredicto", y el descuento
+ * por base_sha se llevaba el hallazgo de la cola sin que nadie lo hubiera
+ * resuelto. Se pillo en vivo tres veces en un dia, con JSON truncado.
+ *
+ * Por eso lo ilegible se mira PRIMERO: no es una tercera opinion del analista,
+ * es la ausencia de opinion legible, y preguntarle a `isActionable` que opina
+ * de un texto que no se pudo parsear solo puede dar una respuesta inventada.
+ *
+ * RECHAZADO y no CADUCADO porque es literalmente lo que el dominio entiende por
+ * rechazo —"no llego a GENERADO"— y porque caducar significa que el hallazgo se
+ * fue; aqui sigue entero, esperando que alguien lea bien la respuesta.
+ *
+ * Aqui NO se arregla el parser. Que lea mejor es otra deuda; esto es que cuando
+ * falle, lo diga.
+ */
+export function veredictoDelAnalisis(analysis: Analysis): Veredicto {
+  if (noSeDejoLeer(analysis)) {
+    const muestra = analysis.risk.slice(ILEGIBLE.length)
+    return { verdict: 'ILEGIBLE', state: 'RECHAZADO', reason: `analisis_ilegible: ${muestra}` }
+  }
+  if (isActionable(analysis)) {
+    return { verdict: 'REAL', state: 'ANALIZADO', reason: analysis.risk }
+  }
+  return { verdict: 'OBSOLETO', state: 'CADUCADO', reason: analysis.risk }
+}

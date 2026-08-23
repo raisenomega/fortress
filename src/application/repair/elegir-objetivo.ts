@@ -1,7 +1,7 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
 import { dentroDelAlcance } from '@domain/repair/alcance'
 import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
-import { hasBlockingRejection } from '@domain/repair/retry-eligibility'
+import { hasBlockingRejection } from '@domain/repair/bloqueo-por-rechazo'
 import { selectTarget, type Candidate, type Selection } from '@domain/repair/select-target'
 import { dirigirA } from '@domain/repair/target-dirigido'
 import type { AppContext } from '../context'

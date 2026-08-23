@@ -1,11 +1,6 @@
-import { isActionable } from '@domain/repair/analysis'
 import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
-import {
-  canTransition,
-  type AnalysisVerdict,
-  type Proposal,
-  type ProposalState
-} from '@domain/repair/proposal'
+import { canTransition, type Proposal } from '@domain/repair/proposal'
+import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
@@ -17,8 +12,10 @@ import { recordAnalyzed, recordElegido } from './record-plan-events'
  * C1 -> C2 desde la app: ELIGE un hallazgo (determinista), ancla el HEAD del
  * repo y lo manda a ENTENDER (grafo-primero, solo lectura). Persiste el
  * veredicto: REAL deja la propuesta en ANALIZADO (lista para C3); OBSOLETO la
- * CADUCA y excluye al hallazgo hasta el proximo escaneo. La extincion del
- * hallazgo NO se toca: eso es del escaneo, con evidencia. NO genera fix.
+ * CADUCA y excluye al hallazgo hasta el proximo escaneo; ILEGIBLE la RECHAZA
+ * sin excluir nada, porque ahi no se llego a saber si el hallazgo existe. La
+ * extincion del hallazgo NO se toca: eso es del escaneo, con evidencia. NO
+ * genera fix.
  *
  * `findingId` invierte el primer paso: con el, quien eligio fue el operador y el
  * motor atiende ESE hallazgo sin mirar la cola ni el cerco de integracion
@@ -56,11 +53,10 @@ export async function planRepair(
   for (const nota of result.analysis.notes ?? []) {
     context.selfObservations.add({ ...nota, sourceProject: project.name })
   }
-  const verdict: AnalysisVerdict = isActionable(result.analysis) ? 'REAL' : 'OBSOLETO'
-  const state: ProposalState = verdict === 'REAL' ? 'ANALIZADO' : 'CADUCADO'
-  if (!canTransition(proposal.state, state)) return proposal
-  const patch = { state, analysisVerdict: verdict, analysisReason: result.analysis.risk, updatedAt: Date.now() } // prettier-ignore
+  const veredicto = veredictoDelAnalisis(result.analysis)
+  if (!canTransition(proposal.state, veredicto.state)) return proposal
+  const patch = { state: veredicto.state, analysisVerdict: veredicto.verdict, analysisReason: veredicto.reason, updatedAt: Date.now() } // prettier-ignore
   context.repairProposals.update(proposal.id, patch)
-  await recordAnalyzed(context.eventLog, proposal, result, state)
+  await recordAnalyzed(context.eventLog, proposal, result, veredicto)
   return { ...proposal, ...patch }
 }

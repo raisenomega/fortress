@@ -5,6 +5,8 @@ export const REJECTION_REASONS = [
   'generator_error',
   /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */
   'turnos_agotados',
+  /** El analista corrio pero su salida no se dejo leer. No es obsolescencia. */
+  'analisis_ilegible',
   'no_diff_produced',
   'worktree_contaminated',
   'orphan_before_generate',

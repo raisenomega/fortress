@@ -1,11 +1,6 @@
-import { isActionable } from '@domain/repair/analysis'
 import { buildTransitionEvent } from '@domain/repair/proposal-event'
-import {
-  canTransition,
-  type AnalysisVerdict,
-  type Proposal,
-  type ProposalState
-} from '@domain/repair/proposal'
+import { canTransition, type Proposal } from '@domain/repair/proposal'
+import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
 import type { Selection } from '@domain/repair/select-target'
 import { newId } from '@domain/shared/id'
 import type { AppContext } from '../context'
@@ -60,13 +55,16 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
     reason: `${retryOf} — reintento explicito del operador sobre el mismo hallazgo`
   }
   const result = await analyzeTarget(ctx.analystFor(project.path, project.id), selection)
-  const verdict: AnalysisVerdict = isActionable(result.analysis) ? 'REAL' : 'OBSOLETO'
-  const state: ProposalState = verdict === 'REAL' ? 'ANALIZADO' : 'CADUCADO'
-  if (!canTransition(proposal.state, state)) return { ok: true, newProposalId: proposal.id }
+  const v = veredictoDelAnalisis(result.analysis)
+  // El reintento hereda el reparto de tres, con su linaje delante. Que el
+  // prefijo deje de casar con el motivo NO es descuido: es lo que corta la
+  // cadena en un intento — el primer ilegible ofrece reintento, el segundo ya no.
+  const veredicto = { ...v, reason: `${retryOf}; ${v.reason}` }
+  if (!canTransition(proposal.state, veredicto.state)) return { ok: true, newProposalId: proposal.id } // prettier-ignore
   ctx.repairProposals.update(proposal.id, {
-    state, analysisVerdict: verdict,
-    analysisReason: `${retryOf}; ${result.analysis.risk}`, updatedAt: Date.now()
+    state: veredicto.state, analysisVerdict: veredicto.verdict,
+    analysisReason: veredicto.reason, updatedAt: Date.now()
   }) // prettier-ignore
-  await recordAnalyzed(ctx.eventLog, proposal, result, state)
+  await recordAnalyzed(ctx.eventLog, proposal, result, veredicto)
   return { ok: true, newProposalId: proposal.id }
 }

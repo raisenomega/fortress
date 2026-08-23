@@ -1,4 +1,5 @@
 import type { Analyst } from '@domain/repair/analysis'
+import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { FindingMemory } from '@domain/project/finding-memory'
 import type { SelfNoteDraft } from '@domain/system/self-observation'
@@ -12,14 +13,21 @@ export function hallazgo(id: string, file: string): FindingMemory {
   } // prettier-ignore
 }
 
-/** Analista doblado: devuelve el veredicto pedido y, si los hay, sus apuntes. */
+/**
+ * Analista doblado: devuelve el veredicto pedido y, si los hay, sus apuntes.
+ *
+ * `status: 'ILEGIBLE'` imita lo que deja el parser cuando la respuesta no se
+ * dejo leer: `risk` con el prefijo y una cola de JSON truncado, como los tres
+ * casos reales del 21 y el 23 de agosto.
+ */
 export function analistaFake(status: string, notes?: readonly SelfNoteDraft[]): Analyst {
+  const risk = status === 'ILEGIBLE' ? `${ILEGIBLE}}  ]}` : 'riesgo bajo'
   return {
     study: (target) =>
       Promise.resolve({
         analysis: {
           target, status, whatToChange: 'w', where: 'd',
-          patternToCopy: 'p', doNotTouch: 'n', risk: 'riesgo bajo', tokensUsed: 7,
+          patternToCopy: 'p', doNotTouch: 'n', risk, tokensUsed: 7,
           ...(notes ? { notes } : {})
         }, // prettier-ignore
         // Con factura, como la corrida real: sin ella no se asienta en el
