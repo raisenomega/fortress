@@ -1,5 +1,9 @@
-/** Cuantas propuestas caben en una pagina de firma. */
-export const POR_PAGINA = 15
+/**
+ * Cuantas propuestas caben en una pagina. Diez y no quince: la fila ya no es
+ * una linea de texto sino una fila desplegable con su boton, asi que quince
+ * llenaban la pantalla de cosas sobre las que hay que decidir.
+ */
+export const POR_PAGINA = 10
 
 /** Una pagina resuelta: cual es, cuantas hay, y que trozo del array mostrar. */
 export interface Pagina {

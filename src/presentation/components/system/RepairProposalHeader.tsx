@@ -3,6 +3,7 @@ import type { Proposal } from '@domain/repair/proposal'
 import { formatMoment } from '../../format/time'
 import { Icon } from '../common/Icon'
 import { retryLineage, STATE_ICON, STATE_TONE } from './repair-proposal-badges'
+import { sitio } from './cola-de-firma'
 
 interface RepairProposalHeaderProps {
   readonly proposal: Proposal
@@ -18,9 +19,9 @@ export function RepairProposalHeader({
   open,
   onToggle
 }: RepairProposalHeaderProps): React.JSX.Element {
-  const donde = finding
-    ? `${finding.severity} ${finding.file}${finding.line === null ? '' : `:${finding.line}`}`
-    : `hallazgo ${proposal.findingId.slice(0, 6)}`
+  // La misma linea que leia la cola de firma, no una copia suya: la cola vive
+  // ahora en estas filas, y dos formas de escribir el mismo sitio se separan.
+  const donde = sitio({ proposal, finding })
   const tone = STATE_TONE[proposal.state] ?? 'text-foreground'
   const lineage = retryLineage(proposal.analysisReason)
 
