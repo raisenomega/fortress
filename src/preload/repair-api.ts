@@ -1,6 +1,7 @@
 import type { GenerateResult } from '@application/repair/generate-types'
 import type { RetryResult } from '@application/repair/retry-repair'
 import type { RunGateResult } from '@application/repair/run-gate'
+import type { AutoMergeResult } from '@application/repair/auto-merge-types'
 import type { ResumenCerco } from '@application/repair/resumen-cerco'
 import type { RunOmegaResult } from '@application/repair/run-omega'
 import type { Proposal } from '@domain/repair/proposal'
@@ -41,6 +42,12 @@ export interface RepairApi {
   runGate(proposalId: string): Promise<RunGateResult>
   /** I4 — juicio semantico independiente. APROBADO -> OMEGA; VETADO -> RECHAZADO. */
   runOmega(proposalId: string): Promise<RunOmegaResult>
+  /**
+   * La FIRMA: integra una propuesta que OMEGA ya aprobo. No pasa por el cerco
+   * —ese decide la integracion sin firma— pero no alcanza los archivos que
+   * gobiernan la autonomia.
+   */
+  sign(proposalId: string): Promise<AutoMergeResult>
   /**
    * I4.2 — reintento explicito de un RECHAZADO de razonamiento (D24):
    * propuesta NUEVA sobre el HEAD actual con C2 fresco; la vieja no se muta.

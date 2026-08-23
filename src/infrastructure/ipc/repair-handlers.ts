@@ -7,8 +7,10 @@ import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
 import { IPC } from './channels'
+import { registerSignHandler } from './repair-sign-handler'
 
 export function registerRepairHandlers(): void {
+  registerSignHandler()
   // C2 spawnea un agente real (read-only): pasa por la misma guardia que
   // cualquier corrida — busy, tope diario y circuit breaker de contaminacion.
   //

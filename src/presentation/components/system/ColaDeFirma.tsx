@@ -30,7 +30,7 @@ export function ColaDeFirma({ cola }: ColaDeFirmaProps): React.JSX.Element | nul
   const firmar = async (): Promise<void> => {
     setFirmando(true)
     try {
-      await firmarPropuesta(cabeza.proposal.projectId, cabeza.proposal.id)
+      await firmarPropuesta(cabeza.proposal)
     } finally {
       setFirmando(false)
     }
@@ -51,7 +51,7 @@ export function ColaDeFirma({ cola }: ColaDeFirmaProps): React.JSX.Element | nul
           <span className={firmando ? 'animate-spin' : ''}>
             <Icon name={firmando ? 'refresh-cw' : 'eye'} size={10} />
           </span>
-          {firmando ? 'Juzgando...' : 'Firmar la siguiente'}
+          {firmando ? 'Firmando...' : 'Firmar la siguiente'}
         </button>
       </div>
       {cola.map((item, i) => (

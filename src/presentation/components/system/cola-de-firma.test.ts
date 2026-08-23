@@ -14,18 +14,25 @@ const ids = (cola: ReturnType<typeof colaDeFirma>): readonly string[] =>
   cola.map((item) => item.proposal.id)
 
 describe('la cola de firma: solo lo que de verdad espera al operador', () => {
-  it('solo GATE entra: es el unico estado que espera firma', () => {
-    // GENERADO aun no compilo, OMEGA ya paso por el revisor, y los terminales
-    // no esperan nada. Meterlos llenaria la cola de lo que no se firma.
+  it('entran GATE y OMEGA, y nada mas', () => {
+    // GATE espera que se autorice el juicio; OMEGA, ya juzgada y aprobada,
+    // espera la integracion. GENERADO aun no compilo y los terminales no
+    // esperan nada: meterlos llenaria la cola de lo que no se firma.
     const todas = [
       prop('a', 'GATE'), prop('b', 'GENERADO'), prop('c', 'OMEGA'),
       prop('d', 'MERGEADO'), prop('e', 'RECHAZADO'), prop('f', 'ANALIZADO')
     ] // prettier-ignore
 
-    expect(ids(colaDeFirma(todas, []))).toEqual(['a'])
+    expect(ids(colaDeFirma(todas, [])).slice().sort()).toEqual(['a', 'c'])
   })
 
-  it('sin nada en el gate la cola esta vacia', () => {
+  it('las aprobadas por OMEGA que estaban atascadas ya son firmables', () => {
+    // Habia dieciseis esperando una puerta que no existia. Ahora entran.
+    const atascadas = [prop('x', 'OMEGA'), prop('y', 'OMEGA')]
+    expect(colaDeFirma(atascadas, [])).toHaveLength(2)
+  })
+
+  it('sin nada esperando la cola esta vacia', () => {
     expect(colaDeFirma([prop('a', 'GENERADO')], [])).toHaveLength(0)
   })
 
