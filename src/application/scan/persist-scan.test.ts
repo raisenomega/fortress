@@ -4,7 +4,7 @@ import { fixture, type Guardado } from './persist-scan-fixture'
 import { persistScan } from './persist-scan'
 
 describe('persistScan', () => {
-  it('puntua el expediente ACTIVE, no solo la corrida', async () => {
+  it('un escaneo NO extingue nada, ni siquiera con el archivo tocado', async () => {
     const saved: Guardado = {}
     const project = { id: 'p1', path: '/tmp/p1', name: 'p1' } as Project
 
@@ -17,13 +17,13 @@ describe('persistScan', () => {
       edits: []
     })
 
-    // tocado.ts cambio -> f2 se extingue y NO cuenta. vivo.ts intacto -> f1
-    // sigue vivo y SI cuenta aunque la corrida no lo nombre: 100 - 3 - 8 = 89.
-    // Puntuar solo la corrida habria dicho 97 con un HIGH vivo en la base.
-    expect(saved.extinct).toEqual(['f2'])
-    expect(summary.score).toBe(89)
-    expect(saved.score).toBe(89)
-    expect(summary.counts.HIGH).toBe(1)
+    // Los DOS HIGH siguen vivos y cuentan, aunque la corrida no los nombre y
+    // aunque git diga que tocado.ts cambio: 100 - 3 - 8 - 8 = 81. Antes f2 se
+    // extinguia por ese cambio de archivo, y asi murieron hallazgos reales.
+    expect(saved.extinct).toBeUndefined()
+    expect(summary.score).toBe(81)
+    expect(saved.score).toBe(81)
+    expect(summary.counts.HIGH).toBe(2)
     expect(summary.counts.MEDIUM).toBe(1)
   })
 
@@ -39,9 +39,9 @@ describe('persistScan', () => {
       edits: []
     })
 
-    // Uno reportado, dos puntuados (el nuevo + el HIGH que sigue vivo). Sin la
-    // segunda cifra, "score 89 con 1 hallazgo" no se puede leer.
+    // Uno reportado, TRES puntuados (el nuevo + los dos que siguen vivos). Sin
+    // la segunda cifra, "score 81 con 1 hallazgo" no se puede leer.
     expect(saved.fila?.findingCount).toBe(1)
-    expect(saved.fila?.dossierCount).toBe(2)
+    expect(saved.fila?.dossierCount).toBe(3)
   })
 })

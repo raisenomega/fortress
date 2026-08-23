@@ -1,3 +1,4 @@
+import type { MotivoExtincion } from './motivo-extincion'
 import type { DetectedFinding } from '../scan/detected-finding'
 import type { FindingMemory } from './finding-memory'
 import type { Finding } from './project'
@@ -46,7 +47,8 @@ export interface FindingRepository {
    * llama quien ya reunio la evidencia de las DOS pruebas de la extincion:
    * ausencia en el escaneo Y archivo tocado desde la primera deteccion.
    */
-  markExtinct(ids: readonly string[], at: string): void
+  /** Extinguir exige DECIR por que: una muerte sin motivo no se puede auditar. */
+  markExtinct(ids: readonly string[], at: string, motivo: MotivoExtincion): void
 
   /**
    * El operador declara que un hallazgo ya esta ARREGLADO, con una nota que

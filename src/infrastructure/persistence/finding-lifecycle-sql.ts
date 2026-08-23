@@ -9,15 +9,19 @@
  */
 
 /**
- * La transicion a extinto deja fecha: sin ella no habria como auditarla.
+ * La transicion a extinto deja fecha Y MOTIVO: sin los dos no habria como
+ * auditarla, y sin el motivo tampoco como distinguir una muerte con juicio de
+ * una por descuido — que es exactamente lo que hubo que reconstruir a mano.
  *
  * Admite venir de ACTIVE o de MITIGATED. Mitigado es "hay un fix, falta
  * confirmar", asi que extinguirlo ES esa confirmacion: sin este segundo estado
  * de origen, un hallazgo marcado por el operador no podria cerrarse jamas.
- * La EVIDENCIA no cambia — la doble prueba sigue decidiendo quien entra aqui.
+ *
+ * Quien entra aqui SI cambio: ya no lo decide el escaneo por ausencia, lo
+ * decide un agente que miro el hallazgo.
  */
-export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved_at = @at
-  WHERE id = @id AND lifecycle IN ('ACTIVE', 'MITIGATED')`
+export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved_at = @at,
+  extinct_reason = @motivo WHERE id = @id AND lifecycle IN ('ACTIVE', 'MITIGATED')`
 
 /**
  * El operador declara que un hallazgo ya esta arreglado. No afirma que haya

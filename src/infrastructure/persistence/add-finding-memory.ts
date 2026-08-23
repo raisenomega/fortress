@@ -23,7 +23,8 @@ const COLUMNS: ReadonlyArray<readonly [string, string]> = [
   ['lifecycle', "ALTER TABLE findings ADD COLUMN lifecycle TEXT NOT NULL DEFAULT 'ACTIVE'"],
   ['first_seen', "ALTER TABLE findings ADD COLUMN first_seen TEXT NOT NULL DEFAULT ''"],
   ['last_seen', "ALTER TABLE findings ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''"],
-  ['resolved_at', 'ALTER TABLE findings ADD COLUMN resolved_at TEXT']
+  ['resolved_at', 'ALTER TABLE findings ADD COLUMN resolved_at TEXT'],
+  ['extinct_reason', 'ALTER TABLE findings ADD COLUMN extinct_reason TEXT']
 ]
 
 const PENDING = `SELECT id, severity, title, file, created_at FROM findings WHERE identity = ''`

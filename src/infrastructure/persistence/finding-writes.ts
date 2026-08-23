@@ -6,7 +6,7 @@ import { toTouch } from './finding-touch'
 
 export interface FindingWrites extends DismissalWrites {
   sync(projectId: string, rows: readonly FindingInsert[], conservados?: ReadonlySet<string>): void
-  markExtinct(ids: readonly string[], at: string): void
+  markExtinct(ids: readonly string[], at: string, motivo: string): void
   markMitigated(findingId: string, note: string, at: string): boolean
   markActive(findingId: string): boolean
 }
@@ -35,10 +35,10 @@ export function createFindingWrites(db: Db): FindingWrites {
     }
   )
 
-  // Todas las extinciones de un escaneo entran juntas: media tanda dejaria el
-  // registro diciendo que unos problemas se cerraron y otros no, sin motivo.
-  const markExtinct = db.transaction((ids: readonly string[], at: string) => {
-    for (const id of ids) extinguish.run({ id, at })
+  // Indivisible: media tanda dejaria el registro diciendo que unos problemas se
+  // cerraron y otros no. El motivo va con cada fila, no en un log aparte.
+  const markExtinct = db.transaction((ids: readonly string[], at: string, motivo: string) => {
+    for (const id of ids) extinguish.run({ id, at, motivo })
   })
 
   // Devuelve si marco algo: el WHERE exige ACTIVE, asi que un hallazgo ya
