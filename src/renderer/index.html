@@ -8,7 +8,23 @@
          del renderer: por eso no hace falta abrir connect-src a api.anthropic.com.
          base-uri y form-action NO heredan de default-src y hay que declararlas
          aparte: sin ellas, un HTML inyectado podria reescribir de donde cuelgan
-         las rutas relativas o enviar un formulario fuera de la app. -->
+         las rutas relativas o enviar un formulario fuera de la app.
+         style-src lleva 'unsafe-inline' por el modo desarrollo: en `npm run dev`
+         electron-vite inyecta las hojas con recarga en caliente como etiquetas
+         style dentro del documento, y sin esa relajacion la interfaz de dev se
+         queda sin estilos (error de CSP en consola, no fallo de compilacion, asi
+         que ni typecheck ni lint lo verian). En el empaquetado no la consume
+         nadie: la hoja se sirve como archivo externo del mismo origen enlazado
+         desde head, que ya cubre 'self', y las medidas calculadas de los
+         componentes se aplican por el objeto style de React, via programatica
+         que style-src no intercepta. Este archivo es unico para los dos
+         entornos, de modo que la relajacion viaja intacta al binario del
+         operador: se acepta el riesgo residual porque solo afecta a estilos
+         —nunca a script-src— y el vector que la haria peligrosa, inyeccion de
+         marcado en el renderer, sigue contenido por script-src 'self', por
+         contextIsolation y por las guardas de navegacion de la ventana. Si algun
+         dia la CSP se separa por entorno, esta relajacion sale de la de
+         produccion; hasta entonces queda registrada aqui. -->
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"
