@@ -27,10 +27,15 @@ function normalize(text: string): string {
 }
 
 /**
- * Que hace que dos hallazgos sean EL MISMO entre escaneos: severidad, archivo
- * y titulo. La LINEA queda fuera a proposito — se mueve con cada edicion del
- * archivo y el hallazgo sigue siendo el mismo; meterla daria un id nuevo cada
- * vez que alguien anade un import arriba.
+ * Que hace que dos hallazgos sean el mismo PATRON en el log: severidad, archivo
+ * y titulo. La LINEA queda fuera — se mueve con cada edicion.
+ *
+ * Esto ya NO identifica la fila de la base: eso es `findingIdentity`, que pasa
+ * por fichero, tipo y simbolo porque el titulo y la severidad demostraron ser
+ * prosa cambiante. Aqui se conserva la formula VIEJA a proposito, y no por
+ * inercia: el log solo persiste severidad y titulo —ver `historyKey`—, asi que
+ * la clave nueva le seria inservible, y cambiarla renumeraria los `PTN-` de
+ * todo el historial dejando huerfana cada entrada ya escrita.
  */
 export function identity(f: PatternIdentity): string {
   return [f.severity, normalize(f.file), normalize(f.title)].join('|')

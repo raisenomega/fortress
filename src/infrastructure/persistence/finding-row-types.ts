@@ -24,6 +24,9 @@ export interface FindingInsert {
   readonly fingerprint: string
   /** Clave estable: decide si esto es una fila nueva o una que ya existia. */
   readonly identity: string
+  /** Las dos piezas de las que sale `identity`, guardadas para poder agrupar. */
+  readonly tipo: string
+  readonly simbolo: string
   readonly status: string
   readonly scanId: string
   /** Momento del escaneo. Sirve de created_at, first_seen y last_seen. */

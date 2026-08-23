@@ -10,6 +10,8 @@ export interface FindingTouch {
   readonly fingerprint: string
   readonly scanId: string
   readonly at: string
+  readonly tipo: string
+  readonly simbolo: string
 }
 
 /**
@@ -19,6 +21,6 @@ export interface FindingTouch {
  * que deberia quedarse quieto.
  */
 export function toTouch(row: FindingInsert, id: string): FindingTouch {
-  const { severity, title, file, line, fingerprint, scanId, at } = row
-  return { id, severity, title, file, line, fingerprint, scanId, at }
+  const { severity, title, file, line, fingerprint, scanId, at, tipo, simbolo } = row
+  return { id, severity, title, file, line, fingerprint, scanId, at, tipo, simbolo }
 }

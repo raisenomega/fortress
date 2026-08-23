@@ -24,7 +24,9 @@ const COLUMNS: ReadonlyArray<readonly [string, string]> = [
   ['first_seen', "ALTER TABLE findings ADD COLUMN first_seen TEXT NOT NULL DEFAULT ''"],
   ['last_seen', "ALTER TABLE findings ADD COLUMN last_seen TEXT NOT NULL DEFAULT ''"],
   ['resolved_at', 'ALTER TABLE findings ADD COLUMN resolved_at TEXT'],
-  ['extinct_reason', 'ALTER TABLE findings ADD COLUMN extinct_reason TEXT']
+  ['extinct_reason', 'ALTER TABLE findings ADD COLUMN extinct_reason TEXT'],
+  ['tipo', "ALTER TABLE findings ADD COLUMN tipo TEXT NOT NULL DEFAULT 'otro'"],
+  ['simbolo', "ALTER TABLE findings ADD COLUMN simbolo TEXT NOT NULL DEFAULT ''"]
 ]
 
 const PENDING = `SELECT id, severity, title, file, created_at FROM findings WHERE identity = ''`

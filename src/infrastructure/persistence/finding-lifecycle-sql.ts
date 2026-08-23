@@ -46,8 +46,8 @@ export const MARK_MITIGATED = `UPDATE findings SET lifecycle = 'MITIGATED',
  * se lee mejor donde se decide.
  */
 export const TOUCH_CONSERVANDO = `UPDATE findings SET severity = @severity, title = @title,
-  file = @file, line = @line, fingerprint = @fingerprint, scan_id = @scanId,
-  last_seen = @at WHERE id = @id`
+  file = @file, line = @line, fingerprint = @fingerprint, tipo = @tipo, simbolo = @simbolo,
+  scan_id = @scanId, last_seen = @at WHERE id = @id`
 
 /**
  * El operador deshace su propia marca: vuelve a ACTIVE y se borra la nota.

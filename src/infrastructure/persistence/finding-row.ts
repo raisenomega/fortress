@@ -43,6 +43,8 @@ export function toInsert(
     scanId,
     fingerprint,
     identity: findingIdentity(finding),
+    tipo: finding.tipo ?? 'otro',
+    simbolo: finding.simbolo ?? '',
     // Un hallazgo ya descartado antes entra descartado: la decision del
     // operador no se pierde porque haya pasado otro escaneo por encima.
     status: dismissed.has(fingerprint) ? 'false_positive' : 'open',
