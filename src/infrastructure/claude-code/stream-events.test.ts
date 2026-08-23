@@ -61,3 +61,13 @@ describe('parseStreamLine', () => {
     expect(parseStreamLine(line)?.denials).toEqual(['rm -rf /'])
   })
 })
+
+describe('denegaciones de permiso', () => {
+  it('tacha el secreto del comando bloqueado antes de que se persista', () => {
+    const blocked = [{ tool_name: 'Bash', tool_input: { command: 'export KEY=sk-ant-abc123def' } }]
+    const line = JSON.stringify({ type: 'result', subtype: 'success', permission_denials: blocked })
+    const denials = parseStreamLine(line)?.denials ?? []
+    expect(denials[0]).toContain('***')
+    expect(denials[0]).not.toContain('abc123def')
+  })
+})
