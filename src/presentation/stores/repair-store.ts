@@ -14,6 +14,8 @@ interface RepairState {
   readonly proposals: readonly Proposal[]
   readonly findings: readonly Finding[]
   readonly busy: boolean
+  /** El drenaje esta recorriendo los elegibles de este proyecto. */
+  readonly drenando: boolean
   /** Cuantos hallazgos vivos no puede elegir la cola por si sola. */
   readonly cerco: ResumenCerco
   setData: (
@@ -23,6 +25,7 @@ interface RepairState {
     cerco: ResumenCerco
   ) => void
   setBusy: (busy: boolean) => void
+  setDrenando: (drenando: boolean) => void
 }
 
 export const useRepairStore = create<RepairState>((set) => ({
@@ -30,8 +33,10 @@ export const useRepairStore = create<RepairState>((set) => ({
   proposals: [],
   findings: [],
   busy: false,
+  drenando: false,
   cerco: { total: 0, fuera: 0 },
   setData: (projectId, proposals, findings, cerco) =>
     set({ projectId, proposals, findings, cerco }),
-  setBusy: (busy) => set({ busy })
+  setBusy: (busy) => set({ busy }),
+  setDrenando: (drenando) => set({ drenando })
 }))
