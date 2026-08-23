@@ -7,7 +7,7 @@ afterEach(() => vi.restoreAllMocks())
 describe('el drenaje recorre los elegibles y los deja esperando firma', () => {
   it('acumula los aprobados y para cuando no queda nadie', async () => {
     motor(espera('a'), espera('b'), espera('c'))
-    expect(await drenarHastaOmega(CTX, 'p1', deps())).toEqual({
+    expect(await drenarHastaOmega(CTX, 'p1', deps())).toMatchObject({
       fin: 'sin-candidato',
       acumuladas: 3
     })

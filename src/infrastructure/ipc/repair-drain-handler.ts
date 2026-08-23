@@ -17,12 +17,15 @@ import { IPC } from './channels'
  * y dos juegos de frenos para la misma cara serian dos sitios donde olvidarse
  * de subir uno.
  */
+/** Ni una vuelta: el drenaje ni llego a arrancar. */
+const NADA_HECHO = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, otrasBajas: 0 }
+
 export function registerDrainHandlers(): void {
   ipcMain.handle(IPC.repairDrain, async (_event, projectId: string): Promise<DrenajeResultado> => {
     const context = getAppContext()
     const id = String(projectId)
     const busy = guardRun(context, id)
-    if (busy !== null) return { fin: 'averia', acumuladas: 0, detalle: busy }
+    if (busy !== null) return { ...NADA_HECHO, fin: 'averia', detalle: busy }
 
     const budget = readLoopBudget(context)
     const base = spentTodayByProject(context, new Date(), id)

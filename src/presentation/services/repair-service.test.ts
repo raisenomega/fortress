@@ -10,7 +10,7 @@ function stubRepair(
   findings = (): Promise<unknown> => Promise.resolve([])
 ): void {
   const cerco = (): Promise<unknown> =>
-    Promise.resolve({ total: 0, trabajables: 0, autoIntegrables: 0 })
+    Promise.resolve({ total: 0, trabajables: 0, autoIntegrables: 0, elegibles: 0 })
   // prettier-ignore
   Object.assign(globalThis, {
     window: {
@@ -28,7 +28,7 @@ const avisos = (): readonly string[] => useToastStore.getState().toasts.map((t) 
 beforeEach(() => {
   useToastStore.setState({ toasts: [] })
   useRepairStore.setState({
-    busy: false, projectId: null, proposals: [], findings: [], cerco: { total: 0, trabajables: 0, autoIntegrables: 0 }
+    busy: false, projectId: null, proposals: [], findings: [], cerco: { total: 0, trabajables: 0, autoIntegrables: 0, elegibles: 0 }
   }) // prettier-ignore
 })
 

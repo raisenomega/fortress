@@ -2,6 +2,7 @@ import type { Project } from '@domain/project/project'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
 import { CercoNotice } from './CercoNotice'
+import { DrenajeEnVivo } from './DrenajeEnVivo'
 import { MotorAcciones } from './MotorAcciones'
 import { colaDeFirma } from './cola-de-firma'
 import { ColaDeFirma } from './ColaDeFirma'
@@ -30,6 +31,7 @@ export function MotorView(): React.JSX.Element {
   const proposals = useRepairStore((state) => state.proposals)
   const findings = useRepairStore((state) => state.findings)
   const cerco = useRepairStore((state) => state.cerco)
+  const drenando = useRepairStore((state) => state.drenando)
 
   useRepairFeed(projectId)
 
@@ -45,7 +47,8 @@ export function MotorView(): React.JSX.Element {
         <p className="text-xs text-muted-foreground">{subtitulo(project ?? null)}</p>
       </header>
 
-      {alDia ? <CercoNotice cerco={cerco} /> : null}
+      {alDia && drenando ? <DrenajeEnVivo cerco={cerco} esperandoFirma={cola.length} /> : null}
+      {alDia && !drenando ? <CercoNotice cerco={cerco} /> : null}
       <ColaDeFirma cola={cola} />
 
       <MotorAcciones projectId={projectId} />
