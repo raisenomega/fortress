@@ -24,7 +24,7 @@ export async function runScan(
   if (problem) return err(problem)
 
   const outcome = await scanner.scan(
-    { projectPath: project.path, projectName: project.name },
+    { projectPath: project.path, projectName: project.name, projectId: project.id },
     onProgress
   )
   if (!outcome.ok) return err(outcome.error)

@@ -66,7 +66,7 @@ export function createClaudeCodeAgent(
         // ella, `claude` usa su propia sesion y consume del plan.
         env: buildEnv(useApiKey ? apiKeys.read() : null)
       })
-      trackChild(child)
+      trackChild(child, request.projectId ?? null)
 
       return collectRun(child, onChunk)
     }

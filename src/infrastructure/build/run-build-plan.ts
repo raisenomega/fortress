@@ -15,6 +15,7 @@ export async function runBuildPlan(
   const reply = await agentFor(context).run(
     {
       projectPath: target.value.path,
+      projectId: target.value.id,
       prompt: buildPlanPrompt(target.value.name, intent),
       permissionMode: 'plan',
       agentId: 'planner',
