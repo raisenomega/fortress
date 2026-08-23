@@ -7,8 +7,15 @@ import { advanceProposal } from './advance-proposal'
 import { cursorFrom } from './book-cursor'
 import type { AutoMergeCase } from './auto-merge-gather'
 import { autoMergeCommitMessage } from './auto-merge-message'
-import type { AutoMergeDeps, AutoMergeResult } from './auto-merge-types'
+import type { AutoMergeDeps, AutoMergeResult, ViaDeIntegracion } from './auto-merge-types'
 import { mergePath } from './reconcile-verdict'
+
+/** La razon que queda en el Libro. La misma palabra que el asunto del commit:
+ *  dos asientos del mismo hecho no pueden contar dos historias. */
+const ASUNTO_LIBRO: Readonly<Record<ViaDeIntegracion, string>> = {
+  automatica: 'integracion automatica',
+  firmada: 'integracion firmada por el operador'
+}
 
 /** La salida de git, acotada: el asiento tiene que caber en una pantalla. */
 function detalleDe(outcome: Exclude<MergeApplyOutcome, { ok: true }>): string {
@@ -29,7 +36,8 @@ export async function applyAutoMerge(
   deps: AutoMergeDeps,
   caso: AutoMergeCase,
   policy: PolicyEvaluation,
-  base: MergeDecision
+  base: MergeDecision,
+  via: ViaDeIntegracion = 'automatica'
 ): Promise<AutoMergeResult> {
   // Aqui la politica ya dijo que si: nada de lo que salga es una denegacion suya.
   const path = mergePath(caso.proposal.state)
@@ -38,12 +46,12 @@ export async function applyAutoMerge(
   const outcome = await deps.mergeApplier.apply({
     projectPath: caso.project.path,
     sourceBranch: caso.state.branch,
-    commitMessage: autoMergeCommitMessage(caso)
+    commitMessage: autoMergeCommitMessage(caso, via)
   })
   const cursor = cursorFrom(caso.events)
 
   if (outcome.ok) {
-    await advanceProposal(ctx, caso.proposal, path, 'integracion automatica', cursor, deps.now())
+    await advanceProposal(ctx, caso.proposal, path, ASUNTO_LIBRO[via], cursor, deps.now())
     recordMergeDecision(ctx, { ...base, policy, commitSha: outcome.mergeCommitSha })
     return { applied: true, mergeCommitSha: outcome.mergeCommitSha, denial: null }
   }
