@@ -4,6 +4,22 @@ import { extractPathHints } from './path-hints'
 const FILE_LIKE = /^[\w@./-]+\.\w+$/
 const CODE = /\.(ts|tsx)$/
 
+/**
+ * Fuera del arbol del proyecto: la misma verdad que el veto de `scope-check`,
+ * en la otra punta de la cadena. Alli juzga el diff; aqui decide si hay correa,
+ * porque el ancla la redacta un agente leyendo el repo auditado (P16) y el
+ * bloque (permitidos) del prompt la vuelca literal — un `..` que entre aqui es
+ * permiso por escrito para escribir donde el `git status` del worktree, que
+ * solo ve su propio arbol, nunca podra mirar. Todas las formas, no el literal
+ * (P1): segmento `..` en cualquier posicion, raiz POSIX, unidad Windows, UNC y
+ * separador invertido.
+ */
+const fuera = (file: string): boolean =>
+  file.startsWith('/') ||
+  file.startsWith('\\') ||
+  /^[a-zA-Z]:/.test(file) ||
+  file.split(/[/\\]/).includes('..')
+
 export interface AllowedFilesInput {
   /** El path ESTRUCTURADO del hallazgo (finding.file / analysis.target.file):
    *  siempre un path real. Es el ANCLA de la correa. */
@@ -23,7 +39,10 @@ export interface AllowedFilesInput {
  */
 export function computeAllowedFiles(input: AllowedFilesInput): string[] {
   const primary = input.primaryFile.trim()
-  if (!FILE_LIKE.test(primary)) return []
+  // El guard va ANTES que todo: los hermanos se derivan del ancla y su dirname
+  // filtra los extras, asi que rechazarla aqui limpia las tres salidas de una
+  // vez. Sin ancla no hay correa (mismo contrato que un ancla sin pinta de path).
+  if (fuera(primary) || !FILE_LIKE.test(primary)) return []
 
   const files: string[] = [primary]
   const code = CODE.exec(primary)
