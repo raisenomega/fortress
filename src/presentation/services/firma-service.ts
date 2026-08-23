@@ -32,7 +32,7 @@ export async function firmarPropuesta(proposal: Proposal): Promise<void> {
   try {
     const fallo = await autorizar(proposal)
     if (fallo !== null) reportError(fallo)
-    else if (proposal.state === 'OMEGA') notify('Integrada. El repo ya lleva el fix.')
+    else if (proposal.state === 'OMEGA') notify('Integrada. El repo ya lleva el fix.', 'ok')
   } catch (error) {
     reportError(error instanceof Error ? error.message : 'Fallo al firmar la propuesta')
   } finally {

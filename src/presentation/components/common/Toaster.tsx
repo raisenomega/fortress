@@ -12,7 +12,7 @@ export function Toaster(): React.JSX.Element | null {
     <div className="fixed right-4 bottom-4 z-50 flex w-80 flex-col gap-2">
       {toasts.map((toast) => (
         <div key={toast.id} className="relative">
-          <Notice tone="error">
+          <Notice tone={toast.tone}>
             {toast.count > 1 ? `${toast.message} (×${toast.count})` : toast.message}
           </Notice>
           <button

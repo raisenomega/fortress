@@ -1,16 +1,21 @@
 import type { FinDelDrenaje } from '@application/repair/drenar-hasta-omega'
+import type { NoticeTone } from '../components/common/Notice'
 import { api } from '../adapters/fortress-api'
 import { notify, reportError } from '../stores/toast-store'
 import { useRepairStore } from '../stores/repair-store'
 import { loadRepair } from './repair-service'
 
-/** Como se cuenta cada final. Detenido NO es un fallo: fue una decision. */
-const PARTE: Record<FinDelDrenaje, (n: number) => string> = {
-  'sin-candidato': (n) => `Drenaje terminado: ${n} esperando firma, no queda nada elegible.`,
-  'tope-vueltas': (n) => `Drenaje al tope de vueltas: ${n} esperando firma.`,
-  'tope-gasto': (n) => `Drenaje al tope de gasto: ${n} esperando firma.`,
-  detenido: (n) => `Drenaje detenido. ${n} quedaron esperando firma.`,
-  averia: (n) => `Drenaje cortado por una averia. ${n} esperando firma.`
+/**
+ * Como se cuenta cada final, y con que cara. Solo agotar el pozo es un exito;
+ * chocar con un tope o parar a mano no son fallos pero tampoco buenas noticias,
+ * y pintarlos en verde afirmaria que el trabajo termino cuando quedo a medias.
+ */
+const PARTE: Record<FinDelDrenaje, { texto: (n: number) => string; tono: NoticeTone }> = {
+  'sin-candidato': { texto: (n) => `Drenaje terminado: ${n} esperando firma, no queda nada elegible.`, tono: 'ok' }, // prettier-ignore
+  'tope-vueltas': { texto: (n) => `Drenaje al tope de vueltas: ${n} esperando firma.`, tono: 'aviso' }, // prettier-ignore
+  'tope-gasto': { texto: (n) => `Drenaje al tope de gasto: ${n} esperando firma.`, tono: 'aviso' },
+  detenido: { texto: (n) => `Drenaje detenido. ${n} quedaron esperando firma.`, tono: 'aviso' },
+  averia: { texto: (n) => `Drenaje cortado por una averia. ${n} esperando firma.`, tono: 'error' }
 }
 
 /**
@@ -25,9 +30,9 @@ export async function drenar(projectId: string): Promise<void> {
   store.setDrenando(true)
   try {
     const r = await api().repair.drain(projectId)
-    const parte = PARTE[r.fin](r.acumuladas)
-    if (r.fin === 'averia') reportError(`${parte} ${r.detalle ?? ''}`.trim())
-    else notify(parte)
+    const { texto, tono } = PARTE[r.fin]
+    if (tono === 'error') reportError(`${texto(r.acumuladas)} ${r.detalle ?? ''}`.trim())
+    else notify(texto(r.acumuladas), tono)
   } catch (error) {
     reportError(error instanceof Error ? error.message : 'Fallo al drenar')
   } finally {
