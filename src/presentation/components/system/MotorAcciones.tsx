@@ -1,6 +1,6 @@
-import { drenar, pararDrenaje } from '../../services/drenaje-service'
 import { proposeRepair } from '../../services/repair-service'
 import { useRepairStore } from '../../stores/repair-store'
+import { BotonDrenar } from './BotonDrenar'
 import { Icon } from '../common/Icon'
 
 interface MotorAccionesProps {
@@ -35,18 +35,7 @@ export function MotorAcciones({ projectId }: MotorAccionesProps): React.JSX.Elem
         {busy ? 'Analizando...' : 'Proponer reparacion'}
       </button>
 
-      <button
-        type="button"
-        disabled={busy || sinProyecto}
-        onClick={() => projectId !== null && void (drenando ? pararDrenaje : drenar)(projectId)}
-        title="Recorre los hallazgos elegibles y deja cada fix esperando firma"
-        className={BOTON}
-      >
-        <span className={drenando ? 'animate-spin' : ''}>
-          <Icon name={drenando ? 'refresh-cw' : 'play'} size={12} />
-        </span>
-        {drenando ? 'Drenando... (parar)' : 'Drenar los elegibles'}
-      </button>
+      <BotonDrenar projectId={projectId} className={BOTON} disabled={busy || sinProyecto} />
     </div>
   )
 }
