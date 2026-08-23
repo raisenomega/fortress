@@ -44,7 +44,7 @@ export function RepairRetryButton({
       type="button"
       disabled={busy}
       onClick={() => void run()}
-      className="border-border text-muted-foreground hover:border-primary/50 hover:text-foreground mx-2 mb-1 flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] tracking-wide uppercase disabled:opacity-60"
+      className="border-border text-muted-foreground hover:border-primary/50 hover:text-foreground flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] tracking-wide uppercase disabled:opacity-60"
     >
       <span className={busy ? 'animate-spin' : ''}>
         <Icon name={busy ? 'refresh-cw' : 'rotate-ccw'} size={10} />

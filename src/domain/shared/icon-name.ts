@@ -38,6 +38,7 @@ export const ICON_NAMES = [
   'paperclip',
   'send',
   'chevron-right',
+  'chevron-left',
   'git-merge',
   'refresh-cw',
   'rotate-ccw'

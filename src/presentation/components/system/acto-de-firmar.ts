@@ -8,13 +8,22 @@ export function esFirmable(state: ProposalState): boolean {
 }
 
 /**
- * Que autoriza la firma AQUI. Un solo boton para los dos estados —para el
- * operador es la misma decision, "adelante con esta"— pero no el mismo acto:
- * en GATE el revisor aun no ha hablado y firmar autoriza su juicio; en OMEGA ya
- * juzgo a favor y firmar integra al repo. Decir solo "Firmar" en los dos sitios
- * dejaria al operador sin saber si esta soltando un fix o pidiendo una opinion.
+ * Como se llama el acto AQUI. Un boton, dos nombres, porque son dos actos y
+ * solo uno toca el arbol vivo.
+ *
+ * Los dos se llamaron "Firmar" un tiempo, con el argumento de que para el
+ * operador es la misma decision —"adelante con esta"—. El argumento no
+ * aguanta: en GATE el revisor no ha hablado todavia y pulsar solo le pide una
+ * opinion, que no mueve el repo; en OMEGA ya juzgo a favor y pulsar INTEGRA.
+ * Un nombre comun para las dos entrena a pulsar sin mirar el estado, que es
+ * justo lo contrario de para lo que existe la firma.
  */
+export function nombreDelActo(state: ProposalState): string {
+  return state === 'GATE' ? 'Pedir revision' : 'Firmar'
+}
+
+/** Lo que el nombre corto no cabe a decir: que pasa exactamente al pulsar. */
 export function queFirma(state: ProposalState): string {
-  if (state === 'GATE') return 'Firmar: autoriza el juicio del revisor, que aun no ha corrido'
+  if (state === 'GATE') return 'Pedir revision: corre el revisor. No integra nada todavia'
   return 'Firmar: integra el fix al repo'
 }

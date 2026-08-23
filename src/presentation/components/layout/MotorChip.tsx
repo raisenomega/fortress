@@ -2,17 +2,18 @@ import { reduceMotorStatus } from '@domain/repair/motor-status'
 import { useRepairStore } from '../../stores/repair-store'
 import { useActiveProject } from '../../stores/project-store'
 import { useUiStore } from '../../stores/ui-store'
-import { etiqueta, ICONO, titulo, TONO } from './motor-chip-look'
+import { detenido, tituloDetenido } from './motor-chip-look'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
+import { Icon } from '../common/Icon'
 
 /**
- * Estado del motor del proyecto ACTIVO, junto a su nombre en la barra. Habla
- * del mismo proyecto que la linea de al lado a proposito: un indicador que
- * ocupa ese sitio y se refiere a otro se lee como si fuera de este.
+ * Avisa de que el motor del proyecto ACTIVO esta PARADO, y lleva a su panel.
  *
- * No pinta nada mientras las propuestas cargadas no sean las de este proyecto
- * — al cambiar de proyecto, o si la lectura fallo. Callarse es honesto; pintar
- * verde por defecto afirmaria que no hay nada pendiente sin haberlo mirado.
+ * No pinta nada cuando el motor esta sano: un indicador permanente que casi
+ * siempre dice "todo bien" ensena a no mirarlo, y justo el dia que cambia nadie
+ * lo ve. Tampoco pinta si las propuestas cargadas no son las de este proyecto
+ * —al cambiar de proyecto, o si la lectura fallo—: callarse es honesto, decir
+ * que esta sano sin haberlo mirado no.
  */
 export function MotorChip(): React.JSX.Element | null {
   const project = useActiveProject()
@@ -26,8 +27,8 @@ export function MotorChip(): React.JSX.Element | null {
 
   if (project === null || cargado !== project.id) return null
 
-  const status = reduceMotorStatus(proposals, project.contaminated)
-  const Icono = ICONO[status.kind]
+  const parado = detenido(reduceMotorStatus(proposals, project.contaminated))
+  if (parado === null) return null
 
   return (
     <button
@@ -35,11 +36,11 @@ export function MotorChip(): React.JSX.Element | null {
       onClick={() => setView('motor')}
       aria-pressed={view === 'motor'}
       data-nav="Motor"
-      title={titulo(status)}
-      className={`tap flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${TONO[status.kind]}`} // prettier-ignore
+      title={tituloDetenido(parado.razon)}
+      className="tap border-critical/50 text-critical hover:bg-critical/10 flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs"
     >
-      <Icono size={13} aria-hidden />
-      {etiqueta(status)}
+      <Icon name="alert-triangle" size={13} />
+      Motor: detenido
     </button>
   )
 }

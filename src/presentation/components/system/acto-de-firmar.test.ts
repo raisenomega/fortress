@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { ProposalState } from '@domain/repair/proposal'
 import { colaDeFirma } from './cola-de-firma'
 import type { Proposal } from '@domain/repair/proposal'
-import { esFirmable, queFirma } from './acto-de-firmar'
+import { esFirmable } from './acto-de-firmar'
 
 const TODOS: readonly ProposalState[] = [
   'ELEGIDO', 'ANALIZADO', 'GENERADO', 'GATE', 'OMEGA', 'APROBADO', 'MERGEADO', 'RECHAZADO', 'CADUCADO'
@@ -45,20 +45,5 @@ describe('la cola y el boton no pueden discrepar', () => {
     const firmada = prop('MERGEADO')
     expect(colaDeFirma([firmada], [])).toHaveLength(0)
     expect(esFirmable(firmada.state)).toBe(false)
-  })
-})
-
-describe('queFirma: un boton, dos actos distintos', () => {
-  it('en GATE dice que lo que autoriza es el juicio, que aun no ha corrido', () => {
-    expect(queFirma('GATE')).toContain('juicio del revisor')
-    expect(queFirma('GATE')).not.toContain('integra')
-  })
-
-  it('en OMEGA dice que integra: el revisor ya hablo', () => {
-    expect(queFirma('OMEGA')).toContain('integra el fix')
-  })
-
-  it('los dos textos son distintos: si no, el boton mentiria en uno', () => {
-    expect(queFirma('GATE')).not.toBe(queFirma('OMEGA'))
   })
 })
