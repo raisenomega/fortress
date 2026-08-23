@@ -51,6 +51,8 @@ describe('buildArgs', () => {
   it('nunca salta las comprobaciones de permisos', () => {
     expect(args('hola', 'acceptEdits').join(' ')).not.toContain('dangerously-skip-permissions')
   })
+
+  it('solo viaja el MCP que arma FORTRESS', () => expect(args()).toContain('--strict-mcp-config'))
 })
 
 describe('buildArgs · allowlist de autoverificacion (gate de confianza)', () => {
