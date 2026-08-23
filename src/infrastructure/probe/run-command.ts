@@ -23,7 +23,8 @@ const MAX_OUT = 32_000_000
  * `buildGateEnv` en vez de copiar la lista: dos listas blancas divergen, y la que
  * se quede atras es un agujero que nadie mira.
  */
-export function runCommand(cmd: string, args: readonly string[], cwd: string): Promise<CmdResult> {
+// prettier-ignore
+export function runCommand(cmd: string, args: readonly string[], cwd: string, timeoutMs = TIMEOUT_MS): Promise<CmdResult> {
   return new Promise((resolve) => {
     // CI=true (dentro de la lista): vitest/jest corren UNA vez y no entran en
     // modo watch, que colgaria el probe hasta el timeout.
@@ -35,7 +36,7 @@ export function runCommand(cmd: string, args: readonly string[], cwd: string): P
     }
     child.stdout?.on('data', capture)
     child.stderr?.on('data', capture)
-    const timer = setTimeout(() => child.kill('SIGKILL'), TIMEOUT_MS)
+    const timer = setTimeout(() => child.kill('SIGKILL'), timeoutMs)
     child.on('error', () => {
       clearTimeout(timer)
       resolve({ code: 1, out, missing: true })
