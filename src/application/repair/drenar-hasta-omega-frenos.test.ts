@@ -9,7 +9,7 @@ describe('los frenos del drenaje', () => {
   it('para al tope de vueltas sin agotar el pozo', async () => {
     motor(espera('a'), espera('b'), espera('c'), espera('d'))
     const r = await drenarHastaOmega(CTX, 'p1', deps({ maxVueltas: 2 }))
-    expect(r).toEqual({ fin: 'tope-vueltas', acumuladas: 2 })
+    expect(r).toMatchObject({ fin: 'tope-vueltas', acumuladas: 2 })
   })
 
   it('el tope de gasto corta antes de la primera vuelta', async () => {

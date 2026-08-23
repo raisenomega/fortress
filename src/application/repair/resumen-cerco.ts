@@ -1,6 +1,6 @@
 import { puedeAutoIntegrarse, puedeTrabajarse } from '@domain/repair/alcance'
 import type { AppContext } from '../context'
-import { vivo } from './elegir-objetivo'
+import { candidates, vivo } from './elegir-objetivo'
 
 /**
  * Los hallazgos vivos, y de ellos los dos subconjuntos que el operador necesita
@@ -12,9 +12,13 @@ export interface ResumenCerco {
   readonly total: number
   readonly trabajables: number
   readonly autoIntegrables: number
+  /** Los que la cola elegiria AHORA: trabajables menos los que ya tienen
+   *  propuesta viva, son fantasmas del escaneo vigente o murieron por una causa
+   *  que repetir no arregla. Es lo que le queda por delante al drenaje. */
+  readonly elegibles: number
 }
 
-const VACIO: ResumenCerco = { total: 0, trabajables: 0, autoIntegrables: 0 }
+const VACIO: ResumenCerco = { total: 0, trabajables: 0, autoIntegrables: 0, elegibles: 0 }
 
 /**
  * Lo que el freno de la seleccion deja fuera, en numero.
@@ -30,9 +34,14 @@ export function resumenCerco(context: AppContext, projectId: string): ResumenCer
 
   const config = context.fortressConfig(project.path)
   const vivos = context.findings.listMemory(projectId).filter(vivo)
+  // El mismo `candidates` que usa la seleccion, con el modo del drenaje: sin
+  // HEAD no hay descuentos anclados al arbol y se cuenta lo que se sabe.
+  const headSha = context.headSha(project.path)
+  const cola = headSha === null ? [] : candidates(context, projectId, headSha, project.path, 'hasta-omega') // prettier-ignore
   return {
     total: vivos.length,
     trabajables: vivos.filter((f) => puedeTrabajarse(f.file)).length,
-    autoIntegrables: vivos.filter((f) => puedeAutoIntegrarse(f.severity, f.file, config)).length
+    autoIntegrables: vivos.filter((f) => puedeAutoIntegrarse(f.severity, f.file, config)).length,
+    elegibles: cola.length
   }
 }

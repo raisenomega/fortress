@@ -1,0 +1,39 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { ChainOutcome } from './motor-chain-outcome'
+import { CTX, deps, espera, motor } from './drenar-fixture'
+import { drenarHastaOmega } from './drenar-hasta-omega'
+
+afterEach(() => vi.restoreAllMocks())
+
+const baja = (motivo: string): ChainOutcome => ({ kind: 'descartada', proposalId: 'x', motivo })
+
+describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
+  it('una corrida con 2 firmas, 1 veto y 1 presupuesto se cuenta entera', async () => {
+    motor(espera('a'), baja('omega_vetado: el cerrojo ya existe'), espera('b'), baja('budget_exceeded')) // prettier-ignore
+
+    expect(await drenarHastaOmega(CTX, 'p1', deps())).toEqual({
+      fin: 'sin-candidato',
+      trabajadas: 4,
+      acumuladas: 2,
+      vetadas: 1,
+      porPresupuesto: 1,
+      otrasBajas: 0
+    })
+  })
+
+  it('el motivo llega con sufijo y se clasifica igual, por prefijo', async () => {
+    motor(baja('omega_vetado: razon larga del revisor'))
+    expect((await drenarHastaOmega(CTX, 'p1', deps())).vetadas).toBe(1)
+  })
+
+  it('gate rojo y correa rota no son ni veto ni dinero', async () => {
+    motor(baja('gate_failed_at=lint'), baja('scope_violation'))
+    const r = await drenarHastaOmega(CTX, 'p1', deps())
+    expect(r).toMatchObject({ trabajadas: 2, otrasBajas: 2, vetadas: 0, porPresupuesto: 0 })
+  })
+
+  it('una vuelta sin candidato no cuenta como trabajada', async () => {
+    motor()
+    expect((await drenarHastaOmega(CTX, 'p1', deps())).trabajadas).toBe(0)
+  })
+})

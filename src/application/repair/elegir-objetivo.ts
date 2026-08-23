@@ -18,8 +18,11 @@ export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f
  *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. Y
  *  los que quedan fuera del alcance de ESTA vuelta, que depende de hasta donde
  *  vaya a llegar: si puede integrar sola, solo lo que el cerco admitiria; si
- *  para antes del merge, todo menos las defensas del motor. */
-function candidates(
+ *  para antes del merge, todo menos las defensas del motor.
+ *  Exportada para que el panel diga cuantos QUEDAN sin recalcularlo por su
+ *  lado: dos cuentas de lo mismo divergen, y el numero que el operador ve
+ *  dejaria de ser el que el motor usa. */
+export function candidates(
   context: AppContext,
   projectId: string,
   headSha: string,

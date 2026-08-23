@@ -1,26 +1,8 @@
 import type { AppContext } from '../context'
-import type { MotorChainDeps } from './run-motor-chain'
 import { runMotorChain } from './run-motor-chain'
+import type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
 
-/** Por que termino el drenaje. `detenido` es una decision, no un fallo. */
-export type FinDelDrenaje = 'sin-candidato' | 'tope-vueltas' | 'tope-gasto' | 'detenido' | 'averia'
-
-export interface DrenajeResultado {
-  readonly fin: FinDelDrenaje
-  /** Propuestas que quedaron juzgadas y esperando firma. */
-  readonly acumuladas: number
-  readonly detalle?: string
-}
-
-export interface DrenajeDeps {
-  readonly motor: MotorChainDeps
-  /** El operador dijo basta. Se consulta antes y despues de cada vuelta. */
-  readonly cancelado: () => boolean
-  /** Dolares gastados en esta sesion de drenaje. */
-  readonly gastado: () => number
-  readonly maxVueltas: number
-  readonly costCapUsd: number
-}
+export type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
 
 /**
  * Recorre los hallazgos elegibles de un proyecto dejando cada fix juzgado y
@@ -38,9 +20,17 @@ export async function drenarHastaOmega(
   projectId: string,
   deps: DrenajeDeps
 ): Promise<DrenajeResultado> {
-  let acumuladas = 0
+  const cuenta = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, otrasBajas: 0 }
   const fin = (f: FinDelDrenaje, detalle?: string): DrenajeResultado =>
-    detalle === undefined ? { fin: f, acumuladas } : { fin: f, acumuladas, detalle }
+    detalle === undefined ? { fin: f, ...cuenta } : { fin: f, ...cuenta, detalle }
+
+  /** Una baja, clasificada por su motivo. El motivo llega con sufijos a veces
+   *  ("omega_vetado: <razon>"), asi que se mira el prefijo. */
+  const anotarBaja = (motivo: string): void => {
+    if (motivo.startsWith('omega_vetado')) cuenta.vetadas += 1
+    else if (motivo.startsWith('budget_exceeded')) cuenta.porPresupuesto += 1
+    else cuenta.otrasBajas += 1
+  }
 
   for (let vuelta = 0; vuelta < deps.maxVueltas; vuelta += 1) {
     if (deps.cancelado()) return fin('detenido')
@@ -52,7 +42,10 @@ export async function drenarHastaOmega(
     if (deps.cancelado()) return fin('detenido')
     if (!salida.ok) return fin('averia', salida.error)
     if (salida.value.kind === 'sin-candidato') return fin('sin-candidato')
-    if (salida.value.kind === 'espera-firma') acumuladas += 1
+
+    cuenta.trabajadas += 1
+    if (salida.value.kind === 'espera-firma') cuenta.acumuladas += 1
+    else if (salida.value.kind === 'descartada') anotarBaja(salida.value.motivo)
   }
   return fin('tope-vueltas')
 }
