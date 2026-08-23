@@ -1,4 +1,5 @@
 import type { CodeAgentReply } from '@domain/chat/code-agent'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
 import { parseStreamLine } from './stream-events'
 
@@ -12,6 +13,11 @@ export interface RunAccumulator {
  * Va juntando la salida del CLI. El texto se emite segun llega para que el
  * chat lo pinte en vivo; al cerrarse el proceso se compone la respuesta final
  * con lo que costo y con las herramientas que se usaron por el camino.
+ *
+ * El stderr es METADATO y acaba persistido como detalle del fallo, asi que
+ * pasa por redactSecrets: el hijo se spawnea con la API key en su entorno, y
+ * un volcado o una traza puede arrastrarla. Se redacta entero al cerrar y no
+ * por trozo, porque un chunk puede partir un secreto por la mitad.
  */
 export function createRunAccumulator(onChunk: (delta: string) => void): RunAccumulator {
   const collected: string[] = []
@@ -55,7 +61,8 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
       const text = collected.join('') || finalText
       if (exitCode === 0 && !failed) return { text, failed: false, denials, usage, tools, edits }
 
-      const detail = stderr.trim() || finalText || `el proceso termino con codigo ${exitCode}`
+      const detail =
+        redactSecrets(stderr).trim() || finalText || `el proceso termino con codigo ${exitCode}`
       return { text: text || detail, failed: true, denials, usage, tools, edits }
     }
   }
