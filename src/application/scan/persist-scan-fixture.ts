@@ -7,17 +7,17 @@ export interface Guardado {
   fila?: { findingCount: number; dossierCount: number }
 }
 
-/** Expediente minimo: un ausente-pero-vivo (archivo intacto) y un candidato a extincion. */
+/** Expediente minimo: dos ausentes, uno con su archivo intacto y otro tocado. */
 export function memoria(): FindingMemory[] {
   const base = { line: 1, status: 'open' as const, lifecycle: 'ACTIVE' as const }
   const fechas = { firstSeen: '2026-08-08T10:00:00Z', lastSeen: '2026-08-08T10:00:00Z' }
   return [
     { ...base, ...fechas, id: 'f1', identity: 'HIGH|vivo.ts|sigue vivo', severity: 'HIGH', title: 'sigue vivo', file: 'vivo.ts', resolvedAt: null, mitigatedAt: null }, // prettier-ignore
-    { ...base, ...fechas, id: 'f2', identity: 'HIGH|tocado.ts|arreglado', severity: 'HIGH', title: 'arreglado', file: 'tocado.ts', resolvedAt: null, mitigatedAt: null } // prettier-ignore
+    { ...base, ...fechas, id: 'f2', identity: 'HIGH|tocado.ts|con su archivo tocado', severity: 'HIGH', title: 'con su archivo tocado', file: 'tocado.ts', resolvedAt: null, mitigatedAt: null } // prettier-ignore
   ]
 }
 
-/** Contexto falso: git dice que SOLO tocado.ts cambio; captura lo persistido. */
+/** Contexto falso: git dice que SOLO tocado.ts cambio — dato que ya no extingue. */
 export function fixture(saved: Guardado): AppContext {
   return {
     fileHistory: { changedSince: (_p: string, file: string) => Promise.resolve(file === 'tocado.ts') }, // prettier-ignore

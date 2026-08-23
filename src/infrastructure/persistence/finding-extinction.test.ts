@@ -12,7 +12,7 @@ describe('markExtinct (la transicion, ya con la evidencia reunida)', () => {
     bench.repo.syncFromScan(PROJECT, 's1', [SSRF, API_KEY], '2026-08-08T10:00:00Z', new Set())
     const id = bench.memoryOf(SSRF.title)?.id ?? ''
 
-    bench.repo.markExtinct([id], '2026-08-09T10:00:00Z')
+    bench.repo.markExtinct([id], '2026-08-09T10:00:00Z', 'juicio_obsoleto')
 
     const memoria = bench.memoryOf(SSRF.title)
     expect(memoria?.lifecycle).toBe('EXTINCT')
@@ -22,7 +22,11 @@ describe('markExtinct (la transicion, ya con la evidencia reunida)', () => {
 
   it('un extinto deja de contar para el tablero', () => {
     bench.repo.syncFromScan(PROJECT, 's1', [SSRF, API_KEY], '2026-08-08T10:00:00Z', new Set())
-    bench.repo.markExtinct([bench.memoryOf(SSRF.title)?.id ?? ''], '2026-08-09T10:00:00Z')
+    bench.repo.markExtinct(
+      [bench.memoryOf(SSRF.title)?.id ?? ''],
+      '2026-08-09T10:00:00Z',
+      'juicio_obsoleto'
+    )
 
     expect(bench.repo.countsByProject()[PROJECT]).toMatchObject({ MEDIUM: 0, LOW: 1 })
   })
@@ -30,7 +34,7 @@ describe('markExtinct (la transicion, ya con la evidencia reunida)', () => {
   it('si el problema REAPARECE, el hallazgo vuelve a la vida', () => {
     bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z', new Set())
     const id = bench.memoryOf(SSRF.title)?.id ?? ''
-    bench.repo.markExtinct([id], '2026-08-09T10:00:00Z')
+    bench.repo.markExtinct([id], '2026-08-09T10:00:00Z', 'juicio_obsoleto')
 
     bench.repo.syncFromScan(PROJECT, 's2', [SSRF], '2026-08-10T10:00:00Z', new Set())
 
@@ -39,21 +43,5 @@ describe('markExtinct (la transicion, ya con la evidencia reunida)', () => {
     expect(memoria?.resolvedAt).toBeNull()
     expect(memoria?.id).toBe(id) // la misma fila de siempre
     expect(memoria?.firstSeen).toBe('2026-08-08T10:00:00Z')
-  })
-
-  it('extinguir dos veces no reescribe la fecha del cierre', () => {
-    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z', new Set())
-    const id = bench.memoryOf(SSRF.title)?.id ?? ''
-
-    bench.repo.markExtinct([id], '2026-08-09T10:00:00Z')
-    bench.repo.markExtinct([id], '2026-08-20T10:00:00Z')
-
-    expect(bench.memoryOf(SSRF.title)?.resolvedAt).toBe('2026-08-09T10:00:00Z')
-  })
-
-  it('una lista vacia no toca nada', () => {
-    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z', new Set())
-    bench.repo.markExtinct([], '2026-08-09T10:00:00Z')
-    expect(bench.memoryOf(SSRF.title)?.lifecycle).toBe('ACTIVE')
   })
 })

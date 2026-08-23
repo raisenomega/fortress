@@ -15,12 +15,17 @@ export function bench(opts: Opciones): Bench {
   const events: ProposalEvent[] = []
   const observadas: unknown[] = []
   const anclaDelDescuento: string[] = []
+  const extinguidos: Array<{ ids: readonly string[]; at: string; motivo: string }> = []
   const analyst = analistaFake(opts.verdictStatus ?? 'REAL', opts.notes)
   const context = {
     projects: { findById: () => ({ id: 'p1', path: '/repo/p1', name: 'Nucleo' }) },
     selfObservations: { add: (o: unknown): void => void observadas.push(o) },
     scans: { listByProject: () => [{ id: 'scan-1' }] },
-    findings: { listMemory: () => opts.findings },
+    findings: {
+      listMemory: () => opts.findings,
+      markExtinct: (ids: readonly string[], at: string, motivo: string): void =>
+        void extinguidos.push({ ids, at, motivo })
+    },
     repairProposals: {
       insert: (p: Proposal): void => void inserted.push(p),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch }),
@@ -45,5 +50,5 @@ export function bench(opts: Opciones): Bench {
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha),
     fortressConfig: () => opts.cerco ?? { kind: 'not-present' }
   } as unknown as AppContext
-  return { context, inserted, patches, events, observadas, anclaDelDescuento }
+  return { context, inserted, patches, events, observadas, anclaDelDescuento, extinguidos }
 }

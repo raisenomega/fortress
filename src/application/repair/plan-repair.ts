@@ -1,7 +1,8 @@
 import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { canTransition, type Proposal } from '@domain/repair/proposal'
 import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
-import { newId } from '@domain/shared/id'
+import { extinguirSiObsoleto } from './extinguir-con-juicio'
+import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
 import { elegirObjetivo } from './elegir-objetivo'
@@ -57,6 +58,8 @@ export async function planRepair(
   if (!canTransition(proposal.state, veredicto.state)) return proposal
   const patch = { state: veredicto.state, analysisVerdict: veredicto.verdict, analysisReason: veredicto.reason, updatedAt: Date.now() } // prettier-ignore
   context.repairProposals.update(proposal.id, patch)
+  // El juicio del agente es lo unico que cierra un hallazgo: el escaneo ya no.
+  extinguirSiObsoleto(context, proposal.findingId, veredicto, nowIso())
   await recordAnalyzed(context.eventLog, proposal, result, veredicto)
   return { ...proposal, ...patch }
 }

@@ -10,6 +10,7 @@ export interface FindingRow {
   readonly status: string
   readonly lifecycle: string
   readonly mitigated_note: string | null
+  readonly last_seen: string | null
 }
 
 /** Parametros con nombre del INSERT. */

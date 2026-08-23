@@ -5,17 +5,16 @@ import { scoreFromFindings } from '@domain/scan/score-from-findings'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { commitScanRows } from './commit-scan-rows'
-import { asDetected } from './extinguish'
+import { asDetected } from './expediente-vivo'
 import { pesarEvidencia } from './pesar-evidencia'
 import type { ScanSummary } from './scan-types'
 
 /**
- * Guarda todo lo que produjo un escaneo y decide, con evidencia, que hallazgos
- * se extinguen.
+ * Guarda todo lo que produjo un escaneo. NO cierra ningun hallazgo.
  *
- * La regla: un hallazgo se extingue solo si el escaneo NO lo reporta Y su
- * archivo cambio desde que se detecto. Antes bastaba la ausencia, y por eso el
- * registro daba por resueltos problemas que nadie habia tocado.
+ * Un escaneo solo puede afirmar lo que vio. Lo que no nombro sigue vivo y
+ * puntuando, porque el escaner es un LLM leyendo codigo y su silencio no es un
+ * veredicto. Quien cierra un hallazgo es un agente que lo mira, al drenar.
  */
 export async function persistScan(
   context: AppContext,
@@ -24,7 +23,7 @@ export async function persistScan(
 ): Promise<ScanSummary> {
   const { findings, durationMs } = outcome
   const scannedAt = nowIso()
-  const { extinct, stillAlive, conservados } = await pesarEvidencia(context, project, findings)
+  const { stillAlive, conservados } = await pesarEvidencia(context, project, findings)
 
   // El score puntua el EXPEDIENTE, no la corrida: lo reportado hoy MAS los
   // ACTIVE que este escaneo no nombro y nadie arreglo. Puntuar solo la corrida
@@ -40,7 +39,6 @@ export async function persistScan(
     dossierCount: expediente.length,
     counts,
     scannedAt,
-    extinct: extinct.map((f) => f.id),
     conservados
   })
 
@@ -53,8 +51,8 @@ export async function persistScan(
     // solo se escribiera lo reportado, dejaria de mentir llamandolo extinto
     // para mentir callandolo.
     findings: expediente,
-    // Extintos: SOLO los que pasaron las dos pruebas.
-    resolved: asDetected(extinct),
+    // Un escaneo ya no resuelve nada por su cuenta: cerrar exige juicio.
+    resolved: [],
     score,
     counts,
     at: scannedAt

@@ -1,0 +1,37 @@
+import { describe, expect, it } from 'vitest'
+import { bench, hallazgo } from './plan-repair-fixture'
+import { planRepair } from './plan-repair'
+
+describe('un hallazgo solo muere si un agente lo ha mirado', () => {
+  it('veredicto OBSOLETO: se extingue, y queda escrito POR QUE', async () => {
+    const b = bench({ findings: [hallazgo('f1', 'a.ts')], verdictStatus: 'OBSOLETO' })
+    await planRepair(b.context, 'p1')
+
+    expect(b.extinguidos).toHaveLength(1)
+    expect(b.extinguidos[0].ids).toEqual(['f1'])
+    expect(b.extinguidos[0].motivo).toBe('juicio_obsoleto')
+  })
+
+  it('veredicto REAL: sigue vivo, que para eso se va a reparar', async () => {
+    const b = bench({ findings: [hallazgo('f1', 'a.ts')], verdictStatus: 'REAL' })
+    await planRepair(b.context, 'p1')
+
+    expect(b.extinguidos).toEqual([])
+  })
+
+  it('ILEGIBLE no mata: un JSON truncado no es una opinion sobre el hallazgo', async () => {
+    // Sin esto, el fallo de parseo que cp113 dejo de disfrazar de obsoleto
+    // habria vuelto por la puerta de atras, cerrando el hallazgo igualmente.
+    const b = bench({ findings: [hallazgo('f1', 'a.ts')], verdictStatus: 'ILEGIBLE' })
+    await planRepair(b.context, 'p1')
+
+    expect(b.extinguidos).toEqual([])
+  })
+
+  it('sin candidato no se toca nada', async () => {
+    const b = bench({ findings: [] })
+    await planRepair(b.context, 'p1')
+
+    expect(b.extinguidos).toEqual([])
+  })
+})

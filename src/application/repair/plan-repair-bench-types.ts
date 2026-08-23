@@ -15,6 +15,8 @@ export interface Bench {
   readonly observadas: unknown[]
   /** Con que se pidio el descuento por obsoleto: debe ser el HEAD, no el escaneo. */
   readonly anclaDelDescuento: string[]
+  /** Extinciones pedidas por el motor: ids, cuando y con que motivo. */
+  readonly extinguidos: Array<{ ids: readonly string[]; at: string; motivo: string }>
 }
 
 export interface Opciones {

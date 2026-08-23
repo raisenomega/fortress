@@ -1,8 +1,9 @@
 import { buildTransitionEvent } from '@domain/repair/proposal-event'
 import { canTransition, type Proposal } from '@domain/repair/proposal'
 import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
+import { extinguirSiObsoleto } from './extinguir-con-juicio'
 import type { Selection } from '@domain/repair/select-target'
-import { newId } from '@domain/shared/id'
+import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { analyzeTarget } from './analyze-target'
 import { safeRecord } from './book-cursor'
@@ -65,6 +66,8 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
     state: veredicto.state, analysisVerdict: veredicto.verdict,
     analysisReason: veredicto.reason, updatedAt: Date.now()
   }) // prettier-ignore
+  // El juicio del agente es lo unico que cierra un hallazgo: el escaneo ya no.
+  extinguirSiObsoleto(ctx, proposal.findingId, veredicto, nowIso())
   await recordAnalyzed(ctx.eventLog, proposal, result, veredicto)
   return { ok: true, newProposalId: proposal.id }
 }

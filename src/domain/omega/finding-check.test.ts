@@ -7,7 +7,8 @@ const base = {
   title: 'algo',
   status: 'open',
   lifecycle: 'ACTIVE' as const,
-  mitigatedNote: null
+  mitigatedNote: null,
+  lastSeen: ''
 } as const
 
 describe('checkFinding', () => {

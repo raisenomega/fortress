@@ -1,7 +1,8 @@
 /** Consultas de findings y dismissals. Todas parametrizadas. */
 // `lifecycle` y la nota cruzan al tablero: sin ellos un hallazgo mitigado seria
 // indistinguible de uno vivo, y marcarlo no se veria en ningun sitio.
-const COLUMNS = 'id, project_id, severity, title, file, line, status, lifecycle, mitigated_note'
+const COLUMNS =
+  'id, project_id, severity, title, file, line, status, lifecycle, mitigated_note, last_seen'
 
 /** Lo urgente arriba, y lo descartado al final: ya no requiere accion. */
 const BY_URGENCY = `CASE status WHEN 'open' THEN 0 ELSE 1 END,
@@ -9,10 +10,11 @@ const BY_URGENCY = `CASE status WHEN 'open' THEN 0 ELSE 1 END,
   file, line`
 
 /**
- * Lo que sigue pidiendo accion. Un EXTINCT ya no: se demostro que se arreglo
- * —ausente del escaneo Y con su archivo tocado— y queda como historia, no como
- * tarea. Sin este filtro la lista crece para siempre desde que la base dejo de
- * borrar, y el tablero acabaria mostrando problemas ya cerrados.
+ * Lo que sigue pidiendo accion. Un EXTINCT ya no: un agente lo miro y dictamino
+ * que el problema ya no esta, y queda como historia. Sin este filtro la lista
+ * crece para siempre desde que la base dejo de borrar.
+ *
+ * Lo que el ultimo escaneo no nombro SI sigue aqui: no fue mirado, solo callado.
  */
 const VIVOS = "project_id = ? AND lifecycle != 'EXTINCT'"
 

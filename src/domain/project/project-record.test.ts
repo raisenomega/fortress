@@ -19,7 +19,8 @@ const open: Finding = {
   line: 9,
   status: 'open',
   lifecycle: 'ACTIVE' as const,
-  mitigatedNote: null
+  mitigatedNote: null,
+  lastSeen: ''
 }
 const descartado: Finding = {
   ...open,
@@ -27,7 +28,8 @@ const descartado: Finding = {
   title: 'Falso',
   status: 'false_positive',
   lifecycle: 'ACTIVE' as const,
-  mitigatedNote: null
+  mitigatedNote: null,
+  lastSeen: ''
 }
 
 describe('buildProjectRecord', () => {
