@@ -51,5 +51,5 @@ export async function firmarIntegracion(
 
   // El asiento lo escribe applyAutoMerge con el resultado real: anotarlo aqui
   // ademas dejaria dos decisiones en el libro para una sola integracion.
-  return applyAutoMerge(ctx, deps, caso, FIRMA, decisionBase(caso))
+  return applyAutoMerge(ctx, deps, caso, FIRMA, decisionBase(caso), 'firmada')
 }
