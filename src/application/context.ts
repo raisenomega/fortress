@@ -47,8 +47,9 @@ export interface AppContext {
   readonly repairProposals: RepairProposalRepository
   /** Libro de vida: un evento por eslabon de cada propuesta. Telemetria, no gate. */
   readonly eventLog: ProposalEventLog
-  /** Analista C2 (grafo-primero, solo lectura) anclado a la carpeta del proyecto. */
-  readonly analystFor: (projectPath: string) => Analyst
+  /** Analista C2 (grafo-primero, solo lectura) anclado a la carpeta del proyecto.
+   *  El id acompana a la ruta: es a nombre de quien se registra su proceso. */
+  readonly analystFor: (projectPath: string, projectId: string) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */
   readonly headSha: (projectPath: string) => string | null
   /** Estado del indice del grafo por proyecto (reindexado automatico). */

@@ -27,7 +27,7 @@ export function registerDrainHandlers(): void {
     const budget = readLoopBudget(context)
     const base = spentTodayByProject(context, new Date(), id)
     const deps = {
-      motor: buildMotorChainDeps(),
+      motor: buildMotorChainDeps(id),
       cancelado: () => isCancelled(id),
       gastado: () => spentTodayByProject(context, new Date(), id) - base,
       maxVueltas: budget.maxCycles,

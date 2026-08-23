@@ -1,6 +1,7 @@
 import { execFileSync, spawn } from 'child_process'
 import { GRAPH_BIN } from '@domain/connectors/graph-mcp'
 import { headSha } from '../git/head-sha'
+import { trackChild } from '../claude-code/child-registry'
 
 const TIMEOUT_MS = 10 * 60 * 1000
 
@@ -39,6 +40,7 @@ export function createReindexRunner(bin = GRAPH_BIN, timeoutMs = TIMEOUT_MS): Re
 
       return new Promise((resolve) => {
         const child = spawn(bin, ['cli', 'index_repository'], { cwd: projectPath })
+        trackChild(child, projectId)
         let out = ''
         const timer = setTimeout(() => {
           child.kill()

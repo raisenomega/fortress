@@ -49,7 +49,7 @@ export async function planRepair(
   context.repairProposals.insert(proposal)
   await recordElegido(context.eventLog, proposal, scanId)
 
-  const crudo = await analyzeTarget(context.analystFor(project.path), selection)
+  const crudo = await analyzeTarget(context.analystFor(project.path, project.id), selection)
   const result = conAgentRun(crudo, recordMotorRun(context, projectId, null, crudo.runMeta))
   // Lo que el analista noto de FORTRESS se guarda pase lo que pase con el
   // hallazgo: un limite del que se topo vale igual si el hallazgo era un fantasma.
