@@ -1,5 +1,6 @@
 import type { AnalystResult } from '@domain/repair/analysis'
-import type { Proposal, ProposalState } from '@domain/repair/proposal'
+import type { Proposal } from '@domain/repair/proposal'
+import type { Veredicto } from '@domain/repair/veredicto-del-analisis'
 import {
   buildAgentRunEvent,
   buildTransitionEvent,
@@ -35,12 +36,18 @@ export function recordElegido(
   )
 }
 
-/** seq 2 y 3 — la corrida del analista y la transicion que su veredicto causo. */
+/**
+ * seq 2 y 3 — la corrida del analista y la transicion que su veredicto causo.
+ *
+ * La fase la manda el estado: solo CADUCADO es EXPIRE. Un analisis ilegible
+ * acaba en RECHAZADO y se asienta en ANALYZE, que es donde fallo — archivarlo
+ * bajo EXPIRE seria repetir en la fase la misma mentira que en el estado.
+ */
 export async function recordAnalyzed(
   log: ProposalEventLog,
   proposal: Proposal,
   result: AnalystResult,
-  toState: ProposalState
+  veredicto: Veredicto
 ): Promise<void> {
   const { analysis, runMeta, raw } = result
   const corrida = buildAgentRunEvent({
@@ -55,8 +62,8 @@ export async function recordAnalyzed(
   await safeRecord(
     log,
     buildTransitionEvent({
-      proposalId: proposal.id, seq: 3, phase: toState === 'ANALIZADO' ? 'ANALYZE' : 'EXPIRE',
-      fromState: 'ELEGIDO', toState, reason: analysis.risk,
+      proposalId: proposal.id, seq: 3, phase: veredicto.state === 'CADUCADO' ? 'EXPIRE' : 'ANALYZE',
+      fromState: 'ELEGIDO', toState: veredicto.state, reason: veredicto.reason,
       evidenceJson: JSON.stringify(analysis), ts: Date.now()
     }) // prettier-ignore
   )

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Proposal, ProposalState } from './proposal'
-import { hasBlockingRejection } from './retry-eligibility'
+import { hasBlockingRejection } from './bloqueo-por-rechazo'
 
 const HEAD = 'abc1234'
 
