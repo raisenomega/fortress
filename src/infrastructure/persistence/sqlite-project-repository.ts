@@ -1,3 +1,4 @@
+import { isConfigState } from '@domain/project/config-state'
 import { normalizeScore } from '@domain/project/fortress-score'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ProjectRepository } from '@domain/project/project-repository'
@@ -22,7 +23,8 @@ function toInsertParams(project: NewProject): Record<string, string | number | n
     gitRemote: project.gitRemote,
     gitBranch: project.gitBranch,
     hasClaude: project.hasClaude ? 1 : 0,
-    configState: project.configState ?? 'CONFIGURADO',
+    // Simetrico a project-row: ausencia o valor fuera del enum caen al defecto.
+    configState: isConfigState(project.configState) ? project.configState : 'CONFIGURADO',
     createdAt: nowIso()
   }
 }
