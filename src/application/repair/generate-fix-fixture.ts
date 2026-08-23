@@ -25,6 +25,7 @@ function depsDe(opts: Opciones, calls: string[], prompts: string[]): GenerateDep
         prompts.push(prompt)
         const runMeta = { tokensUsed: opts.genCost ?? 50_000, durationMs: 9, startedAt: 1, endedAt: 10, usage: EMPTY_USAGE } // prettier-ignore
         return Promise.resolve(
+          opts.turnosAgotados === true ? { ok: false as const, error: 'no completo en 30 turnos', turnosAgotados: true as const, runMeta } : // prettier-ignore
           opts.generatorFails === true ? { ok: false as const, error: 'kaput', runMeta } : { ok: true as const, runMeta } // prettier-ignore
         )
       }

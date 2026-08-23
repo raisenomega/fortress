@@ -1,6 +1,7 @@
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
 import { tail } from '@domain/repair/tail'
-import { totalTokens, type TokenUsage } from '@domain/telemetry/token-usage'
+import { trabajoReal } from '@domain/repair/budget'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 import type { Analysis } from '@domain/repair/analysis'
 import type { Candidate } from '@domain/repair/select-target'
 import { toSelfNotes } from '@domain/system/self-note-item'
@@ -61,7 +62,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
     patternToCopy: text('patternToCopy'),
     doNotTouch: text('doNotTouch'),
     risk: leido === null ? `${ILEGIBLE}${ilegible}` : text('risk'),
-    tokensUsed: totalTokens(out.usage),
+    tokensUsed: trabajoReal(out.usage),
     ...(notes.length > 0 ? { notes } : {})
   }
 }

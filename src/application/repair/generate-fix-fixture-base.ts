@@ -11,6 +11,8 @@ export interface Opciones {
   readonly latestId?: string
   readonly spentPrevio?: number
   readonly generatorFails?: boolean
+  /** El generador se quedo sin vueltas: desenlace propio, no averia. */
+  readonly turnosAgotados?: boolean
   readonly genCost?: number
   readonly hasChanges?: boolean
   readonly changed?: readonly string[]

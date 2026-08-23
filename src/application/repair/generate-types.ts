@@ -21,7 +21,9 @@ export interface WorktreePort {
 /** Puerto del generador (C3). El motor jamas le cree los archivos tocados. */
 export interface GeneratorPort {
   generate(worktreePath: string, prompt: string): Promise<
-    { ok: true; runMeta: AnalystRunMeta } | { ok: false; error: string; runMeta: AnalystRunMeta }
+    | { ok: true; runMeta: AnalystRunMeta }
+    /** `turnosAgotados` separa el techo de vueltas de una averia del generador. */
+    | { ok: false; error: string; turnosAgotados?: true; runMeta: AnalystRunMeta }
   > // prettier-ignore
 }
 

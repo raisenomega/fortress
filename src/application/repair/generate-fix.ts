@@ -40,7 +40,7 @@ export async function generateFix(
   const result = conAgentRun(crudo, recordMotorRun(ctx, a.proposal.projectId, null, crudo.runMeta, !crudo.ok)) // prettier-ignore
   await emitGeneratorRun(ctx.eventLog, a.cursor, a.proposal.id, result.runMeta)
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
-  if (!result.ok) return fail('generator_error', { error: result.error }, true)
+  if (!result.ok) return fail(result.turnosAgotados ? 'turnos_agotados' : 'generator_error', { error: result.error }, true) // prettier-ignore
 
   return verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, allows, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
 }

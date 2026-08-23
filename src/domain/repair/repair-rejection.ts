@@ -3,6 +3,8 @@ export const REJECTION_REASONS = [
   'scope_violation',
   'budget_exceeded',
   'generator_error',
+  /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */
+  'turnos_agotados',
   'no_diff_produced',
   'worktree_contaminated',
   'orphan_before_generate',
