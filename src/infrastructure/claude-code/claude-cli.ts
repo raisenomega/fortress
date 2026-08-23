@@ -25,16 +25,9 @@ export function buildArgs(
   trusted = false,
   scripts: readonly string[] = []
 ): string[] {
-  const args = [
-    '-p',
-    prompt,
-    '--output-format',
-    'stream-json',
-    // stream-json solo emite el flujo completo de eventos con --verbose.
-    '--verbose',
-    '--permission-mode',
-    claudeModeArg(permissionMode)
-  ]
+  // stream-json solo emite el flujo completo de eventos con --verbose.
+  // prettier-ignore
+  const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--permission-mode', claudeModeArg(permissionMode)]
 
   // Red de seguridad: sin tope, un agente sobre un repo enorme sigue leyendo
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
@@ -63,12 +56,20 @@ export function isClaudeInstalled(): boolean {
   }
 }
 
+/** Llaves de la SESION VIVA del operador; el porque de cada una, en `repair/gate-env.ts`. */
+// prettier-ignore
+const SESION_VIVA: readonly string[] = ['SSH_AUTH_SOCK', 'GNOME_KEYRING_CONTROL', 'GPG_AGENT_INFO', 'XAUTHORITY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS', 'LD_LIBRARY_PATH', 'npm_config__auth']
+
 /**
- * Entorno del proceso hijo. Si el operador configuro una key en FORTRESS se le
- * pasa; si no, se deja que `claude` use sus propias credenciales (login OAuth),
- * que es como funciona en la terminal.
+ * Entorno del hijo, menos esas llaves: el CLI corre con cwd en el repo AUDITADO
+ * y su allowlist le deja lanzar sus `npm run` y sus MCP, nietos que heredan
+ * ESTE entorno. Recorte y no lista blanca como el gate: alli el hijo ES el repo
+ * auditado; aqui es el CLI, y lo que el y sus MCP necesitan no lo enumero nadie.
+ * Con key configurada se le pasa; sin ella `claude` usa las suyas (login OAuth).
+ * LIMITE: la key SI viaja —es la eleccion de facturacion— y la ven los nietos.
  */
 export function buildEnv(apiKey: string | null): NodeJS.ProcessEnv {
-  if (!apiKey) return process.env
-  return { ...process.env, ANTHROPIC_API_KEY: apiKey }
+  const env: NodeJS.ProcessEnv = { ...process.env }
+  for (const clave of SESION_VIVA) delete env[clave]
+  return apiKey ? { ...env, ANTHROPIC_API_KEY: apiKey } : env
 }
