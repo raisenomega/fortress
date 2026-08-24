@@ -37,13 +37,32 @@ function parseAmount(raw: string | null, fallback: number): number {
   return Math.min(value, 1000)
 }
 
-/** Null si todavia cabe; si no, el motivo exacto para ensenarlo tal cual. */
-export function dayLimitReached(budget: Budget, spentToday: number): string | null {
+/**
+ * Null si todavia cabe; si no, el motivo exacto para ensenarlo tal cual.
+ *
+ * Este es el UNICO sitio donde un humano lee el gasto del DIA, asi que es donde
+ * tiene que constar lo que ese gasto no cuenta: corridas que ocurrieron y cuya
+ * factura no se pudo leer. No se suman ni se estiman —el dinero que les falta no
+ * existe en ningun sitio— pero callarlas presenta como completo un total que el
+ * sistema sabe incompleto.
+ *
+ * `sinMedir` llega como funcion y no como numero para que solo se consulte
+ * cuando hay mensaje que componer: en el camino normal, que es no haber llegado
+ * al tope, no se paga una consulta para una frase que nadie va a leer.
+ */
+export function dayLimitReached(
+  budget: Budget,
+  spentToday: number,
+  sinMedir: () => number = () => 0
+): string | null {
   if (budget.perDay <= 0) return null
   if (spentToday < budget.perDay) return null
 
+  const cuantas = sinMedir()
+  const falta =
+    cuantas > 0 ? ` Ademas hubo ${cuantas} corrida(s) de coste desconocido, fuera de esa cuenta.` : '' // prettier-ignore
   return (
-    `Tope diario alcanzado: llevas $${spentToday.toFixed(2)} de $${budget.perDay.toFixed(2)}. ` +
+    `Tope diario alcanzado: llevas $${spentToday.toFixed(2)} de $${budget.perDay.toFixed(2)}.${falta} ` +
     'Subelo en Configuracion o espera a manana.'
   )
 }

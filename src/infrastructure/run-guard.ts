@@ -1,5 +1,5 @@
 import type { AppContext } from '@application/context'
-import { readBudget, spentToday } from '@application/settings/read-budget'
+import { readBudget, sinMedirHoy, spentToday } from '@application/settings/read-budget'
 import { CONTAMINATED_BLOCK } from '@domain/probe/contamination'
 import { dayLimitReached } from '@domain/settings/run-budget'
 import { tryBeginMerge, tryBeginRun } from './run-control'
@@ -22,7 +22,10 @@ export function guardRun(context: AppContext, projectId: string): string | null 
   const bloqueo = contaminado(context, projectId)
   if (bloqueo !== null) return bloqueo
 
-  const limite = dayLimitReached(readBudget(context), spentToday(context, new Date()))
+  const ahora = new Date()
+  const limite = dayLimitReached(readBudget(context), spentToday(context, ahora), () =>
+    sinMedirHoy(context, ahora)
+  )
   if (limite !== null) return limite
 
   return tryBeginRun(projectId) ? null : BUSY

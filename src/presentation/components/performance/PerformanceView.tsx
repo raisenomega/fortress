@@ -12,6 +12,7 @@ import { WindowPicker } from './WindowPicker'
 export function PerformanceView(): React.JSX.Element {
   const window = usePerformanceStore((state) => state.window)
   const usage = usePerformanceStore((state) => state.usage)
+  const sinFactura = usePerformanceStore((state) => state.sinFactura)
   const byProject = usePerformanceStore((state) => state.byProject)
   const ranking = usePerformanceStore((state) => state.ranking)
   const scans = usePerformanceStore((state) => state.scans)
@@ -33,7 +34,7 @@ export function PerformanceView(): React.JSX.Element {
         {loading ? <span className="text-xs text-muted-foreground">Actualizando…</span> : null}
       </div>
 
-      <UsageCards usage={usage} />
+      <UsageCards usage={usage} sinFactura={sinFactura} />
 
       <CognitionBlock title="Tokens por proyecto">
         <TokensByProject byProject={byProject} />

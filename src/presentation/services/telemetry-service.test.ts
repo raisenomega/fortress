@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { NADA_SIN_MEDIR } from '@domain/telemetry/sin-factura'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import { useTelemetryStore } from '../stores/telemetry-store'
 import { subscribeMotorUsage } from './telemetry-service'
@@ -13,12 +14,14 @@ function stubPuente(): { avisar: (id: string) => void; lecturas: () => number } 
   }
   const session = (): Promise<unknown> =>
     Promise.resolve({ ...EMPTY_USAGE, outputTokens: ++lecturas * 1000 })
-  Object.assign(globalThis, { window: { api: { repair: { onChanged }, telemetry: { session } } } })
+  const sinFactura = (): Promise<unknown> => Promise.resolve(NADA_SIN_MEDIR)
+  // prettier-ignore
+  Object.assign(globalThis, { window: { api: { repair: { onChanged }, telemetry: { session, sinFactura } } } })
   return { avisar: (id) => listener?.(id), lecturas: () => lecturas }
 }
 
 beforeEach(() => {
-  useTelemetryStore.setState({ session: EMPTY_USAGE })
+  useTelemetryStore.setState({ session: EMPTY_USAGE, sinMedir: NADA_SIN_MEDIR })
 })
 
 describe('el pie cuenta tambien el trabajo del motor', () => {

@@ -1,4 +1,5 @@
 import { SYSTEM_CHANNELS } from './system-channels'
+import { TELEMETRY_CHANNELS } from './telemetry-channels'
 import { BUILD_CHANNELS } from './build-channels'
 import { GRAPH_CHANNELS } from './graph-channels'
 import { NEWPROJECT_CHANNELS } from './newproject-channels'
@@ -8,6 +9,7 @@ import { REPAIR_CHANNELS } from './repair-channels'
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
   ...SYSTEM_CHANNELS,
+  ...TELEMETRY_CHANNELS,
   ...BUILD_CHANNELS,
   ...GRAPH_CHANNELS,
   ...OMEGA_CHANNELS,
@@ -36,16 +38,10 @@ export const IPC = {
   scanProgress: 'scan:progress',
   qualityRun: 'quality:run',
   pushRun: 'push:run',
-  telemetrySession: 'telemetry:session',
   postureRun: 'posture:run',
   accountStatus: 'account:status',
   accountLogin: 'account:login',
   accountLoginOutput: 'account:login-output',
-  telemetryBilling: 'telemetry:billing',
-  telemetryAverage: 'telemetry:average',
-  telemetrySince: 'telemetry:since',
-  telemetryByProject: 'telemetry:by-project',
-  telemetryRanking: 'telemetry:ranking',
   cognitionRead: 'cognition:read',
   graphStatus: 'graph:status',
   ...NEWPROJECT_CHANNELS,

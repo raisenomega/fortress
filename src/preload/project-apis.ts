@@ -46,6 +46,7 @@ export const projectApis: Pick<
     session: () => ipcRenderer.invoke(IPC.telemetrySession),
     since: (iso) => ipcRenderer.invoke(IPC.telemetrySince, iso),
     byProject: (iso) => ipcRenderer.invoke(IPC.telemetryByProject, iso),
+    sinFactura: (iso) => ipcRenderer.invoke(IPC.telemetrySinFactura, iso),
     ranking: (iso, limit) => ipcRenderer.invoke(IPC.telemetryRanking, iso, limit)
   },
   cognition: { read: (projectId) => ipcRenderer.invoke(IPC.cognitionRead, projectId) },

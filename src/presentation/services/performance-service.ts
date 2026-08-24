@@ -17,13 +17,14 @@ export async function loadPerformance(window: TimeWindow): Promise<void> {
   const since = windowStart(new Date(), window)
 
   try {
-    const [usage, byProject, ranking, scans] = await Promise.all([
+    const [usage, sinFactura, byProject, ranking, scans] = await Promise.all([
       api().telemetry.since(since),
+      api().telemetry.sinFactura(since),
       api().telemetry.byProject(since),
       api().telemetry.ranking(since, TOP_AGENTS),
       api().scan.historySince(since)
     ])
-    usePerformanceStore.getState().setData({ usage, byProject, ranking, scans })
+    usePerformanceStore.getState().setData({ usage, sinFactura, byProject, ranking, scans })
   } catch (error) {
     usePerformanceStore.getState().setLoading(false)
     reportError(error instanceof Error ? error.message : 'No se pudo cargar el rendimiento')
