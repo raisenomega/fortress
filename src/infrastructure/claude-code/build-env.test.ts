@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { buildEnv } from './claude-cli'
+import { buildEnv } from './build-env'
 
 /** Lo que una sesion de escritorio real le ofrecia al CLI, y el a sus nietos. */
 const SESION: NodeJS.ProcessEnv = {
