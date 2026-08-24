@@ -1,5 +1,6 @@
 import type { SelfNoteDraft } from '../system/self-observation'
 import type { TokenUsage } from '../telemetry/token-usage'
+import type { Evidencia } from './evidencia-obsolescencia'
 import type { Candidate } from './select-target'
 
 /**
@@ -10,6 +11,10 @@ export interface Analysis {
   readonly target: Candidate
   /** Veredicto verificado contra el archivo real: "REAL" (accionable) u "OBSOLETO". */
   readonly status: string
+  /** La prueba del OBSOLETO, y la unica llave que abre la extincion: un marcador
+   *  que debe estar AUSENTE del fichero —el defecto se fue— o PRESENTE —existe
+   *  el control que lo tapa—. Sin ella el hallazgo no muere: se mitiga. */
+  readonly evidencia?: Evidencia
   readonly whatToChange: string
   readonly where: string
   /** El patron a copiar y de donde (guardRun en scan-handlers/quality-handlers). */
@@ -24,13 +29,6 @@ export interface Analysis {
    * ayudado. No es del proyecto auditado; es material para que FORTRESS madure.
    */
   readonly notes?: readonly SelfNoteDraft[]
-}
-
-/** COMPLETO (listo para C3) si todas las partes de prosa tienen contenido. */
-export function isComplete(a: Analysis): boolean {
-  return [a.whatToChange, a.where, a.patternToCopy, a.doNotTouch, a.risk].every(
-    (part) => part.trim().length > 0
-  )
 }
 
 /** REAL y accionable (no obsoleto): C3 solo debe proponer sobre esto. */

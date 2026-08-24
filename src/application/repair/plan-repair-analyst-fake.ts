@@ -1,4 +1,5 @@
 import type { Analyst } from '@domain/repair/analysis'
+import type { Evidencia } from '@domain/repair/evidencia-obsolescencia'
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { FindingMemory } from '@domain/project/finding-memory'
@@ -20,7 +21,8 @@ export function hallazgo(id: string, file: string): FindingMemory {
  * dejo leer: `risk` con el prefijo y una cola de JSON truncado, como los tres
  * casos reales del 21 y el 23 de agosto.
  */
-export function analistaFake(status: string, notes?: readonly SelfNoteDraft[]): Analyst {
+// prettier-ignore
+export function analistaFake(status: string, notes?: readonly SelfNoteDraft[], evidencia?: Evidencia): Analyst {
   const risk = status === 'ILEGIBLE' ? `${ILEGIBLE}}  ]}` : 'riesgo bajo'
   return {
     study: (target) =>
@@ -28,6 +30,7 @@ export function analistaFake(status: string, notes?: readonly SelfNoteDraft[]): 
         analysis: {
           target, status, whatToChange: 'w', where: 'd',
           patternToCopy: 'p', doNotTouch: 'n', risk, tokensUsed: 7,
+          ...(evidencia ? { evidencia } : {}),
           ...(notes ? { notes } : {})
         }, // prettier-ignore
         // Con factura, como la corrida real: sin ella no se asienta en el

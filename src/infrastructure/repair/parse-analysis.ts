@@ -1,4 +1,5 @@
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
+import { leerEvidencia } from '@domain/repair/leer-evidencia'
 import { tail } from '@domain/repair/tail'
 import { trabajoReal } from '@domain/repair/budget'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
@@ -54,9 +55,14 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   // autopsia, que ademas corta en salto de linea para no empezar a medias.
   const ilegible = tail(out.result.trim(), MUESTRA)
   const notes = toSelfNotes(j.notes)
+  // Lo que no se entiende no viaja a medias: sin evidencia legible el OBSOLETO
+  // no puede extinguir. Un `status` ausente o torcido cae en OBSOLETO como
+  // siempre, pero ya no mata nada, porque tampoco trae con que probarlo.
+  const evidencia = leerEvidencia(j.evidencia)
   return {
     target,
     status: leido === null ? 'DESCONOCIDO' : text('status') || 'DESCONOCIDO',
+    ...(evidencia === undefined ? {} : { evidencia }),
     whatToChange: text('whatToChange'),
     where: text('where'),
     patternToCopy: text('patternToCopy'),

@@ -38,4 +38,20 @@ describe('el prompt le dice al modelo la regla que antes solo sabia el codigo', 
       expect(prompt()).toContain(`"${clave}"`)
     expect(prompt()).toContain('"REAL" u "OBSOLETO"')
   })
+
+  it('exige evidencia comprobable para cerrar, y avisa de que el commit no decide', () => {
+    // Pedir la cita del commit no bastaba: los dos casos de la CSP citaron uno
+    // real y exacto que solo habia anadido un comentario.
+    const texto = prompt()
+    expect(texto).toContain('"evidencia" es OBLIGATORIA')
+    expect(texto).toContain('El "commit" NO decide')
+    expect(texto).toContain('"ausente"')
+    expect(texto).toContain('"presente"')
+  })
+
+  it('dice que argumentar el riesgo de tocar NO es evidencia', () => {
+    // Es literalmente lo que hicieron los dos dudosos, y el motor lo guardaba
+    // como razon de la extincion porque la razon sale del campo `risk`.
+    expect(prompt()).toContain('Argumentar que tocarlo es arriesgado NO es')
+  })
 })

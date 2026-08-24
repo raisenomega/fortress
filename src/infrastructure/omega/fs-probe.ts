@@ -36,6 +36,16 @@ export function createFsProbe(): FilesystemProbe {
       }
     },
 
+    // Misma lectura blindada que las otras dos: la red de la extincion busca su
+    // marcador en el texto, y la ruta que lo ancla tambien viene de un agente.
+    contenido: (projectPath, relativeFile) => {
+      try {
+        return safeRead(projectPath, relativeFile)
+      } catch {
+        return null
+      }
+    },
+
     snippet: (projectPath, relativeFile, line) => {
       try {
         const content = safeRead(projectPath, relativeFile)

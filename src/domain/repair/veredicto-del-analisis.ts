@@ -29,6 +29,11 @@ export interface Veredicto {
  *
  * Aqui NO se arregla el parser. Que lea mejor es otra deuda; esto es que cuando
  * falle, lo diga.
+ *
+ * Lo que este veredicto NO decide es la suerte del HALLAZGO. OBSOLETO caduca la
+ * propuesta y abre la puerta a extinguirlo, pero quien la cruza es
+ * `extinguirSiObsoleto`, comprobando la evidencia del analisis contra el fichero
+ * real: sin prueba, el hallazgo se mitiga y sigue en el tablero.
  */
 export function veredictoDelAnalisis(analysis: Analysis): Veredicto {
   if (noSeDejoLeer(analysis)) {
