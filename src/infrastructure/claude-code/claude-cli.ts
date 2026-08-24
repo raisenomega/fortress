@@ -40,8 +40,9 @@ export function buildArgs(
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)
 
-  // El grafo viaja en TODO spawn. Si no arranca, Claude Code sigue sin el.
-  args.push(MCP_CONFIG_FLAG, withGraph(mcpConfig))
+  // El grafo viaja en TODO spawn. Si no arranca, Claude Code sigue sin el. Y
+  // el flag estricto cierra el conjunto: el hijo monta esto y nada del entorno.
+  args.push(MCP_CONFIG_FLAG, withGraph(mcpConfig), '--strict-mcp-config')
 
   return args
 }
