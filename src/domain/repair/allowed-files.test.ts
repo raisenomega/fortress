@@ -56,3 +56,19 @@ describe('computeAllowedFiles (I2.1: anclada al file estructurado)', () => {
     expect(computeAllowedFiles({ primaryFile: '' })).toEqual([])
   })
 })
+
+/** P1: la misma travesia se escribe de muchas formas y todas cuentan. P3: se
+ *  prueba en la CORREA, no en el veto de scope-check, o seria un falso verde. */
+describe('un ancla fuera del arbol no da correa, se escriba como se escriba', () => {
+  const FUERA = ['..', '../x.ts', '../../otro/x.ts', 'src/../../x.ts', '/etc/passwd.ts', 'C:\\x.ts', '\\\\host\\x.ts', '..\\..\\x.ts'] // prettier-ignore
+
+  it('h) ni el ancla, ni sus hermanos, ni los extras del hint', () => {
+    for (const sucia of FUERA) {
+      expect(computeAllowedFiles({ primaryFile: sucia, hint: `tocar ${sucia}` })).toEqual([])
+    }
+  })
+
+  it('i) un punto en el NOMBRE no es travesia (ADR-012: no apretar de mas)', () => {
+    expect(computeAllowedFiles({ primaryFile: 'src/ui/i18n.en.json' })).toEqual(['src/ui/i18n.en.json']) // prettier-ignore
+  })
+})
