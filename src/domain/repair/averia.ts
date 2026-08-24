@@ -16,12 +16,12 @@ import type { RejectionReason } from './repair-rejection'
  * terminar en tres minutos. El gate ya lo trataba asi; ahora tambien el
  * generador y el revisor.
  *
- * `generator_error` sigue aqui mientras cubra la transicion invalida, que es un
- * bug nuestro: si el estado esta roto, la vuelta siguiente lo romperia igual y
- * cada vuelta cuesta un analista. Cuando ese caso tenga nombre propio, esta
- * entrada queda solo para las filas viejas y sale.
+ * `generator_error` YA NO ESTA, y esto es el cumplimiento de lo que esta misma
+ * nota prometia: cubria la transicion invalida, esa se llama ahora
+ * `invalid_state`, y sin nadie que lo emita clasificar el valor seria clasificar
+ * un fantasma. Sobrevive en el vocabulario para que las filas viejas se lean.
  */
-const AVERIAS: readonly RejectionReason[] = ['provider_error', 'omega_error', 'generator_error']
+const AVERIAS: readonly RejectionReason[] = ['provider_error', 'omega_error']
 
 export function esAveria(motivo: string): boolean {
   return (AVERIAS as readonly string[]).includes(motivo)

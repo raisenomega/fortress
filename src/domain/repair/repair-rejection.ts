@@ -15,8 +15,13 @@ export const REJECTION_REASONS = [
    * parte cuando haya uno que estudiar, no antes.
    */
   'provider_error',
-  /** Solo la transicion invalida, que es un bug nuestro, y las filas viejas:
-   *  antes cubria tambien el timeout y el spawn fallido, y los mezclaba. */
+  /**
+   * HISTORICO: ya no lo emite nadie. Cubrio a la vez el timeout, el spawn
+   * fallido y la transicion invalida —tres naturalezas bajo un nombre que
+   * acusaba al generador de las tres—. Los dos primeros se separaron; la
+   * tercera resulto no ser suya, sino de la maquina de estados, y se llama
+   * `invalid_state`. Se conserva para que las filas ya escritas se lean.
+   */
   'generator_error',
   /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */
   'turnos_agotados',
