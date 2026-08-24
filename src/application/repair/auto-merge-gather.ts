@@ -45,7 +45,12 @@ export async function gatherCase(ctx: AppContext, proposalId: string): Promise<G
   return { ok: true, caso: { proposal, project, state, severity: hallazgo.severity, events } }
 }
 
-/** El asiento con lo ya sabido y las cuatro incognitas en null. Cada rama llena las suyas. */
+/**
+ * El asiento con lo ya sabido y las cuatro incognitas en null. Cada rama llena
+ * las suyas. La via nace en `automatica` porque los dos asientos que se quedan
+ * con este valor —configuracion ilegible y politica que frena— solo los escribe
+ * el cerco; la firma pasa por `applyAutoMerge`, que pone la suya de verdad.
+ */
 export function decisionBase(caso: AutoMergeCase): MergeDecision {
   return {
     projectId: caso.proposal.projectId,
@@ -58,6 +63,7 @@ export function decisionBase(caso: AutoMergeCase): MergeDecision {
     policy: null,
     configError: null,
     applyError: null,
-    commitSha: null
+    commitSha: null,
+    via: 'automatica'
   }
 }

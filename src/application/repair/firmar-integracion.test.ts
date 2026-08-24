@@ -20,6 +20,9 @@ describe('la firma humana integra lo que OMEGA aprobo', () => {
     expect(await firmar(b)).toMatchObject({ applied: true, mergeCommitSha: 'merge01' })
     expect(b.patches.map((p) => p.state)).toEqual(['APROBADO', 'MERGEADO'])
     expect(b.aplicados[0]).toMatchObject({ projectPath: '/repo', sourceBranch: 'repair/p-1-slug' })
+    // Este test miraba solo el retorno, y por eso el asiento pudo pasarse seis
+    // dias diciendo "denegada" de once integraciones que estaban en main.
+    expect(b.entries[0]).toMatchObject({ verdict: 'ok', kind: 'merge' })
   })
 
   it('NO integra si OMEGA no aprobo: la firma no revoca un veto', async () => {

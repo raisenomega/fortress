@@ -52,12 +52,12 @@ export async function applyAutoMerge(
 
   if (outcome.ok) {
     await advanceProposal(ctx, caso.proposal, path, ASUNTO_LIBRO[via], cursor, deps.now())
-    recordMergeDecision(ctx, { ...base, policy, commitSha: outcome.mergeCommitSha })
+    recordMergeDecision(ctx, { ...base, policy, via, commitSha: outcome.mergeCommitSha })
     return { applied: true, mergeCommitSha: outcome.mergeCommitSha, denial: null }
   }
 
   const detalle = detalleDe(outcome)
   await advanceProposal(ctx, caso.proposal, ['CADUCADO'], `merge fallido — ${detalle}`, cursor, deps.now()) // prettier-ignore
-  recordMergeDecision(ctx, { ...base, policy, applyError: detalle })
+  recordMergeDecision(ctx, { ...base, policy, via, applyError: detalle })
   return { applied: false, reason: `merge-failed-${outcome.kind}`, denial: null }
 }

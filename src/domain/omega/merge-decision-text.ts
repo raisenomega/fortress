@@ -13,7 +13,11 @@ import type { MergeDecision } from './merge-decision'
 export function motivo(d: MergeDecision): string | null {
   if (d.configError !== null) return `configuracion ilegible — ${d.configError}`
   if (d.policy === null) return 'la politica no se llego a evaluar'
-  if (d.policy.reason !== null) return `politica — ${d.policy.reason}`
+  // Se pregunta por `allowed`, NO por si hay texto: `reason` documenta "por que
+  // NO se integra sola", y la firma humana metia ahi un porque AFIRMATIVO. Once
+  // asientos acabaron diciendo "denegada" sobre commits que estan en main, y
+  // cortar aqui dejaba ademas inalcanzable el fallo de git de mas abajo.
+  if (!d.policy.allowed) return `politica — ${d.policy.reason}`
   if (d.gate !== null && !d.gate.ok) return `gate — ${d.gate.reason} en ${d.gate.failedAt}`
   if (d.omega !== null && d.omega.veredicto_global === 'VETADO') {
     return `revisor — ${d.omega.razon}`

@@ -2,7 +2,7 @@ import { mergeDecisionEntry, type MergeDecision } from '@domain/omega/merge-deci
 import type { AppContext } from '../context'
 
 /**
- * OMEGA deja constancia de cada decision de integracion automatica en el Libro
+ * OMEGA deja constancia de cada decision de integracion en el Libro
  * de la Vida, se haya aplicado o no. Mismo criterio que con la publicacion: el
  * registro no cambia la regla, la documenta con evidencia — que politica se
  * cumplio, que archivos se tocaron, cuantas lineas, y el commit si llego a
