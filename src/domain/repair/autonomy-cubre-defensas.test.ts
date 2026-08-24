@@ -9,7 +9,7 @@ const fix = (file: string): Parameters<typeof evaluate>[0] => ({
   severity: 'LOW', files: [file], insertions: 1, deletions: 0
 }) // prettier-ignore
 
-/** Las defensas que las piezas de la raiz A y del entorno del gate crearon. */
+/** Las defensas que la raiz A, el entorno del gate y la revision de la lista crearon. */
 const NUEVAS: readonly string[] = [
   'src/domain/project/project-path.ts',
   'src/domain/newproject/target-path.ts',
@@ -29,8 +29,9 @@ const NUEVAS: readonly string[] = [
   'src/infrastructure/system/self-project.ts',
   'src/domain/repair/scope-check.ts',
   'src/domain/repair/auto-merge-evaluation.ts',
-  'src/domain/repair/auto-merge-config.ts'
-]
+  'src/domain/repair/auto-merge-config.ts',
+  'src/domain/chat/tool-detail.ts', 'src/infrastructure/claude-code/claude-cli.ts'
+] // prettier-ignore
 
 describe('la lista innegociable cubre las defensas nuevas', () => {
   it('un fix minimo sobre cada una NO se integra solo', () => {
