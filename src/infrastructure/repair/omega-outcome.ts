@@ -19,6 +19,8 @@ export type OmegaRunResult =
       ok: false
       error: string
       timedOut: boolean
+      /** El CLI no llego a arrancar: no hubo juicio, ni bueno ni malo. */
+      noArranco?: true
       runMeta: AnalystRunMeta
       detail?: string
       raw?: string

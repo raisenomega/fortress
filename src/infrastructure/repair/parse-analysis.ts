@@ -1,4 +1,5 @@
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
+import { sinProceso } from '@domain/repair/cli-no-arranco'
 import { leerEvidencia } from '@domain/repair/leer-evidencia'
 import { tail } from '@domain/repair/tail'
 import { trabajoReal } from '@domain/repair/budget'
@@ -6,28 +7,20 @@ import type { TokenUsage } from '@domain/telemetry/token-usage'
 import type { Analysis } from '@domain/repair/analysis'
 import type { Candidate } from '@domain/repair/select-target'
 import { toSelfNotes } from '@domain/system/self-note-item'
+import { leerObjeto } from './leer-objeto'
 
 /** Lo que devuelve la corrida headless: el texto y la factura entera. */
 export interface RunOut {
   readonly result: string
   /** Ausente si el CLI no dejo factura legible. No se sustituye por ceros. */
   readonly usage?: TokenUsage
+  /** El proceso jamas existio. Distinto de una salida vacia, que si corrio. */
+  readonly noArranco?: true
 }
 
 /** Cuanto del texto ilegible se guarda: bastante para reconocer que devolvio
  *  el analista, poco para no llenar el libro con una respuesta entera. */
 const MUESTRA = 300
-
-/** Lo leido, o null si no habia JSON que leer o el que habia no se deja leer. */
-function leer(texto: string): Record<string, unknown> | null {
-  const match = texto.match(/\{[\s\S]*\}/)
-  if (match === null) return null
-  try {
-    return JSON.parse(match[0]) as Record<string, unknown>
-  } catch {
-    return null
-  }
-}
 
 /**
  * Extrae el Analysis del JSON que el analista deja en su respuesta.
@@ -44,7 +37,7 @@ function leer(texto: string): Record<string, unknown> | null {
  * que habia devuelto el analista era volver a ejecutarlo y esperar suerte.
  */
 export function toAnalysis(target: Candidate, out: RunOut): Analysis {
-  const leido = leer(out.result)
+  const leido = leerObjeto(out.result)
   const j = leido ?? {}
   const text = (k: string): string => (typeof j[k] === 'string' ? j[k] : '').trim()
   // `risk` es el canal: plan-repair lo persiste como analysisReason y el libro
@@ -55,6 +48,9 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   // primer caso real (18-ago); es el mismo `tail` que el gate usa para su
   // autopsia, que ademas corta en salto de linea para no empezar a medias.
   const ilegible = tail(out.result.trim(), MUESTRA)
+  // El CLI que no arranco no produjo una respuesta mala: no produjo ninguna.
+  // Su marca gana a la de ilegible, que supondria que hubo algo que leer.
+  if (out.noArranco === true) return sinProceso(target, out.result)
   const notes = toSelfNotes(j.notes)
   // Lo que no se entiende no viaja a medias: sin evidencia legible el OBSOLETO
   // no puede extinguir. Un `status` ausente o torcido cae en OBSOLETO como

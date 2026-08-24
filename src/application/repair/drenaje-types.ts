@@ -1,7 +1,12 @@
 import type { MotorChainDeps } from './run-motor-chain'
 
-/** Por que termino el drenaje. `detenido` es una decision, no un fallo. */
-export type FinDelDrenaje = 'sin-candidato' | 'tope-vueltas' | 'tope-gasto' | 'detenido' | 'averia'
+/**
+ * Por que termino el drenaje. `detenido` es una decision, no un fallo, y
+ * `entorno` no es una averia del proveedor: es esta maquina, que es otra cosa y
+ * se arregla de otra manera.
+ */
+// prettier-ignore
+export type FinDelDrenaje = 'sin-candidato' | 'tope-vueltas' | 'tope-gasto' | 'detenido' | 'averia' | 'entorno'
 
 /**
  * Lo que la corrida HIZO, no solo lo que dejo. Un parte que solo contaba las

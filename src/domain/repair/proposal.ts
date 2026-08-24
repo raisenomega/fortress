@@ -19,12 +19,12 @@ export type ProposalState =
  * Veredicto de C2. Tres, no dos: REAL (accionable), OBSOLETO (el problema ya no
  * existe) e ILEGIBLE (el analista dictamino, pero su salida no se dejo leer).
  *
- * ILEGIBLE existe porque sin el, un fallo de lectura caia por el lado de
- * OBSOLETO y el motor afirmaba que el hallazgo no existia sin haber llegado a
- * saberlo. Ademas es lo que mira el descuento por base_sha, que solo silencia
- * al hallazgo cuando el veredicto es OBSOLETO de verdad.
+ * Cada uno nacio de una confusion real: sin ILEGIBLE un fallo de lectura caia
+ * en OBSOLETO y el motor afirmaba que el hallazgo no existia sin saberlo; sin
+ * NO_ARRANCO un PATH roto se registraba como una mala contestacion del modelo,
+ * porque ILEGIBLE supone que hubo respuesta y aqui no hubo proceso.
  */
-export type AnalysisVerdict = 'REAL' | 'OBSOLETO' | 'ILEGIBLE'
+export type AnalysisVerdict = 'REAL' | 'OBSOLETO' | 'ILEGIBLE' | 'NO_ARRANCO'
 
 export interface Proposal {
   readonly id: string

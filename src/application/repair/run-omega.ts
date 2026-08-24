@@ -15,6 +15,7 @@ export type OmegaAgentResult =
       ok: false
       error: string
       timedOut: boolean
+      noArranco?: true
       runMeta: AnalystRunMeta
       detail?: string
       raw?: string

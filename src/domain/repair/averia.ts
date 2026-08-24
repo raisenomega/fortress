@@ -16,12 +16,18 @@ import type { RejectionReason } from './repair-rejection'
  * terminar en tres minutos. El gate ya lo trataba asi; ahora tambien el
  * generador y el revisor.
  *
+ * `cli_no_arranco` SI esta, y es el unico que corta sin ser del proveedor: un
+ * binario que falta no es de la propuesta sino de la MAQUINA, asi que seguir
+ * solo compraria el mismo fallo una vez por hallazgo. Cortar y reintentar son
+ * preguntas distintas: esta corta y no se reintenta, que es una combinacion que
+ * ningun otro estado expresaba.
+ *
  * `generator_error` YA NO ESTA, y esto es el cumplimiento de lo que esta misma
  * nota prometia: cubria la transicion invalida, esa se llama ahora
  * `invalid_state`, y sin nadie que lo emita clasificar el valor seria clasificar
  * un fantasma. Sobrevive en el vocabulario para que las filas viejas se lean.
  */
-const AVERIAS: readonly RejectionReason[] = ['provider_error', 'omega_error']
+const AVERIAS: readonly RejectionReason[] = ['provider_error', 'omega_error', 'cli_no_arranco']
 
 export function esAveria(motivo: string): boolean {
   return (AVERIAS as readonly string[]).includes(motivo)
@@ -36,4 +42,14 @@ const TIMEOUTS: readonly RejectionReason[] = ['generator_timeout', 'gate_timeout
 
 export function esTimeout(motivo: string): boolean {
   return (TIMEOUTS as readonly string[]).some((t) => motivo === t || motivo.startsWith(`${t}:`))
+}
+
+/**
+ * El fallo que no es del proveedor sino de ESTA maquina. Corta como una averia
+ * —seguir compraria el mismo fallo una vez por hallazgo— pero se anuncia
+ * aparte: al operador le sirve de poco esperar a que "el proveedor se
+ * recupere" cuando lo que falta es un binario en su PATH.
+ */
+export function esEntorno(motivo: string): boolean {
+  return motivo === 'cli_no_arranco' || motivo.startsWith('cli_no_arranco:')
 }

@@ -55,3 +55,15 @@ describe('el parte dice que hizo la corrida', () => {
     )
   })
 })
+
+describe('el CLI que no arranca no se anuncia como una averia del proveedor', () => {
+  it('lo dice por su nombre: es esta maquina, no el otro lado', () => {
+    // "Cortado por una averia" manda a esperar a que el proveedor se recupere,
+    // y lo que falta es un binario en el PATH del operador.
+    const { texto, tono } = parteDelDrenaje(r({ fin: 'entorno', trabajadas: 2, acumuladas: 1 }))
+
+    expect(texto).toContain('el CLI no arranca en esta maquina')
+    expect(texto).not.toContain('cortado por una averia')
+    expect(tono).toBe('error')
+  })
+})

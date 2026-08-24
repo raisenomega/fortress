@@ -1,10 +1,8 @@
 import { spawn } from 'child_process'
-import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { toOmegaOutcome, type OmegaRunResult } from './omega-outcome'
-import { trabajoReal } from '@domain/repair/budget'
-import type { TokenUsage } from '@domain/telemetry/token-usage'
+import { relojDeCorrida } from './reloj-de-corrida'
 
 export type { OmegaRunResult }
 
@@ -28,14 +26,7 @@ export interface GraphOmega {
 export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS): GraphOmega {
   return {
     run: (worktreePath, prompt) => {
-      const startedAt = Date.now()
-      const sinFactura = (): AnalystRunMeta => ({
-        durationMs: Date.now() - startedAt, startedAt, endedAt: Date.now()
-      }) // prettier-ignore
-      const meta = (usage?: TokenUsage): AnalystRunMeta => usage === undefined ? sinFactura() : ({
-        tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined, usage,
-        durationMs: Date.now() - startedAt, startedAt, endedAt: Date.now()
-      }) // prettier-ignore
+      const { sinFactura, meta } = relojDeCorrida(Date.now())
       const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
         '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS] // prettier-ignore
       return new Promise((resolve) => {
@@ -62,7 +53,8 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
         })
         child.on('error', (error) => {
           clearTimeout(timer)
-          resolve({ ok: false, error: error.message, timedOut: false, runMeta: sinFactura() })
+          // El revisor no llego a existir: no es su juicio el que fallo.
+          resolve({ ok: false, error: error.message, timedOut: false, noArranco: true, runMeta: sinFactura() }) // prettier-ignore
         })
       })
     }
