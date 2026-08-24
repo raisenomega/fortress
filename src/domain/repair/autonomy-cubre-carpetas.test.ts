@@ -4,7 +4,7 @@ import { DEFAULT_POLICY } from './auto-merge-policy'
 
 const ACTIVA = { ...DEFAULT_POLICY, enabled: true }
 const fix = (file: string): Parameters<typeof evaluate>[0] => ({
-  severity: 'LOW', files: [file], insertions: 1, deletions: 0
+  severity: 'LOW', files: [file], insertions: 1, deletions: 0, lineasPorFichero: {}
 }) // prettier-ignore
 
 /** Proteger POR CARPETA donde la carpeta entera es la defensa. */

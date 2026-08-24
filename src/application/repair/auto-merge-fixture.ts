@@ -28,6 +28,8 @@ export interface Opciones {
   readonly hallazgo?: boolean
   readonly proyecto?: boolean
   readonly propuesta?: boolean
+  /** Lineas que tendria cada fichero YA con el fix puesto. Vacio = sin medir. */
+  readonly lineas?: Readonly<Record<string, number>>
 }
 
 export interface Banco {
@@ -66,6 +68,7 @@ export function banco(opts: Opciones = {}): Banco {
       }
     },
     readConfig: () => opts.config ?? CONFIG_ON,
+    lineasDeFicheros: () => opts.lineas ?? {},
     now: () => 42
   }
   return { context, deps, patches, entries, aplicados }

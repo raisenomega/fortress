@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { evaluate } from '@domain/repair/auto-merge-evaluation'
-import type { AutoMergePolicy } from '@domain/repair/auto-merge-policy'
+import type { AutoMergePolicy, ProposalDiff } from '@domain/repair/auto-merge-policy'
 import { readFortressConfig } from './fortress-config'
 
 /**
@@ -18,8 +18,11 @@ function politica(): AutoMergePolicy {
   return config.policy
 }
 
-const bloquea = (file: string): boolean =>
-  !evaluate({ severity: 'LOW', files: [file], insertions: 1, deletions: 0 }, politica()).allowed
+// prettier-ignore
+const diff = (file: string): ProposalDiff =>
+  ({ severity: 'LOW', files: [file], insertions: 1, deletions: 0, lineasPorFichero: {} })
+
+const bloquea = (file: string): boolean => !evaluate(diff(file), politica()).allowed
 
 describe('.fortress/config de este repo', () => {
   it('el parser lo acepta y la integracion automatica queda activada', () => {
@@ -49,7 +52,7 @@ describe('.fortress/config de este repo', () => {
   })
 
   it('el tope de lineas corta a la decima, no a la undecima', () => {
-    const chico = { severity: 'LOW', files: ['src/domain/repair/additive.ts'], insertions: 8, deletions: 1 } as const // prettier-ignore
+    const chico = { severity: 'LOW', files: ['src/domain/repair/additive.ts'], insertions: 8, deletions: 1, lineasPorFichero: {} } as const // prettier-ignore
     expect(evaluate(chico, politica()).allowed).toBe(true)
     expect(evaluate({ ...chico, deletions: 2 }, politica()).allowed).toBe(false)
   })

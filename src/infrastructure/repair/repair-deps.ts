@@ -13,7 +13,7 @@ import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
 import { createGraphGenerator } from './graph-generator'
 import { createGraphOmega } from './graph-omega'
-import { readAtHead, readAtSha, showHead } from './worktree-file-reader'
+import { lineasDeFicheros, readAtHead, readAtSha, showHead } from './worktree-file-reader'
 import { assertRepairSandbox } from './repair-sandbox'
 import { createWorktreeManager } from './worktree-manager'
 
@@ -66,7 +66,9 @@ export function buildOmegaDeps(projectId: string): OmegaDeps {
   }
 }
 
-/** Deps de la integracion automatica: git contra el repo vivo y el config del proyecto. */
+/** Deps de la integracion automatica. Se mide sobre el worktree: ahi el fix ya esta puesto. */
+// prettier-ignore
 export function buildAutoMergeDeps(): AutoMergeDeps {
-  return { mergeApplier: createGitMergeApplier(), readConfig: readFortressConfig, now: Date.now }
+  return { mergeApplier: createGitMergeApplier(), readConfig: readFortressConfig, now: Date.now,
+    lineasDeFicheros: (id, files) => lineasDeFicheros(`${worktreeRoot()}/${id}`, files) }
 }

@@ -36,7 +36,8 @@ export type ChainOutcome =
  *
  * `null` tampoco cuenta: ahi ni se llego a mirar la politica.
  */
-const DENEGACIONES: readonly FailedCondition[] = ['severity', 'diff', 'files', 'blacklist']
+// prettier-ignore
+const DENEGACIONES: readonly FailedCondition[] = ['severity', 'diff', 'files', 'blacklist', 'max-lines']
 
 export function esDenegacion(condition: FailedCondition | null): boolean {
   return condition !== null && DENEGACIONES.includes(condition)
