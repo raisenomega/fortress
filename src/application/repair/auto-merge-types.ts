@@ -45,5 +45,15 @@ export interface AutoMergeDeps {
    * disco: la aplicacion no importa infraestructura, la recibe.
    */
   readonly readConfig: (projectPath: string) => ConfigState
+  /**
+   * Cuantas lineas tendra cada archivo del fix una vez integrado, medidas sobre
+   * el worktree que ya lo tiene aplicado. Puerto por lo mismo que el de arriba:
+   * contar lineas es leer disco, y la politica que decide con ese numero es
+   * pura. Se mide el RESULTADO y no se estima sumando altas menos bajas.
+   */
+  readonly lineasDeFicheros: (
+    proposalId: string,
+    files: readonly string[]
+  ) => Readonly<Record<string, number>>
   readonly now: () => number
 }

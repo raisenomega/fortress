@@ -32,7 +32,9 @@ export async function autoMergeProposal(
   }
 
   const { state, severity } = caso
-  const diff = { severity, files: state.files, insertions: state.insertions, deletions: state.deletions } // prettier-ignore
+  const lineasPorFichero = deps.lineasDeFicheros(caso.proposal.id, state.files)
+  // prettier-ignore
+  const diff = { severity, files: state.files, insertions: state.insertions, deletions: state.deletions, lineasPorFichero }
   const policy = evaluate(diff, config.kind === 'valid' ? config.policy : DEFAULT_POLICY)
   if (!policy.allowed) {
     recordMergeDecision(ctx, { ...base, policy })

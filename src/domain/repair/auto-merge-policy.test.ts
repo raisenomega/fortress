@@ -6,7 +6,7 @@ import { DEFAULT_POLICY, evaluate, type ProposalDiff } from './auto-merge-policy
 const ACTIVA = { ...DEFAULT_POLICY, enabled: true }
 
 function fix(over: Partial<ProposalDiff> = {}): ProposalDiff {
-  return { severity: 'LOW' as Severity, files: ['src/a/b.ts'], insertions: 6, deletions: 2, ...over } // prettier-ignore
+  return { severity: 'LOW' as Severity, files: ['src/a/b.ts'], insertions: 6, deletions: 2, lineasPorFichero: {}, ...over } // prettier-ignore
 }
 
 describe('evaluate: las cuatro condiciones acumulativas', () => {

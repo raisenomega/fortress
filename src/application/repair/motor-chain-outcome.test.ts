@@ -2,13 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { describir, esDenegacion } from './motor-chain-outcome'
 
 describe('esDenegacion: apagar la integracion no es que te la denieguen', () => {
-  it('las cuatro condiciones con la politica activa cuentan', () => {
+  it('las condiciones con la politica activa cuentan, el tope de lineas incluido', () => {
     // La politica miro el fix y lo freno por un criterio concreto. Eso es lo
     // que una racha de denegaciones tiene que contar.
     expect(esDenegacion('severity')).toBe(true)
     expect(esDenegacion('diff')).toBe(true)
     expect(esDenegacion('files')).toBe(true)
     expect(esDenegacion('blacklist')).toBe(true)
+    // Frenar por tamano no acusa a la maquina: manda el fix a la firma humana,
+    // donde alguien puede partir el fichero antes de integrarlo.
+    expect(esDenegacion('max-lines')).toBe(true)
   })
 
   it('la integracion apagada NO cuenta', () => {

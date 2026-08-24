@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { describe, expect, it } from 'vitest'
-import { readAtHead, readAtSha, showHead } from './worktree-file-reader'
+import { lineasDeFicheros, readAtHead, readAtSha, showHead } from './worktree-file-reader'
 
 /** Repo git REAL: base con a.ts; segundo commit lo cambia y crea nuevo.ts. */
 function seedRepo(): { repo: string; baseSha: string } {
@@ -47,5 +47,16 @@ describe('worktree-file-reader (git real)', () => {
   it('archivo inexistente en head: vacio, sin lanzar', () => {
     const { repo } = seedRepo()
     expect(readAtHead(repo, 'no-existe.ts')).toBe('')
+  })
+
+  it('lineasDeFicheros mide el archivo YA con el fix puesto', () => {
+    const { repo } = seedRepo()
+    writeFileSync(join(repo, 'largo.ts'), 'x\n'.repeat(80))
+    expect(lineasDeFicheros(repo, ['a.ts', 'largo.ts'])).toEqual({ 'a.ts': 1, 'largo.ts': 80 })
+  })
+
+  it('lo que no se deja leer se OMITE: cero diria que cabe algo que nadie miro', () => {
+    const { repo } = seedRepo()
+    expect(lineasDeFicheros(repo, ['no-existe.ts'])).toEqual({})
   })
 })
