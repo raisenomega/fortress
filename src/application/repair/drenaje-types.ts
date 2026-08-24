@@ -19,6 +19,10 @@ export interface DrenajeResultado {
   readonly vetadas: number
   /** Murieron al pasarse del tope por propuesta. */
   readonly porPresupuesto: number
+  /** El reloj de alguno de los tres jueces se agoto. Casilla propia: una
+   *  propuesta perdida por tiempo no dice nada del fix, y contarla con las del
+   *  gate mandaba a leer un diff que nunca llego a juzgarse. */
+  readonly porTimeout: number
   /** Gate rojo, correa rota, sin diff: bajas que no son ni veto ni dinero. */
   readonly otrasBajas: number
   readonly detalle?: string

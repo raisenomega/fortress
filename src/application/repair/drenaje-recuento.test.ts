@@ -17,6 +17,7 @@ describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
       acumuladas: 2,
       vetadas: 1,
       porPresupuesto: 1,
+      porTimeout: 0,
       otrasBajas: 0
     })
   })
@@ -30,6 +31,21 @@ describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
     motor(baja('gate_failed_at=lint'), baja('scope_violation'))
     const r = await drenarHastaOmega(CTX, 'p1', deps())
     expect(r).toMatchObject({ trabajadas: 2, otrasBajas: 2, vetadas: 0, porPresupuesto: 0 })
+  })
+
+  it('los relojes de los TRES jueces van a su casilla, no con las del gate', async () => {
+    // Contarlos como "gate o correa" mandaba al operador a leer un diff que
+    // nunca llego a juzgarse: la propuesta murio antes, y por tiempo.
+    motor(baja('generator_timeout'), baja('gate_timeout'), baja('omega_timeout'))
+    const r = await drenarHastaOmega(CTX, 'p1', deps())
+    expect(r).toMatchObject({ trabajadas: 3, porTimeout: 3, otrasBajas: 0 })
+  })
+
+  it('un reloj agotado NO corta el drenaje: el pozo se sigue vaciando', async () => {
+    motor(baja('generator_timeout'), espera('b'), baja('omega_timeout'), espera('c'))
+    const r = await drenarHastaOmega(CTX, 'p1', deps())
+    expect(r.fin).toBe('sin-candidato')
+    expect(r).toMatchObject({ trabajadas: 4, acumuladas: 2, porTimeout: 2 })
   })
 
   it('una vuelta sin candidato no cuenta como trabajada', async () => {

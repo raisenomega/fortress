@@ -9,6 +9,7 @@ import { admitProposal, type Admitted } from './generate-guards'
 import type { FailFn } from './generate-fail'
 import { prepareWorktree } from './generate-setup'
 import { loadAnalysis } from './load-analysis'
+import { motivoDelGenerador } from './motivo-del-generador'
 import { emitGeneratorRun, emitOutcome } from './record-generate-events'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 
@@ -40,7 +41,7 @@ export async function generateFix(
   const result = conAgentRun(crudo, recordMotorRun(ctx, a.proposal.projectId, null, crudo.runMeta, !crudo.ok)) // prettier-ignore
   await emitGeneratorRun(ctx.eventLog, a.cursor, a.proposal.id, result.runMeta)
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
-  if (!result.ok) return fail(result.turnosAgotados ? 'turnos_agotados' : 'generator_error', { error: result.error }, true) // prettier-ignore
+  if (!result.ok) return fail(motivoDelGenerador(result), { error: result.error }, true)
 
   return verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, allows, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
 }

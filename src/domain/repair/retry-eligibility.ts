@@ -2,9 +2,15 @@ import type { ProposalState } from './proposal'
 
 /**
  * D24 — solo los rechazos de RAZONAMIENTO del motor merecen reintento: OMEGA
- * veto, el generador se salio de correa, no produjo diff o fallo. Los fallos
- * TECNICOS (presupuesto, techo de turnos, timeouts, worktree perdido/sucio, npm
- * ci) no: repetir sin arreglar la causa daria lo mismo.
+ * veto, el generador se salio de correa o no produjo diff. Los fallos TECNICOS
+ * (presupuesto, techo de turnos, timeouts, worktree perdido/sucio, npm ci) no:
+ * repetir sin arreglar la causa daria lo mismo.
+ *
+ * `provider_error` SI entra, y no rompe la regla: un 429 o un corte de red no
+ * son un fallo del fix y la vez siguiente puede ir bien. Antes entraba
+ * `generator_error`, que ademas de eso cubria nuestro propio reloj — o sea que
+ * la lista contradecia al parrafo de arriba, que nombra los timeouts. Partir el
+ * estado es lo que las reconcilia.
  *
  * El analisis ilegible entra por el criterio, no por la categoria: lo que no se
  * dejo leer fue la respuesta de un modelo, que no es la misma dos veces, asi
@@ -16,7 +22,7 @@ export const RETRYABLE_REJECTION_REASONS = [
   'omega_vetado',
   'scope_violation',
   'no_diff_produced',
-  'generator_error',
+  'provider_error',
   'analisis_ilegible'
 ] as const
 

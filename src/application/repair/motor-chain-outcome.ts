@@ -1,5 +1,4 @@
 import type { FailedCondition } from '@domain/repair/auto-merge-policy'
-import type { RejectionReason } from '@domain/repair/repair-rejection'
 
 /**
  * Donde acabo una vuelta del motor. TODAS son finales legitimas: que el revisor
@@ -26,20 +25,6 @@ export type ChainOutcome =
    */
   | { readonly kind: 'espera-omega'; readonly proposalId: string }
   | { readonly kind: 'integrada'; readonly proposalId: string }
-
-/**
- * Las tres razones que pueden traer una averia del proveedor detras —un 429,
- * una cuota agotada, un corte de red— y no un juicio sobre el fix.
- *
- * La distincion no es cosmetica: quien envuelve al loop reintenta para siempre
- * ante un fallo transitorio y lo mata ante uno terminal. Un veto viajando como
- * error mataria el loop por hacer justo lo que se le pide.
- */
-const AVERIAS: readonly RejectionReason[] = ['generator_error', 'omega_timeout', 'omega_error']
-
-export function esAveria(motivo: string): boolean {
-  return (AVERIAS as readonly string[]).includes(motivo)
-}
 
 /**
  * Las cuatro condiciones que son una DENEGACION: la politica estaba activa y

@@ -55,9 +55,9 @@ describe('generateFix (C3) — verificacion post-generacion', () => {
     expect(b.calls).not.toContain('remove')
   })
 
-  it('generador roto: RECHAZADO generator_error, factura asentada, CONSERVA', async () => {
+  it('generador roto: RECHAZADO provider_error, factura asentada, CONSERVA', async () => {
     const b = bench({ generatorFails: true })
-    expect(await generateFix(b.context, 'prop-1', b.deps)).toMatchObject({ ok: false, reason: 'generator_error' }) // prettier-ignore
+    expect(await generateFix(b.context, 'prop-1', b.deps)).toMatchObject({ ok: false, reason: 'provider_error' }) // prettier-ignore
     expect(b.events.some((e) => e.eventType === 'AGENT_RUN')).toBe(true)
     expect(b.calls).not.toContain('remove')
   })

@@ -15,6 +15,7 @@ function bajas(r: DrenajeResultado): string {
   const partes = [
     r.vetadas > 0 ? `${r.vetadas} vetada${r.vetadas > 1 ? 's' : ''} por el revisor` : '',
     r.porPresupuesto > 0 ? `${r.porPresupuesto} por presupuesto` : '',
+    r.porTimeout > 0 ? `${r.porTimeout} por timeout` : '',
     r.otrasBajas > 0 ? `${r.otrasBajas} por gate o correa` : ''
   ].filter((p) => p !== '')
   return partes.length === 0 ? '' : ` Se perdieron ${partes.join(', ')}.`
