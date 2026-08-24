@@ -11,6 +11,9 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/repair/confianza.ts',
   'src/application/repair/gate-guards.ts',
   'src/infrastructure/repair/gate-env.ts',
+  // La otra mitad de esa guarda: `gate-env` arma el entorno del gate y
+  // `claude-cli` el de TODO agente, ademas de sus tools y su MCP en `buildArgs`.
+  'src/infrastructure/claude-code/claude-cli.ts',
   'src/infrastructure/system/self-project.ts',
   // El perimetro del generador: hasta donde llega un fix.
   'src/domain/repair/scope-check.ts',
@@ -30,6 +33,10 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/connectors/connector-url.ts',
   'src/domain/shared/safe-url.ts',
   'src/infrastructure/newproject/create-folder.ts',
+  // La TERCERA familia, sin ser ninguna de las otras dos: `redactSecrets` tacha
+  // el secreto antes de que se PERSISTA —comando, permiso denegado, stderr—, y
+  // lo escrito no se deshace retirando el fix despues.
+  'src/domain/chat/tool-detail.ts',
   // POR CARPETA, no por fichero: posture ENTERA es la defensa anti-SSRF, con
   // tres HIGH a su espalda. Enumerar sus mitades fallo cuatro veces seguidas —
   // se protegia quien clasifica y no quien pregunta— porque la lista solo cubre
