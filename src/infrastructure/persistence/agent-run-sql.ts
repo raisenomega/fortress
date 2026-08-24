@@ -1,6 +1,7 @@
 /** Consultas de la tabla agent_runs. Todas parametrizadas, nunca concatenadas. */
 const COLUMNS = `id, project_id, agent_id, kind, duration_ms, failed, input_tokens,
-  output_tokens, cache_read_tokens, cache_creation_tokens, cost_usd, num_turns, tools, at`
+  output_tokens, cache_read_tokens, cache_creation_tokens, cost_usd, num_turns, tools, at,
+  usage_known`
 
 /** COALESCE porque SUM sobre cero filas devuelve NULL, no 0. */
 const SUMS = `COALESCE(SUM(input_tokens), 0)          AS input_tokens,
@@ -15,10 +16,10 @@ const SCOPED = 'agent_id = @agentId AND (@projectId IS NULL OR project_id = @pro
 
 export const INSERT_RUN = `INSERT INTO agent_runs (id, project_id, agent_id, kind,
   duration_ms, failed, input_tokens, output_tokens, cache_read_tokens,
-  cache_creation_tokens, cost_usd, num_turns, edits, tools, at)
+  cache_creation_tokens, cost_usd, num_turns, edits, tools, at, usage_known)
   VALUES (@id, @projectId, @agentId, @kind, @durationMs, @failed, @inputTokens,
   @outputTokens, @cacheReadTokens, @cacheCreationTokens, @costUsd, @numTurns,
-  @edits, @tools, @at)`
+  @edits, @tools, @at, @usageKnown)`
 
 export const SELECT_ONE = `SELECT ${COLUMNS} FROM agent_runs WHERE id = ?`
 
@@ -50,6 +51,19 @@ export const RANKING_SINCE = `SELECT agent_id, COUNT(*) AS runs,
 export const AVERAGE_RUN = `SELECT COUNT(*) AS runs,
   COALESCE(AVG(cost_usd), 0) AS avg_cost, COALESCE(AVG(duration_ms), 0) AS avg_ms
   FROM agent_runs WHERE project_id = ? AND failed = 0`
+
+/**
+ * Lo que ocurrio y no se pudo medir, desde una fecha ISO. Las dos cifras son
+ * MEDIDAS —cuantas corridas y cuanto tiempo—; el dinero que falta no aparece
+ * aqui porque no existe en ningun sitio. Quien ensene un total lo acompana con
+ * esto para no dar por completo lo que sabe incompleto.
+ *
+ * `usage_known = 0` y no `IS NOT 1`: las filas viejas llevan NULL y no se sabe
+ * de que lado caen, asi que contarlas seria afirmar algo que nadie comprobo.
+ */
+export const SIN_FACTURA_SINCE = `SELECT COUNT(*) AS runs,
+  COALESCE(SUM(duration_ms), 0) AS duration_ms
+  FROM agent_runs WHERE at >= ? AND usage_known = 0`
 
 /** Episodios (ejecuciones reales) y fallos desde una fecha ISO. Un run = un episodio. */
 export const EPISODE_TALLY_SINCE = `SELECT COUNT(*) AS episodes,

@@ -30,3 +30,12 @@ describe('el parser trae la evidencia del OBSOLETO, o no la trae', () => {
     expect(a.evidencia).toBeUndefined()
   })
 })
+
+describe('sin factura del CLI el analisis no inventa un coste', () => {
+  it('tokensUsed queda en cero y la corrida se asentara como no medida', () => {
+    // `RunOut` sin `usage` es el CLI que murio antes de facturar. Antes llegaba
+    // aqui como EMPTY_USAGE y era indistinguible de una corrida gratis.
+    const a = toAnalysis(TARGET, { result: '{"status":"REAL"}' })
+    expect(a.tokensUsed).toBe(0)
+  })
+})

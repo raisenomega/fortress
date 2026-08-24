@@ -4,7 +4,7 @@ import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { toOmegaOutcome, type OmegaRunResult } from './omega-outcome'
 import { trabajoReal } from '@domain/repair/budget'
-import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 
 export type { OmegaRunResult }
 
@@ -29,7 +29,10 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
   return {
     run: (worktreePath, prompt) => {
       const startedAt = Date.now()
-      const meta = (usage: TokenUsage): AnalystRunMeta => ({
+      const sinFactura = (): AnalystRunMeta => ({
+        durationMs: Date.now() - startedAt, startedAt, endedAt: Date.now()
+      }) // prettier-ignore
+      const meta = (usage?: TokenUsage): AnalystRunMeta => usage === undefined ? sinFactura() : ({
         tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined, usage,
         durationMs: Date.now() - startedAt, startedAt, endedAt: Date.now()
       }) // prettier-ignore
@@ -52,13 +55,14 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
         child.on('close', () => {
           clearTimeout(timer)
           if (timedOut)
-            return resolve({ ok: false, error: 'timeout', timedOut, runMeta: meta(EMPTY_USAGE) })
+            // Murio por el plazo: no hay factura que leer, y cero seria mentira.
+            return resolve({ ok: false, error: 'timeout', timedOut, runMeta: sinFactura() })
           // La lectura de la salida vive aparte: aqui solo el ciclo del proceso.
           resolve(toOmegaOutcome(out, meta))
         })
         child.on('error', (error) => {
           clearTimeout(timer)
-          resolve({ ok: false, error: error.message, timedOut: false, runMeta: meta(EMPTY_USAGE) })
+          resolve({ ok: false, error: error.message, timedOut: false, runMeta: sinFactura() })
         })
       })
     }

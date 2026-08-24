@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { trabajoReal } from '@domain/repair/budget'
-import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { argsDelGenerador } from './generator-args'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
@@ -36,13 +36,16 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         startedAt,
         endedAt: Date.now()
       })
-      const meta = (usage: TokenUsage): AnalystRunMeta => ({
-        tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined,
-        usage,
-        durationMs: Date.now() - startedAt,
-        startedAt,
-        endedAt: Date.now()
-      })
+      const meta = (usage?: TokenUsage): AnalystRunMeta =>
+        usage === undefined
+          ? sinFactura()
+          : {
+              tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined,
+              usage,
+              durationMs: Date.now() - startedAt,
+              startedAt,
+              endedAt: Date.now()
+            }
       return new Promise((resolve) => {
         const child = spawn(claudeBin, [...argsDelGenerador(prompt)], { cwd: worktreePath })
         trackChild(child, projectId)
@@ -63,8 +66,9 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         })
         child.on('error', (error) => {
           clearTimeout(timer)
-          resolve({ ok: false, error: error.message, runMeta: meta(EMPTY_USAGE) })
-        }) // el CLI que no arranca sigue cayendo en provider_error: su pieza aparte
+          // El CLI que no arranca no facturo nada, y eso NO es gasto cero.
+          resolve({ ok: false, error: error.message, runMeta: sinFactura() })
+        }) // sigue cayendo en provider_error: darle nombre propio es su pieza
       })
     }
   }

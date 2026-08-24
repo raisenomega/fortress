@@ -23,6 +23,13 @@ export interface AgentRunRepository {
 
   usageByProjectSince(since: string): Readonly<Record<string, TokenUsage>>
 
+  /**
+   * Corridas que OCURRIERON y no se pudieron medir, desde una fecha ISO: cuantas
+   * y cuanto tiempo sumaron. Las dos cifras estan medidas; el gasto que falta no
+   * se estima aqui ni en ningun sitio, porque nadie lo vio.
+   */
+  sinFacturaSince(since: string): { readonly runs: number; readonly durationMs: number }
+
   /** Agentes mas activos desde una fecha. */
   rankingSince(since: string, limit: number): readonly AgentRanking[]
 

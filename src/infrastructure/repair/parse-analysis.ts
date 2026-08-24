@@ -10,7 +10,8 @@ import { toSelfNotes } from '@domain/system/self-note-item'
 /** Lo que devuelve la corrida headless: el texto y la factura entera. */
 export interface RunOut {
   readonly result: string
-  readonly usage: TokenUsage
+  /** Ausente si el CLI no dejo factura legible. No se sustituye por ceros. */
+  readonly usage?: TokenUsage
 }
 
 /** Cuanto del texto ilegible se guarda: bastante para reconocer que devolvio
@@ -68,7 +69,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
     patternToCopy: text('patternToCopy'),
     doNotTouch: text('doNotTouch'),
     risk: leido === null ? `${ILEGIBLE}${ilegible}` : text('risk'),
-    tokensUsed: trabajoReal(out.usage),
+    tokensUsed: out.usage === undefined ? 0 : trabajoReal(out.usage),
     ...(notes.length > 0 ? { notes } : {})
   }
 }

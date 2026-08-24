@@ -49,8 +49,8 @@ describe('desenlaceDelGenerador', () => {
 
   it('la factura se conserva al quedarse sin turnos: se pago, se apunta', () => {
     const fin = desenlaceDelGenerador(salida({ subtype: 'error_max_turns' }), 1)
-    expect(fin.usage.outputTokens).toBe(20_000)
-    expect(fin.usage.numTurns).toBe(30)
+    expect(fin.usage?.outputTokens).toBe(20_000)
+    expect(fin.usage?.numTurns).toBe(30)
   })
 
   it('una corrida buena sigue siendo buena', () => {
@@ -65,8 +65,8 @@ describe('desenlaceDelGenerador', () => {
     expect(fin.error).toContain('codigo 7')
   })
 
-  it('sin JSON no se inventa factura', () => {
+  it('sin JSON la factura queda AUSENTE, que no es una de ceros', () => {
     const fin = desenlaceDelGenerador('cualquier cosa', 1)
-    expect(fin.usage.outputTokens).toBe(0)
+    expect(fin.usage).toBeUndefined()
   })
 })

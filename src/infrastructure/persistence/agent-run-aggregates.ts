@@ -6,7 +6,7 @@ import { usageFromRow, type UsageColumns } from './usage-row'
 
 type Aggregates = Pick<
   AgentRunRepository,
-  'usageSince' | 'usageByProjectSince' | 'averageRun' | 'episodeTallySince'
+  'usageSince' | 'usageByProjectSince' | 'averageRun' | 'episodeTallySince' | 'sinFacturaSince'
 >
 
 interface AverageRow {
@@ -21,11 +21,17 @@ export function createRunAggregates(db: Db): Aggregates {
   const usageByProject = db.prepare(SQL.USAGE_BY_PROJECT_SINCE)
   const average = db.prepare(SQL.AVERAGE_RUN)
   const tally = db.prepare(SQL.EPISODE_TALLY_SINCE)
+  const sinFactura = db.prepare(SQL.SIN_FACTURA_SINCE)
 
   return {
     usageSince: (since) => usageFromRow(usageSince.get(since) as UsageColumns),
 
     episodeTallySince: (since) => tally.get(since) as { episodes: number; failures: number },
+
+    sinFacturaSince: (since) => {
+      const row = sinFactura.get(since) as { runs: number; duration_ms: number }
+      return { runs: row.runs, durationMs: row.duration_ms }
+    },
 
     usageByProjectSince: (since) => {
       const rows = usageByProject.all(since) as Array<UsageColumns & { project_id: string }>
