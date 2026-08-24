@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
 import { toOmegaOutcome } from './omega-outcome'
 
-const META = (usage: TokenUsage): { usage: TokenUsage; durationMs: number; startedAt: number; endedAt: number } => ({ usage, durationMs: 1, startedAt: 1, endedAt: 2 }) // prettier-ignore
+const META = (usage?: TokenUsage): AnalystRunMeta => ({ ...(usage ? { usage } : {}), durationMs: 1, startedAt: 1, endedAt: 2 }) // prettier-ignore
 
 const sobre = (texto: string): string => JSON.stringify({ result: texto })
 

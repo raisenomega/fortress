@@ -37,7 +37,7 @@ export type OmegaRunResult =
  */
 export function toOmegaOutcome(
   out: string,
-  meta: (usage: TokenUsage) => AnalystRunMeta
+  meta: (usage?: TokenUsage) => AnalystRunMeta
 ): OmegaRunResult {
   const { usage, text } = processOmegaOut(out)
   const parsed = parseOmegaResponse(text)

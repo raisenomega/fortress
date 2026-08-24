@@ -1,3 +1,4 @@
+import { addAgentRunColumns } from './add-agent-run-columns'
 import { addFindingMemory } from './add-finding-memory'
 import { addProjectColumns } from './add-project-columns'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
@@ -51,7 +52,12 @@ export function runMigrations(db: Db): void {
   // Stats del grafo + las 6 columnas del score integral (todas nullables).
   addProjectColumns(db)
 
-  // El motor de reparacion necesita su propio `kind`. Va la ultima porque es la
-  // unica que recrea una tabla: si algo falla, lo anterior ya quedo aplicado.
+  // El motor de reparacion necesita su propio `kind`. Va antes que el ALTER de
+  // abajo porque es la unica que recrea una tabla, y su `INSERT ... SELECT *`
+  // exige que las dos tengan las MISMAS columnas: una de mas y no abre.
   expandAgentRunsKind(db)
+
+  // La bandera de "esta factura no se pudo leer". Aditiva y despues del
+  // recambio, por lo anterior.
+  addAgentRunColumns(db)
 }

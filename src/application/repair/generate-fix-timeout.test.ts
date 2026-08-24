@@ -11,15 +11,17 @@ describe('el reloj del generador tiene nombre propio y no finge factura', () => 
     expect(r).not.toMatchObject({ reason: 'provider_error' })
   })
 
-  it('NO asienta una corrida de cero dolares', async () => {
-    // El SIGKILL cae antes del unico JSON del CLI, asi que no hay factura que
-    // leer. Escribirla en cero diria que quince minutos salieron gratis, y el
-    // libro mayor prefiere no tener la fila a tener una falsa.
+  it('asienta la corrida SIN factura: ni cero falso ni agujero', async () => {
+    // El SIGKILL cae antes del unico JSON del CLI. Escribir cero diria que
+    // quince minutos salieron gratis; no escribir nada los volvia invisibles.
+    // La fila entra marcada como no medida, y por eso hay id que citar.
     const b = bench({ timedOut: true })
     await generateFix(b.context, 'prop-1', b.deps)
 
     expect(b.events.some((e) => e.eventType === 'AGENT_RUN')).toBe(true)
-    expect(b.events.every((e) => e.agentRunId === undefined)).toBe(true)
+    expect(b.runs).toHaveLength(1)
+    expect(b.runs[0].usage).toBeUndefined()
+    expect(b.runs[0].durationMs).toBe(900_000)
   })
 
   it('CONSERVA el worktree: hay medio fix que mirar', async () => {

@@ -22,8 +22,8 @@ describe('recordMotorRun: el motor entra en el libro mayor del tope', () => {
 
     expect(filas).toHaveLength(1)
     expect(filas[0]).toMatchObject({ projectId: 'proj', kind: 'repair', failed: false })
-    expect(filas[0].usage.costUsd).toBe(7.5)
-    expect(filas[0].usage.cacheCreationTokens).toBe(8000)
+    expect(filas[0].usage?.costUsd).toBe(7.5)
+    expect(filas[0].usage?.cacheCreationTokens).toBe(8000)
   })
 
   it('el analista y el generador van sin agente; el revisor con el suyo', () => {
@@ -36,12 +36,15 @@ describe('recordMotorRun: el motor entra en el libro mayor del tope', () => {
     expect(filas.map((f) => f.agentId)).toEqual([null, 'sentinel-omega'])
   })
 
-  it('sin factura legible no se asienta nada', () => {
-    // Escribirla en cero diria que salio gratis.
+  it('sin factura legible se asienta DICIENDO que no la hubo', () => {
+    // Un cero afirmaria que salio gratis; no asentarla la volvia invisible con
+    // sus quince minutos dentro. La fila entra sin factura y con su reloj.
     const { ctx, filas } = banco()
-    recordMotorRun(ctx, 'proj', null, { durationMs: 10, startedAt: 1, endedAt: 2 })
+    recordMotorRun(ctx, 'proj', null, { durationMs: 900_018, startedAt: 1, endedAt: 2 })
 
-    expect(filas).toHaveLength(0)
+    expect(filas).toHaveLength(1)
+    expect(filas[0].usage).toBeUndefined()
+    expect(filas[0].durationMs).toBe(900_018)
   })
 
   it('una corrida fallida se asienta igual: gasto tuvo', () => {

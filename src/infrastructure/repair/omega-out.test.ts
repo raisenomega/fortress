@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { totalTokens } from '@domain/telemetry/token-usage'
+import { EMPTY_USAGE, totalTokens } from '@domain/telemetry/token-usage'
 import { processOmegaOut } from './omega-out'
 
 const salida = (usage: Record<string, number>): string =>
@@ -18,18 +18,21 @@ describe('processOmegaOut: la factura cuenta los CUATRO contadores', () => {
       })
     )
 
-    expect(totalTokens(out.usage)).toBe(15_000)
-    expect(out.usage.costUsd).toBe(0.42)
+    expect(totalTokens(out.usage ?? EMPTY_USAGE)).toBe(15_000)
+    expect(out.usage?.costUsd).toBe(0.42)
     expect(out.text).toBe('texto del revisor')
   })
 
-  it('sin JSON valido no se inventa factura', () => {
+  it('sin JSON valido la factura queda AUSENTE, no en cero', () => {
+    // Cero afirmaria que la corrida salio gratis; ausente dice que no se pudo
+    // leer, que es lo unico cierto. La fila del libro lo marcara como tal.
     const crudo = processOmegaOut('esto no es json')
-    expect(totalTokens(crudo.usage)).toBe(0)
+    expect(crudo.usage).toBeUndefined()
     expect(crudo.text).toBe('esto no es json')
   })
 
-  it('sin bloque usage la factura es cero, no undefined', () => {
-    expect(totalTokens(processOmegaOut(JSON.stringify({ result: 'ok' })).usage)).toBe(0)
+  it('con JSON pero sin bloque usage la factura SI es cero: el CLI la envio', () => {
+    // Aqui la respuesta llego entera y no declaro consumo. Eso es una medida.
+    expect(totalTokens(processOmegaOut(JSON.stringify({ result: 'ok' })).usage ?? EMPTY_USAGE)).toBe(0) // prettier-ignore
   })
 })

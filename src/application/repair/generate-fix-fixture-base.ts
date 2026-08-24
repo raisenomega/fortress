@@ -2,6 +2,7 @@ import type { ScopeGroup } from '@domain/repair/scope-groups'
 import type { Proposal } from '@domain/repair/proposal'
 import { buildAgentRunEvent, buildTransitionEvent, type ProposalEvent } from '@domain/repair/proposal-event' // prettier-ignore
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
+import type { NewAgentRun } from '@domain/telemetry/agent-run'
 import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
 
@@ -33,6 +34,8 @@ export interface Bench {
   readonly events: ProposalEvent[]
   readonly calls: string[]
   readonly prompts: string[]
+  /** Lo que se asento en el libro mayor: con factura o sin ella. */
+  readonly runs: NewAgentRun[]
 }
 
 /** La factura que NO existe: el SIGKILL del plazo llega antes del JSON. */

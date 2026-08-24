@@ -1,17 +1,18 @@
-import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { MAX_TURNS } from './generator-args'
 import { parseUsage } from '../claude-code/parse-usage'
 
 /** Como marca el CLI la corrida que se quedo sin turnos. */
 const SIN_TURNOS = 'error_max_turns'
 
+/** `usage` ausente = el CLI no dejo factura legible. No es una de ceros. */
 export type Desenlace =
-  | { readonly ok: true; readonly usage: TokenUsage }
+  | { readonly ok: true; readonly usage?: TokenUsage }
   | {
       readonly ok: false
       readonly error: string
       readonly turnosAgotados?: true
-      readonly usage: TokenUsage
+      readonly usage?: TokenUsage
     }
 
 /**
@@ -23,14 +24,14 @@ export type Desenlace =
  * completo en N vueltas es un hecho, y se dice.
  */
 export function desenlaceDelGenerador(out: string, code: number | null): Desenlace {
-  let usage = EMPTY_USAGE
+  let usage: TokenUsage | undefined
   let subtype = ''
   try {
     const j = JSON.parse(out) as Record<string, unknown>
     usage = parseUsage(j)
     subtype = typeof j.subtype === 'string' ? j.subtype : ''
   } catch {
-    // Sin JSON no hay factura: tokensUsed queda undefined, no inventado.
+    // Sin JSON no hay factura, y `undefined` lo dice. Ceros diria "gratis".
   }
 
   if (subtype === SIN_TURNOS) {

@@ -21,9 +21,11 @@ describe('la corrida del motor se puede senalar desde el libro', () => {
     expect(recordMotorRun(ctxCon('run-7'), 'proj', null, META)).toBe('run-7')
   })
 
-  it('sin factura legible no hay fila y no hay id que citar', () => {
+  it('sin factura legible TAMBIEN hay fila, y su id se puede citar', () => {
+    // Antes se descartaba para no mentir con un cero, y eso borraba la corrida
+    // entera del libro. La fila entra marcada como no medida; el asiento la cita.
     const sinFactura = { durationMs: 10, startedAt: 1, endedAt: 2 }
-    expect(recordMotorRun(ctxCon('run-7'), 'proj', null, sinFactura)).toBeNull()
+    expect(recordMotorRun(ctxCon('run-7'), 'proj', null, sinFactura)).toBe('run-7')
   })
 
   it('si el libro revienta tampoco se inventa uno', () => {

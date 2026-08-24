@@ -1,6 +1,7 @@
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
 import { EMPTY_CORPUS } from '@domain/project/corpus-descriptor'
+import type { NewAgentRun } from '@domain/telemetry/agent-run'
 import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
 import { cadenaDe, proposalDe, type Bench, type Opciones } from './generate-fix-fixture-base'
@@ -33,6 +34,7 @@ export function bench(opts: Opciones = {}): Bench {
   const patches: Array<ProposalPatch & { id: string }> = []
   const events: ProposalEvent[] = []
   const calls: string[] = []
+  const runs: NewAgentRun[] = []
   const prompts: string[] = []
   const proposal = proposalDe(opts)
   const chain = cadenaDe(opts)
@@ -49,7 +51,7 @@ export function bench(opts: Opciones = {}): Bench {
     },
     // Como el repositorio real: la fila vuelve con su id, que es lo que el
     // asiento cita para poder cruzarse con el libro mayor del gasto.
-    runs: { record: (r: object) => ({ ...r, id: 'run-gen', at: '' }) },
+    runs: { record: (r: NewAgentRun) => (runs.push(r), { ...r, id: 'run-gen', at: '' }) },
     eventLog: {
       list: () => Promise.resolve([...chain, ...events]),
       record: (event: ProposalEvent): Promise<void> => {
@@ -60,5 +62,5 @@ export function bench(opts: Opciones = {}): Bench {
   } as unknown as AppContext
 
   const deps = depsDe(opts, calls, prompts)
-  return { context, deps, patches, events, calls, prompts }
+  return { context, deps, patches, events, calls, prompts, runs }
 }
