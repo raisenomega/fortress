@@ -1,7 +1,10 @@
 /**
- * Puerto de la SEGUNDA prueba de la extincion: que el archivo de un hallazgo
- * haya cambiado desde que se detecto. Lo responde git, que es la unica fuente
- * de verdad sobre si alguien toco el codigo.
+ * Puerto para preguntarle a git si el archivo de un hallazgo cambio desde una
+ * fecha. Git es la unica fuente de verdad sobre si alguien toco el codigo.
+ *
+ * Nacio como la segunda prueba de la extincion por ausencia, que ya no existe:
+ * un escaneo no cierra nada. Hoy su unico consumidor es la marca de MITIGADO,
+ * que se conserva mientras el archivo no se mueva.
  */
 export interface FileHistory {
   /**
@@ -9,9 +12,9 @@ export interface FileHistory {
    * (fecha ISO).
    *
    * Ante cualquier duda —no es un repo git, el archivo nunca existio, git
-   * falla— devuelve **false**. Un false conserva el hallazgo; un true lo
-   * extingue. Equivocarse conservando cuesta un hallazgo de mas en la lista;
-   * equivocarse extinguiendo borra un problema real del registro.
+   * falla— devuelve **false**, que es el lado conservador de su unico sitio: un
+   * false CONSERVA la marca de mitigado, porque sin evidencia no se deshace una
+   * decision que alguien tomo a proposito.
    */
   changedSince(projectPath: string, file: string, since: string): Promise<boolean>
 }

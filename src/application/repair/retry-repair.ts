@@ -66,8 +66,8 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
     state: veredicto.state, analysisVerdict: veredicto.verdict,
     analysisReason: veredicto.reason, updatedAt: Date.now()
   }) // prettier-ignore
-  // El juicio del agente es lo unico que cierra un hallazgo: el escaneo ya no.
-  extinguirSiObsoleto(ctx, proposal.findingId, veredicto, nowIso())
+  // El reintento cierra con la misma red: sin prueba comprobable, se mitiga.
+  extinguirSiObsoleto(ctx, project, result.analysis, veredicto, nowIso())
   await recordAnalyzed(ctx.eventLog, proposal, result, veredicto)
   return { ok: true, newProposalId: proposal.id }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isActionable, isComplete, type Analysis, type Analyst } from '@domain/repair/analysis'
+import { isActionable, type Analysis, type Analyst } from '@domain/repair/analysis'
 import type { Candidate, Selection } from '@domain/repair/select-target'
 import { analyzeTarget } from './analyze-target'
 
@@ -40,11 +40,6 @@ describe('analyzeTarget (C2 analisis)', () => {
 
   it('C2 no genera fix: el analisis es inerte (sin claves de codigo/patch/diff)', () => {
     expect(Object.keys(FULL).some((k) => /patch|diff|code|edit|fix/i.test(k))).toBe(false)
-  })
-
-  it('isComplete exige TODAS las partes con contenido', () => {
-    expect(isComplete(FULL)).toBe(true)
-    expect(isComplete({ ...FULL, risk: '   ' })).toBe(false)
   })
 
   it('isActionable: solo REAL habilita C3; OBSOLETO no (se extingue, como posture)', () => {

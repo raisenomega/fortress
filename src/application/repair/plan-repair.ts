@@ -14,9 +14,9 @@ import { recordAnalyzed, recordElegido } from './record-plan-events'
  * repo y lo manda a ENTENDER (grafo-primero, solo lectura). Persiste el
  * veredicto: REAL deja la propuesta en ANALIZADO (lista para C3); OBSOLETO la
  * CADUCA y excluye al hallazgo hasta el proximo escaneo; ILEGIBLE la RECHAZA
- * sin excluir nada, porque ahi no se llego a saber si el hallazgo existe. La
- * extincion del hallazgo NO se toca: eso es del escaneo, con evidencia. NO
- * genera fix.
+ * sin excluir nada, porque ahi no se llego a saber si el hallazgo existe. Un
+ * OBSOLETO ademas EXTINGUE el hallazgo, pero solo si su evidencia se comprueba
+ * contra el fichero; si no, lo deja mitigado. NO genera fix.
  *
  * `findingId` invierte el primer paso: con el, quien eligio fue el operador y el
  * motor atiende ESE hallazgo sin mirar la cola ni el cerco de integracion
@@ -58,8 +58,9 @@ export async function planRepair(
   if (!canTransition(proposal.state, veredicto.state)) return proposal
   const patch = { state: veredicto.state, analysisVerdict: veredicto.verdict, analysisReason: veredicto.reason, updatedAt: Date.now() } // prettier-ignore
   context.repairProposals.update(proposal.id, patch)
-  // El juicio del agente es lo unico que cierra un hallazgo: el escaneo ya no.
-  extinguirSiObsoleto(context, proposal.findingId, veredicto, nowIso())
+  // El juicio del agente es lo unico que cierra un hallazgo, y solo si trae
+  // prueba comprobable: sin ella el hallazgo se mitiga, no muere.
+  extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso())
   await recordAnalyzed(context.eventLog, proposal, result, veredicto)
   return { ...proposal, ...patch }
 }
