@@ -4,8 +4,8 @@ import { discoverCorpus } from '../project/discover-corpus'
 import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
 import { toAnalysis, type RunOut } from './parse-analysis'
-import { trabajoReal } from '@domain/repair/budget'
 import { parseUsage } from '../claude-code/parse-usage'
+import { relojDeCorrida } from './reloj-de-corrida'
 import { trackChild } from '../claude-code/child-registry'
 
 const GRAPH = JSON.stringify({
@@ -37,7 +37,9 @@ function run(bin: string, cwd: string, prompt: string, owner: string): Promise<R
         resolve({ result: out })
       }
     })
-    child.on('error', () => resolve({ result: '' }))
+    // Antes resolvia con una cadena vacia, indistinguible de un CLI que corrio
+    // y no dijo nada: el expediente acababa juzgando una respuesta inexistente.
+    child.on('error', (error) => resolve({ result: error.message, noArranco: true }))
   })
 }
 
@@ -49,24 +51,18 @@ function run(bin: string, cwd: string, prompt: string, owner: string): Promise<R
 export function createGraphAnalyst(claudeBin: string, projectPath: string, projectId: string): Analyst {
   return {
     study: async (target) => {
-      const startedAt = Date.now()
+      const reloj = relojDeCorrida(Date.now())
       // El corpus se lee en cada estudio, no al crear el analista: entre dos
       // propuestas el proyecto puede haber ganado un ADR.
       const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath))
       const out = await run(claudeBin, projectPath, prompt, projectId)
-      const endedAt = Date.now()
       const analysis = toAnalysis(target, out)
       return {
         analysis,
         // El crudo ENTERO solo cuando no se dejo leer: es lo unico con lo que
         // se puede reproducir el fallo, y el asiento guarda solo una muestra.
         ...(noSeDejoLeer(analysis) ? { raw: out.result } : {}),
-        // Sin factura viaja solo el reloj: la fila dira que no es medida.
-        // prettier-ignore
-        runMeta: {
-          ...(out.usage === undefined ? {} : { tokensUsed: trabajoReal(out.usage) || undefined, usage: out.usage }),
-          durationMs: endedAt - startedAt, startedAt, endedAt
-        }
+        runMeta: reloj.meta(out.usage)
       }
     }
   }

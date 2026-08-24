@@ -7,7 +7,8 @@ const CIERRE: Record<FinDelDrenaje, { texto: string; tono: NoticeTone }> = {
   'tope-vueltas': { texto: 'tope de vueltas alcanzado', tono: 'aviso' },
   'tope-gasto': { texto: 'tope de gasto alcanzado', tono: 'aviso' },
   detenido: { texto: 'detenido por ti', tono: 'aviso' },
-  averia: { texto: 'cortado por una averia', tono: 'error' }
+  averia: { texto: 'cortado por una averia', tono: 'error' },
+  entorno: { texto: 'cortado: el CLI no arranca en esta maquina', tono: 'error' }
 }
 
 /** Las bajas, cada una con su causa. Una baja sin causa no se puede aprender. */

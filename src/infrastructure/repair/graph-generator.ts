@@ -1,8 +1,7 @@
 import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
-import { trabajoReal } from '@domain/repair/budget'
-import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { argsDelGenerador } from './generator-args'
+import { relojDeCorrida } from './reloj-de-corrida'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
 
@@ -14,7 +13,8 @@ export type GeneratorResult =
   | { ok: true; runMeta: AnalystRunMeta }
   /** `turnosAgotados` y `timedOut` viajan DESDE AQUI porque solo aqui se sabe:
    *  quien lee la salida despues no puede distinguir su reloj del ajeno. */
-  | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; runMeta: AnalystRunMeta }
+  // prettier-ignore
+  | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; noArranco?: true; runMeta: AnalystRunMeta }
 
 export interface GraphGenerator {
   generate(worktreePath: string, prompt: string): Promise<GeneratorResult>
@@ -30,22 +30,7 @@ export interface GraphGenerator {
 export function createGraphGenerator(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS): GraphGenerator {
   return {
     generate: (worktreePath, prompt) => {
-      const startedAt = Date.now()
-      const sinFactura = (): AnalystRunMeta => ({
-        durationMs: Date.now() - startedAt,
-        startedAt,
-        endedAt: Date.now()
-      })
-      const meta = (usage?: TokenUsage): AnalystRunMeta =>
-        usage === undefined
-          ? sinFactura()
-          : {
-              tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined,
-              usage,
-              durationMs: Date.now() - startedAt,
-              startedAt,
-              endedAt: Date.now()
-            }
+      const { sinFactura, meta } = relojDeCorrida(Date.now())
       return new Promise((resolve) => {
         const child = spawn(claudeBin, [...argsDelGenerador(prompt)], { cwd: worktreePath })
         trackChild(child, projectId)
@@ -66,9 +51,9 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         })
         child.on('error', (error) => {
           clearTimeout(timer)
-          // El CLI que no arranca no facturo nada, y eso NO es gasto cero.
-          resolve({ ok: false, error: error.message, runMeta: sinFactura() })
-        }) // sigue cayendo en provider_error: darle nombre propio es su pieza
+          // El proceso jamas existio: ni facturo nada ni es del proveedor.
+          resolve({ ok: false, noArranco: true, error: error.message, runMeta: sinFactura() })
+        })
       })
     }
   }

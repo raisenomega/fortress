@@ -7,7 +7,9 @@ import type { ProposalState } from './proposal'
  * repetir sin arreglar la causa daria lo mismo.
  *
  * `provider_error` SI entra, y no rompe la regla: un 429 o un corte de red no
- * son un fallo del fix y la vez siguiente puede ir bien. Antes entraba
+ * son un fallo del fix y la vez siguiente puede ir bien. `cli_no_arranco` NO,
+ * aunque tambien sea ajeno al fix: un binario que falta sigue faltando, y el
+ * boton de reintentar solo serviria para gastar otra corrida en comprobarlo. Antes entraba
  * `generator_error`, que ademas de eso cubria nuestro propio reloj — o sea que
  * la lista contradecia al parrafo de arriba, que nombra los timeouts. Partir el
  * estado es lo que las reconcilia.

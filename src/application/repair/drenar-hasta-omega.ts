@@ -1,4 +1,4 @@
-import { esTimeout } from '@domain/repair/averia'
+import { esEntorno, esTimeout } from '@domain/repair/averia'
 import type { AppContext } from '../context'
 import { runMotorChain } from './run-motor-chain'
 import type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
@@ -42,7 +42,9 @@ export async function drenarHastaOmega(
     // Antes de leer el resultado: parar mata al hijo, y el hijo muriendo se
     // parece a una averia. Una parada humana es una parada, no un fallo.
     if (deps.cancelado()) return fin('detenido')
-    if (!salida.ok) return fin('averia', salida.error)
+    // Las dos cortan, pero no son lo mismo y el parte no puede decir lo mismo:
+    // una se arregla esperando y la otra mirando la maquina.
+    if (!salida.ok) return fin(esEntorno(salida.error) ? 'entorno' : 'averia', salida.error)
     if (salida.value.kind === 'sin-candidato') return fin('sin-candidato')
 
     cuenta.trabajadas += 1

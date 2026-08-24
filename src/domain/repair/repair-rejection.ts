@@ -16,6 +16,18 @@ export const REJECTION_REASONS = [
    */
   'provider_error',
   /**
+   * El binario del CLI no llego a arrancar: no existe, no es ejecutable, el
+   * PATH esta roto. NO es del agente ni del proveedor: es de la MAQUINA, y por
+   * eso corta la tanda —la vuelta siguiente fallaria identica— pero no se
+   * reintenta, porque esperar no crea un fichero que falta.
+   *
+   * Asume causas PERMANENTES, que son las observadas (ENOENT, EACCES). `spawn`
+   * tambien emite `error` por EAGAIN o ENOMEM, que si son transitorias y
+   * querrian reintento; no se les hace rama porque no se han visto ninguna vez,
+   * y aqui no se construye defensa para un caso no observado.
+   */
+  'cli_no_arranco',
+  /**
    * HISTORICO: ya no lo emite nadie. Cubrio a la vez el timeout, el spawn
    * fallido y la transicion invalida —tres naturalezas bajo un nombre que
    * acusaba al generador de las tres—. Los dos primeros se separaron; la

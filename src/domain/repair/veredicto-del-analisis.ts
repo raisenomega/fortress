@@ -1,5 +1,6 @@
 import { isActionable, type Analysis } from './analysis'
 import { ILEGIBLE, noSeDejoLeer } from './analysis-ilegible'
+import { NO_ARRANCO, noArranco } from './cli-no-arranco'
 import type { AnalysisVerdict, ProposalState } from './proposal'
 
 export interface Veredicto {
@@ -36,6 +37,12 @@ export interface Veredicto {
  * real: sin prueba, el hallazgo se mitiga y sigue en el tablero.
  */
 export function veredictoDelAnalisis(analysis: Analysis): Veredicto {
+  // Antes que nada: sin proceso no hay respuesta que juzgar, ni legible ni
+  // ilegible. Es del entorno de la maquina, no del analista ni del hallazgo.
+  if (noArranco(analysis)) {
+    const causa = analysis.risk.slice(NO_ARRANCO.length)
+    return { verdict: 'NO_ARRANCO', state: 'RECHAZADO', reason: `cli_no_arranco: ${causa}` }
+  }
   if (noSeDejoLeer(analysis)) {
     const muestra = analysis.risk.slice(ILEGIBLE.length)
     return { verdict: 'ILEGIBLE', state: 'RECHAZADO', reason: `analisis_ilegible: ${muestra}` }
