@@ -11,18 +11,9 @@ export interface AutoMergeInput {
   readonly proposalId: string
 }
 
-/**
- * Por donde entro un fix al repo. Dos vias, y el historial tiene que
- * distinguirlas: la politica integra sola dentro del cerco; la firma la integra
- * un humano que miro el diff. Confundirlas en el mensaje del commit borra la
- * unica diferencia que importa cuando alguien pregunte, dentro de un ano, quien
- * autorizo ese cambio.
- *
- * Viaja como dato explicito y no se deduce de la PolicyEvaluation: casar por el
- * texto de un motivo ata el historial de git a una cadena que alguien puede
- * reescribir sin enterarse de lo que rompe.
- */
-export type ViaDeIntegracion = 'automatica' | 'firmada'
+// La via vive en el dominio: el asiento del Libro tambien la nombra. Se
+// reexporta para que quien ya la pedia aqui la siga pidiendo aqui.
+export type { ViaDeIntegracion } from '@domain/repair/via-de-integracion'
 
 export interface AutoMergeResult {
   readonly applied: boolean

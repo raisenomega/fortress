@@ -16,6 +16,10 @@ const asunto = (b: ReturnType<typeof banco>): string =>
 const razonDelLibro = (b: ReturnType<typeof banco>): string =>
   b.patches.find((p) => p.state === 'MERGEADO')?.analysisReason ?? ''
 
+/** El asiento de OMEGA: el TERCER sitio donde se cuenta la misma integracion. */
+const asientoOmega = (b: ReturnType<typeof banco>): { verdict: string; summary: string } =>
+  b.entries[0] ?? { verdict: 'sin asiento', summary: 'sin asiento' }
+
 describe('el historial dice por que via entro cada fix', () => {
   it('firmada por el operador: el commit lo dice', async () => {
     // Los dos primeros merges firmados quedaron escritos como automaticos. En
@@ -34,6 +38,13 @@ describe('el historial dice por que via entro cada fix', () => {
     expect(razonDelLibro(b)).toContain('firmada por el operador')
   })
 
+  it('el asunto sigue citando la propuesta y su severidad', async () => {
+    const b = banco()
+    await firmar(b)
+    expect(asunto(b)).toContain('p-1')
+    expect(asunto(b)).toContain('(LOW)')
+  })
+
   it('no-regresion: la politica que integra sola sigue diciendo automatica', async () => {
     const b = banco()
     await integrar(b)
@@ -41,11 +52,24 @@ describe('el historial dice por que via entro cada fix', () => {
     expect(asunto(b)).toContain('integracion automatica')
     expect(razonDelLibro(b)).toBe('integracion automatica')
   })
+})
 
-  it('el asunto sigue citando la propuesta y su severidad', async () => {
+describe('el TERCER registro del mismo hecho: el asiento de OMEGA', () => {
+  it('firmada: tambien aqui, y ya no la llama automatica ni denegada', async () => {
+    // Era el unico de los tres registros que seguia diciendo "automatica", y la
+    // decia dentro de "denegada": el motivo leia la autorizacion como bloqueo.
     const b = banco()
     await firmar(b)
-    expect(asunto(b)).toContain('p-1')
-    expect(asunto(b)).toContain('(LOW)')
+
+    expect(asientoOmega(b).summary).toContain('firmada')
+    expect(asientoOmega(b).summary).not.toContain('automatica')
+    expect(asientoOmega(b).summary).not.toContain('denegada')
+  })
+
+  it('no-regresion: la que se integra sola sigue asentandose como automatica', async () => {
+    const b = banco()
+    await integrar(b)
+    expect(asientoOmega(b).summary).toContain('automatica aplicada')
+    expect(asientoOmega(b).verdict).toBe('ok')
   })
 })

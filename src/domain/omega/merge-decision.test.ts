@@ -6,7 +6,7 @@ const APROBADA = { allowed: true, reason: null, conditionFailed: null } as const
 function decision(over: Partial<MergeDecision> = {}): MergeDecision {
   return {
     projectId: 'p1', proposalId: '288e299f-aaaa', severity: 'LOW', files: ['src/a.ts'],
-    diffLines: 8, policy: APROBADA, configError: null, gate: { ok: true, commands: [] }, applyError: null, commitSha: 'f987edbc0000',
+    diffLines: 8, policy: APROBADA, configError: null, gate: { ok: true, commands: [] }, applyError: null, commitSha: 'f987edbc0000', via: 'automatica',
     omega: { resuelve_el_hallazgo: 'SI', respeta_scope: 'SI', respeta_doNotTouch: 'SI',
       calidad_del_diff: 'BUENO', riesgo_residual: 'MENOR', veredicto_global: 'APROBADO',
       razon: 'fix minimo' }, ...over

@@ -5,12 +5,12 @@ import { applyAutoMerge } from './apply-auto-merge'
 import { decisionBase, gatherCase } from './auto-merge-gather'
 import type { AutoMergeDeps, AutoMergeInput, AutoMergeResult } from './auto-merge-types'
 
-/** Lo que se asienta en lugar de la evaluacion de politica: quien autorizo. */
-const FIRMA: PolicyEvaluation = {
-  allowed: true,
-  reason: 'firma humana',
-  conditionFailed: null
-}
+/**
+ * Lo que se asienta en lugar de la evaluacion de politica: aqui no hubo cerco
+ * que evaluar. `reason` va en null porque documenta "por que NO se integra
+ * sola", y quien autorizo no es un motivo de rechazo: viaja como `via`.
+ */
+const FIRMA: PolicyEvaluation = { allowed: true, reason: null, conditionFailed: null }
 
 /**
  * La puerta al repo: el operador integra una propuesta que OMEGA ya aprobo.
