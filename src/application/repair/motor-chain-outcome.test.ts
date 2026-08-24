@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { describir, esAveria, esDenegacion } from './motor-chain-outcome'
+import { describir, esDenegacion } from './motor-chain-outcome'
 
 describe('esDenegacion: apagar la integracion no es que te la denieguen', () => {
   it('las cuatro condiciones con la politica activa cuentan', () => {
@@ -20,20 +20,6 @@ describe('esDenegacion: apagar la integracion no es que te la denieguen', () => 
 
   it('sin condicion tampoco: ahi ni se miro la politica', () => {
     expect(esDenegacion(null)).toBe(false)
-  })
-})
-
-describe('esAveria: solo lo que se arregla esperando', () => {
-  it('las tres que pueden traer un fallo del proveedor detras', () => {
-    expect(esAveria('generator_error')).toBe(true)
-    expect(esAveria('omega_timeout')).toBe(true)
-    expect(esAveria('omega_error')).toBe(true)
-  })
-
-  it('un veto o un gate en rojo son veredictos, no averias', () => {
-    expect(esAveria('omega_vetado')).toBe(false)
-    expect(esAveria('gate_failed')).toBe(false)
-    expect(esAveria('scope_violation')).toBe(false)
   })
 })
 

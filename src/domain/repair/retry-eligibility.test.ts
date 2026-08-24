@@ -11,7 +11,7 @@ describe('isRetryable (D24)', () => {
     }
   })
 
-  it('las 4 razones de razonamiento son reintentables, tal cual', () => {
+  it('las razones de RAZONAMIENTO son reintentables, tal cual', () => {
     for (const reason of RETRYABLE_REJECTION_REASONS) {
       expect(isRetryable('RECHAZADO', reason)).toBe(true)
     }
@@ -29,6 +29,8 @@ describe('isRetryable (D24)', () => {
       'gate_timeout',
       'gate_failed_at=test:unit',
       'omega_timeout',
+      'generator_timeout',
+      'generator_error',
       'omega_error',
       'omega_response_invalid',
       'npm_ci_failed',

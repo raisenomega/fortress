@@ -22,8 +22,9 @@ export interface WorktreePort {
 export interface GeneratorPort {
   generate(worktreePath: string, prompt: string): Promise<
     | { ok: true; runMeta: AnalystRunMeta }
-    /** `turnosAgotados` separa el techo de vueltas de una averia del generador. */
-    | { ok: false; error: string; turnosAgotados?: true; runMeta: AnalystRunMeta }
+    /** Los dos hechos que SOLO el origen conoce: si se acabaron las vueltas y
+     *  si se acabo el plazo. Sin ellos, el motivo tendria que adivinarse. */
+    | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; runMeta: AnalystRunMeta }
   > // prettier-ignore
 }
 

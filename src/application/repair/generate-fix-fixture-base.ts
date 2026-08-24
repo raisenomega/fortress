@@ -13,6 +13,9 @@ export interface Opciones {
   readonly generatorFails?: boolean
   /** El generador se quedo sin vueltas: desenlace propio, no averia. */
   readonly turnosAgotados?: boolean
+  /** NUESTRO reloj se agoto. Llega SIN factura, como en el origen real: el
+   *  SIGKILL cae antes de que el CLI emita su unico JSON con el gasto. */
+  readonly timedOut?: boolean
   readonly genCost?: number
   readonly hasChanges?: boolean
   readonly changed?: readonly string[]
@@ -31,6 +34,9 @@ export interface Bench {
   readonly calls: string[]
   readonly prompts: string[]
 }
+
+/** La factura que NO existe: el SIGKILL del plazo llega antes del JSON. */
+export const SIN_FACTURA = { durationMs: 900_000, startedAt: 1, endedAt: 900_001 }
 
 export const ANALYSIS = {
   target: { id: 'f1', severity: 'LOW', title: 'parentDir sin validar', file: 'src/a/b.ts', line: 1 },

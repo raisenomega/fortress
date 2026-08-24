@@ -8,6 +8,7 @@ const r = (over: Partial<DrenajeResultado> = {}): DrenajeResultado => ({
   acumuladas: 0,
   vetadas: 0,
   porPresupuesto: 0,
+  porTimeout: 0,
   otrasBajas: 0,
   ...over
 })
@@ -28,6 +29,13 @@ describe('el parte dice que hizo la corrida', () => {
     const { texto } = parteDelDrenaje(r({ trabajadas: 4, acumuladas: 1, vetadas: 2, otrasBajas: 1 })) // prettier-ignore
     expect(texto).toContain('2 vetadas por el revisor')
     expect(texto).toContain('1 por gate o correa')
+  })
+
+  it('un timeout se cuenta como timeout, nunca como gate o correa', () => {
+    // Era la ultima mentira del parte: el reloj salia con el uniforme del gate.
+    const { texto } = parteDelDrenaje(r({ trabajadas: 3, acumuladas: 2, porTimeout: 1 }))
+    expect(texto).toContain('1 por timeout')
+    expect(texto).not.toContain('gate o correa')
   })
 
   it('sin bajas no se menciona ninguna perdida', () => {

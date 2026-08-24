@@ -5,7 +5,8 @@ import type { GenerateDeps } from './generate-types'
 import { generateFix } from './generate-fix'
 import type { JudgeDeps } from './judge-and-integrate'
 import { judgeAndIntegrate } from './judge-and-integrate'
-import { esAveria, type ChainOutcome } from './motor-chain-outcome'
+import { esAveria } from '@domain/repair/averia'
+import type { ChainOutcome } from './motor-chain-outcome'
 import { planRepair } from './plan-repair'
 import { runGate, type GateDeps } from './run-gate'
 
@@ -27,11 +28,10 @@ const cortar = (proposalId: string, motivo: string): Result<ChainOutcome> =>
  * cada handler sabia solo del suyo. Aqui esta escrita una vez para que la pueda
  * recorrer tambien quien no tiene dedos.
  *
- * `err` se reserva a la averia del proveedor, que es lo unico que se arregla
- * esperando. Un veto del revisor o un gate en rojo son veredictos y salen como
- * resultado: quien envuelve esto reintenta sin descanso ante un error y se muere
- * ante el que no reconoce, asi que un veredicto viajando como error mataria el
- * ciclo por hacer exactamente lo que se le pide.
+ * `err` se reserva a la averia del proveedor, lo unico que se arregla esperando.
+ * Un veto, un gate rojo o un reloj agotado son desenlaces y salen como resultado:
+ * quien envuelve esto reintenta sin descanso ante un error, asi que un desenlace
+ * viajando como error mataria el ciclo por hacer lo que se le pide. Ver `esAveria`.
  *
  * `modo` parte la vuelta por donde el riesgo cambia de naturaleza: TRABAJAR
  * —elegir, entender, generar, compilar— ocurre entero dentro de un worktree y

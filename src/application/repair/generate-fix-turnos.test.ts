@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { esAveria } from './motor-chain-outcome'
+import { esAveria } from '@domain/repair/averia'
 import { isRejectionReason } from '@domain/repair/repair-rejection'
 import { isRetryable } from '@domain/repair/retry-eligibility'
 import { bench } from './generate-fix-fixture'

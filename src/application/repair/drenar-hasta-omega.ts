@@ -1,3 +1,4 @@
+import { esTimeout } from '@domain/repair/averia'
 import type { AppContext } from '../context'
 import { runMotorChain } from './run-motor-chain'
 import type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
@@ -20,7 +21,7 @@ export async function drenarHastaOmega(
   projectId: string,
   deps: DrenajeDeps
 ): Promise<DrenajeResultado> {
-  const cuenta = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, otrasBajas: 0 }
+  const cuenta = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, otrasBajas: 0 } // prettier-ignore
   const fin = (f: FinDelDrenaje, detalle?: string): DrenajeResultado =>
     detalle === undefined ? { fin: f, ...cuenta } : { fin: f, ...cuenta, detalle }
 
@@ -29,6 +30,7 @@ export async function drenarHastaOmega(
   const anotarBaja = (motivo: string): void => {
     if (motivo.startsWith('omega_vetado')) cuenta.vetadas += 1
     else if (motivo.startsWith('budget_exceeded')) cuenta.porPresupuesto += 1
+    else if (esTimeout(motivo)) cuenta.porTimeout += 1
     else cuenta.otrasBajas += 1
   }
 

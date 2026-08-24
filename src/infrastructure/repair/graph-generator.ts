@@ -6,11 +6,15 @@ import { argsDelGenerador } from './generator-args'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
 
+/** El plazo, sacado del dato: las corridas que TERMINARON tardaron entre 205 y
+ *  709 s, asi que 900 deja margen sobre la peor sin premiar a la que divaga. */
 const TIMEOUT_MS = 15 * 60 * 1000
 
 export type GeneratorResult =
   | { ok: true; runMeta: AnalystRunMeta }
-  | { ok: false; error: string; turnosAgotados?: true; runMeta: AnalystRunMeta }
+  /** `turnosAgotados` y `timedOut` viajan DESDE AQUI porque solo aqui se sabe:
+   *  quien lee la salida despues no puede distinguir su reloj del ajeno. */
+  | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; runMeta: AnalystRunMeta }
 
 export interface GraphGenerator {
   generate(worktreePath: string, prompt: string): Promise<GeneratorResult>
@@ -27,6 +31,11 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
   return {
     generate: (worktreePath, prompt) => {
       const startedAt = Date.now()
+      const sinFactura = (): AnalystRunMeta => ({
+        durationMs: Date.now() - startedAt,
+        startedAt,
+        endedAt: Date.now()
+      })
       const meta = (usage: TokenUsage): AnalystRunMeta => ({
         tokensUsed: trabajoReal(usage) > 0 ? trabajoReal(usage) : undefined,
         usage,
@@ -38,9 +47,12 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         const child = spawn(claudeBin, [...argsDelGenerador(prompt)], { cwd: worktreePath })
         trackChild(child, projectId)
         let out = ''
+        // SIGKILL sin gracia (OMEGA da tres segundos; este EDITA, y esos tres
+        // segundos son ediciones). Y sin factura, no con una de ceros: el libro
+        // mayor distingue "no la pude leer" de "salio gratis" por ese undefined.
         const timer = setTimeout(() => {
           child.kill('SIGKILL')
-          resolve({ ok: false, error: `timeout tras ${Math.round(timeoutMs / 60000)} min`, runMeta: meta(EMPTY_USAGE) }) // prettier-ignore
+          resolve({ ok: false, timedOut: true, error: `timeout tras ${Math.round(timeoutMs / 60000)} min`, runMeta: sinFactura() }) // prettier-ignore
         }, timeoutMs)
         child.stdout.on('data', (d: Buffer) => (out += d.toString()))
         child.on('close', (code) => {
@@ -52,7 +64,7 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         child.on('error', (error) => {
           clearTimeout(timer)
           resolve({ ok: false, error: error.message, runMeta: meta(EMPTY_USAGE) })
-        })
+        }) // el CLI que no arranca sigue cayendo en provider_error: su pieza aparte
       })
     }
   }
