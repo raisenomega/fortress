@@ -29,6 +29,12 @@ export function registerTelemetryHandlers(): void {
     getAppContext().runs.usageByProjectSince(since)
   )
 
+  // Lo que el total NO cuenta. Va por su propio canal y no dentro del consumo:
+  // mezclarlas invitaria a sumarlas, y el punto es justamente que no se suman.
+  ipcMain.handle(IPC.telemetrySinFactura, (_event, since: string) =>
+    getAppContext().runs.sinFacturaSince(since === '' ? SESSION_START : since)
+  )
+
   ipcMain.handle(IPC.telemetryRanking, (_event, since: string, limit: number) =>
     getAppContext().runs.rankingSince(since, limit)
   )

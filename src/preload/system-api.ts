@@ -10,6 +10,7 @@ import type { Account } from '@domain/settings/account'
 import type { Billing } from '@domain/telemetry/billing-mode'
 import type { Unsubscribe } from './api-types'
 import type { MeasuredRun } from '@domain/workflow/workflow-estimate'
+import type { SinFactura } from '@domain/telemetry/sin-factura'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 
 /** Contratos que no cuelgan de un escaneo: telemetria, cerebro y sistema. */
@@ -21,6 +22,8 @@ export interface TelemetryApi {
   /** Consumo desde que arranco la app. */
   session(): Promise<TokenUsage>
   since(iso: string): Promise<TokenUsage>
+  /** Lo que ocurrio sin poder medirse. Cadena vacia = desde que arranco la app. */
+  sinFactura(iso: string): Promise<SinFactura>
   byProject(iso: string): Promise<Readonly<Record<string, TokenUsage>>>
   ranking(iso: string, limit: number): Promise<readonly AgentRanking[]>
 }

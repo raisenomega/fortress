@@ -6,7 +6,13 @@ import { useTelemetryStore } from '../stores/telemetry-store'
  * intervalo: un contador que se refresca solo consume sin que nadie mire.
  */
 export async function refreshSessionUsage(): Promise<void> {
-  useTelemetryStore.getState().setSession(await api().telemetry.session())
+  // Las dos en la misma tanda: el total y lo que el total no cuenta se leen a
+  // la vez o el pie ensenaria una mitad vieja al lado de la otra nueva.
+  const [session, sinMedir] = await Promise.all([
+    api().telemetry.session(),
+    api().telemetry.sinFactura('')
+  ])
+  useTelemetryStore.getState().setSession(session, sinMedir)
 }
 
 /**

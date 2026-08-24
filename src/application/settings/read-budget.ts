@@ -21,6 +21,17 @@ export function spentToday(context: AppContext, now: Date): number {
 }
 
 /**
+ * Cuantas corridas de HOY ocurrieron sin que se pudiera medir su coste.
+ *
+ * Acompana a `spentToday` y no lo modifica: el gasto que les falta no existe en
+ * ningun sitio y estimarlo subestimaria justo donde duele, porque las que se
+ * quedan sin factura son las largas. Lo unico honesto es decir cuantas son.
+ */
+export function sinMedirHoy(context: AppContext, now: Date): number {
+  return context.runs.sinFacturaSince(windowStart(now, 'hoy')).runs
+}
+
+/**
  * Lo mismo, pero de UN proyecto. El tope de sesion del loop es suyo y de nadie
  * mas: chatear o escanear en otro proyecto mientras corre no puede comerselo,
  * y hasta hoy se lo comia. Sin fila para el proyecto es cero gastado, no un
