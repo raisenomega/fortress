@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from 'child_process'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
 import { tail } from '@domain/repair/tail'
@@ -47,12 +48,15 @@ export function spawnCommand(
     let timedOut = false
     const timer = armTimeout(child, timeoutMs, () => (timedOut = true))
 
+    // La autopsia se PERSISTE entera en `evidence_json`, que es append-only, y
+    // aqui imprime codigo ajeno: se redacta ANTES de recortar, porque `tail`
+    // corta por el medio y un secreto partido ya no lo reconoce ninguna regex.
     const outcome = (exitCode: number, extraErr = ''): CommandOutcome => ({
       command: key,
       exitCode,
       durationMs: Date.now() - startedAt,
-      stdoutTail: tail(out, TAIL_CHARS),
-      stderrTail: tail(errOut + extraErr, TAIL_CHARS),
+      stdoutTail: tail(redactSecrets(out), TAIL_CHARS),
+      stderrTail: tail(redactSecrets(errOut + extraErr), TAIL_CHARS),
       timedOut
     })
 

@@ -4,17 +4,19 @@ import { join } from 'path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { spawnCommand } from './spawn-command'
 
-/** Un binario que solo cuenta lo que ve en su entorno. */
-function chivato(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'fcc-env-'))
-  const bin = join(dir, 'chivato')
-  writeFileSync(bin, '#!/bin/sh\necho "CI=[$CI] PATH=[$PATH] MARCA=[$FCC_MARCA]"\n')
+/** Un binario de mentira con el cuerpo de shell que se le de. */
+function fake(body: string): string {
+  const dir = mkdtempSync(join(tmpdir(), 'fcc-bin-'))
+  const bin = join(dir, 'fake')
+  writeFileSync(bin, `#!/bin/sh\n${body}\n`)
   chmodSync(bin, 0o755)
   return bin
 }
 
 const correr = async (): Promise<string> => {
-  const salido = await spawnCommand(chivato(), 'chivato', [], tmpdir(), 5000)
+  // El chivato solo cuenta lo que ve en su entorno.
+  const chivato = fake('echo "CI=[$CI] PATH=[$PATH] MARCA=[$FCC_MARCA]"')
+  const salido = await spawnCommand(chivato, 'chivato', [], tmpdir(), 5000)
   return salido.stdoutTail
 }
 
@@ -48,5 +50,26 @@ describe('el entorno con el que corre un comando del gate', () => {
     } finally {
       delete process.env.CI
     }
+  })
+})
+
+describe('lo que el repo auditado escupe y acaba en la autopsia', () => {
+  it('un secreto impreso no llega en claro a la evidencia', async () => {
+    const bin = fake("echo 'ANTHROPIC_API_KEY=sk-ant-secreta1'; echo 'Bearer ajeno1' >&2")
+    const salido = await spawnCommand(bin, 'fake', [], tmpdir(), 5000)
+
+    expect(salido.stdoutTail).not.toContain('sk-ant-')
+    expect(salido.stderrTail).not.toContain('ajeno1')
+  })
+
+  it('tampoco cuando el recorte de la cola parte el secreto en dos', async () => {
+    // Si se redactara DESPUES de `tail`, el trozo que sobrevive al corte ya no
+    // casa con ninguna regex y se asienta en claro en un libro append-only.
+    const linea = '.'.repeat(100) + 'sk-ant-' + 'x'.repeat(20) + '.'.repeat(1976)
+    const bin = fake(`printf '%s' '${linea}'`)
+    const salido = await spawnCommand(bin, 'fake', [], tmpdir(), 5000)
+
+    expect(salido.stdoutTail).not.toContain('ant-')
+    expect(salido.stdoutTail).toContain('***')
   })
 })
