@@ -4,6 +4,7 @@ import { argsDelGenerador } from './generator-args'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
+import { buildEnv } from '../claude-code/build-env'
 
 /** El plazo, sacado del dato: las corridas que TERMINARON tardaron entre 205 y
  *  709 s, asi que 900 deja margen sobre la peor sin premiar a la que divaga. */
@@ -32,7 +33,12 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
     generate: (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       return new Promise((resolve) => {
-        const child = spawn(claudeBin, [...argsDelGenerador(prompt)], { cwd: worktreePath })
+        // El mismo recorte que los demas lanzamientos del CLI: este es el que
+        // EDITA, con prompt del repo AJENO y un MCP nieto que hereda esto, asi
+        // que la sesion viva del operador no baja. `null` = sin key propia: se
+        // sigue facturando por donde ya se facturaba (login OAuth bajo HOME).
+        const env = buildEnv(null)
+        const child = spawn(claudeBin, [...argsDelGenerador(prompt)], { cwd: worktreePath, env })
         trackChild(child, projectId)
         let out = ''
         // SIGKILL sin gracia (OMEGA da tres segundos; este EDITA, y esos tres
