@@ -109,6 +109,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-068](adr-068-tope-mide-trabajo-y-techo-de-turnos.md) | El tope por propuesta mide trabajo, no contexto releído | 2026-08-23 | Aceptada | Motor |
 | [ADR-069](adr-069-cerco-mide-el-fichero-antes-de-integrar.md) | El cerco mide el fichero antes de integrarlo | 2026-08-24 | Aceptada | Motor |
 | [ADR-070](adr-070-una-autorizacion-no-es-una-denegacion.md) | Una autorización no es una denegación | 2026-08-24 | Aceptada | Motor |
+| [ADR-071](adr-071-cuando-dos-filas-son-una.md) | Cuando dos filas son una: la fusión de la Fase B | 2026-08-24 | Aceptada | Escaneo |
 
 ## Referencias
 
