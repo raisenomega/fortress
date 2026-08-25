@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import { buildEnv } from '../claude-code/build-env'
 import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { toOmegaOutcome, type OmegaRunResult } from './omega-outcome'
@@ -30,7 +31,11 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
       const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
         '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS] // prettier-ignore
       return new Promise((resolve) => {
-        const child = spawn(claudeBin, args, { cwd: worktreePath, detached: true })
+        // Recorte del CLI, no herencia cruda: ni el revisor ni sus nietos —el MCP
+        // del grafo que el mismo levanta— ven las llaves de la sesion viva. Sin key
+        // porque hoy se autentica con lo que hereda: quien paga no cambia aqui.
+        const env = buildEnv(null)
+        const child = spawn(claudeBin, args, { cwd: worktreePath, detached: true, env })
         // Detached: el registro tiene que matarlo por GRUPO o solo cae el lider.
         trackChild(child, projectId, 'grupo')
         let out = ''
