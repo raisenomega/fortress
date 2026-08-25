@@ -171,8 +171,8 @@ y solo se extinguen cuando un agente los juzga).
 | lifecycle | TEXT | NOT NULL DEFAULT 'ACTIVE' (ACTIVE/MITIGATED/EXTINCT) |
 | scan_id | TEXT | escaneo que lo vio por última vez |
 | first_seen / last_seen | TEXT | NOT NULL DEFAULT '' (ISO) |
-| resolved_at | TEXT | fecha de extinción, null si vivo |
-| extinct_reason | TEXT | por qué murió; null si vivo |
+| resolved_at | TEXT | fecha de extinción; null si vivo — y también si fue absorbida por fusión |
+| extinct_reason | TEXT | por qué murió, o con quién se fusionó; null si vivo |
 | created_at | TEXT | NOT NULL |
 
 **Índices:** idx_findings_project (project_id).
@@ -192,6 +192,33 @@ no lo admite en ALTER); valida el dominio al leer.
 extingue por ausencia. Ver
 [ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
 
+**Una fila ABSORBIDA por fusión es el otro camino a EXTINCT**, y no es una
+muerte: dos filas resultaron ser el mismo defecto y una absorbió a la otra. Se
+reconoce por sus cuatro marcas juntas, que solo tienen sentido como conjunto:
+
+| marca | valor | qué dice |
+|---|---|---|
+| `lifecycle` | `EXTINCT` | sale del tablero y de los conteos, como cualquier extinta |
+| `extinct_reason` | `fusionada-con-<id de la ganadora>` | con quién se fusionó, y que no fue un juicio |
+| `resolved_at` | **NULL** | **no se resolvió**. Una extinción normal escribe aquí su fecha; ponerla aquí afirmaría algo que no pasó |
+| `identity` | `fusionada:<id de la ganadora>\|<identidad vieja>` | su clave retirada de circulación, con la traza dentro |
+
+El `resolved_at` en NULL es la diferencia que hay que mirar: distingue una fila
+absorbida de una extinta con juicio. Las dos están en `EXTINCT`, pero solo una
+tiene fecha de resolución.
+
+**Por qué la identidad se retira con un centinela y no se vacía.** La consulta
+que busca la fila de un hallazgo no filtra por ciclo de vida, así que una
+absorbida que conservara la clave de la ganadora podría salir elegida en el
+escaneo siguiente y volver a `ACTIVE`. Y vaciarla tampoco vale: la migración de
+memoria rellena precisamente las filas con `identity = ''`, y se la
+recalcularía sola en el arranque siguiente. El centinela no colisiona con
+ninguna clave real y deja escrito con quién se fusionó.
+
+La ganadora es la de `first_seen` más antiguo y **conserva su fecha**: es la
+historia real del defecto. Ver
+[ADR-071](DECISIONS/adr-071-cuando-dos-filas-son-una.md).
+
 **Repositorio principal:** sqlite-finding-repository.
 
 ### Las TRES identidades de un hallazgo, y por qué no son una
@@ -207,6 +234,17 @@ duplicadas y una renumeración evitada del historial:
 
 `findingIdentity` y `patternId` compartieron fórmula por comodidad hasta el
 2026-08-23. Ver [ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md).
+
+**Conviven dos generaciones de `identity` en la base.** El cambio de fórmula
+aplicó hacia adelante, así que las filas anteriores conservaron la vieja
+—`severidad │ fichero │ título`— y las dos poblaciones no pueden empatar nunca:
+el mismo defecto abría fila nueva junto a la que ya tenía. Las de **este
+repositorio** se reconciliaron el 2026-08-24 con una pasada que les asignó tipo
+y símbolo y fusionó los duplicados
+([ADR-071](DECISIONS/adr-071-cuando-dos-filas-son-una.md)). Las de **otros
+proyectos siguen con la fórmula vieja**: reclasificarlas no sirve de nada hasta
+que se los vuelva a escanear, y ese fue el alcance decidido. Se reconocen porque
+su `identity` empieza por la severidad en mayúsculas.
 
 ### dismissals
 
