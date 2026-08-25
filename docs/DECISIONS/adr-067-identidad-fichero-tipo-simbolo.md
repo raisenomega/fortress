@@ -1,7 +1,7 @@
 # ADR-067: La identidad de un hallazgo es fichero │ tipo │ símbolo
 
 - **Fecha:** 2026-08-23
-- **Estado:** Aceptada (Fase A — hacia adelante)
+- **Estado:** Aceptada (Fase A y Fase B — ver [ADR-071](adr-071-cuando-dos-filas-son-una.md))
 - **Área:** Escaneo · Identidad de hallazgos
 
 ## Contexto
@@ -60,9 +60,11 @@ se inventa ninguno de los dos y el escaneo no se tira por eso.
 
 ## Consecuencias
 
-- Aplica **hacia adelante**. Las filas anteriores conservan su identidad vieja
-  hasta que se las reconcilie (Fase B: una pasada que les asigne tipo y símbolo
-  y colapse duplicados).
+- Aplica **hacia adelante**. Las filas anteriores conservaron su identidad vieja
+  hasta la Fase B, ejecutada el 2026-08-24: una pasada de agente que les asignó
+  tipo y símbolo, y una fusión que colapsó los duplicados conservando la fila
+  más antigua ([ADR-071](adr-071-cuando-dos-filas-son-una.md)). Las filas de
+  otros proyectos siguen con la fórmula vieja hasta que se los vuelva a escanear.
 - El primer escaneo tras esto muestra **más** filas, no menos: cada defecto
   reportado con la clave nueva abre fila junto a su versión vieja.
 - El `patternId` de COGNITION **no** cambia: ver
