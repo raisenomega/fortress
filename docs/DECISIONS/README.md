@@ -107,6 +107,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-066](adr-066-analisis-ilegible-no-es-obsoleto.md) | Un análisis que no se deja leer no es un hallazgo obsoleto | 2026-08-23 | Aceptada | Motor |
 | [ADR-067](adr-067-identidad-fichero-tipo-simbolo.md) | La identidad de un hallazgo es fichero │ tipo │ símbolo | 2026-08-23 | Aceptada | Escaneo |
 | [ADR-068](adr-068-tope-mide-trabajo-y-techo-de-turnos.md) | El tope por propuesta mide trabajo, no contexto releído | 2026-08-23 | Aceptada | Motor |
+| [ADR-069](adr-069-cerco-mide-el-fichero-antes-de-integrar.md) | El cerco mide el fichero antes de integrarlo | 2026-08-24 | Aceptada | Motor |
 
 ## Referencias
 
