@@ -1,7 +1,7 @@
 import { chmodSync, mkdtempSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { createGraphOmega } from './graph-omega'
 
 const VERDICT =
@@ -47,5 +47,19 @@ describe('createGraphOmega (binario fake)', () => {
     const result = await createGraphOmega('/no/existe', 'p1').run(tmpdir(), 'p')
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.timedOut).toBe(false)
+  })
+})
+
+describe('createGraphOmega — lo que el revisor ya no hereda', () => {
+  afterEach(() => delete process.env.SSH_AUTH_SOCK)
+
+  it('las llaves de la sesion viva del operador no bajan al hijo', async () => {
+    process.env.SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
+    // El binario fake declara lo que VE: es la unica forma de medir el entorno
+    // real del hijo y no la opcion que le pasamos.
+    const bin = fakeBin('echo "sock:[$SSH_AUTH_SOCK]"')
+    const result = await createGraphOmega(bin, 'p1').run(tmpdir(), 'p')
+    if (result.ok) return expect.fail('la salida fake no es un VERDICT')
+    expect(result.raw).toContain('sock:[]')
   })
 })
