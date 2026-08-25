@@ -100,6 +100,13 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
   un archivo, hasta diez líneas de diff, y una lista negra que excluye
   migraciones, secretos, workflows, IPC, preload y el empaquetado. Todo lo
   demás espera firma. Ver [ADR-060](DECISIONS/adr-060-auto-merge-loop.md).
+- El cerco mide además el **resultado**: si el fix dejara algún archivo por
+  encima del límite de líneas del proyecto, no se integra solo. El gate corre
+  dentro del worktree de la propuesta y nadie mide el árbol ya integrado, así
+  que sin esta condición un fix de una línea sobre un archivo en el filo dejaría
+  `main` sin pasar su propio lint, sin que ningún humano lo hubiera mirado.
+  Frenar aquí no rechaza el fix: lo manda a la firma. Ver
+  [ADR-069](DECISIONS/adr-069-cerco-mide-el-fichero-antes-de-integrar.md).
 - Push a origin: siempre humano. El motor jamás toca el remoto.
 - Correa de alcance: el fix solo puede tocar los archivos permitidos;
   salirse rechaza la propuesta.
@@ -108,6 +115,22 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
   escáner no lo nombrara una vez. Ver
   [ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
 - Presupuesto de tokens por propuesta con techo duro.
+- **Hay archivos que el motor no puede integrar sin que un humano los mire**,
+  esté el cerco donde esté. Un sistema no aplica por su cuenta un cambio a las
+  reglas que gobiernan lo que puede aplicar por su cuenta
+  ([principio 21](PRINCIPLES.md)); proponerlo sí, porque son código y pueden
+  tener defectos. La lista **no es configurable**: un
+  proyecto añade entradas a su lista negra, nunca quita estas — si la protección
+  fuese declarativa, bastaría una propuesta que la borrase para abrir todo lo
+  demás. El criterio para entrar es uno: **si cambiar ese archivo debilita una
+  defensa, entra**, y da igual a cuál de las tres familias pertenezca —gobernar
+  la autonomía, validar lo que entra, o implementar una defensa de seguridad—.
+  Cubre así el modo efectivo y las guardas de ejecución, las rutas y URLs que
+  llegan del renderer o de la red, el filtro anti-SSRF entero por carpeta, la
+  redacción de secretos antes de que se persistan (`redactSecrets`), y el
+  armado del entorno y las herramientas de **todo** agente (`buildEnv` y
+  `buildArgs`) — heredar el entorno del operador o abrir la lista de tools son
+  la misma clase de agujero que la lista existe para no reabrir sola.
 
 ### Supply chain
 
@@ -166,6 +189,7 @@ sección se completará cuando el proyecto lo establezca.
 - `docs/ARCHITECTURE.md` — arquitectura completa y documentación consumida
   por el runtime.
 - `docs/PRINCIPLES.md` — principios 1 (todas las formas del input), 3
-  (defensa por capas), 6 (datos vs metadatos) y 16 (contenido de agente como
-  input no confiable).
+  (defensa por capas), 6 (datos vs metadatos), 16 (contenido de agente como
+  input no confiable) y 21 (un sistema no cambia solo las reglas que lo
+  gobiernan).
 - `docs/GLOSSARY.md` — términos usados aquí.
