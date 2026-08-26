@@ -1,4 +1,5 @@
 /** Semillas compartidas por los checks de OMEGA: hallazgos y repos de prueba. */
+const { execFileSync } = require('child_process')
 const { mkdtempSync, mkdirSync, writeFileSync } = require('fs')
 const { join } = require('path')
 const { tmpdir } = require('os')
@@ -33,11 +34,27 @@ function addExpr(name, path, gitRemote = null) {
      gitRemote: ${gitRemote ? `'${gitRemote}'` : 'null'}, gitBranch: 'main', hasClaude: true })`
 }
 
-/** Crea un repo temporal con src/real.ts. Devuelve su ruta. */
+/**
+ * Repo git REAL con src/real.ts dentro. Devuelve su ruta.
+ *
+ * El `git init` no es adorno: un proyecto de FORTRESS es la raiz de su propio
+ * repositorio, y hay guardas que se lo preguntan a git —`push:run` rechaza una
+ * carpeta que no lo sea, porque empujarla publicaria el repo padre—. Mientras
+ * esto devolvio una carpeta suelta, los checks pasaban por caminos que en
+ * produccion no existen, y el dia que una guarda pregunto se cayeron cinco de
+ * golpe. Un harness que no se parece a produccion prueba otra cosa.
+ */
 function makeRepo(prefix, body = 'a\nb\nc\n') {
   const dir = mkdtempSync(join(tmpdir(), prefix))
   mkdirSync(join(dir, 'src'), { recursive: true })
   writeFileSync(join(dir, 'src', 'real.ts'), body)
+
+  const git = (...args) => execFileSync('git', args, { cwd: dir, stdio: 'ignore' })
+  git('init', '--quiet')
+  git('config', 'user.email', 'test@fortress.local')
+  git('config', 'user.name', 'FORTRESS Test')
+  git('add', '-A')
+  git('commit', '--quiet', '-m', 'init')
   return dir
 }
 
