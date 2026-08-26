@@ -13,11 +13,12 @@ que aquí aparecen son cierres o firmas explícitas, no trabajo en vuelo. El
 relato se organiza por temas con sus fechas reales, porque el desarrollo
 avanzó por capas superpuestas y no por etapas estancas. La sección
 **Presente**, al final, describe lo que se trabaja ahora sin comprometer
-fechas. El corte de esta versión es el 2026-08-11; las etapas posteriores se
-añadirán por edición cuando cierren.
+fechas. La primera versión de este documento cortaba el 2026-08-11; las etapas
+posteriores se añaden por edición conforme cierran, y el relato llega hoy al
+2026-08-25.
 
-El proyecto entero, hasta este corte, cabe en once días intensos: del
-2026-08-01 al 2026-08-11.
+Los tres primeros actos —el proyecto entero hasta aquel primer corte— caben en
+once días intensos: del 2026-08-01 al 2026-08-11.
 
 ## Acto 1 — Construcción de la plataforma pre-motor (2026-08-01 a 2026-08-08)
 
@@ -357,15 +358,98 @@ resultaron igual de inestables—. Ahora es fichero, tipo y símbolo, con un
 [vocabulario cerrado](TAXONOMIA-DE-DEFECTOS.md) derivado de los defectos reales
 del repositorio ([ADR-067](DECISIONS/adr-067-identidad-fichero-tipo-simbolo.md)).
 
+## Acto 5 — Los estados dejan de mentir (2026-08-24 a 2026-08-25)
+
+El acto anterior enseñó a mirar las facturas y las muertes del motor. Este vino
+de mirar lo que el motor **escribía** de sí mismo, y de encontrar que en varios
+sitios no era verdad.
+
+**Empezó con el escáner mudo.** Una caída del proveedor —un 529 persistente,
+específico de la combinación de flags con la que el motor lanza sus agentes—
+había dejado al escaneo sin poder correr. Cuando se soltó, el escaneo volvió con
+su patrón bueno: siete hallazgos, todos clasificados, y su factura legible por
+primera vez desde que existe la columna que la registra.
+
+**La lista innegociable se había quedado corta por tercera vez, y por el mismo
+motivo.** La protección seguía al nombre del archivo y no a su responsabilidad,
+así que dos defensas de seguridad estaban fuera: la que tacha los secretos antes
+de que se persistan, y la que arma el entorno y las herramientas de todo agente.
+Entraron con un criterio explícito que ya no depende de recordar categorías: si
+cambiar ese archivo debilita una defensa, entra, sea de la familia que sea. Está
+en [SECURITY-MODEL](SECURITY-MODEL.md).
+
+**Después, el cerco aprendió a mirar el resultado.** El gate corre dentro del
+worktree de la propuesta y da verde sobre un árbol donde el fix está solo; nadie
+mide el árbol ya integrado. Con veintitrés archivos de este repositorio en 75
+líneas justas, una sola línea rompe el lint. Se añadió una sexta condición: si
+el fix dejara un archivo por encima del límite, no se integra solo — va a la
+firma, donde alguien puede partirlo antes
+([ADR-069](DECISIONS/adr-069-cerco-mide-el-fichero-antes-de-integrar.md)).
+
+El incidente que lo destapó **no es de los que esa condición evita**, y conviene
+decirlo: dos propuestas nacidas de la misma base llevaron `claude-cli.ts` de 74 a
+75 líneas cada una, las dos legales en su worktree, y el merge lo dejó en 76.
+Cada fix era correcto; la suma no. Cerrar esa mitad es detección posterior a la
+integración, y sigue pendiente.
+
+**Y la lección del acto: una autorización no es una denegación.** El asiento que
+OMEGA escribe por cada integración decidía si algo se había denegado preguntando
+si la política traía texto. La firma humana traía el suyo —un porqué afirmativo
+en un campo que el tipo documenta como «por qué NO se integra»—, así que **once
+asientos del Libro dicen "denegada" sobre integraciones que están en `main`**,
+con el sha en su propia evidencia al lado. Y cortar ahí dejaba sin registrar el
+fallo de git de una firma: el Libro entero no tenía un solo asiento citando a
+git, con dos firmas que sí habían fallado
+([ADR-070](DECISIONS/adr-070-una-autorizacion-no-es-una-denegacion.md)).
+
+Es la forma de [ADR-059](DECISIONS/adr-059-capas-de-estado-no-heredan.md)
+aplicada a un solo campo: la razón estaba decidiendo el qué. Los once asientos
+seguirán ahí —el Libro es append-only por diseño—, y lo que queda por decidir no
+es el arreglo sino cómo se anota una rectificación en un registro eterno.
+
+**La Fase B de la identidad, que el acto anterior dejó prometida.** Las filas
+anteriores al cambio de clave conservaban la fórmula vieja y no podían empatar
+con la nueva: cada escaneo abría fila junto a una que ya no muere. Re-escanear no
+lo arregla —está demostrado— y una migración determinista tampoco puede: el tipo
+lo elige un modelo de un vocabulario cerrado. Se hizo en tres piezas, con la
+clasificación deliberadamente separada de la escritura para que la parte no
+determinista quedara fuera de la irreversible. Diecisiete filas reclasificadas,
+cuatro fusiones, cinco absorbidas
+([ADR-071](DECISIONS/adr-071-cuando-dos-filas-son-una.md)).
+
+**Y aquí el acto anterior tenía escrita una promesa que resultó falsa.** Decía
+que quedaba «revivir los tres hallazgos que murieron mal». Eran **cuatro**, y al
+juzgarlos uno a uno contra el código **ninguno debía revivirse**: los cuatro
+tenían su defecto ya arreglado, y devolverlos a la vida habría puesto en el
+tablero problemas que no existen. Tres de ellos, además, habían muerto
+correctamente. La regla vale en los dos sentidos — nada muere sin juicio, y nada
+revive sin él tampoco. Lo que sí les falta, y sigue faltándoles, es una razón de
+muerte registrada.
+
+**El drenaje puso todo a prueba sobre hallazgos frescos**, y en él la red del
+acto anterior hizo su primer trabajo real: **seis hallazgos extinguidos con
+juicio**, entre ellos la relajación de la CSP que llevaba días señalada como el
+caso perfecto — un defecto ya arreglado en el código cuyo hallazgo seguía vivo
+porque, desde que el escaneo dejó de matar por ausencia, solo un agente que lo
+mire puede cerrarlo. Lo miró y lo cerró.
+
+Y el arreglo del veredicto se comprobó solo: la primera integración firmada
+después de él asentó **«Integración firmada aplicada»**, con su veredicto
+correcto y su commit. Es el primer asiento de integración aplicada de la historia
+del proyecto — antes no había ninguno, porque todos decían lo contrario.
+
 ## Presente
 
-El plan documental está completo y los agentes conocen la documentación que
-explica el sistema en el que trabajan. Las deudas que la integración destapó
-quedaron saldadas.
+El motor repara, el operador firma, y ahora el registro de lo que hizo dice lo
+que pasó. La identidad de los hallazgos de este repositorio está reconciliada; la
+de otros proyectos espera a que se los vuelva a escanear.
 
-El motor repara, el operador firma y nada desaparece del tablero sin que alguien
-lo haya visto. Queda la Fase B de la identidad: reconciliar las filas anteriores
-al cambio y revivir los tres hallazgos que murieron mal.
+Hay un drenaje en vuelo con propuestas esperando firma, así que este acto cuenta
+lo cerrado y no la cola. Quedan tres cosas nombradas y sin cerrar: la detección
+de lo que rompe el árbol **después** de integrarlo —que es la otra mitad de la
+sexta condición—, los veintiséis hallazgos que murieron antes de que las
+extinciones exigieran motivo y siguen sin decir por qué, y cómo se rectifica un
+asiento en un libro que solo sabe anexar.
 
 Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
 convertir el auditor en un entorno de desarrollo asistido completo, y preparar el
