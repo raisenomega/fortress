@@ -11,7 +11,16 @@ import type { OmegaDeps, RunOmegaResult } from './run-omega'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { evidenciaOmega, falloDeOmega } from './omega-autopsia'
 
-/** El juicio en si, ya dentro de la cola: inputs -> agente -> veredicto. */
+/**
+ * El juicio en si, ya dentro de la cola: inputs -> agente -> veredicto.
+ *
+ * El veredicto que se PERSISTE es el del motor, no el del agente. Si el agente
+ * veto algo que las cuatro reglas duras no vetan, guardar su palabra dejaba la
+ * propuesta en un estado que dice aprobada llevando dentro un VETADO: la firma
+ * lo leia y rebotaba, y la integracion automatica tambien. Los ejes se
+ * conservan enteros —son la evidencia que el humano mira— y lo unico que se
+ * sustituye es la conclusion, que por D19 nunca fue suya.
+ */
 export async function judgeProposal(
   ctx: AppContext,
   proposal: Proposal,
@@ -57,6 +66,7 @@ export async function judgeProposal(
   if (computed === 'VETADO') {
     return veto('omega_vetado', `omega_vetado: ${result.verdict.razon.slice(0, 80)}`, { verdict: result.verdict }) // prettier-ignore
   }
-  await closeOmega(ctx, cursor, proposal, 'OMEGA', 'omega aprobo', `omega_aprobado: ${result.verdict.razon.slice(0, 80)}`, { verdict: result.verdict }, deps.now()) // prettier-ignore
-  return { ok: true, verdict: result.verdict }
+  const veredicto = { ...result.verdict, veredicto_global: computed }
+  await closeOmega(ctx, cursor, proposal, 'OMEGA', 'omega aprobo', `omega_aprobado: ${result.verdict.razon.slice(0, 80)}`, { verdict: veredicto }, deps.now()) // prettier-ignore
+  return { ok: true, verdict: veredicto }
 }
