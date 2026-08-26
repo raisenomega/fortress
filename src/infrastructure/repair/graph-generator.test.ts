@@ -1,7 +1,7 @@
 import { chmodSync, mkdtempSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { createGraphGenerator } from './graph-generator'
 
 /** Binario fake: el generador solo mira exit code y el JSON de stdout. */
@@ -42,5 +42,29 @@ describe('createGraphGenerator', () => {
     const result = await createGraphGenerator(fakeBin('echo hola'), 'p1').generate(tmpdir(), 'p')
     expect(result.ok).toBe(true)
     expect(result.runMeta.tokensUsed).toBeUndefined()
+  })
+})
+
+/**
+ * El binario fake hace de chivato: mira su propio entorno y sale por 3 si ve lo
+ * que no deberia. Se prueba la GARANTIA, no la llamada — comprobar que el codigo
+ * "invoca al helper" seria probar la implementacion.
+ */
+describe('el agente que EDITA arranca con el entorno recortado', () => {
+  afterEach(() => {
+    delete process.env.SSH_AUTH_SOCK
+  })
+
+  it('las llaves de la sesion viva del operador no llegan al CLI ni a sus MCP', async () => {
+    process.env.SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
+    const bin = fakeBin(`test -n "$SSH_AUTH_SOCK" && exit 3\necho '{"result":"listo"}'`)
+
+    expect((await createGraphGenerator(bin, 'p1').generate(tmpdir(), 'p')).ok).toBe(true)
+  })
+
+  it('HOME sigue viajando: de ahi salen las credenciales con las que se factura', async () => {
+    const bin = fakeBin(`test -z "$HOME" && exit 3\necho '{"result":"listo"}'`)
+
+    expect((await createGraphGenerator(bin, 'p1').generate(tmpdir(), 'p')).ok).toBe(true)
   })
 })
