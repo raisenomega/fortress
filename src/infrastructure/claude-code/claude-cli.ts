@@ -56,7 +56,3 @@ export function isClaudeInstalled(): boolean {
     return false
   }
 }
-
-/** `buildEnv` vive en `build-env.ts`. Se re-exporta para no mover los imports
- *  de sus tres consumidores de produccion, que no tienen por que enterarse. */
-export { buildEnv } from './build-env'

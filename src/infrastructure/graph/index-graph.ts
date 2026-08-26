@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import { GRAPH_TOOL_RULE, withGraph } from '@domain/connectors/graph-mcp'
-import { buildEnv, CLAUDE_BIN } from '../claude-code/claude-cli'
+import { buildEnv } from '../claude-code/build-env'
+import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
 const PROMPT =
   'Corre la herramienta index_repository del MCP codebase-memory sobre la raiz de ' +

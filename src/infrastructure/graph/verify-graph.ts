@@ -2,7 +2,8 @@ import { spawn } from 'child_process'
 import { GRAPH_READ_TOOLS, withGraph } from '@domain/connectors/graph-mcp'
 import type { GraphVerify } from '@domain/graph/graph-actions'
 import { parseInitEvent } from '@domain/graph/parse-init'
-import { buildEnv, CLAUDE_BIN } from '../claude-code/claude-cli'
+import { buildEnv } from '../claude-code/build-env'
+import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
 const FAILED: GraphVerify = { connected: false, tools: [] }
 
