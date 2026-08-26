@@ -200,8 +200,11 @@ los descartes: tres claves distintas para tres preguntas distintas, tabuladas en
 [DATA-MODEL](DATA-MODEL.md).
 
 ### isAbsoluteProjectPath
-Guard de dominio: las rutas de proyecto deben ser absolutas y normalizadas.
-Cierra rutas relativas hostiles al registrar u operar proyectos.
+Guard de dominio: la raíz de un proyecto debe ser absoluta (POSIX, unidad de
+Windows o UNC). Cierra rutas relativas hostiles al registrar u operar
+proyectos. Comprueba el PREFIJO: no normaliza la cadena ni rechaza segmentos
+`..`; ese rechazo lo añade encima el guard de la carpeta padre en el alta de
+proyecto nuevo, y solo para ese flujo.
 
 ### isPrivateHost
 Guard anti-[SSRF](#ssrf): rechaza loopback, rangos privados, link-local y

@@ -57,8 +57,18 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
 
 ### Path traversal
 
-- Validación de ruta absoluta y normalizada en el dominio, aplicada al
-  registrar proyectos y en las operaciones que escriben en disco.
+- Validación de ruta absoluta en el dominio al registrar proyectos: se exige
+  raíz absoluta (POSIX, unidad de Windows o UNC). Es una comprobación de
+  prefijo; la cadena registrada **no** se normaliza, porque esa cadena es la
+  identidad del proyecto y transformarla en silencio movería el modelo de
+  datos, no solo la validación.
+- El rechazo de segmentos `..` cubre el alta de proyecto nuevo —la carpeta
+  padre bajo la que se crea el árbol—, no todas las puertas de registro. Es
+  cobertura declarada de un flujo, no una garantía de dominio (ver "Lo que NO
+  cubre este modelo").
+- Las lecturas y escrituras dentro de un proyecto sí resuelven la ruta contra
+  la raíz y rechazan lo que se salga, symlinks incluidos: ahí la defensa vive
+  en infraestructura, que es donde puede resolverlos.
 - Los nombres de archivo que propone un agente pasan por allowlist antes de
   escribirse (ver `docs/PRINCIPLES.md`, principio 16).
 
@@ -174,6 +184,10 @@ todos los proyectos.
 
 ## Lo que NO cubre este modelo
 
+- La forma de la raíz que el operador registra a mano: se exige que sea
+  absoluta, pero un `..` intermedio solo se rechaza en el alta de proyecto
+  nuevo, y ningún symlink de esa raíz se resuelve antes de guardarla. Queda
+  asentado como límite conocido, no como garantía.
 - Compromiso del sistema operativo del usuario.
 - Ataque físico al equipo.
 - Ingeniería social contra el operador.
