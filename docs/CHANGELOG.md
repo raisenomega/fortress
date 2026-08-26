@@ -31,6 +31,40 @@ general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
 [DECISIONS/](DECISIONS/README.md) contiene las sesenta decisiones
 arquitectónicas.
 
+## 2026-08-25
+
+**[Escaneo]** La identidad de los hallazgos anteriores al cambio de clave queda
+reconciliada: una pasada de agente les asigna tipo y símbolo, y las que resultan
+ser el mismo defecto se fusionan conservando la fila más antigua con su fecha de
+nacimiento. La absorbida no se borra — se marca con quién se fusionó y sin fecha
+de resolución, porque no se resolvió
+([ADR-071](DECISIONS/adr-071-cuando-dos-filas-son-una.md)).
+
+**[Motor]** Un hallazgo cuyo defecto ya estaba arreglado murió por primera vez
+**con juicio**: seis extinciones motivadas durante el drenaje, entre ellas la
+relajación de la CSP. Es la red de «nada muere sin juicio» funcionando en el
+sentido para el que se construyó.
+
+## 2026-08-24
+
+**[Motor]** El cerco de integración automática mide el **resultado** antes de
+integrar: si el fix dejara un archivo por encima del límite de líneas, no se
+integra solo y espera firma. El gate corre dentro del worktree de la propuesta y
+nadie medía el árbol ya integrado
+([ADR-069](DECISIONS/adr-069-cerco-mide-el-fichero-antes-de-integrar.md)).
+
+**[Motor]** El asiento de una integración deja de leer una autorización como una
+denegación. La firma humana se registraba como «denegada por política» sobre
+merges aplicados, y el fallo de git de una firma no se registraba en absoluto. La
+vía —automática o firmada— entra en el asiento
+([ADR-070](DECISIONS/adr-070-una-autorizacion-no-es-una-denegacion.md)).
+
+**[Seguridad]** La lista de archivos que el motor no puede integrar sin que un
+humano los mire cubre dos defensas más: la redacción de secretos antes de
+persistirlos, y el armado del entorno y las herramientas de todo agente. Con un
+criterio explícito que ya no depende de recordar categorías — si cambiar ese
+archivo debilita una defensa, entra. Ver [SECURITY-MODEL](SECURITY-MODEL.md).
+
 ## 2026-08-23
 
 **[Escaneo]** Un escaneo deja de extinguir hallazgos por ausencia. Lo que no
