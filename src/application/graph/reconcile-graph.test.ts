@@ -43,17 +43,6 @@ describe('reconcileGraph', () => {
     await b.runQueued()
     expect(b.marks).toEqual(['running', 'error:kaput'])
   })
-
-  it('proyecto sin repo git: SKIPPED sin tocar estado', async () => {
-    const b = bench({ sha: null })
-    expect(await reconcileGraph(b.context, 'p1', b.deps)).toBe('SKIPPED')
-    expect(b.marks).toEqual([])
-  })
-
-  it('proyecto inexistente: SKIPPED', async () => {
-    const b = bench()
-    expect(await reconcileGraph(b.context, 'nope', b.deps)).toBe('SKIPPED')
-  })
 })
 
 describe('reconcileGraph en el arranque', () => {

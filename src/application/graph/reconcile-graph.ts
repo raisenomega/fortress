@@ -1,5 +1,6 @@
 import { decideReindex } from '@domain/graph/reindex-decision'
 import type { AppContext } from '../context'
+import { loQueHayQueReconciliar } from './lo-que-hay-que-reconciliar'
 
 export type ReconcileOutcome = 'SKIPPED' | 'STARTED' | 'FAILED_TO_START'
 
@@ -31,13 +32,9 @@ export async function reconcileGraph(
   deps: ReconcileDeps,
   onBoot = false
 ): Promise<ReconcileOutcome> {
-  const project = context.projects.findById(projectId)
-  if (!project) return 'SKIPPED'
-  const currentSha = context.headSha(project.path)
-  if (currentSha === null) {
-    console.info('[graph-reindex]', project.name, 'SKIP: sin repo git')
-    return 'SKIPPED'
-  }
+  const listo = loQueHayQueReconciliar(context, projectId)
+  if (listo === null) return 'SKIPPED'
+  const { project, currentSha } = listo
 
   const state = context.graphState.getGraphState(projectId)
   const decision = decideReindex({
