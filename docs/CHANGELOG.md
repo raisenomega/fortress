@@ -31,6 +31,14 @@ general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
 [DECISIONS/](DECISIONS/README.md) contiene las sesenta decisiones
 arquitectónicas.
 
+## 2026-08-26
+
+**[Motor]** El motor cierra sus propios arreglos: un drenaje volvió a mirar los
+cuatro hallazgos que los fixes firmados el día anterior habían resuelto, y los
+cuatro se extinguieron **con juicio y motivo escrito**. La vuelta completa
+—detectar, reparar, firmar, volver a mirar, cerrar diciendo por qué— ocurre por
+primera vez sobre el propio repositorio.
+
 ## 2026-08-25
 
 **[Escaneo]** La identidad de los hallazgos anteriores al cambio de clave queda
@@ -41,9 +49,32 @@ de resolución, porque no se resolvió
 ([ADR-071](DECISIONS/adr-071-cuando-dos-filas-son-una.md)).
 
 **[Motor]** Un hallazgo cuyo defecto ya estaba arreglado murió por primera vez
-**con juicio**: seis extinciones motivadas durante el drenaje, entre ellas la
+**con juicio**: cuatro extinciones motivadas en esa tanda, entre ellas la
 relajación de la CSP. Es la red de «nada muere sin juicio» funcionando en el
 sentido para el que se construyó.
+
+**[Motor]** La transición que aprueba una propuesta persiste el veredicto que
+recomputa el motor, no el que escribió el agente. Cuando el agente vetaba algo
+que las cuatro reglas duras no vetan, la propuesta quedaba en un estado que dice
+aprobada llevando dentro un veto, y tanto la firma como la integración
+automática la rechazaban sin ruido. Es la familia de
+[ADR-070](DECISIONS/adr-070-una-autorizacion-no-es-una-denegacion.md): la razón
+decidiendo el qué.
+
+**[Seguridad]** `push:run` comprueba que la carpeta del proyecto es la raíz de su
+propio repositorio antes de empujar — una subcarpeta publicaría el repo padre
+entero. Se le pregunta a git, no al remoto guardado en la base. El generador de
+fixes deja de heredar el entorno del operador, y la salida del gate se redacta
+antes de persistirse como evidencia.
+
+**[Test]** El arnés de integración monta repositorios git reales. Montaba
+carpetas —una función llamada `makeRepo` sin `git init`— y en cuanto esa guarda
+preguntó por git se cayeron cinco comprobaciones a la vez: el choque semántico
+que [ADR-069](DECISIONS/adr-069-cerco-mide-el-fichero-antes-de-integrar.md) había
+dejado nombrado como no cubierto, esa misma madrugada. Una sexta llevaba tiempo
+en verde sin probar nada —afirmaba que el error «ya no dice CRITICAL», lo que se
+cumple con el push fallando por cualquier otra causa— y ahora afirma que el push
+ocurre.
 
 ## 2026-08-24
 
