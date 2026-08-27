@@ -1,6 +1,7 @@
 import type { Project } from '@domain/project/project'
 import { useActiveProject } from '../../stores/project-store'
 import { useRepairStore } from '../../stores/repair-store'
+import { AvisoContaminacion } from './AvisoContaminacion'
 import { DrenajeEnVivo } from './DrenajeEnVivo'
 import { MotorAcciones } from './MotorAcciones'
 import { colaDeFirma } from './cola-de-firma'
@@ -50,6 +51,7 @@ export function MotorView(): React.JSX.Element {
 
       {alDia && drenando ? <DrenajeEnVivo cerco={cerco} esperandoFirma={cola.length} /> : null}
 
+      {project?.contaminated ? <AvisoContaminacion project={project} /> : null}
       <MotorAcciones projectId={projectId} />
 
       <div className="space-y-1">
