@@ -50,6 +50,18 @@ export async function setProjectTrusted(id: string, trusted: boolean): Promise<v
   }
 }
 
+/** Levanta el circuit breaker de la Capa 4. Al recargar, el proyecto llega ya
+ *  sin marca y el aviso se apaga solo: no hay estado local que acordarse de bajar. */
+export async function desbloquearProyecto(id: string): Promise<void> {
+  try {
+    const result = await api().projects.unblock(id)
+    if (result.ok) await loadProjects()
+    else reportError(result.error)
+  } catch (error) {
+    reportError(error instanceof Error ? error.message : 'No se pudo desbloquear el proyecto')
+  }
+}
+
 export async function setProjectLoopEnabled(id: string, enabled: boolean): Promise<void> {
   try {
     const result = await api().projects.setLoopEnabled(id, enabled)
