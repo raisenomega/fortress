@@ -427,9 +427,9 @@ revive sin él tampoco. Lo que sí les falta, y sigue faltándoles, es una razó
 muerte registrada.
 
 **El drenaje puso todo a prueba sobre hallazgos frescos**, y en él la red del
-acto anterior hizo su primer trabajo real: **seis hallazgos extinguidos con
-juicio**, entre ellos la relajación de la CSP que llevaba días señalada como el
-caso perfecto — un defecto ya arreglado en el código cuyo hallazgo seguía vivo
+acto anterior hizo su primer trabajo real: **cuatro hallazgos extinguidos con
+juicio** en esa tanda, entre ellos la relajación de la CSP que llevaba días
+señalada como el caso perfecto — un defecto ya arreglado en el código cuyo hallazgo seguía vivo
 porque, desde que el escaneo dejó de matar por ausencia, solo un agente que lo
 mire puede cerrarlo. Lo miró y lo cerró.
 
@@ -438,18 +438,68 @@ después de él asentó **«Integración firmada aplicada»**, con su veredicto
 correcto y su commit. Es el primer asiento de integración aplicada de la historia
 del proyecto — antes no había ninguno, porque todos decían lo contrario.
 
+### El desenlace: cuatro firmas, una grieta prevista, y el ciclo cerrándose
+
+El 2026-08-25 el operador firmó **cuatro** de los fixes que el drenaje había
+dejado esperando, y el Libro los asentó como lo que eran. Cinco asientos honestos
+donde antes había once que decían lo contrario.
+
+**Y uno de los cuatro rompió `main`.** El fix que hacía que `push:run` preguntara
+a git si la carpeta del proyecto es la raíz de su repositorio —para no publicar
+el repo padre— entró firmado, con su gate en verde, y tumbó cinco comprobaciones
+de integración. No porque el fix fuera malo: porque el arnés de pruebas montaba
+proyectos que no eran repositorios, y mientras ninguna guarda preguntó por git,
+nadie lo notó. Una función llamada `makeRepo` llevaba meses creando una carpeta
+con un fichero dentro.
+
+**Eso es exactamente el hueco que [ADR-069](DECISIONS/adr-069-cerco-mide-el-fichero-antes-de-integrar.md)
+había nombrado esa misma madrugada**, veinte horas antes: el gate mide la
+propuesta en su worktree y nadie mide el árbol integrado; la sexta condición
+cubre el tamaño, y el choque semántico —un fix que rompe algo del árbol sin
+añadir una línea de más— queda fuera. El documento decía que esa mitad estaba sin
+cubrir, y la mitad sin cubrir se manifestó el mismo día. No es un fracaso del
+sistema: es el sistema enseñando su propia grieta donde ya la había señalado, y
+con eso deja de ser una hipótesis del ADR para ser un caso.
+
+Se arregló el arnés —los proyectos temporales son repositorios de verdad, como en
+producción— sin tocar la guarda: un guard de seguridad con un escape para los
+tests es un guard con un agujero. De paso apareció una comprobación que llevaba
+tiempo en verde sin probar nada: afirmaba «el error ya no dice CRITICAL», y eso
+se cumple en cuanto el sistema falla por cualquier otra razón. Pasó a afirmar que
+el push **ocurre**.
+
+**Y el arco cerró con un defecto de la misma familia que todo lo demás.** La
+transición que aprueba una propuesta decidía con el veredicto que recomputa el
+motor —los ejes son evidencia, la regla es código— y **guardaba el del agente**.
+Cuando los dos coinciden da igual; cuando el agente veta algo que las cuatro
+reglas duras no vetan, la propuesta quedaba en un estado que dice aprobada
+llevando dentro un veto, y las dos puertas de integración la rechazaban sin
+ruido: ni avería, ni aviso, ni rechazo visible. Se quedaba en la cola con aspecto
+de firmable, para siempre. Una de 43 lo estaba, y sigue estándolo: el arreglo va
+hacia adelante, y su evento ya escrito no se reescribe.
+
+**El ciclo se cerró entero al día siguiente.** Un segundo drenaje volvió a mirar
+los cuatro hallazgos que aquellos fixes habían arreglado, y los cuatro murieron
+**con juicio y con motivo escrito**. Detectar, reparar, firmar, volver a mirar,
+confirmar que ya no está, y cerrarlo diciendo por qué. Es la primera vez que la
+vuelta completa ocurre sobre sus propios arreglos.
+
 ## Presente
 
-El motor repara, el operador firma, y ahora el registro de lo que hizo dice lo
-que pasó. La identidad de los hallazgos de este repositorio está reconciliada; la
-de otros proyectos espera a que se los vuelva a escanear.
+El motor repara, el operador firma, el motor vuelve a mirar y cierra lo que ya
+está arreglado diciendo por qué. La vuelta entera funciona sobre el propio
+repositorio, y el registro de lo que hizo dice lo que pasó. La identidad de los
+hallazgos de este repositorio está reconciliada; la de otros proyectos espera a
+que se los vuelva a escanear.
 
-Hay un drenaje en vuelo con propuestas esperando firma, así que este acto cuenta
-lo cerrado y no la cola. Quedan tres cosas nombradas y sin cerrar: la detección
-de lo que rompe el árbol **después** de integrarlo —que es la otra mitad de la
-sexta condición—, los veintiséis hallazgos que murieron antes de que las
-extinciones exigieran motivo y siguen sin decir por qué, y cómo se rectifica un
-asiento en un libro que solo sabe anexar.
+Quedan cuatro cosas nombradas y sin cerrar. La **detección de lo que rompe el
+árbol después de integrarlo** —la otra mitad de la sexta condición, que ya cobró
+su primera pieza—. Una **propuesta atascada** con un veto escrito que el arreglo
+posterior no alcanza, porque el libro de eventos solo sabe anexar. Los
+**veintiséis hallazgos** que murieron antes de que las extinciones exigieran
+motivo y siguen sin decir por qué. Y **cómo se rectifica un asiento** en un
+registro que no se edita — la pregunta que dejaron los once que dicen
+«denegada» sobre integraciones que están en `main`.
 
 Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
 convertir el auditor en un entorno de desarrollo asistido completo, y preparar el
