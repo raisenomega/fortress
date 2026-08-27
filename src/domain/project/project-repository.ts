@@ -25,4 +25,6 @@ export interface ProjectRepository {
   setGraph(id: string, nodes: number, edges: number, indexedAt: string): void
   /** Circuit breaker (Capa 4): marca el proyecto CONTAMINADO con el detalle forense. */
   markContaminated(id: string, detail: string): void
+  /** Inverso de markContaminated: el operador reviso el forense y desbloqueo el proyecto. */
+  markClean(id: string): void
 }
