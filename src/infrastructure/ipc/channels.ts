@@ -21,6 +21,7 @@ export const IPC = {
   projectsSelf: 'projects:self',
   projectsSetTrusted: 'projects:set-trusted',
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
+  projectsUnblock: 'projects:unblock',
   loopStatus: 'loop:status',
   loopChunk: 'loop:chunk',
   loopLastSession: 'loop:last-session',
