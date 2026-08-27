@@ -16,6 +16,7 @@ interface Opciones {
   readonly sha?: string | null
   readonly runnerResult?: RunnerResult
   readonly now?: number
+  readonly contaminado?: boolean
 }
 
 /** Contexto y deps falsos: registran marcas y capturan el trabajo encolado. */
@@ -29,7 +30,7 @@ export function bench(opts: Opciones = {}): Bench {
   } // prettier-ignore
 
   const context = {
-    projects: { findById: (id: string) => (id === 'p1' ? { id, name: 'P1', path: '/repo' } : null) }, // prettier-ignore
+    projects: { findById: (id: string) => (id === 'p1' ? { id, name: 'P1', path: '/repo', contaminated: opts.contaminado === true } : null) }, // prettier-ignore
     headSha: () => (opts.sha === undefined ? 'a'.repeat(40) : opts.sha),
     graphState: {
       getGraphState: () => state,
