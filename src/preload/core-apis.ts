@@ -16,6 +16,7 @@ export interface ProjectsApi {
   self(): Promise<NewProject | null>
   setTrusted(id: string, trusted: boolean): Promise<Result<null>>
   setLoopEnabled(id: string, enabled: boolean): Promise<Result<null>>
+  unblock(id: string): Promise<Result<null>>
 }
 
 export interface ChatApi {

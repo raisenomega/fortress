@@ -3,6 +3,7 @@ import { addProject } from '@application/project/add-project'
 import { listProjects } from '@application/project/list-projects'
 import { removeProject } from '@application/project/remove-project'
 import { setProjectLoopEnabled } from '@application/project/set-project-loop-enabled'
+import { desbloquearContaminacion } from '@application/project/desbloquear-contaminacion'
 import { setProjectTrusted } from '@application/project/set-project-trusted'
 import { startLoop, stopLoop } from '../loop/loop-controller'
 import { exportProjectRecord } from '../project/export-record'
@@ -38,6 +39,12 @@ export function registerProjectHandlers(): void {
     if (result.ok) (enabled ? startLoop : stopLoop)(id)
     return result
   })
+
+  // Levantar el circuit breaker de la Capa 4. No lleva bandera: no es un toggle
+  // que se apaga y se enciende, es un acto que se asienta una vez en el Libro.
+  ipcMain.handle(IPC.projectsUnblock, (_event, id: string) =>
+    desbloquearContaminacion(getAppContext(), String(id))
+  )
 
   // El dialogo se ancla a la ventana que lo pidio para que sea modal.
   ipcMain.handle(IPC.projectsPickFolder, (event) =>
