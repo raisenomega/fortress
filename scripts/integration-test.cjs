@@ -21,6 +21,7 @@ const SUITES = [
   ['Hallazgos', require('./checks/scan-checks.cjs')],
   ['Cognition', require('./checks/cognition-checks.cjs')],
   ['Descartes e historico', require('./checks/dismissal-checks.cjs')],
+  ['Mitigar un hallazgo', require('./checks/mitigate-checks.cjs')],
   ['Push bloqueado por CRITICAL', require('./checks/push-checks.cjs')],
   ['Loop blindado (gate en el main)', require('./checks/loop-guard-checks.cjs')],
   ['Razon de parada persistida', require('./checks/loop-session-checks.cjs')],

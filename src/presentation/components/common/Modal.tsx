@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 interface ModalProps {
@@ -6,8 +7,16 @@ interface ModalProps {
   readonly children: React.ReactNode
 }
 
+/**
+ * Se monta en `document.body` por PORTAL y no donde se declara. `position:
+ * fixed` basta mientras el modal cuelgue de un div normal, pero el primero que
+ * nacio dentro de una `<table>` —el de mitigar, en su celda— salio con el texto
+ * desbordado fuera de la caja: la maquetacion de tabla alcanza al hijo aunque
+ * este fijado. El portal lo saca de ahi, y de cualquier otro contenedor
+ * incomodo que venga despues. Mismo motivo que `BreakdownPopover`.
+ */
 export function Modal({ title, onClose, children }: ModalProps): React.JSX.Element {
-  return (
+  return createPortal(
     <div
       role="presentation"
       onClick={onClose}
@@ -33,6 +42,7 @@ export function Modal({ title, onClose, children }: ModalProps): React.JSX.Eleme
         </header>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
