@@ -31,6 +31,7 @@ const SUITES = [
   ['Gate hermetico (I3)', require('./checks/repair-gate-checks.cjs')],
   ['OMEGA sobre el diff (I4)', require('./checks/repair-omega-checks.cjs')],
   ['Reintento explicito (I4.2)', require('./checks/repair-retry-checks.cjs')],
+  ['Retirada de propuesta (W2)', require('./checks/repair-withdraw-checks.cjs')],
   ['Libro de la Vida (OMEGA)', require('./checks/omega-checks.cjs')],
   ['Puntuacion y veto (OMEGA)', require('./checks/omega-score-checks.cjs')],
   ['Crear proyecto desde cero', require('./checks/newproject-checks.cjs')]
