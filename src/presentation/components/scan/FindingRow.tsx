@@ -1,5 +1,6 @@
 import type { Finding } from '@domain/project/finding'
 import { FindingActions } from './FindingActions'
+import { FindingMitigarAction } from './FindingMitigarAction'
 import { FindingRepairAction } from './FindingRepairAction'
 import { FindingMarks } from './FindingMarks'
 import { SeverityBadge } from './SeverityBadge'
@@ -34,11 +35,6 @@ export function FindingRow({
   // ha confirmado. Lo que cambia es que deja de pedir trabajo al motor.
   const mitigado = finding.lifecycle === 'MITIGATED'
 
-  const marcar = (): void => {
-    const nota = window.prompt('Que lo arregla (por ejemplo el sha del commit):')
-    if (nota !== null && nota.trim() !== '') onMitigate(finding.id, nota)
-  }
-
   return (
     <tr className={`border-b border-border/60 last:border-0 ${dismissed ? 'opacity-45' : ''}`}>
       <td className="py-2 pr-3 align-top">
@@ -54,13 +50,17 @@ export function FindingRow({
         {!dismissed && !mitigado ? (
           <FindingRepairAction onRepair={() => onRepair(finding.id)} />
         ) : null}
-        <FindingActions
+        <FindingMitigarAction
+          finding={finding}
           dismissed={dismissed}
           mitigado={mitigado}
+          onMitigate={onMitigate}
+          onUnmitigate={() => onUnmitigate(finding.id)}
+        />
+        <FindingActions
+          dismissed={dismissed}
           onDismiss={() => onDismiss(finding.id)}
           onReopen={() => onReopen(finding.id)}
-          onMitigate={marcar}
-          onUnmitigate={() => onUnmitigate(finding.id)}
         />
       </td>
     </tr>
