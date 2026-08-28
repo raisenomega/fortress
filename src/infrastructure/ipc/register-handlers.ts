@@ -21,6 +21,7 @@ import { registerRepairOmegaHandler } from './repair-omega-handler'
 import { registerRepairGenerateHandler } from './repair-generate-handler'
 import { registerRepairHandlers } from './repair-handlers'
 import { registerRepairRetryHandler } from './repair-retry-handler'
+import { registerRepairWithdrawHandler } from './repair-withdraw-handler'
 import { registerScanHandlers } from './scan-handlers'
 import { registerQualityHandlers } from './quality-handlers'
 import { registerSettingsHandlers } from './settings-handlers'
@@ -41,6 +42,7 @@ export function registerIpcHandlers(): void {
   registerRepairGateHandler()
   registerRepairOmegaHandler()
   registerRepairRetryHandler()
+  registerRepairWithdrawHandler()
   registerQualityHandlers()
   registerPushHandlers()
   registerActivityHandlers()

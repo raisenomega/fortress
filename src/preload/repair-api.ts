@@ -61,4 +61,10 @@ export interface RepairApi {
    * propuesta NUEVA sobre el HEAD actual con C2 fresco; la vieja no se muta.
    */
   retry(proposalId: string): Promise<RetryResult>
+  /**
+   * Retira una propuesta viva: la CADUCA con el motivo del operador y la saca
+   * de la cola, liberando su hallazgo. No existe deshacer — el libro conserva
+   * la historia entera, pero la propuesta ya no vuelve.
+   */
+  withdraw(proposalId: string, motivo?: string): Promise<Result<null>>
 }

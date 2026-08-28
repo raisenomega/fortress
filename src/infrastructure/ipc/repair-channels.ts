@@ -8,6 +8,8 @@ export const REPAIR_CHANNELS = {
   repairRunGate: 'repair:run-gate',
   repairRunOmega: 'repair:run-omega',
   repairRetry: 'repair:retry',
+  /** La salida de una propuesta viva: el operador la caduca con motivo. */
+  repairWithdraw: 'repair:withdraw',
   /** La firma humana: integrar una propuesta que OMEGA ya aprobo. */
   repairSign: 'repair:sign',
   /** Drenar los elegibles dejandolos juzgados y esperando firma. */
