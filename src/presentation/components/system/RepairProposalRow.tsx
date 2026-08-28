@@ -5,12 +5,9 @@ import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { api } from '../../adapters/fortress-api'
 import { ExpandableText } from '../common/ExpandableText'
 import { ProposalEventList } from './ProposalEventList'
-import { RepairFirmaButton } from './RepairFirmaButton'
-import { RepairGateButton } from './RepairGateButton'
-import { RepairGenerateButton } from './RepairGenerateButton'
+import { RepairProposalAcciones } from './RepairProposalAcciones'
 import { RepairProposalHeader } from './RepairProposalHeader'
 import { reasonBody } from './repair-proposal-badges'
-import { RepairRetryButton } from './RepairRetryButton'
 
 interface RepairProposalRowProps {
   readonly proposal: Proposal
@@ -41,15 +38,12 @@ export function RepairProposalRow({
     setOpen(!open)
   }
 
-  // Cada boton se pinta solo si el estado es el suyo, asi que la fila lleva
-  // como mucho uno. Refetch incondicional al terminar: sin stale closure (I3.1).
   const acciones = (
-    <>
-      <RepairGenerateButton proposal={proposal} onDone={() => open && void loadEvents()} />
-      <RepairGateButton proposal={proposal} onDone={() => open && void loadEvents()} />
-      <RepairFirmaButton proposal={proposal} onDone={() => void loadEvents()} />
-      <RepairRetryButton proposal={proposal} onDone={() => void loadEvents()} />
-    </>
+    <RepairProposalAcciones
+      proposal={proposal}
+      onDone={() => void loadEvents()}
+      onDoneSiAbierto={() => open && void loadEvents()}
+    />
   )
 
   return (
