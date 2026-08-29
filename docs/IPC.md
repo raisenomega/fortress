@@ -69,6 +69,7 @@ Gestión del catálogo de proyectos y su confianza.
 | `projects:set-trusted` | R/R | (id, trusted) → Result<null> | decisión explícita del operador |
 | `projects:set-loop-enabled` | R/R | (id, enabled) → Result<null> | bloqueo del loop sobre el self-repo |
 | `projects:focus` | R/R | id → null (dispara reconcilio del grafo) | — |
+| `projects:unblock` | R/R | (id, motivo?) → Result<null> (levanta el circuit breaker) | exige que el proyecto ESTÉ contaminado |
 
 ### chat
 
@@ -103,6 +104,8 @@ Escaneo de seguridad con agentes reales.
 | `scan:history-since` | R/R | iso → ScanRecord[] | — |
 | `scan:dismiss` | R/R | findingId → Result<null> (sobrevive re-escaneos) | — |
 | `scan:reopen` | R/R | findingId → Result<null> | — |
+| `scan:mitigate` | R/R | (findingId, nota) → Result<null> (el operador declara que ya está arreglado) | solo desde ACTIVE; la nota es obligatoria |
+| `scan:unmitigate` | R/R | findingId → Result<null> (deshace la marca) | solo desde MITIGATED |
 | `scan:progress` | PUSH | ScanChunk (avance del escaneo) | — |
 
 > **El informe que devuelven los agentes** no cruza el IPC como tal: llega en el
@@ -122,18 +125,39 @@ Los canales del flujo [SELF-REPAIR](FLOWS/SELF-REPAIR.md).
 | `repair:propose` | R/R | projectId → Result<Proposal \| null> (C1+C2) | guardRun |
 | `repair:list` | R/R | projectId → Proposal[] | — |
 | `repair:get` | R/R | id → Proposal \| null | — |
-| `repair:self` | R/R | () → Project \| null (resuelve el repo propio en el main) | — |
 | `repair:events` | R/R | proposalId → ProposalEvent[] (el libro de vida) | — |
 | `repair:generate` | R/R | proposalId → GenerateResult (C3 en worktree) | guardRun; correa; presupuesto |
 | `repair:run-gate` | R/R | proposalId → RunGateResult | guardRun; cola serial de juicio |
 | `repair:run-omega` | R/R | proposalId → RunOmegaResult | guardRun; reserva de presupuesto; cola serial |
+| `repair:retry` | R/R | proposalId → RetryResult (propuesta NUEVA con C2 fresco) | guardRun; solo rechazos de razonamiento |
+| `repair:sign` | R/R | proposalId → AutoMergeResult (la firma humana) | guardMerge; exige veredicto APROBADO; no alcanza las defensas |
+| `repair:withdraw` | R/R | (proposalId, motivo?) → Result<null> (la CADUCA) | exige no terminal; **sin** guardRun |
+| `repair:drain` | R/R | projectId → DrenajeResultado (recorre los elegibles hasta OMEGA) | guardRun |
+| `repair:drain:stop` | R/R | projectId → number (cancela el drenaje en curso) | — |
+| `repair:cerco` | R/R | projectId → ResumenCerco (cuántos elegibles y por qué) | — |
+| `repair:changed` | PUSH | projectId (el expediente de ese proyecto se movió) | — |
 
 #### Notas de estado
 
-El canal `repair:retry` está diseñado y documentado en
-[FLOWS/RETRY](FLOWS/RETRY.md). Su implementación vive en la rama del
-incremento pendiente de firma humana; se añadirá a este listado cuando el
-incremento se mergee a main.
+**Las tres salidas de una propuesta viva, y en qué se distinguen.** `repair:sign`
+la integra —es la única puerta al árbol vivo, y pide `guardMerge` porque la rama
+activa es un recurso compartido—. `repair:retry` no la mueve: abre una propuesta
+NUEVA sobre el HEAD actual con un C2 fresco, y solo para los rechazos de
+razonamiento (ver [FLOWS/RETRY](FLOWS/RETRY.md)). `repair:withdraw` la CADUCA con
+el motivo del operador, y es la única de las tres que **no** pide `guardRun`: no
+spawnea nada, no gasta un token y no toca el árbol — mueve una fila y deja dos
+asientos. Exigirle el carril cerraría la única salida de una propuesta justo
+mientras el motor trabaja. Ver
+[ADR-072](DECISIONS/adr-072-caducado-no-miente.md).
+
+**`repair:withdraw` no exige que el proyecto ni el hallazgo sigan existiendo**, y
+es deliberado: retirar tiene que funcionar precisamente cuando ya no están. Una
+propuesta huérfana —su proyecto borrado debajo— no aparece en ninguna vista,
+porque toda la interfaz del motor lista por proyecto; el canal la alcanza igual.
+
+**Lo que ninguno de los tres hace es disponer del hallazgo.** Que vuelva a la
+cola es consecuencia de que su propuesta deje de ser viva. Declararlo arreglado
+es otro acto y vive en el Escaneo (`scan:mitigate`).
 
 ### graph
 
@@ -227,6 +251,7 @@ El panel del meta-auditor y el Libro de la Vida.
 | `telemetry:billing` | R/R | () → Billing | — |
 | `telemetry:average` | R/R | projectId → MeasuredRun \| null | — |
 | `telemetry:since` | R/R | iso → TokenUsage | — |
+| `telemetry:sin-factura` | R/R | iso → { runs, durationMs } (corridas sin coste medible) | — |
 | `telemetry:by-project` | R/R | iso → Record<projectId, TokenUsage> | — |
 | `telemetry:ranking` | R/R | (iso, limit) → AgentRanking[] | — |
 
@@ -277,6 +302,7 @@ El panel del meta-auditor y el Libro de la Vida.
 
 | Canal | Dir | Contrato | Guards |
 |---|---|---|---|
+| `loop:last-session` | R/R | projectId → LoopSession \| null (la última sesión, con su razón de parada) | — |
 | `loop:status` | PUSH | LoopStatus (estado del ciclo autónomo) | — |
 | `loop:chunk` | PUSH | ChatChunk (salida del ciclo en curso) | — |
 
