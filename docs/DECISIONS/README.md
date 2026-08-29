@@ -110,6 +110,10 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-069](adr-069-cerco-mide-el-fichero-antes-de-integrar.md) | El cerco mide el fichero antes de integrarlo | 2026-08-24 | Aceptada | Motor |
 | [ADR-070](adr-070-una-autorizacion-no-es-una-denegacion.md) | Una autorización no es una denegación | 2026-08-24 | Aceptada | Motor |
 | [ADR-071](adr-071-cuando-dos-filas-son-una.md) | Cuando dos filas son una: la fusión de la Fase B | 2026-08-24 | Aceptada | Escaneo |
+| [ADR-072](adr-072-caducado-no-miente.md) | Retirar una propuesta la CADUCA: el estado dice que murió, la razón dice quién | 2026-08-27 | Aceptada | Motor |
+| [ADR-073](adr-073-el-freno-en-el-embudo.md) | El freno del reindexado va en el embudo, no en el handler | 2026-08-27 | Aceptada | Grafo |
+| [ADR-074](adr-074-el-asiento-no-afirma-mas-de-lo-que-sabe.md) | El asiento no afirma más de lo que sabe: los actos del operador son `info` | 2026-08-27 | Aceptada | Motor |
+| [ADR-075](adr-075-el-modal-por-portal.md) | `Modal` se monta en `document.body` por portal, no donde se declara | 2026-08-28 | Aceptada | UI |
 
 ## Referencias
 
