@@ -41,6 +41,10 @@ La filosofía en una frase: **el motor propone, el humano dispone.**
       APROBADO
       v
  [Firma humana]       -> MERGEADO (merge local; push siempre humano)
+
+ (en cualquier punto vivo)
+      |
+      +--- el operador la RETIRA -----------------> CADUCADO (terminal)
 ```
 
 ## La máquina de estados
@@ -59,6 +63,33 @@ terminal.
 - `APROBADO`: el humano firmó; en proceso de merge local.
 - `MERGEADO` / `RECHAZADO` / `CADUCADO`: terminales. No se re-abren jamás
   (ver `docs/PRINCIPLES.md`, principio 12).
+
+### La salida del operador
+
+Los cinco eslabones de arriba solo saben **avanzar**. Una propuesta que no
+admitiera ninguno de ellos —un veredicto que la firma rechaza, un proyecto
+borrado bajo sus pies— se quedaba viva para siempre, y con ella su hallazgo
+fuera de la cola, porque uno con propuesta viva no se re-elige.
+
+`repair:withdraw` es la salida. Lleva cualquier estado vivo a **`CADUCADO`** con
+la razón `retirada por el operador: <motivo>`. La transición ya era legal desde
+los seis estados vivos: lo que faltaba no era el camino, era quien lo ejerciera.
+
+**`CADUCADO` y no `RECHAZADO`**, y la diferencia importa dos veces. El
+vocabulario reserva `RECHAZADO` al juicio de una máquina —el gate, el revisor,
+el generador— y aquí no juzgó ninguna; además, un `RECHAZADO` cuya razón no está
+entre las reintentables **bloquearía el hallazgo**, que es lo contrario de lo que
+se busca. El estado dice que murió; la razón dice quién. Ver
+[ADR-072](../DECISIONS/adr-072-caducado-no-miente.md).
+
+Retirar **anexa**: el libro conserva sus eslabones anteriores y gana el de
+cierre. Y deja además una nota en el Libro de la Vida con el motivo, asentada
+como acto humano y no como verificación
+([ADR-074](../DECISIONS/adr-074-el-asiento-no-afirma-mas-de-lo-que-sabe.md)).
+
+Lo que **no** hace es disponer del hallazgo: que vuelva a la cola es
+consecuencia de que su propuesta deje de ser viva. Declararlo arreglado es otro
+acto, y vive en el Escaneo.
 
 ## Los cinco eslabones automáticos
 
