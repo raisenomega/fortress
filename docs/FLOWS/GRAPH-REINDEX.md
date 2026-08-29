@@ -31,10 +31,36 @@ sistema evalúa puntualmente.
    de SHA.
 4. **Manual:** el operador puede forzar un reindex desde la interfaz.
 
+## Las precondiciones: por qué NO hay nada que reconciliar
+
+Antes de mirar SHAs y estados hay **tres preguntas** que pueden cerrar el asunto
+sin llegar a la matriz. Viven en un módulo propio (`loQueHayQueReconciliar`) que
+`reconcileGraph` consulta primero, y las tres devuelven `SKIPPED` con su línea de
+registro:
+
+| Precondición | Por qué |
+|---|---|
+| El proyecto ya no existe | no hay nada que indexar |
+| El proyecto está **CONTAMINADO** | el circuit breaker de la Capa 4 lo bloquea |
+| No hay repositorio git | el reindex necesita un HEAD que leer |
+
+**El freno de contaminación es el añadido reciente, y cubre las tres puertas de
+golpe.** El arranque, el chip del grafo y el foco de proyecto convergen todos en
+`reconcileGraph`, así que una sola comprobación en el embudo cierra lo que en el
+handler habría cubierto solo dos de las tres — y la que se habría quedado fuera
+es la del arranque, la más silenciosa. Ver
+[ADR-073](../DECISIONS/adr-073-el-freno-en-el-embudo.md).
+
+Se mira **antes** que el HEAD a propósito: leerlo lanza git, y un proyecto
+bloqueado no merece ni el proceso. Y no condena a nadie: la marca se relee en
+cada llamada, así que en cuanto el operador desbloquea el proyecto
+(`projects:unblock`) la siguiente evaluación entra sin más.
+
 ## Matriz de decisión
 
 La decisión es una función PURA del dominio: mismo input, misma decisión.
-Se evalúa en este orden (el orden importa):
+Se evalúa en este orden (el orden importa), y **solo si las precondiciones de
+arriba dejaron pasar**:
 
 | Estado observado | Decisión |
 |---|---|

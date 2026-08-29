@@ -142,6 +142,48 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
   `buildArgs`) — heredar el entorno del operador o abrir la lista de tools son
   la misma clase de agujero que la lista existe para no reabrir sola.
 
+### Auditoría de calidad: cuatro capas y un circuit breaker
+
+La auditoría integral de 6 dimensiones corre **probes sobre el árbol vivo** del
+proyecto, no sobre una copia. Que un probe sea de solo lectura es una promesa que
+hay que poder verificar, así que se verifica en cuatro capas:
+
+| Capa | Qué hace |
+|---|---|
+| **1 — snapshot** | foto «antes»: hashea **y copia** cada archivo (sin `node_modules`/`.git`) |
+| **2 — restauración** | deja el árbol EXACTO como el snapshot: borra lo nuevo, repone lo modificado o borrado |
+| **3 — verificación** | comprueba que quedó byte-idéntico; lo que no cuadre sale como violación forense con sus dos hashes |
+| **4 — circuit breaker** | si la Capa 3 encuentra diferencias, el proyecto queda **CONTAMINADO** |
+
+**Qué hace la Capa 4 cuando salta.** No persiste el score —auditar un árbol que
+la propia auditoría alteró no mide nada— y marca el proyecto con el detalle
+forense de lo que cambió: qué archivo, y su hash antes y después.
+
+**Qué bloquea la marca.** `guardRun` y `guardMerge` la consultan antes que nada,
+así que ningún agente corre y ninguna firma integra sobre ese proyecto. Y desde
+el cerrojo del reindexado, tampoco se realinea su grafo: las tres puertas del
+reindex —arranque, chip y foco— pasan por la misma precondición. Ver
+[ADR-073](DECISIONS/adr-073-el-freno-en-el-embudo.md) y
+[FLOWS/GRAPH-REINDEX](FLOWS/GRAPH-REINDEX.md).
+
+**Cómo se sale.** El mensaje del bloqueo dice *«revisa el detalle forense y
+desbloquéalo a mano»*, y durante un tiempo esa frase fue falsa: no existía forma
+de quitar la marca, así que un proyecto contaminado quedaba bloqueado para
+siempre. El desbloqueo (`projects:unblock`) cierra el ciclo — enseña el forense
+al operador, y solo si confirma limpia las dos columnas y asienta la decisión en
+el Libro de la Vida con su motivo, como acto humano y no como verificación
+([ADR-074](DECISIONS/adr-074-el-asiento-no-afirma-mas-de-lo-que-sabe.md)).
+
+El ciclo entero, y ninguna de las tres piezas sirve sin las otras dos:
+
+```
+contaminar (Capa 4)  ->  frenar (acciones + reindex)  ->  desbloquear (humano)
+```
+
+Frenar sin salida condenaría el proyecto; una salida sin freno no protegería
+nada. El breaker no decide que el árbol esté limpio cuando se levanta: registra
+que un humano miró el forense y cargó con la decisión.
+
 ### Supply chain
 
 - Dependencias y servidores MCP con versión fijada; nada de ejecutar "lo

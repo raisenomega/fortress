@@ -129,7 +129,12 @@ nace con todo), agrupadas por dominio funcional:
 - Estado del reindex del grafo (5): `graph_indexed_at_sha`,
   `graph_indexed_at_ts`, `graph_indexing_status`,
   `graph_indexing_started_at`, `graph_indexing_error`.
-- Circuit breaker (2): `contaminated_at`, `contamination_detail`.
+- Circuit breaker (2): `contaminated_at`, `contamination_detail`. Las escribe
+  una auditoría que dejó el árbol alterado, y **se limpian juntas** cuando el
+  operador desbloquea el proyecto (`markClean`): `contaminated` nace de que la
+  fecha sea NULL, pero el detalle forense viaja a la interfaz por su cuenta, y
+  dejarlo atrás daría un proyecto ya no contaminado que sigue contando por qué
+  lo estuvo. Ver [SECURITY-MODEL](SECURITY-MODEL.md).
 
 **Repositorio principal:** sqlite-project-repository. **Nota:** las
 columnas `graph_*` del reindex las opera un repositorio auxiliar dedicado
@@ -358,6 +363,21 @@ propuesta, con su ancla de reproducibilidad y su estado en la máquina (ver
 created_at) — impide duplicados exactos · idx_repair_proposals_estado
 (project_id, state).
 **Repositorio principal:** sqlite-repair-proposal-repository.
+
+**Los tres estados terminales, y qué los distingue.** `MERGEADO` es la única
+salida buena. `RECHAZADO` lo escribe el juicio de una **máquina** —el gate en
+rojo, el revisor con veto, el generador fuera de correa—. `CADUCADO` es lo que
+el dominio llama *la salida de emergencia de todos los vivos*: la base se movió,
+el análisis quedó obsoleto, el worktree desapareció… **o el operador la retiró**.
+
+En ese último caso la fila queda `CADUCADO` con `analysis_reason` empezando por
+`retirada por el operador:` y el motivo que escribiera. El estado dice que
+murió; la razón dice quién. No se usó `RECHAZADO` a propósito: mentiría sobre
+quién juzgó, y además dejaría el hallazgo bloqueado para la cola. Ver
+[ADR-072](DECISIONS/adr-072-caducado-no-miente.md).
+
+La fila se actualiza, pero su historia no se pisa: cada transición **anexa** su
+eslabón en `proposal_events`, incluida la de cierre.
 
 ### proposal_events
 
