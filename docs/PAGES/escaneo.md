@@ -30,11 +30,32 @@ del proyecto.
 - **Botón de calidad:** dispara la auditoría integral de 6 dimensiones.
 - **Botón de push:** intenta empujar; queda BLOQUEADO si hay CRITICAL
   abiertos, con su razón visible.
+- **Marcar como ya arreglado (la llave inglesa):** el operador declara que el
+  defecto era real y ya está resuelto. Pide una **nota obligatoria** en un
+  diálogo —qué lo arregla: normalmente el sha del commit—, y con ella el
+  hallazgo sale de la cola del motor **pero sigue visible y sigue contando**:
+  que esté arreglado lo confirma un escaneo, no esta marca. El ↺ de al lado
+  deshace la declaración y lo devuelve a la cola.
 - **Descartar / reabrir un hallazgo:** decisión del operador (marca el
   hallazgo como descartado o lo reabre) — el descarte sobrevive a
   re-escaneos.
 - **Preguntar al chat sobre un hallazgo:** lleva el hallazgo al chat para
   analizarlo o repararlo.
+
+> **Marcar y descartar no son lo mismo, y el tablero lo dice distinto.**
+> Descartar (el ojo tachado) significa **«esto no era un problema»**: el hallazgo
+> se tacha, se etiqueta como falso positivo y deja de contar para la nota.
+> Marcar (la llave) significa **«lo era, y ya lo arreglé»**: no se tacha, sigue
+> contando, y lleva su nota debajo. Mezclarlos haría que descartar pareciera
+> arreglar.
+>
+> La nota importa más de lo que parece: es la **única pista de dónde vive el
+> arreglo** cuando no está en el fichero del hallazgo — el caso normal de una
+> guarda que se movió a otro módulo. Por eso la marca sobrevive a los
+> re-escaneos: el escáner seguirá leyendo ese fichero y seguirá encontrando el
+> defecto ahí, y si cada escaneo borrase la marca, marcarla no serviría de nada.
+> Solo cae si **ese fichero cambia** después de marcarlo, porque entonces la
+> declaración ya no cubre lo que hay ahora.
 
 ## Estados de la vista
 
@@ -65,7 +86,8 @@ Detalle en [DATA-MODEL](../DATA-MODEL.md).
 
 - `scan:run`, `scan:findings`, `scan:counts`, `scan:history`,
   `scan:progress` — el escaneo y su expediente.
-- `scan:dismiss`, `scan:reopen` — las decisiones del operador.
+- `scan:dismiss`, `scan:reopen` — descartar un falso positivo y deshacerlo.
+- `scan:mitigate`, `scan:unmitigate` — declararlo ya arreglado, con su nota, y deshacerlo.
 - `quality:run` — la auditoría integral.
 - `push:run` — el empuje con su bloqueo por CRITICAL.
 

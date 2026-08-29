@@ -44,6 +44,31 @@ Una por propuesta, ordenadas por última actividad, **paginadas de diez**. Cada
 fila es una línea que se despliega para ver la razón del análisis y el libro de
 vida entero, con el botón que corresponda a su estado.
 
+Los botones deciden solos si les toca aparecer, así que una fila lleva como
+mucho dos: el que la **hace avanzar** —generar, pedir revisión, firmar, o
+reintentar si el rechazo lo admite— y el que la **retira**.
+
+### Retirar
+
+Aparece en cualquier propuesta **no terminal**, y es su única salida que no
+consiste en avanzar. Hasta que existió, una propuesta que no se pudiera firmar
+ni reintentar se quedaba viva para siempre — y con ella su hallazgo fuera de la
+cola, porque uno con propuesta viva no se re-elige.
+
+Pregunta antes de hacerlo, porque es irreversible y tiene dos consecuencias que
+no se deducen del botón:
+
+- **el hallazgo vuelve a la cola de reparación.** Retirar un intento no dice
+  nada del defecto que lo motivó. Quien retira porque el problema ya está
+  cubierto espera lo contrario, y para eso el sitio es el [Escaneo](escaneo.md).
+- **queda asentado** en el Libro de la Vida con el motivo que se escriba, y de
+  ahí no se borra.
+
+El motivo es un campo opcional del diálogo. Si no se escribe, el asiento lo dice
+en vez de inventar una justificación que nadie dio. La propuesta queda CADUCADA
+y sale sola del expediente y de la cola de firma. Ver
+[ADR-072](../DECISIONS/adr-072-caducado-no-miente.md).
+
 ## El chip «Motor: detenido»
 
 Solo aparece cuando el proyecto está **contaminado** y `guardRun` bloquea todo
@@ -55,6 +80,21 @@ Contó propuestas vivas («Pendientes: N») hasta el 2026-08-23. Se retiró porq
 en reposo ese número es idéntico al del chip de Firma —toda propuesta viva es
 una que espera al operador— y dos cifras iguales al lado se leen como dos cosas
 distintas que no lo son.
+
+**El chip lleva a algún sitio.** Pulsarlo abre esta página, y desde el 2026-08-27
+la página explica por qué está detenido: un aviso encabeza el expediente con lo
+que pasó —una auditoría alteró el proyecto y las capas de restauración no lo
+devolvieron byte a byte— y ofrece **Revisar y desbloquear**.
+
+Antes el recorrido terminaba aquí sin decir nada: el operador llegaba siguiendo
+el chip y encontraba un panel normal que no hacía nada, con la razón guardada en
+una columna que no leía nadie.
+
+El botón abre el **detalle forense** —qué archivos cambiaron, con su hash antes y
+después— y solo tras verlo se puede confirmar. Al desbloquear, el proyecto vuelve
+a circulación: los agentes corren, la firma y el push dejan de estar frenados, y
+el aviso y el chip se apagan solos. La decisión queda asentada. Ver
+[SECURITY-MODEL](../SECURITY-MODEL.md), el ciclo de la Capa 4.
 
 ## Referencias
 

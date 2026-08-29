@@ -158,8 +158,34 @@ puede aparecer dos veces —una por cada esquema— hasta que se reconcilien. Ve
 
 El escaneo **ya no extingue nada**. Un hallazgo solo desaparece cuando un agente
 lo juzga obsoleto al drenar. Si el problema está arreglado de verdad, drenarlo
-lo cierra con su motivo; también se puede marcar como mitigado a mano. Ver
+lo cierra con su motivo. Ver
 [ADR-065](DECISIONS/adr-065-nada-muere-sin-juicio.md).
+
+También se puede **marcar a mano**, con la llave inglesa de su fila en el
+Escaneo: pide una nota —qué lo arregla— y con ella el hallazgo sale de la cola
+del motor sin salir del tablero. Es la vía correcta cuando el arreglo vive en
+**otro fichero** y el escáner va a seguir viéndolo donde está.
+
+> Ese botón **no funcionó hasta el 2026-08-28**. Pedía la nota con
+> `window.prompt`, que Electron no implementa: lanzaba una excepción que moría
+> muda, así que el clic no hacía nada. Si la aplicación instalada no abre el
+> diálogo al pulsarlo, el binario es anterior al arreglo — reconstruye e instala
+> en frío (ver [RELEASE](RELEASE.md)).
+
+### El motor no corre sobre un proyecto y aparece «Motor: detenido»
+
+- **Síntoma:** ningún agente arranca sobre ese proyecto, la firma no integra y
+  el grafo no se realinea. En la barra superior aparece «Motor: detenido».
+- **Causa:** el proyecto está **CONTAMINADO**. Una auditoría de calidad lo
+  alteró y las capas de restauración no lo dejaron byte-idéntico, así que el
+  circuit breaker de la Capa 4 lo bloqueó hasta que un humano lo revise. No es
+  un fallo del motor: es la protección haciendo su trabajo.
+- **Solución:** pulsa el chip «Motor: detenido». Lleva al expediente del motor,
+  donde un aviso explica qué pasó y ofrece **Revisar y desbloquear**. El diálogo
+  enseña el **detalle forense** —qué archivos cambiaron, con su hash antes y
+  después— y solo tras verlo se confirma. Al desbloquear, el proyecto vuelve a
+  circulación y la decisión queda asentada. Ver
+  [SECURITY-MODEL](SECURITY-MODEL.md) y [PAGES/motor](PAGES/motor.md).
 
 ## Base de datos
 
