@@ -28,8 +28,52 @@ misma fecha —como el cierre documental del 2026-08-11— se registran tal cual
 sin distribuir artificialmente. Cada entrada apunta al documento donde el hito
 se narra o su decisión se registra: [HISTORY](HISTORY.md) ofrece la narrativa
 general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
-[DECISIONS/](DECISIONS/README.md) contiene las sesenta decisiones
+[DECISIONS/](DECISIONS/README.md) contiene las setenta y cinco decisiones
 arquitectónicas.
+
+## 2026-08-28
+
+**[Escaneo]** La llave inglesa que marca un hallazgo como ya arreglado **vuelve
+a existir**: pedía su nota con `window.prompt`, que Electron no implementa —
+lanzaba una excepción que moría muda, así que el clic no hacía nada y nunca lo
+había hecho. Ahora la pide un diálogo. De paso, el componente de modales pasa a
+montarse por portal: era el primero que nacía dentro de una tabla y su texto se
+salía de la caja, con todo el gate en verde
+([ADR-075](DECISIONS/adr-075-el-modal-por-portal.md)).
+
+**[Motor]** Las tres propuestas que llevaban semanas sin salida quedan cerradas,
+cada una por su vía: la del veto con el botón nuevo, su hallazgo marcado con la
+llave, y la huérfana —invisible para toda la interfaz, porque su proyecto se
+había borrado— por el canal directo.
+
+**[Documentación]** El Acto 6 queda documentado en ocho commits: cuatro
+decisiones nuevas ([ADR-072](DECISIONS/adr-072-caducado-no-miente.md) a
+[ADR-075](DECISIONS/adr-075-el-modal-por-portal.md)), la referencia técnica —los
+diez canales que faltaban en [IPC](IPC.md), el ciclo de vida con su salida, y la
+Capa 4 escrita por primera vez en [SECURITY-MODEL](SECURITY-MODEL.md)—, las
+páginas que el operador lee, y esta narrativa.
+
+## 2026-08-27
+
+**[Seguridad]** El circuit breaker de la Capa 4 **tiene salida**. Su mensaje
+prometía «revisa el detalle forense y desbloquéalo a mano» desde que existe, y
+no había cómo: ningún SQL quitaba la marca, ningún canal lo intentaba, ninguna
+pantalla lo ofrecía. Ahora un aviso en el expediente enseña el forense y, solo
+tras verlo, permite desbloquear; la decisión queda asentada como acto humano
+([ADR-074](DECISIONS/adr-074-el-asiento-no-afirma-mas-de-lo-que-sabe.md)).
+
+**[Sistema evolutivo]** Y el mismo breaker **frena el reindexado del grafo**, que
+era la única acción que no lo consultaba: un proyecto contaminado se realineaba
+igual, sobre todo al arrancar. El freno va en el embudo por el que pasan las tres
+puertas, no en el handler
+([ADR-073](DECISIONS/adr-073-el-freno-en-el-embudo.md)). Las dos mitades se
+necesitan: frenar sin salida habría condenado el proyecto.
+
+**[Motor]** Una propuesta viva **puede retirarse**. Hasta hoy solo sabía avanzar
+—firmar, reintentar, o esperar a caducar—, y la que no admitiera ninguna de las
+tres se quedaba viva para siempre con su hallazgo fuera de la cola. Retirar la
+CADUCA con el motivo del operador, sin mentir sobre quién juzgó y sin bloquear el
+hallazgo ([ADR-072](DECISIONS/adr-072-caducado-no-miente.md)).
 
 ## 2026-08-26
 

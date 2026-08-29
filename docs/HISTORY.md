@@ -15,7 +15,7 @@ avanzó por capas superpuestas y no por etapas estancas. La sección
 **Presente**, al final, describe lo que se trabaja ahora sin comprometer
 fechas. La primera versión de este documento cortaba el 2026-08-11; las etapas
 posteriores se añaden por edición conforme cierran, y el relato llega hoy al
-2026-08-25.
+2026-08-28.
 
 Los tres primeros actos —el proyecto entero hasta aquel primer corte— caben en
 once días intensos: del 2026-08-01 al 2026-08-11.
@@ -484,6 +484,115 @@ los cuatro hallazgos que aquellos fixes habían arreglado, y los cuatro murieron
 confirmar que ya no está, y cerrarlo diciendo por qué. Es la primera vez que la
 vuelta completa ocurre sobre sus propios arreglos.
 
+## Acto 6 — Las salidas que faltaban (2026-08-27 a 2026-08-28)
+
+Los actos anteriores enseñaron al sistema a **entrar** en sus estados y a
+escribir la verdad sobre ellos. Este vino de preguntar cómo se **sale**, y de
+encontrar que en tres sitios no se salía.
+
+Tres arcos del mismo diagnóstico —un estado sin salida— y un cuarto que es la
+misma lección cobrada al revés.
+
+### La llave: contaminar tenía entrada y no tenía salida
+
+El circuit breaker de la Capa 4 marca un proyecto CONTAMINADO cuando una
+auditoría lo deja alterado y las capas de restauración no lo devuelven
+byte-idéntico. Su mensaje llevaba desde que existe diciendo *«revisa el detalle
+forense y desbloquéalo a mano»*.
+
+**No había cómo.** `markContaminated` era el único escritor de la columna y
+siempre escribía una fecha; ningún SQL del repositorio la ponía a NULL, ningún
+canal lo intentaba, ninguna pantalla lo ofrecía. Un proyecto marcado quedaba
+bloqueado para siempre, y la promesa del mensaje era falsa.
+
+Se construyó en tres piezas el 2026-08-27: el mecanismo (`markClean`, `8017579`),
+el canal con su asiento (`d35cf6d`) y la cara —un aviso en el expediente que
+enseña el **forense** antes de dejar confirmar (`7295de6`)—. El asiento de esa
+decisión se registra como acto humano y no como verificación: FORTRESS no
+comprueba que el árbol esté limpio, registra que alguien miró y cargó con ello
+([ADR-074](DECISIONS/adr-074-el-asiento-no-afirma-mas-de-lo-que-sabe.md)).
+
+### El cerrojo, y por qué necesitaba a la llave para ser seguro
+
+El freno de contaminación existía en las acciones —`guardRun`, `guardMerge`— y
+**no en el reindexado del grafo**. Un proyecto marcado se reindexaba igual por
+sus tres puertas, y sobre todo al arrancar, que es donde nadie mira.
+
+El propio motor lo había detectado meses antes y propuesto un fix que ponía el
+freno en el handler: dos rutas de tres, dejando fuera la del arranque. El
+analista escribió entonces que el arreglo más ancho *«debe asumirse a
+conciencia, no como efecto colateral»*, y la propuesta no se integró — con razón,
+porque **sin desbloqueo, frenar el reindex habría condenado al proyecto para
+siempre**.
+
+Con la llave puesta esa misma mañana, el cerrojo pasó a ser seguro. Se puso en
+el embudo por el que convergen las tres rutas (`0e8567f`), no en el handler
+([ADR-073](DECISIONS/adr-073-el-freno-en-el-embudo.md)). Los dos arcos se
+sostienen mutuamente: frenar sin salida condena, y una salida sin freno no
+protege nada.
+
+### La retirada: una propuesta viva solo sabía avanzar
+
+Firmar, reintentar, o esperar a que el motor la caducara. La que no admitiera
+ninguna de las tres se quedaba viva para siempre, y con ella su hallazgo fuera
+de la cola.
+
+La transición no era el obstáculo —`CADUCADO` ya era legal desde los seis
+estados vivos—; faltaba quién la ejerciera. Tres piezas el mismo 2026-08-27: el
+mecanismo (`231fbce`), el canal (`0fd9d1b`) y el botón con su confirmación
+(`fcf8e3e`).
+
+**`CADUCADO` y no `RECHAZADO`**, y la diferencia importa dos veces: el segundo
+mentiría sobre quién juzgó, y además dejaría el hallazgo **bloqueado** para la
+cola, que es lo contrario de para lo que existe retirar
+([ADR-072](DECISIONS/adr-072-caducado-no-miente.md)).
+
+### Mitigar: una salida documentada que nunca funcionó
+
+El 2026-08-28, al ir a usar la llave inglesa del Escaneo para marcar un hallazgo
+como ya arreglado, no pasó nada. Ni diálogo, ni cambio, ni aviso.
+
+Pedía la nota con `window.prompt`, que **Electron no implementa**: lanza
+`prompt() is not supported.`. Sin `try/catch` y sin ningún error boundary en la
+aplicación, la excepción moría muda. Era el único uso de `prompt` del
+repositorio, así que ningún otro camino lo delataba — y la base del operador
+confirmó que **jamás se había mitigado nada**.
+
+El arreglo (`5fbc872`) lo cambia por un modal. Y al verlo en pantalla apareció un
+segundo defecto que ningún gate veía: era el primer modal que nacía dentro de una
+`<table>`, y su texto se salía de la caja. `Modal` pasó a montarse por portal
+([ADR-075](DECISIONS/adr-075-el-modal-por-portal.md)).
+
+**Es la lección de este acto al revés.** El canal `scan:mitigate` estaba sano y
+se probaba **saltándose la interfaz**; el typecheck, las 1748 pruebas unitarias,
+los checks de integración y el smoke estuvieron en verde todo el tiempo con el
+botón muerto y luego con el diálogo ilegible. El gate verifica que el código
+compile, respete sus reglas y que sus canales hagan lo que dicen. No ve un
+`onClick` roto ni un texto que desborda. Para eso hay que mirar la pantalla.
+
+### El cierre: las tres atascadas, cada una por su vía
+
+Con las salidas construidas, las tres se resolvieron el 2026-08-28, y ninguna
+por el mismo camino.
+
+**La del veto** se retiró con el botón nuevo: quedó CADUCADA con el motivo del
+operador y su asiento en el Libro.
+
+**El hallazgo que la motivó** se marcó con la llave recién arreglada, y su nota
+dice dónde vive el arreglo —en otro fichero, que es el caso para el que la marca
+existe—.
+
+**La huérfana** no se pudo retirar con el botón, porque **ninguna vista la
+mostraba**: toda la interfaz del motor lista por proyecto, y su proyecto se había
+borrado debajo catorce días antes. Se retiró invocando el canal directamente, que
+la acepta porque nunca exigió proyecto ni hallazgo vivos.
+
+Y un detalle que merece quedar escrito: la reconciliación del arranque **la
+dejaba viva a propósito**. Su regla dice que un ANALIZADO sin commit espera a que
+el operador pulse Generar, y caducarlo sería matar trabajo en curso. La regla es
+correcta; lo falso era su supuesto — nadie puede pulsar Generar en una propuesta
+que ninguna pantalla enseña.
+
 ## Presente
 
 El motor repara, el operador firma, el motor vuelve a mirar y cierra lo que ya
@@ -492,14 +601,31 @@ repositorio, y el registro de lo que hizo dice lo que pasó. La identidad de los
 hallazgos de este repositorio está reconciliada; la de otros proyectos espera a
 que se los vuelva a escanear.
 
-Quedan cuatro cosas nombradas y sin cerrar. La **detección de lo que rompe el
-árbol después de integrarlo** —la otra mitad de la sexta condición, que ya cobró
-su primera pieza—. Una **propuesta atascada** con un veto escrito que el arreglo
-posterior no alcanza, porque el libro de eventos solo sabe anexar. Los
-**veintiséis hallazgos** que murieron antes de que las extinciones exigieran
-motivo y siguen sin decir por qué. Y **cómo se rectifica un asiento** en un
-registro que no se edita — la pregunta que dejaron los once que dicen
-«denegada» sobre integraciones que están en `main`.
+Ninguna propuesta queda atascada: las tres que lo estaban se cerraron el
+2026-08-28, cada una por su vía. Las que siguen vivas esperan firma, que es un
+estado legítimo y no un bloqueo.
+
+Lo que sigue nombrado y sin cerrar, de antes de este acto: la **detección de lo
+que rompe el árbol después de integrarlo** —la otra mitad de la sexta condición,
+que ya cobró su primera pieza—; los **veintiséis hallazgos** que murieron antes
+de que las extinciones exigieran motivo y siguen sin decir por qué; y **cómo se
+rectifica un asiento** en un registro que no se edita, la pregunta que dejaron
+los once que dicen «denegada» sobre integraciones que están en `main`.
+
+Y cuatro **defectos conocidos sin arreglo aplicado**, que el Acto 6 destapó y no
+resolvió:
+
+- **Borrar un proyecto no arrastra sus propuestas.** Una sobrevivió a su
+  proyecto catorce días, invisible para toda la interfaz. Ninguna debería
+  sobrevivir a lo que la creó.
+- **La reconciliación del arranque no alcanza a las huérfanas.** Su motivo
+  `proyecto_ausente` existe y está documentado, pero el orden de sus dos
+  primeras comprobaciones hace que un ANALIZADO sin commit se resuelva antes,
+  dejándolo vivo. La rama correcta está escrita y no llega.
+- **El arnés de integración está en el filo**: 74 de las 75 líneas que su propia
+  regla permite. La próxima suite de comprobaciones no cabe sin partirlo.
+- **Ningún modal se cierra con Escape.** El componente compartido no escucha el
+  teclado, y los doce que cuelgan de él heredan la carencia.
 
 Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
 convertir el auditor en un entorno de desarrollo asistido completo, y preparar el
@@ -508,7 +634,7 @@ proyecto para publicarse. Sin fechas de compromiso, como todo aquí.
 ## Referencias
 
 - [DECISIONS/](DECISIONS/README.md) — los registros de decisión
-  arquitectónica (ADR-001 a ADR-068) que sostienen esta historia.
+  arquitectónica (ADR-001 a ADR-075) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),
