@@ -71,6 +71,10 @@ admitiera ninguno de ellos —un veredicto que la firma rechaza, un proyecto
 borrado bajo sus pies— se quedaba viva para siempre, y con ella su hallazgo
 fuera de la cola, porque uno con propuesta viva no se re-elige.
 
+El segundo de esos dos casos ya no llega hasta aquí: el proyecto que desaparece
+tiene ahora su propia salida, más abajo. Esta sigue siendo la del operador que
+quiere cerrar **una** propuesta concreta.
+
 `repair:withdraw` es la salida. Lleva cualquier estado vivo a **`CADUCADO`** con
 la razón `retirada por el operador: <motivo>`. La transición ya era legal desde
 los seis estados vivos: lo que faltaba no era el camino, era quien lo ejerciera.
@@ -90,6 +94,34 @@ como acto humano y no como verificación
 Lo que **no** hace es disponer del hallazgo: que vuelva a la cola es
 consecuencia de que su propuesta deje de ser viva. Declararlo arreglado es otro
 acto, y vive en el Escaneo.
+
+### La salida del proyecto
+
+Una propuesta pertenece a su proyecto: es el expediente de reparar **ese**
+repositorio. Cuando el proyecto se quita del tablero, la clave foránea se lleva
+sus propuestas por cascada — pero la cascada **borra en silencio**, y una
+propuesta viva es trabajo sin terminar con un hallazgo congelado detrás.
+
+Por eso `projects:remove` no suelta la fila a secas. El orden es:
+
+1. Se exporta `FORTRESS-RECORD.md` a la carpeta del proyecto: la foto del
+   instante anterior, con las propuestas **todavía vivas** y su estado.
+2. Cada propuesta viva se retira **con juicio**, razón `proyecto_retirado`, por
+   el mismo camino que la salida del operador — validación de estado incluida.
+   Las que ya eran terminales no se re-juzgan.
+3. Se borra la fila del proyecto. La cascada limpia lo demás.
+
+**Por qué el asiento va al Libro de la Vida.** El parche de la propuesta y su
+cadena de `proposal_events` **cuelgan de ella**, así que el paso 3 se los lleva
+un instante después de escribirlos. `omega_log` es la única tabla sin clave
+foránea a `projects` —el registro es eterno—, y el `append` que deja constancia
+del juicio lo hace la retirada, no la transición. Sin él, caducar en el paso 2
+sería una ceremonia que no deja rastro
+([ADR-076](../DECISIONS/adr-076-el-juicio-antes-de-la-cascada.md)).
+
+Y `proyecto_retirado` no es `proyecto_ausente`: aquella la **descubre** la
+reconciliación al arrancar; esta la **provoca** un acto deliberado. Mismo
+estado, causas distintas, razones distintas.
 
 ## Los cinco eslabones automáticos
 
@@ -274,6 +306,10 @@ presupuestos, prompt injection en los metadatos del hallazgo) está en
 
 ## Rechazos y sus significados
 
+Las razones con las que una propuesta **no llegó a GENERADO** (`REJECTION_REASONS`
+en el dominio). Salvo `superseded`, que caduca, todas dejan la fila en
+`RECHAZADO`.
+
 | Razón | Significado |
 |---|---|
 | `scope_violation` | El generador tocó archivos fuera de la correa. |
@@ -289,6 +325,25 @@ presupuestos, prompt injection en los metadatos del hallazgo) está en
 | `worktree_missing` / `worktree_contaminated` | El worktree se perdió o estaba sucio al retomar. |
 | `superseded` | Una propuesta más nueva sobre el mismo hallazgo la reemplazó. |
 | `orphan_before_generate` | La corrida quedó huérfana (app cerrada a mitad) y se cerró al reclamar. |
+
+## Razones de la reconciliación y del ciclo de vida
+
+Vocabulario **distinto** del anterior (`RECLAIM_REASONS`), y con otro efecto: la
+mayoría **caduca**, no rechaza. Aquí no juzga el motor el trabajo de un agente;
+se constata que el mundo cambió debajo de una propuesta. El estado dice qué
+pasó, la razón dice por qué, y no se colapsan: un worktree que falta y un
+proyecto que ya no existe llevan al mismo sitio por caminos que no se parecen
+([ADR-059](../DECISIONS/adr-059-capas-de-estado-no-heredan.md)).
+
+| Razón | Deja la fila en | Quién la escribe |
+|---|---|---|
+| `orphan_before_generate` | `RECHAZADO` | La pasada disco→BD del arranque: había worktree de una propuesta a medio analizar. La única de esta familia que rechaza. |
+| `analisis_interrumpido` | `CADUCADO` | La pasada BD→git: `ELEGIDO` sin commit. Su análisis es síncrono, así que sobrevivir a un arranque solo puede significar que murió a medias. |
+| `worktree_ausente` | `CADUCADO` | La pasada BD→git: propuesta viva sin worktree y sin merge demostrable. Sin prueba no se fabrica un `MERGEADO`. |
+| `proyecto_ausente` | `CADUCADO` | La pasada BD→git al **descubrir** que el proyecto ya no está. Se comprueba antes que el commit: si no hay proyecto, la fase da igual. |
+| `proyecto_retirado` | `CADUCADO` | `projects:remove`, al **provocar** esa ausencia. Se emite antes de soltar la fila, con asiento en el Libro de la Vida. |
+| `merge_detectado_en_git` | `MERGEADO` | La pasada BD→git: el commit del fix ya vive en `HEAD`. La única que no mata — lo firmó un humano. |
+| `cadena_sintetica` | `CADUCADO` | Un script puntual de línea de comandos, no la reconciliación: su libro se reconstruyó a mano y no guarda el análisis, así que C3 no puede generar por más veces que se pulse. |
 
 ## Reintento explícito
 
