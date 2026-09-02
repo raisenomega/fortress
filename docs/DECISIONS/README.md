@@ -115,6 +115,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-074](adr-074-el-asiento-no-afirma-mas-de-lo-que-sabe.md) | El asiento no afirma más de lo que sabe: los actos del operador son `info` | 2026-08-27 | Aceptada | Motor |
 | [ADR-075](adr-075-el-modal-por-portal.md) | `Modal` se monta en `document.body` por portal, no donde se declara | 2026-08-28 | Aceptada | UI |
 | [ADR-076](adr-076-el-juicio-antes-de-la-cascada.md) | El juicio se emite antes de la cascada: borrar un proyecto no mata sus propuestas en silencio | 2026-09-02 | Aceptada | Motor |
+| [ADR-077](adr-077-cuando-una-migracion-deja-de-ser-aditiva.md) | Cuándo una migración deja de ser aditiva: el recambio de tabla y qué le está permitido borrar | 2026-09-02 | Aceptada | Arquitectura |
 
 ## Referencias
 
