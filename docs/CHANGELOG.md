@@ -31,6 +31,37 @@ general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
 [DECISIONS/](DECISIONS/README.md) contiene las setenta y cinco decisiones
 arquitectónicas.
 
+## 2026-09-02
+
+**[Motor]** Retirar un proyecto ya no mata sus propuestas en silencio. Las que
+siguen vivas **caducan con juicio** antes de que se suelte la fila —razón
+`proyecto_retirado`, con su asiento en el Libro de la Vida— y solo después
+limpia la cascada. El paso intermedio no es ceremonia: el parche de la propuesta
+y su libro de eventos cuelgan de ella y mueren en la cascada un instante
+después, así que el juicio únicamente sobrevive en la tabla que no tiene clave
+foránea ([ADR-076](DECISIONS/adr-076-el-juicio-antes-de-la-cascada.md)). En la
+misma vuelta, la reconciliación del arranque comprueba el proyecto **antes** que
+el commit: una propuesta anterior a GENERATE cuyo proyecto desapareció ya no se
+queda esperando a un operador que no tiene proyecto que mirar.
+
+**[Arquitectura]** `repair_proposals` y `quality_scans` cuelgan por fin del
+proyecto con `ON DELETE CASCADE`. Les faltaba la clave foránea por omisión y no
+por decisión — sus ficheros de esquema eran los únicos que no argumentaban nada
+al respecto—, y por ahí sobrevivió una propuesta a su proyecto durante catorce
+días. Añadirla obligó a la segunda migración de **recambio de tabla** del
+proyecto, que además borra las filas que la restricción nueva no admitiría; el
+patrón y sus límites quedan fijados en
+[ADR-077](DECISIONS/adr-077-cuando-una-migracion-deja-de-ser-aditiva.md), y
+[ADR-036](DECISIONS/adr-036-sqlite-modular-migraciones-aditivas.md) recibe la
+nota que le faltaba desde agosto.
+
+**[Documentación]** El arco queda escrito en seis commits: las dos decisiones
+nuevas, la referencia técnica al día —el esquema con sus claves en
+[DATA-MODEL](DATA-MODEL.md), la salida del proyecto y el catálogo completo de
+razones de la reconciliación en [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), y el
+contrato de `projects:remove` en [IPC](IPC.md)— y el Acto 7 de esta historia,
+con lo que el arco apretó de paso.
+
 ## 2026-08-28
 
 **[Escaneo]** La llave inglesa que marca un hallazgo como ya arreglado **vuelve
