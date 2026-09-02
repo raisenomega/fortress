@@ -4,6 +4,14 @@
 **Fecha:** 2026-08-03
 **Autor:** operador (registro retroactivo, 2026-08-11)
 
+> **Nota (2026-09-02).** El invariante que este registro protege —*una base
+> antigua siempre abre*— sigue vigente. Lo que dejó de ser absoluto es el
+> medio: desde `31a6ba0` (2026-08-14) existen migraciones de **recambio de
+> tabla**, no aditivas, para lo que un `ALTER` no puede expresar (añadir una
+> restricción a una tabla que ya existe). Su procedimiento, y qué les está
+> permitido borrar, en
+> [ADR-077](adr-077-cuando-una-migracion-deja-de-ser-aditiva.md).
+
 ## Contexto
 
 FORTRESS guarda todo su estado en el equipo del usuario (proyectos,
