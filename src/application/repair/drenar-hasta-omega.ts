@@ -1,4 +1,5 @@
-import { esEntorno, esTimeout } from '@domain/repair/averia'
+import { esEntorno } from '@domain/repair/averia'
+import { casillaDeBaja } from '@domain/repair/clasificacion-de-baja'
 import type { AppContext } from '../context'
 import { runMotorChain } from './run-motor-chain'
 import type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
@@ -21,17 +22,18 @@ export async function drenarHastaOmega(
   projectId: string,
   deps: DrenajeDeps
 ): Promise<DrenajeResultado> {
-  const cuenta = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, otrasBajas: 0 } // prettier-ignore
+  const cuenta = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0, porDefectoInterno: 0, superadas: 0, sinClasificar: 0 } // prettier-ignore
   const fin = (f: FinDelDrenaje, detalle?: string): DrenajeResultado =>
     detalle === undefined ? { fin: f, ...cuenta } : { fin: f, ...cuenta, detalle }
 
-  /** Una baja, clasificada por su motivo. El motivo llega con sufijos a veces
-   *  ("omega_vetado: <razon>"), asi que se mira el prefijo. */
+  /**
+   * Una baja, en la casilla que su motivo manda. El reparto vive en el dominio
+   * y es una TABLA exhaustiva, no una cadena de `if` con un `else` al final:
+   * aquel cajon anunciaba quince motivos como "gate o correa" —cierto en tres—
+   * y mandaba a leer un diff que en varios de ellos nunca existio.
+   */
   const anotarBaja = (motivo: string): void => {
-    if (motivo.startsWith('omega_vetado')) cuenta.vetadas += 1
-    else if (motivo.startsWith('budget_exceeded')) cuenta.porPresupuesto += 1
-    else if (esTimeout(motivo)) cuenta.porTimeout += 1
-    else cuenta.otrasBajas += 1
+    cuenta[casillaDeBaja(motivo)] += 1
   }
 
   for (let vuelta = 0; vuelta < deps.maxVueltas; vuelta += 1) {

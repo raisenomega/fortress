@@ -19,14 +19,17 @@ import { IPC } from './channels'
  */
 /** Ni una vuelta: el drenaje ni llego a arrancar. */
 // prettier-ignore
-const NADA_HECHO = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, otrasBajas: 0 }
+const NADA_HECHO = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0, porDefectoInterno: 0, superadas: 0, sinClasificar: 0 }
 
 export function registerDrainHandlers(): void {
   ipcMain.handle(IPC.repairDrain, async (_event, projectId: string): Promise<DrenajeResultado> => {
     const context = getAppContext()
     const id = String(projectId)
     const busy = guardRun(context, id)
-    if (busy !== null) return { ...NADA_HECHO, fin: 'averia', detalle: busy }
+    // `ocupado`, no `averia`: el tope diario, otra corrida en marcha o un
+    // proyecto en revision son frenos del sistema haciendo su trabajo. Pintarlos
+    // de rojo como una caida hacia que el operador buscara una falla inexistente.
+    if (busy !== null) return { ...NADA_HECHO, fin: 'ocupado', detalle: busy }
 
     const budget = readLoopBudget(context)
     const base = spentTodayByProject(context, new Date(), id)
