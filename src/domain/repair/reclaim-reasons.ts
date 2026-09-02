@@ -14,6 +14,18 @@ export const RECLAIM_REASONS = {
   WORKTREE_AUSENTE: 'worktree_ausente',
   /** BD -> git: el proyecto ya no esta; la ancestria no se puede consultar. */
   PROYECTO_AUSENTE: 'proyecto_ausente',
+  /**
+   * El operador retiro el proyecto del tablero. NO es PROYECTO_AUSENTE, y la
+   * diferencia es la que este fichero existe para guardar: aquella la DESCUBRE
+   * la reconciliacion al arrancar y encontrarse un proyecto que ya no esta;
+   * esta la PROVOCA un acto deliberado, y se emite ANTES de soltar la fila.
+   *
+   * Sin ella, la cascada se llevaria las propuestas vivas en silencio y el
+   * mismo hecho —este proyecto ya no esta— tendria dos destinos segun por
+   * donde entrara. Mismo estado por causas distintas: colapsarlas perderia el
+   * porque, que es justo lo que el estado por si solo no captura (ADR-059).
+   */
+  PROYECTO_RETIRADO: 'proyecto_retirado',
   /** BD -> git: el commit del fix ya vive en HEAD. Lo firmo un humano. */
   MERGE_DETECTADO: 'merge_detectado_en_git',
   /**
