@@ -7,9 +7,9 @@
 const { app } = require('electron')
 const { join } = require('path')
 const Database = require('better-sqlite3')
+const { writeLegacyRepair } = require('./legacy-repair.cjs')
 
-const LEGACY_SCHEMA = `
-CREATE TABLE projects (
+const LEGACY_SCHEMA = `CREATE TABLE projects (
   id TEXT PRIMARY KEY, name TEXT NOT NULL, path TEXT NOT NULL UNIQUE,
   stack TEXT NOT NULL DEFAULT '', git_remote TEXT, git_branch TEXT,
   fortress_score INTEGER NOT NULL DEFAULT 0, last_scan TEXT,
@@ -35,8 +35,7 @@ CREATE TABLE loop_sessions (
   recent_scores TEXT NOT NULL DEFAULT '[]', spent_baseline REAL NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL);
 
-CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-`
+CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);`
 
 const AT = '2026-08-01T05:00:00.000Z'
 
@@ -46,6 +45,7 @@ function writeLegacyDatabase() {
 
   try {
     db.exec(LEGACY_SCHEMA)
+    writeLegacyRepair(db)
     db.prepare(
       `INSERT INTO projects (id, name, path, stack, git_remote, git_branch,
        fortress_score, last_scan, has_claude, created_at)

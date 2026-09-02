@@ -22,8 +22,10 @@ function seed(projectId) {
     )
     propuesta.run({ id: 'w9-atascada', projectId, findingId: 'find-w9', state: 'OMEGA', at: 100 })
     propuesta.run({ id: 'w9-muerta', projectId, findingId: 'find-w9', state: 'MERGEADO', at: 110 })
-    // Huerfana a proposito: su project_id no existe. Retirarla no debe pedirlo.
-    propuesta.run({ id: 'w9-huerfana', projectId: 'proyecto-borrado', findingId: 'find-nope', state: 'ANALIZADO', at: 120 }) // prettier-ignore
+    // Su hallazgo NO existe: retirar no lo resuelve, y no debe pedirlo. El
+    // proyecto si es real — desde que `repair_proposals` cuelga de `projects`
+    // con ON DELETE CASCADE, una propuesta sin proyecto ya no puede existir.
+    propuesta.run({ id: 'w9-sin-hallazgo', projectId, findingId: 'find-nope', state: 'ANALIZADO', at: 120 }) // prettier-ignore
     db.prepare(
       `INSERT INTO proposal_events (id, proposal_id, seq, phase, event_type, to_state, actor, ts)
        VALUES ('ev-w9', 'w9-atascada', 1, 'SELECT', 'TRANSITION', 'ELEGIDO', 'motor', 100)`
@@ -60,10 +62,10 @@ module.exports = async function repairWithdrawChecks(window) {
   const asientos = notas()
   check('el Libro de la Vida recibe la nota CON el motivo', asientos.length === 1 && asientos[0].evidence === MOTIVO, JSON.stringify(asientos)) // prettier-ignore
 
-  const huerfana = await run(`window.api.repair.withdraw('w9-huerfana')`)
-  check('HUERFANA: sin proyecto vivo se retira igual', huerfana.ok === true, JSON.stringify(huerfana)) // prettier-ignore
+  const sinHallazgo = await run(`window.api.repair.withdraw('w9-sin-hallazgo')`)
+  check('sin hallazgo vivo se retira igual', sinHallazgo.ok === true, JSON.stringify(sinHallazgo)) // prettier-ignore
 
-  const sinMotivo = await run(`window.api.repair.get('w9-huerfana')`)
+  const sinMotivo = await run(`window.api.repair.get('w9-sin-hallazgo')`)
   check('sin motivo lo dice, no lo inventa', sinMotivo.analysisReason.includes('sin motivo escrito'), sinMotivo.analysisReason) // prettier-ignore
 
   return results

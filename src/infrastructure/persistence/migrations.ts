@@ -1,6 +1,7 @@
 import { addAgentRunColumns } from './add-agent-run-columns'
 import { addFindingMemory } from './add-finding-memory'
 import { addProjectColumns } from './add-project-columns'
+import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
 import { SUELTAS } from './columnas-sueltas'
 import type { Db } from './database'
@@ -53,11 +54,16 @@ export function runMigrations(db: Db): void {
   addProjectColumns(db)
 
   // El motor de reparacion necesita su propio `kind`. Va antes que el ALTER de
-  // abajo porque es la unica que recrea una tabla, y su `INSERT ... SELECT *`
+  // abajo porque recrea la tabla `agent_runs`, y su `INSERT ... SELECT *`
   // exige que las dos tengan las MISMAS columnas: una de mas y no abre.
   expandAgentRunsKind(db)
 
   // La bandera de "esta factura no se pudo leer". Aditiva y despues del
   // recambio, por lo anterior.
   addAgentRunColumns(db)
+
+  // El otro recambio: las dos tablas que colgaban del proyecto sin clave
+  // foranea. Va la ULTIMA — recrea tablas, y ningun ALTER de arriba debe
+  // encontrarselas a medio sustituir.
+  addRepairProjectFk(db)
 }
