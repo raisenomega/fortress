@@ -11,15 +11,13 @@ describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
   it('una corrida con 2 firmas, 1 veto y 1 presupuesto se cuenta entera', async () => {
     motor(espera('a'), baja('omega_vetado: el cerrojo ya existe'), espera('b'), baja('budget_exceeded')) // prettier-ignore
 
+    // toEqual y no toMatchObject: fija la forma ENTERA, asi que una casilla
+    // nueva sin poner a cero aqui se nota en vez de colarse.
     expect(await drenarHastaOmega(CTX, 'p1', deps())).toEqual({
-      fin: 'sin-candidato',
-      trabajadas: 4,
-      acumuladas: 2,
-      vetadas: 1,
-      porPresupuesto: 1,
-      porTimeout: 0,
-      otrasBajas: 0
-    })
+      fin: 'sin-candidato', trabajadas: 4, acumuladas: 2, vetadas: 1, porPresupuesto: 1,
+      porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0,
+      porDefectoInterno: 0, superadas: 0, sinClasificar: 0
+    }) // prettier-ignore
   })
 
   it('el motivo llega con sufijo y se clasifica igual, por prefijo', async () => {
@@ -30,7 +28,7 @@ describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
   it('gate rojo y correa rota no son ni veto ni dinero', async () => {
     motor(baja('gate_failed_at=lint'), baja('scope_violation'))
     const r = await drenarHastaOmega(CTX, 'p1', deps())
-    expect(r).toMatchObject({ trabajadas: 2, otrasBajas: 2, vetadas: 0, porPresupuesto: 0 })
+    expect(r).toMatchObject({ trabajadas: 2, porCorrea: 2, vetadas: 0, porPresupuesto: 0 })
   })
 
   it('los relojes de los TRES jueces van a su casilla, no con las del gate', async () => {
@@ -38,7 +36,7 @@ describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
     // nunca llego a juzgarse: la propuesta murio antes, y por tiempo.
     motor(baja('generator_timeout'), baja('gate_timeout'), baja('omega_timeout'))
     const r = await drenarHastaOmega(CTX, 'p1', deps())
-    expect(r).toMatchObject({ trabajadas: 3, porTimeout: 3, otrasBajas: 0 })
+    expect(r).toMatchObject({ trabajadas: 3, porTimeout: 3, porCorrea: 0 })
   })
 
   it('un reloj agotado NO corta el drenaje: el pozo se sigue vaciando', async () => {

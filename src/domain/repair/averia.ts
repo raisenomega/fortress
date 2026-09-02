@@ -27,7 +27,10 @@ import type { RejectionReason } from './repair-rejection'
  * `invalid_state`, y sin nadie que lo emita clasificar el valor seria clasificar
  * un fantasma. Sobrevive en el vocabulario para que las filas viejas se lean.
  */
-const AVERIAS: readonly RejectionReason[] = ['provider_error', 'omega_error', 'cli_no_arranco']
+const AVERIAS = ['provider_error', 'omega_error', 'cli_no_arranco'] as const satisfies readonly RejectionReason[] // prettier-ignore
+
+/** Los tres de arriba, como tipo: la clasificacion de bajas los excluye. */
+export type MotivoDeAveria = (typeof AVERIAS)[number]
 
 export function esAveria(motivo: string): boolean {
   return (AVERIAS as readonly string[]).includes(motivo)

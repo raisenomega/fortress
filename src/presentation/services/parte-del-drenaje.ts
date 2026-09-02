@@ -7,18 +7,35 @@ const CIERRE: Record<FinDelDrenaje, { texto: string; tono: NoticeTone }> = {
   'tope-vueltas': { texto: 'tope de vueltas alcanzado', tono: 'aviso' },
   'tope-gasto': { texto: 'tope de gasto alcanzado', tono: 'aviso' },
   detenido: { texto: 'detenido por ti', tono: 'aviso' },
+  // No es un fallo: es un freno del sistema. Por eso aviso y no error — pintarlo
+  // de rojo mandaba a buscar una averia que nunca existio.
+  ocupado: { texto: 'no arranco: el motor esta ocupado', tono: 'aviso' },
   averia: { texto: 'cortado por una averia', tono: 'error' },
   entorno: { texto: 'cortado: el CLI no arranca en esta maquina', tono: 'error' }
 }
 
-/** Las bajas, cada una con su causa. Una baja sin causa no se puede aprender. */
+/**
+ * Las bajas, cada una con su causa. Una baja sin causa no se puede aprender —y
+ * una con la causa EQUIVOCADA es peor: "por gate o correa" mandaba a leer un
+ * diff que, para doce de los quince motivos que caian ahi, no existia.
+ *
+ * Cada linea nombra la accion que le toca al operador, que es lo que agrupa las
+ * casillas: leer el diff, mirar su proyecto, o abrirnos un issue.
+ */
+const LINEAS: ReadonlyArray<readonly [keyof DrenajeResultado, (n: number) => string]> = [
+  ['vetadas', (n) => `${n} vetada${n > 1 ? 's' : ''} por el revisor`],
+  ['porPresupuesto', (n) => `${n} por presupuesto`],
+  ['porTimeout', (n) => `${n} por timeout`],
+  ['porCorrea', (n) => `${n} por el gate o la correa`],
+  ['porLimitePropio', (n) => `${n} sin turnos (no se llego a juzgar el fix)`],
+  ['porEntornoDelProyecto', (n) => `${n} por el entorno del proyecto`],
+  ['porDefectoInterno', (n) => `${n} por un fallo nuestro, no de la propuesta`],
+  ['superadas', (n) => `${n} reemplazada${n > 1 ? 's' : ''} o reclamada${n > 1 ? 's' : ''}`],
+  ['sinClasificar', (n) => `${n} con un motivo que no sabemos nombrar`]
+]
+
 function bajas(r: DrenajeResultado): string {
-  const partes = [
-    r.vetadas > 0 ? `${r.vetadas} vetada${r.vetadas > 1 ? 's' : ''} por el revisor` : '',
-    r.porPresupuesto > 0 ? `${r.porPresupuesto} por presupuesto` : '',
-    r.porTimeout > 0 ? `${r.porTimeout} por timeout` : '',
-    r.otrasBajas > 0 ? `${r.otrasBajas} por gate o correa` : ''
-  ].filter((p) => p !== '')
+  const partes = LINEAS.filter(([k]) => (r[k] as number) > 0).map(([k, texto]) => texto(r[k] as number)) // prettier-ignore
   return partes.length === 0 ? '' : ` Se perdieron ${partes.join(', ')}.`
 }
 

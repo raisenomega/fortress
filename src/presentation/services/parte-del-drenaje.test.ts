@@ -9,7 +9,12 @@ const r = (over: Partial<DrenajeResultado> = {}): DrenajeResultado => ({
   vetadas: 0,
   porPresupuesto: 0,
   porTimeout: 0,
-  otrasBajas: 0,
+  porCorrea: 0,
+  porLimitePropio: 0,
+  porEntornoDelProyecto: 0,
+  porDefectoInterno: 0,
+  superadas: 0,
+  sinClasificar: 0,
   ...over
 })
 
@@ -26,9 +31,9 @@ describe('el parte dice que hizo la corrida', () => {
   })
 
   it('cada baja va con su causa, y varias causas caben juntas', () => {
-    const { texto } = parteDelDrenaje(r({ trabajadas: 4, acumuladas: 1, vetadas: 2, otrasBajas: 1 })) // prettier-ignore
+    const { texto } = parteDelDrenaje(r({ trabajadas: 4, acumuladas: 1, vetadas: 2, porCorrea: 1 })) // prettier-ignore
     expect(texto).toContain('2 vetadas por el revisor')
-    expect(texto).toContain('1 por gate o correa')
+    expect(texto).toContain('1 por el gate o la correa')
   })
 
   it('un timeout se cuenta como timeout, nunca como gate o correa', () => {
