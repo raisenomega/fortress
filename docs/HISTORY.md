@@ -593,6 +593,93 @@ el operador pulse Generar, y caducarlo sería matar trabajo en curso. La regla e
 correcta; lo falso era su supuesto — nadie puede pulsar Generar en una propuesta
 que ninguna pantalla enseña.
 
+## Acto 7 — La clase de huérfanas, extinguida en su origen (2026-09-02)
+
+El Acto 6 terminó con las tres atascadas cerradas y una observación incómoda: la
+reconciliación del arranque **dejaba viva a propósito** a la huérfana de agosto,
+porque su regla dice que un `ANALIZADO` sin commit espera a que el operador pulse
+Generar. La regla era correcta; lo falso era su supuesto. Aquello se cerró a mano,
+por el canal directo, y a mano solo se cierra un caso.
+
+Este acto no cierra un caso: cierra la clase. Un inventario contra el código
+mostró que `752a50b8` no había sobrevivido por una anomalía, sino por **dos
+defectos estructurales independientes**, y que cualquiera de los dos bastaba para
+producir otra igual. Tres commits, uno por capa.
+
+### El mecanismo: una clave foránea que faltaba por olvido
+
+`db902b0`. De las diez tablas con `project_id`, siete colgaban del proyecto con
+`ON DELETE CASCADE` y tres no. Una de las tres, `omega_log`, no la tiene **a
+propósito** y su fichero lo argumenta: el asiento sobrevive al proyecto. Las otras
+dos, `repair_proposals` y `quality_scans`, no argumentaban nada. Ese silencio era
+la prueba: la clave no se decidió omitir, se omitió sin decidir.
+
+El arreglo no cabía en un `ALTER` —SQLite no admite añadir una restricción a una
+tabla que ya existe—, así que hubo que recrearlas. Es la segunda migración no
+aditiva del proyecto, y al escribirla salió a la luz que
+[ADR-036](DECISIONS/adr-036-sqlite-modular-migraciones-aditivas.md) llevaba desde
+agosto afirmando que las migraciones nunca cambian tipos, cuando la primera
+—`31a6ba0`, del 2026-08-14— ya lo había desmentido sin que nadie lo registrara.
+La regla que sí seguía viva, *una base antigua siempre abre*, se conservó;
+[ADR-077](DECISIONS/adr-077-cuando-una-migracion-deja-de-ser-aditiva.md) recoge
+el procedimiento y, sobre todo, qué le está permitido borrar a una migración: la
+constricción limpia su propio dominio, y el Libro no está en su dominio.
+
+Sobre la base del operador la migración se llevó una propuesta huérfana con sus
+cuatro eventos y una auditoría de calidad, y dejó intactos los nueve asientos del
+proyecto muerto en el Libro de la Vida.
+
+### El juicio: la cascada arreglaba una mitad y abría la otra
+
+`312d6c1`. Con la clave puesta, borrar un proyecto ya se llevaba sus propuestas
+—pero **en silencio**. Y ahí apareció el segundo problema, que no era técnico
+sino de coherencia: cuando un proyecto se desvanece del disco, la reconciliación
+caduca sus propuestas **con razón**; si el operador lo quitaba del tablero, la
+cascada se las llevaría **sin ninguna**. El mismo hecho, dos destinos según por
+dónde entrara. Es exactamente lo que
+[ADR-059](DECISIONS/adr-059-capas-de-estado-no-heredan.md) prohíbe.
+
+De modo que las propuestas vivas pasaron a caducar **antes** de soltar la fila,
+con razón propia `PROYECTO_RETIRADO` — distinta de `PROYECTO_AUSENTE`, porque una
+la descubre la reconciliación y la otra la provoca un acto deliberado.
+
+Y aquí estaba la trampa que define el arco. `advanceProposal` no escribe en
+`omega_log`: escribe el parche de la propuesta y su eslabón en el libro de
+eventos, y las dos cosas **cuelgan de la propuesta**, así que la cascada se las
+lleva un instante después. Caducar por la vía obvia habría sido teatro — emitir
+el juicio y borrarlo acto seguido, con la conciencia tranquila y ni un rastro en
+la base. El asiento solo sobrevive porque va a la única tabla sin clave foránea,
+y ese `append` lo pone la retirada, no el avance
+([ADR-076](DECISIONS/adr-076-el-juicio-antes-de-la-cascada.md)). La prueba se
+escribió sobre una base real y no sobre un doble, precisamente porque un doble no
+habría notado la diferencia entre el juicio y su representación.
+
+### La red: el guard que estaba detrás del guard equivocado
+
+`488ad16`. Quedaba el segundo agujero, el que el Acto 6 había dejado anotado. La
+red existía —`proyecto_ausente` tiene nombre, comentario y razón propia desde
+ADR-059—, pero `decideOrphan` preguntaba primero si había commit. Una propuesta
+anterior a GENERATE no lo tiene, porque el commit nace ahí; salía por *«ANALIZADO
+espera al operador»* y no alcanzaba nunca el chequeo escrito para ella.
+
+El arreglo es el orden: si el proyecto no está, la fase da igual. Con el proyecto
+vivo no cambia nada, y eso no es una afirmación de confianza — revertir el orden
+tumba exactamente los dos casos nuevos y deja los quince restantes en verde.
+
+### Lo que se ganó, y lo que se apretó
+
+El mismo hecho —este proyecto ya no está— tiene ahora **un solo destino**, entre
+por donde entre. La divergencia que ADR-059 prohíbe dejó de ser construible, y la
+huérfana invisible dejó de ser un estado que la base admita.
+
+Pero el arco no salió gratis, y conviene que quede escrito junto a lo demás. La
+cobertura del recambio obligó a que la suite de migración ejercitara de verdad la
+tabla vieja —antes la creaba ya con su forma nueva y la migración se saltaba
+sola, de modo que el gate pasaba sin probar nada—, y eso costó líneas:
+`scripts/migration-test.cjs` pasó de 71 a **75 de 75**. El arnés de integración
+tenía un fichero al filo; ahora tiene dos, y el segundo sin margen ninguno. Se
+cerró una clase de defecto y se apretó otro.
+
 ## Presente
 
 El motor repara, el operador firma, el motor vuelve a mirar y cierra lo que ya
@@ -603,29 +690,46 @@ que se los vuelva a escanear.
 
 Ninguna propuesta queda atascada: las tres que lo estaban se cerraron el
 2026-08-28, cada una por su vía. Las que siguen vivas esperan firma, que es un
-estado legítimo y no un bloqueo.
+estado legítimo y no un bloqueo. Y ninguna puede quedar huérfana: una propuesta
+sin proyecto ya no es un estado que la base admita.
 
-Lo que sigue nombrado y sin cerrar, de antes de este acto: la **detección de lo
-que rompe el árbol después de integrarlo** —la otra mitad de la sexta condición,
-que ya cobró su primera pieza—; los **veintiséis hallazgos** que murieron antes
-de que las extinciones exigieran motivo y siguen sin decir por qué; y **cómo se
-rectifica un asiento** en un registro que no se edita, la pregunta que dejaron
-los once que dicen «denegada» sobre integraciones que están en `main`.
+Lo que sigue nombrado y sin cerrar, de antes de estos dos actos: la **detección
+de lo que rompe el árbol después de integrarlo** —la otra mitad de la sexta
+condición, que ya cobró su primera pieza—; los **veintiséis hallazgos** que
+murieron antes de que las extinciones exigieran motivo y siguen sin decir por
+qué; y **cómo se rectifica un asiento** en un registro que no se edita, la
+pregunta que dejaron los once que dicen «denegada» sobre integraciones que están
+en `main`.
 
-Y cuatro **defectos conocidos sin arreglo aplicado**, que el Acto 6 destapó y no
-resolvió:
+De los cuatro **defectos conocidos** que el Acto 6 destapó, el Acto 7 cerró los
+dos primeros —la cascada y el orden de la reconciliación—. Siguen sin arreglo
+aplicado:
 
-- **Borrar un proyecto no arrastra sus propuestas.** Una sobrevivió a su
-  proyecto catorce días, invisible para toda la interfaz. Ninguna debería
-  sobrevivir a lo que la creó.
-- **La reconciliación del arranque no alcanza a las huérfanas.** Su motivo
-  `proyecto_ausente` existe y está documentado, pero el orden de sus dos
-  primeras comprobaciones hace que un ANALIZADO sin commit se resuelva antes,
-  dejándolo vivo. La rama correcta está escrita y no llega.
-- **El arnés de integración está en el filo**: 74 de las 75 líneas que su propia
-  regla permite. La próxima suite de comprobaciones no cabe sin partirlo.
+- **El arnés de integración está en el filo, y ahora por partida doble**:
+  `integration-test.cjs` en 74 de las 75 líneas que su propia regla permite, y
+  `migration-test.cjs` en 75 de 75, sin margen ninguno — lo apretó el Acto 7 al
+  hacer que la suite ejercitara de verdad el recambio de tabla. La próxima suite
+  de comprobaciones no cabe en ninguno de los dos.
 - **Ningún modal se cierra con Escape.** El componente compartido no escucha el
   teclado, y los doce que cuelgan de él heredan la carencia.
+
+Y tres huecos que el Acto 7 destapó documentando, y tampoco resolvió:
+
+- **El catálogo de rechazos está a medias.** La tabla de
+  [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md) explica catorce de las veintiuna
+  razones que el dominio declara; faltan `generator_timeout`, `cli_no_arranco`,
+  `turnos_agotados`, `analisis_ilegible`, `gate_sin_verificacion`, `omega_error`
+  y `proyecto_sin_confianza`. La familia hermana —las siete de la
+  reconciliación— sí quedó completa en este acto.
+- **`turnos_agotados` se anuncia como lo que no es.** No está entre los tres
+  motivos que el dominio cuenta como timeout, así que el clasificador del parte
+  lo mete en «otras bajas», que el operador lee como *«por gate o correa»*. Una
+  propuesta que agotó sus turnos no hizo ninguna de las dos cosas, y el parte lo
+  manda a leer un diff que nunca llegó a juzgarse.
+- **Dos piezas sin documento propio.** La reconciliación del arranque, que este
+  acto ha modificado, solo está escrita en ADR-059 y en el código; y el
+  `FORTRESS-RECORD.md` que se deja en la carpeta del proyecto al retirarlo —al
+  que este acto añadió las propuestas vivas— no aparece en ningún documento.
 
 Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
 convertir el auditor en un entorno de desarrollo asistido completo, y preparar el
@@ -634,7 +738,7 @@ proyecto para publicarse. Sin fechas de compromiso, como todo aquí.
 ## Referencias
 
 - [DECISIONS/](DECISIONS/README.md) — los registros de decisión
-  arquitectónica (ADR-001 a ADR-075) que sostienen esta historia.
+  arquitectónica (ADR-001 a ADR-077) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),
