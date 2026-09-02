@@ -40,11 +40,17 @@ export function mergePath(from: ProposalState): readonly ProposalState[] | null 
  * como funcion. Sesgo seguro en cada rama — sin prueba de merge se CADUCA,
  * nunca se fabrica un MERGEADO.
  *
- * Sin commit en el libro no falta ningun worktree —nace en GENERATE, a la vez
- * que el commit— y ahi manda el estado. ANALIZADO espera a que el operador
- * pulse Generar, y puede esperar dias: caducarlo seria matar trabajo en curso,
- * asi que se devuelve null. ELEGIDO no espera a nadie: su analisis es sincrono
- * y ningun boton lo avanza, asi que sobrevivir a un arranque solo puede
+ * El proyecto ausente se comprueba EL PRIMERO, y el orden es la regla: si el
+ * proyecto ya no esta, la fase de la propuesta da igual. Con el guard del
+ * commit delante, una pre-GENERATE —sin commit porque nace en GENERATE— salia
+ * por "ANALIZADO espera al operador" y jamas alcanzaba este chequeo, que existe
+ * justo para ella: quedaba viva para siempre esperando a un operador que ya no
+ * tenia proyecto que mirar. Fue el caso de 752a50b8.
+ *
+ * Con el proyecto vivo manda el estado, como siempre. ANALIZADO espera a que el
+ * operador pulse Generar, y puede esperar dias: caducarlo seria matar trabajo en
+ * curso, asi que se devuelve null. ELEGIDO no espera a nadie: su analisis es
+ * sincrono y ningun boton lo avanza, asi que sobrevivir a un arranque solo puede
  * significar que murio a medias. Y al arrancar nada esta en vuelo: no hay duda
  * que conceder.
  */
@@ -55,10 +61,10 @@ export function decideOrphan(
   isMerged: (repoPath: string, commitSha: string) => boolean
 ): Verdict | null {
   const caducar = (reason: string): Verdict => ({ path: ['CADUCADO'], reason })
+  if (repoPath === null) return caducar(RECLAIM_REASONS.PROYECTO_AUSENTE)
   if (commitSha === null) {
     return state === 'ELEGIDO' ? caducar(RECLAIM_REASONS.ANALISIS_INTERRUMPIDO) : null
   }
-  if (repoPath === null) return caducar(RECLAIM_REASONS.PROYECTO_AUSENTE)
   if (!isMerged(repoPath, commitSha)) return caducar(RECLAIM_REASONS.WORKTREE_AUSENTE)
   const path = mergePath(state)
   return path === null
