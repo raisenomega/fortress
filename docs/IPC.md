@@ -63,13 +63,21 @@ Gestión del catálogo de proyectos y su confianza.
 |---|---|---|---|
 | `projects:list` | R/R | () → Project[] | — |
 | `projects:add` | R/R | NewProject → Result<Project> | validación de ruta absoluta |
-| `projects:remove` | R/R | id → Result<null> (cascada en BD) | — |
+| `projects:remove` | R/R | id → Result<null> (juicio a las propuestas vivas, luego cascada en BD) | — |
 | `projects:pick-folder` | R/R | () → NewProject \| null (diálogo nativo) | — |
 | `projects:self` | R/R | () → NewProject \| null (el repo propio) | — |
 | `projects:set-trusted` | R/R | (id, trusted) → Result<null> | decisión explícita del operador |
 | `projects:set-loop-enabled` | R/R | (id, enabled) → Result<null> | bloqueo del loop sobre el self-repo |
 | `projects:focus` | R/R | id → null (dispara reconcilio del grafo) | — |
 | `projects:unblock` | R/R | (id, motivo?) → Result<null> (levanta el circuit breaker) | exige que el proyecto ESTÉ contaminado |
+
+`projects:remove` hace tres cosas en orden, y el orden importa: deja un
+`FORTRESS-RECORD.md` en la carpeta del proyecto, **caduca con juicio** cada
+propuesta viva —razón `proyecto_retirado`, con asiento en el Libro de la Vida— y
+solo entonces borra la fila, dejando que la cascada del esquema limpie el resto.
+El paso intermedio existe porque la cascada borraría en silencio, y el asiento
+del juicio solo sobrevive en la única tabla sin clave foránea
+([ADR-076](DECISIONS/adr-076-el-juicio-antes-de-la-cascada.md)).
 
 ### chat
 
