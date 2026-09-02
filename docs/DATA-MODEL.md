@@ -38,11 +38,19 @@ funcional, reflejo de la organización DDD del código:
 | conectores | connectors |
 
 Un orquestador de migraciones corre en cada arranque: el esquema base es
-idempotente (`CREATE TABLE IF NOT EXISTS`) y las MIGRACIONES ADITIVAS
-añaden con `ALTER TABLE` las columnas que falten en bases creadas por
-versiones anteriores (verificación por `hasColumn`, nombres siempre
-literales). FORTRESS nunca borra columnas ni cambia tipos: una base vieja
-siempre abre.
+idempotente (`CREATE TABLE IF NOT EXISTS`) y las migraciones ADITIVAS añaden
+con `ALTER TABLE` las columnas que falten en bases creadas por versiones
+anteriores (verificación por `hasColumn`, nombres siempre literales). Ninguna
+migración borra una columna: **una base vieja siempre abre**, y ese es el
+invariante que se protege.
+
+Lo aditivo es el caso normal, no el único. Para lo que un `ALTER` no puede
+expresar —añadir una restricción a una tabla que ya existe— hay migraciones de
+**recambio de tabla**: crear la gemela, copiar, comparar el recuento, borrar y
+renombrar. Hay dos (`agent_runs` en agosto, `repair_proposals` y `quality_scans`
+en septiembre), y la segunda además borra las filas que su clave foránea nueva
+no admitiría. Su procedimiento y qué les está permitido borrar, en
+[ADR-077](DECISIONS/adr-077-cuando-una-migracion-deja-de-ser-aditiva.md).
 
 ## Diagrama de relaciones
 
@@ -52,11 +60,11 @@ siempre abre.
     |----< chat_messages (N)                  [CASCADE]
     |----< agent_runs (N)                     [CASCADE]
     |----< scans (N)                          [CASCADE]
-    |----< quality_scans (N)                  [sin FK declarada]
+    |----< quality_scans (N)                  [CASCADE]
     |----< activity (N)                       [CASCADE]
     |----< dismissals (N)                     [CASCADE]
     |----- loop_sessions (0..1)               [CASCADE, PK = project_id]
-    |----< repair_proposals (N)               [sin FK declarada]
+    |----< repair_proposals (N)               [CASCADE, juicio antes de borrar]
     |            |
     |            '----< proposal_events (N)   [CASCADE, UNIQUE(proposal,seq)]
     |
@@ -295,7 +303,7 @@ vino después). No fusionar.
 | Columna | Tipo | Constraints |
 |---|---|---|
 | id | TEXT | PRIMARY KEY |
-| project_id | TEXT | NOT NULL (sin FK declarada) |
+| project_id | TEXT | NOT NULL, FK projects ON DELETE CASCADE |
 | global / partial | INTEGER | NOT NULL |
 | dim_seguridad / dim_correctitud / dim_tests / dim_mantenibilidad / dim_dependencias / dim_operacion | INTEGER | null = dimensión sin medir |
 | at | TEXT | NOT NULL |
@@ -351,7 +359,7 @@ propuesta, con su ancla de reproducibilidad y su estado en la máquina (ver
 | Columna | Tipo | Constraints |
 |---|---|---|
 | id | TEXT | PRIMARY KEY |
-| project_id | TEXT | NOT NULL (sin FK declarada) |
+| project_id | TEXT | NOT NULL, FK projects ON DELETE CASCADE |
 | finding_id | TEXT | NOT NULL |
 | base_sha | TEXT | NOT NULL (HEAD anclado al nacer) |
 | state | TEXT | NOT NULL (la máquina de estados) |
@@ -368,13 +376,30 @@ created_at) — impide duplicados exactos · idx_repair_proposals_estado
 salida buena. `RECHAZADO` lo escribe el juicio de una **máquina** —el gate en
 rojo, el revisor con veto, el generador fuera de correa—. `CADUCADO` es lo que
 el dominio llama *la salida de emergencia de todos los vivos*: la base se movió,
-el análisis quedó obsoleto, el worktree desapareció… **o el operador la retiró**.
+el análisis quedó obsoleto, el worktree desapareció, **el operador la retiró**…
+**o se retiró su proyecto**.
 
-En ese último caso la fila queda `CADUCADO` con `analysis_reason` empezando por
-`retirada por el operador:` y el motivo que escribiera. El estado dice que
-murió; la razón dice quién. No se usó `RECHAZADO` a propósito: mentiría sobre
-quién juzgó, y además dejaría el hallazgo bloqueado para la cola. Ver
-[ADR-072](DECISIONS/adr-072-caducado-no-miente.md).
+En los dos últimos casos la fila queda `CADUCADO` con `analysis_reason`
+empezando por `retirada por el operador:` y el motivo — el que escribiera, o
+`proyecto_retirado` cuando lo que se quitó fue el proyecto entero. El estado
+dice que murió; la razón dice quién. No se usó `RECHAZADO` a propósito:
+mentiría sobre quién juzgó, y además dejaría el hallazgo bloqueado para la cola.
+Ver [ADR-072](DECISIONS/adr-072-caducado-no-miente.md).
+
+**Qué pasa al quitar un proyecto.** La fila de `projects` no se suelta a secas.
+El orden es:
+
+1. Se exporta `FORTRESS-RECORD.md` a la carpeta del proyecto — la foto del
+   instante anterior, con las propuestas **todavía vivas**.
+2. Las propuestas vivas caducan **una a una y con juicio**, razón
+   `proyecto_retirado`, y cada una deja su asiento en `omega_log`.
+3. Se borra la fila, y la cascada limpia el resto: propuestas (ya terminales),
+   sus `proposal_events`, hallazgos, chat, telemetría, escaneos y auditorías.
+
+El paso 2 no es ceremonia: el parche de la propuesta y su libro de eventos
+**cuelgan de ella** y mueren en la cascada un instante después. El juicio solo
+sobrevive porque `omega_log` no tiene clave foránea. Ver
+[ADR-076](DECISIONS/adr-076-el-juicio-antes-de-la-cascada.md).
 
 La fila se actualiza, pero su historia no se pisa: cada transición **anexa** su
 eslabón en `proposal_events`, incluida la de cierre.
