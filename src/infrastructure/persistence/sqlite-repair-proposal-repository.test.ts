@@ -18,7 +18,9 @@ function seedFinding(db: Db, id: string, scanId: string): void {
 
 describe('createSqliteRepairProposalRepository', () => {
   it('inserta, parchea y lee el expediente (mas reciente primero)', () => {
-    const repo = createSqliteRepairProposalRepository(createMemoryDb())
+    const db = createMemoryDb()
+    seedProject(db, 'p1')
+    const repo = createSqliteRepairProposalRepository(db)
     repo.insert(propuesta('r1', 'f1', 1))
     repo.insert(propuesta('r2', 'f2', 2))
     repo.update('r1', { state: 'ANALIZADO', analysisVerdict: 'REAL', analysisReason: 'ok', updatedAt: 9 }) // prettier-ignore

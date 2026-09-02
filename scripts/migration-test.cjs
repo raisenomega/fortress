@@ -6,6 +6,7 @@
 const { app } = require('electron')
 const harness = require('./lib/app-harness.cjs')
 const { writeLegacyDatabase } = require('./lib/legacy-db.cjs')
+const { checkRepairMigration } = require('./lib/legacy-repair.cjs')
 const { createRecorder } = require('./lib/renderer-checks.cjs')
 const { report } = require('./lib/suite-runner.cjs')
 
@@ -49,6 +50,9 @@ async function verify(window) {
 
   const descarte = await run(`window.api.scan.dismiss('${hallazgos[0]?.id}')`)
   check('se puede descartar un hallazgo migrado', descarte.ok, JSON.stringify(descarte))
+
+  // El recambio: se afirma por SQL porque lo que cambia es el esquema.
+  checkRepairMigration(check)
 
   return results
 }

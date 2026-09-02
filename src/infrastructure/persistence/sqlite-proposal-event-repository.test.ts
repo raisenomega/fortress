@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { buildTransitionEvent, type ProposalEvent } from '@domain/repair/proposal-event'
-import { createMemoryDb } from './memory-db'
+import { createMemoryDb, seedProject } from './memory-db'
 import { PROPOSAL_EVENTS_SCHEMA } from './schema-proposal-events'
 import { createSqliteProposalEventRepository } from './sqlite-proposal-event-repository'
 import type { Db } from './database'
 
+/** La propuesta cuelga de su proyecto (ON DELETE CASCADE): hay que sembrarlo. */
 function seedProposal(db: Db, id: string): void {
+  seedProject(db, 'p1')
   db.prepare(
     `INSERT INTO repair_proposals (id, project_id, finding_id, base_sha, state, created_at, updated_at)
      VALUES (?, 'p1', 'f1', 'sha', 'ELEGIDO', 1, 1)`
