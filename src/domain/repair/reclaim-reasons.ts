@@ -34,8 +34,12 @@ export const RECLAIM_REASONS = {
    * entrada. La propuesta no puede avanzar por mas veces que se pulse; el
    * hallazgo vuelve a la baraja para intentarlo con una cadena completa.
    *
-   * Es de otra familia que las cuatro de arriba: no la descubre la
-   * reconciliacion mirando el disco, sino el propio guard al ir a generar.
+   * Es de otra familia que las de arriba, y no por donde se descubre sino por
+   * QUIEN la escribe: no la reconciliacion del arranque, sino una pasada manual
+   * —`scripts/caduca-cadena-sintetica.ts`— que el operador corre desde la linea
+   * de comandos con la app cerrada. Ningun guard del motor la emite. El script
+   * repite el literal en vez de importar esta constante porque corre suelto,
+   * sin resolver los alias del `src`.
    */
   CADENA_SINTETICA: 'cadena_sintetica'
 } as const
