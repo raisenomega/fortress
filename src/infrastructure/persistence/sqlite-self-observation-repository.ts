@@ -1,5 +1,5 @@
 import { newId, nowIso } from '@domain/shared/id'
-import type { ObservationKind, SelfObservation } from '@domain/system/self-observation'
+import type { ObservationKind, ObservationStatus, SelfObservation } from '@domain/system/self-observation' // prettier-ignore
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
 import type { Db } from './database'
 
@@ -9,10 +9,14 @@ interface Row {
   readonly kind: string
   readonly area: string
   readonly note: string
-  readonly resolved: number
+  readonly status: string
+  readonly reason: string | null
+  readonly attended_by: string | null
+  readonly attended_at: string | null
   readonly created_at: string
 }
 
+/** `resolved` no se lee: sigue en la tabla por ADR-036, no en el modelo. */
 function toObs(row: Row): SelfObservation {
   return {
     id: row.id,
@@ -20,7 +24,10 @@ function toObs(row: Row): SelfObservation {
     kind: row.kind as ObservationKind,
     area: row.area,
     note: row.note,
-    resolved: row.resolved === 1,
+    status: row.status as ObservationStatus,
+    reason: row.reason,
+    attendedBy: row.attended_by,
+    attendedAt: row.attended_at,
     createdAt: row.created_at
   }
 }
@@ -33,9 +40,14 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
   )
   const byId = db.prepare('SELECT * FROM self_observations WHERE id = ?')
   const open = db.prepare(
-    'SELECT * FROM self_observations WHERE resolved = 0 ORDER BY created_at DESC'
+    "SELECT * FROM self_observations WHERE status = 'pendiente' ORDER BY created_at DESC"
   )
-  const markResolved = db.prepare('UPDATE self_observations SET resolved = 1 WHERE id = ?')
+  const update = db.prepare(`UPDATE self_observations
+    SET status = @status, reason = @reason, attended_by = @attendedBy, attended_at = @attendedAt
+    WHERE id = @id`)
+
+  const setStatus = (entrada: Parameters<SelfObservationRepository['setStatus']>[0]): boolean =>
+    update.run(entrada).changes > 0
 
   return {
     add: (o) => {
@@ -44,8 +56,12 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
       return toObs(byId.get(id) as Row)
     },
     listOpen: () => (open.all() as Row[]).map(toObs),
+    setStatus,
+    // El boton viejo de la vista sigue vivo hasta que la importacion lo
+    // sustituya: se le da el estado nuevo para que no quede escribiendo una
+    // columna que ya no lee nadie.
     resolve: (id) => {
-      markResolved.run(id)
+      setStatus({ id, status: 'atendido', reason: null, attendedBy: 'operador', attendedAt: nowIso() }) // prettier-ignore
     }
   }
 }
