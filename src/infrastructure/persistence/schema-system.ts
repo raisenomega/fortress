@@ -2,8 +2,19 @@
  * Tablas del propio FORTRESS (no de un proyecto): no cuelgan de projects ni
  * cascadean al borrar uno. Aparte de schema.ts solo para no pasar de 75 lineas.
  * Idempotentes: se aplican en cada arranque sin duplicar nada.
+ *
+ * `self_observations` estuvo en el esquema base hasta el 2026-09-03, sola y
+ * lejos de las cuatro tablas del mismo subsistema. Vino aqui cuando hizo falta
+ * sitio para darle estado: la asimetria no molestaba hasta que la tabla tuvo
+ * que crecer y su fichero estaba lleno.
  */
 export const SYSTEM_SCHEMA = `
+CREATE TABLE IF NOT EXISTS self_observations (
+  id TEXT PRIMARY KEY, source_project TEXT NOT NULL, kind TEXT NOT NULL,
+  area TEXT NOT NULL, note TEXT NOT NULL, resolved INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS capabilities (
   id                 TEXT PRIMARY KEY,
   kind               TEXT NOT NULL,
