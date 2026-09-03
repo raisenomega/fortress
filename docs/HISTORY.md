@@ -713,23 +713,33 @@ aplicado:
 - **Ningún modal se cierra con Escape.** El componente compartido no escucha el
   teclado, y los doce que cuelgan de él heredan la carencia.
 
-Y tres huecos que el Acto 7 destapó documentando, y tampoco resolvió:
+De los tres huecos que el Acto 7 destapó documentando, el del parte se cerró el
+mismo día: `turnos_agotados` —y otros catorce motivos— caían en un `else` que
+los anunciaba a todos como «por gate o correa», cierto para tres. El reparto
+pasó a una tabla exhaustiva agrupada por la acción que le toca al operador, y
+un rechazo nuevo sin casilla ya no compila. Cerró tres deudas del registro y las
+doce hermanas que compartían cajón. Siguen abiertos los otros dos:
 
 - **El catálogo de rechazos está a medias.** La tabla de
-  [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md) explica catorce de las veintiuna
-  razones que el dominio declara; faltan `generator_timeout`, `cli_no_arranco`,
-  `turnos_agotados`, `analisis_ilegible`, `gate_sin_verificacion`, `omega_error`
-  y `proyecto_sin_confianza`. La familia hermana —las siete de la
-  reconciliación— sí quedó completa en este acto.
-- **`turnos_agotados` se anuncia como lo que no es.** No está entre los tres
-  motivos que el dominio cuenta como timeout, así que el clasificador del parte
-  lo mete en «otras bajas», que el operador lee como *«por gate o correa»*. Una
-  propuesta que agotó sus turnos no hizo ninguna de las dos cosas, y el parte lo
-  manda a leer un diff que nunca llegó a juzgarse.
-- **Dos piezas sin documento propio.** La reconciliación del arranque, que este
-  acto ha modificado, solo está escrita en ADR-059 y en el código; y el
+  [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md) explica catorce de las **veintidós**
+  razones que el dominio declara; faltan `generator_timeout`, `provider_error`,
+  `cli_no_arranco`, `turnos_agotados`, `analisis_ilegible`,
+  `gate_sin_verificacion`, `omega_error` y `proyecto_sin_confianza`. Son ocho, no
+  siete: la cuenta de veintiuna con la que se escribió esto era de vista, y al
+  contarla contra el vocabulario salieron veintidós. La familia hermana —las
+  siete de la reconciliación— sí quedó completa, y desde el cierre del parte cada
+  una tiene además su casilla documentada.
+- **Dos piezas sin documento propio.** La reconciliación del arranque, que el
+  Acto 7 modificó, solo está escrita en ADR-059 y en el código; y el
   `FORTRESS-RECORD.md` que se deja en la carpeta del proyecto al retirarlo —al
-  que este acto añadió las propuestas vivas— no aparece en ningún documento.
+  que ese acto añadió las propuestas vivas— no aparece en ningún documento.
+
+Y una deuda que llevaba meses sin veredicto **se manifestó sola**: el gate del
+merge del parte cayó con un «claude — No instalado» que no era del cambio, sino
+del CLI recién reinstalado —216 MB— tardando más que los ocho segundos que el
+probe de la app concede, con la caché fría. Caliente tarda una centésima. Estaba
+anotada como sin auditar desde agosto; ahora tiene evidencia y fecha, y es el
+argumento de que las veintiocho que siguen sin mirar no son ruido.
 
 Lo que viene por delante está en [ROADMAP](ROADMAP.md): afianzar lo construido,
 convertir el auditor en un entorno de desarrollo asistido completo, y preparar el

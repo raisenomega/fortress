@@ -345,6 +345,57 @@ proyecto que ya no existe llevan al mismo sitio por caminos que no se parecen
 | `merge_detectado_en_git` | `MERGEADO` | La pasada BD→git: el commit del fix ya vive en `HEAD`. La única que no mata — lo firmó un humano. |
 | `cadena_sintetica` | `CADUCADO` | Un script puntual de línea de comandos, no la reconciliación: su libro se reconstruyó a mano y no guarda el análisis, así que C3 no puede generar por más veces que se pulse. |
 
+## Cómo el parte del drenaje agrupa las bajas
+
+Los dos catálogos de arriba dicen **qué pasó**. El parte que el operador lee al
+final de un drenaje tiene que decir además **qué le toca hacer a él**, y esas no
+son la misma pregunta: leer el diff, mirar su propio repositorio o abrirnos un
+issue son tres respuestas distintas.
+
+Por eso el recuento no agrupa por la fase que produjo la baja sino por esa
+acción. La tabla vive en `domain/repair/clasificacion-de-baja.ts` y es
+**exhaustiva sobre el vocabulario**: añadir un rechazo sin darle casilla no
+compila.
+
+| Casilla | Qué recoge | Lo que el parte dice |
+|---|---|---|
+| `vetadas` | `omega_vetado` | «N vetadas por el revisor» |
+| `porPresupuesto` | `budget_exceeded` | «N por presupuesto» |
+| `porTimeout` | `generator_timeout`, `gate_timeout`, `omega_timeout` | «N por timeout» |
+| `porCorrea` | `scope_violation`, `gate_failed`, `no_diff_produced` | «N por el gate o la correa» — las únicas tres donde hay un diff que leer |
+| `porLimitePropio` | `turnos_agotados` | «N sin turnos (no se llegó a juzgar el fix)» |
+| `porEntornoDelProyecto` | `npm_ci_failed`, `gate_sin_verificacion`, `proyecto_sin_confianza`, `worktree_missing`, `worktree_contaminated` | «N por el entorno del proyecto» |
+| `porDefectoInterno` | `invalid_state`, `omega_response_invalid`, `analisis_ilegible`, `generator_error` | «N por un fallo nuestro, no de la propuesta» |
+| `superadas` | `superseded`, `orphan_before_generate` | «N reemplazadas o reclamadas» |
+| `sinClasificar` | lo que no esté en el vocabulario | «N con un motivo que no sabemos nombrar» |
+
+Las tres averías (`provider_error`, `omega_error`, `cli_no_arranco`) no aparecen:
+**cortan la tanda** antes de contarse, y el parte lo dice en el cierre, no en las
+bajas.
+
+**Por qué existe `sinClasificar`.** Hasta el 2026-09-02 las cuatro primeras
+casillas eran una cadena de `if` con un `else` al final, y en ese `else` caían
+**quince** motivos que el parte anunciaba a todos como «por gate o correa» —
+cierto para tres. Una propuesta que agotó sus turnos, o a la que otra reemplazó,
+o que murió porque el proyecto no es de confianza, mandaba al operador a leer un
+diff que en varios de esos casos nunca llegó a existir. Un cajón que se traga lo
+que no reconoce vuelve a producir ese defecto en cuanto aparezca un motivo nuevo,
+así que ahora lo que no se reconoce **se anuncia**.
+
+## Por qué se detuvo un drenaje
+
+El cierre del parte es otra cosa que las bajas: dice por qué paró la tanda, no
+qué le pasó a cada propuesta.
+
+| Fin | Tono | Significado |
+|---|---|---|
+| `sin-candidato` | ok | Se agotaron los elegibles. El final normal. |
+| `tope-vueltas` / `tope-gasto` | aviso | Chocó con un techo del operador. |
+| `detenido` | aviso | El operador dijo basta. |
+| `ocupado` | aviso | «no arrancó: el motor está ocupado» — el tope diario, otra corrida en marcha o un proyecto en revisión. **No es un fallo**: es un freno del sistema haciendo su trabajo, y por eso dejó de pintarse en rojo como una avería. |
+| `averia` | error | Un fallo que se arregla esperando: el proveedor. |
+| `entorno` | error | El CLI no arranca en esta máquina. Se arregla mirando el PATH, no esperando. |
+
 ## Reintento explícito
 
 Cuando una propuesta queda RECHAZADO por razones de RAZONAMIENTO
