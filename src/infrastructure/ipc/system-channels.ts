@@ -6,7 +6,6 @@ export const SYSTEM_CHANNELS = {
   systemObservations: 'system:observations',
   systemExportObservations: 'system:export-observations',
   systemImportAttended: 'system:import-attended',
-  systemResolveObservation: 'system:resolve-observation',
   systemCapabilities: 'system:capabilities',
   systemProposeCapability: 'system:propose-capability',
   systemPromoteCapability: 'system:promote-capability',

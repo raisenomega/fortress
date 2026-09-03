@@ -16,7 +16,6 @@ import type { Unsubscribe } from './api-types'
 export interface SelfImprovementApi {
   /** Pendientes abiertos, del mas reciente al mas antiguo. */
   observations(): Promise<readonly SelfObservation[]>
-  resolveObservation(id: string): Promise<void>
   /** Escribe el backlog a un JSON trabajable desde fuera. Devuelve su ruta. */
   exportObservations(): Promise<Result<string>>
   /** Asienta el registro de lo atendido fuera. Devuelve el resumen con sus rechazos. */

@@ -2,13 +2,14 @@ import type { SelfObservation } from '@domain/system/self-observation'
 
 interface ObservationCardProps {
   readonly observation: SelfObservation
-  readonly onResolve: (id: string) => void
 }
 
-export function ObservationCard({
-  observation,
-  onResolve
-}: ObservationCardProps): React.JSX.Element {
+/**
+ * Solo lectura a proposito. Tuvo un boton de "marcar atendido" que en semanas no
+ * se pulso ni una vez: cerrar trescientas cuarenta observaciones a mano no es
+ * trabajo de una tarjeta. Ahora se cierran fuera y entran por el registro.
+ */
+export function ObservationCard({ observation }: ObservationCardProps): React.JSX.Element {
   return (
     <article className="rounded-lg border border-border bg-card p-3">
       <header className="flex flex-wrap items-center gap-2">
@@ -22,14 +23,6 @@ export function ObservationCard({
       </header>
 
       <p className="mt-1.5 text-sm text-foreground">{observation.note}</p>
-
-      <button
-        type="button"
-        onClick={() => onResolve(observation.id)}
-        className="mt-2 text-[11px] text-muted-foreground hover:text-primary"
-      >
-        Marcar atendido
-      </button>
     </article>
   )
 }

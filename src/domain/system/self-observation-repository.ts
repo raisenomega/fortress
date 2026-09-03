@@ -15,7 +15,6 @@ export interface SelfObservationRepository {
    * id inexistente sin una consulta previa (patron de `markMitigated`).
    */
   setStatus(entrada: CambioDeEstado): boolean
-  resolve(id: string): void
 }
 
 /** Lo que hace falta para cerrar una observacion. */

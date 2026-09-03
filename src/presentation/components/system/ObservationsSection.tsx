@@ -1,5 +1,4 @@
 import type { SelfObservation } from '@domain/system/self-observation'
-import { resolveObservation } from '../../services/self-improvement-service'
 import { ObservationCard } from './ObservationCard'
 
 interface ObservationsSectionProps {
@@ -18,11 +17,7 @@ export function ObservationsSection({
       </p>
       <div className="mt-2 grid gap-2 lg:grid-cols-2">
         {observations.map((observation) => (
-          <ObservationCard
-            key={observation.id}
-            observation={observation}
-            onResolve={(id) => void resolveObservation(id)}
-          />
+          <ObservationCard key={observation.id} observation={observation} />
         ))}
       </div>
     </section>

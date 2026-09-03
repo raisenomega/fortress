@@ -46,10 +46,13 @@ describe('el estado de una observacion: quien la cerro y por que', () => {
     expect(r.listOpen().map((x) => x.id)).not.toContain(o.id)
   })
 
-  it('el boton viejo sigue funcionando: resolve deja la fila atendida', () => {
+  it('findById la ve en el estado que este, no solo si esta pendiente', () => {
+    // La importacion lo usa para saber si esta pisando un cierre anterior.
     const r = repo()
-    r.resolve(r.listOpen()[0].id)
+    const [o] = r.listOpen()
+    r.setStatus({ id: o.id, status: 'atendido', reason: null, attendedBy: 'x', attendedAt: AT })
 
-    expect(r.listOpen()).toHaveLength(0)
+    expect(r.findById(o.id)).toMatchObject({ status: 'atendido' })
+    expect(r.findById('no-existe')).toBeNull()
   })
 })

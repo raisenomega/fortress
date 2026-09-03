@@ -60,12 +60,6 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
       const row = byId.get(id) as Row | undefined
       return row ? toObs(row) : null
     },
-    setStatus,
-    // El boton viejo de la vista sigue vivo hasta que la importacion lo
-    // sustituya: se le da el estado nuevo para que no quede escribiendo una
-    // columna que ya no lee nadie.
-    resolve: (id) => {
-      setStatus({ id, status: 'atendido', reason: null, attendedBy: 'operador', attendedAt: nowIso() }) // prettier-ignore
-    }
+    setStatus
   }
 }

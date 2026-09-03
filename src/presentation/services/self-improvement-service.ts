@@ -1,5 +1,6 @@
 import type { NewCapability } from '@domain/system/capability'
 import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capability-note'
+import type { ResumenImport } from '@application/system/importar-atendidos'
 import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useSelfImprovementStore } from '../stores/self-improvement-store'
@@ -14,10 +15,11 @@ export async function exportObservations(): Promise<Result<string>> {
   return api().system.exportObservations()
 }
 
-/** Marca un pendiente como atendido y refresca la lista. */
-export async function resolveObservation(id: string): Promise<void> {
-  await api().system.resolveObservation(id)
-  await loadObservations()
+/** Asienta lo que se atendio fuera y relee: la lista pierde lo ya cerrado. */
+export async function importAttended(): Promise<Result<ResumenImport>> {
+  const resumen = await api().system.importAttended()
+  if (resumen.ok) await loadObservations()
+  return resumen
 }
 
 /** Relee las capacidades con su fase, madurez y veredicto de OMEGA. */
