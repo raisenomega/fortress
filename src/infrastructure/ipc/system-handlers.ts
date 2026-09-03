@@ -9,6 +9,7 @@ import { registerAgentDraftHandlers } from './agent-draft-handlers'
 import { registerCapabilityEpisodeHandlers } from './capability-episode-handlers'
 import { registerGenesisHandlers } from './genesis-handlers'
 import { exportObservations } from '../system/export-observations'
+import { importAttended } from '../system/import-attended'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -20,6 +21,9 @@ export function registerSystemHandlers(): void {
   // Devuelve la RUTA escrita: el operador tiene que saber donde buscarlo, y
   // quien lo lee desde la terminal, adonde ir.
   ipcMain.handle(IPC.systemExportObservations, () => exportObservations(getAppContext()))
+
+  // La vuelta del bucle: lo que se atendio fuera se asienta aqui.
+  ipcMain.handle(IPC.systemImportAttended, () => importAttended(getAppContext()))
 
   ipcMain.handle(IPC.systemResolveObservation, (_event, id: string) =>
     getAppContext().selfObservations.resolve(id)

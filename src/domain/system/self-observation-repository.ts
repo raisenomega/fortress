@@ -6,6 +6,9 @@ export interface SelfObservationRepository {
   add(observation: NewSelfObservation): SelfObservation
   /** Pendientes (no atendidas ni descartadas), del mas reciente al mas antiguo. */
   listOpen(): readonly SelfObservation[]
+  /** Una cualquiera, en el estado que este. La importacion la mira ANTES de
+   *  cerrarla para saber si esta pisando un cierre anterior. */
+  findById(id: string): SelfObservation | null
   /**
    * Cierra una observacion diciendo en que quedo, quien y por que. Devuelve si
    * cambio algo: el `WHERE id = ?` que no encuentra nada es como se detecta un
