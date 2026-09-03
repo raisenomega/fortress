@@ -8,6 +8,7 @@ import type { NewCapabilityNote } from '@domain/system/capability-note'
 import { registerAgentDraftHandlers } from './agent-draft-handlers'
 import { registerCapabilityEpisodeHandlers } from './capability-episode-handlers'
 import { registerGenesisHandlers } from './genesis-handlers'
+import { exportObservations } from '../system/export-observations'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -15,6 +16,10 @@ import { IPC } from './channels'
  *  mismo mientras trabajan en otros proyectos, y las capacidades auto-propuestas. */
 export function registerSystemHandlers(): void {
   ipcMain.handle(IPC.systemObservations, () => getAppContext().selfObservations.listOpen())
+
+  // Devuelve la RUTA escrita: el operador tiene que saber donde buscarlo, y
+  // quien lo lee desde la terminal, adonde ir.
+  ipcMain.handle(IPC.systemExportObservations, () => exportObservations(getAppContext()))
 
   ipcMain.handle(IPC.systemResolveObservation, (_event, id: string) =>
     getAppContext().selfObservations.resolve(id)
