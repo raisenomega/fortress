@@ -6,7 +6,6 @@ import { subscribe } from './subscribe'
 /** Implementacion del puente del subsistema de auto-mejora (system:*). */
 export const systemApi: SelfImprovementApi = {
   observations: () => ipcRenderer.invoke(IPC.systemObservations),
-  resolveObservation: (id) => ipcRenderer.invoke(IPC.systemResolveObservation, id),
   exportObservations: () => ipcRenderer.invoke(IPC.systemExportObservations),
   importAttended: () => ipcRenderer.invoke(IPC.systemImportAttended),
   proposeCapability: (input) => ipcRenderer.invoke(IPC.systemProposeCapability, input),

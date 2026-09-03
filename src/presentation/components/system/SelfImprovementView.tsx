@@ -3,6 +3,7 @@ import { loadCapabilities, loadObservations } from '../../services/self-improvem
 import { useCapabilities, useSelfObservations } from '../../stores/self-improvement-store'
 import { CapabilitiesSection } from './CapabilitiesSection'
 import { ExportObservations } from './ExportObservations'
+import { ImportAttended } from './ImportAttended'
 import { ObservationsSection } from './ObservationsSection'
 import { ProposeCapability } from './ProposeCapability'
 
@@ -32,6 +33,7 @@ export function SelfImprovementView(): React.JSX.Element {
       </header>
       <ProposeCapability />
       <ExportObservations />
+      <ImportAttended />
       {vacio ? (
         <p className="text-xs text-muted-foreground">
           Aun no hay capacidades ni pendientes. Propon una arriba, o apareceran cuando un agente

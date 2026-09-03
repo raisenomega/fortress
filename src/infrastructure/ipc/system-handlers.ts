@@ -25,10 +25,6 @@ export function registerSystemHandlers(): void {
   // La vuelta del bucle: lo que se atendio fuera se asienta aqui.
   ipcMain.handle(IPC.systemImportAttended, () => importAttended(getAppContext()))
 
-  ipcMain.handle(IPC.systemResolveObservation, (_event, id: string) =>
-    getAppContext().selfObservations.resolve(id)
-  )
-
   ipcMain.handle(IPC.systemCapabilities, () => {
     const ctx = getAppContext()
     return describeCapabilities(ctx.capabilities, ctx.capabilityEpisodes)
