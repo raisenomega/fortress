@@ -1,5 +1,6 @@
 import { addAgentRunColumns } from './add-agent-run-columns'
 import { addFindingMemory } from './add-finding-memory'
+import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
 import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
@@ -61,6 +62,9 @@ export function runMigrations(db: Db): void {
   // La bandera de "esta factura no se pudo leer". Aditiva y despues del
   // recambio, por lo anterior.
   addAgentRunColumns(db)
+
+  // El estado de tres valores del backlog de auto-mejora, con su backfill.
+  addObservationStatus(db)
 
   // El otro recambio: las dos tablas que colgaban del proyecto sin clave
   // foranea. Va la ULTIMA — recrea tablas, y ningun ALTER de arriba debe

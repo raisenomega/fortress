@@ -15,6 +15,15 @@ export const OBSERVATION_KINDS: readonly ObservationKind[] = [
   'oportunidad'
 ]
 
+/**
+ * En que ha quedado una observacion. Cerrado, como `kind`: un estado que se
+ * escribe libre acaba siendo un cajon, y `descartado` sin motivo es exactamente
+ * lo que este vocabulario existe para impedir.
+ */
+export const OBSERVATION_STATUSES = ['pendiente', 'atendido', 'descartado'] as const
+
+export type ObservationStatus = (typeof OBSERVATION_STATUSES)[number]
+
 export interface SelfObservation {
   readonly id: string
   /** El proyecto donde el agente lo descubrio (no es del proyecto, es de FORTRESS). */
@@ -24,8 +33,12 @@ export interface SelfObservation {
   readonly area: string
   /** Que paso o que falta, en palabras del agente. */
   readonly note: string
-  /** Abierto (pendiente) o ya atendido. */
-  readonly resolved: boolean
+  readonly status: ObservationStatus
+  /** Por que se atendio o se descarto. Obligatorio en el descarte, por doctrina. */
+  readonly reason: string | null
+  /** Quien la cerro: el operador, o quien trabajo el backlog desde fuera. */
+  readonly attendedBy: string | null
+  readonly attendedAt: string | null
   readonly createdAt: string
 }
 

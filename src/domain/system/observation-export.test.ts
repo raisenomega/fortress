@@ -3,7 +3,7 @@ import { buildObservationExport } from './observation-export'
 import type { ObservationKind, SelfObservation } from './self-observation'
 
 const obs = (id: string, area: string, kind: ObservationKind): SelfObservation =>
-  ({ id, area, kind, note: `nota ${id}`, sourceProject: 'p', resolved: false, createdAt: '2026-08-20' }) // prettier-ignore
+  ({ id, area, kind, note: `nota ${id}`, sourceProject: 'p', status: 'pendiente', reason: null, attendedBy: null, attendedAt: null, createdAt: '2026-08-20' }) // prettier-ignore
 
 const AT = '2026-09-03T10:00:00.000Z'
 

@@ -13,7 +13,10 @@ const obs = (
   kind,
   note: `nota ${id}`,
   sourceProject: 'p',
-  resolved: false,
+  status: 'pendiente',
+  reason: null,
+  attendedBy: null,
+  attendedAt: null,
   createdAt
 })
 
