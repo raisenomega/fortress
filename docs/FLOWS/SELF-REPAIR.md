@@ -306,9 +306,16 @@ presupuestos, prompt injection en los metadatos del hallazgo) está en
 
 ## Rechazos y sus significados
 
-Las razones con las que una propuesta **no llegó a GENERADO** (`REJECTION_REASONS`
-en el dominio). Salvo `superseded`, que caduca, todas dejan la fila en
+Las **veintidós** razones con las que una propuesta **no llegó a GENERADO**
+(`REJECTION_REASONS` en el dominio), completas. Salvo `superseded`, que caduca
+porque nadie la juzgó —la reemplazó una más nueva—, todas dejan la fila en
 `RECHAZADO`.
+
+Tres de ellas **cortan la tanda** además de matar la propuesta, y van marcadas:
+son las que no juzgan el fix y se arreglan esperando o mirando la máquina. Y
+cinco son **reintentables** (`omega_vetado`, `scope_violation`,
+`no_diff_produced`, `provider_error`, `analisis_ilegible`): las de razonamiento,
+más el error del proveedor, donde repetir puede dar otra cosa.
 
 | Razón | Significado |
 |---|---|
@@ -325,6 +332,14 @@ en el dominio). Salvo `superseded`, que caduca, todas dejan la fila en
 | `worktree_missing` / `worktree_contaminated` | El worktree se perdió o estaba sucio al retomar. |
 | `superseded` | Una propuesta más nueva sobre el mismo hallazgo la reemplazó. |
 | `orphan_before_generate` | La corrida quedó huérfana (app cerrada a mitad) y se cerró al reclamar. |
+| `generator_timeout` | **Nuestro** reloj se agotó, no el proveedor. Ni corta la tanda ni se reintenta: la propuesta siguiente puede terminar en tres minutos. |
+| `turnos_agotados` | El generador agotó su techo de turnos sin terminar. No es presupuesto. |
+| `analisis_ilegible` | El analista corrió pero su salida no se dejó leer. **No** es obsolescencia — y sí se reintenta, porque la respuesta de un modelo no es la misma dos veces. |
+| `gate_sin_verificacion` | El proyecto no declara ningún script con el que verificar el fix. |
+| `proyecto_sin_confianza` | El proyecto no es de confianza: el gate no ejecuta su código. |
+| `provider_error` | El CLI salió con código de error: 429, cuota, corte de red o un crash suyo. Es una bolsa de dos a propósito, hasta que haya un 429 registrado con el que separarlas. **Corta la tanda**, y se reintenta. |
+| `omega_error` | El revisor falló por algo que no es su reloj ni una respuesta ilegible. **Corta la tanda**. |
+| `cli_no_arranco` | El binario del CLI no llegó a arrancar: no existe, no es ejecutable, el PATH está roto. Es de la **máquina**, no del fix ni del proveedor: **corta la tanda** y no se reintenta, porque esperar no crea un fichero que falta. |
 
 ## Razones de la reconciliación y del ciclo de vida
 
