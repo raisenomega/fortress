@@ -8,6 +8,7 @@ export const systemApi: SelfImprovementApi = {
   observations: () => ipcRenderer.invoke(IPC.systemObservations),
   resolveObservation: (id) => ipcRenderer.invoke(IPC.systemResolveObservation, id),
   exportObservations: () => ipcRenderer.invoke(IPC.systemExportObservations),
+  importAttended: () => ipcRenderer.invoke(IPC.systemImportAttended),
   proposeCapability: (input) => ipcRenderer.invoke(IPC.systemProposeCapability, input),
   capabilities: () => ipcRenderer.invoke(IPC.systemCapabilities),
   promoteCapability: (id, human) => ipcRenderer.invoke(IPC.systemPromoteCapability, id, human),

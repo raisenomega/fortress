@@ -56,6 +56,10 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
       return toObs(byId.get(id) as Row)
     },
     listOpen: () => (open.all() as Row[]).map(toObs),
+    findById: (id) => {
+      const row = byId.get(id) as Row | undefined
+      return row ? toObs(row) : null
+    },
     setStatus,
     // El boton viejo de la vista sigue vivo hasta que la importacion lo
     // sustituya: se le da el estado nuevo para que no quede escribiendo una

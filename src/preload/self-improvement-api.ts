@@ -5,6 +5,7 @@ import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
 import type { CapabilityEpisode } from '@domain/system/capability-episode'
 import type { GenesisStatus } from '@domain/system/genesis-status'
 import type { SelfObservation } from '@domain/system/self-observation'
+import type { ResumenImport } from '@application/system/importar-atendidos'
 import type { Result } from '@domain/shared/result'
 import type { Unsubscribe } from './api-types'
 
@@ -18,6 +19,8 @@ export interface SelfImprovementApi {
   resolveObservation(id: string): Promise<void>
   /** Escribe el backlog a un JSON trabajable desde fuera. Devuelve su ruta. */
   exportObservations(): Promise<Result<string>>
+  /** Asienta el registro de lo atendido fuera. Devuelve el resumen con sus rechazos. */
+  importAttended(): Promise<Result<ResumenImport>>
   /** Registra una capacidad nueva en 'propuesta'. No genera ni ejecuta nada. */
   proposeCapability(input: NewCapability): Promise<Result<StoredCapability>>
   /** Capacidades auto-propuestas con su fase y madurez, derivadas del historial. */
