@@ -1,4 +1,14 @@
-/** Por que una propuesta NO llego a GENERADO. La razon viaja en analysis_reason. */
+/**
+ * Por que una propuesta NO llego a GENERADO. La razon viaja en analysis_reason.
+ *
+ * Es el vocabulario de DESENLACES de un intento, no la lista de lo que produce
+ * el estado `RECHAZADO`, y la diferencia se ve en `superseded`: no llego a
+ * GENERADO —luego pertenece aqui— pero `generate-guards` la deja en `CADUCADO`,
+ * porque a esa propuesta no la juzgo nadie, la reemplazo una mas nueva. Sacarla
+ * para "arreglar" la asimetria seria peor: se comprobo quitandola y da dos
+ * errores de tipo, porque el generador y la tabla de clasificacion la exigen —
+ * el remedio consiste en ponerla dos veces donde estaba una.
+ */
 export const REJECTION_REASONS = [
   'scope_violation',
   'budget_exceeded',
