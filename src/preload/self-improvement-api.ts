@@ -16,6 +16,8 @@ export interface SelfImprovementApi {
   /** Pendientes abiertos, del mas reciente al mas antiguo. */
   observations(): Promise<readonly SelfObservation[]>
   resolveObservation(id: string): Promise<void>
+  /** Escribe el backlog a un JSON trabajable desde fuera. Devuelve su ruta. */
+  exportObservations(): Promise<Result<string>>
   /** Registra una capacidad nueva en 'propuesta'. No genera ni ejecuta nada. */
   proposeCapability(input: NewCapability): Promise<Result<StoredCapability>>
   /** Capacidades auto-propuestas con su fase y madurez, derivadas del historial. */

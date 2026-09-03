@@ -7,6 +7,7 @@ import { subscribe } from './subscribe'
 export const systemApi: SelfImprovementApi = {
   observations: () => ipcRenderer.invoke(IPC.systemObservations),
   resolveObservation: (id) => ipcRenderer.invoke(IPC.systemResolveObservation, id),
+  exportObservations: () => ipcRenderer.invoke(IPC.systemExportObservations),
   proposeCapability: (input) => ipcRenderer.invoke(IPC.systemProposeCapability, input),
   capabilities: () => ipcRenderer.invoke(IPC.systemCapabilities),
   promoteCapability: (id, human) => ipcRenderer.invoke(IPC.systemPromoteCapability, id, human),

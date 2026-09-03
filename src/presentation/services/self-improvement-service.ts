@@ -1,11 +1,17 @@
 import type { NewCapability } from '@domain/system/capability'
 import type { CapabilityNote, NewCapabilityNote } from '@domain/system/capability-note'
+import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useSelfImprovementStore } from '../stores/self-improvement-store'
 
 /** Relee los pendientes de auto-mejora que los agentes fueron dejando. */
 export async function loadObservations(): Promise<void> {
   useSelfImprovementStore.getState().setObservations(await api().system.observations())
+}
+
+/** Escribe el backlog a disco para trabajarlo fuera. Devuelve la ruta o el error. */
+export async function exportObservations(): Promise<Result<string>> {
+  return api().system.exportObservations()
 }
 
 /** Marca un pendiente como atendido y refresca la lista. */
