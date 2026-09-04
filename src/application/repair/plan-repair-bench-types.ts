@@ -1,5 +1,5 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
-import type { SelfNoteDraft } from '@domain/system/self-observation'
+import type { SelfNoteDraft, SelfObservation } from '@domain/system/self-observation'
 import type { ConfigState } from '@domain/repair/auto-merge-config'
 import type { Evidencia } from '@domain/repair/evidencia-obsolescencia'
 import type { Proposal } from '@domain/repair/proposal'
@@ -14,6 +14,8 @@ export interface Bench {
   readonly events: ProposalEvent[]
   /** Auto-observaciones asentadas durante la corrida. */
   readonly observadas: unknown[]
+  /** La memoria que recibio el analista en cada estudio: lo ya atendido. */
+  readonly memoria: Array<readonly string[]>
   /** Con que se pidio el descuento por obsoleto: debe ser el HEAD, no el escaneo. */
   readonly anclaDelDescuento: string[]
   /** Extinciones pedidas por el motor: ids, cuando y con que motivo. */
@@ -42,6 +44,9 @@ export interface Opciones {
   readonly cerco?: ConfigState
   /** Lo que el analista fake devolvera como `evidencia` de su OBSOLETO. */
   readonly evidencia?: Evidencia
+  /** Observaciones YA cerradas en la base: lo que el analista debe recibir para
+   *  no volver a anotarlas. */
+  readonly cerradas?: readonly SelfObservation[]
   /** El texto del fichero del hallazgo tal como lo lee la sonda. `null` imita el
    *  fichero que no se pudo leer, que NO es prueba de que el defecto se fuera. */
   readonly contenido?: string | null

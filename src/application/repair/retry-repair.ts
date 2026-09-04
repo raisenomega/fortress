@@ -5,7 +5,7 @@ import { extinguirSiObsoleto } from './extinguir-con-juicio'
 import type { Selection } from '@domain/repair/select-target'
 import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
-import { analyzeTarget } from './analyze-target'
+import { estudiar } from './estudiar-con-memoria'
 import { safeRecord } from './book-cursor'
 import { recordAnalyzed } from './record-plan-events'
 import { admitRetry } from './retry-guards'
@@ -55,7 +55,7 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
     target: { id, severity, title, file, line, firstSeen },
     reason: `${retryOf} — reintento explicito del operador sobre el mismo hallazgo`
   }
-  const result = await analyzeTarget(ctx.analystFor(project.path, project.id), selection)
+  const result = await estudiar(ctx, project, selection)
   const v = veredictoDelAnalisis(result.analysis)
   // El reintento hereda el reparto de tres, con su linaje delante. Que el
   // prefijo deje de casar con el motivo NO es descuido: es lo que corta la

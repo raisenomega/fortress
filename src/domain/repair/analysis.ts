@@ -65,7 +65,10 @@ export interface AnalystResult {
   readonly raw?: string
 }
 
-/** Puerto: el analista grafo-primero que ESTUDIA el hallazgo. Infra lo implementa. */
+/** Puerto: el analista grafo-primero que ESTUDIA el hallazgo. Infra lo implementa.
+ *  `atendidas` son las lineas YA saneadas y formateadas de lo que FORTRESS trato
+ *  (vacio = sin seccion). Viajan formateadas, nunca crudas: quien las convierte
+ *  en texto es el dominio, no el adaptador que las mete en el prompt. */
 export interface Analyst {
-  study(target: Candidate): Promise<AnalystResult>
+  study(target: Candidate, atendidas: readonly string[]): Promise<AnalystResult>
 }

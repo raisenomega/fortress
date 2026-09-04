@@ -4,7 +4,7 @@ import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
 import { extinguirSiObsoleto } from './extinguir-con-juicio'
 import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
-import { analyzeTarget } from './analyze-target'
+import { estudiar } from './estudiar-con-memoria'
 import { elegirObjetivo } from './elegir-objetivo'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
@@ -47,7 +47,7 @@ export async function planRepair(
   context.repairProposals.insert(proposal)
   await recordElegido(context.eventLog, proposal, scanId)
 
-  const crudo = await analyzeTarget(context.analystFor(project.path, project.id), selection)
+  const crudo = await estudiar(context, project, selection)
   const result = conAgentRun(crudo, recordMotorRun(context, projectId, null, crudo.runMeta))
   // Lo que el analista noto de FORTRESS se guarda pase lo que pase con el
   // hallazgo: un limite del que se topo vale igual si el hallazgo era un fantasma.
