@@ -1,3 +1,4 @@
+import { senasDeIdentidad } from '@domain/project/finding-identity'
 import { buildTransitionEvent } from '@domain/repair/proposal-event'
 import { canTransition, type Proposal } from '@domain/repair/proposal'
 import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
@@ -50,9 +51,9 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
   ctx.repairProposals.insert(proposal)
   await recordRetryElegido(ctx, proposal, old.id)
 
-  const { id, severity, title, file, line, firstSeen } = finding
+  const { id, severity, title, file, line, firstSeen, identity } = finding
   const selection: Selection = {
-    target: { id, severity, title, file, line, firstSeen },
+    target: { id, severity, title, file, line, firstSeen, ...senasDeIdentidad(identity) },
     reason: `${retryOf} — reintento explicito del operador sobre el mismo hallazgo`
   }
   const result = await estudiar(ctx, project, selection)

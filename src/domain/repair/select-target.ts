@@ -12,6 +12,11 @@ export interface Candidate {
   readonly line: number | null
   /** Cuando se vio por primera vez. Es lo que hace que quien espera suba. */
   readonly firstSeen: string
+  /** De que CLASE es el defecto, del vocabulario cerrado. `null` en las claves
+   *  del formato viejo, que no lo llevan. */
+  readonly tipo: string | null
+  /** La funcion o bloque donde vive, normalizado en minusculas. */
+  readonly simbolo: string | null
 }
 
 export interface Selection {

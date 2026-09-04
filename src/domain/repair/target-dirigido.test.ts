@@ -6,7 +6,7 @@ import { dirigirA } from './target-dirigido'
 const candidato = (severity: Severity): Candidate => ({
   id: 'f1', severity, title: 'el canal no pasa por guardRun',
   file: 'src/infrastructure/ipc/graph-action-handlers.ts', line: 49,
-  firstSeen: '2026-08-19T10:00:00Z'
+  firstSeen: '2026-08-19T10:00:00Z', tipo: 'path-traversal', simbolo: 'handleverify'
 }) // prettier-ignore
 
 describe('el operador senala un hallazgo y el motor lo atiende', () => {

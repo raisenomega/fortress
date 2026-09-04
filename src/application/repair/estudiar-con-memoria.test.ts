@@ -6,7 +6,7 @@ import type { AppContext } from '../context'
 import { estudiar } from './estudiar-con-memoria'
 
 // prettier-ignore
-const TARGET: Candidate = { id: 'f1', severity: 'LOW', title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z' }
+const TARGET: Candidate = { id: 'f1', severity: 'LOW', title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }
 const SEL: Selection = { target: TARGET, reason: 'r' }
 const PROJECT = { id: 'p1', path: '/tmp/p', name: 'p' } as Project
 
