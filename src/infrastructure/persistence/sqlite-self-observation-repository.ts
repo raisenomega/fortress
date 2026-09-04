@@ -44,9 +44,11 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
   )
   // Por `attended_at` y no por `created_at`: lo que importa es cuando se CERRO,
   // que es lo reciente para quien va a leerlo, no cuando se observo.
+  // Los dos desempates los exige el puerto: sin ellos una tanda empata en masa
+  // y el LIMIT corta por donde la base quiera. Ver `listClosed`.
   const closed = db.prepare(
     `SELECT * FROM self_observations WHERE status != 'pendiente'
-     ORDER BY attended_at DESC LIMIT ?`
+     ORDER BY attended_at DESC, created_at DESC, id LIMIT ?`
   )
   const update = db.prepare(`UPDATE self_observations
     SET status = @status, reason = @reason, attended_by = @attendedBy, attended_at = @attendedAt

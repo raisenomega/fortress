@@ -22,17 +22,26 @@ function sanitize(text: string): string {
 }
 
 /**
- * El motivo viaja SOLO en el descarte, y la asimetria es deliberada. Lo atendido
- * ya no esta en el codigo: basta el tema para reconocerlo. Lo descartado SIGUE
- * ahi, intacto y visible, asi que sin la razon el agente lo vuelve a levantar
- * con toda la logica del mundo — y la lista, que existe para callar el ruido,
- * seria el ruido. `null` en un descarte no deberia ocurrir (el contrato lo
- * exige), pero si ocurre se dice, que es mejor que insinuar que no hubo juicio.
+ * Cada linea lleva las DOS mitades: que se observo, y que se hizo con ello.
+ *
+ * El motivo viajaba solo en el descarte, con el argumento de que lo atendido ya
+ * no esta en el codigo y basta el tema. Era falso en la practica: bajo un
+ * encabezado que dice "ya atendido", el agente leia el ENUNCIADO DEL PROBLEMA
+ * RESUELTO —"la llamada a list_projects fue denegada por permisos"— sin una
+ * palabra de que se arreglo ni como. Le repetiamos la queja de algo que ya no
+ * pasa, que es lo contrario de lo que esta lista existe para hacer.
+ *
+ * Ahora las dos ramas son simetricas y el `reason` lleva el sha del arreglo,
+ * asi que la memoria dice donde mirar en vez de solo que no insista. `null` no
+ * deberia ocurrir en un descarte (el contrato lo exige) y si puede ocurrir en
+ * un atendido; en ambos casos se dice, que es mejor que insinuar que no hubo
+ * juicio.
  */
 function linea(obs: SelfObservation): string {
   const tema = sanitize(`${obs.area} — ${obs.note}`)
-  if (obs.status !== 'descartado') return tema
-  return `${tema} (descartado: ${obs.reason === null ? 'sin motivo escrito' : sanitize(obs.reason)})`
+  const verbo = obs.status === 'descartado' ? 'descartado' : 'arreglado'
+  const razon = obs.reason === null ? 'sin detalle escrito' : sanitize(obs.reason)
+  return `${tema} → ${verbo}: ${razon}`
 }
 
 /**

@@ -10,7 +10,7 @@ const CERRADA: SelfObservation = {
   id: 'o1', sourceProject: 'p', kind: 'gap', area: 'grafo', note: 'auto-indexa sin permiso',
   status: 'atendido', reason: 'arreglado', attendedBy: 'x', attendedAt: '2026-09-01', createdAt: '2026-08-01'
 }
-const LINEA = 'grafo — auto-indexa sin permiso'
+const LINEA = 'grafo — auto-indexa sin permiso → arreglado: arreglado'
 
 describe('el motor le pasa al analista lo que FORTRESS ya trato', () => {
   it('planRepair: el analista estudia CON la memoria delante', async () => {

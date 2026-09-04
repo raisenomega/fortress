@@ -14,6 +14,15 @@ export interface SelfObservationRepository {
    *
    * El tope va en el SQL y no en memoria: traer trescientas filas para quedarse
    * con cuarenta es trabajo que la base hace mejor.
+   *
+   * ORDEN EXIGIDO: `attended_at` descendente, y DESEMPATADO. La recencia sola
+   * bastaba mientras las observaciones se cerraban de una en una; en cuanto se
+   * cerro la primera TANDA, ciento diecisiete compartieron el mismo instante y
+   * el tope empezo a cortar dentro del empate por donde la base quisiera —dos
+   * llamadas iguales, dos listas distintas—. Desempata `created_at` descendente,
+   * que dentro de una tanda pone delante lo observado mas fresco (lo que mas
+   * riesgo tiene de repetirse), y cierra el `id`, que es unico: el corte es
+   * siempre el mismo.
    */
   listClosed(limite: number): readonly SelfObservation[]
   /** Una cualquiera, en el estado que este. La importacion la mira ANTES de
