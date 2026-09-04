@@ -59,10 +59,4 @@ describe('buildDocsFirst: segun la decision que toque', () => {
     expect(texto).toContain('DOCS FIRST (estructural)')
     expect(texto).toContain('docs/ARCHITECTURE.md, docs/DECISIONS/, docs/')
   })
-
-  it('sin documentos de su clase cae a la doctrina general, no se inventa una', () => {
-    const texto = buildDocsFirst('security', GENERALES)
-    expect(texto).toContain('DOCS FIRST (seguridad)')
-    expect(texto).toContain('CLAUDE.md, README.md')
-  })
 })

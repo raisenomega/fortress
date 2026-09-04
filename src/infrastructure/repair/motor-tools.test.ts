@@ -33,3 +33,19 @@ describe('los tres agentes del motor alcanzan TODO el grafo de lectura', () => {
     expect(TOOLS_EDICION.split(',')).not.toContain('Bash')
   })
 })
+
+describe('el VOCABULARIO en si, no solo que se derive de el', () => {
+  it('lleva las dos de frescura, que decidian REAL vs OBSOLETO a ciegas', () => {
+    // Recorrer GRAPH_READ_TOOLS prueba que las tres listas derivan de el, pero
+    // no que el vocabulario este completo: quitar una herramienta la quita de
+    // los dos lados y el test de arriba sigue verde. Estas van por su nombre.
+    expect(GRAPH_READ_TOOLS).toContain('mcp__codebase-memory__check_index_coverage')
+    expect(GRAPH_READ_TOOLS).toContain('mcp__codebase-memory__detect_changes')
+  })
+
+  it('sigue sin conceder ninguna de ESCRITURA', () => {
+    for (const escribe of ['index_repository', 'delete_project', 'ingest_traces', 'manage_adr']) {
+      expect(GRAPH_READ_TOOLS).not.toContain(`mcp__codebase-memory__${escribe}`)
+    }
+  })
+})
