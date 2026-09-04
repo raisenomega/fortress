@@ -34,3 +34,25 @@ describe('el analista sabe como se llama el proyecto en el grafo', () => {
     expect(prompt()).toContain('list_projects te da el nombre real')
   })
 })
+
+describe('que hacer cuando el grafo no tiene el proyecto', () => {
+  it('le dice que index_status se lo resuelve en una llamada', () => {
+    expect(prompt()).toContain('index_status te lo dice en una llamada')
+  })
+
+  it('le prohibe indexar: es accion del operador, con gate', () => {
+    expect(prompt()).toContain('NO lo indexes tu')
+  })
+
+  it('le dice que NO lo anote: es un estado conocido, no un fallo', () => {
+    // 53 observaciones repitiendo el mismo estado operativo. Pero solo eso:
+    // "lo demas que te falte, si" — no se le manda callar en general.
+    expect(prompt()).toContain('no hace falta anotarlo en "notes"')
+    expect(prompt()).toContain('lo demas que te falte, si')
+  })
+
+  it('le da las dos herramientas de frescura por su nombre', () => {
+    expect(prompt()).toContain('check_index_coverage')
+    expect(prompt()).toContain('detect_changes')
+  })
+})
