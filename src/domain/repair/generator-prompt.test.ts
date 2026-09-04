@@ -5,7 +5,7 @@ import { computeAllowedFiles } from './allowed-files'
 import { buildGeneratorPrompt } from './generator-prompt'
 
 const ANALYSIS: Analysis = {
-  target: { id: 'f1', severity: 'LOW', title: 'parentDir sin validar', file: 'src/a/b.ts', line: 15, firstSeen: '2026-01-01T00:00:00.000Z' }, // prettier-ignore
+  target: { id: 'f1', severity: 'LOW', title: 'parentDir sin validar', file: 'src/a/b.ts', line: 15, firstSeen: '2026-01-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }, // prettier-ignore
   status: 'REAL',
   whatToChange: 'validar parentDir con isSafeParent',
   where: 'src/a/b.ts',

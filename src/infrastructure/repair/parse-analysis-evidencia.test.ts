@@ -4,7 +4,7 @@ import type { Candidate } from '@domain/repair/select-target'
 import { toAnalysis } from './parse-analysis'
 
 // prettier-ignore
-const TARGET: Candidate = { id: 'f1', severity: 'LOW', title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-08-01T00:00:00.000Z' }
+const TARGET: Candidate = { id: 'f1', severity: 'LOW', title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-08-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }
 
 const leer = (texto: string): ReturnType<typeof toAnalysis> =>
   toAnalysis(TARGET, { result: texto, usage: EMPTY_USAGE })

@@ -7,7 +7,9 @@ const at = (title: string, file: string): Candidate => ({
   title,
   file,
   line: 1,
-  firstSeen: '2026-01-01T00:00:00.000Z'
+  firstSeen: '2026-01-01T00:00:00.000Z',
+  tipo: 'path-traversal',
+  simbolo: 'handleverify'
 })
 
 /** Los dos que la heuristica vieja penalizaba con superficie 11. */

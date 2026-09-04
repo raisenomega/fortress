@@ -8,7 +8,9 @@ const TARGET = {
   title: 't',
   file: 'a.ts',
   line: 1,
-  firstSeen: '2026-01-01T00:00:00.000Z'
+  firstSeen: '2026-01-01T00:00:00.000Z',
+  tipo: 'path-traversal',
+  simbolo: 'handleverify'
 }
 const BASE = {
   status: 'REAL',

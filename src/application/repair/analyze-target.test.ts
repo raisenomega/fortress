@@ -9,7 +9,9 @@ const TARGET: Candidate = {
   title: 'postureRun sin guardRun',
   file: 'src/infrastructure/ipc/posture-handlers.ts',
   line: 11,
-  firstSeen: '2026-01-01T00:00:00.000Z'
+  firstSeen: '2026-01-01T00:00:00.000Z',
+  tipo: 'path-traversal',
+  simbolo: 'handleverify'
 }
 const SEL: Selection = { target: TARGET, reason: 'menor superficie' }
 const FULL: Analysis = {

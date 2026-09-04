@@ -6,7 +6,7 @@ const VIEJO = '2026-08-04T00:00:00.000Z'
 const NUEVO = '2026-08-19T00:00:00.000Z'
 
 /** No aditivo (surface 11): el 86% del pozo real esta ahi. */
-const c = (id: string, file: string, firstSeen = NUEVO, title = 'permite reenviar correos'): Candidate => ({ id, severity: 'LOW', title, file, line: 1, firstSeen }) // prettier-ignore
+const c = (id: string, file: string, firstSeen = NUEVO, title = 'permite reenviar correos'): Candidate => ({ id, severity: 'LOW', title, file, line: 1, firstSeen, tipo: null, simbolo: null }) // prettier-ignore
 
 describe('los criterios de desempate del selector, uno a uno', () => {
   it('quien espera sube: a igual superficie, el mas viejo primero', () => {

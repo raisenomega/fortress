@@ -14,6 +14,8 @@ interface Fila {
   readonly id: string
   readonly identidad: string
   readonly firstSeen: string
+  tipo: 'path-traversal'
+  simbolo: 'handleverify'
 }
 
 /**

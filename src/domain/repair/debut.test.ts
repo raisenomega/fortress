@@ -9,7 +9,9 @@ const candidate = (severity: Severity, title: string, file: string): Candidate =
   title,
   file,
   line: 1,
-  firstSeen: '2026-01-01T00:00:00.000Z'
+  firstSeen: '2026-01-01T00:00:00.000Z',
+  tipo: 'path-traversal',
+  simbolo: 'handleverify'
 })
 
 /** El hallazgo real que motivo la ampliacion: MEDIUM, aditivo, superficie 1. */

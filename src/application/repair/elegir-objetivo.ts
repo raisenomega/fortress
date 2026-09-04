@@ -1,4 +1,5 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
+import { senasDeIdentidad } from '@domain/project/finding-identity'
 import { dentroDelAlcance } from '@domain/repair/alcance'
 import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { hasBlockingRejection } from '@domain/repair/bloqueo-por-rechazo'
@@ -6,7 +7,7 @@ import { selectTarget, type Candidate, type Selection } from '@domain/repair/sel
 import { dirigirA } from '@domain/repair/target-dirigido'
 import type { AppContext } from '../context'
 
-const aCandidato = ({ id, severity, title, file, line, firstSeen }: FindingMemory): Candidate => ({ id, severity, title, file, line, firstSeen }) // prettier-ignore
+const aCandidato = ({ id, severity, title, file, line, firstSeen, identity }: FindingMemory): Candidate => ({ id, severity, title, file, line, firstSeen, ...senasDeIdentidad(identity) }) // prettier-ignore
 
 export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f.status === 'open'
 
@@ -16,9 +17,8 @@ export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f
  *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
  *  (ADR-059). Los que fracasaron por una causa que repetir no arregla con el
  *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. Y
- *  los que quedan fuera del alcance de ESTA vuelta, que depende de hasta donde
- *  vaya a llegar: si puede integrar sola, solo lo que el cerco admitiria; si
- *  para antes del merge, todo menos las defensas del motor.
+ *  los que quedan fuera del alcance de ESTA vuelta: si puede integrar sola, solo
+ *  lo que el cerco admitiria; si para antes del merge, todo menos las defensas.
  *  Exportada para que el panel diga cuantos QUEDAN sin recalcularlo por su
  *  lado: dos cuentas de lo mismo divergen, y el numero que el operador ve
  *  dejaria de ser el que el motor usa. */

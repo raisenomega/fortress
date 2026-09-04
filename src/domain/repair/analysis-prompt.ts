@@ -1,4 +1,5 @@
 import { seccionAtendido } from './analysis-prompt-atendido'
+import { senasDelHallazgo } from './analysis-prompt-senas'
 import { FORMATO } from './analysis-prompt-formato'
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
@@ -24,6 +25,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     // mirar. El sha del arbol NO se le da: no tiene Bash, no podria diffear, y
     // un dato que no puede usar solo ocupa prompt.
     'La fecha NO es prueba: lo que decide es el fichero. Orienta, nada mas.',
+    ...senasDelHallazgo(t),
     '',
     ...(docs === '' ? [] : [docs, '']),
     `En el grafo este proyecto se llama "${enElGrafo}" (deducido de su ruta; si no`,

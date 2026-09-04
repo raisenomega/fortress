@@ -6,7 +6,7 @@ import type { Candidate } from './select-target'
 import { veredictoDelAnalisis } from './veredicto-del-analisis'
 
 // prettier-ignore
-const TARGET: Candidate = { id: 'f1', severity: 'LOW', title: 't', file: 'a.ts', line: 1, firstSeen: '2026-08-01T00:00:00.000Z' }
+const TARGET: Candidate = { id: 'f1', severity: 'LOW', title: 't', file: 'a.ts', line: 1, firstSeen: '2026-08-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }
 
 describe('un CLI que no arranca NO es un analisis ilegible', () => {
   it('el veredicto lo nombra por lo que fue: no hubo proceso', () => {

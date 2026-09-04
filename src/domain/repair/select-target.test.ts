@@ -3,7 +3,7 @@ import { selectTarget, surface, type Candidate } from './select-target'
 import type { Severity } from '../shared/severity'
 
 const VISTO = '2026-01-01T00:00:00.000Z'
-const at = (id: string, severity: Severity, title: string, file: string, line: number): Candidate => ({ id, severity, title, file, line, firstSeen: VISTO }) // prettier-ignore
+const at = (id: string, severity: Severity, title: string, file: string, line: number): Candidate => ({ id, severity, title, file, line, firstSeen: VISTO, tipo: 'path-traversal', simbolo: 'handleverify' }) // prettier-ignore
 
 // Los 5 hallazgos reales del self-audit de FORTRESS.
 const HIGH = at('h', 'HIGH', 'preload expone process.env', 'src/preload/index.ts', 60)

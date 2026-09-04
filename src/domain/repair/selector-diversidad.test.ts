@@ -4,7 +4,7 @@ import { selectTarget, type Candidate } from './select-target'
 const NUEVO = '2026-08-19T00:00:00.000Z'
 
 /** No aditivo (surface 11): el 86% del pozo real esta ahi. */
-const c = (id: string, file: string): Candidate => ({ id, severity: 'LOW', title: 'permite reenviar correos', file, line: 1, firstSeen: NUEVO }) // prettier-ignore
+const c = (id: string, file: string): Candidate => ({ id, severity: 'LOW', title: 'permite reenviar correos', file, line: 1, firstSeen: NUEVO, tipo: 'path-traversal', simbolo: 'handleverify' }) // prettier-ignore
 
 /** El pozo real en pequeno: un dotfile denso, dos carpetas de letra baja, una
  *  carpeta de letra alta con el grueso, y las tres migraciones que hoy no se
