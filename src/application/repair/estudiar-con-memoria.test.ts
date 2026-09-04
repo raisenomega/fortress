@@ -39,14 +39,16 @@ describe('el analista recibe la memoria, y la recibe formateada', () => {
     const b = banco([cerrada({ area: 'grafo', note: 'auto-indexa sin permiso' })])
     await estudiar(b.ctx, PROJECT, SEL)
 
-    expect(b.recibido()).toEqual(['grafo — auto-indexa sin permiso'])
+    expect(b.recibido()).toEqual([
+      'grafo — auto-indexa sin permiso → arreglado: sin detalle escrito'
+    ])
   })
 
   it('el descarte llega con su motivo: sin el, el analista lo reabre', async () => {
     const b = banco([cerrada({ status: 'descartado', reason: 'no aplica' })])
     await estudiar(b.ctx, PROJECT, SEL)
 
-    expect(b.recibido()).toEqual(['grafo — n (descartado: no aplica)'])
+    expect(b.recibido()).toEqual(['grafo — n → descartado: no aplica'])
   })
 
   it('sin cerradas pasa una lista vacia, y el prompt no pondra seccion', async () => {
