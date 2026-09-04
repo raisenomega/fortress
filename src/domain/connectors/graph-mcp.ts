@@ -27,7 +27,15 @@ export const GRAPH_READ_TOOLS: readonly string[] = [
   'query_graph',
   'list_projects',
   'index_status',
-  'get_graph_schema'
+  'get_graph_schema',
+  // Las dos de FRESCURA, y las pidio el analista veinticinco veces sin saber
+  // que existian: `check_index_coverage` dice si el indice cubre un fichero y
+  // si va al dia respecto al disco, y `detect_changes` dice que cambio desde
+  // una fecha o un ref. Sin ellas, decidir REAL vs OBSOLETO era abrir el
+  // fichero a ciegas — y el analista corre SIN Bash, asi que no podia diffear
+  // por su cuenta. Leen; no escriben.
+  'check_index_coverage',
+  'detect_changes'
 ].map((tool) => `mcp__${GRAPH_SERVER}__${tool}`)
 
 /**
