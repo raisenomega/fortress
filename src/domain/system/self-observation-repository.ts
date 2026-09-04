@@ -25,6 +25,18 @@ export interface SelfObservationRepository {
    * siempre el mismo.
    */
   listClosed(limite: number): readonly SelfObservation[]
+  /**
+   * TODAS, en el orden en que se observaron. No es `listOpen` mas `listClosed`:
+   * es la otra pregunta. Aquellas dos sirven al trabajo —que queda por hacer,
+   * que recordarle al analista—; esta sirve a MIRAR, y para mirar el estado no
+   * es un filtro sino un color. Con las cerradas fuera, el panel no podia
+   * enseñar que se atendio nada: solo sabia pintar lo que faltaba.
+   *
+   * Por `created_at` y no por estado: agrupar los pendientes delante dejaria las
+   * primeras veintidos paginas de un solo color y las cerradas al final, que es
+   * justo lo contrario de ver la mezcla. La cuenta por estado va en la cabecera.
+   */
+  listAll(): readonly SelfObservation[]
   /** Una cualquiera, en el estado que este. La importacion la mira ANTES de
    *  cerrarla para saber si esta pisando un cierre anterior. */
   findById(id: string): SelfObservation | null

@@ -14,7 +14,8 @@ import type { Unsubscribe } from './api-types'
  * mientras trabajan en otros proyectos, para que el sistema madure solo.
  */
 export interface SelfImprovementApi {
-  /** Pendientes abiertos, del mas reciente al mas antiguo. */
+  /** Todas, del mas reciente al mas antiguo. Cerradas incluidas: sin ellas el
+   *  panel no podia enseñar que se hubiera atendido nada. */
   observations(): Promise<readonly SelfObservation[]>
   /** Escribe el backlog a un JSON trabajable desde fuera. Devuelve su ruta. */
   exportObservations(): Promise<Result<string>>
