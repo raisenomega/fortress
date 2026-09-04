@@ -32,7 +32,7 @@ describe('analyzeTarget (C2 analisis)', () => {
   it('devuelve analisis + factura del analista SIN mutar la seleccion', async () => {
     const analyst: Analyst = { study: async () => RESULT }
     const before = JSON.stringify(SEL)
-    const result = await analyzeTarget(analyst, SEL)
+    const result = await analyzeTarget(analyst, SEL, [])
     expect(result.analysis).toBe(FULL)
     expect(result.runMeta.durationMs).toBe(99)
     expect(JSON.stringify(SEL)).toBe(before)

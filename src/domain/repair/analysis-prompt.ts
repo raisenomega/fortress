@@ -1,3 +1,4 @@
+import { seccionAtendido } from './analysis-prompt-atendido'
 import { FORMATO } from './analysis-prompt-formato'
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
@@ -8,7 +9,8 @@ import type { Candidate } from './select-target'
  * para cualquier hallazgo. Pide VERIFICAR contra el archivo real si sigue siendo REAL
  * u OBSOLETO (como paso con posture), y un JSON inerte con el entendimiento.
  */
-export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor): string {
+// prettier-ignore
+export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, atendidas: readonly string[]): string {
   // El analista juzga si un hallazgo de seguridad sigue vivo: lo que el proyecto
   // haya escrito sobre lo que protege es parte de esa respuesta.
   const docs = buildDocsFirst('security', corpus)
@@ -29,6 +31,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor): str
     'hallazgo: leelo.',
     '',
     'NO propongas el fix ni escribas codigo.',
-    ...FORMATO
+    ...FORMATO,
+    ...seccionAtendido(atendidas)
   ].join('\n')
 }

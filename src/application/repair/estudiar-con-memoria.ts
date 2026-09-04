@@ -1,0 +1,26 @@
+import type { Project } from '@domain/project/project'
+import type { AnalystResult } from '@domain/repair/analysis'
+import type { Selection } from '@domain/repair/select-target'
+import type { AppContext } from '../context'
+import { loYaAtendido } from '../system/lo-ya-atendido'
+import { analyzeTarget } from './analyze-target'
+
+/**
+ * El analista MAS lo que FORTRESS ya trato. Existe para que la memoria no sea
+ * opcional: hay dos caminos al analisis —el normal y el reintento— y el mismo
+ * hecho no puede tener dos destinos segun por donde se entre (ADR-059). Con la
+ * lectura suelta en cada llamador, el tercero que aparezca la olvidara, y el
+ * sintoma seria mudo: el analista simplemente volveria a observar lo resuelto,
+ * que es exactamente lo que hacia antes de existir este bucle.
+ *
+ * La base se lee AQUI, en la aplicacion, y baja ya formateada. El analista vive
+ * en infraestructura y no alcanza el repositorio: no es un descuido de cableado,
+ * es la capa haciendo su trabajo.
+ */
+export function estudiar(
+  ctx: AppContext,
+  project: Project,
+  selection: Selection
+): Promise<AnalystResult> {
+  return analyzeTarget(ctx.analystFor(project.path, project.id), selection, loYaAtendido(ctx))
+}

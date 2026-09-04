@@ -1,4 +1,5 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
+import type { SelfObservation } from '@domain/system/self-observation'
 import type { Proposal } from '@domain/repair/proposal'
 import { bench, hallazgo, type Bench } from './plan-repair-fixture'
 
@@ -20,6 +21,7 @@ interface Opciones {
   readonly findings?: readonly FindingMemory[]
   readonly verdictStatus?: string
   readonly sha?: string | null
+  readonly cerradas?: readonly SelfObservation[]
 }
 
 /**
@@ -31,6 +33,7 @@ export function retryBench(opts: Opciones = {}): Bench {
   const b = bench({
     findings: opts.findings ?? [hallazgo('f1', 'a.ts')],
     verdictStatus: opts.verdictStatus,
+    cerradas: opts.cerradas,
     sha: opts.sha
   })
   Object.assign(b.context.repairProposals, {

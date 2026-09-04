@@ -50,11 +50,11 @@ function run(bin: string, cwd: string, prompt: string, owner: string): Promise<R
 // prettier-ignore
 export function createGraphAnalyst(claudeBin: string, projectPath: string, projectId: string): Analyst {
   return {
-    study: async (target) => {
+    study: async (target, atendidas) => {
       const reloj = relojDeCorrida(Date.now())
       // El corpus se lee en cada estudio, no al crear el analista: entre dos
       // propuestas el proyecto puede haber ganado un ADR.
-      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath))
+      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas)
       const out = await run(claudeBin, projectPath, prompt, projectId)
       const analysis = toAnalysis(target, out)
       return {
