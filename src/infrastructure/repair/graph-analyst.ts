@@ -1,5 +1,7 @@
+import { TOOLS_LECTURA } from './motor-tools'
 import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
+import { slugDelGrafo } from '@domain/connectors/slug-del-grafo'
 import { discoverCorpus } from '../project/discover-corpus'
 import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
@@ -11,17 +13,12 @@ import { trackChild } from '../claude-code/child-registry'
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
 })
-// Solo herramientas de LECTURA (grafo + Read/Grep/Glob): analisis read-only, sin editar.
-const TOOLS =
-  'mcp__codebase-memory__get_architecture,mcp__codebase-memory__search_graph,' +
-  'mcp__codebase-memory__trace_path,mcp__codebase-memory__get_code_snippet,' +
-  'mcp__codebase-memory__search_code,Read,Grep,Glob'
 
 function run(bin: string, cwd: string, prompt: string, owner: string): Promise<RunOut> {
   // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config
   // aisla el grafo (sin los MCP de claude.ai). Solo tools de lectura: read-only.
   const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
-    '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS] // prettier-ignore
+    '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
   return new Promise((resolve) => {
     const child = spawn(bin, args, { cwd })
     trackChild(child, owner)
@@ -54,7 +51,7 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       const reloj = relojDeCorrida(Date.now())
       // El corpus se lee en cada estudio, no al crear el analista: entre dos
       // propuestas el proyecto puede haber ganado un ADR.
-      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas)
+      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, slugDelGrafo(projectPath))
       const out = await run(claudeBin, projectPath, prompt, projectId)
       const analysis = toAnalysis(target, out)
       return {

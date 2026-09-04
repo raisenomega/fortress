@@ -1,3 +1,4 @@
+import { TOOLS_LECTURA } from './motor-tools'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
 import { trackChild } from '../claude-code/child-registry'
@@ -11,10 +12,6 @@ const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
 })
 // LECTURA ESTRICTA: grafo + Read/Grep/Glob. Sin Edit, sin Write, sin Bash.
-const TOOLS =
-  'mcp__codebase-memory__get_architecture,mcp__codebase-memory__search_graph,' +
-  'mcp__codebase-memory__trace_path,mcp__codebase-memory__get_code_snippet,' +
-  'mcp__codebase-memory__search_code,Read,Grep,Glob'
 const TIMEOUT_MS = 900_000
 
 export interface GraphOmega {
@@ -29,7 +26,7 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
     run: (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
-        '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS] // prettier-ignore
+        '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
       return new Promise((resolve) => {
         // Recorte del CLI, no herencia cruda: ni el revisor ni sus nietos —el MCP
         // del grafo que el mismo levanta— ven las llaves de la sesion viva. Sin key
