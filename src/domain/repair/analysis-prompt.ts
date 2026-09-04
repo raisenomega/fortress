@@ -26,6 +26,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     // un dato que no puede usar solo ocupa prompt.
     'La fecha NO es prueba: lo que decide es el fichero. Orienta, nada mas.',
     ...senasDelHallazgo(t),
+    ...(t.intentos == null ? [] : ['', t.intentos]),
     '',
     ...(docs === '' ? [] : [docs, '']),
     `En el grafo este proyecto se llama "${enElGrafo}" (deducido de su ruta; si no`,

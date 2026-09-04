@@ -17,6 +17,9 @@ export interface Candidate {
   readonly tipo: string | null
   /** La funcion o bloque donde vive, normalizado en minusculas. */
   readonly simbolo: string | null
+  /** Lo que YA se intento con el, si algo. `null` mientras solo se ELIGE: lo
+   *  pone quien va a estudiarlo, que es quien tiene el expediente delante. */
+  readonly intentos?: string | null
 }
 
 export interface Selection {
