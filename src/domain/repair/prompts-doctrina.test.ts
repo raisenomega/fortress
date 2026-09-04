@@ -32,7 +32,7 @@ const omega = (corpus: CorpusDescriptor): string =>
 
 describe('las tres fases del motor citan la doctrina del proyecto', () => {
   it('el analista mira lo que el proyecto escribio sobre lo que protege', () => {
-    const prompt = buildAnalysisPrompt(TARGET, CORPUS, [])
+    const prompt = buildAnalysisPrompt(TARGET, CORPUS, [], 'g')
 
     expect(prompt).toContain('DOCS FIRST (seguridad)')
     expect(prompt).toContain('docs/SECURITY-MODEL.md')
@@ -54,7 +54,7 @@ describe('las tres fases del motor citan la doctrina del proyecto', () => {
 describe('un proyecto sin doctrina no recibe una seccion vacia', () => {
   it('los tres prompts se construyen sin la seccion y sin romperse', () => {
     for (const prompt of [
-      buildAnalysisPrompt(TARGET, EMPTY_CORPUS, []),
+      buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g'),
       buildGeneratorPrompt(ANALYSIS, EMPTY_CORPUS, ['src/a.ts']),
       omega(EMPTY_CORPUS)
     ]) {
@@ -64,7 +64,7 @@ describe('un proyecto sin doctrina no recibe una seccion vacia', () => {
   })
 
   it('y el resto del prompt sigue entero: no se perdio nada por el camino', () => {
-    expect(buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [])).toContain('GRAFO PRIMERO')
+    expect(buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g')).toContain('GRAFO PRIMERO')
     expect(buildGeneratorPrompt(ANALYSIS, EMPTY_CORPUS, ['src/a.ts'])).toContain('<permitidos>')
     expect(omega(EMPTY_CORPUS)).toContain('VERDICT')
   })

@@ -5,7 +5,7 @@ import { buildAnalysisPrompt } from './analysis-prompt'
 // prettier-ignore
 const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z' }
 
-const prompt = (): string => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [])
+const prompt = (): string => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g')
 
 describe('el prompt le dice al modelo la regla que antes solo sabia el codigo', () => {
   it('exige UN UNICO objeto, y prohibe un segundo bloque', () => {

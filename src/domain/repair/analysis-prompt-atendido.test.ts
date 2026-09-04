@@ -6,7 +6,7 @@ import { seccionAtendido } from './analysis-prompt-atendido'
 // prettier-ignore
 const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z' }
 const prompt = (atendidas: readonly string[]): string =>
-  buildAnalysisPrompt(TARGET, EMPTY_CORPUS, atendidas)
+  buildAnalysisPrompt(TARGET, EMPTY_CORPUS, atendidas, 'home-jojo-repo')
 
 describe('el analista lee lo ya atendido antes de observar', () => {
   it('con cerradas, el prompt las lleva y le dice que no las repita', () => {
