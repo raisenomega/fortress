@@ -1,6 +1,7 @@
 import { TOOLS_LECTURA } from './motor-tools'
 import { spawn } from 'child_process'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
+import { slugDelGrafo } from '@domain/connectors/slug-del-grafo'
 import { discoverCorpus } from '../project/discover-corpus'
 import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
@@ -50,7 +51,7 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       const reloj = relojDeCorrida(Date.now())
       // El corpus se lee en cada estudio, no al crear el analista: entre dos
       // propuestas el proyecto puede haber ganado un ADR.
-      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas)
+      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, slugDelGrafo(projectPath))
       const out = await run(claudeBin, projectPath, prompt, projectId)
       const analysis = toAnalysis(target, out)
       return {
