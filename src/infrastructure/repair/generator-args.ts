@@ -1,13 +1,10 @@
+import { TOOLS_EDICION } from './motor-tools'
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
 })
 
 // Lectura (grafo + Read/Grep/Glob) MAS edicion (Edit/Write). SIN Bash: el
 // generador no corre git ni tests; el commit y el gate son del motor.
-const TOOLS =
-  'mcp__codebase-memory__get_architecture,mcp__codebase-memory__search_graph,' +
-  'mcp__codebase-memory__trace_path,mcp__codebase-memory__get_code_snippet,' +
-  'mcp__codebase-memory__search_code,Read,Grep,Glob,Edit,Write'
 
 /**
  * Techo de turnos del generador.
@@ -31,6 +28,6 @@ export const MAX_TURNS = 30
 /** Con que se lanza C3: solo lee y edita, dentro del worktree, y con techo. */
 export function argsDelGenerador(prompt: string): readonly string[] {
   return ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
-    '--strict-mcp-config', '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS,
+    '--strict-mcp-config', '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION,
     '--max-turns', String(MAX_TURNS)] // prettier-ignore
 }
