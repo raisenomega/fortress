@@ -6,6 +6,16 @@ export interface SelfObservationRepository {
   add(observation: NewSelfObservation): SelfObservation
   /** Pendientes (no atendidas ni descartadas), del mas reciente al mas antiguo. */
   listOpen(): readonly SelfObservation[]
+  /**
+   * Las CERRADAS (atendidas o descartadas), de la mas reciente a la mas vieja.
+   * Lo contrario de `listOpen`, y para lo contrario: no lo que queda por hacer,
+   * sino lo que ya se trato — el material con el que un agente sabe que un tema
+   * ya paso por aqui y no hace falta que lo vuelva a levantar.
+   *
+   * El tope va en el SQL y no en memoria: traer trescientas filas para quedarse
+   * con cuarenta es trabajo que la base hace mejor.
+   */
+  listClosed(limite: number): readonly SelfObservation[]
   /** Una cualquiera, en el estado que este. La importacion la mira ANTES de
    *  cerrarla para saber si esta pisando un cierre anterior. */
   findById(id: string): SelfObservation | null
