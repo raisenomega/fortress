@@ -2,6 +2,7 @@ import type { Project } from '@domain/project/project'
 import type { AnalystResult } from '@domain/repair/analysis'
 import type { Selection } from '@domain/repair/select-target'
 import type { AppContext } from '../context'
+import { intentosPrevios } from '@domain/repair/intentos-previos'
 import { loYaAtendido } from '../system/lo-ya-atendido'
 import { analyzeTarget } from './analyze-target'
 
@@ -22,5 +23,11 @@ export function estudiar(
   project: Project,
   selection: Selection
 ): Promise<AnalystResult> {
-  return analyzeTarget(ctx.analystFor(project.path, project.id), selection, loYaAtendido(ctx))
+  // El expediente del hallazgo se lee AQUI por lo mismo que la memoria: hay dos
+  // caminos al analisis y el dato no puede depender de por cual se entre.
+  const suyas = ctx.repairProposals
+    .listByProject(project.id)
+    .filter((p) => p.findingId === selection.target.id)
+  const target = { ...selection.target, intentos: intentosPrevios(suyas) }
+  return analyzeTarget(ctx.analystFor(project.path, project.id), { ...selection, target }, loYaAtendido(ctx)) // prettier-ignore
 }

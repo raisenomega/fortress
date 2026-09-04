@@ -24,6 +24,8 @@ function banco(cerradas: readonly SelfObservation[]): {
   let recibido: readonly string[] | null = null
   const ctx = {
     selfObservations: { listClosed: () => cerradas },
+    // Desde la tanda 4, `estudiar` tambien lee el expediente del hallazgo.
+    repairProposals: { listByProject: () => [] },
     analystFor: () => ({
       study: (_t: Candidate, atendidas: readonly string[]) => {
         recibido = atendidas
