@@ -6,9 +6,22 @@ import {
 } from '../project/corpus-descriptor'
 import { CABECERA, CABECERA_SIN_PROPIA } from './docs-first-cabeceras'
 
+/**
+ * Se decia `file_pattern '*.md'` y ese valor devuelve CERO. El parametro no
+ * toma un glob ni una expresion regular: casa por SUBCADENA contra la ruta del
+ * fichero. Medido contra el grafo vivo de este repo: `'*.md'` da 0 nodos,
+ * `'.md'` da 1948 y `'docs/'` da 1613.
+ *
+ * El fallo era de los caros porque no se nota: la herramienta no protesta,
+ * responde `total 0`, y la lectura ingenua es que la documentacion no esta
+ * indexada. Veinte veces el agente concluyo eso y se fue a leer los ficheros a
+ * mano, o dio por bueno un falso negativo. Se le enseñaba una sintaxis que no
+ * existe y despues se le pedia que confiara en el resultado.
+ */
 const GRAFO =
-  "Los .md estan indexados en el grafo: pidelos con file_pattern '*.md' cuando el " +
-  'dominio de la decision lo requiera.'
+  "Los .md estan indexados en el grafo: pidelos con file_pattern '.md' (o " +
+  "'docs/' para una carpeta). Es una SUBCADENA de la ruta, no un glob ni una " +
+  "regex: '*.md' devuelve cero y parece que no hay nada indexado."
 
 /** El nombre de la carpeta, sin la barra final ni el camino que la precede. */
 const nombreDe = (dir: string): string => dir.replace(/\/$/, '').split('/').pop() ?? dir
