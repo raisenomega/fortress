@@ -16,7 +16,7 @@ export const useSelfImprovementStore = create<SelfImprovementState>((set) => ({
   setCapabilities: (capabilities) => set({ capabilities })
 }))
 
-/** Pendientes de FORTRESS abiertos, los que dejaron los agentes en otros proyectos. */
+/** El backlog ENTERO, en los tres estados: el panel pinta el estado, no lo filtra. */
 export function useSelfObservations(): readonly SelfObservation[] {
   return useSelfImprovementStore((state) => state.observations)
 }
