@@ -15,8 +15,16 @@ vi.mock('./loop-registry', () => ({
 
 const CONFIG = { projectId: 'p1', costCap: 10, maxCycles: 3 }
 
+/** Lo minimo para pasar el freno: proyecto limpio, tope sin tocar. Desde que
+ *  `fix` toma `guardRun`, un contexto vacio ya no llega al motor. */
+const LIMPIO = {
+  projects: { findById: () => ({ id: 'p1', contaminated: false }) },
+  settings: { get: () => null },
+  runs: { usageSince: () => ({ costUsd: 0 }), sinFacturaSince: () => ({ runs: 0 }) }
+} as unknown as AppContext
+
 const params = (hastaGate: boolean): EngineParams => ({
-  context: {} as AppContext,
+  context: LIMPIO,
   config: CONFIG,
   baseline: 0,
   hastaGate,

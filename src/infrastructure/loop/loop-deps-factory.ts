@@ -3,7 +3,7 @@ import type { LoopConfig, LoopDeps } from '@application/loop/loop-deps'
 import { spentTodayByProject } from '@application/settings/read-budget'
 import { readLoopBudget } from '@application/settings/read-loop-budget'
 import { loopScan } from './loop-ops'
-import { runMotorChain } from '@application/repair/run-motor-chain'
+import { loopFix } from './loop-fix'
 import { describir } from '@application/repair/motor-chain-outcome'
 import { buildMotorChainDeps } from '../repair/motor-chain-deps'
 import { isLoopCancelled, sendLoopChunk, sendLoopStatus, waitOrCancel } from './loop-registry'
@@ -48,12 +48,8 @@ export function buildDeps(params: EngineParams): LoopDeps {
     fix: () =>
       withStandby(async () => {
         toChat('\n\n— Motor —\n')
-        const vuelta = await runMotorChain(
-          context,
-          pid,
-          buildMotorChainDeps(pid),
-          params.hastaGate ? 'hasta-gate' : 'completo'
-        )
+        const modo = params.hastaGate ? 'hasta-gate' : 'completo'
+        const vuelta = await loopFix(context, pid, buildMotorChainDeps(pid), modo)
         if (vuelta.ok) toChat(`${describir(vuelta.value)}\n`)
         return vuelta
       }, hooks),
