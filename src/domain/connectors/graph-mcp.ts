@@ -6,11 +6,12 @@
 export const GRAPH_SERVER = 'codebase-memory'
 
 /**
- * Regla de --allowedTools que habilita TODAS las herramientas del grafo. Sin
- * ella, en plan headless la llamada al MCP se auto-deniega y el agente cae a
- * Bash: ese era el fallo que dejaba GRAFO PRIMERO como letra muerta.
+ * La UNICA de ESCRITURA, y solo para la accion que existe para eso. Aqui vivia
+ * un prefijo que abria el servidor ENTERO —`delete_project` incluida— a todo
+ * agente fuera del modo lectura. Nacio de un fallo real: sin regla, en headless
+ * el MCP se auto-denegaba. Pero lo arreglaba por exceso.
  */
-export const GRAPH_TOOL_RULE = `mcp__${GRAPH_SERVER}`
+export const GRAPH_INDEX_TOOL = `mcp__${GRAPH_SERVER}__index_repository`
 
 /**
  * Herramientas de SOLO LECTURA del grafo. Se pre-autorizan en el modo lectura+grafo

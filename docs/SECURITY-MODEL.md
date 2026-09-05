@@ -59,13 +59,17 @@ terceros aguas arriba (ver "Lo que NO cubre este modelo").
 
 - Validación de ruta absoluta en el dominio al registrar proyectos: se exige
   raíz absoluta (POSIX, unidad de Windows o UNC). Es una comprobación de
-  prefijo; la cadena registrada **no** se normaliza, porque esa cadena es la
-  identidad del proyecto y transformarla en silencio movería el modelo de
-  datos, no solo la validación.
-- El rechazo de segmentos `..` cubre el alta de proyecto nuevo —la carpeta
-  padre bajo la que se crea el árbol—, no todas las puertas de registro. Es
-  cobertura declarada de un flujo, no una garantía de dominio (ver "Lo que NO
-  cubre este modelo").
+  prefijo; la cadena registrada se recorta —y **solo** se recorta— para que lo
+  validado y lo persistido sean el mismo valor: validar con `trim` y guardar sin
+  él dejaba entrar rutas con espacios que la base contaba como proyectos
+  distintos. Más allá del recorte no se normaliza, porque esa cadena es la
+  identidad del proyecto.
+- El rechazo de segmentos `..` es **garantía de dominio**, no cobertura de un
+  flujo: vive en `isAbsoluteProjectPath`, por donde pasan todas las puertas de
+  registro. Se mira por segmentos y no por subcadena, así que un `..` dentro de
+  un nombre (`/srv/app..old`) es un directorio legítimo y no se rechaza. Este
+  párrafo declaró lo contrario hasta que el rechazo se movió a donde su propio
+  texto ya prometía que vivía.
 - Las lecturas y escrituras dentro de un proyecto sí resuelven la ruta contra
   la raíz y rechazan lo que se salga, symlinks incluidos: ahí la defensa vive
   en infraestructura, que es donde puede resolverlos.

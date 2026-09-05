@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { GRAPH_SERVER, GRAPH_TOOL_RULE, withGraph } from './graph-mcp'
+import { GRAPH_SERVER, GRAPH_INDEX_TOOL, withGraph } from './graph-mcp'
 import { buildMcpConfig } from './mcp-config'
 
 describe('withGraph', () => {
@@ -38,6 +38,6 @@ describe('withGraph', () => {
   })
 
   it('la regla de herramienta abre TODO el servidor del grafo', () => {
-    expect(GRAPH_TOOL_RULE).toBe('mcp__codebase-memory')
+    expect(GRAPH_INDEX_TOOL).toBe('mcp__codebase-memory__index_repository')
   })
 })
