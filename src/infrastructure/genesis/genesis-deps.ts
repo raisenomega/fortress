@@ -4,6 +4,7 @@ import type { GenesisDeps } from '@application/system/run-genesis'
 import type { GenesisBudget } from '@domain/settings/genesis-budget'
 import { isGenesisCancelled, sendGenesisStatus, waitOrCancel } from './genesis-registry'
 import { nextGenesisCapability, runGenesisEpisode } from './genesis-ops'
+import { topeDiarioAlcanzado } from '../run-guard'
 
 export interface GenesisRuntime {
   readonly deps: GenesisDeps
@@ -34,6 +35,8 @@ export function buildGenesisRuntime(
       return Promise.resolve()
     },
     spentSession: () => spent,
+    // Persistido y por dia: `spent` vuelve a cero en cada encendido, esto no.
+    topeDiario: () => topeDiarioAlcanzado(context, new Date()) !== null,
     isCancelled: () => isGenesisCancelled(token),
     wait: (ms) => waitOrCancel(ms, token),
     emit: (done) => {

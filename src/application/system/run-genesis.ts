@@ -12,6 +12,8 @@ export interface GenesisDeps {
   /** Promueve lo reversible; un agente nuevo se deja pendiente de firma humana. */
   advance: (id: string) => Promise<void>
   spentSession: () => number
+  /** Si la cuenta ya gasto lo del dia. Persistido: no se reinicia con el bucle. */
+  topeDiario: () => boolean
   isCancelled: () => boolean
   wait: (ms: number) => Promise<void>
   emit: (episodesDone: number) => void
@@ -31,6 +33,7 @@ export async function runGenesis(
     const id = deps.nextCapability()
     const stop = genesisStop({
       cancelled: deps.isCancelled(),
+      topeDiario: deps.topeDiario(),
       spentSession: deps.spentSession(),
       costCap: budget.costCapUsd,
       episodesDone,

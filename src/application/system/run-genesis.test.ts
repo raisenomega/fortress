@@ -10,6 +10,7 @@ function deps(over: Partial<GenesisDeps> = {}): GenesisDeps {
     runEpisode: () => Promise.resolve(),
     advance: () => Promise.resolve(),
     spentSession: () => 0,
+    topeDiario: () => false,
     isCancelled: () => false,
     wait: () => Promise.resolve(),
     emit: () => {},

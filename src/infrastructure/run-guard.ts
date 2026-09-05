@@ -22,13 +22,26 @@ export function guardRun(context: AppContext, projectId: string): string | null 
   const bloqueo = contaminado(context, projectId)
   if (bloqueo !== null) return bloqueo
 
-  const ahora = new Date()
-  const limite = dayLimitReached(readBudget(context), spentToday(context, ahora), () =>
-    sinMedirHoy(context, ahora)
-  )
+  const limite = topeDiarioAlcanzado(context, new Date())
   if (limite !== null) return limite
 
   return tryBeginRun(projectId) ? null : BUSY
+}
+
+/**
+ * Solo el tope del DIA, sin carril ni breaker. Sale aparte porque hay gasto que
+ * no cuelga de un proyecto —genesis entrena en un sandbox temporal— y por tanto
+ * no puede tomar un carril de proyecto, pero el dinero que quema sale de la
+ * misma cuenta y del mismo dia.
+ *
+ * Es ademas lo unico que sobrevive al reinicio: se calcula sobre `runs`, que
+ * esta persistido, no sobre un contador en memoria que vuelve a cero con cada
+ * encendido.
+ */
+export function topeDiarioAlcanzado(context: AppContext, ahora: Date): string | null {
+  return dayLimitReached(readBudget(context), spentToday(context, ahora), () =>
+    sinMedirHoy(context, ahora)
+  )
 }
 
 /** Circuit breaker (Capa 4): un proyecto contaminado se bloquea hasta revision
