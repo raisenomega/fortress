@@ -29,8 +29,16 @@ export interface AutoMergeResult {
   readonly denial: FailedCondition | null
 }
 
+/** El turno del arbol vivo. Puerto porque el mutex vive en infraestructura y la
+ *  aplicacion no la importa: lo recibe, como el applier. */
+export interface CarrilDeMerge {
+  readonly tomar: (projectId: string) => boolean
+  readonly soltar: (projectId: string) => void
+}
+
 export interface AutoMergeDeps {
   readonly mergeApplier: MergeApplier
+  readonly carril: CarrilDeMerge
   /**
    * Lee la configuracion del proyecto auditado. Entra como puerto porque toca
    * disco: la aplicacion no importa infraestructura, la recibe.
