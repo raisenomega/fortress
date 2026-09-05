@@ -23,6 +23,7 @@ export interface Opciones {
   readonly events?: ProposalEvent[]
   readonly config?: ConfigState
   readonly outcome?: MergeApplyOutcome
+  /** true = otro tiene el turno del arbol vivo. */ readonly carrilOcupado?: boolean
   readonly severity?: Severity
   /** false = el hallazgo ya no esta en la memoria del proyecto. */
   readonly hallazgo?: boolean
@@ -61,15 +62,11 @@ export function banco(opts: Opciones = {}): Banco {
     omegaLog: { append: (e: NewOmegaEntry): void => void entries.push(e) }
   } as unknown as AppContext
   const deps: AutoMergeDeps = {
-    mergeApplier: {
-      apply: (input: MergeApplyInput): Promise<MergeApplyOutcome> => {
-        aplicados.push(input)
-        return Promise.resolve(opts.outcome ?? OK)
-      }
-    },
+    // prettier-ignore
+    mergeApplier: { apply: (input: MergeApplyInput): Promise<MergeApplyOutcome> => (aplicados.push(input), Promise.resolve(opts.outcome ?? OK)) },
+    carril: { tomar: () => opts.carrilOcupado !== true, soltar: () => {} },
     readConfig: () => opts.config ?? CONFIG_ON,
-    lineasDeFicheros: () => opts.lineas ?? {},
-    now: () => 42
+    lineasDeFicheros: () => opts.lineas ?? {}, now: () => 42
   }
   return { context, deps, patches, entries, aplicados }
 }

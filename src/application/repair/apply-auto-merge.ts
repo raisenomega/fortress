@@ -8,6 +8,7 @@ import { cursorFrom } from './book-cursor'
 import type { AutoMergeCase } from './auto-merge-gather'
 import { autoMergeCommitMessage } from './auto-merge-message'
 import type { AutoMergeDeps, AutoMergeResult, ViaDeIntegracion } from './auto-merge-types'
+import { conCarrilDeMerge, OCUPADO } from './carril-del-merge'
 import { mergePath } from './reconcile-verdict'
 
 /** La razon que queda en el Libro. La misma palabra que el asunto del commit:
@@ -43,11 +44,18 @@ export async function applyAutoMerge(
   const path = mergePath(caso.proposal.state)
   if (path === null) return { applied: false, reason: 'illegal-transition', denial: null }
 
-  const outcome = await deps.mergeApplier.apply({
-    projectPath: caso.project.path,
-    sourceBranch: caso.state.branch,
-    commitMessage: autoMergeCommitMessage(caso, via)
-  })
+  const outcome = await conCarrilDeMerge(deps.carril, caso.project.id, via, () =>
+    deps.mergeApplier.apply({
+      projectPath: caso.project.path,
+      sourceBranch: caso.state.branch,
+      commitMessage: autoMergeCommitMessage(caso, via)
+    })
+  )
+  // El turno ocupado NO es un merge fallido: no se llego a tocar el arbol, asi
+  // que no hay nada que abortar y la propuesta NO se caduca. Queda aprobada
+  // esperando la firma, que es lo que el operador estaba haciendo. Caducarla
+  // seria matar un fix bueno por una colision de horario.
+  if (outcome === OCUPADO) return { applied: false, reason: OCUPADO, denial: null }
   const cursor = cursorFrom(caso.events)
 
   if (outcome.ok) {
