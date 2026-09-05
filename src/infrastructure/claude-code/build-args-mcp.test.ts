@@ -24,7 +24,9 @@ describe('buildArgs con MCP', () => {
   })
 
   it('el grafo se permite en --allowedTools: sin la regla el MCP se auto-deniega', () => {
-    expect(buildArgs('hola', 'plan', AGENTS, null, 3)).toContain('mcp__codebase-memory')
+    expect(buildArgs('hola', 'plan', AGENTS, null, 3)).toContain(
+      'mcp__codebase-memory__search_graph'
+    )
   })
 
   it('con conectores, se suman al grafo sin desplazarlo', () => {

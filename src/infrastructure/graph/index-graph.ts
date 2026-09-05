@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import { GRAPH_TOOL_RULE, withGraph } from '@domain/connectors/graph-mcp'
+import { GRAPH_INDEX_TOOL, withGraph } from '@domain/connectors/graph-mcp'
 import { buildEnv } from '../claude-code/build-env'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
@@ -23,7 +23,7 @@ export function indexGraph(
     '--permission-mode',
     'default',
     '--allowedTools',
-    GRAPH_TOOL_RULE,
+    GRAPH_INDEX_TOOL,
     '--mcp-config',
     withGraph(null)
   ]

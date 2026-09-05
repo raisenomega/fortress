@@ -1,3 +1,4 @@
+import { GRAPH_READ_TOOLS } from '@domain/connectors/graph-mcp'
 import { describe, expect, it } from 'vitest'
 import { buildAllowedTools } from './build-allowed-tools'
 
@@ -13,13 +14,15 @@ describe('buildAllowedTools', () => {
     expect(tools.some((tool) => tool.startsWith('Bash('))).toBe(false)
   })
 
-  it('plan: la regla del grafo (prefijo), sin autoverificacion', () => {
-    expect(buildAllowedTools('plan', true, ['test:unit'])).toEqual(['mcp__codebase-memory'])
+  it('plan: las tools de LECTURA del grafo, sin autoverificacion', () => {
+    // Era el prefijo, que abria el servidor entero. Aqui daba igual —plan
+    // bloquea todo MCP— pero la misma linea servia acceptEdits.
+    expect(buildAllowedTools('plan', true, ['test:unit'])).toEqual([...GRAPH_READ_TOOLS])
   })
 
   it('acceptEdits de confianza: grafo + autoverificacion de los scripts reales', () => {
     const tools = buildAllowedTools('acceptEdits', true, ['type-check'])
-    expect(tools).toContain('mcp__codebase-memory')
+    expect(tools).toContain('mcp__codebase-memory__search_graph')
     expect(tools).toContain('Bash(npm run type-check)')
   })
 })
