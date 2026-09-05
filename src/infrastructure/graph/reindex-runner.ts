@@ -1,4 +1,5 @@
 import { execFileSync, spawn } from 'child_process'
+import { buildEnv } from '../claude-code/build-env'
 import { GRAPH_BIN } from '@domain/connectors/graph-mcp'
 import { headSha } from '../git/head-sha'
 import { trackChild } from '../claude-code/child-registry'
@@ -39,7 +40,10 @@ export function createReindexRunner(bin = GRAPH_BIN, timeoutMs = TIMEOUT_MS): Re
       if (sha === null) return Promise.resolve({ ok: false, error: 'sin repo git' })
 
       return new Promise((resolve) => {
-        const child = spawn(bin, ['cli', 'index_repository'], { cwd: projectPath })
+        // Recorte y no lista blanca: el indexador es una herramienta instalada, no
+        // codigo del repo auditado, y lo que necesita no lo enumera nadie.
+        const env = buildEnv(null)
+        const child = spawn(bin, ['cli', 'index_repository'], { cwd: projectPath, env })
         trackChild(child, projectId)
         let out = ''
         const timer = setTimeout(() => {
