@@ -1,4 +1,5 @@
 import { execFile } from 'child_process'
+import { gitEnvRemoto } from './git-env'
 import type { GitPusher } from '@domain/project/git-pusher'
 import { err, ok } from '@domain/shared/result'
 
@@ -9,7 +10,7 @@ const TIMEOUT_MS = 2 * 60 * 1000
  * contrasena que nadie va a teclear: sin terminal, el prompt no se ve y el
  * push parece colgado. Asi falla rapido y con un motivo legible.
  */
-const ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+const ENV = gitEnvRemoto()
 
 /** execFile con argumentos separados: no hay shell, no hay inyeccion posible. */
 export function createGitPusher(): GitPusher {

@@ -1,51 +1,61 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 
 /**
- * Todo spawn de FORTRESS acota su entorno, y eso se comprueba sobre el CODIGO:
- * verificarlo corriendo exigiria lanzar `claude`, `git merge` y el indexador de
- * verdad. Lo que se fija es el PUNTO DE LLAMADA —que la opcion `env` viaja— y
- * no que el fichero mencione `buildEnv`: la primera version de este test miraba
- * lo segundo y dos mutaciones lo pasaron en verde, porque quitar el `env` del
- * spawn dejaba intactos el import y el comentario.
+ * Ningun proceso hijo hereda la sesion viva del operador — y la lista de quien
+ * spawnea se DERIVA, no se escribe.
+ *
+ * La primera version enumeraba ocho ficheros a mano. Se dejo dos fuera
+ * (`git-commit`, `repair-git`) y los encontro el escaner, no el test; al
+ * derivarla aparecieron otros tres mas (`git-init`, `file-history`,
+ * `git-push`). Enumerar a mano lo que se puede derivar fue el error, y es el
+ * mismo que ya se corrigio en las allowlists del grafo: una lista copiada se
+ * queda corta y nadie se entera, porque "el test pasa".
+ *
+ * La regla mira `cwd`, que es lo que separa las dos clases: un spawn con `cwd`
+ * corre DONDE VIVE el repo auditado —sus hooks, sus scripts— y no puede llevar
+ * la sesion del operador. Uno sin `cwd` corre nuestras propias herramientas
+ * (`claude --version`, `claude auth status`) y no es la amenaza: acotarlo de
+ * mas romperia el login, que necesita esa sesion a proposito.
  */
-const SPAWNEA: readonly string[] = [
-  'src/infrastructure/repair/graph-analyst.ts',
-  'src/infrastructure/repair/graph-omega.ts',
-  'src/infrastructure/repair/graph-generator.ts',
-  'src/infrastructure/repair/git-merge-applier.ts',
-  'src/infrastructure/graph/reindex-runner.ts',
-  'src/infrastructure/graph/index-graph.ts',
-  'src/infrastructure/graph/verify-graph.ts',
-  'src/infrastructure/claude-code/claude-code-agent.ts'
-]
+const RAIZ = 'src'
+const SPAWN = /\b(?:spawn|spawnSync|execFile)\(/g
+const tiene = (t: string): boolean => new RegExp(SPAWN.source).test(t)
+const ES_TEST = /\.test\.ts$|fixture|fake/
 
-/**
- * Los literales de opciones de un spawn: se reconocen por llevar `cwd`, que es
- * lo que siempre se le pasa. Los que van en una variable aparte quedan cubiertos
- * por las otras dos reglas — no hay forma de armar una sin `buildEnv` y sin
- * `...process.env` que herede nada.
- */
-function opcionesInline(fuente: string): readonly string[] {
-  return [...fuente.matchAll(/\{[^{}]*\bcwd\b[^{}]*\}/g)].map((m) => m[0])
+function ficheros(dir: string): readonly string[] {
+  return readdirSync(dir).flatMap((entrada) => {
+    const ruta = join(dir, entrada)
+    if (statSync(ruta).isDirectory()) return ficheros(ruta)
+    return ruta.endsWith('.ts') && !ES_TEST.test(ruta) ? [ruta] : []
+  })
 }
 
-describe('ningun spawn hereda el entorno del operador sin acotar', () => {
-  it.each(SPAWNEA)('%s: todo literal de opciones lleva `env`', (fichero) => {
-    for (const opciones of opcionesInline(readFileSync(fichero, 'utf8'))) {
-      expect({ fichero, opciones, conEnv: /\benv\b/.test(opciones) }).toEqual({ fichero, opciones, conEnv: true }) // prettier-ignore
-    }
+/** Quien spawnea de verdad: importa `child_process`. Sin eso, un `execFile(`
+ *  dentro de una cadena de ejemplo contaria como spawn. */
+const spawnean = ficheros(RAIZ)
+  .map((ruta) => ({ ruta, fuente: readFileSync(ruta, 'utf8') }))
+  .filter(({ fuente }) => fuente.includes("from 'child_process'") && tiene(fuente))
+
+const conCwd = spawnean.filter(({ fuente }) =>
+  [...fuente.matchAll(SPAWN)].some((m) => /\bcwd\b/.test(fuente.slice(m.index, m.index + 320)))
+)
+
+describe('ningun spawn en el repo auditado hereda la sesion del operador', () => {
+  it('la lista se deriva y NO esta vacia: si el barrido falla, se nota', () => {
+    expect(spawnean.length).toBeGreaterThan(10)
+    expect(conCwd.length).toBeGreaterThan(5)
   })
 
-  it.each(SPAWNEA)('%s: el entorno sale de buildEnv', (fichero) => {
-    expect(readFileSync(fichero, 'utf8')).toContain('buildEnv(')
+  it.each(conCwd.map((s) => s.ruta))('%s acota su entorno', (ruta) => {
+    const fuente = readFileSync(ruta, 'utf8')
+
+    expect({ ruta, acota: /\bbuild(Env|GateEnv)\b|\bgitEnv(Remoto)?\(/.test(fuente) }).toEqual({ ruta, acota: true }) // prettier-ignore
   })
 
-  it('ninguno reparte `...process.env` a pelo', () => {
-    // La forma exacta del agujero en git-merge-applier: el entorno entero mas
-    // dos variables de git, con las llaves de la sesion viva dentro.
-    for (const f of SPAWNEA) {
-      expect({ f, crudo: /\.\.\.process\.env/.test(readFileSync(f, 'utf8')) }).toEqual({ f, crudo: false }) // prettier-ignore
-    }
+  it.each(spawnean.map((s) => s.ruta))('%s no reparte `...process.env`', (ruta) => {
+    // La forma exacta de la fuga: el entorno entero mas una variable de git.
+    expect({ ruta, crudo: /\.\.\.process\.env/.test(readFileSync(ruta, 'utf8')) }).toEqual({ ruta, crudo: false }) // prettier-ignore
   })
 })
