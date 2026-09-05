@@ -1,5 +1,9 @@
-/** Ver `criterio-innegociable.ts`: que entra en esta lista, y por que. */
+import { DEFENSAS_INNEGOCIABLES } from './innegociables-defensa'
+
+/** Ver `criterio-innegociable.ts`: que entra en esta lista, y por que. La
+ *  TERCERA familia —las defensas— vive en `innegociables-defensa`. */
 export const AUTONOMY_RULES_FILES: readonly string[] = [
+  ...DEFENSAS_INNEGOCIABLES,
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
   'src/domain/settings/protected-areas.ts',
@@ -17,11 +21,9 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/infrastructure/system/self-project.ts',
   // El perimetro del generador: hasta donde llega un fix.
   'src/domain/repair/scope-check.ts',
-  // Lo que ENTRA al sistema y no es fuente de confianza. `project-path` decide
-  // que ruta puede ser raiz de proyecto y `target-path` es la otra mitad de esa
-  // misma guarda —la que rechaza el ".."—: proteger una sola repetiria el error
-  // que hizo falta esta lista. `graph-mcp` decide que herramientas recibe el
-  // agente, y `private-host` es el filtro anti-SSRF, con dos HIGH a su espalda.
+  // Lo que ENTRA y no es fuente de confianza. `project-path` y `target-path` son
+  // las dos mitades de la misma guarda —proteger una sola repetiria el error que
+  // hizo falta esta lista—; `graph-mcp` decide que herramientas recibe el agente.
   'src/domain/project/project-path.ts',
   'src/domain/newproject/target-path.ts',
   'src/domain/connectors/graph-mcp.ts',
@@ -33,17 +35,14 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/connectors/connector-url.ts',
   'src/domain/shared/safe-url.ts',
   'src/infrastructure/newproject/create-folder.ts',
-  // La TERCERA familia, sin ser ninguna de las otras dos: `redactSecrets` tacha
-  // el secreto antes de que se PERSISTA —comando, permiso denegado, stderr—, y
-  // lo escrito no se deshace retirando el fix despues.
+  // `redactSecrets` tacha el secreto antes de que se PERSISTA, y lo escrito no
+  // se deshace retirando el fix despues. Sus hermanas, en `innegociables-defensa`.
   'src/domain/chat/tool-detail.ts',
-  // POR CARPETA, no por fichero: posture ENTERA es la defensa anti-SSRF, con
-  // tres HIGH a su espalda. Enumerar sus mitades fallo cuatro veces seguidas —
-  // se protegia quien clasifica y no quien pregunta— porque la lista solo cubre
-  // lo que alguien recuerda escribir. Un glob cubre tambien lo que aun no
-  // existe: un archivo nuevo ahi nace protegido sin que nadie se acuerde.
-  // El precio es que 22 archivos dejan de poder integrarse solos, y para este
-  // subsistema es el precio correcto.
+  // POR CARPETA: posture ENTERA es la defensa anti-SSRF. Enumerar sus mitades
+  // fallo cuatro veces —la lista solo cubre lo que alguien recuerda escribir— y
+  // un glob cubre tambien lo que aun no existe: `ipv4-formas`, nacido el 05 de
+  // septiembre, quedo protegido sin que nadie se acordara. Ese es el precio
+  // correcto para este subsistema.
   'src/domain/posture/**',
   'src/infrastructure/posture/**',
   // Quien deja pasar una integracion. `auto-merge-policy` declara la politica;
