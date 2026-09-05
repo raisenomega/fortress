@@ -13,12 +13,33 @@ export interface ToolInput {
   readonly path?: string
 }
 
-const SECRET: readonly RegExp[] = [
+/**
+ * Por el NOMBRE de lo que se asigna. Llevaba `\b` delante y el `\b` no existe
+ * entre dos caracteres de palabra: en `GITHUB_TOKEN` no hay frontera entre el
+ * `_` y la `T`, asi que NINGUN token con prefijo se tachaba. Medido:
+ * `GITHUB_TOKEN=ghp_...`, `GH_TOKEN=`, `MI_SECRET=` y `npm_config_token=`
+ * pasaban enteros. La `ANTHROPIC_API_KEY` se salvaba de casualidad, por el
+ * patron `sk-ant-` de abajo y no por su nombre.
+ *
+ * Ahora basta con que la palabra no venga pegada a otra LETRA, que es lo que
+ * distingue `_KEY=` de `monkey=`. Sin eso, la version amplia tachaba `monkey`,
+ * `donkey`, `turkey` y `keyboard`: acotar de mas destroza texto legitimo, y un
+ * comando tachado entero no se puede leer ni auditar.
+ */
+const POR_NOMBRE =
+  /(?<![A-Za-z])(?:api[_-]?key|key|token|secret|password|passwd|pwd|credentials?)\s*[=:]\s*\S+/gi
+
+/** Por la FORMA del valor, para los que se reconocen sin ver su nombre: viajan
+ *  sueltos en una URL, en un log o en la salida de un agente. */
+const POR_VALOR: readonly RegExp[] = [
   /sk-ant-[\w-]{6,}/gi,
-  /\b(api[_-]?key|key|token|secret|password|pwd)\s*[=:]\s*\S+/gi,
+  /\bgh[pousr]_[A-Za-z0-9]{16,}/g,
+  /\bgithub_pat_[A-Za-z0-9_]{20,}/g,
   /Bearer\s+\S+/gi,
   /\b[0-9a-f]{32,}\b/gi
 ]
+
+const SECRET: readonly RegExp[] = [POR_NOMBRE, ...POR_VALOR]
 
 /** Tacha lo que parezca secreto antes de mostrar un comando en vivo. */
 export function redactSecrets(text: string): string {
