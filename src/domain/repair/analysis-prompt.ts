@@ -1,6 +1,7 @@
 import { seccionAtendido } from './analysis-prompt-atendido'
 import { senasDelHallazgo } from './analysis-prompt-senas'
 import { FORMATO } from './analysis-prompt-formato'
+import { sanearParaPrompt } from '../shared/sanear-para-prompt'
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import type { Candidate } from './select-target'
@@ -17,7 +18,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
   const docs = buildDocsFirst('security', corpus)
   return [
     `Eres el analista de FORTRESS. ANALIZA (no arregles) este hallazgo ${t.severity}:`,
-    `"${t.title}" en ${t.file}:${t.line}. Detectado el ${t.firstSeen.slice(0, 10)}.`,
+    `"${sanearParaPrompt(t.title)}" en ${t.file}:${t.line}. Detectado el ${t.firstSeen.slice(0, 10)}.`,
     '',
     // La antiguedad es contexto para el veredicto: un hallazgo de hace semanas
     // ha tenido tiempo de arreglarse por otra via, y uno de hoy no. No decide

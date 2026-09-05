@@ -1,25 +1,8 @@
+import { sanearParaPrompt } from '@domain/shared/sanear-para-prompt'
 import type { SelfObservation } from '@domain/system/self-observation'
 import type { AppContext } from '../context'
 
 const MAX = 40
-const MAX_LEN = 200
-
-/**
- * El area, la nota y el motivo los escribio OTRO AGENTE en prosa libre, y este
- * texto vuelve al prompt de un agente futuro: es un canal agente -> agente que
- * atraviesa la base del operador, y este saneado es el unico filtro entre los
- * dos. Se aplana a una linea y se acota para que ni un salto de linea ni un
- * marcador puedan romper el formato del prompt e inyectar ordenes. El mismo
- * tratamiento que `knownFindings` da al texto del repo auditado, y por la misma
- * razon: quien escribe no es quien lee.
- */
-function sanitize(text: string): string {
-  const flat = text
-    .replace(/[\r\n\t]+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim()
-  return flat.length > MAX_LEN ? `${flat.slice(0, MAX_LEN)}…` : flat
-}
 
 /**
  * Cada linea lleva las DOS mitades: que se observo, y que se hizo con ello.
@@ -38,9 +21,9 @@ function sanitize(text: string): string {
  * juicio.
  */
 function linea(obs: SelfObservation): string {
-  const tema = sanitize(`${obs.area} — ${obs.note}`)
+  const tema = sanearParaPrompt(`${obs.area} — ${obs.note}`)
   const verbo = obs.status === 'descartado' ? 'descartado' : 'arreglado'
-  const razon = obs.reason === null ? 'sin detalle escrito' : sanitize(obs.reason)
+  const razon = obs.reason === null ? 'sin detalle escrito' : sanearParaPrompt(obs.reason)
   return `${tema} → ${verbo}: ${razon}`
 }
 

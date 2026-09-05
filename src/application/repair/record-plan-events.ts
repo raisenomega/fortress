@@ -1,3 +1,4 @@
+import { redactSecrets } from '@domain/chat/tool-detail'
 import type { AnalystResult } from '@domain/repair/analysis'
 import type { Proposal } from '@domain/repair/proposal'
 import type { Veredicto } from '@domain/repair/veredicto-del-analisis'
@@ -57,7 +58,9 @@ export async function recordAnalyzed(
   }) // prettier-ignore
   // El crudo ENTERO por el mismo canal que la autopsia de OMEGA: la evidencia
   // del evento de la corrida. La razon del asiento sigue siendo la muestra.
-  const evidenceJson = raw === undefined ? undefined : JSON.stringify({ raw })
+  // REDACTADO: es la salida literal de un `claude` con la API key en su entorno,
+  // y esto va a la base para siempre. Lo efimero se redactaba y lo PERMANENTE no.
+  const evidenceJson = raw === undefined ? undefined : JSON.stringify({ raw: redactSecrets(raw) })
   await safeRecord(log, evidenceJson === undefined ? corrida : { ...corrida, evidenceJson })
   await safeRecord(
     log,
