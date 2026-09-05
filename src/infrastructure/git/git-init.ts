@@ -1,8 +1,9 @@
 import { execFile } from 'child_process'
+import { gitEnv } from './git-env'
 import { err, ok, type Result } from '@domain/shared/result'
 
 const TIMEOUT_MS = 30 * 1000
-const ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+const ENV = gitEnv()
 
 /**
  * `git init` en la carpeta recien creada. execFile con argumentos separados:

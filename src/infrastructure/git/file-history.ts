@@ -1,7 +1,8 @@
 import { execFile } from 'child_process'
+import { gitEnv } from './git-env'
 import type { FileHistory } from '@domain/project/file-history'
 
-const ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+const ENV = gitEnv()
 const TIMEOUT_MS = 15 * 1000
 
 /**

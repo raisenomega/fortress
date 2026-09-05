@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import { gitEnv } from '../git/git-env'
 
 export interface GitOut {
   readonly code: number
@@ -8,7 +9,7 @@ export interface GitOut {
 /** git con args en array, jamas shell strings. stdout+stderr juntos para autopsia. */
 export function git(cwd: string, args: readonly string[]): Promise<GitOut> {
   return new Promise((resolve) => {
-    const child = spawn('git', args as string[], { cwd })
+    const child = spawn('git', args as string[], { cwd, env: gitEnv() })
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.stderr.on('data', (d: Buffer) => (out += d.toString()))

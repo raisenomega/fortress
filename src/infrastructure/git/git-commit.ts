@@ -1,7 +1,8 @@
 import { execFile } from 'child_process'
+import { gitEnv } from './git-env'
 import { err, ok, type Result } from '@domain/shared/result'
 
-const ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+const ENV = gitEnv()
 const TIMEOUT_MS = 30 * 1000
 
 // Identidad inline y firma desactivada: un repo recien creado no tiene
