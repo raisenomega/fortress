@@ -4,6 +4,7 @@
  * locales. Sin esto la app se vuelve un escaner de la red interna del operador,
  * activable desde el renderer o sugerible por la propia IA.
  */
+import { aIpv4Punteada } from './ipv4-formas'
 import { unmapIpv4 } from './unmap-ipv4'
 
 const LOCAL_NAME = /^(localhost|[^.]+\.local)$/i
@@ -16,10 +17,13 @@ export function isPrivateHost(hostname: string): boolean {
   if (host === '::1' || host === '::') return true
   if (/^f[cd][0-9a-f]{2}:/.test(host) || /^fe[89ab][0-9a-f]:/.test(host)) return true
 
-  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host)
-  if (!m) return false
-  const a = Number(m[1])
-  const b = Number(m[2])
+  // Normalizada ANTES de mirarla: `2130706433`, `0x7f000001`, `0177.0.0.1` y
+  // `127.1` son 127.0.0.1, y el decimal punteado era la unica forma que este
+  // filtro conocia. Un `connect` las resuelve todas, asi que mirar solo una no
+  // filtraba nada — bastaba con escribir la direccion de otro modo.
+  const punteada = aIpv4Punteada(host)
+  if (punteada === null) return false
+  const [a, b] = punteada.split('.').map(Number)
   if (a === 0 || a === 10 || a === 127) return true
   if (a === 169 && b === 254) return true
   if (a === 172 && b >= 16 && b <= 31) return true
