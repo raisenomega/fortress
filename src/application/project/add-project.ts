@@ -14,14 +14,23 @@ function validate(input: NewProject): string | null {
   return null
 }
 
-/** Agrega un proyecto rechazando rutas duplicadas: la ruta es la identidad real. */
+/**
+ * Agrega un proyecto rechazando rutas duplicadas: la ruta es la identidad real.
+ *
+ * Se valida y se persiste LA MISMA cadena. Antes se validaba `input.path.trim()`
+ * y se guardaba `input.path`, asi que lo comprobado y lo guardado eran dos
+ * valores distintos: `"/a/b "` pasaba el control de ruta absoluta —por el
+ * recorte— y entraba con el espacio. Y como la ruta ES la identidad, `"/a/b"` y
+ * `"/a/b "` eran dos proyectos para la base y uno solo en el disco.
+ */
 export function addProject(context: AppContext, input: NewProject): Result<Project> {
   const invalid = validate(input)
   if (invalid) return err(invalid)
 
-  if (context.projects.findByPath(input.path)) {
-    return err(`Ese proyecto ya esta en FORTRESS: ${input.path}`)
+  const saneado = { ...input, name: input.name.trim(), path: input.path.trim() }
+  if (context.projects.findByPath(saneado.path)) {
+    return err(`Ese proyecto ya esta en FORTRESS: ${saneado.path}`)
   }
 
-  return ok(context.projects.add(input))
+  return ok(context.projects.add(saneado))
 }
