@@ -2,7 +2,7 @@ import { ipcMain } from 'electron'
 import { firmarIntegracion } from '@application/repair/firmar-integracion'
 import type { AutoMergeResult } from '@application/repair/auto-merge-types'
 import { getAppContext } from '../persistence/app-context'
-import { buildAutoMergeDeps } from '../repair/repair-deps'
+import { buildAutoMergeDeps } from '../repair/auto-merge-deps'
 import { endMerge } from '../run-control'
 import { guardMerge } from '../run-guard'
 import { IPC } from './channels'
@@ -26,7 +26,7 @@ export function registerSignHandler(): void {
     if (busy !== null) return { applied: false, reason: busy, denial: null }
 
     try {
-      return await firmarIntegracion(context, buildAutoMergeDeps(), { proposalId: id })
+      return await firmarIntegracion(context, buildAutoMergeDeps(projectId), { proposalId: id })
     } finally {
       endMerge(projectId)
     }

@@ -1,19 +1,16 @@
-import { endMerge, tryBeginMerge } from '../run-control'
 import { app } from 'electron'
 import { existsSync } from 'fs'
 import { join } from 'path'
-import type { AutoMergeDeps } from '@application/repair/auto-merge-types'
 import type { GateDeps } from '@application/repair/run-gate'
 import type { OmegaDeps } from '@application/repair/run-omega'
 import type { GenerateDeps } from '@application/repair/generate-types'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
-import { readFortressConfig, readScopeGroups } from '../project/fortress-config'
-import { createGitMergeApplier } from './git-merge-applier'
+import { readScopeGroups } from '../project/fortress-config'
 import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
 import { createGraphGenerator } from './graph-generator'
 import { createGraphOmega } from './graph-omega'
-import { lineasDeFicheros, readAtHead, readAtSha, showHead } from './worktree-file-reader'
+import { readAtHead, readAtSha, showHead } from './worktree-file-reader'
 import { assertRepairSandbox } from './repair-sandbox'
 import { createWorktreeManager } from './worktree-manager'
 
@@ -64,12 +61,4 @@ export function buildOmegaDeps(projectId: string): OmegaDeps {
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }
-}
-
-/** Deps de la integracion automatica. Se mide sobre el worktree: ahi el fix ya esta puesto. */
-// prettier-ignore
-export function buildAutoMergeDeps(): AutoMergeDeps {
-  return { mergeApplier: createGitMergeApplier(), readConfig: readFortressConfig, now: Date.now,
-    carril: { tomar: tryBeginMerge, soltar: endMerge },
-    lineasDeFicheros: (id, files) => lineasDeFicheros(`${worktreeRoot()}/${id}`, files) }
 }

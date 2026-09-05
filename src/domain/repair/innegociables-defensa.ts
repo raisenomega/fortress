@@ -36,6 +36,16 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   'src/infrastructure/loop/loop-fix.ts',
   // Las HERRAMIENTAS del motor, derivadas del vocabulario del grafo.
   'src/infrastructure/repair/motor-tools.ts',
+  // La MEDIDA del arbol integrado: quien decide si hay que volver a medir antes
+  // de tocar el arbol vivo, quien lo mide, y quien lo cuenta sin exagerar el
+  // alcance. `apply-auto-merge` entra con ellas porque es donde se INVOCA el
+  // freno: protegerlo a el y no al sitio que lo llama dejaria quitar la llamada
+  // sin tocar un solo fichero protegido, que es el hueco de siempre.
+  'src/domain/repair/arbol-que-se-movio.ts',
+  'src/domain/repair/asiento-de-la-medida.ts',
+  'src/application/repair/integrar-midiendo-el-arbol.ts',
+  'src/infrastructure/repair/medir-arbol-integrado.ts',
+  'src/application/repair/apply-auto-merge.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
   'src/domain/repair/innegociables-defensa.ts'
 ]
