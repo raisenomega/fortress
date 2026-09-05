@@ -2,7 +2,8 @@ import { ipcMain } from 'electron'
 import { judgeAndIntegrate } from '@application/repair/judge-and-integrate'
 import type { RunOmegaResult } from '@application/repair/run-omega'
 import { getAppContext } from '../persistence/app-context'
-import { buildAutoMergeDeps, buildOmegaDeps } from '../repair/repair-deps'
+import { buildAutoMergeDeps } from '../repair/auto-merge-deps'
+import { buildOmegaDeps } from '../repair/repair-deps'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
 import { IPC } from './channels'
@@ -30,7 +31,10 @@ export function registerRepairOmegaHandler(): void {
       const busy = guardRun(context, proposal.projectId)
       if (busy !== null) return { ok: false, reason: busy }
       try {
-        const deps = { omega: buildOmegaDeps(proposal.projectId), autoMerge: buildAutoMergeDeps() }
+        const deps = {
+          omega: buildOmegaDeps(proposal.projectId),
+          autoMerge: buildAutoMergeDeps(proposal.projectId)
+        }
         return (await judgeAndIntegrate(context, proposal.id, deps)).omega
       } finally {
         endRun(proposal.projectId)

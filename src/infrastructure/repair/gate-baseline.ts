@@ -1,8 +1,6 @@
+import { DEPENDENCIAS } from '@domain/repair/arbol-que-se-movio'
 import { git } from './repair-git'
 import { spawnCommand } from './spawn-command'
-
-/** Tocar las dependencias invalida la medida: el `npm ci` instalado ya no es el de la base. */
-const DEPENDENCIAS = ['package.json', 'package-lock.json']
 
 export interface MedidaHerencia {
   /** true si el comando ya fallaba en la base y el fix no empeora lo suyo. */

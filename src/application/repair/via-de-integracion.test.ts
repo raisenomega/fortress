@@ -48,9 +48,9 @@ describe('el historial dice por que via entro cada fix', () => {
   it('no-regresion: la politica que integra sola sigue diciendo automatica', async () => {
     const b = banco()
     await integrar(b)
-
     expect(asunto(b)).toContain('integracion automatica')
-    expect(razonDelLibro(b)).toBe('integracion automatica')
+    // toContain: la razon arrastra ahora tambien QUE se midio del arbol integrado.
+    expect(razonDelLibro(b)).toContain('integracion automatica')
   })
 })
 

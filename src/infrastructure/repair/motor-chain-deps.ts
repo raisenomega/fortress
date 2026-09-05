@@ -1,5 +1,6 @@
 import type { MotorChainDeps } from '@application/repair/run-motor-chain'
-import { buildAutoMergeDeps, buildGateDeps, buildGenerateDeps, buildOmegaDeps } from './repair-deps'
+import { buildAutoMergeDeps } from './auto-merge-deps'
+import { buildGateDeps, buildGenerateDeps, buildOmegaDeps } from './repair-deps'
 
 /**
  * Las dependencias reales de una vuelta entera del motor, armadas de una vez.
@@ -16,6 +17,6 @@ export function buildMotorChainDeps(projectId: string): MotorChainDeps {
   return {
     generate: buildGenerateDeps(projectId),
     gate: buildGateDeps(projectId),
-    judge: { omega: buildOmegaDeps(projectId), autoMerge: buildAutoMergeDeps() }
+    judge: { omega: buildOmegaDeps(projectId), autoMerge: buildAutoMergeDeps(projectId) }
   }
 }

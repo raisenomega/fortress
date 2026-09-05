@@ -1,6 +1,7 @@
 import type { FailedCondition } from '@domain/repair/auto-merge-policy'
 import type { ConfigState } from '@domain/repair/auto-merge-config'
 import type { MergeApplier } from '@domain/repair/merge-applier'
+import type { MedidaDelArbol } from '@domain/repair/asiento-de-la-medida'
 
 /**
  * Un id y nada mas. proposalId, projectId y projectPath pasados por separado
@@ -54,5 +55,20 @@ export interface AutoMergeDeps {
     proposalId: string,
     files: readonly string[]
   ) => Readonly<Record<string, number>>
+  /**
+   * Los ficheros que el destino ha tocado desde la base de la propuesta; con
+   * eso solo se decide si hay que volver a medir. `null` significa que no se
+   * pudo saber, que NO es lo mismo que "no toco nada".
+   */
+  readonly ficherosDelDestino: (
+    projectPath: string,
+    baseSha: string
+  ) => Promise<readonly string[] | null>
+  /**
+   * Mergea el destino DENTRO del worktree y corre ahi el gate del motor. Ese es
+   * el sitio porque ya tiene sus dependencias puestas: en uno nuevo la medida
+   * costaria ademas el `npm ci`, y en el arbol vivo exigiria romperlo antes.
+   */
+  readonly medirArbolIntegrado: (proposalId: string, projectPath: string) => Promise<MedidaDelArbol>
   readonly now: () => number
 }
