@@ -1,4 +1,5 @@
 import { execFile } from 'child_process'
+import { buildEnv } from '../claude-code/build-env'
 import type { MergeApplier, MergeApplyOutcome } from '@domain/repair/merge-applier'
 
 const TIMEOUT_MS = 2 * 60 * 1000
@@ -10,7 +11,10 @@ const TIMEOUT_MS = 2 * 60 * 1000
  * GIT_TERMINAL_PROMPT=0 evita que se quede esperando una contrasena que nadie
  * va a teclear: sin terminal el prompt no se ve y el merge parece colgado.
  */
-const ENV = { ...process.env, GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' }
+// Sobre `buildEnv` y no sobre `process.env`: `git merge` ejecuta los HOOKS del
+// repo auditado —codigo ajeno en el arbol vivo— y heredaban el agente ssh y el
+// keyring del operador.
+const ENV = { ...buildEnv(null), GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' }
 
 interface Corrida {
   readonly fallo: boolean
