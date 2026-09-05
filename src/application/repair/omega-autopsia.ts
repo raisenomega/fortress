@@ -1,3 +1,4 @@
+import { redactSecrets } from '@domain/chat/tool-detail'
 import type { OmegaAgentResult } from './run-omega'
 
 type Fallo = Extract<OmegaAgentResult, { ok: false }>
@@ -14,7 +15,13 @@ type Fallo = Extract<OmegaAgentResult, { ok: false }>
  */
 export function evidenciaOmega(crudo: OmegaAgentResult, diffFiles: readonly string[]): object {
   if (crudo.ok) return { verdict: crudo.verdict, diffFiles }
-  return { error: crudo.error, detail: crudo.detail, raw: crudo.raw, diffFiles }
+  // Redactado: mismo canal permanente que el crudo del analista.
+  return {
+    error: crudo.error,
+    detail: crudo.detail,
+    raw: crudo.raw === undefined ? undefined : redactSecrets(crudo.raw),
+    diffFiles
+  }
 }
 
 /**

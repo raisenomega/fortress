@@ -1,21 +1,8 @@
+import { sanearParaPrompt } from '@domain/shared/sanear-para-prompt'
 import type { Project } from '@domain/project/project'
 import type { AppContext } from '../context'
 
 const MAX = 40
-const MAX_LEN = 200
-
-/**
- * El titulo y la ruta salen del REPO auditado (texto no confiable). Se aplanan a
- * una sola linea y se acotan para que un hallazgo con saltos de linea o marcadores
- * no pueda romper el formato del prompt e inyectar ordenes en la fase de edicion.
- */
-function sanitize(text: string): string {
-  const flat = text
-    .replace(/[\r\n\t]+/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim()
-  return flat.length > MAX_LEN ? `${flat.slice(0, MAX_LEN)}…` : flat
-}
 
 /**
  * Lo que FORTRESS ya midio, en texto, para metérselo al agente en el prompt.
@@ -35,6 +22,6 @@ export function knownFindings(context: AppContext, project: Project): readonly s
     .slice(0, MAX)
     .map((finding) => {
       const loc = `${finding.file}${finding.line === null ? '' : `:${finding.line}`}`
-      return sanitize(`${finding.severity} ${loc} — ${finding.title}`)
+      return sanearParaPrompt(`${finding.severity} ${loc} — ${finding.title}`)
     })
 }
