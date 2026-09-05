@@ -1,4 +1,5 @@
 import { rutas } from './auto-merge-fields'
+import { globDeAlcanceValido, globsDeAlcance } from './glob-de-alcance'
 
 /**
  * Un grupo de co-modificacion declarado por el proyecto: "cuando el hallazgo
@@ -20,10 +21,18 @@ interface RawGroup {
   readonly allow?: unknown
 }
 
+/**
+ * El `when` se filtra igual que el `allow`, y no es simetria por gusto: un
+ * `when` universal activa el grupo para CUALQUIER hallazgo, asi que su allow
+ * —por acotado que sea— pasa a regir siempre. Filtrar solo el allow dejaria la
+ * mitad de la puerta abierta.
+ */
 function grupo(raw: RawGroup): ScopeGroup | null {
-  const allow = rutas(raw.allow)
+  const declarado = rutas(raw.allow)
+  const allow = declarado === null ? null : globsDeAlcance(declarado)
   if (typeof raw.name !== 'string' || typeof raw.when !== 'string' || allow === null) return null
-  return raw.name === '' || raw.when === '' ? null : { name: raw.name, when: raw.when, allow }
+  if (raw.name === '' || !globDeAlcanceValido(raw.when)) return null
+  return { name: raw.name, when: raw.when, allow }
 }
 
 /**
