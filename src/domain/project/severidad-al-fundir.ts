@@ -8,24 +8,15 @@ export interface FilaConSeveridad extends FilaAFusionar {
 }
 
 /**
- * Que severidad debe quedar cuando dos filas resultan ser una.
+ * Que severidad queda cuando dos filas resultan ser una: la MAXIMA del grupo, no
+ * la de la superviviente. Gana la misma fila de siempre —su `first_seen` es la
+ * historia real del defecto (ADR-071)— pero fundir deja de poder bajar la
+ * gravedad. Por que hizo falta la enmienda: ver ADR-071.
  *
- * Hasta ahora ninguna: la fusion escribia solo las absorbidas y la superviviente
- * conservaba la suya por OMISION. Como gana la mas antigua (ADR-071) y la
- * severidad no entra ni en la identidad ni en el desempate, un grupo mixto
- * perdia la gravedad mas alta al fundirse. No es hipotetico: de las cinco
- * fusiones reales del 24 de agosto, DOS degradaron —un HIGH de la correa de
- * alcance quedo en MEDIUM y un MEDIUM de la config MCP quedo en LOW—, y el
- * tablero de FORTRESS lleva desde entonces puntuando por debajo.
- *
- * La regla: gana la misma fila de siempre —su `first_seen` es la historia real
- * del defecto— pero se queda con la severidad MAXIMA del grupo. Fundir deja de
- * poder bajar la gravedad; solo puede subirla o dejarla igual.
- *
- * NO importa nada en tiempo de ejecucion —recibe `masUrgente`— porque las dos
- * rutas que fusionan tienen que consumir ESTA funcion y no una copia: una es la
- * del dominio y la otra un script suelto, que no resuelve alias ni imports sin
- * extension (deuda `contrato-scan-no-importable-desde-script`).
+ * Este modulo NO importa nada en tiempo de ejecucion —recibe `masUrgente`—
+ * porque las dos rutas que fusionan tienen que consumir ESTAS funciones y no una
+ * copia: una es del dominio y la otra un script suelto, que no resuelve alias ni
+ * imports sin extension (deuda `contrato-scan-no-importable-desde-script`).
  */
 export function severidadDeLaSuperviviente(
   fusion: Fusion,
@@ -43,15 +34,42 @@ export function severidadDeLaSuperviviente(
   return masUrgente(delGrupo)
 }
 
+/** Una superviviente viva con la severidad de UNA de sus absorbidas. Es la forma
+ *  en la que la base puede contar los grupos DESPUES de fundir: la absorbida
+ *  dice de quien es en `extinct_reason`, y no queda otro hilo. */
+export interface Pareja {
+  readonly id: string
+  readonly viva: Severity
+  readonly absorbida: Severity
+}
+
+export interface Degradada {
+  readonly id: string
+  readonly viva: Severity
+  readonly maxima: Severity
+}
+
 /**
- * Si una superviviente quedo por DEBAJO de su grupo. Como la maxima incluye la
- * suya, que difieran ya significa que la de ella es menor: no hace falta
- * comparar en otro sentido, y asi hay una sola autoridad sobre el orden.
+ * La red (criterio 6): que supervivientes quedaron por DEBAJO de su grupo.
+ *
+ * DECIDE y no lanza: quien lanza es la cascara del script, y asi la decision
+ * —que es lo unico que puede equivocarse— corre en el gate. Como la maxima
+ * incluye la de la superviviente, que difieran ya significa que la suya es
+ * menor: una sola autoridad sobre el orden, sin comparar en dos sentidos.
+ *
+ * Devuelve la lista y no un booleano: el fallo tiene que decir CUAL quedo baja.
  */
-export function porDebajoDeSuGrupo(
-  actual: Severity,
-  delGrupo: readonly Severity[],
+export function supervivientesDegradadas(
+  parejas: readonly Pareja[],
   masUrgente: (severities: readonly Severity[]) => Severity
-): boolean {
-  return masUrgente([actual, ...delGrupo]) !== actual
+): readonly Degradada[] {
+  const porGanadora = new Map<string, Severity[]>()
+  for (const p of parejas) {
+    porGanadora.set(p.id, [...(porGanadora.get(p.id) ?? [p.viva]), p.absorbida])
+  }
+
+  const vivaDe = new Map(parejas.map((p) => [p.id, p.viva]))
+  return [...porGanadora]
+    .map(([id, grupo]) => ({ id, viva: vivaDe.get(id) as Severity, maxima: masUrgente(grupo) }))
+    .filter((d) => d.maxima !== d.viva)
 }

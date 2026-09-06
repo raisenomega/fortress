@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { masUrgente, type Severity } from '../shared/severity'
 import type { Fusion } from './fusion-de-duplicados'
-import { porDebajoDeSuGrupo, severidadDeLaSuperviviente } from './severidad-al-fundir'
+import { severidadDeLaSuperviviente } from './severidad-al-fundir'
 
 const GRUPO: Fusion = {
   ganadora: 'vieja',
@@ -33,16 +33,5 @@ describe('que severidad queda cuando dos filas eran una', () => {
 
   it('sin severidades no inventa una: lanza, porque es un fallo de cableado', () => {
     expect(() => maxima(mapa())).toThrow('fusion sin severidades')
-  })
-})
-
-describe('la red: una superviviente por debajo de su grupo', () => {
-  it('la detecta', () => {
-    expect(porDebajoDeSuGrupo('MEDIUM', ['MEDIUM', 'HIGH'], masUrgente)).toBe(true)
-  })
-
-  it('y no protesta cuando ya lleva la mas alta', () => {
-    expect(porDebajoDeSuGrupo('HIGH', ['MEDIUM', 'LOW'], masUrgente)).toBe(false)
-    expect(porDebajoDeSuGrupo('LOW', ['LOW'], masUrgente)).toBe(false)
   })
 })
