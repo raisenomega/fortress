@@ -26,5 +26,6 @@ export const SENTINEL_OMEGA: Agent = {
   name: 'Sentinel Omega',
   purpose: 'Meta-auditor: contrasta lo que reportan los demas agentes contra el filesystem real',
   enabledByDefault: true,
-  charter: OMEGA_CHARTER
+  charter: OMEGA_CHARTER,
+  model: 'opus'
 }
