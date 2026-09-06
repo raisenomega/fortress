@@ -32,6 +32,7 @@ const DEFENSAS = [
   'src/infrastructure/repair/motor-tools.ts',
   'src/domain/repair/auto-merge-blacklist.ts',
   'src/domain/repair/innegociables-defensa.ts',
+  'src/domain/repair/allowed-files.ts',
   'src/infrastructure/electron/main-window.ts',
   'src/preload/index.ts'
 ]
