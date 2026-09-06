@@ -1,4 +1,5 @@
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'fs'
+import { rutaContenida } from '../fs/ruta-contenida'
 import { dirname, join, relative } from 'path'
 import { listDirs, listFiles } from './list-files'
 import { sha256, type Snapshot } from './snapshot'
@@ -23,7 +24,8 @@ export function restore(projectPath: string, snap: Snapshot): void {
     if (!snap.hashes.has(relative(projectPath, file))) rmSync(file, { force: true })
   }
   for (const [rel, hash] of snap.hashes) {
-    const dest = join(projectPath, rel)
+    const dest = rutaContenida(projectPath, rel)
+    if (dest === null) continue
     if (existsSync(dest) && sha256(dest) === hash) continue
     mkdirSync(dirname(dest), { recursive: true })
     copyFileSync(join(snap.copyDir, rel), dest)

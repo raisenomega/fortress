@@ -1,3 +1,4 @@
+import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
 /**
  * La TERCERA familia del criterio innegociable: ficheros que IMPLEMENTAN una
  * defensa, sin gobernar la autonomia ni validar una entrada. Ver
@@ -16,6 +17,7 @@
  * que nadie lo notara, porque la lista sigue al fichero y la defensa se mudo.
  */
 export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
+  ...DEFENSAS_DEL_DISCO,
   // El ENTORNO de todo hijo: `build-env` recorta la sesion viva del operador
   // —agente ssh, keyring, GPG— y `git-env` hace lo propio para los cinco `git`
   // que corren en el repo auditado y ejecutan sus hooks.
@@ -58,13 +60,11 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   'src/application/repair/judge-and-integrate.ts',
   // El AISLAMIENTO DEL RENDERER, dos mitades de una sola garantia: `main-window`
   // fuerza `sandbox`, `contextIsolation` y `nodeIntegration: false`, y
-  // `preload/index` es la UNICA superficie que cruza ese puente —su comentario
-  // se apoya en la primera—. Cambiar `nodeIntegration` es UNA linea en UN
-  // fichero. Iba cubierto por `electron/**` en la config del proyecto, y ese
-  // patron nunca matcheo: los globs se anclan en la raiz y el codigo vive en
-  // `src/infrastructure/electron/`. Un glob muerto no protege pero lo parece,
-  // que es peor. La carpeta entera y no solo el fichero, por lo mismo que
-  // `posture/**`: quien anada ahi otra pieza la encuentra protegida.
+  // `preload/index` es la UNICA superficie que cruza ese puente. Cambiar
+  // `nodeIntegration` es UNA linea. Iba cubierto por `electron/**` en la config
+  // del proyecto, y ese patron nunca matcheo: los globs se anclan en la raiz y
+  // el codigo vive en `src/infrastructure/electron/`. Un glob muerto no protege
+  // pero lo parece, que es peor. La carpeta entera, como `posture/**`.
   'src/infrastructure/electron/**',
   'src/preload/index.ts',
   // El TACHADO de lo que sale en vivo al chat: `tool-detail` ya estaba, pero

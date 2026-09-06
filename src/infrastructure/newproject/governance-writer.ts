@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs'
-import { join } from 'path'
+import { rutaContenida } from '../fs/ruta-contenida'
 import type { GovernanceWriter } from '@application/newproject/execute-configuration'
 import { COMMITTED_DOCS } from '@domain/chat/config-docs'
 import { err } from '@domain/shared/result'
@@ -23,7 +23,11 @@ export function createGovernanceWriter(): GovernanceWriter {
       try {
         for (const [name, content] of Object.entries(files)) {
           if (!isSafeName(name)) return err(`Nombre de archivo no permitido: ${name}`)
-          writeFileSync(join(projectPath, name), content, 'utf8')
+          // `isSafeName` frena las barras y el `..`; no frena un enlace, que no
+          // es lexico. Si la carpeta se reutilizo, el nombre puede estar tomado.
+          const destino = rutaContenida(projectPath, name)
+          if (destino === null) return err(`Ruta no permitida: ${name}`)
+          writeFileSync(destino, content, 'utf8')
         }
       } catch (error) {
         return err(error instanceof Error ? error.message : 'No se pudo escribir el marco')
