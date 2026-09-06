@@ -1,4 +1,5 @@
 import type { Database } from 'better-sqlite3'
+import { sinSupervivientesDegradadas } from './fase-b-criterio-6.ts'
 
 /**
  * Los criterios que se comprueban DENTRO de la transaccion, antes del commit.
@@ -54,4 +55,7 @@ export function verificarEnCaliente(
       .get() as { n: number }
   ).n
   if (malas > 0) throw new Error(`criterio 5: ${malas} absorbidas mal marcadas`)
+
+  // 6 — ninguna superviviente por debajo de la maxima de su grupo, en su modulo.
+  sinSupervivientesDegradadas(db, proyecto)
 }

@@ -66,6 +66,40 @@ la transacción se deshace entera, así que "esto no cuadra" se resuelve sin
 restaurar nada. El backup sigue siendo obligatorio para lo que una transacción
 no cubre y como referencia para comparar `first_seen` fila a fila.
 
+## Enmienda (2026-09-06): la superviviente se queda con la gravedad máxima
+
+La regla original decidía **qué fila** queda, y calló sobre **qué severidad**
+queda. No era una omisión inocua: como la severidad no entra en la identidad ni
+en el desempate, la fila más antigua conservaba la suya y se llevaba por delante
+la más alta del grupo.
+
+Ocurrió. De las **cinco fusiones reales del 24 de agosto sobre el propio tablero
+de FORTRESS, dos degradaron**: un `HIGH` de la correa de alcance quedó en
+`MEDIUM`, y un `MEDIUM` de la config MCP en argv quedó en `LOW`. El tablero
+lleva desde entonces puntuando por debajo de lo que sabe.
+
+**Se enmienda así:** gana la misma fila de siempre —su `first_seen` sigue siendo
+la historia real del defecto, y el desempate no cambia— **pero se queda con la
+severidad MÁXIMA del grupo**. Fundir deja de poder bajar la gravedad: solo puede
+subirla o dejarla igual. Es lo único que la fusión escribe sobre la que
+sobrevive, y no toca ni su fecha, ni su identidad, ni su ciclo de vida.
+
+Dos efectos que conviene saber antes de usarla:
+
+- **El bloqueo de push es inmediato.** Una fila que suba a `CRITICAL` veta el
+  push desde ese instante: la decisión lee las filas vivas, no un número
+  guardado.
+- **El score del tablero NO se recalcula.** Se persiste al escanear, así que
+  sigue mostrando la cifra vieja **hasta el escaneo siguiente**. Que el número no
+  se mueva tras la enmienda no significa que no haya hecho nada.
+
+La red que lo sostiene es el **criterio 6** de la verificación en caliente:
+ninguna superviviente viva por debajo de la máxima de su grupo. Corre dentro de
+la transacción y, si falla, la deshace entera.
+
+Esta enmienda **no repara las dos filas ya degradadas**: eso es un gesto
+firmado aparte, no un efecto colateral de arreglar el mecanismo.
+
 ## Consecuencias
 
 Ejecutado el 2026-08-24 sobre la base del operador, con la app cerrada y backup

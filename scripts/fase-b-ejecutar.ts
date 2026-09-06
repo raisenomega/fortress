@@ -3,7 +3,9 @@ import { readFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 import { identidadFusionada, planDeFusion } from '../src/domain/project/fusion-de-duplicados.ts'
-import { MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from '../src/infrastructure/persistence/finding-fusion-sql.ts' // prettier-ignore
+import { severidadDeLaSuperviviente } from '../src/domain/project/severidad-al-fundir.ts'
+import { masUrgente, type Severity } from '../src/domain/shared/severity.ts'
+import { ELEVAR_SEVERIDAD, MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from '../src/infrastructure/persistence/finding-fusion-sql.ts' // prettier-ignore
 import { verificarEnCaliente } from './fase-b-verificar.ts'
 
 // Pieza 2b: reclasifica las filas del JSON y fusiona lo que empate, en UNA
@@ -33,6 +35,7 @@ const exentas = datos.clasificadas.filter((c) => c.tipo === 'otro').map((c) => c
 
 const reclasificarUna = db.prepare(RECLASIFICAR_FINDING)
 const marcar = db.prepare(MARCAR_FUSIONADA)
+const elevar = db.prepare(ELEVAR_SEVERIDAD)
 let absorbidas = 0
 const fusiones: string[] = []
 
@@ -45,19 +48,22 @@ const faseB = db.transaction(() => {
   // fuera del JSON y son la mitad de las fusiones que hay que hacer.
   const vivas = db
     .prepare(
-      `SELECT id, identity AS identidad, first_seen AS firstSeen FROM findings
+      `SELECT id, identity AS identidad, first_seen AS firstSeen, severity FROM findings
        WHERE project_id = ? AND lifecycle != 'EXTINCT'`
     )
-    .all(proyecto) as { id: string; identidad: string; firstSeen: string }[]
+    .all(proyecto) as { id: string; identidad: string; firstSeen: string; severity: Severity }[]
+  const porId = new Map(vivas.map((v) => [v.id, v.severity]))
 
   for (const fusion of planDeFusion(vivas)) {
     fusiones.push(`${fusion.absorbidas.length + 1}->1  ${fusion.identidad}`)
     for (const id of fusion.absorbidas) {
-      // El payload a mano, como en `toTouch`: la sentencia pide `@identity`.
       const identity = identidadFusionada(fusion.ganadora, fusion.identidad)
       marcar.run({ id, motivo: `fusionada-con-${fusion.ganadora}`, identity })
       absorbidas += 1
     }
+    // La MISMA funcion que usa `createFindingFusion`: fundir no baja la gravedad.
+    const maxima = severidadDeLaSuperviviente(fusion, porId, masUrgente)
+    if (maxima !== porId.get(fusion.ganadora)) elevar.run({ id: fusion.ganadora, severity: maxima })
   }
 
   verificarEnCaliente(db, proyecto, exentas)
