@@ -12,9 +12,18 @@
  * Es el UNICO UPDATE del sistema que escribe `identity` fuera de la migracion de
  * memoria — y aquella solo alcanza a las filas que la tienen vacia, que es por
  * lo que estas quedaron congeladas con la formula vieja.
+ *
+ * Por eso una fila ya ABSORBIDA queda fuera de su alcance. Sin la guarda, pasarle
+ * un id absorbido le devolveria la clave del GANADOR, y `SELECT_BY_IDENTITY` no
+ * filtra por ciclo de vida: el escaneo siguiente podria elegirla y `TOUCH_FINDING`
+ * la resucitaria a ACTIVE — el centinela existe justo para impedir eso, y este
+ * UPDATE era lo unico que podia borrarlo. Que nunca le llegara una absorbida era
+ * CONVENCION (el filtro vive en la lectura, tres pasos antes, con un JSON
+ * revisable en medio), y una convencion no es una guarda.
  */
 export const RECLASIFICAR_FINDING = `UPDATE findings
-  SET identity = @identity, tipo = @tipo, simbolo = @simbolo WHERE id = @id`
+  SET identity = @identity, tipo = @tipo, simbolo = @simbolo
+  WHERE id = @id AND lifecycle != 'EXTINCT'`
 
 /**
  * La absorbida. Se MARCA, no se borra: 102 de las 106 propuestas de reparacion
