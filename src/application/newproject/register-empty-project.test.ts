@@ -21,6 +21,28 @@ function ctx(): { context: AppContext; added: NewProject[] } {
 const okInit = (): Promise<Result<string>> => Promise.resolve(ok('init'))
 const input = { name: 'Nueva', path: '/tmp/nueva', stack: '' }
 
+describe('la ruta se recorta UNA vez y vale para las tres cosas', () => {
+  it('el arbol en disco, el duplicado y la fila son la MISMA ruta', async () => {
+    // Antes se validaba y se hacia `git init` sobre la CRUDA y `addProject`
+    // persistia la recortada: el `.git` quedaba en `/tmp/nueva ` y la fila en
+    // `/tmp/nueva`. Dos rutas para un proyecto, y la ruta ES la identidad. El
+    // duplicado tampoco se veia: comparaba la cruda contra filas recortadas.
+    const { context, added } = ctx()
+    const iniciados: string[] = []
+    const buscadas: string[] = []
+    const espia = { ...context, projects: { ...context.projects, findByPath: (p: string) => (buscadas.push(p), null) } } as unknown as AppContext // prettier-ignore
+    const init = (cwd: string): Promise<Result<string>> => (iniciados.push(cwd), Promise.resolve(ok('init'))) // prettier-ignore
+
+    const r = await registerEmptyProject(espia, init, { ...input, path: '/tmp/nueva ' })
+
+    expect(r.ok).toBe(true)
+    expect(iniciados).toEqual(['/tmp/nueva'])
+    expect(added[0].path).toBe('/tmp/nueva')
+    // Todas las consultas —la de aqui y la de `addProject`— con la recortada.
+    expect([...new Set(buscadas)]).toEqual(['/tmp/nueva'])
+  })
+})
+
 describe('registerEmptyProject', () => {
   it('registra el proyecto en PENDIENTE_CONFIGURACION tras git init', async () => {
     const { context, added } = ctx()
