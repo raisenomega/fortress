@@ -22,6 +22,7 @@ export const deps = (over: Partial<DrenajeDeps> = {}): DrenajeDeps => ({
   motor: {} as DrenajeDeps['motor'],
   cancelado: () => false,
   gastado: () => 0,
+  topeDiario: () => null,
   maxVueltas: 6,
   costCapUsd: 25,
   ...over
