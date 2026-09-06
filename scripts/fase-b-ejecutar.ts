@@ -5,18 +5,15 @@ import { join } from 'path'
 import { identidadFusionada, planDeFusion } from '../src/domain/project/fusion-de-duplicados.ts'
 import { severidadDeLaSuperviviente } from '../src/domain/project/severidad-al-fundir.ts'
 import { masUrgente, type Severity } from '../src/domain/shared/severity.ts'
-import { ELEVAR_SEVERIDAD, MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from '../src/infrastructure/persistence/finding-fusion-sql.ts' // prettier-ignore
+import { MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from '../src/infrastructure/persistence/finding-fusion-sql.ts' // prettier-ignore
+import { ELEVAR_SEVERIDAD } from '../src/infrastructure/persistence/reparar-gravedad.ts'
 import { verificarEnCaliente } from './fase-b-verificar.ts'
 
 // Pieza 2b: reclasifica las filas del JSON y fusiona lo que empate, en UNA
-// transaccion. NO llama al modelo — consume la clasificacion ya revisada, asi
-// que no hay red en la seccion critica. Exige app cerrada y backup: escribe.
-interface Clasificada {
-  readonly id: string
-  readonly tipo: string
-  readonly simbolo: string
-  readonly identidad_nueva: string
-}
+// transaccion. NO llama al modelo: consume la clasificacion ya revisada, asi que
+// no hay red en la seccion critica. Exige app cerrada y backup: escribe.
+// prettier-ignore
+interface Clasificada { readonly id: string; readonly tipo: string; readonly simbolo: string; readonly identidad_nueva: string }
 
 const PROYECTO = 'fortress-command-center'
 const datos = JSON.parse(readFileSync('internal/fase-b-clasificacion.json', 'utf8')) as { clasificadas: Clasificada[] } // prettier-ignore
@@ -29,8 +26,8 @@ const proyecto = (db.prepare('SELECT id FROM projects WHERE name = ?').get(PROYE
 const vivasAntes = (): number =>
   (db.prepare(`SELECT COUNT(*) n FROM findings WHERE project_id = ? AND lifecycle != 'EXTINCT'`).get(proyecto) as { n: number }).n // prettier-ignore
 const antes = vivasAntes()
-// La que quedo en 'otro' es la CSP obsoleta: se le escribe su identidad nueva y
-// nada mas. No le falta un tipo, le falta juicio — y juzgar es del motor.
+// La que quedo en 'otro' es la CSP obsoleta: no le falta un tipo, le falta
+// juicio — y juzgar es del motor. Se le escribe la identidad y nada mas.
 const exentas = datos.clasificadas.filter((c) => c.tipo === 'otro').map((c) => c.id)
 
 const reclasificarUna = db.prepare(RECLASIFICAR_FINDING)

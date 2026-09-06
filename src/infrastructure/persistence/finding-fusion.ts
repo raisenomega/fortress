@@ -2,7 +2,8 @@ import { identidadFusionada, planDeFusion } from '@domain/project/fusion-de-dupl
 import { severidadDeLaSuperviviente, type FilaConSeveridad } from '@domain/project/severidad-al-fundir' // prettier-ignore
 import { masUrgente } from '@domain/shared/severity'
 import type { Db } from './database'
-import { ELEVAR_SEVERIDAD, MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from './finding-fusion-sql'
+import { MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from './finding-fusion-sql'
+import { ELEVAR_SEVERIDAD } from './reparar-gravedad'
 
 /** Lo que el backfill le pasa por cada fila que un agente acaba de clasificar. */
 export interface Reclasificacion {

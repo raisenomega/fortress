@@ -1,12 +1,7 @@
 import type { Database } from 'better-sqlite3'
 import { supervivientesDegradadas, type Pareja } from '../src/domain/project/severidad-al-fundir.ts' // prettier-ignore
 import { masUrgente } from '../src/domain/shared/severity.ts'
-
-/** Cada superviviente VIVA junto a la severidad de una absorbida suya. La
- *  absorbida dice de quien es por `extinct_reason`, que es donde quedo escrito. */
-const PAREJAS = `SELECT g.id, g.severity AS viva, a.severity AS absorbida
-  FROM findings g JOIN findings a ON a.extinct_reason = 'fusionada-con-' || g.id
-  WHERE g.project_id = ? AND g.lifecycle != 'EXTINCT'`
+import { PAREJAS_DE_FUSION } from '../src/infrastructure/persistence/reparar-gravedad.ts'
 
 /**
  * Criterio 6: ninguna superviviente por debajo de la maxima de su grupo.
@@ -20,7 +15,7 @@ const PAREJAS = `SELECT g.id, g.severity AS viva, a.severity AS absorbida
  * equivocar tiene que estar del otro lado de esa frontera.
  */
 export function sinSupervivientesDegradadas(db: Database, proyecto: string): void {
-  const parejas = db.prepare(PAREJAS).all(proyecto) as Pareja[]
+  const parejas = db.prepare(PAREJAS_DE_FUSION).all(proyecto) as Pareja[]
   const degradadas = supervivientesDegradadas(parejas, masUrgente)
   if (degradadas.length === 0) return
 
