@@ -1,6 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import type { ChatChunk } from '@domain/chat/chat-stream'
 import type { LoopStatus } from '@domain/loop/loop-status'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import { IPC } from '../ipc/channels'
 
 /** Estado en memoria de los loops vivos. Aislado por proyecto: una entrada cada uno. */
@@ -53,7 +54,8 @@ export function sendLoopStatus(status: LoopStatus): void {
  * antes el estado (evita la carrera al reanudar) y sin pisar un chat manual.
  */
 export function sendLoopChunk(projectId: string, delta: string): void {
-  const chunk: ChatChunk = { projectId, delta }
+  // Tachado, como el del chat: es la misma salida de agente por otro canal.
+  const chunk: ChatChunk = { projectId, delta: redactSecrets(delta) }
   if (win && !win.isDestroyed()) win.webContents.send(IPC.loopChunk, chunk)
 }
 

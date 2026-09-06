@@ -9,14 +9,16 @@ import { verifyGraph } from '../graph/verify-graph'
 import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
+import { sinSecretosEnVivo } from '@application/chat/en-vivo-tachado'
 import { IPC } from './channels'
 
 const NO_GRAPH: GraphVerify = { connected: false, tools: [] }
 
+/** Tachado: sale lo que el CLI del grafo dice del repo auditado. */
 function logger(event: IpcMainInvokeEvent, projectId: string): (delta: string) => void {
-  return (delta) => {
+  return sinSecretosEnVivo((delta) => {
     if (!event.sender.isDestroyed()) event.sender.send(IPC.graphProgress, { projectId, delta })
-  }
+  })
 }
 
 async function handleInstall(event: IpcMainInvokeEvent, id: string): Promise<Result<GraphStatus>> {
@@ -46,11 +48,9 @@ async function handleAb(id: string, question: string): Promise<Result<GraphAb>> 
   }
 }
 
-/**
- * Verificar tambien spawnea el CLI con la key, y el breaker de contaminacion
- * vale aunque casi no gaste. El motivo del rechazo sale por graph:progress:
- * GraphVerify es plano, y devolverlo mudo confunde bloqueado con "no conecta".
- */
+/** Verificar tambien spawnea el CLI con la key, y el breaker vale aunque casi no
+ *  gaste. El motivo del rechazo sale por graph:progress: `GraphVerify` es plano,
+ *  y devolverlo mudo confunde bloqueado con "no conecta". */
 async function handleVerify(event: IpcMainInvokeEvent, id: string): Promise<GraphVerify> {
   const context = getAppContext()
   const project = context.projects.findById(id)
