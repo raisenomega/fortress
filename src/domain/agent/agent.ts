@@ -32,4 +32,10 @@ export interface Agent {
    * resto deriva su prompt de name + purpose.
    */
   readonly charter?: string
+  /**
+   * Alias o id de modelo para este agente. Ausente = hereda el de la sesion.
+   * Alias (`opus`, `sonnet`, `haiku`) y no un id fijo: asi el agente sube de
+   * version sola cuando sale la siguiente, sin tocar el catalogo.
+   */
+  readonly model?: string
 }

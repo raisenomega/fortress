@@ -472,6 +472,15 @@ en el chat, reversible con su toggle.
 conserva el término histórico "draft" (el flujo nació como borradores de
 agente); en referencias viejas del código puede aparecer como agent_draft.
 
+**No hay columna `model`, y es deliberado.** Desde
+[ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md) cada agente puede
+declarar con qué modelo corre, pero eso vive en el **catálogo en código**
+(`src/domain/agent/`) y no en la base: los once de auditoría no son datos, y los
+auto-creados —que sí lo son— heredan el modelo de la sesión porque el campo es
+opcional y su ausencia es una respuesta. Si algún día un agente auto-creado
+necesita elegir modelo, la columna se añade entonces; hoy sería una columna vacía
+para todas las filas.
+
 ### capabilities
 
 **Propósito:** capacidades que FORTRESS se propone crearse (función,

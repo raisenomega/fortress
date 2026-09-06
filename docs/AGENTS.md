@@ -166,8 +166,19 @@ descritas por intención — son:
 
 ### Los 11 agentes
 
-Formato: dominio · cuándo se activa · salida esperada. El registro de
+Formato: dominio · cuándo se activa · salida esperada · modelo. El registro de
 telemetría es común (ver Trazabilidad).
+
+Cada agente declara **con qué modelo corre**, y el criterio es qué hace, no su
+importancia. Se declara el alias y no un id fijo, para que suba de versión solo.
+La decisión completa y su porqué, en
+[ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md).
+
+| Modelo | Agentes | Trabajo |
+|---|---|---|
+| `opus` | Security Reviewer, Sentinel Omega, Planner, Cognition | Juzgan: deciden si algo es un defecto y con qué gravedad |
+| `sonnet` | Code Reviewer, TDD Guide, Build Error Resolver, E2E Runner | Ejecutan contra algo comprobable: un test pasa o no |
+| `haiku` | Refactor Cleaner, Code Simplifier, Opensource Sanitizer | Barren: pasadas mecánicas sobre criterios ya escritos |
 
 #### Security Reviewer (`security-reviewer`)
 
@@ -176,24 +187,28 @@ telemetría es común (ver Trazabilidad).
 - **Cuándo se activa:** ON por defecto; escaneos y consultas de seguridad.
 - **Salida esperada:** hallazgos de seguridad con severidad (los CRITICAL
   bloquean el push).
+- **Modelo:** `opus` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Code Reviewer (`code-reviewer`)
 
 - **Dominio:** bugs, errores no manejados, edge cases.
 - **Cuándo se activa:** ON por defecto; escaneos y "busca bugs".
 - **Salida esperada:** hallazgos de correctitud con evidencia.
+- **Modelo:** `sonnet` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Refactor Cleaner (`refactor-cleaner`)
 
 - **Dominio:** código muerto, imports sin usar, duplicación.
 - **Cuándo se activa:** ON por defecto; escaneos y limpiezas.
 - **Salida esperada:** hallazgos de higiene, típicamente MEDIUM/LOW.
+- **Modelo:** `haiku` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### TDD Guide (`tdd-guide`)
 
 - **Dominio:** tests que reproducen el bug ANTES del fix.
 - **Cuándo se activa:** ON por defecto; acompaña arreglos.
 - **Salida esperada:** tests propuestos y brechas de cobertura.
+- **Modelo:** `sonnet` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Planner (`planner`)
 
@@ -201,6 +216,7 @@ telemetría es común (ver Trazabilidad).
   tocar código.
 - **Cuándo se activa:** ON por defecto; "planifica esta feature".
 - **Salida esperada:** plan por pasos con archivos afectados y riesgos.
+- **Modelo:** `opus` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Cognition (`cognition`)
 
@@ -215,12 +231,14 @@ telemetría es común (ver Trazabilidad).
   la reflexión: tras cada escaneo el MOTOR —no el LLM— reescribe de forma
   determinista el COGNITION-LOG; persiste memoria entre sesiones. Decisión de
   fondo: `docs/DECISIONS/adr-047-dos-bucles-de-aprendizaje.md`.
+- **Modelo:** `opus` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Build Error Resolver (`build-error-resolver`)
 
 - **Dominio:** diagnóstico y arreglo de fallos de build.
 - **Cuándo se activa:** OFF por defecto; se enciende cuando el build falla.
 - **Salida esperada:** diagnóstico del fallo y fix mínimo propuesto.
+- **Modelo:** `sonnet` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### E2E Runner (`e2e-runner`)
 
@@ -228,18 +246,21 @@ telemetría es común (ver Trazabilidad).
   completos.
 - **Cuándo se activa:** OFF por defecto.
 - **Salida esperada:** resultado de flujos con evidencia de fallos.
+- **Modelo:** `sonnet` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Code Simplifier (`code-simplifier`)
 
 - **Dominio:** reducción de complejidad sin cambiar comportamiento.
 - **Cuándo se activa:** OFF por defecto; "simplifica esta función".
 - **Salida esperada:** propuestas de simplificación equivalentes.
+- **Modelo:** `haiku` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Opensource Sanitizer (`opensource-sanitizer`)
 
 - **Dominio:** preparar el repo para publicarse sin filtrar nada.
 - **Cuándo se activa:** OFF por defecto; "vamos a publicar".
 - **Salida esperada:** inventario de material sensible y plan de limpieza.
+- **Modelo:** `haiku` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
 
 #### Sentinel Omega (`sentinel-omega`) — carta propia
 
@@ -264,6 +285,9 @@ Los cuatro pilares de su carta (descritos por intención):
 Y una regla operativa dura de su carta: **grafo-primero, no negociable** —
 navega el código por el Knowledge Graph y abre archivos enteros solo si el
 grafo no basta.
+
+- **Modelo:** `opus` (ver [ADR-078](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
+  Juzga a los demás agentes, así que corre con el que juzga.
 
 Tres funciones se le REHUSARON a propósito, porque lo darían poder para
 violar justo lo que vigila:

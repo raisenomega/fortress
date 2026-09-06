@@ -42,6 +42,8 @@ export function agentPrompt(agent: Agent, corpus: CorpusDescriptor): string {
 export interface AgentDefinition {
   readonly description: string
   readonly prompt: string
+  /** Solo si el agente lo declara. Ausente = el CLI usa el de la sesion. */
+  readonly model?: string
 }
 
 /** Forma exacta que espera `claude --agents`, verificada contra su --help. */
@@ -52,7 +54,16 @@ export function buildAgentsPayload(
   const payload: Record<string, AgentDefinition> = {}
 
   for (const agent of agents) {
-    payload[agent.id] = { description: agent.purpose, prompt: agentPrompt(agent, corpus) }
+    // La llave se OMITE cuando no hay modelo, en vez de mandarla en undefined:
+    // `JSON.stringify` la borraria igual, pero el objeto que viaja por el codigo
+    // hasta ahi diria que el campo existe y vale nada, que no es lo mismo que
+    // "este agente no elige modelo". Y la cadena VACIA se omite tambien: es un
+    // descuido, no una eleccion, y mandaria al CLI a pedir un modelo sin nombre.
+    payload[agent.id] = {
+      description: agent.purpose,
+      prompt: agentPrompt(agent, corpus),
+      ...(agent.model ? { model: agent.model } : {})
+    }
   }
 
   return payload
