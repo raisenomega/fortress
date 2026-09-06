@@ -20,5 +20,15 @@ export const SCAN_RULES = [
   '- Cada hallazgo necesita archivo y linea concretos. Si no puedes senalarlos,',
   '  no lo reportes: una sospecha sin evidencia no es un hallazgo.',
   '- No inventes problemas. Un proyecto limpio se reporta como limpio.',
-  '- CRITICAL es solo lo explotable tal y como esta el codigo hoy.'
+  '- CRITICAL es solo lo explotable tal y como esta el codigo hoy.',
+  // Los dos falsos positivos que mas ha cometido, y los dos son de lectura
+  // superficial: marcar ausente un control que estaba un salto mas abajo, y
+  // nombrar como control esperado algo que solo existe en un comentario.
+  '- Antes de marcar "falta el control C", sigue la llamada UN salto: el control',
+  '  puede estar aplicado en el ayudante al que la funcion delega, y penalizarlo',
+  '  ahi castiga justo el patron correcto.',
+  '- Si nombras un control —una funcion, una politica, una cabecera— comprueba que',
+  '  existe en el repo antes de citarlo. Un comentario que describe algo que nunca',
+  '  se implemento no prueba que exista, y mandar a buscarlo es mandar a buscar un',
+  '  fantasma.'
 ].join('\n')
