@@ -31,18 +31,20 @@ export function registerDrainHandlers(): void {
     // de rojo como una caida hacia que el operador buscara una falla inexistente.
     if (busy !== null) return { ...NADA_HECHO, fin: 'ocupado', detalle: busy }
 
-    const budget = readLoopBudget(context)
-    const base = spentTodayByProject(context, new Date(), id)
-    const deps = {
-      motor: buildMotorChainDeps(id),
-      cancelado: () => isCancelled(id),
-      gastado: () => spentTodayByProject(context, new Date(), id) - base,
-      maxVueltas: budget.maxCycles,
-      costCapUsd: budget.costCapUsd
-    }
     // endRun va DESPUES de que el drenaje lea su ultima cancelacion: borra la
-    // marca, y borrarla antes le quitaria la razon por la que paro.
+    // marca, y borrarla antes le quitaria la razon por la que paro. Y todo lo
+    // que se arma va DENTRO: leer el presupuesto o el gasto del dia puede
+    // fallar, y fuera ese fallo dejaba el carril tomado hasta reiniciar.
     try {
+      const budget = readLoopBudget(context)
+      const base = spentTodayByProject(context, new Date(), id)
+      const deps = {
+        motor: buildMotorChainDeps(id),
+        cancelado: () => isCancelled(id),
+        gastado: () => spentTodayByProject(context, new Date(), id) - base,
+        maxVueltas: budget.maxCycles,
+        costCapUsd: budget.costCapUsd
+      }
       return await drenarHastaOmega(context, id, deps)
     } finally {
       endRun(id)

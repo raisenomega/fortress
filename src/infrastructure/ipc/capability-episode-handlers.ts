@@ -21,12 +21,16 @@ export function registerCapabilityEpisodeHandlers(): void {
     if (selfGraphMissing(context)) return err(GRAPH_REQUIRED_MSG)
     const busy = guardRun(context, id)
     if (busy !== null) return err(busy)
-    const sandbox = mkdtempSync(join(tmpdir(), 'fortress-episode-'))
+    // Se DECLARA fuera porque el finally lo borra, pero se CREA dentro: crear el
+    // temporal puede fallar —disco lleno, permisos— y fuera del try ese fallo
+    // saltaba por encima del `endRun` y dejaba el carril tomado para siempre.
+    let sandbox: string | null = null
     try {
+      sandbox = mkdtempSync(join(tmpdir(), 'fortress-episode-'))
       const agent = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context))
       return await runLearningEpisode(context, id, agent, sandbox)
     } finally {
-      rmSync(sandbox, { recursive: true, force: true })
+      if (sandbox !== null) rmSync(sandbox, { recursive: true, force: true })
       endRun(id)
     }
   })
