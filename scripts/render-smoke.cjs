@@ -1,7 +1,7 @@
 /**
  * Smoke test del renderer: monta la UI real (con preload e IPC vivos), pasa el
- * onboarding y falla si el shell no se pinta, si Tailwind no aplica o si hay
- * errores en consola.
+ * onboarding y falla si el shell no se pinta, si Tailwind no aplica, si la CSP
+ * efectiva no es la de produccion o si hay errores en consola.
  *
  * Ya ha cazado un bucle de render infinito (React #185), utilidades de Tailwind
  * que no se generaban, un preload ausente y un cuelgue sin salida.
@@ -12,17 +12,12 @@ const { app } = require('electron')
 const { join } = require('path')
 const { writeFileSync } = require('fs')
 const harness = require('./lib/app-harness.cjs')
-const { clickByText } = require('./checks/ui-scripts.cjs')
+const { clickByText, TAILWIND_APPLIED } = require('./checks/ui-scripts.cjs')
+const { META_CSP, revisaCsp } = require('./checks/csp-check.cjs')
 
 const SCREENSHOT = join(__dirname, '..', '.render-smoke.png')
 const SETTLE_MS = 2500
 const MIN_HTML_LENGTH = 2000
-
-// Sin sidebar en el onboarding: la comprobacion mira el contenedor raiz, que
-// existe en las dos pantallas, y usa optional chaining para no lanzar nunca.
-const TAILWIND_APPLIED = `
-  getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)' &&
-  getComputedStyle(document.querySelector('#root > div') ?? document.body).display === 'flex'`
 
 harness.useTemporaryUserData()
 harness.bootMainProcess()
@@ -62,13 +57,15 @@ app.whenReady().then(async () => {
     if (html < MIN_HTML_LENGTH) return fail(`el shell no se pinto (${html} caracteres)`)
 
     if (!(await run(TAILWIND_APPLIED))) return fail('los estilos de Tailwind no se aplicaron')
+    const csp = revisaCsp(await run(META_CSP))
+    if (csp !== null) return fail(csp)
     if (errors.length > 0) return fail(`errores en consola — ${errors.join(' | ')}`)
   } catch (error) {
     // Un rechazo sin capturar aqui dejaba el proceso colgado y mudo.
     return fail(`excepcion durante la comprobacion — ${error.message}`)
   }
 
-  console.log('SMOKE OK: shell renderizado, estilos aplicados, 0 errores')
+  console.log('SMOKE OK: shell renderizado, estilos aplicados, CSP de produccion, 0 errores')
   harness.cleanup()
   app.exit(0)
 })

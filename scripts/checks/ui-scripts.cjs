@@ -1,4 +1,5 @@
-/** Fragmentos que se evaluan dentro del renderer desde los scripts de preview. */
+/** Fragmentos que se evaluan dentro del renderer desde los scripts de preview
+ *  y de smoke. */
 
 const BODY_TEXT = 'document.body.innerText'
 
@@ -48,4 +49,13 @@ const TOGGLES_INSIDE_TRACK = `(() => {
   return problemas
 })()`
 
-module.exports = { BODY_TEXT, clickByText, clickSelector, TOGGLES_INSIDE_TRACK }
+/**
+ * Comprueba que Tailwind aplico de verdad. Sin sidebar en el onboarding, mira
+ * el contenedor raiz —que existe en las dos pantallas— y usa optional chaining
+ * para no lanzar nunca.
+ */
+const TAILWIND_APPLIED = `
+  getComputedStyle(document.body).backgroundColor !== 'rgba(0, 0, 0, 0)' &&
+  getComputedStyle(document.querySelector('#root > div') ?? document.body).display === 'flex'`
+
+module.exports = { BODY_TEXT, clickByText, clickSelector, TAILWIND_APPLIED, TOGGLES_INSIDE_TRACK }
