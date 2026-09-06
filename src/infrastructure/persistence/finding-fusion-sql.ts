@@ -44,11 +44,5 @@ export const MARCAR_FUSIONADA = `UPDATE findings
   SET lifecycle = 'EXTINCT', extinct_reason = @motivo, resolved_at = NULL, identity = @identity
   WHERE id = @id`
 
-/**
- * La superviviente se queda con la severidad MAXIMA de su grupo. Es lo UNICO que
- * la fusion escribe sobre la que sobrevive, y no toca nada mas: ni `first_seen`
- * —su historia, y el motivo de que sea ella la que gana—, ni la identidad, ni el
- * ciclo de vida. Solo corre cuando la maxima difiere de la que ya tiene: un
- * UPDATE que escribe lo mismo es ruido en el registro.
- */
-export const ELEVAR_SEVERIDAD = `UPDATE findings SET severity = @severity WHERE id = @id`
+/** `ELEVAR_SEVERIDAD` vive en `reparar-gravedad.ts`, con la reparacion que lo
+ *  usa y la consulta que encuentra a quien le toca. */
