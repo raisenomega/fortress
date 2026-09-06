@@ -53,6 +53,17 @@ export interface DrenajeDeps {
   readonly cancelado: () => boolean
   /** Dolares gastados en esta sesion de drenaje. */
   readonly gastado: () => number
+  /**
+   * El motivo del tope del DIA, o null si todavia cabe. Es OTRO tope: `gastado`
+   * mide esta sesion y este proyecto, y el del dia suma todo lo que se ha
+   * gastado hoy por cualquier via. Se consulta cada vuelta porque un drenaje
+   * dura media hora y el que arranca cerca del tope se lo pasaba entero.
+   *
+   * Llega como funcion —y no como `guardRun`— porque el drenaje YA tiene el
+   * carril tomado desde su handler: pedirlo otra vez se responderia a si mismo
+   * que esta ocupado, que es la reentrancia que costo la Familia E.
+   */
+  readonly topeDiario: () => string | null
   readonly maxVueltas: number
   readonly costCapUsd: number
 }

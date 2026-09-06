@@ -5,7 +5,7 @@ import { spentTodayByProject } from '@application/settings/read-budget'
 import { getAppContext } from '../persistence/app-context'
 import { buildMotorChainDeps } from '../repair/motor-chain-deps'
 import { cancelRun, endRun, isCancelled } from '../run-control'
-import { guardRun } from '../run-guard'
+import { guardRun, topeDiarioAlcanzado } from '../run-guard'
 import { IPC } from './channels'
 
 /**
@@ -42,6 +42,7 @@ export function registerDrainHandlers(): void {
         motor: buildMotorChainDeps(id),
         cancelado: () => isCancelled(id),
         gastado: () => spentTodayByProject(context, new Date(), id) - base,
+        topeDiario: () => topeDiarioAlcanzado(context, new Date()),
         maxVueltas: budget.maxCycles,
         costCapUsd: budget.costCapUsd
       }

@@ -39,6 +39,11 @@ export async function drenarHastaOmega(
   for (let vuelta = 0; vuelta < deps.maxVueltas; vuelta += 1) {
     if (deps.cancelado()) return fin('detenido')
     if (deps.gastado() >= deps.costCapUsd) return fin('tope-gasto')
+    // Y el del DIA, que es otro y manda mas: aquel acota esta sesion, este el
+    // dinero real. Sale como `ocupado` —un freno del sistema haciendo su
+    // trabajo, no una averia— con el texto que el operador tiene que leer.
+    const tope = deps.topeDiario()
+    if (tope !== null) return fin('ocupado', tope)
 
     const salida = await runMotorChain(ctx, projectId, deps.motor, 'hasta-omega')
     // Antes de leer el resultado: parar mata al hijo, y el hijo muriendo se
