@@ -31,7 +31,9 @@ const DEFENSAS = [
   'src/infrastructure/loop/loop-fix.ts',
   'src/infrastructure/repair/motor-tools.ts',
   'src/domain/repair/auto-merge-blacklist.ts',
-  'src/domain/repair/innegociables-defensa.ts'
+  'src/domain/repair/innegociables-defensa.ts',
+  'src/infrastructure/electron/main-window.ts',
+  'src/preload/index.ts'
 ]
 
 describe('un fix a una defensa NO se integra solo: exige firma humana', () => {

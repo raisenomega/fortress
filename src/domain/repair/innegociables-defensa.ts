@@ -52,6 +52,22 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // por donde se escapo la vez anterior.
   'src/application/repair/integrable-sin-firma.ts',
   'src/application/repair/judge-and-integrate.ts',
+  // El AISLAMIENTO DEL RENDERER, que son dos mitades de una sola garantia y por
+  // eso entran juntas: `main-window` fuerza `sandbox`, `contextIsolation` y
+  // `nodeIntegration: false` sobre la ventana, y `preload/index` es la UNICA
+  // superficie que cruza ese puente —su propio comentario se apoya en la
+  // primera: "contextIsolation esta forzado a true en main-window.ts, asi que
+  // este es el unico camino"—. Cambiar `nodeIntegration` a true es UNA linea en
+  // UN fichero: cabe de sobra en cualquier cerco por tamano.
+  //
+  // Iba cubierto por `electron/**` en la configuracion del proyecto, y ese
+  // patron nunca matcheo nada: los globs se anclan en la raiz del repo y el
+  // codigo vive en `src/infrastructure/electron/`. Un glob muerto no protege,
+  // pero lo parece, que es peor que no tenerlo. La carpeta entera y no solo el
+  // fichero, por lo mismo que `posture/**`: quien anada ahi otra pieza de la
+  // ventana la encuentra protegida sin acordarse.
+  'src/infrastructure/electron/**',
+  'src/preload/index.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
   'src/domain/repair/innegociables-defensa.ts'
 ]
