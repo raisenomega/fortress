@@ -4,6 +4,7 @@ import { buildEnv } from '../claude-code/build-env'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import { slugDelGrafo } from '@domain/connectors/slug-del-grafo'
 import { discoverCorpus } from '../project/discover-corpus'
+import { readCognitionLog } from '../cognition/read-cognition-log'
 import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
 import { toAnalysis, type RunOut } from './parse-analysis'
@@ -53,9 +54,10 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
   return {
     study: async (target, atendidas) => {
       const reloj = relojDeCorrida(Date.now())
-      // El corpus se lee en cada estudio, no al crear el analista: entre dos
-      // propuestas el proyecto puede haber ganado un ADR.
-      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, slugDelGrafo(projectPath))
+      // El corpus y el COGNITION-LOG se leen en cada estudio, no al crear el
+      // analista: entre dos propuestas el proyecto puede haber ganado un ADR, y
+      // el log se reescribe entero en cada escaneo.
+      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, slugDelGrafo(projectPath), readCognitionLog(projectPath).patterns)
       const out = await run(claudeBin, projectPath, prompt, projectId)
       const analysis = toAnalysis(target, out)
       return {

@@ -1,4 +1,6 @@
+import type { CognitionPattern } from '../cognition/cognition-log'
 import { seccionAtendido } from './analysis-prompt-atendido'
+import { patronDelHallazgo } from './patron-del-hallazgo'
 import { senasDelHallazgo } from './analysis-prompt-senas'
 import { FORMATO } from './analysis-prompt-formato'
 import { sanearParaPrompt } from '../shared/sanear-para-prompt'
@@ -12,7 +14,7 @@ import type { Candidate } from './select-target'
  * u OBSOLETO (como paso con posture), y un JSON inerte con el entendimiento.
  */
 // prettier-ignore
-export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, atendidas: readonly string[], enElGrafo: string): string {
+export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, atendidas: readonly string[], enElGrafo: string, patrones: readonly CognitionPattern[] = []): string {
   // El analista juzga si un hallazgo de seguridad sigue vivo: lo que el proyecto
   // haya escrito sobre lo que protege es parte de esa respuesta.
   const docs = buildDocsFirst('security', corpus)
@@ -27,6 +29,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     // un dato que no puede usar solo ocupa prompt.
     'La fecha NO es prueba: lo que decide es el fichero. Orienta, nada mas.',
     ...senasDelHallazgo(t),
+    ...patronDelHallazgo(t, patrones),
     ...(t.intentos == null ? [] : ['', t.intentos]),
     '',
     ...(docs === '' ? [] : [docs, '']),
