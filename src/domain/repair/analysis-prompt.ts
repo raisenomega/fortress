@@ -1,7 +1,9 @@
 import type { CognitionPattern } from '../cognition/cognition-log'
 import { seccionAtendido } from './analysis-prompt-atendido'
 import { patronDelHallazgo } from './patron-del-hallazgo'
+import { ALCANCE_DEL_SITIO } from './analysis-prompt-alcance'
 import { CALLEJONES } from './analysis-prompt-callejones'
+import { EL_GRAFO } from './analysis-prompt-grafo'
 import { senasDelHallazgo } from './analysis-prompt-senas'
 import { FORMATO } from './analysis-prompt-formato'
 import { sanearParaPrompt } from '../shared/sanear-para-prompt'
@@ -32,25 +34,13 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     ...senasDelHallazgo(t),
     ...patronDelHallazgo(t, patrones),
     ...(t.intentos == null ? [] : ['', t.intentos]),
+    ...(t.hermanos == null ? [] : ['', t.hermanos]),
     '',
     ...(docs === '' ? [] : [docs, '']),
     `En el grafo este proyecto se llama "${enElGrafo}" (deducido de su ruta; si no`,
     'cuadra, list_projects te da el nombre real). Usalo como project en cada consulta.',
     '',
-    'GRAFO PRIMERO: usa get_architecture, search_graph, trace_path y get_code_snippet',
-    'del servidor codebase-memory ANTES de leer archivos. Lee un archivo solo si el',
-    'grafo no basta. Entender BARATO.',
-    '',
-    'Si el proyecto NO esta indexado, index_status te lo dice en una llamada, sin',
-    'descubrirlo a base de consultas que fallan. Entonces sigue a mano con Read,',
-    'Grep y Glob, y NO lo indexes tu: indexar es una accion del operador, con su',
-    'gate. Que no lo este es un estado conocido y no un fallo de FORTRESS, asi que',
-    'no hace falta anotarlo en "notes" — lo demas que te falte, si.',
-    '',
-    'check_index_coverage dice si el indice cubre un fichero y si esta al dia',
-    'respecto al disco; detect_changes, con since, dice que cambio desde una fecha.',
-    'Son la via para saber si el grafo va retrasado sin abrir el fichero a ciegas.',
-    '',
+    ...EL_GRAFO,
     ...CALLEJONES,
     'Pasos: (1) localiza en el grafo el simbolo del hallazgo, quien lo llama y que toca;',
     '(2) si el fix seria agregar un control ya usado en el repo (el titulo suele',
@@ -60,6 +50,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     'hallazgo: leelo. Abrir el fichero del ancla NO contradice el grafo primero: el',
     'grafo decide QUE abrir, no si abrir.',
     '',
+    ...ALCANCE_DEL_SITIO,
     'NO propongas el fix ni escribas codigo.',
     ...FORMATO,
     ...seccionAtendido(atendidas)

@@ -2,7 +2,9 @@ import type { Project } from '@domain/project/project'
 import type { AnalystResult } from '@domain/repair/analysis'
 import type { Selection } from '@domain/repair/select-target'
 import type { AppContext } from '../context'
+import { hermanosDelHallazgo } from '@domain/repair/hermanos-del-hallazgo'
 import { intentosPrevios } from '@domain/repair/intentos-previos'
+import { senasDeIdentidad } from '@domain/project/finding-identity'
 import { loYaAtendido } from '../system/lo-ya-atendido'
 import { analyzeTarget } from './analyze-target'
 
@@ -28,6 +30,17 @@ export function estudiar(
   const suyas = ctx.repairProposals
     .listByProject(project.id)
     .filter((p) => p.findingId === selection.target.id)
-  const target = { ...selection.target, intentos: intentosPrevios(suyas) }
+  // Las otras sedes abiertas del mismo defecto se leen del mismo sitio y por la
+  // misma razon: el analista no alcanza la base, y el dato no puede depender de
+  // por que camino se entre al analisis.
+  const abiertos = ctx.findings
+    .listMemory(project.id)
+    .filter((f) => f.status === 'open' && f.lifecycle === 'ACTIVE')
+    .map((f) => ({ id: f.id, file: f.file, line: f.line, title: f.title, ...senasDeIdentidad(f.identity) })) // prettier-ignore
+  const target = {
+    ...selection.target,
+    intentos: intentosPrevios(suyas),
+    hermanos: hermanosDelHallazgo(selection.target, abiertos)
+  }
   return analyzeTarget(ctx.analystFor(project.path, project.id), { ...selection, target }, loYaAtendido(ctx)) // prettier-ignore
 }

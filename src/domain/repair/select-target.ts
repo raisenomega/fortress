@@ -20,6 +20,8 @@ export interface Candidate {
   /** Lo que YA se intento con el, si algo. `null` mientras solo se ELIGE: lo
    *  pone quien va a estudiarlo, que es quien tiene el expediente delante. */
   readonly intentos?: string | null
+  /** Las OTRAS sedes abiertas del mismo defecto. Lo pone quien tiene la base. */
+  readonly hermanos?: string | null
 }
 
 export interface Selection {
