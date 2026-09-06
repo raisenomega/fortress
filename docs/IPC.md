@@ -174,7 +174,7 @@ El Knowledge Graph y su realineado ([FLOWS/GRAPH-REINDEX](FLOWS/GRAPH-REINDEX.md
 | Canal | Dir | Contrato | Guards |
 |---|---|---|---|
 | `graph:status` | R/R | projectId → GraphStatus | — |
-| `graph:install` | R/R | projectId → Result<GraphStatus> | — |
+| `graph:install` | R/R | projectId → Result<GraphStatus> | guardRun |
 | `graph:verify` | R/R | projectId → GraphVerify | guardRun |
 | `graph:ab` | R/R | (projectId, question) → Result<GraphAb> | guardRun |
 | `graph:reindex` | R/R | projectId → ReconcileOutcome (manual) | cola serial de 1 |
@@ -294,7 +294,7 @@ El panel del meta-auditor y el Libro de la Vida.
 |---|---|---|---|
 | `posture:run` | R/R | PostureRequest → Result<PostureResult> | guardRun; validación de host (anti-SSRF); confirmación de propiedad |
 | `quality:run` | R/R | projectId → Result<IntegralScore> | guardRun; circuit breaker de contaminación |
-| `push:run` | R/R | projectId → Result<string> | bloqueo por hallazgos CRITICAL abiertos |
+| `push:run` | R/R | projectId → Result<string> | guardMerge; bloqueo por hallazgos CRITICAL abiertos; la carpeta debe ser la raíz de su propio repo |
 | `health:run` | R/R | () → HealthReport (self-diagnóstico) | — |
 | `cognition:read` | R/R | projectId → CognitionSnapshot (parsea, jamás ejecuta) | — |
 
@@ -350,12 +350,22 @@ y causaría fugas de listeners al desmontar.
 
 ## Guards transversales
 
-Por clase (ubicaciones y detalle interno: fuera de este documento):
+Por clase (ubicaciones y detalle interno: fuera de este documento).
+
+La columna **Guards** de las tablas de arriba no se mantiene a mano: un test
+la lee y la contrasta con las llamadas reales de `guardRun` y `guardMerge`
+en los registros de handlers, canal por canal. Nació de una deriva concreta
+— dos filas decían «—» con el guard puesto —, y esta tabla es justo lo que
+consulta quien juzga si a un canal le falta un guard por descuido o por
+decisión: cuando miente, el veredicto sale al revés.
 
 - **guardRun** — una corrida por proyecto para toda operación que gasta
   modelo o lanza procesos pesados (12 familias de handlers la aplican:
   chat, scan, quality, posture, build, acciones de grafo, redacción y
   episodios de capacidades, y los eslabones del motor).
+- **guardMerge** — el turno de la RAMA ACTIVA, que es otro recurso: lo
+  piden `repair:sign` y `push:run`, las dos operaciones que la escriben o
+  la publican. Trae además el circuit breaker de contaminación.
 - **Confianza (Workspace Trust)** — el modo autónomo y el loop exigen
   proyecto confiable; el flag se cambia solo por decisión explícita del
   operador.
