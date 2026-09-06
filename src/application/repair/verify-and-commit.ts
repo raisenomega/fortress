@@ -1,7 +1,7 @@
 import { exceededBudget } from '@domain/repair/budget'
 import { canTransition } from '@domain/repair/proposal'
 import { checkScope } from '@domain/repair/scope-check'
-import { toSlug } from '@domain/repair/slug'
+import { mensajeDelFix } from '@domain/repair/mensaje-del-fix'
 import type { AppContext } from '../context'
 import type { GenerateDeps, GenerateResult, Produced } from './generate-types'
 import type { Admitted } from './generate-guards'
@@ -30,7 +30,7 @@ export async function verifyAndCommit(
   // CONSERVADO: el commit del fix existiria pero el coste excedio; autopsia posible.
   if (exceededBudget(a.spent, p.cost)) return fail('budget_exceeded', { spent: a.spent, cost: p.cost }, true) // prettier-ignore
 
-  const message = `repair(${toSlug(a.analysis.target.title)}): ${a.analysis.whatToChange.slice(0, 60)}` // prettier-ignore
+  const message = mensajeDelFix(a.analysis.target, a.analysis.whatToChange)
   const commit = await deps.worktrees.commit(p.worktreePath, message)
   if (!commit.ok) return fail('no_diff_produced', { error: commit.error }, false)
 
