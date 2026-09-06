@@ -57,11 +57,12 @@ export function buildAgentsPayload(
     // La llave se OMITE cuando no hay modelo, en vez de mandarla en undefined:
     // `JSON.stringify` la borraria igual, pero el objeto que viaja por el codigo
     // hasta ahi diria que el campo existe y vale nada, que no es lo mismo que
-    // "este agente no elige modelo".
+    // "este agente no elige modelo". Y la cadena VACIA se omite tambien: es un
+    // descuido, no una eleccion, y mandaria al CLI a pedir un modelo sin nombre.
     payload[agent.id] = {
       description: agent.purpose,
       prompt: agentPrompt(agent, corpus),
-      ...(agent.model === undefined ? {} : { model: agent.model })
+      ...(agent.model ? { model: agent.model } : {})
     }
   }
 
