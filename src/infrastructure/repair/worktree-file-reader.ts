@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import { join } from 'path'
+import { rutaContenida } from '../fs/ruta-contenida'
 import { cuentaLineas } from '@domain/shared/limite-de-fichero'
 import { git } from './repair-git'
 
@@ -11,7 +11,10 @@ import { git } from './repair-git'
  */
 export function readAtHead(worktreePath: string, relPath: string): string {
   try {
-    return readFileSync(join(worktreePath, relPath), 'utf8')
+    // Lo que sale de aqui entra en el prompt de OMEGA. Un fichero del worktree
+    // que sea un enlace fuera lo convertiria en un canal de exfiltracion.
+    const real = rutaContenida(worktreePath, relPath)
+    return real === null ? '' : readFileSync(real, 'utf8')
   } catch {
     return ''
   }

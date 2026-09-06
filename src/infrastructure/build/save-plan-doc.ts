@@ -1,5 +1,5 @@
 import { writeFileSync } from 'fs'
-import { join } from 'path'
+import { rutaContenida } from '../fs/ruta-contenida'
 import { planDocument } from '@domain/build/plan-document'
 
 /**
@@ -16,7 +16,8 @@ export function savePlanDoc(
 ): string | null {
   try {
     const stamp = whenIso.slice(0, 19).replace(/[:T]/g, '-')
-    const path = join(projectPath, `FORTRESS-PLAN-${stamp}.md`)
+    const path = rutaContenida(projectPath, `FORTRESS-PLAN-${stamp}.md`)
+    if (path === null) return null
     writeFileSync(path, planDocument(projectName, intent, plan, whenIso), 'utf8')
     return path
   } catch {

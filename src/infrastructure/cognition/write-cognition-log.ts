@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { rutaContenida } from '../fs/ruta-contenida'
 import type { CognitionScan } from '@domain/cognition/cognition-writer'
 import { rebuildLog } from '@domain/cognition/rebuild-log'
 
@@ -16,7 +16,11 @@ const FILE = 'COGNITION-LOG.md'
  */
 export function writeScan(scan: CognitionScan): void {
   try {
-    const path = join(scan.projectPath, FILE)
+    // null = el nombre resuelve fuera del proyecto (un enlace commiteado) o no
+    // se pudo saber. No se escribe: sobrescribir el destino de ese enlace es
+    // exactamente el ataque, y el contenido lleva titulos del propio repo.
+    const path = rutaContenida(scan.projectPath, FILE)
+    if (path === null) return
     const existing = existsSync(path) ? readFileSync(path, 'utf8') : ''
     writeFileSync(
       path,
