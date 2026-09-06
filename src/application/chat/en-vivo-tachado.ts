@@ -1,12 +1,12 @@
 import { redactSecrets } from '@domain/chat/tool-detail'
 
 /**
- * Lo que sale EN VIVO al chat, tachado antes de salir.
+ * Lo que sale EN VIVO a la pantalla, tachado antes de salir.
  *
- * Se envuelve UNA vez, en el paso por el que el callback baja a todos los
- * motores, y no dentro de cada uno: el CLI lo emite trozo a trozo desde su
- * acumulador y la API por su propio stream, y ninguno de los dos tiene que
- * enterarse de esto ni acordarse de hacerlo.
+ * Nacio para el chat y hoy lo usan los CINCO canales en vivo: el chat, el
+ * escaneo, el grafo, el bucle y la salida del login. Cada uno tiene su propio
+ * emisor —por eso el tachado del chat no llegaba a los otros cuatro— y cada uno
+ * se envuelve en su puerta, sin que quien emite tenga que acordarse.
  *
  * Por TROZO es lo unico que se puede hacer en vivo, y por eso NO basta: un
  * secreto partido entre dos trozos no encaja con ningun patron hasta que se

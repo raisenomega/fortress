@@ -10,16 +10,19 @@ import { getAppContext } from '../persistence/app-context'
 import { guardRun } from '../run-guard'
 import { endRun } from '../run-control'
 import { createClaudeScanner } from '../scan/claude-scanner'
+import { sinSecretosEnVivo } from '@application/chat/en-vivo-tachado'
 import { IPC } from './channels'
 import { registerFindingDecisionHandlers } from './finding-decision-handlers'
 
-/** Emite progreso solo si la ventana sigue viva: un scan dura minutos. */
-function progressSender(event: IpcMainInvokeEvent, projectId: string) {
-  return (delta: string): void => {
+/** Emite progreso solo si la ventana sigue viva: un scan dura minutos. Y
+ *  tachado: es salida de un agente leyendo el repo auditado, igual que el chat,
+ *  y este canal tiene su propio emisor —por eso no le llegaba el del chat—. */
+function progressSender(event: IpcMainInvokeEvent, projectId: string): (d: string) => void {
+  return sinSecretosEnVivo((delta: string): void => {
     if (event.sender.isDestroyed()) return
     const chunk: ScanChunk = { projectId, delta }
     event.sender.send(IPC.scanProgress, chunk)
-  }
+  })
 }
 
 async function handleRun(

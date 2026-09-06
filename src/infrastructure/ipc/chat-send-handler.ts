@@ -1,4 +1,5 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
+import { sinSecretosEnVivo } from '@application/chat/en-vivo-tachado'
 import { sendMessage } from '@application/chat/send-message'
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { StepProgress } from '@application/workflow/step-progress'
@@ -13,13 +14,16 @@ import { isFortressRepo } from '../system/self-project'
 import { buildChatEngines } from './chat-engines'
 import { IPC } from './channels'
 
-/** Emite fragmentos solo si la ventana sigue viva (el usuario pudo cerrarla). */
-function chunkSender(event: IpcMainInvokeEvent, projectId: string) {
-  return (delta: string): void => {
+/** Solo si la ventana sigue viva, y tachado. `sendMessage` ya envuelve aguas
+ *  arriba —ahi cubre a los motores que no pasan por aqui—; se envuelve OTRA VEZ
+ *  a proposito, porque tachar es idempotente y una puerta que se protege sola no
+ *  depende de que quien la llame se acuerde. */
+function chunkSender(event: IpcMainInvokeEvent, projectId: string): (d: string) => void {
+  return sinSecretosEnVivo((delta: string): void => {
     if (event.sender.isDestroyed()) return
     const chunk: ChatChunk = { projectId, delta }
     event.sender.send(IPC.chatChunk, chunk)
-  }
+  })
 }
 
 /** Manda el avance del workflow para el medidor en vivo (agentes/tokens/coste). */
@@ -48,10 +52,8 @@ export function registerChatSendHandler(): void {
     const denegado = guardRun(context, input.projectId)
     if (denegado !== null) return err(denegado)
 
-    // DENTRO del try, no antes: armar los motores lee presupuesto, conectores y
-    // agentes de la base, y cualquiera de esas lecturas puede fallar. Fuera, ese
-    // fallo saltaba por encima del `finally` y dejaba el carril TOMADO: ni chat,
-    // ni escaneo, ni loop en ese proyecto hasta reiniciar la app.
+    // DENTRO del try: armar los motores lee la base y puede fallar, y fuera ese
+    // fallo saltaba por encima del `finally` y dejaba el carril TOMADO.
     try {
       const { codeAgent, assistant } = buildChatEngines(context)
       return await sendMessage(
