@@ -34,6 +34,8 @@ const DEFENSAS = [
   'src/domain/repair/innegociables-defensa.ts',
   'src/domain/repair/allowed-files.ts',
   'src/infrastructure/fs/ruta-contenida.ts',
+  'src/domain/settings/settings-repository.ts',
+  'src/infrastructure/security/api-key-store.ts',
   'src/infrastructure/electron/main-window.ts',
   'src/preload/index.ts'
 ]
