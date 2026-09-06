@@ -21,11 +21,15 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // que corren en el repo auditado y ejecutan sus hooks.
   'src/infrastructure/claude-code/build-env.ts',
   'src/infrastructure/git/git-env.ts',
-  // El PERIMETRO del generador. `scope-check` ya estaba; estos dos son la otra
-  // mitad: `scope-groups` lee los globs que declara el repo AUDITADO y
-  // `glob-de-alcance` es quien rechaza los que apagarian la correa entera.
+  // El PERIMETRO del generador. `scope-check` ya estaba —juzga el diff—; estos
+  // son la otra punta: `scope-groups` lee los globs del repo AUDITADO,
+  // `glob-de-alcance` rechaza los que apagarian la correa, y `allowed-files` con
+  // `path-hints` la DECIDEN. Proteger al que juzga y no al que decide dejaba
+  // fuera la mitad que importa.
   'src/domain/repair/scope-groups.ts',
   'src/domain/repair/glob-de-alcance.ts',
+  'src/domain/repair/allowed-files.ts',
+  'src/domain/repair/path-hints.ts',
   // El SANEADO de texto ajeno que entra en el prompt de un agente. `tool-detail`
   // ya estaba por `redactSecrets`; este es el mismo control para la otra puerta.
   'src/domain/shared/sanear-para-prompt.ts',
@@ -63,9 +67,8 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // `posture/**`: quien anada ahi otra pieza la encuentra protegida.
   'src/infrastructure/electron/**',
   'src/preload/index.ts',
-  // El TACHADO de lo que sale en vivo al chat. `tool-detail` —donde vive
-  // `redactSecrets`— ya estaba; este es quien lo APLICA al stream, y sin el la
-  // funcion existe y nadie la llama.
+  // El TACHADO de lo que sale en vivo al chat: `tool-detail` ya estaba, pero
+  // este es quien lo APLICA, y sin el la funcion existe y nadie la llama.
   'src/application/chat/en-vivo-tachado.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
   'src/domain/repair/innegociables-defensa.ts'

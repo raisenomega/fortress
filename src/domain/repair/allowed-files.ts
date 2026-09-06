@@ -52,8 +52,19 @@ export function computeAllowedFiles(input: AllowedFilesInput): string[] {
     files.push(`${base}.test.${ext}`, `${base}.spec.${ext}`)
   }
 
-  if (input.hint !== undefined) {
-    const dir = primary.slice(0, primary.lastIndexOf('/') + 1)
+  // La cordura de directorio es lo UNICO que hace segura la prosa: un extra
+  // entra porque esta AL LADO del ancla. Con el ancla en la raiz ese `dir` queda
+  // vacio y la regla deja de restringir — pasa a significar "cualquier fichero
+  // de la raiz", que es donde vive la configuracion. Medido: un ancla
+  // `index.ts` metia en la correa `.mcp.json` y `package.json` si la prosa los
+  // nombraba, y la correa se vuelca literal en el bloque (permitidos) del prompt.
+  //
+  // Con ancla en la raiz el hint no anade nada. No hay lista de prohibidos y no
+  // debe haberla: enumerar los sensibles dejaria fuera al que nadie recordo. Se
+  // restaura la condicion, no sus excepciones. El ancla y sus hermanos siguen
+  // entrando; tocar OTRO fichero pide su propia propuesta ("un hallazgo, un fix").
+  const dir = primary.slice(0, primary.lastIndexOf('/') + 1)
+  if (input.hint !== undefined && dir !== '') {
     const extras = extractPathHints(input.hint)
       .filter((token) => !files.includes(token))
       .filter((token) => token.startsWith(dir) && !token.slice(dir.length).includes('/'))
