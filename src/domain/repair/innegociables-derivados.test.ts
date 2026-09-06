@@ -28,7 +28,18 @@ const ficheros = (dir: string): readonly string[] =>
 const cubierto = (f: string): boolean =>
   AUTONOMY_RULES_FILES.some((p) => p === f || (p.endsWith('/**') && f.startsWith(p.slice(0, -2))))
 
-const defensas = ficheros('src').filter((f) => CONTROLES.test(readFileSync(f, 'utf8')))
+/**
+ * La otra clase que se escapo, y por la misma razon: `main-window` decidia el
+ * aislamiento del renderer y la lista lo cubria con `electron/**`, un patron que
+ * no encajaba con su ruta real. Quien DECIDE si el renderer esta aislado —donde
+ * quiera que viva— tiene que estar cubierto.
+ */
+const AISLAMIENTO = /\b(nodeIntegration|contextIsolation|exposeInMainWorld)\b/
+
+const fuente = (f: string): string => readFileSync(f, 'utf8')
+const todos = ficheros('src')
+const defensas = todos.filter((f) => CONTROLES.test(fuente(f)))
+const ventanas = todos.filter((f) => AISLAMIENTO.test(fuente(f)))
 
 describe('toda defensa esta en la lista que el auto-merge no puede tocar', () => {
   it('el barrido encuentra defensas: si no, la regex dejo de valer', () => {
@@ -38,6 +49,10 @@ describe('toda defensa esta en la lista que el auto-merge no puede tocar', () =>
   it.each(defensas)('%s es innegociable', (fichero) => {
     // Si esto falla al mover una guarda, la respuesta NO es aflojar la regex:
     // es anadir el fichero. La defensa se mudo; la proteccion tiene que seguirla.
+    expect({ fichero, protegido: cubierto(fichero) }).toEqual({ fichero, protegido: true })
+  })
+
+  it.each(ventanas)('%s decide el aislamiento del renderer: innegociable', (fichero) => {
     expect({ fichero, protegido: cubierto(fichero) }).toEqual({ fichero, protegido: true })
   })
 
