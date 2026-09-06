@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { judgeAndIntegrate } from '@application/repair/judge-and-integrate'
-import type { RunOmegaResult } from '@application/repair/run-omega'
+import type { JuicioConIntegracion } from '@application/repair/juicio-con-integracion'
+import { isFortressRepo } from '../system/self-project'
 import { getAppContext } from '../persistence/app-context'
 import { buildAutoMergeDeps } from '../repair/auto-merge-deps'
 import { buildOmegaDeps } from '../repair/repair-deps'
@@ -17,25 +18,34 @@ import { IPC } from './channels'
  * empezar. Lo que DECIDE si se integra vive en la capa de aplicacion; aqui solo
  * se arman las dependencias reales y se sostiene el carril del proyecto.
  *
- * El caso de uso informa de las dos cosas que hace; por el puente viaja solo el
- * juicio. La adaptacion vive aqui, en la frontera con el transporte, y no
- * empobreciendo el retorno de dentro para que quepa en el contrato de fuera.
+ * El caso de uso informa de las dos cosas que hace y por el puente viajan las
+ * DOS: el veredicto, y si ademas se integro. La adaptacion vive aqui, en la
+ * frontera con el transporte. Que viajara solo el juicio dejaba a la interfaz
+ * sin saber si el repo habia cambiado, y por eso el aviso de "integrada" se
+ * deducia del estado anterior en vez de leerse de lo que paso.
+ *
+ * `esRepoPropio` baja como puerto: sobre el codigo de FORTRESS este boton juzga
+ * y NO integra, porque el operador pidio un juicio y la integracion del codigo
+ * propio exige su propia firma. La regla esta en la aplicacion; aqui solo se
+ * responde a la pregunta, que es leer un package.json.
  */
 export function registerRepairOmegaHandler(): void {
   ipcMain.handle(
     IPC.repairRunOmega,
-    async (_event, proposalId: string): Promise<RunOmegaResult> => {
+    async (_event, proposalId: string): Promise<JuicioConIntegracion> => {
       const context = getAppContext()
       const proposal = context.repairProposals.findById(String(proposalId))
-      if (!proposal) return { ok: false, reason: 'invalid_state' }
+      if (!proposal) return { ok: false, reason: 'invalid_state', integrada: false }
       const busy = guardRun(context, proposal.projectId)
-      if (busy !== null) return { ok: false, reason: busy }
+      if (busy !== null) return { ok: false, reason: busy, integrada: false }
       try {
         const deps = {
           omega: buildOmegaDeps(proposal.projectId),
-          autoMerge: buildAutoMergeDeps(proposal.projectId)
+          autoMerge: buildAutoMergeDeps(proposal.projectId),
+          esRepoPropio: isFortressRepo
         }
-        return (await judgeAndIntegrate(context, proposal.id, deps)).omega
+        const juicio = await judgeAndIntegrate(context, proposal.id, deps)
+        return { ...juicio.omega, integrada: juicio.merge?.applied === true }
       } finally {
         endRun(proposal.projectId)
       }

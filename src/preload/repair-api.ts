@@ -4,7 +4,7 @@ import type { RunGateResult } from '@application/repair/run-gate'
 import type { AutoMergeResult } from '@application/repair/auto-merge-types'
 import type { DrenajeResultado } from '@application/repair/drenar-hasta-omega'
 import type { ResumenCerco } from '@application/repair/resumen-cerco'
-import type { RunOmegaResult } from '@application/repair/run-omega'
+import type { JuicioConIntegracion } from '@application/repair/juicio-con-integracion'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { Result } from '@domain/shared/result'
@@ -42,7 +42,7 @@ export interface RepairApi {
    */
   runGate(proposalId: string): Promise<RunGateResult>
   /** I4 — juicio semantico independiente. APROBADO -> OMEGA; VETADO -> RECHAZADO. */
-  runOmega(proposalId: string): Promise<RunOmegaResult>
+  runOmega(proposalId: string): Promise<JuicioConIntegracion>
   /**
    * La FIRMA: integra una propuesta que OMEGA ya aprobo. No pasa por el cerco
    * —ese decide la integracion sin firma— pero no alcanza los archivos que

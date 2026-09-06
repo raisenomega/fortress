@@ -46,6 +46,12 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   'src/application/repair/integrar-midiendo-el-arbol.ts',
   'src/infrastructure/repair/medir-arbol-integrado.ts',
   'src/application/repair/apply-auto-merge.ts',
+  // La garantia del CODIGO PROPIO: sobre el repo de FORTRESS la puerta
+  // automatica no vale, la pida quien la pida. `loop-gate` —donde vive la
+  // regla— ya estaba; estos dos son quien la consulta y quien la aplica, que es
+  // por donde se escapo la vez anterior.
+  'src/application/repair/integrable-sin-firma.ts',
+  'src/application/repair/judge-and-integrate.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
   'src/domain/repair/innegociables-defensa.ts'
 ]
