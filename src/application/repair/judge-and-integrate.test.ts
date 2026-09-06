@@ -14,11 +14,9 @@ const NADA = {
   now: () => 1
 } as unknown as AutoMergeDeps
 
-/**
- * `gatherCase` busca el proyecto antes que nada y `runOmega` no lo mira nunca:
- * esa consulta es el rastro que distingue "se planteo integrar" de "no se
- * llego a plantear".
- */
+/** `runOmega` no mira el proyecto NUNCA, asi que contar consultas distingue los
+ *  caminos: 0 es "el veto corto antes", 1 es "la regla del repo propio miro", 2
+ *  es "ademas se planteo integrar" —la segunda la hace `gatherCase`—. */
 function conTestigo(b: Bench): { ctx: Bench['context']; consultas: () => number } {
   let n = 0
   const ctx = {
@@ -31,6 +29,9 @@ function conTestigo(b: Bench): { ctx: Bench['context']; consultas: () => number 
 const conVerdicto = (verdict: OmegaVerdict): Bench =>
   bench({ result: { ok: true, verdict, runMeta: META } })
 
+/** El proyecto NO es el repo de FORTRESS: el camino de cualquier otro. */
+const AJENO = { esRepoPropio: (): boolean => false }
+
 describe('judgeAndIntegrate: el veto corta antes de mirar la politica', () => {
   it('vetado: ni se plantea integrar', async () => {
     // Preguntarle a la politica por un fix que el revisor acaba de rechazar
@@ -38,10 +39,10 @@ describe('judgeAndIntegrate: el veto corta antes de mirar la politica', () => {
     const b = conVerdicto(VETADO)
     const { ctx, consultas } = conTestigo(b)
 
-    const result = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA })
+    const r = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA, ...AJENO })
 
-    expect(result.omega).toMatchObject({ ok: false })
-    expect(result.merge).toBeNull() // no se planteo: no hay nada que contar
+    expect(r.omega).toMatchObject({ ok: false })
+    expect(r.merge).toBeNull() // no se planteo: no hay nada que contar
     expect(consultas()).toBe(0)
   })
 
@@ -49,22 +50,25 @@ describe('judgeAndIntegrate: el veto corta antes de mirar la politica', () => {
     const b = conVerdicto(APROBADO)
     const { ctx, consultas } = conTestigo(b)
 
-    const result = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA })
+    const r = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA, ...AJENO })
 
-    expect(result.omega).toMatchObject({ ok: true })
-    expect(result.merge).not.toBeNull() // se planteo: el informe lo cuenta
-    expect(consultas()).toBe(1)
+    expect(r.omega).toMatchObject({ ok: true })
+    expect(r.merge).not.toBeNull() // se planteo: el informe lo cuenta
+    expect(consultas()).toBe(2)
   })
 
-  it('si integrar revienta, el veredicto sale igual', async () => {
+  it('si preguntar de quien es el codigo revienta, el veredicto sale igual', async () => {
     // OMEGA ya juzgo y ya lo asento. El operador tiene derecho a saber que su
-    // propuesta paso, aunque el merge no.
+    // propuesta paso, aunque lo de despues no. Y no se integra: la duda cae
+    // contra integrar, nunca a favor.
     const b = conVerdicto(APROBADO)
-    const rota = { readConfig: () => { throw new Error('disco lleno') } } as unknown as AutoMergeDeps // prettier-ignore
+    const { ctx, consultas } = conTestigo(b)
+    const revienta = (): boolean => { throw new Error('no se pudo leer el package.json') } // prettier-ignore
 
-    const result = await judgeAndIntegrate(b.context, 'prop-1', { omega: b.deps, autoMerge: rota })
+    const r = await judgeAndIntegrate(ctx, 'prop-1', { omega: b.deps, autoMerge: NADA, esRepoPropio: revienta }) // prettier-ignore
 
-    expect(result.omega).toMatchObject({ ok: true })
-    expect(result.merge).toBeNull()
+    expect(r.omega).toMatchObject({ ok: true })
+    expect(r.merge).toBeNull()
+    expect(consultas()).toBe(1) // miro de quien era; no llego a gatherCase
   })
 })

@@ -1,4 +1,5 @@
 import type { MotorChainDeps } from '@application/repair/run-motor-chain'
+import { isFortressRepo } from '../system/self-project'
 import { buildAutoMergeDeps } from './auto-merge-deps'
 import { buildGateDeps, buildGenerateDeps, buildOmegaDeps } from './repair-deps'
 
@@ -17,6 +18,12 @@ export function buildMotorChainDeps(projectId: string): MotorChainDeps {
   return {
     generate: buildGenerateDeps(projectId),
     gate: buildGateDeps(projectId),
-    judge: { omega: buildOmegaDeps(projectId), autoMerge: buildAutoMergeDeps(projectId) }
+    judge: {
+      omega: buildOmegaDeps(projectId),
+      autoMerge: buildAutoMergeDeps(projectId),
+      // Segundo cerrojo: el loop ya corre hasta-gate sobre el repo propio y no
+      // llega aqui, pero la garantia no puede depender de que ese modo siga.
+      esRepoPropio: isFortressRepo
+    }
   }
 }
