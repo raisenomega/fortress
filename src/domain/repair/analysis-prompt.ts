@@ -1,6 +1,7 @@
 import type { CognitionPattern } from '../cognition/cognition-log'
 import { seccionAtendido } from './analysis-prompt-atendido'
 import { patronDelHallazgo } from './patron-del-hallazgo'
+import { CALLEJONES } from './analysis-prompt-callejones'
 import { senasDelHallazgo } from './analysis-prompt-senas'
 import { FORMATO } from './analysis-prompt-formato'
 import { sanearParaPrompt } from '../shared/sanear-para-prompt'
@@ -50,12 +51,14 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     'respecto al disco; detect_changes, con since, dice que cambio desde una fecha.',
     'Son la via para saber si el grafo va retrasado sin abrir el fichero a ciegas.',
     '',
+    ...CALLEJONES,
     'Pasos: (1) localiza en el grafo el simbolo del hallazgo, quien lo llama y que toca;',
     '(2) si el fix seria agregar un control ya usado en el repo (el titulo suele',
     'nombrarlo), encuentra COMO se usa ese control en otros lugares: como se invoca y',
     'que garantiza; (3) CRUCIAL: VERIFICA contra el archivo REAL, linea por linea, si',
     'el hallazgo SIGUE siendo REAL o ya esta RESUELTO (OBSOLETO). No te creas el',
-    'hallazgo: leelo.',
+    'hallazgo: leelo. Abrir el fichero del ancla NO contradice el grafo primero: el',
+    'grafo decide QUE abrir, no si abrir.',
     '',
     'NO propongas el fix ni escribas codigo.',
     ...FORMATO,
