@@ -52,22 +52,21 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // por donde se escapo la vez anterior.
   'src/application/repair/integrable-sin-firma.ts',
   'src/application/repair/judge-and-integrate.ts',
-  // El AISLAMIENTO DEL RENDERER, que son dos mitades de una sola garantia y por
-  // eso entran juntas: `main-window` fuerza `sandbox`, `contextIsolation` y
-  // `nodeIntegration: false` sobre la ventana, y `preload/index` es la UNICA
-  // superficie que cruza ese puente —su propio comentario se apoya en la
-  // primera: "contextIsolation esta forzado a true en main-window.ts, asi que
-  // este es el unico camino"—. Cambiar `nodeIntegration` a true es UNA linea en
-  // UN fichero: cabe de sobra en cualquier cerco por tamano.
-  //
-  // Iba cubierto por `electron/**` en la configuracion del proyecto, y ese
-  // patron nunca matcheo nada: los globs se anclan en la raiz del repo y el
-  // codigo vive en `src/infrastructure/electron/`. Un glob muerto no protege,
-  // pero lo parece, que es peor que no tenerlo. La carpeta entera y no solo el
-  // fichero, por lo mismo que `posture/**`: quien anada ahi otra pieza de la
-  // ventana la encuentra protegida sin acordarse.
+  // El AISLAMIENTO DEL RENDERER, dos mitades de una sola garantia: `main-window`
+  // fuerza `sandbox`, `contextIsolation` y `nodeIntegration: false`, y
+  // `preload/index` es la UNICA superficie que cruza ese puente —su comentario
+  // se apoya en la primera—. Cambiar `nodeIntegration` es UNA linea en UN
+  // fichero. Iba cubierto por `electron/**` en la config del proyecto, y ese
+  // patron nunca matcheo: los globs se anclan en la raiz y el codigo vive en
+  // `src/infrastructure/electron/`. Un glob muerto no protege pero lo parece,
+  // que es peor. La carpeta entera y no solo el fichero, por lo mismo que
+  // `posture/**`: quien anada ahi otra pieza la encuentra protegida.
   'src/infrastructure/electron/**',
   'src/preload/index.ts',
+  // El TACHADO de lo que sale en vivo al chat. `tool-detail` —donde vive
+  // `redactSecrets`— ya estaba; este es quien lo APLICA al stream, y sin el la
+  // funcion existe y nadie la llama.
+  'src/application/chat/en-vivo-tachado.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
   'src/domain/repair/innegociables-defensa.ts'
 ]
