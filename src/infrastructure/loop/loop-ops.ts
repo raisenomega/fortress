@@ -18,11 +18,13 @@ export async function loopScan(
   const busy = guardRun(context, projectId)
   if (busy !== null) return err(busy)
 
-  const budget = readBudget(context)
-  const scanner = createClaudeScanner(
-    createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
-  )
+  // Dentro del try, por lo mismo que en el handler del escaneo: un fallo al
+  // armar el escaner no puede saltarse el `endRun` del finally.
   try {
+    const budget = readBudget(context)
+    const scanner = createClaudeScanner(
+      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+    )
     const summary = await runScan(context, scanner, projectId, onProgress)
     if (!summary.ok) return err(summary.error)
     const c = summary.value.counts

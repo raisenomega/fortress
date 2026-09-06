@@ -48,9 +48,12 @@ export function registerChatSendHandler(): void {
     const denegado = guardRun(context, input.projectId)
     if (denegado !== null) return err(denegado)
 
-    const { codeAgent, assistant } = buildChatEngines(context)
-
+    // DENTRO del try, no antes: armar los motores lee presupuesto, conectores y
+    // agentes de la base, y cualquiera de esas lecturas puede fallar. Fuera, ese
+    // fallo saltaba por encima del `finally` y dejaba el carril TOMADO: ni chat,
+    // ni escaneo, ni loop en ese proyecto hasta reiniciar la app.
     try {
+      const { codeAgent, assistant } = buildChatEngines(context)
       return await sendMessage(
         context,
         assistant,

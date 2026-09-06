@@ -30,12 +30,13 @@ async function handleRun(
   const denegado = guardRun(context, projectId)
   if (denegado !== null) return err(denegado)
 
-  const budget = readBudget(context)
-  const scanner = createClaudeScanner(
-    createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
-  )
-
+  // Dentro del try: leer el presupuesto y armar el escaner puede fallar, y
+  // fuera ese fallo dejaba el carril tomado hasta reiniciar.
   try {
+    const budget = readBudget(context)
+    const scanner = createClaudeScanner(
+      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+    )
     return await runScan(context, scanner, projectId, progressSender(event, projectId))
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
