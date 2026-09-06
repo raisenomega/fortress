@@ -1,6 +1,5 @@
 import type { Degradada, Pareja } from '@domain/project/severidad-al-fundir'
 import type { Db } from './database'
-import type { Veredicto } from './reparar-gravedad-guardas'
 
 /** Cada superviviente VIVA junto a la severidad de una absorbida suya: el unico
  *  hilo que queda entre las dos despues de fundir. */
@@ -14,56 +13,29 @@ export const ELEVAR_SEVERIDAD = `UPDATE findings SET severity = @severity WHERE 
 
 export type Regla = (parejas: readonly Pareja[]) => readonly Degradada[]
 
-/**
- * El permiso para ESCRIBIR, inyectado. Ausente, no se escribe.
- *
- * Viene de fuera y no se importa aqui para que este modulo no tenga imports en
- * tiempo de ejecucion: asi lo consume igual un script suelto, que no resuelve
- * alias ni rutas sin extension (deuda `contrato-scan-no-importable-desde-script`).
- */
-export type Permiso = (victimas: readonly Degradada[], findingsVivos: number) => Veredicto
-
-/** Quien quedo por debajo de su grupo. SOLO LEE: es lo que mira el modo plan. */
+/** Quien quedo por debajo de su grupo. SOLO LEE: es todo lo que este runner
+ *  hace, y la conexion que le llega viene abierta en `readonly`. */
 export function leerVictimas(db: Db, proyecto: string, regla: Regla): readonly Degradada[] {
   return regla(db.prepare(PAREJAS_DE_FUSION).all(proyecto) as Pareja[])
 }
 
 /**
- * Repara los grupos que se fundieron ANTES de que la regla existiera. No recibe
- * una lista de victimas: las ENCUENTRA con la misma autoridad que usa la fusion,
- * asi que si hubiera mas de las que alguien cree, salen igual.
+ * Los UPDATE que el operador correria A MANO, como TEXTO. Este repo no los
+ * ejecuta: la escritura en la base real dejo de ser una capacidad del codigo.
  *
- * Verifica DENTRO de la transaccion: vuelve a preguntar quien queda degradado
- * despues de escribir —releyendo la base, sin fiarse de lo que acaba de hacer— y
- * si queda alguno lanza y `better-sqlite3` deshace todo.
- *
- * El permiso se pide con las victimas ya sabidas y PEGADO a la transaccion: el
- * backup tiene que contener justo las filas que se van a tocar, y la app tiene
- * que estar cerrada AHORA, no cuando arranco el proceso.
+ * No es una limitacion tecnica, es la conclusion de un incidente: mientras
+ * existio un `--aplicar`, se alcanzo dos veces en una tarde "para ver si
+ * funciona", la primera escribiendo en produccion. Una barrera mas alta en esa
+ * puerta seguia siendo una puerta; lo que se quita es la puerta. El gesto vuelve
+ * a ser del operador, como `install.sh` y como el push al remoto.
  */
-export function repararGravedad(
-  db: Db,
-  proyecto: string,
-  regla: Regla,
-  permiso?: Permiso
-): readonly Degradada[] {
-  const victimas = leerVictimas(db, proyecto, regla)
-
-  if (permiso !== undefined) {
-    const vivos = (db.prepare('SELECT COUNT(*) n FROM findings').get() as { n: number }).n
-    const veredicto = permiso(victimas, vivos)
-    if (!veredicto.ok) throw new Error(veredicto.porque)
-  }
-
-  const elevar = db.prepare(ELEVAR_SEVERIDAD)
-  db.transaction(() => {
-    for (const v of victimas) elevar.run({ id: v.id, severity: v.maxima })
-
-    const quedan = leerVictimas(db, proyecto, regla)
-    if (quedan.length > 0) {
-      throw new Error(`quedan ${quedan.length} degradadas tras reparar: ${quedan[0].id}`)
-    }
-  })()
-
-  return victimas
+export function updatesParaElOperador(victimas: readonly Degradada[]): readonly string[] {
+  if (victimas.length === 0) return []
+  return [
+    '-- Para aplicar (gesto humano, con app cerrada y backup):',
+    ...victimas.map(
+      (v) => `UPDATE findings SET severity='${v.maxima}' WHERE id='${v.id}';  -- ${v.viva} -> ${v.maxima}` // prettier-ignore
+    ),
+    'Verifica app cerrada por los cuatro caminos y haz backup antes. Este script NO escribe.'
+  ]
 }

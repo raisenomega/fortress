@@ -1,5 +1,4 @@
 import Database from 'better-sqlite3'
-import type { Degradada } from '@domain/project/severidad-al-fundir'
 
 export interface Veredicto {
   readonly ok: boolean
@@ -11,6 +10,12 @@ const NO = (porque: string): Veredicto => ({ ok: false, porque })
 
 /**
  * Un backup de verdad, no un fichero que exista.
+ *
+ * NO tiene llamador en produccion, y es a proposito: el camino que lo pedia —el
+ * `--aplicar` del runner de gravedad— ya no existe. Se conserva porque es la
+ * verificacion que hay que hacerle a una copia antes de fiarse de ella, y porque
+ * `fase-b-ejecutar` dice en su cabecera que "exige app cerrada y backup" sin
+ * comprobar ninguna de las dos: ahi es donde le toca ir.
  *
  * `existsSync` lo satisface un `touch`, y eso no es una guarda: es un placebo —
  * lo comprobo un incidente real, no una hipotesis. Se exige lo mismo que se
@@ -52,18 +57,4 @@ export function backupValido(
   } finally {
     db?.close()
   }
-}
-
-/** Las dos condiciones, en el orden que importa: primero lo caro de comprobar
- *  (el backup), y la app CERRADA lo ULTIMO, pegada a la escritura. */
-export function puedeAplicar(
-  victimas: readonly Degradada[],
-  findingsVivos: number,
-  backup: string,
-  appCerrada: () => boolean
-): Veredicto {
-  const copia = backupValido(backup, findingsVivos, victimas.map((v) => v.id)) // prettier-ignore
-  if (!copia.ok) return copia
-  if (!appCerrada()) return NO('la app esta ABIERTA: cierrala antes de aplicar')
-  return { ok: true, porque: copia.porque }
 }

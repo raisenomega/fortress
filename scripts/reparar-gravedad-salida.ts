@@ -1,5 +1,6 @@
 import type { Database } from 'better-sqlite3'
 import type { Degradada } from '../src/domain/project/severidad-al-fundir.ts'
+import { updatesParaElOperador } from '../src/infrastructure/persistence/reparar-gravedad.ts'
 
 /** El estreno del motor cubre LOW y MEDIUM (ADR-007): subir por encima saca al
  *  hallazgo de la cola y lo manda a firma humana. Es correcto, y hay que decirlo. */
@@ -37,11 +38,13 @@ export function salidaDelPlan(
 ): readonly string[] {
   const salen = victimas.filter((v) => ESTRENO.includes(v.viva) && !ESTRENO.includes(v.maxima))
   return [
-    `MODO PLAN (solo lectura) · proyecto=${proyecto}`,
-    'Ninguna fila se toca: esto es lo que la reparacion HARIA si se aplicara.',
+    `PLAN (solo lectura) · proyecto=${proyecto}`,
+    'Este script NO escribe: la reparacion es un gesto del operador.',
     '',
     ...victimas.flatMap((v) => bloque(db, v)),
     `TOTAL: ${victimas.length} superviviente(s) por debajo de su grupo`,
-    `ALCANCE: ${salen.length} saldria(n) del estreno del motor y pasaria(n) a firma humana`
+    `ALCANCE: ${salen.length} saldria(n) del estreno del motor y pasaria(n) a firma humana`,
+    '',
+    ...updatesParaElOperador(victimas)
   ]
 }
