@@ -156,8 +156,14 @@ humana. Testigo-no-actor: OMEGA frena, no dirige.
   `tmp-fortress-genesis-*` si corre durante génesis: son sandboxes efímeros
   que existieron por segundos.)
 - **Topes obligatorios** sin default: sin ambos, no hay encendido.
-- **Guardia de corrida compartida:** la cuota del sistema; génesis compite
-  con chat, escaneo, posture y capacidades.
+- **Tope diario compartido:** génesis consulta el mismo tope de gasto diario
+  que chat, escaneo, posture y capacidades, y para en cuanto lo alcanza. Lo
+  comprueba **entre** episodios, no dentro de uno.
+- **Lo que génesis NO toma es el carril de corrida** (`guardRun`), y no es un
+  descuido: ese carril serializa el trabajo sobre un proyecto concreto, y un
+  episodio no corre sobre ningún proyecto — corre en un sandbox efímero. Sus
+  frenos propios son los topes de sesión (coste y número de episodios), el
+  tope diario y el cancelador.
 - **OMEGA como freno** sobre borradores y promociones.
 - **Aislamiento por proyecto:** génesis opera sobre el proyecto activo, no
   cross-proyecto.
