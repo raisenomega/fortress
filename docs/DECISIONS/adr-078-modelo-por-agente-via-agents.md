@@ -76,6 +76,31 @@ La llave se **omite** cuando no hay modelo, en vez de viajar en `undefined`. Y l
 cadena vacía se omite también: es un descuido, no una elección, y mandaría al CLI
 a pedir un modelo sin nombre. Lo destapó una prueba antes de salir de la rama.
 
+## Verificado contra el CLI, no supuesto
+
+El `--help` de la 2.1.263 documenta `--agents` con un ejemplo de solo
+`description` y `prompt`: no menciona `model`. Así que se comprobó **corriendo el
+CLI**, con tres agentes de prueba y leyendo el `model` del `system/init` y el
+`modelUsage` del `result` en el stream-json — el id del modelo directo, nunca
+inferido por coste ni por tiempo.
+
+| agente de prueba | `model` declarado | modelo que corrió |
+|---|---|---|
+| `probador-haiku` | `haiku` | `claude-haiku-4-5-20251001` |
+| `probador-opus` | `opus` | `claude-opus-5` |
+| `probador-mudo` | *(sin campo)* | `claude-opus-5[1m]` |
+
+El tercero es el que cierra la prueba. Sin él, la corrida de `opus` no
+demostraría nada —coincide con el modelo de la sesión— y la de `haiku` podría
+atribuirse a cualquier otra cosa. Con el control se ven **tres valores
+distintos**: el alias `haiku` desvía, el alias `opus` resuelve a
+`claude-opus-5` (sin el sufijo `[1m]` que lleva el de la sesión, así que tampoco
+es herencia), y la ausencia hereda. El campo se respeta.
+
+La ventana de contexto no se resiente: las dos variantes de opus reportan
+`contextWindow: 1000000`. Se comprobó porque el sufijo distinto lo hacía dudoso,
+y la duda resultó infundada.
+
 ## Consecuencias
 
 - El coste de un escaneo deja de ser uniforme: baja donde se barre y se mantiene
