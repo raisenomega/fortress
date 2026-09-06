@@ -1,5 +1,6 @@
 import { findingIdentity } from '@domain/project/finding-identity'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
+import type { Severity } from '@domain/shared/severity'
 import { PROJECT, type Bench } from './finding-fixture'
 import { createFindingFusion } from './finding-fusion'
 
@@ -14,6 +15,7 @@ interface Fila {
   readonly id: string
   readonly identidad: string
   readonly firstSeen: string
+  readonly severity: Severity
   tipo: 'path-traversal'
   simbolo: 'handleverify'
 }
@@ -47,7 +49,7 @@ export function reclasificarYFusionar(bench: Bench): number {
 
   // prettier-ignore
   const vivas = bench.db.prepare(
-    `SELECT id, identity AS identidad, first_seen AS firstSeen FROM findings
+    `SELECT id, identity AS identidad, first_seen AS firstSeen, severity FROM findings
      WHERE project_id = ? AND lifecycle != 'EXTINCT'`
   ).all(PROJECT) as Fila[]
   return fusion.fusionar(vivas)

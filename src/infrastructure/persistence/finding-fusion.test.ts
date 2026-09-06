@@ -41,3 +41,27 @@ describe('el colapso: dos filas eran una', () => {
     expect(memoria(bench, 'media').resolved_at).toBeNull()
   })
 })
+
+describe('fundir no puede bajar la gravedad', () => {
+  it('la superviviente MEDIUM se queda con el HIGH que absorbe', () => {
+    // El caso REAL del 24 de agosto: la mas antigua era MEDIUM y absorbio el
+    // HIGH de la correa de alcance, que desaparecio del tablero. Hoy sube.
+    expect(memoria(bench, 'vieja').severity).toBe('MEDIUM')
+
+    reclasificarYFusionar(bench)
+
+    expect(memoria(bench, 'vieja').severity).toBe('HIGH')
+    // Y sigue ganando ELLA: la severidad sube, el desempate no cambia (ADR-071).
+    expect(memoria(bench, 'vieja').first_seen).toBe('2026-07-01T00:00:00Z')
+  })
+
+  it('con el grupo homogeneo nadie toca la severidad', () => {
+    const soloMedium = createBench()
+    conLasTresFilas(soloMedium)
+    soloMedium.db.prepare(`UPDATE findings SET severity = 'MEDIUM'`).run()
+
+    reclasificarYFusionar(soloMedium)
+
+    expect(memoria(soloMedium, 'vieja').severity).toBe('MEDIUM')
+  })
+})
