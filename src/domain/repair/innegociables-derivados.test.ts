@@ -36,10 +36,16 @@ const cubierto = (f: string): boolean =>
  */
 const AISLAMIENTO = /\b(nodeIntegration|contextIsolation|exposeInMainWorld)\b/
 
+/** Y la tercera: quien decide que clave de configuracion es publica, o toca la
+ *  key cifrada. `safeStorage.` con punto —la palabra suelta sale en un
+ *  comentario de `context`, y marcarlo seria pedir proteger el mapa de puertos. */
+const SECRETOS = /\bencryptedApiKey\b|\bisPublicSettingKey\b|\bsafeStorage\.|\bPUBLIC_KEYS\b/
+
 const fuente = (f: string): string => readFileSync(f, 'utf8')
 const todos = ficheros('src')
 const defensas = todos.filter((f) => CONTROLES.test(fuente(f)))
 const ventanas = todos.filter((f) => AISLAMIENTO.test(fuente(f)))
+const secretos = todos.filter((f) => SECRETOS.test(fuente(f)))
 
 describe('toda defensa esta en la lista que el auto-merge no puede tocar', () => {
   it('el barrido encuentra defensas: si no, la regex dejo de valer', () => {
@@ -53,6 +59,10 @@ describe('toda defensa esta en la lista que el auto-merge no puede tocar', () =>
   })
 
   it.each(ventanas)('%s decide el aislamiento del renderer: innegociable', (fichero) => {
+    expect({ fichero, protegido: cubierto(fichero) }).toEqual({ fichero, protegido: true })
+  })
+
+  it.each(secretos)('%s guarda la key cifrada: innegociable', (fichero) => {
     expect({ fichero, protegido: cubierto(fichero) }).toEqual({ fichero, protegido: true })
   })
 
