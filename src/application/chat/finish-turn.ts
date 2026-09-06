@@ -1,5 +1,6 @@
 import type { ChatEngine } from '@domain/chat/code-agent'
 import type { ChatMessage } from '@domain/chat/chat-message'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import { err, ok, type Result } from '@domain/shared/result'
@@ -28,7 +29,15 @@ export function finishTurn(input: FinishTurnInput): Result<ChatMessage> {
   const { context, project, meta, outcome } = input
   // El chip del mensaje es el primer agente que participo de verdad.
   const agentId = outcome.agents[0] ?? null
-  const texto = outcome.text + input.aviso
+  // La prosa del agente, tachada antes de entrar en la base. Es el CUARTO sitio
+  // de la familia: los canales mecanicos —comandos, colas del spawn, stderr— ya
+  // se tachaban, y lo que quedaba crudo era lo que el agente ESCRIBE, que puede
+  // citar un token que acaba de leer. Aqui y no en cada motor porque `finishTurn`
+  // es el unico paso por el que pasan todos, y sobre el texto ENTERO: es la
+  // unica forma de alcanzar un secreto que el stream partio en dos.
+  //
+  // El aviso queda fuera del tachado: es texto nuestro, no del agente.
+  const texto = redactSecrets(outcome.text) + input.aviso
   const stored = persistTurn(context, project.id, meta, 'assistant', texto, agentId)
   if (!stored.ok) return err(stored.error)
 

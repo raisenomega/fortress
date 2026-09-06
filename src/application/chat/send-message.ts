@@ -6,6 +6,7 @@ import { effectiveMode } from '@domain/settings/modo-efectivo'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
+import { sinSecretosEnVivo } from './en-vivo-tachado'
 import { finishTurn } from './finish-turn'
 import { persistTurn } from './persist-message'
 import { produceReply } from './produce-reply'
@@ -25,11 +26,12 @@ export async function sendMessage(
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
+  const enVivo = sinSecretosEnVivo(onChunk)
 
   // Bloqueo autoritativo (vale en autonomo): un proyecto sin marco aprobado solo
   // hace la entrevista de configuracion, nunca trabajo normal.
   if (project.configState === 'PENDIENTE_CONFIGURACION') {
-    return runConfigurationTurn(context, codeAgent, project, input, onChunk)
+    return runConfigurationTurn(context, codeAgent, project, input, enVivo)
   }
 
   // Degrada a supervisado si la peticion toca un area protegida O si el
@@ -52,7 +54,7 @@ export async function sendMessage(
     excludedAgents: input.excludedAgents,
     onStep,
     isCancelled,
-    onChunk
+    onChunk: enVivo
   })
 
   const stored = finishTurn({ context, project, meta, outcome, aviso, startedAt, prompt: input.prompt }) // prettier-ignore
