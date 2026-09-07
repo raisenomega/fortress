@@ -2,8 +2,8 @@ import { appendMessage } from '@application/chat/chat-history'
 import { buildFeature } from '@application/build/build-feature'
 import type { AppContext } from '@application/context'
 import { err, ok, type Result } from '@domain/shared/result'
-import { gitRevert, gitSnapshot } from '../loop/loop-git'
-import { loopVerify } from '../loop/loop-verify'
+import { gitRevert, gitSnapshot } from '../git/git-snapshot'
+import { verificarArbol } from './build-verify'
 import { agentFor, resolveEditTarget } from './build-target'
 
 /** Fase 2: construye el plan aprobado con red git+verify y persiste el resultado. */
@@ -26,7 +26,7 @@ export async function runBuild(
     {
       snapshot: () => gitSnapshot(project.path, 'build: checkpoint'),
       revert: (sha) => gitRevert(project.path, sha),
-      verify: () => loopVerify(project.path)
+      verify: () => verificarArbol(project.path)
     },
     () => {}
   )
