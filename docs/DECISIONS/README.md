@@ -118,6 +118,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-077](adr-077-cuando-una-migracion-deja-de-ser-aditiva.md) | Cuándo una migración deja de ser aditiva: el recambio de tabla y qué le está permitido borrar | 2026-09-02 | Aceptada | Arquitectura |
 | [ADR-078](adr-078-modelo-por-agente-via-agents.md) | Modelo por agente, declarado en el catálogo y transportado por `--agents` | 2026-09-06 | Aceptada | Agentes |
 | [ADR-079](adr-079-editar-el-arbol-vivo-exige-red-de-reversion.md) | Editar el árbol vivo exige red de reversión: checkpoint transitorio, por turno, y sin git se degrada | 2026-09-07 | Aceptada | Terminal |
+| [ADR-080](adr-080-severidad-por-ejes-derivados.md) | La severidad se deriva de tres ejes de vocabulario cerrado: el escáner reporta hechos, FORTRESS decide la banda | 2026-09-07 | Aceptada | Escaneo |
 
 ## Referencias
 
