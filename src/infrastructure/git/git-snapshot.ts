@@ -14,7 +14,7 @@ function git(cwd: string, args: readonly string[]): string {
  * padre, git operaria sobre el padre entero: un `add -A` / `reset --hard` ahi
  * podria destruir trabajo ajeno. En ese caso se trata como "sin red git".
  */
-function isRepoRoot(cwd: string): boolean {
+export function isRepoRoot(cwd: string): boolean {
   try {
     return resolve(git(cwd, ['rev-parse', '--show-toplevel']).trim()) === resolve(cwd)
   } catch {

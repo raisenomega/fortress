@@ -24,18 +24,21 @@ describe('los bordes de la red del Terminal', () => {
     expect(asuntos(dir)).toEqual(['base'])
   })
 
-  it('e) sin git: en este commit corre como hoy, sin red — la degradacion es el commit 4', async () => {
+  it('e) sin git: no hay red posible, asi que el autonomo degrada a supervisado y lo dice', async () => {
     const dir = guarda(crearCarpetaSinGit())
     const { context, textos } = contexto(proyectoEn(dir))
+    const cli = cliQue(false)
     const red = redReal()
 
-    const r = await enviar(context, cliQue(true), {}, red)
+    const r = await enviar(context, cli, {}, red)
 
     expect(r.ok).toBe(true)
-    // Se intento abrir y no hubo red: el null es la senal que el commit 4 usara.
-    expect(red.abiertos()).toBe(1)
-    expect(existe(dir, 'b.txt')).toBe(true)
-    expect(textos[1]).not.toContain('REVERTIDO')
+    // Degradado ANTES de abrir nada: el agente corre en plan, no hay checkpoint
+    // que abrir, y el operador lee por que no tuvo el autonomo que pidio.
+    expect(cli.peticiones[0].permissionMode).toBe('plan')
+    expect(red.abiertos()).toBe(0)
+    expect(existe(dir, 'b.txt')).toBe(false)
+    expect(textos[1]).toContain('Sin repositorio git no hay red de reversion')
   })
 
   it('f) Detener: el hijo muerto resuelve con failed, y eso revierte lo que dejo a medias', async () => {

@@ -5,7 +5,7 @@ import { effectiveMode } from './modo-efectivo'
 const CONFIABLE = { id: 'p1', trusted: true } as Project
 const AJENO = { id: 'p2', trusted: false } as Project
 const pedir = (project: Project | null, request = 'formatea los archivos'): string =>
-  effectiveMode({ mode: 'autonomo', request, selfRepo: false, project })
+  effectiveMode({ mode: 'autonomo', request, selfRepo: false, project, redGit: true })
 
 describe('sobre un proyecto sin confianza el agente no edita por su cuenta', () => {
   it('no confiable en autonomo: degrada a supervisado', () => {
@@ -23,7 +23,7 @@ describe('sobre un proyecto sin confianza el agente no edita por su cuenta', () 
 
   it('no-regresion: el repo propio degrada aunque sea de confianza', () => {
     // prettier-ignore
-    const modo = effectiveMode({ mode: 'autonomo', request: 'limpia el codigo muerto', selfRepo: true, project: CONFIABLE })
+    const modo = effectiveMode({ mode: 'autonomo', request: 'limpia el codigo muerto', selfRepo: true, project: CONFIABLE, redGit: true })
     expect(modo).toBe('supervisado')
   })
 
@@ -33,7 +33,7 @@ describe('sobre un proyecto sin confianza el agente no edita por su cuenta', () 
 
   it('la degradacion solo aplica desde autonomo: supervisado no se mueve', () => {
     // prettier-ignore
-    const modo = effectiveMode({ mode: 'supervisado', request: 'lo que sea', selfRepo: false, project: AJENO })
+    const modo = effectiveMode({ mode: 'supervisado', request: 'lo que sea', selfRepo: false, project: AJENO, redGit: true })
     expect(modo).toBe('supervisado')
   })
 })

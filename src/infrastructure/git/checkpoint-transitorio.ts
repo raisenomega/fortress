@@ -1,5 +1,5 @@
 import { execFileSync } from 'child_process'
-import { gitRevert, gitSnapshot } from './git-snapshot'
+import { gitRevert, gitSnapshot, isRepoRoot } from './git-snapshot'
 
 /** git contra el repo real, salida en texto; lanza si git falla. */
 function git(cwd: string, args: readonly string[]): string {
@@ -14,6 +14,12 @@ function tieneHistoria(cwd: string): boolean {
   } catch {
     return false
   }
+}
+
+/** Si aqui HAY red: la UNICA verdad de cuando `abrirCheckpoint` devolveria null,
+ *  sin efectos, para que el modo efectivo degrade ANTES de abrir nada. */
+export function redDisponible(cwd: string): boolean {
+  return isRepoRoot(cwd) && tieneHistoria(cwd)
 }
 
 /**
@@ -31,21 +37,16 @@ export interface CheckpointAbierto {
 
 /**
  * La red de reversion del ADR-079: el snapshot de siempre, pero TRANSITORIO.
- * `gitSnapshot` comitea el arbol (`add -A`, `--allow-empty`): es la unica forma
- * de restaurarlo byte a byte, untracked incluidos. Lo que no puede quedarse es
- * el commit —en el Terminal seria uno por mensaje, con el trabajo a medias del
- * operador dentro—, asi que al cerrar, por la puerta que sea, `reset --soft
- * <sha^>`: el puntero vuelve y el arbol no se toca. El indice queda como en el
- * SNAPSHOT: lo del operador a medio stagear pasa a stageado (contenido
- * identico) y lo que el agente edito despues queda SIN stagear — `git diff` es
- * exactamente lo que hizo el agente. Al revertir, `clean -fd` es seguro porque
- * tras el `add -A` lo unico sin seguimiento es lo que el agente creo.
- *
- * null = sin red posible (no es raiz de un repo git, o no tiene commits): la
- * senal para que quien edita degrade.
+ * `gitSnapshot` comitea el arbol (`add -A`, `--allow-empty`): la unica forma de
+ * restaurarlo byte a byte, untracked incluidos. El commit no puede quedarse —uno
+ * por mensaje, con el WIP del operador dentro—, asi que al cerrar, por la puerta
+ * que sea, `reset --soft <sha^>`: el puntero vuelve y el arbol no se toca. El
+ * indice queda como en el SNAPSHOT: el WIP pasa a stageado (contenido identico)
+ * y lo que el agente edito queda SIN stagear — `git diff` es lo que hizo. Al
+ * revertir, `clean -fd` es seguro: tras el `add -A` lo unico untracked es suyo.
  */
 export function abrirCheckpoint(cwd: string): CheckpointAbierto | null {
-  if (!tieneHistoria(cwd)) return null
+  if (!redDisponible(cwd)) return null
   const sha = gitSnapshot(cwd, 'checkpoint transitorio')
   if (sha === null) return null
 

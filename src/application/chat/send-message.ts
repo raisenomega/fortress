@@ -2,7 +2,7 @@ import type { StepProgress } from '../workflow/step-progress'
 import type { Assistant } from '@domain/chat/assistant'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { SIN_RED, type RedDeReversion } from '@domain/chat/red-de-reversion'
-import { SELF_REPO_SUPERVISED } from '@domain/settings/operation-mode'
+import { avisoDeDegradacion } from '@domain/settings/operation-mode'
 import { effectiveMode } from '@domain/settings/modo-efectivo'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
@@ -38,8 +38,9 @@ export async function sendMessage(
   }
   // Degrada a supervisado si toca un area protegida o si el objetivo es el repo propio.
   const selfRepo = isSelfRepo(project.path)
-  const mode = effectiveMode({ mode: input.mode, request: input.prompt, selfRepo, project })
-  const aviso = selfRepo && input.mode === 'autonomo' ? SELF_REPO_SUPERVISED : ''
+  const redGit = red.disponible(project.path)
+  const mode = effectiveMode({ mode: input.mode, request: input.prompt, selfRepo, project, redGit }) // prettier-ignore
+  const aviso = avisoDeDegradacion(input.mode, selfRepo, redGit)
 
   const chosen = chooseEngine(codeAgent, assistant, project)
   if (!chosen.ok) return err(chosen.error)
@@ -50,7 +51,6 @@ export async function sendMessage(
   if (!user.ok) return err(user.error)
 
   const startedAt = Date.now()
-  // La red solo cuando algo puede escribir: autonomo con el CLI (plan y la API no editan).
   const activa = mode === 'autonomo' && engine === 'claude-code'
   const producir = (): Promise<ReplyOutcome> =>
     produceReply({

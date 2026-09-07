@@ -11,6 +11,7 @@ function redFalsa(verde = true, retirado = true): { red: RedDeReversion; pasos: 
     return retirado
   }
   const red: RedDeReversion = {
+    disponible: () => true,
     abrir: () => {
       pasos.push('abrir')
       return { conservar: () => paso('conservar'), revertir: () => paso('revertir') }
