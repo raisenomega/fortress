@@ -8,7 +8,7 @@ const CONFIABLE = { id: 'p1', trusted: true } as Project
 
 /** Atajo del banco: el objeto entero en cada llamada tapaba lo que se prueba. */
 const modo = (mode: OperationMode, request: string, selfRepo = false): OperationMode =>
-  effectiveMode({ mode, request, selfRepo, project: CONFIABLE })
+  effectiveMode({ mode, request, selfRepo, project: CONFIABLE, redGit: true })
 
 /**
  * El repo propio degrada, no rechaza: leer y analizar FORTRESS desde el

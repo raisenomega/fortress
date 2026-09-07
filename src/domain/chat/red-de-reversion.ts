@@ -12,14 +12,18 @@ export interface CheckpointDelTurno {
 }
 
 export interface RedDeReversion {
+  /** Si `abrir` tendria red: raiz de repo git con historia. Sin efectos, para
+   *  decidir el modo ANTES de abrir nada; es la senal que degrada a supervisado. */
+  readonly disponible: (cwd: string) => boolean
   /** null = no hay red posible: sin git, sin raiz de repo, o sin commits. */
   readonly abrir: (cwd: string) => CheckpointDelTurno | null
   /** El typecheck del proyecto tras el turno: true si el arbol compila. */
   readonly verificar: (cwd: string) => Promise<boolean>
 }
 
-/** Sin red: lo que hay cuando nadie la inyecta. Sobre ese null se degrada. */
+/** Sin red: lo que hay cuando nadie la inyecta. `disponible` en false degrada. */
 export const SIN_RED: RedDeReversion = {
+  disponible: () => false,
   abrir: () => null,
   verificar: () => Promise.resolve(true)
 }

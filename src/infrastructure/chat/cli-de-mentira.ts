@@ -2,7 +2,7 @@ import type { CodeAgent, CodeAgentReply, CodeAgentRequest } from '@domain/chat/c
 import type { RedDeReversion } from '@domain/chat/red-de-reversion'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import { escribir } from '../git/checkpoint-fixture'
-import { abrirCheckpoint } from '../git/checkpoint-transitorio'
+import { abrirCheckpoint, redDisponible } from '../git/checkpoint-transitorio'
 
 /** El CLI de mentira: EDITA el arbol como lo haria el agente y contesta lo que se le diga. */
 export function cliQue(
@@ -30,6 +30,7 @@ export function cliQue(
 export function redReal(verde = true): RedDeReversion & { abiertos: () => number } {
   let n = 0
   return {
+    disponible: redDisponible,
     abrir: (cwd) => {
       n += 1
       return abrirCheckpoint(cwd)

@@ -28,6 +28,27 @@ export const SELF_REPO_SUPERVISED =
   'y propongo, pero no aplico. Los cambios en el codigo propio pasan por el motor ' +
   'de Auto-mejora (worktree aislado + gate + revisor + firma humana).'
 
+/** La otra degradacion que se explica (ADR-079): sin red no se escribe. */
+export const SIN_RED_GIT_SUPERVISADO =
+  '\n\n---\nSin repositorio git no hay red de reversion, asi que sobre este proyecto ' +
+  'trabajo en supervisado: analizo y propongo, no edito. Inicia git en la raiz del ' +
+  'proyecto para volver al autonomo.'
+
+/**
+ * Por que no se tuvo el autonomo que se pidio, dicho al final de la respuesta.
+ * El repo propio manda sobre la red: es la razon mas fuerte y la que el operador
+ * tiene que leer. Area protegida y falta de confianza no avisan, como hasta hoy.
+ */
+export function avisoDeDegradacion(
+  pedido: OperationMode,
+  selfRepo: boolean,
+  redGit: boolean
+): string {
+  if (pedido !== 'autonomo') return ''
+  if (selfRepo) return SELF_REPO_SUPERVISED
+  return redGit ? '' : SIN_RED_GIT_SUPERVISADO
+}
+
 /**
  * Lo que se le dice al agente sobre su modo. Vive en el dominio para que lo
  * usen las dos rutas: el system prompt de la API y el prompt de cada paso del
