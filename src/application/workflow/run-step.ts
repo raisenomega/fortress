@@ -41,6 +41,7 @@ export async function runStep(
     failed: reply.failed,
     usage: reply.usage,
     tools: reply.tools,
+    edits: reply.edits,
     durationMs: Date.now() - startedAt
   }
 }

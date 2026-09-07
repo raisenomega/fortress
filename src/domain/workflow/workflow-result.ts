@@ -16,6 +16,8 @@ export interface StepResult {
   readonly usage: TokenUsage
   /** Herramientas que uso ESTE paso, en orden. Para ver el grafo por agente. */
   readonly tools: readonly string[]
+  /** Rutas que ESTE paso escribio. Se tiraban al consolidar el workflow. */
+  readonly edits: readonly string[]
   /** Lo que tardo ESTE paso, para atribuir tiempo por agente y no en bloque. */
   readonly durationMs: number
 }
