@@ -116,6 +116,8 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-075](adr-075-el-modal-por-portal.md) | `Modal` se monta en `document.body` por portal, no donde se declara | 2026-08-28 | Aceptada | UI |
 | [ADR-076](adr-076-el-juicio-antes-de-la-cascada.md) | El juicio se emite antes de la cascada: borrar un proyecto no mata sus propuestas en silencio | 2026-09-02 | Aceptada | Motor |
 | [ADR-077](adr-077-cuando-una-migracion-deja-de-ser-aditiva.md) | Cuándo una migración deja de ser aditiva: el recambio de tabla y qué le está permitido borrar | 2026-09-02 | Aceptada | Arquitectura |
+| [ADR-078](adr-078-modelo-por-agente-via-agents.md) | Modelo por agente, declarado en el catálogo y transportado por `--agents` | 2026-09-06 | Aceptada | Agentes |
+| [ADR-079](adr-079-editar-el-arbol-vivo-exige-red-de-reversion.md) | Editar el árbol vivo exige red de reversión: checkpoint transitorio, por turno, y sin git se degrada | 2026-09-07 | Aceptada | Terminal |
 
 ## Referencias
 
