@@ -14,6 +14,7 @@ const step = (overrides: Partial<StepResult>): StepResult => ({
   failed: false,
   usage: EMPTY_USAGE,
   tools: [],
+  edits: [],
   durationMs: 0,
   ...overrides
 })

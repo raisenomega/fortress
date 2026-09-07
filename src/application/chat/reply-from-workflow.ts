@@ -60,7 +60,7 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
     failed: outcome.results.some((result) => result.failed),
     usage: sumUsage(outcome.results),
     tools: [],
-    edits: [],
+    edits: outcome.results.flatMap((result) => result.edits),
     agents: participants(outcome.results),
     comprehensive: workflow.id === 'produccion',
     runs: outcome.results.map((r) => ({

@@ -11,13 +11,13 @@ import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { isFortressRepo } from '../system/self-project'
+import { RED_DE_REVERSION } from '../chat/red-de-reversion'
 import { buildChatEngines } from './chat-engines'
 import { IPC } from './channels'
 
 /** Solo si la ventana sigue viva, y tachado. `sendMessage` ya envuelve aguas
- *  arriba —ahi cubre a los motores que no pasan por aqui—; se envuelve OTRA VEZ
- *  a proposito, porque tachar es idempotente y una puerta que se protege sola no
- *  depende de que quien la llame se acuerde. */
+ *  arriba; se envuelve OTRA VEZ a proposito: tachar es idempotente y una puerta
+ *  que se protege sola no depende de que quien la llame se acuerde. */
 function chunkSender(event: IpcMainInvokeEvent, projectId: string): (d: string) => void {
   return sinSecretosEnVivo((delta: string): void => {
     if (event.sender.isDestroyed()) return
@@ -36,9 +36,8 @@ function progressSender(event: IpcMainInvokeEvent, projectId: string) {
 }
 
 export function registerChatSendHandler(): void {
-  // Detener TOTAL del proyecto: marca el loop (si corre, su espera corta en
-  // <=2s) Y corta el proceso vivo (chat o loop, con escalada a SIGKILL).
-  // Devuelve cuantos corto — el contrato Promise<number> que ChatApi ya promete.
+  // Detener TOTAL del proyecto: marca el loop (su espera corta en <=2s) Y corta
+  // el proceso vivo con escalada a SIGKILL. Devuelve cuantos corto (Promise<number>).
   ipcMain.handle(IPC.chatStop, (_event, projectId: string) => {
     const id = String(projectId)
     cancelLoop(id)
@@ -64,7 +63,8 @@ export function registerChatSendHandler(): void {
         chunkSender(event, input.projectId),
         progressSender(event, input.projectId),
         () => isCancelled(input.projectId),
-        isFortressRepo
+        isFortressRepo,
+        RED_DE_REVERSION
       )
     } catch (error) {
       return err(describeAssistantError(error))

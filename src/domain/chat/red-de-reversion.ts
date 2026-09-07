@@ -1,0 +1,36 @@
+/**
+ * Lo que el Terminal necesita de la red de reversion del ADR-079, sin saber que
+ * detras hay git. Un checkpoint abierto sobre el arbol vivo tiene dos unicas
+ * salidas, y las dos dicen si el commit del checkpoint quedo RETIRADO del
+ * historial: `false` es un checkpoint huerfano en la rama del operador.
+ */
+export interface CheckpointDelTurno {
+  /** Exito: el arbol se queda con las ediciones del agente. */
+  conservar(): boolean
+  /** Fallo: las ediciones se descartan y el arbol vuelve a como estaba. */
+  revertir(): boolean
+}
+
+export interface RedDeReversion {
+  /** null = no hay red posible: sin git, sin raiz de repo, o sin commits. */
+  readonly abrir: (cwd: string) => CheckpointDelTurno | null
+  /** El typecheck del proyecto tras el turno: true si el arbol compila. */
+  readonly verificar: (cwd: string) => Promise<boolean>
+}
+
+/** Sin red: lo que hay cuando nadie la inyecta. Sobre ese null se degrada. */
+export const SIN_RED: RedDeReversion = {
+  abrir: () => null,
+  verificar: () => Promise.resolve(true)
+}
+
+/** Lo que lee el operador cuando el turno se deshizo. Es texto nuestro, no del agente. */
+export const REVERTIDO_POR_RED =
+  '\n\n---\nTurno REVERTIDO (ADR-079): el agente fallo, se detuvo, o el arbol no ' +
+  'compilaba despues. El proyecto ha vuelto byte a byte a como estaba antes de ' +
+  'este mensaje; tu trabajo sin guardar sigue ahi.'
+
+/** El caso que no deberia pasar, dicho en vez de callado. */
+export const CHECKPOINT_HUERFANO =
+  '\n\n---\nAVISO: no se pudo retirar el commit "checkpoint transitorio" de tu rama. ' +
+  'Esta en el historial: `git reset --soft HEAD^` lo quita sin tocar el arbol.'
