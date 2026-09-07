@@ -11,7 +11,7 @@ describe('parseScanOutput', () => {
       )
     )
     expect(result.ok && result.value).toEqual([
-      { severity: 'CRITICAL', title: 'Secret', file: 'a.js', line: 3, tipo: 'secret-in-env', simbolo: 'buildEnv' } // prettier-ignore
+      { severity: 'CRITICAL', title: 'Secret', file: 'a.js', line: 3, tipo: 'secret-in-env', simbolo: 'buildEnv', sinEjes: true } // prettier-ignore
     ])
   })
 
@@ -37,7 +37,8 @@ ${report('{"findings":[{"severity":"HIGH","title":"nuevo","file":"b.ts","line":9
       file: '',
       line: null,
       tipo: 'otro',
-      simbolo: ''
+      simbolo: '',
+      sinEjes: true
     })
   })
 })

@@ -1,4 +1,5 @@
 import type { Severity } from '../shared/severity'
+import type { Alcance, Efecto, Estado } from './ejes-de-severidad'
 import type { TipoDeDefecto } from './tipo-de-defecto'
 
 /**
@@ -6,6 +7,8 @@ import type { TipoDeDefecto } from './tipo-de-defecto'
  * porque lo asigna la persistencia: el escaner describe el problema, no la fila.
  */
 export interface DetectedFinding {
+  /** La banda que MANDA: derivada de los tres ejes cuando los hay (ADR-080), o
+   *  la que dijo el modelo cuando no. */
   readonly severity: Severity
   readonly title: string
   /** Ruta relativa a la raiz del proyecto. Vacia si el hallazgo es global. */
@@ -25,4 +28,15 @@ export interface DetectedFinding {
    * Vacio cuando no hay codigo que nombrar (una etiqueta de index.html).
    */
   readonly simbolo?: string
+  /** Los tres ejes de ADR-080. Ausentes en las filas anteriores al ADR y en los
+   *  hallazgos que no vienen de un escaner. */
+  readonly alcance?: Alcance
+  readonly efecto?: Efecto
+  readonly estado?: Estado
+  /** Lo que el modelo dijo por su cuenta, conservado como evidencia cuando la
+   *  banda que manda es la derivada. */
+  readonly severidadDelModelo?: Severity
+  /** El bloque vino sin ejes, o con uno fuera del vocabulario: la severidad es
+   *  la palabra del modelo, sin derivar. */
+  readonly sinEjes?: true
 }
