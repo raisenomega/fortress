@@ -20,7 +20,8 @@ export const SCAN_RULES = [
   '- Cada hallazgo necesita archivo y linea concretos. Si no puedes senalarlos,',
   '  no lo reportes: una sospecha sin evidencia no es un hallazgo.',
   '- No inventes problemas. Un proyecto limpio se reporta como limpio.',
-  '- CRITICAL es solo lo explotable tal y como esta el codigo hoy.',
+  '- El eje estado vale explotable-hoy SOLO para lo explotable tal y como esta el',
+  '  codigo hoy. La banda la deriva FORTRESS de los tres ejes, no la eliges tu.',
   // Los dos falsos positivos que mas ha cometido, y los dos son de lectura
   // superficial: marcar ausente un control que estaba un salto mas abajo, y
   // nombrar como control esperado algo que solo existe en un comentario.

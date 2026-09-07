@@ -5,6 +5,7 @@ import { scoreFromFindings } from '@domain/scan/score-from-findings'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { commitScanRows } from './commit-scan-rows'
+import { asentarSeveridadDerivada } from './asentar-severidad'
 import { asDetected } from './expediente-vivo'
 import { pesarEvidencia } from './pesar-evidencia'
 import type { ScanSummary } from './scan-types'
@@ -41,6 +42,10 @@ export async function persistScan(
     scannedAt,
     conservados
   })
+
+  // Lo que la derivacion cambio respecto a la palabra del modelo (ADR-080):
+  // un asiento por escaneo, fuera de la transaccion y a mejor esfuerzo.
+  asentarSeveridadDerivada(context, project, findings)
 
   // Cognition registra lo aprendido en la memoria del proyecto. Fuera de la
   // transaccion: es un archivo, y perderlo no debe invalidar el escaneo.
