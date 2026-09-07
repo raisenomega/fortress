@@ -140,11 +140,105 @@ antes: ganó la vieja, del 21 de agosto, y esa fecha es la que se habría perdid
 - Las filas con identidad vieja de otros proyectos **no se tocaron**: fuera del
   alcance decidido.
 
+## Adenda (2026-09-06): esto es una migración, y tiene fecha de retirada
+
+La decisión y la enmienda describen **cómo** se funde. Ninguna dice **cuándo
+vuelve a hacer falta**, y la respuesta —medida, no supuesta— es que no vuelve.
+
+### Un escaneo no puede crear un duplicado de identidad
+
+`syncFromScan` no inserta a ciegas. Busca primero con `SELECT_BY_IDENTITY`, que
+filtra por `project_id` e `identity` **y por nada más** —en particular, **no por
+`lifecycle`**—. Si ya hay una fila con esa clave, viva o EXTINCT, la refresca;
+solo abre fila nueva cuando no encuentra ninguna:
+
+```ts
+const existing = byIdentity.get(projectId, row.identity)
+if (!existing) insert.run(row)
+else (conservados.has(existing.id) ? touchKeep : touch).run(toTouch(row, existing.id))
+```
+
+El refresco por defecto (`TOUCH_FINDING`) además **revive**: pone
+`lifecycle = 'ACTIVE'` y `resolved_at = NULL`, así que un defecto que reaparece
+vuelve al tablero en vez de quedarse enterrado bajo su propia extinción. La
+variante `TOUCH_CONSERVANDO` **no** toca el ciclo de vida, a propósito, para
+respetar el MITIGATED que puso el operador. Las dos actualizan en el sitio: por
+ninguna de las dos ramas nace una segunda fila con la misma clave.
+
+De ahí se sigue lo que este ADR no decía: **un proyecto que nace bajo
+[ADR-067](adr-067-identidad-fichero-tipo-simbolo.md) no acumula duplicados de
+identidad.** Los que existen no vienen de escanear muchas veces —eso fue una
+suposición nuestra, y era falsa—: vienen del cambio de fórmula, que dejó dos
+poblaciones incapaces de empatar.
+
+**Medido el 2026-09-06** contra la base viva, en solo lectura:
+
+| proyecto | vivas | identidad nueva | identidad vieja | grupos fusionables sin reclasificar |
+|---|---|---|---|---|
+| `fortress-command-center` | 54 | 54 | 0 | **0** |
+| `mailbd-main` | 114 | 16 | 98 | **0** |
+
+Cero en los dos, y por la razón de arriba: donde la identidad ya es la de hoy,
+no hay duplicados que colapsar.
+
+Una salvedad, para no afirmar de más: la unicidad vale para lo que escribe el
+escaneo. El **centinela** de la absorbida —`fusionada:‹ganadora›│‹identidad
+vieja›`— se forma con la ganadora y la clave vieja, no con el id de la
+absorbida, así que dos filas del mismo grupo comparten centinela. Ocurre hoy,
+en dos filas EXTINCT del 24 de agosto. No afecta a ninguna consulta viva —el
+criterio 3 solo mira vivas, y ningún escaneo produce esa clave— pero la
+identidad de una absorbida no es única y conviene saberlo antes de apoyarse en
+ella.
+
+### La fusión es una herramienta de migración, no de mantenimiento
+
+Su único trabajo pendiente son las filas con identidad anterior a ADR-067 —hoy,
+**98 en `mailbd-main`**—, y ninguna se puede fundir sin pasar antes por la
+reclasificación, que **exige el modelo** (`scripts/fase-b-clasificar.ts`): el
+tipo lo elige un agente, no una regla. De ahí tres consecuencias, escritas aquí
+para que nadie las tenga que volver a derivar:
+
+- **No es una capacidad de la app y no debe cablearse.** Un disparo automático
+  al cerrar un escaneo sería un no-op permanente sobre base limpia —no habría
+  nada que fundir—, y el único momento en que sí tendría trabajo es el peor
+  posible: una base a medio migrar, marcando absorbidas como EXTINCT, que no
+  vuelve. Ninguna capa de la app llama hoy a `createFindingFusion`; el
+  empaquetado la deja fuera del binario, y eso es correcto.
+- **Se corre a mano, una vez por proyecto**, con la app cerrada y backup
+  verificado, como se corrió el 2026-08-24.
+- **Cuando la última base con identidad vieja esté migrada, la fusión sale del
+  repo**: `fusion-de-duplicados.ts`, `severidad-al-fundir.ts`,
+  `finding-fusion.ts`, `finding-fusion-sql.ts`, `red-de-la-fusion.ts` y los
+  `scripts/fase-b-*`. Igual que salió el modo `--aplicar` del runner de
+  gravedad: lo que ya no tiene trabajo no se queda por si acaso. **Esta adenda
+  es el marcador de esa retirada.**
+
+### Dónde vive la red que lo protege
+
+Desde el 2026-09-06 los criterios de la verificación en caliente están dentro de
+`src/`, que es lo único que cubre el `include` de vitest:
+
+- **1, 2, 3 y 5** en `src/infrastructure/persistence/red-de-la-fusion.ts`.
+- **6** en `src/domain/project/severidad-al-fundir.ts`, desde la enmienda.
+- **4** queda fuera, y está documentado en el módulo: compara `first_seen` fila
+  a fila contra el **backup**, que es otra base, y una función sobre una sola
+  conexión no lo puede mirar. Es la razón por la que el backup sigue siendo
+  obligatorio aunque la transacción cubra todo lo demás.
+
+`scripts/fase-b-verificar.ts` queda como cáscara: compone y lanza, sin criterios
+propios. Mientras los tuvo, la red del momento más irreversible del sistema era
+la única pieza del motor que ningún gate probaba.
+
 ## Código
 
 `src/domain/project/fusion-de-duplicados.ts` ·
+`src/domain/project/severidad-al-fundir.ts` ·
+`src/domain/project/informe-de-fusion.ts` ·
 `src/infrastructure/persistence/finding-fusion-sql.ts` ·
 `src/infrastructure/persistence/finding-fusion.ts` ·
+`src/infrastructure/persistence/red-de-la-fusion.ts` ·
+`src/infrastructure/persistence/reparar-gravedad.ts` ·
 `src/infrastructure/persistence/fusionada-no-resucita.test.ts` ·
 `scripts/fase-b-clasificar.ts` · `scripts/fase-b-ejecutar.ts` ·
-`scripts/fase-b-verificar.ts`
+`scripts/fase-b-verificar.ts` · `scripts/fase-b-criterio-6.ts` ·
+`scripts/reparar-gravedad.ts`
