@@ -7,7 +7,7 @@ const TIMEOUT_MS = 180_000
  * Verifica que el arbol sigue compilando tras un arreglo. typecheck es rapido y
  * caza lo que rompe de verdad; lint y test los corre el propio agente al
  * autoverificarse. Si el proyecto no tiene el script, no se puede comprobar
- * aqui y se da por bueno (no se bloquea el loop por falta de tooling).
+ * aqui y se da por bueno (no se bloquea la construccion por falta de tooling).
  *
  * Corre por `runCommand` y no por un `execFile` propio, y ese es el arreglo de
  * fondo. `npm run typecheck` EJECUTA CODIGO DEL REPO AJENO —el script del
@@ -21,7 +21,7 @@ const TIMEOUT_MS = 180_000
  * crudo MENOS en el codigo, que es la unica prevencion que no depende de que
  * alguien se acuerde.
  */
-export async function loopVerify(cwd: string): Promise<boolean> {
+export async function verificarArbol(cwd: string): Promise<boolean> {
   const salida = await runCommand('npm', ['run', 'typecheck'], cwd, TIMEOUT_MS)
   if (salida.code === 0) return true
   // Sin script que correr no hay nada que verificar, y eso no es un fallo del

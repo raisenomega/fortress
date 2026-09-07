@@ -78,7 +78,7 @@ porque su copia aislada es su red.
 ### 2. La red es un checkpoint transitorio, no un commit permanente ni un stash
 
 Antes de editar: `git add -A` y `git commit --allow-empty --no-verify`, como
-hace `gitSnapshot` hoy (`src/infrastructure/loop/loop-git.ts:29-38`). Al terminar
+hace `gitSnapshot` hoy (`src/infrastructure/git/git-snapshot.ts:29-38`). Al terminar
 el turno, **en éxito o en fallo**, `git reset --soft <sha^>`: el commit sale del
 historial y el árbol de trabajo queda **byte-exacto** — el trabajo del operador
 más las ediciones del agente si fue bien; solo el trabajo del operador si se
@@ -115,7 +115,7 @@ Revierte:
 
 - `outcome.failed` — algún paso falló (`src/application/chat/reply-from-workflow.ts:60`).
 - La **verificación** en rojo tras el turno, con la misma `typecheck` que
-  Construir (`src/infrastructure/loop/loop-verify.ts:24-30`).
+  Construir (`src/infrastructure/build/build-verify.ts:24-30`).
 - **Detener.** El botón mata al hijo con escalada a SIGKILL
   (`src/infrastructure/ipc/chat-send-handler.ts:39-46`), y un agente muerto a
   media edición es el peor estado posible del árbol. La doctrina de que *una
@@ -139,7 +139,7 @@ hace ante el repo propio, un área protegida o la falta de confianza
 analizando; lo que no ocurre es escribir sin poder deshacer.
 
 La regla "sin raíz de repo, no" no es nueva: la aplica `gitSnapshot`
-(`loop-git.ts:12-15`, *"un `add -A` / `reset --hard` ahí podría destruir trabajo
+(`git-snapshot.ts:12-15`, *"un `add -A` / `reset --hard` ahí podría destruir trabajo
 ajeno"*) y la aplica el push (`src/infrastructure/ipc/push-handlers.ts:12-24`,
 *"el push publicaría el repo padre"*). Esta es su tercera aplicación de la misma
 verdad.
@@ -170,8 +170,10 @@ repartida en dos ficheros.
   registra qué ficheros se tocaron, con red o sin ella.
 - Cierra la deuda `terminal-autonomo-edita-sin-red-de-reversion` y, de paso, da
   a Construir el ADR que no tenía. La reubicación de `loop-git.ts` y
-  `loop-verify.ts` bajo `build/` —hoy solo los importa el Ejecutor— es la deuda
-  `loop-git-y-loop-verify-son-de-build`, y conviene hacerla en el mismo arco.
+  `loop-verify.ts` —que solo importaba el Ejecutor y cuyos nombres describían
+  el loop retirado— se hizo en el mismo commit que la pieza: las primitivas git
+  viven ahora en `git/git-snapshot.ts`, junto al checkpoint transitorio que las
+  reutiliza, y la verificación en `build/build-verify.ts` como `verificarArbol`.
 - Lo que este ADR **no** decide: si el checkpoint transitorio debe sustituir al
   permanente en Construir. Es una decisión del operador y se toma sola, con su
   medida delante.
@@ -195,5 +197,5 @@ repartida en dos ficheros.
 
 `src/application/chat/send-message.ts` · `src/application/chat/reply-from-workflow.ts` ·
 `src/application/workflow/run-workflow.ts` · `src/domain/settings/modo-efectivo.ts` ·
-`src/application/build/build-feature.ts` · `src/infrastructure/loop/loop-git.ts` ·
-`src/infrastructure/loop/loop-verify.ts`
+`src/application/build/build-feature.ts` · `src/infrastructure/git/git-snapshot.ts` · `src/infrastructure/git/checkpoint-transitorio.ts` ·
+`src/infrastructure/build/build-verify.ts`
