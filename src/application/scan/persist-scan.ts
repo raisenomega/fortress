@@ -6,6 +6,7 @@ import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { commitScanRows } from './commit-scan-rows'
 import { asentarSeveridadDerivada } from './asentar-severidad'
+import { asentarVocabulario } from './asentar-vocabulario'
 import { asDetected } from './expediente-vivo'
 import { pesarEvidencia } from './pesar-evidencia'
 import type { ScanSummary } from './scan-types'
@@ -43,9 +44,11 @@ export async function persistScan(
     conservados
   })
 
-  // Lo que la derivacion cambio respecto a la palabra del modelo (ADR-080):
-  // un asiento por escaneo, fuera de la transaccion y a mejor esfuerzo.
+  // Los dos termometros de la corrida, fuera de la transaccion y a mejor
+  // esfuerzo: lo que la derivacion cambio respecto al modelo (ADR-080) y
+  // cuanto no se supo clasificar (ADR-081).
   asentarSeveridadDerivada(context, project, findings)
+  asentarVocabulario(context, project, findings)
 
   // Cognition registra lo aprendido en la memoria del proyecto. Fuera de la
   // transaccion: es un archivo, y perderlo no debe invalidar el escaneo.
