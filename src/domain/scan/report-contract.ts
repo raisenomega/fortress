@@ -1,5 +1,5 @@
+import { BLOQUE_DE_TIPOS } from './bloque-de-tipos'
 import { ALCANCES, EFECTOS } from './ejes-de-severidad'
-import { TIPOS_DE_DEFECTO } from './tipo-de-defecto'
 
 const lista = (valores: readonly string[]): string => valores.join(', ')
 
@@ -11,11 +11,15 @@ const lista = (valores: readonly string[]): string => valores.join(', ')
  * Los tres ejes (ADR-080) son lo que decide la banda: el agente reporta
  * hechos de vocabulario cerrado y FORTRESS deriva la severidad. Su propia
  * `severity` sigue viajando, como evidencia de cuanto se calibra.
+ *
+ * El bloque de tipos y el ejemplo hablan de codigo AJENO (ADR-081). El ejemplo
+ * anterior era un defecto interno de FORTRESS emparejado con un tipo que
+ * definia otra cosa: ensenaba a forzar justo donde hace falta lo contrario.
  */
 export const REPORT_CONTRACT = `Termina SIEMPRE tu respuesta con este bloque, y nada despues:
 
 \`\`\`json
-{"findings":[{"severity":"CRITICAL","title":"API key hardcodeada en un repo publico","file":"src/config.js","line":1,"tipo":"secret-in-env","simbolo":"buildEnv","alcance":"anonimo","efecto":"credenciales","estado":"explotable-hoy"}]}
+{"findings":[{"severity":"CRITICAL","title":"El checkout cobra el precio que llega en el cuerpo de la peticion","file":"api/checkout.js","line":42,"tipo":"confianza-en-datos-del-cliente","simbolo":"createCheckout","alcance":"anonimo","efecto":"dinero","estado":"explotable-hoy"}]}
 \`\`\`
 
 Formato del bloque:
@@ -25,12 +29,13 @@ Formato del bloque:
 - title: una frase corta y concreta, sin markdown.
 - file: ruta relativa a la raiz del proyecto.
 - line: numero de linea, o null si el hallazgo no esta en una linea concreta.
-- tipo: ELIGE uno de esta lista, no inventes ninguno. Si de verdad no encaja,
-  pon "otro"; es preferible a forzar un tipo que no es.
-${TIPOS_DE_DEFECTO.map((t) => `  · ${t}`).join('\n')}
+- tipo: no inventes ninguno. ELIGE uno de esta lista POR SU DEFINICION y no
+  por su nombre, y elige el mismo que elegirias manana para el mismo defecto:
+  es lo que permite reconocerlo entre escaneos.
+${BLOQUE_DE_TIPOS}
 - simbolo: el nombre de la funcion o bloque que contiene el defecto (por
-  ejemplo "handleVerify" o "buildEnv"), sin parentesis. Cadena vacia si el
-  hallazgo no esta dentro de codigo con nombre.
+  ejemplo "createCheckout" o "resolvePrice"), sin parentesis. Cadena vacia si
+  el hallazgo no esta dentro de codigo con nombre.
 - alcance: quien llega hasta el defecto. ELIGE uno: ${lista(ALCANCES)}.
 - efecto: que se lleva o rompe quien lo explota. ELIGE uno: ${lista(EFECTOS)}.
   Los datos de personas son datos-de-terceros, no informacion; informacion es

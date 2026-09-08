@@ -1,51 +1,31 @@
+import { DEFECTOS_DE_CASA } from './defectos-de-casa'
+import { DEFECTOS_DE_CODIGO_AJENO } from './defectos-de-codigo-ajeno'
+
 /**
  * Vocabulario CERRADO de tipos de defecto. El escaner ELIGE de esta lista; no
- * redacta. Es la pieza que hace estable la identidad de un hallazgo.
+ * redacta. Es la pieza que hace estable la identidad de un hallazgo (ADR-067).
  *
- * Sale de agrupar los 34 defectos reales del propio repo, no de una lista
- * generica: cada tipo existe porque hay al menos un defecto que lo pedia. Los
- * que aparecen una sola vez se conservan a proposito — son clases que pueden
- * repetirse, y mandarlas a `otro` habria escondido justo lo que distinguen.
+ * Cada tipo va con su definicion de una linea, y esa definicion VIAJA al prompt
+ * (ADR-081): mandar 27 slugs desnudos era pedirle al modelo que eligiera por el
+ * nombre. Una sola verdad — el contrato no copia estos textos, los emite.
+ *
+ * Dos origenes, a proposito separados: lo que salio del propio repo y lo que
+ * hizo falta para codigo ajeno. `otro` cierra la lista porque es el ultimo
+ * recurso, y su definicion lo dice.
  *
  * Congelado aqui como decision de producto. Anadir un tipo es cambiar el
  * contrato del escaner, y por eso no se hace a la ligera.
  */
-export const TIPOS_DE_DEFECTO = [
-  /** Codigo del repo auditado corriendo sin exigir project.trusted. */
-  'missing-trust-check',
-  /** Una corrida de agente que no pasa por guardRun: evade tope y carril. */
-  'missing-run-guard',
-  /** Ruta que admite `..` o absolutos: lectura, listado o escritura fuera. */
-  'path-traversal',
-  /** Se hereda el entorno del operador —API key, keyring— a codigo ajeno. */
-  'secret-in-env',
-  /** Un secreto viaja en argv y queda visible en `ps`. Otro canal, otro fix. */
-  'secret-in-argv',
-  /** Algo con secretos se persiste o se muestra sin pasar por redactSecrets. */
-  'secreto-sin-redactar',
-  /** El .mcp.json del repo auditado entra sin acotar y puede suplantar. */
-  'mcp-no-acotado',
-  /** Una allowlist de tools que readmite lo que decia excluir. */
-  'allowlist-permisiva',
-  /** El filtro anti-SSRF no cubre IPv4 mapeada en IPv6. */
-  'ssrf-ipv6-mapped',
-  /** El filtro anti-SSRF no cubre IPv4 en decimal, hexadecimal u octal. */
-  'ssrf-ipv4-formatos',
-  /** Una capa anti-SSRF existe pero nunca llega a ejecutarse. */
-  'ssrf-capa-no-alcanzada',
-  /** La documentacion o un comentario afirman una garantia que el codigo no da. */
-  'doc-contradice-codigo',
-  /** Se gasta sin consultar el tope que gobierna ese gasto. */
-  'tope-no-consultado',
-  /** Se valida al leer pero no al escribir (o al reves). */
-  'validacion-asimetrica',
-  /** Una operacion por proyecto que alcanza a todos. */
-  'alcance-de-proyecto-ignorado',
-  /** Lo genuinamente inclasificable. Que crezca es senal de que falta un tipo. */
-  'otro'
-] as const
+export const DEFECTOS = {
+  ...DEFECTOS_DE_CASA,
+  ...DEFECTOS_DE_CODIGO_AJENO,
+  otro: 'lo genuinamente inclasificable, y solo tras descartar los otros 26.'
+} as const
 
-export type TipoDeDefecto = (typeof TIPOS_DE_DEFECTO)[number]
+export type TipoDeDefecto = keyof typeof DEFECTOS
+
+/** El orden es el del prompt: casa, codigo ajeno y `otro` al final. */
+export const TIPOS_DE_DEFECTO = Object.keys(DEFECTOS) as readonly TipoDeDefecto[]
 
 /** Fuera del vocabulario no se inventa nada: cae a `otro`, y se nota. */
 export function aTipoDeDefecto(value: unknown): TipoDeDefecto {
