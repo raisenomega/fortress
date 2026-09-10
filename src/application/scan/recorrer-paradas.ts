@@ -1,15 +1,15 @@
 import type { Project } from '@domain/project/project'
 import type { Manifiesto } from '@domain/scan/manifiesto'
+import { modulosDeParada } from '@domain/scan/modulos-de-carpeta'
 import { ordenarPorSensibilidad } from '@domain/scan/prioridad-de-paradas'
 import type { Scanner } from '@domain/scan/scanner'
 import { err, ok, type Result } from '@domain/shared/result'
-import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import type { RecorridoDeps } from './recorrido-deps'
 import { NADA_RECORRIDO, sumarParada } from './acumulador-del-recorrido'
 import { asentarHallazgos } from './asentar-hallazgos'
-import { crearCierreConLog } from './cierre-con-log'
-import { escanearParada } from './pasos-del-recorrido'
+import { abrirRecorrido } from './abrir-recorrido'
+import { escanearParada } from './escanear-parada'
 import type { SalidasDelRecorrido } from './progreso-del-recorrido'
 import type { ScanSummary } from './scan-types'
 
@@ -29,14 +29,10 @@ export async function recorrerParadas(
   deps: RecorridoDeps
 ): Promise<Result<ScanSummary>> {
   const paradas = ordenarPorSensibilidad(manifiesto.paradas)
-  const at = nowIso()
-  const scanId = context.scans.abrir({
-    projectId: project.id,
-    startedAt: at,
-    paradasTotal: paradas.length,
-    ficherosTotal: manifiesto.ficherosTotal
-  }).id
-  const cerrar = crearCierreConLog(context, project, scanId, salidas.scanLog, {
+  // De los doce, solo los de CARPETA bajan a la parada. Los de tema miran el
+  // proyecto entero y no tienen carpeta donde correr: son otra fase.
+  const temas = modulosDeParada(manifiesto.modulosAplicables)
+  const { scanId, at, cerrar } = abrirRecorrido(context, project, salidas, {
     paradasTotal: paradas.length,
     ficherosTotal: manifiesto.ficherosTotal
   })
@@ -46,7 +42,7 @@ export async function recorrerParadas(
   for (const parada of paradas) {
     if (deps.cancelado()) return ok(cerrar('abortado', acumulado))
 
-    const salida = await escanearParada(scanner, project, parada, salidas.progreso)
+    const salida = await escanearParada(scanner, project, parada, salidas.progreso, temas)
     // Un fallo del escaner cierra el recorrido ABORTADO con lo que SI se
     // audito, en vez de dejar la fila ABIERTA para siempre. El rastro fino del
     // fallo —su factura, su motivo propio— es la pieza que le falta al arco.

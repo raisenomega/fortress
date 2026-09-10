@@ -1,3 +1,4 @@
+import type { ModuloAuditoria } from './modulo-auditoria'
 import type { Result } from '../shared/result'
 import type { TokenUsage } from '../telemetry/token-usage'
 import type { DetectedFinding } from './detected-finding'
@@ -19,6 +20,12 @@ export interface ScanRequest {
    * dependen de ella—. Quien la verifica despues es el manifiesto.
    */
   readonly rutas?: readonly string[]
+  /**
+   * Los modulos de CARPETA que esta parada activa (ADR-083, Fase 2). Ausente =
+   * ninguno, y el prompt sale como el de ayer. Viaja por el mismo carril que
+   * `rutas` y por la misma razon: solo lo consume el prompt.
+   */
+  readonly modulos?: readonly ModuloAuditoria[]
 }
 
 export interface ScanOutcome {

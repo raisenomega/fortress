@@ -1,10 +1,9 @@
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { parseScanOutput } from '@domain/scan/parse-scan-output'
-import { buildScanPrompt } from '@domain/scan/scan-prompt'
-import { discoverCorpus } from '../project/discover-corpus'
 import type { ScanRequest, Scanner } from '@domain/scan/scanner'
 import { err, ok } from '@domain/shared/result'
 import { avisarDelFallo, type AvisoDeFallo } from './aviso-de-fallo'
+import { promptDeParada } from './prompt-de-parada'
 
 const FAILED = 'El escaneo no llego a terminar'
 
@@ -39,7 +38,7 @@ async function escanear(
     {
       projectPath: request.projectPath,
       projectId: request.projectId,
-      prompt: buildScanPrompt(request.projectName, discoverCorpus(request.projectPath), request.rutas), // prettier-ignore
+      prompt: promptDeParada(request),
       permissionMode: 'plan',
       // La FASE 1 es cosa del Security Reviewer, siempre el mismo agente.
       agentId: 'security-reviewer',
