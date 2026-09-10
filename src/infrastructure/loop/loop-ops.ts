@@ -8,6 +8,8 @@ import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { createClaudeScanner } from '../scan/claude-scanner'
+import { scanLogWriter } from '../scan/write-scan-log'
+import { asentarIntentoFallido } from '@application/scan/asentar-intento-fallido'
 import { medirProyecto } from '../scan/medir-proyecto'
 
 /** Escanea y devuelve el score, o err (que el standby clasifica). Siempre plan. */
@@ -24,12 +26,16 @@ export async function loopScan(
   try {
     const budget = readBudget(context)
     const scanner = createClaudeScanner(
-      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context)),
+      (intento) => asentarIntentoFallido(context, intento)
     )
     // El bucle autonomo pinta texto y ya tomo su carril: el metadato de parada
     // no tiene donde ir y la cancelacion es la suya, la del loop.
-    const progreso = { texto: onProgress, parada: () => undefined }
-    const summary = await runScan(context, scanner, projectId, progreso, {
+    const salidas = {
+      progreso: { texto: onProgress, parada: () => undefined },
+      scanLog: scanLogWriter
+    }
+    const summary = await runScan(context, scanner, projectId, salidas, {
       cancelado: () => isCancelled(projectId),
       medir: medirProyecto
     })

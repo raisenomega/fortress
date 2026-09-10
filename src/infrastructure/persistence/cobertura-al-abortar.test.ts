@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { recorrerParadas } from '@application/scan/recorrer-paradas'
-import { SIN_PROGRESO } from '@application/scan/progreso-del-recorrido'
+import { SIN_SALIDAS } from '@application/scan/progreso-del-recorrido'
 import { crearBench, PROJECT, PROYECTO, type Bench } from './cierre-partido-fixture'
 import { CUATRO, ficherosDe, scannerFalso } from './recorrido-fixture'
 
@@ -19,7 +19,7 @@ async function detenerDurante(carpeta: string): Promise<readonly string[]> {
     if (enCurso === carpeta) detenido = true
   })
 
-  await recorrerParadas(bench.context, scanner, PROJECT, CUATRO, SIN_PROGRESO, {
+  await recorrerParadas(bench.context, scanner, PROJECT, CUATRO, SIN_SALIDAS, {
     cancelado: () => detenido
   })
   return scanner.pedidas

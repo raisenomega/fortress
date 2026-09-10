@@ -10,6 +10,8 @@ import { guardRun } from '../run-guard'
 import { cancelRun, endRun, isCancelled } from '../run-control'
 import { createClaudeScanner } from '../scan/claude-scanner'
 import { medirProyecto } from '../scan/medir-proyecto'
+import { scanLogWriter } from '../scan/write-scan-log'
+import { asentarIntentoFallido } from '@application/scan/asentar-intento-fallido'
 import { IPC } from './channels'
 import { progresoDeEscaneo } from './scan-progress'
 import { registerFindingDecisionHandlers } from './finding-decision-handlers'
@@ -26,16 +28,17 @@ async function handleRun(
   // fuera ese fallo dejaba el carril tomado hasta reiniciar.
   try {
     const budget = readBudget(context)
+    // El callback ve el intento con su FACTURA antes de que el fallo se
+    // convierta en `err(string)` y deje de haber nada que asentar.
     const scanner = createClaudeScanner(
-      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
+      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context)),
+      (intento) => asentarIntentoFallido(context, intento)
     )
-    // El carril se toma UNA vez para todo el recorrido, no por parada: las XX
-    // paradas son un solo trabajo, y trocear el turno dejaria colar otro
-    // escaneo entre dos de ellas.
-    return await runScan(context, scanner, projectId, progresoDeEscaneo(event, projectId), {
-      cancelado: () => isCancelled(projectId),
-      medir: medirProyecto
-    })
+    // El carril se toma UNA vez para todo el recorrido: las XX paradas son un
+    // solo trabajo, y trocearlo dejaria colar otro escaneo entre dos de ellas.
+    const salidas = { progreso: progresoDeEscaneo(event, projectId), scanLog: scanLogWriter }
+    const deps = { cancelado: () => isCancelled(projectId), medir: medirProyecto }
+    return await runScan(context, scanner, projectId, salidas, deps)
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
   } finally {

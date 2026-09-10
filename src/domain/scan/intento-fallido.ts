@@ -1,0 +1,31 @@
+import type { TokenUsage } from '../telemetry/token-usage'
+
+/** Por que no hubo informe. Los dos gastan; el segundo ademas TERMINO BIEN. */
+export type MotivoDelFallo =
+  /** El proceso murio: lo mato el reloj, un error, o se cayo. */
+  | 'proceso'
+  /**
+   * Termino con exito y su salida no se entendio. Es el caso de Health Flow:
+   * gasto, cerro limpio, y el informe llego sin bloque legible. La factura de
+   * este es PERFECTAMENTE legible — se tiraba por el camino, no por falta.
+   */
+  | 'informe-ilegible'
+
+/**
+ * Un intento de escaneo que no llego a informe, con lo que costo.
+ *
+ * Nace porque `Result<T>` solo es generico en `T`: al convertir el fallo a
+ * `err(string)` se perdian la factura, las herramientas y la duracion, y despues
+ * ya no habia de donde sacarlas. Esto las saca ANTES de esa conversion.
+ */
+export interface IntentoFallido {
+  readonly projectId: string
+  readonly motivo: MotivoDelFallo
+  readonly durationMs: number
+  /** La factura REAL del CLI. Un intento que gasto y no consta es la brecha
+   *  que este arco cierra: nunca mas un token gastado en silencio. */
+  readonly usage: TokenUsage
+  readonly tools: readonly string[]
+  /** La salida cruda, para que el fallo tambien deje transcripcion. */
+  readonly texto: string
+}

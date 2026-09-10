@@ -22,6 +22,8 @@ export interface Acumulado {
   readonly usage: TokenUsage
   readonly tools: readonly string[]
   readonly edits: readonly string[]
+  /** La transcripcion de todas las paradas, para que quede en disco al cerrar. */
+  readonly texto: string
 }
 
 export const NADA_RECORRIDO: Acumulado = {
@@ -31,7 +33,8 @@ export const NADA_RECORRIDO: Acumulado = {
   durationMs: 0,
   usage: EMPTY_USAGE,
   tools: [],
-  edits: []
+  edits: [],
+  texto: ''
 }
 
 /** Suma una parada terminada. Nunca se llama con una que quedo a medias. */
@@ -43,6 +46,7 @@ export function sumarParada(previo: Acumulado, parada: Parada, salida: ScanOutco
     durationMs: previo.durationMs + salida.durationMs,
     usage: addUsage(previo.usage, salida.usage),
     tools: [...previo.tools, ...salida.tools],
-    edits: [...previo.edits, ...salida.edits]
+    edits: [...previo.edits, ...salida.edits],
+    texto: previo.texto + salida.texto
   }
 }

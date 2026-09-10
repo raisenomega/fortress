@@ -24,7 +24,7 @@ export const SIN_FACTURA = {
 }
 
 export function corrida(findings: readonly DetectedFinding[]): ScanOutcome {
-  return { findings, durationMs: 1234, usage: SIN_FACTURA, tools: [], edits: [] }
+  return { findings, durationMs: 1234, usage: SIN_FACTURA, tools: [], edits: [], texto: '' }
 }
 
 export interface Bench extends Consultas {
