@@ -120,6 +120,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-079](adr-079-editar-el-arbol-vivo-exige-red-de-reversion.md) | Editar el árbol vivo exige red de reversión: checkpoint transitorio, por turno, y sin git se degrada | 2026-09-07 | Aceptada | Terminal |
 | [ADR-080](adr-080-severidad-por-ejes-derivados.md) | La severidad se deriva de tres ejes de vocabulario cerrado: el escáner reporta hechos, FORTRESS decide la banda | 2026-09-07 | Aceptada | Escaneo |
 | [ADR-081](adr-081-el-vocabulario-de-tipos-cubre-codigo-ajeno.md) | El vocabulario de tipos cubre código ajeno, y elegir de él se guía | 2026-09-07 | Aceptada | Escaneo |
+| [ADR-082](adr-082-escaneo-por-paradas-con-cobertura-declarada.md) | El escaneo avanza por paradas, y declara su cobertura | 2026-09-09 | Aceptada | Escaneo |
 
 ## Referencias
 
