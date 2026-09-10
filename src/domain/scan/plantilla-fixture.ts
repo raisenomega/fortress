@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import type { ModuloAuditoria } from './modulo-auditoria'
-import type { PlantillaDeModulo } from './resumen-de-modulo'
+import { TODO_EL_PROYECTO } from './modulos-de-tema'
+import type { AlcanceDePasada, PlantillaDeModulo } from './resumen-de-modulo'
 
 const KIT = join(process.cwd(), 'internal', 'AUDIT-KIT')
 
@@ -18,3 +19,12 @@ export const delKit = (modulo: ModuloAuditoria): PlantillaDeModulo => ({
   modulo,
   texto: readFileSync(join(KIT, FICHERO[modulo] ?? ''), 'utf8')
 })
+
+/** El alcance de una parada de carpeta: la ruta y el nombre coinciden. */
+export const enCarpeta = (carpeta: string): AlcanceDePasada => ({
+  ruta: carpeta,
+  nombre: carpeta
+})
+
+/** El de una parada de tema: el grep sale de la raiz, el encabezado lo dice. */
+export const EN_TODO: AlcanceDePasada = { ruta: '.', nombre: TODO_EL_PROYECTO }

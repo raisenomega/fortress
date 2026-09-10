@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { delKit } from './plantilla-fixture'
+import { delKit, enCarpeta } from './plantilla-fixture'
 import { cuerpoAccionable } from './plantilla-accionable'
 import { resumenDeModulo } from './resumen-de-modulo'
 
 const M8 = delKit('M8')
 const cuerpo = cuerpoAccionable(M8.texto) ?? ''
-const resumen = resumenDeModulo(M8, 'src/api', 'Proyecto') ?? ''
+const resumen = resumenDeModulo(M8, enCarpeta('src/api'), 'Proyecto') ?? ''
 
 /** Lo que NO puede viajar, y por que cada cosa. */
 const PODADO: ReadonlyArray<readonly [string, string]> = [

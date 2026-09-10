@@ -1,4 +1,4 @@
-import type { Parada } from '@domain/scan/manifiesto'
+import { ficherosDe, type Parada } from '@domain/scan/parada'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
 import type { ScanOutcome } from '@domain/scan/scanner'
 import { addUsage, EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
@@ -16,6 +16,10 @@ export interface Acumulado {
    * verdad se auditaron. Un hallazgo que apunte fuera de su parada NO la sube —
    * es real y se guarda, pero cubrir una carpeta es haberla mirado, no haberla
    * mencionado. Asi el numero jamas miente hacia arriba (ADR-082, Enmienda 1).
+   *
+   * Una parada de TEMA suma cero: mira el proyecto entero y no cubre carpetas.
+   * Sumarle el total a cada tema daria mas del cien por cien, que es la misma
+   * mentira dicha al reves. Los temas se cuentan en `hechas`, no aqui.
    */
   readonly cubiertos: number
   readonly durationMs: number
@@ -42,7 +46,7 @@ export function sumarParada(previo: Acumulado, parada: Parada, salida: ScanOutco
   return {
     reportados: [...previo.reportados, ...salida.findings],
     hechas: previo.hechas + 1,
-    cubiertos: previo.cubiertos + parada.ficheros.length,
+    cubiertos: previo.cubiertos + ficherosDe(parada),
     durationMs: previo.durationMs + salida.durationMs,
     usage: addUsage(previo.usage, salida.usage),
     tools: [...previo.tools, ...salida.tools],

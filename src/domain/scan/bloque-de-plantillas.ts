@@ -8,12 +8,17 @@ export type { PlantillasDeParada }
  * ADR lo dice al derecho: las plantillas refuerzan el escaneo, no lo
  * sustituyen. Por eso el bloque entra DESPUES de la checklist y anuncia que es
  * profundidad tematica, no un contrato de salida nuevo.
+ *
+ * Se anuncia con el NOMBRE del alcance y no con la palabra «carpeta»: una
+ * pasada de tema mira el proyecto entero, y llamarla carpeta contaria mal lo
+ * que se esta haciendo justo en la linea que lo presenta.
  */
-const CABECERA = [
-  'Ademas, esta carpeta activa modulos de la campana de auditoria. Son',
-  'profundidad TEMATICA sobre lo anterior, no un reemplazo: los hallazgos se',
-  'reportan igual, con el mismo contrato y los mismos ejes.'
-].join('\n')
+const cabecera = (alcance: string): string =>
+  [
+    `Ademas, en ${alcance} aplican modulos de la campana de auditoria. Son`,
+    'profundidad TEMATICA sobre lo anterior, no un reemplazo: los hallazgos se',
+    'reportan igual, con el mismo contrato y los mismos ejes.'
+  ].join('\n')
 
 /**
  * El bloque de plantillas de una parada, o cadena VACIA si no aplica ninguno.
@@ -30,7 +35,7 @@ export function bloqueDePlantillas(temas: PlantillasDeParada, projectName: strin
   const { resumenes, avisos } = repartirPlantillas(temas, projectName)
   if (resumenes.length === 0 && avisos.length === 0) return ''
 
-  const guia = resumenes.length === 0 ? [] : [CABECERA, '', ...resumenes]
+  const guia = resumenes.length === 0 ? [] : [cabecera(temas.nombre), '', ...resumenes]
   const falta = avisos.length === 0 ? [] : [SIN_GUIA, ...avisos]
   const separador = guia.length > 0 && falta.length > 0 ? [''] : []
 

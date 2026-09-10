@@ -4,12 +4,13 @@ import { SIN_SALIDAS } from '@application/scan/progreso-del-recorrido'
 import { MANIFIESTO_VACIO, type Manifiesto } from '@domain/scan/manifiesto'
 import { caminoSoldado } from './camino-soldado'
 import { corrida, crearBench, PROJECT, PROYECTO } from './cierre-partido-fixture'
-import { hallazgoDe, scannerFalso } from './recorrido-fixture'
+import { deCarpeta, hallazgoDe } from './recorrido-fixture'
+import { scannerFalso } from './scanner-falso'
 
 /** Un proyecto de una sola carpeta: el escaneo monolitico de siempre. */
 const UNA: Manifiesto = {
   ...MANIFIESTO_VACIO,
-  paradas: [{ carpeta: 'src', ficheros: ['src/a.ts', 'src/b.ts'] }],
+  paradas: [deCarpeta('src', ['src/a.ts', 'src/b.ts'])],
   ficherosTotal: 2
 }
 

@@ -1,6 +1,7 @@
 import { rmSync } from 'fs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { SIN_DECLARACION } from '@domain/scan/declaracion-de-modulos'
+import { esDeCarpeta } from '@domain/scan/parada'
 import { listarFuente } from './listar-fuente'
 import { listarSenales } from './listar-senales'
 import { medirProyecto } from './medir-proyecto'
@@ -42,7 +43,7 @@ describe('las senales se leen sin tocar ES_FUENTE', () => {
     // Si alguien metiera .vue (o .yml, o package.json) en ES_FUENTE, el
     // compromiso de ADR-082 crece sin que nadie lo decida: esto lo cazaria.
     expect(manifiesto.ficherosTotal).toBe(1)
-    expect(manifiesto.paradas.map((p) => p.carpeta)).toEqual(['src/domain'])
+    expect(manifiesto.paradas.filter(esDeCarpeta).map((p) => p.carpeta)).toEqual(['src/domain'])
     expect(manifiesto.modulosAplicables).toContain('M9')
   })
 

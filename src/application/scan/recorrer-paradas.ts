@@ -1,7 +1,8 @@
 import type { Project } from '@domain/project/project'
 import type { Manifiesto } from '@domain/scan/manifiesto'
 import { modulosDeParada } from '@domain/scan/modulos-de-carpeta'
-import { ordenarPorSensibilidad } from '@domain/scan/prioridad-de-paradas'
+import { ordenDelRecorrido } from '@domain/scan/orden-del-recorrido'
+import { rotuloDe } from '@domain/scan/parada'
 import type { Scanner } from '@domain/scan/scanner'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
@@ -28,9 +29,9 @@ export async function recorrerParadas(
   salidas: SalidasDelRecorrido,
   deps: RecorridoDeps
 ): Promise<Result<ScanSummary>> {
-  const paradas = ordenarPorSensibilidad(manifiesto.paradas)
-  // De los doce, solo los de CARPETA bajan a la parada. Los de tema miran el
-  // proyecto entero y no tienen carpeta donde correr: son otra fase.
+  const paradas = ordenDelRecorrido(manifiesto.paradas)
+  // Los de CARPETA bajan a TODAS las paradas de carpeta; el de un tema lo lleva
+  // la parada de tema, que es una por modulo y va al final del recorrido.
   const temas = modulosDeParada(manifiesto.modulosAplicables)
   const { scanId, at, cerrar } = abrirRecorrido(context, project, salidas, {
     paradasTotal: paradas.length,
@@ -59,7 +60,7 @@ export async function recorrerParadas(
     salidas.progreso.parada({
       hecha: acumulado.hechas,
       total: paradas.length,
-      carpeta: parada.carpeta
+      carpeta: rotuloDe(parada)
     })
   }
 
