@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
+import type { ParadaDeCarpeta } from './manifiesto'
 import { ordenarPorSensibilidad } from './prioridad-de-paradas'
 
-const parada = (carpeta: string): { carpeta: string; ficheros: string[] } => ({
+const parada = (carpeta: string): ParadaDeCarpeta => ({
+  clase: 'carpeta',
   carpeta,
   ficheros: [`${carpeta}/a.ts`]
 })

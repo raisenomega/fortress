@@ -1,4 +1,4 @@
-import type { Parada } from './manifiesto'
+import type { ParadaDeCarpeta } from './manifiesto'
 
 /**
  * Las carpetas que se auditan PRIMERO. Nombres, no grafo: la aplicacion no
@@ -37,7 +37,9 @@ function esSensible(carpeta: string): boolean {
  * decide que alcanzo a mirarse. Partition estable: dentro de cada mitad se
  * conserva el orden que traia el manifiesto.
  */
-export function ordenarPorSensibilidad(paradas: readonly Parada[]): readonly Parada[] {
+export function ordenarPorSensibilidad(
+  paradas: readonly ParadaDeCarpeta[]
+): readonly ParadaDeCarpeta[] {
   return [
     ...paradas.filter((p) => esSensible(p.carpeta)),
     ...paradas.filter((p) => !esSensible(p.carpeta))

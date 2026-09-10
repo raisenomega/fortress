@@ -1,10 +1,10 @@
 import type { ModuloAuditoria } from './modulo-auditoria'
 import { razonIlegible, razonSinSembrar } from './plantilla-ausente'
-import { resumenDeModulo, type PlantillaDeModulo } from './resumen-de-modulo'
+// prettier-ignore
+import { resumenDeModulo, type AlcanceDePasada, type PlantillaDeModulo } from './resumen-de-modulo'
 
 /** Las plantillas que esta parada activa, ya leidas de disco (ADR-083, Fase 2). */
-export interface PlantillasDeParada {
-  readonly carpeta: string
+export interface PlantillasDeParada extends AlcanceDePasada {
   /**
    * Los modulos de carpeta que el manifiesto declaro aplicables. Viaja aparte
    * de las plantillas a proposito: la RESTA entre lo que aplica y lo que hay
@@ -39,7 +39,7 @@ export function repartirPlantillas(temas: PlantillasDeParada, projectName: strin
       avisos.push(razonSinSembrar(modulo))
       continue
     }
-    const resumen = resumenDeModulo(plantilla, temas.carpeta, projectName)
+    const resumen = resumenDeModulo(plantilla, temas, projectName)
     if (resumen === null) avisos.push(razonIlegible(modulo))
     else resumenes.push(resumen)
   }

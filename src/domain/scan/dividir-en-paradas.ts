@@ -1,4 +1,4 @@
-import { REPARTO_VACIO, type Parada, type Reparto } from './manifiesto'
+import { REPARTO_VACIO, type ParadaDeCarpeta, type Reparto } from './manifiesto'
 
 /** La carpeta de la raiz, para los ficheros que no cuelgan de ninguna. */
 export const RAIZ = '.'
@@ -63,9 +63,9 @@ export function dividirEnParadas(ficheros: readonly string[]): Reparto {
     porCarpeta.set(carpeta, [...(porCarpeta.get(carpeta) ?? []), fichero])
   }
 
-  const paradas: Parada[] = [...porCarpeta.entries()]
+  const paradas: ParadaDeCarpeta[] = [...porCarpeta.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([carpeta, suyos]) => ({ carpeta, ficheros: suyos }))
+    .map(([carpeta, suyos]) => ({ clase: 'carpeta', carpeta, ficheros: suyos }))
 
   return { paradas, ficherosTotal: ficheros.length }
 }

@@ -4,6 +4,7 @@ import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { SIN_DECLARACION } from '@domain/scan/declaracion-de-modulos'
 import { MODULOS_AUDITORIA } from '@domain/scan/modulo-auditoria'
+import { esDeCarpeta } from '@domain/scan/parada'
 import { REPARTO_VACIO } from '@domain/scan/manifiesto'
 import { medirProyecto } from './medir-proyecto'
 import { repoCon } from './repo-fixture'
@@ -22,7 +23,7 @@ describe('medirProyecto junta las tres lecturas', () => {
   it('del repo real salen las paradas y su total', async () => {
     const { paradas, ficherosTotal } = await medirProyecto(repo, SIN_DECLARACION)
 
-    expect(paradas.map((p) => p.carpeta)).toEqual(['src/app', 'src/domain'])
+    expect(paradas.filter(esDeCarpeta).map((p) => p.carpeta)).toEqual(['src/app', 'src/domain'])
     expect(ficherosTotal).toBe(2)
   })
 

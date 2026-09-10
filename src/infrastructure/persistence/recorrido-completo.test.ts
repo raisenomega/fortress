@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { recorrerParadas } from '@application/scan/recorrer-paradas'
 import { SIN_SALIDAS } from '@application/scan/progreso-del-recorrido'
 import { crearBench, PROJECT, PROYECTO, type Bench } from './cierre-partido-fixture'
-import { CUATRO, scannerFalso, type ScannerFalso } from './recorrido-fixture'
+import { CUATRO } from './recorrido-fixture'
+import { scannerFalso, type ScannerFalso } from './scanner-falso'
 
 let bench: Bench
 let scanner: ScannerFalso

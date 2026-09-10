@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { delKit } from './plantilla-fixture'
+import { delKit, enCarpeta } from './plantilla-fixture'
 import { buildScanPrompt } from './scan-prompt'
 import { SECURITY_CHECKLIST } from './scan-checklist'
 
@@ -8,10 +8,10 @@ const prompt = (temas: Parameters<typeof buildScanPrompt>[3]): string =>
   buildScanPrompt('Proyecto', SIN_CORPUS, ['src/api'], temas)
 
 /** M8 aplica y el operador NO sembro su plantilla: el lector devolvio null. */
-const SIN_SEMBRAR = { carpeta: 'src/api', modulos: ['M8'] as const, plantillas: [] }
-const SEMBRADA = { carpeta: 'src/api', modulos: ['M8'] as const, plantillas: [delKit('M8')] }
+const SIN_SEMBRAR = { ...enCarpeta('src/api'), modulos: ['M8'] as const, plantillas: [] }
+const SEMBRADA = { ...enCarpeta('src/api'), modulos: ['M8'] as const, plantillas: [delKit('M8')] }
 const ROTA = {
-  carpeta: 'src/api',
+  ...enCarpeta('src/api'),
   modulos: ['M8'] as const,
   plantillas: [{ modulo: 'M8' as const, texto: '# un .md que no es del kit\n' }]
 }
@@ -30,7 +30,7 @@ describe('un modulo que aplica sin su plantilla NO se calla', () => {
   })
 
   it('un modulo que NO aplica no se nombra: no hay ruido sobre lo que no toca', () => {
-    const nada = prompt({ carpeta: 'src/api', modulos: [], plantillas: [] })
+    const nada = prompt({ ...enCarpeta('src/api'), modulos: [], plantillas: [] })
 
     expect(nada).not.toContain('M8')
     expect(nada).not.toContain('guia tematica')
