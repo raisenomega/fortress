@@ -1,43 +1,16 @@
-import type { ScanHistoryRepository, ScanRecord } from '@domain/scan/scan-record'
+import type { ScanHistoryRepository } from '@domain/scan/scan-history-repository'
+import { SCORE_PROVISIONAL } from '@domain/scan/scan-history-repository'
 import { newId } from '@domain/shared/id'
 import type { Db } from './database'
-
-const COLUMNS =
-  'id, project_id, score, finding_count, dossier_count, critical_count, duration_ms, at'
-
-interface ScanRow {
-  readonly id: string
-  readonly project_id: string
-  readonly score: number
-  readonly finding_count: number
-  readonly dossier_count: number
-  readonly critical_count: number
-  readonly duration_ms: number
-  readonly at: string
-}
-
-function toRecord(row: ScanRow): ScanRecord {
-  return {
-    id: row.id,
-    projectId: row.project_id,
-    score: row.score,
-    findingCount: row.finding_count,
-    dossierCount: row.dossier_count,
-    criticalCount: row.critical_count,
-    durationMs: row.duration_ms,
-    at: row.at
-  }
-}
+import { toRecord, type ScanRow } from './scan-row'
+import { SCAN_SQL } from './scan-sql'
 
 export function createSqliteScanHistoryRepository(db: Db): ScanHistoryRepository {
-  const insert = db.prepare(
-    `INSERT INTO scans (${COLUMNS})
-     VALUES (@id, @projectId, @score, @findingCount, @dossierCount, @criticalCount, @durationMs, @at)`
-  )
-  const byProject = db.prepare(
-    `SELECT ${COLUMNS} FROM scans WHERE project_id = ? ORDER BY at DESC LIMIT ?`
-  )
-  const since = db.prepare(`SELECT ${COLUMNS} FROM scans WHERE at >= ? ORDER BY at ASC`)
+  const insert = db.prepare(SCAN_SQL.INSERT)
+  const insertAbierto = db.prepare(SCAN_SQL.INSERT_ABIERTO)
+  const cerrarFila = db.prepare(SCAN_SQL.CERRAR)
+  const byProject = db.prepare(SCAN_SQL.BY_PROJECT)
+  const since = db.prepare(SCAN_SQL.SINCE)
 
   return {
     record: (scan) => {
@@ -45,6 +18,32 @@ export function createSqliteScanHistoryRepository(db: Db): ScanHistoryRepository
       insert.run({ id, ...scan })
       return { id, ...scan }
     },
+
+    abrir: (apertura) => {
+      const id = newId()
+      insertAbierto.run({ id, score: SCORE_PROVISIONAL, ...apertura })
+      return {
+        id,
+        projectId: apertura.projectId,
+        score: SCORE_PROVISIONAL,
+        findingCount: 0,
+        dossierCount: 0,
+        criticalCount: 0,
+        durationMs: 0,
+        at: apertura.startedAt,
+        estado: 'ABIERTO',
+        startedAt: apertura.startedAt,
+        paradasTotal: apertura.paradasTotal,
+        paradasHechas: null,
+        ficherosTotal: apertura.ficherosTotal,
+        ficherosCubiertos: null,
+        motivoCierre: null
+      }
+    },
+
+    // `changes` y no una lectura previa: cerrar una fila que ya no existe es
+    // un hecho que el UPDATE ya sabe, y preguntar antes abriria una carrera.
+    cerrar: (scanId, cierre) => cerrarFila.run({ id: scanId, ...cierre }).changes > 0,
 
     listByProject: (projectId, limit) =>
       (byProject.all(projectId, limit) as ScanRow[]).map(toRecord),

@@ -20,6 +20,20 @@ export const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   ['loop_sessions', 'stopped_reason_detail', 'ALTER TABLE loop_sessions ADD COLUMN stopped_reason_detail TEXT'], // prettier-ignore
   ['loop_sessions', 'stopped_at', 'ALTER TABLE loop_sessions ADD COLUMN stopped_at TEXT'],
   ['scans', 'dossier_count', 'ALTER TABLE scans ADD COLUMN dossier_count INTEGER NOT NULL DEFAULT 0'], // prettier-ignore
+  // El recorrido por paradas (ADR-082). `estado` es el unico NOT NULL, y su
+  // default es el lado seguro: las filas que ya existian son escaneos
+  // TERMINADOS, y llamarlas abiertas las dejaria esperando un cierre que nunca
+  // va a llegar. Las demas nullables porque ausente es "no se midio" — que es
+  // la verdad de todo lo anterior a esta pieza, y no es lo mismo que cero.
+  // `score` NO se toca: sigue NOT NULL, y quien dice que es provisional es
+  // `estado`. Quitarle el NOT NULL exigiria el recambio de tabla de ADR-077.
+  ['scans', 'estado', "ALTER TABLE scans ADD COLUMN estado TEXT NOT NULL DEFAULT 'CERRADO'"], // prettier-ignore
+  ['scans', 'started_at', 'ALTER TABLE scans ADD COLUMN started_at TEXT'],
+  ['scans', 'paradas_total', 'ALTER TABLE scans ADD COLUMN paradas_total INTEGER'],
+  ['scans', 'paradas_hechas', 'ALTER TABLE scans ADD COLUMN paradas_hechas INTEGER'],
+  ['scans', 'ficheros_total', 'ALTER TABLE scans ADD COLUMN ficheros_total INTEGER'],
+  ['scans', 'ficheros_cubiertos', 'ALTER TABLE scans ADD COLUMN ficheros_cubiertos INTEGER'], // prettier-ignore
+  ['scans', 'motivo_cierre', 'ALTER TABLE scans ADD COLUMN motivo_cierre TEXT'],
   // Nullables: sin marca no hay nada que contar, y `resolved_at` no sirve para
   // esto — ahi vive la extincion, que afirma otra cosa.
   ['findings', 'mitigated_at', 'ALTER TABLE findings ADD COLUMN mitigated_at TEXT'], // prettier-ignore

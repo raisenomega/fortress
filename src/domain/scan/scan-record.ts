@@ -1,4 +1,6 @@
-/** Un escaneo terminado. Se guardan todos: la tendencia necesita historia. */
+import type { EstadoScan } from './estado-scan'
+
+/** Un escaneo. Se guardan todos: la tendencia necesita historia. */
 export interface ScanRecord {
   readonly id: string
   readonly projectId: string
@@ -15,15 +17,21 @@ export interface ScanRecord {
   readonly criticalCount: number
   readonly durationMs: number
   readonly at: string
+  /**
+   * Los campos del recorrido por paradas (ADR-082). Opcionales porque un
+   * escaneo de una sola pieza no tiene paradas que contar, y las 50 filas
+   * anteriores tampoco: ausente es "no consta", no cero.
+   */
+  readonly estado?: EstadoScan
+  /** Cuando empezo. Antes solo se guardaba `at`, que es el CIERRE. */
+  readonly startedAt?: string | null
+  readonly paradasTotal?: number | null
+  readonly paradasHechas?: number | null
+  /** La cobertura declarada: `cubiertos` de `total`. */
+  readonly ficherosTotal?: number | null
+  readonly ficherosCubiertos?: number | null
+  /** Por que dejo de correr. Null mientras sigue ABIERTO. */
+  readonly motivoCierre?: string | null
 }
 
 export type NewScanRecord = Omit<ScanRecord, 'id'>
-
-/** Puerto del historico de escaneos. */
-export interface ScanHistoryRepository {
-  record(scan: NewScanRecord): ScanRecord
-  /** Del mas reciente al mas antiguo. */
-  listByProject(projectId: string, limit: number): readonly ScanRecord[]
-  /** Todos los proyectos a la vez, para las graficas del dashboard. */
-  listSince(since: string): readonly ScanRecord[]
-}
