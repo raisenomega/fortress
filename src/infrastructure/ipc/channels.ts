@@ -20,6 +20,7 @@ export const IPC = {
   projectsPickFolder: 'projects:pick-folder',
   projectsSelf: 'projects:self',
   projectsSetTrusted: 'projects:set-trusted',
+  projectsDeclararModulos: 'projects:declarar-modulos',
   projectsSetLoopEnabled: 'projects:set-loop-enabled',
   projectsUnblock: 'projects:unblock',
   loopStatus: 'loop:status',

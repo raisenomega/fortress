@@ -1,4 +1,4 @@
-import { MANIFIESTO_VACIO, type Manifiesto, type Parada } from './manifiesto'
+import { REPARTO_VACIO, type Parada, type Reparto } from './manifiesto'
 
 /** La carpeta de la raiz, para los ficheros que no cuelgan de ninguna. */
 export const RAIZ = '.'
@@ -52,8 +52,8 @@ function carpetaDe(ruta: string, profundidad: number): string {
  * recorrido con la heuristica de nombres sensibles (Enmienda 1), y eso es otra
  * pieza.
  */
-export function dividirEnParadas(ficheros: readonly string[]): Manifiesto {
-  if (ficheros.length === 0) return MANIFIESTO_VACIO
+export function dividirEnParadas(ficheros: readonly string[]): Reparto {
+  if (ficheros.length === 0) return REPARTO_VACIO
 
   const profundidad = profundidadDe(ficheros)
   const porCarpeta = new Map<string, string[]>()

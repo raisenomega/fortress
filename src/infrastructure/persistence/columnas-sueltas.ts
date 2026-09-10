@@ -34,6 +34,10 @@ export const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   ['scans', 'ficheros_total', 'ALTER TABLE scans ADD COLUMN ficheros_total INTEGER'],
   ['scans', 'ficheros_cubiertos', 'ALTER TABLE scans ADD COLUMN ficheros_cubiertos INTEGER'], // prettier-ignore
   ['scans', 'motivo_cierre', 'ALTER TABLE scans ADD COLUMN motivo_cierre TEXT'],
+  // La declaracion del operador sobre los modulos de la campana (ADR-083). TEXT
+  // con el JSON de {M8?:bool, M3?:bool} y NULL por defecto, que es el lado
+  // honesto: sin declarar no es «no aplica», es «no consta».
+  ['projects', 'modulos_declarados', 'ALTER TABLE projects ADD COLUMN modulos_declarados TEXT'], // prettier-ignore
   // Nullables: sin marca no hay nada que contar, y `resolved_at` no sirve para
   // esto — ahi vive la extincion, que afirma otra cosa.
   ['findings', 'mitigated_at', 'ALTER TABLE findings ADD COLUMN mitigated_at TEXT'], // prettier-ignore

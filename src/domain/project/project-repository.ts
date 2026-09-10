@@ -1,3 +1,4 @@
+import type { DeclaracionDeModulos } from '../scan/declaracion-de-modulos'
 import type { DimensionScores } from '../score/dimension'
 import type { ConfigState } from './config-state'
 import type { NewProject, Project } from './project'
@@ -27,4 +28,6 @@ export interface ProjectRepository {
   markContaminated(id: string, detail: string): void
   /** Inverso de markContaminated: el operador reviso el forense y desbloqueo el proyecto. */
   markClean(id: string): void
+  /** Lo que el operador declara sobre los modulos que no se detectan por fichero (ADR-083). */
+  setModulosDeclarados(id: string, declaracion: DeclaracionDeModulos): void
 }

@@ -28,6 +28,7 @@ const project = (overrides: Partial<Project> = {}): Project => ({
   contaminated: false,
   contaminationDetail: null,
   configState: 'CONFIGURADO',
+  modulosDeclarados: {},
   createdAt: SCANNED,
   ...overrides
 })

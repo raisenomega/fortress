@@ -5,6 +5,8 @@ import { removeProject } from '@application/project/remove-project'
 import { setProjectLoopEnabled } from '@application/project/set-project-loop-enabled'
 import { desbloquearContaminacion } from '@application/project/desbloquear-contaminacion'
 import { setProjectTrusted } from '@application/project/set-project-trusted'
+import { declararModulos } from '@application/project/declarar-modulos'
+import { aDeclaracion } from '@domain/scan/declaracion-de-modulos'
 import { startLoop, stopLoop } from '../loop/loop-controller'
 import { exportProjectRecord } from '../project/export-record'
 import type { NewProject } from '@domain/project/project'
@@ -31,6 +33,14 @@ export function registerProjectHandlers(): void {
   // Revocar detiene el loop en curso (stopLoop): quitar la confianza es parar.
   ipcMain.handle(IPC.projectsSetTrusted, (_event, id: string, trusted: boolean) =>
     setProjectTrusted(getAppContext(), String(id), trusted === true, stopLoop)
+  )
+
+  // Lo que llega del renderer pasa por `aDeclaracion` antes de tocar nada, por
+  // lo mismo que `trusted` se coacciona a booleano estricto: fuera del
+  // vocabulario de modulos no se guarda nada, y una clave rara no borra las
+  // buenas que viajan con ella.
+  ipcMain.handle(IPC.projectsDeclararModulos, (_event, id: string, declaracion: unknown) =>
+    declararModulos(getAppContext(), String(id), aDeclaracion(declaracion))
   )
 
   ipcMain.handle(IPC.projectsSetLoopEnabled, (_event, id: string, enabled: boolean) => {

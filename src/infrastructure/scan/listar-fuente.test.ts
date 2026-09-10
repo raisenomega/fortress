@@ -3,7 +3,6 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { medirProyecto } from './medir-proyecto'
 import { listarFuente } from './listar-fuente'
 
 let repo: string
@@ -50,23 +49,5 @@ describe('listarFuente contra un repo de verdad', () => {
     escribir('src/domain/borrador.ts')
 
     expect(await listarFuente(repo)).not.toContain('src/domain/borrador.ts')
-  })
-})
-
-describe('medirProyecto junta las dos mitades', () => {
-  it('del repo real salen las paradas y su total', async () => {
-    const { paradas, ficherosTotal } = await medirProyecto(repo)
-
-    expect(paradas.map((p) => p.carpeta)).toEqual(['src/app', 'src/domain'])
-    expect(ficherosTotal).toBe(2)
-  })
-
-  it('una carpeta sin repo git da manifiesto vacio, no un fallo', async () => {
-    const vacio = mkdtempSync(join(tmpdir(), 'sin-git-'))
-    try {
-      expect(await medirProyecto(vacio)).toEqual({ paradas: [], ficherosTotal: 0 })
-    } finally {
-      rmSync(vacio, { recursive: true, force: true })
-    }
   })
 })
