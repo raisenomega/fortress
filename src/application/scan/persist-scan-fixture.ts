@@ -4,7 +4,13 @@ import type { AppContext } from '../context'
 export interface Guardado {
   score?: number
   extinct?: readonly string[]
-  fila?: { findingCount: number; dossierCount: number }
+  /** Lo que el CIERRE fijo en la fila: antes lo ponia `record` al crearla. */
+  fila?: { findingCount: number; dossierCount: number; estado: string; motivoCierre: string }
+  /** Cuantas veces se abrio, se cerro y se escribio la memoria: una cada una. */
+  abiertos?: number
+  cierres?: number
+  escrituras?: number
+  timeline?: number
 }
 
 /** Expediente minimo: dos ausentes, uno con su archivo intacto y otro tocado. */
@@ -27,10 +33,21 @@ export function fixture(saved: Guardado): AppContext {
       markExtinct: (ids: readonly string[]): void => void (saved.extinct = ids)
     },
     transaction: (fn: () => void): void => fn(),
-    scans: { record: (fila: Guardado['fila']) => ((saved.fila = fila), { id: 's1' }) },
+    scans: {
+      abrir: () => ((saved.abiertos = (saved.abiertos ?? 0) + 1), { id: 's1' }),
+      cerrar: (_id: string, fila: Guardado['fila']) => (
+        (saved.fila = fila),
+        (saved.cierres = (saved.cierres ?? 0) + 1),
+        true
+      )
+    },
     projects: { updateScan: (_id: string, score: number): void => void (saved.score = score) },
     runs: { record: (): void => undefined },
-    activity: { recordMany: (): void => undefined },
-    cognitionWriter: { writeScan: (): void => undefined }
+    activity: {
+      recordMany: (filas: readonly unknown[]): void => void (saved.timeline = filas.length)
+    },
+    cognitionWriter: {
+      writeScan: (): void => void (saved.escrituras = (saved.escrituras ?? 0) + 1)
+    }
   } as unknown as AppContext
 }

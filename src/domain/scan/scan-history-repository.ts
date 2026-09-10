@@ -1,4 +1,5 @@
 import type { EstadoFinal } from './estado-scan'
+import type { MotivoCierre } from './motivo-cierre'
 import type { NewScanRecord, ScanRecord } from './scan-record'
 
 /**
@@ -9,12 +10,18 @@ import type { NewScanRecord, ScanRecord } from './scan-record'
  */
 export const SCORE_PROVISIONAL = 0
 
-/** Lo que se sabe al ABRIR: cuando empieza y cuanto hay que mirar. */
+/**
+ * Lo que se sabe al ABRIR: cuando empieza y cuanto hay que mirar.
+ *
+ * `ficherosTotal` admite null porque medir el proyecto es el manifiesto, y hasta
+ * que exista un escaneo abre sin saber cuantos ficheros tiene delante. Null es
+ * "no se midio"; cero afirmaria que no hay ninguno.
+ */
 export interface AperturaDeScan {
   readonly projectId: string
   readonly startedAt: string
   readonly paradasTotal: number
-  readonly ficherosTotal: number
+  readonly ficherosTotal: number | null
 }
 
 /** Lo que se sabe al CERRAR: el score deja de ser provisional. */
@@ -26,8 +33,9 @@ export interface CierreDeScan {
   readonly criticalCount: number
   readonly durationMs: number
   readonly paradasHechas: number
-  readonly ficherosCubiertos: number
-  readonly motivoCierre: string
+  /** Null por lo mismo que `ficherosTotal`: sin manifiesto no hay cobertura. */
+  readonly ficherosCubiertos: number | null
+  readonly motivoCierre: MotivoCierre
   readonly at: string
 }
 
