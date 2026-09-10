@@ -17,6 +17,9 @@ export interface ScanApi {
   /** Conteos de todos los proyectos a la vez, para las tarjetas. */
   counts(): Promise<Readonly<Record<string, SeverityCounts>>>
   onProgress(listener: (chunk: ScanChunk) => void): Unsubscribe
+  /** Detener: la parada en curso termina, la siguiente no arranca. Devuelve
+   *  cuantos procesos hijos se cortaron. */
+  stop(projectId: string): Promise<number>
   /** Escaneos anteriores, del mas reciente al mas antiguo. */
   history(projectId: string, limit: number): Promise<readonly ScanRecord[]>
   /** Escaneos de todos los proyectos desde una fecha, para la tendencia. */

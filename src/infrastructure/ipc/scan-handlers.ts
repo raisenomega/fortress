@@ -1,29 +1,18 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { runScan } from '@application/scan/run-scan'
 import type { ScanSummary } from '@application/scan/scan-types'
-import type { ScanChunk } from '@domain/scan/scan-chunk'
 import { err, type Result } from '@domain/shared/result'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import { getAppContext } from '../persistence/app-context'
 import { guardRun } from '../run-guard'
-import { endRun } from '../run-control'
+import { cancelRun, endRun, isCancelled } from '../run-control'
 import { createClaudeScanner } from '../scan/claude-scanner'
-import { sinSecretosEnVivo } from '@application/chat/en-vivo-tachado'
+import { medirProyecto } from '../scan/medir-proyecto'
 import { IPC } from './channels'
+import { progresoDeEscaneo } from './scan-progress'
 import { registerFindingDecisionHandlers } from './finding-decision-handlers'
-
-/** Emite progreso solo si la ventana sigue viva: un scan dura minutos. Y
- *  tachado: es salida de un agente leyendo el repo auditado, igual que el chat,
- *  y este canal tiene su propio emisor —por eso no le llegaba el del chat—. */
-function progressSender(event: IpcMainInvokeEvent, projectId: string): (d: string) => void {
-  return sinSecretosEnVivo((delta: string): void => {
-    if (event.sender.isDestroyed()) return
-    const chunk: ScanChunk = { projectId, delta }
-    event.sender.send(IPC.scanProgress, chunk)
-  })
-}
 
 async function handleRun(
   event: IpcMainInvokeEvent,
@@ -40,7 +29,13 @@ async function handleRun(
     const scanner = createClaudeScanner(
       createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
     )
-    return await runScan(context, scanner, projectId, progressSender(event, projectId))
+    // El carril se toma UNA vez para todo el recorrido, no por parada: las XX
+    // paradas son un solo trabajo, y trocear el turno dejaria colar otro
+    // escaneo entre dos de ellas.
+    return await runScan(context, scanner, projectId, progresoDeEscaneo(event, projectId), {
+      cancelado: () => isCancelled(projectId),
+      medir: medirProyecto
+    })
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
   } finally {
@@ -64,6 +59,10 @@ export function registerScanHandlers(): void {
   ipcMain.handle(IPC.scanHistorySince, (_event, since: string) =>
     getAppContext().scans.listSince(since)
   )
+
+  // Detener: marca la cancelacion y mata al hijo en curso. El recorrido la lee
+  // en la frontera de la SIGUIENTE parada, asi que la que corre termina.
+  ipcMain.handle(IPC.scanStop, (_event, projectId: string) => cancelRun(String(projectId)))
 
   registerFindingDecisionHandlers()
 }

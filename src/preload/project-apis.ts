@@ -25,6 +25,7 @@ export const projectApis: Pick<
     findings: (projectId) => ipcRenderer.invoke(IPC.scanFindings, projectId),
     counts: () => ipcRenderer.invoke(IPC.scanCounts),
     onProgress: (listener) => subscribe(IPC.scanProgress, listener),
+    stop: (projectId) => ipcRenderer.invoke(IPC.scanStop, projectId),
     history: (projectId, limit) => ipcRenderer.invoke(IPC.scanHistory, projectId, limit),
     historySince: (iso) => ipcRenderer.invoke(IPC.scanHistorySince, iso),
     dismiss: (findingId) => ipcRenderer.invoke(IPC.scanDismiss, findingId),
