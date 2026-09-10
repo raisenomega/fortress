@@ -11,15 +11,24 @@ export const TELEMETRY_SCHEMA = `
 CREATE TABLE IF NOT EXISTS agent_runs (${AGENT_RUNS_COLUMNS});
 ${AGENT_RUNS_INDEXES}
 
+-- El recorrido por paradas (ADR-082) vive aqui para las bases nuevas y en
+-- columnas-sueltas para las que ya existen. Las dos listas dicen lo mismo.
 CREATE TABLE IF NOT EXISTS scans (
-  id             TEXT PRIMARY KEY,
-  project_id     TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  score          INTEGER NOT NULL,
-  finding_count  INTEGER NOT NULL DEFAULT 0,
-  dossier_count  INTEGER NOT NULL DEFAULT 0,
-  critical_count INTEGER NOT NULL DEFAULT 0,
-  duration_ms    INTEGER NOT NULL DEFAULT 0,
-  at             TEXT NOT NULL
+  id                 TEXT PRIMARY KEY,
+  project_id         TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  score              INTEGER NOT NULL,
+  finding_count      INTEGER NOT NULL DEFAULT 0,
+  dossier_count      INTEGER NOT NULL DEFAULT 0,
+  critical_count     INTEGER NOT NULL DEFAULT 0,
+  duration_ms        INTEGER NOT NULL DEFAULT 0,
+  at                 TEXT NOT NULL,
+  estado             TEXT NOT NULL DEFAULT 'CERRADO',
+  started_at         TEXT,
+  paradas_total      INTEGER,
+  paradas_hechas     INTEGER,
+  ficheros_total     INTEGER,
+  ficheros_cubiertos INTEGER,
+  motivo_cierre      TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_scans_project ON scans (project_id, at);

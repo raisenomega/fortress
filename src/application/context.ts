@@ -16,7 +16,7 @@ import type { RepairProposalRepository } from '@domain/repair/proposal-repositor
 import type { GraphStateRepository } from '@domain/graph/graph-state'
 import type { ProposalEventLog } from './repair/proposal-event-log'
 import type { QualityHistoryRepository } from '@domain/score/quality-record'
-import type { ScanHistoryRepository } from '@domain/scan/scan-record'
+import type { ScanHistoryRepository } from '@domain/scan/scan-history-repository'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
 import type { SettingsRepository } from '@domain/settings/settings-repository'
 import type { CognitionWriter } from '@domain/cognition/cognition-writer'
