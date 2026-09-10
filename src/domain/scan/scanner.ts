@@ -9,6 +9,16 @@ export interface ScanRequest {
   /** De quien es el proceso que se va a lanzar, para que una parada de OTRO
    *  proyecto no se lo lleve por delante. */
   readonly projectId: string
+  /**
+   * A que carpetas se acota ESTA pasada. Ausente = el proyecto entero, que es
+   * como escaneaba antes de las paradas (ADR-082).
+   *
+   * Es una frontera BLANDA: se le pide al agente en el prompt, igual que se le
+   * pide ignorar `node_modules`, y no hay flag del CLI que la imponga. El `cwd`
+   * sigue en la raiz —el grafo, el corpus y la identidad de los hallazgos
+   * dependen de ella—. Quien la verifica despues es el manifiesto.
+   */
+  readonly rutas?: readonly string[]
 }
 
 export interface ScanOutcome {

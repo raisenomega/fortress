@@ -25,7 +25,7 @@ export function createClaudeScanner(codeAgent: CodeAgent): Scanner {
         {
           projectPath: request.projectPath,
           projectId: request.projectId,
-          prompt: buildScanPrompt(request.projectName, discoverCorpus(request.projectPath)),
+          prompt: buildScanPrompt(request.projectName, discoverCorpus(request.projectPath), request.rutas), // prettier-ignore
           permissionMode: 'plan',
           // La FASE 1 es cosa del Security Reviewer, siempre el mismo agente.
           agentId: 'security-reviewer',

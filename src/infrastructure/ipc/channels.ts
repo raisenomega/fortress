@@ -37,6 +37,7 @@ export const IPC = {
   scanUnmitigate: 'scan:unmitigate',
   scanReopen: 'scan:reopen',
   scanProgress: 'scan:progress',
+  scanStop: 'scan:stop',
   qualityRun: 'quality:run',
   pushRun: 'push:run',
   postureRun: 'posture:run',

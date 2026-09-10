@@ -5,9 +5,10 @@ import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import { err, ok, type Result } from '@domain/shared/result'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
-import { endRun } from '../run-control'
+import { endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { createClaudeScanner } from '../scan/claude-scanner'
+import { medirProyecto } from '../scan/medir-proyecto'
 
 /** Escanea y devuelve el score, o err (que el standby clasifica). Siempre plan. */
 export async function loopScan(
@@ -25,7 +26,13 @@ export async function loopScan(
     const scanner = createClaudeScanner(
       createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context))
     )
-    const summary = await runScan(context, scanner, projectId, onProgress)
+    // El bucle autonomo pinta texto y ya tomo su carril: el metadato de parada
+    // no tiene donde ir y la cancelacion es la suya, la del loop.
+    const progreso = { texto: onProgress, parada: () => undefined }
+    const summary = await runScan(context, scanner, projectId, progreso, {
+      cancelado: () => isCancelled(projectId),
+      medir: medirProyecto
+    })
     if (!summary.ok) return err(summary.error)
     const c = summary.value.counts
     const resultado = `Escaneo: ${summary.value.score}/100 — ${c.CRITICAL} CRITICAL, ${c.HIGH} HIGH, ${c.MEDIUM} MEDIUM, ${c.LOW} LOW`

@@ -25,7 +25,9 @@ export async function runScan(projectId: string): Promise<void> {
 
   store.startScan(projectId)
   const unsubscribe = api().scan.onProgress((chunk) => {
-    if (chunk.projectId === projectId) useScanStore.getState().appendProgress(chunk.delta)
+    if (chunk.projectId !== projectId) return
+    useScanStore.getState().appendProgress(chunk.delta)
+    if (chunk.parada) useScanStore.getState().setParada(chunk.parada)
   })
 
   try {
