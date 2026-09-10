@@ -1,17 +1,10 @@
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import { GRAPH_FIRST_SECURITY } from '../settings/graph-first'
-import { bloqueDePlantillas } from './bloque-de-plantillas'
+import { bloqueDePlantillas, type PlantillasDeParada } from './bloque-de-plantillas'
 import { alcance, COMPLETO } from './cabecera-de-alcance'
-import type { PlantillaDeModulo } from './resumen-de-modulo'
 import { REPORT_CONTRACT } from './report-contract'
 import { SCAN_RULES, SECURITY_CHECKLIST } from './scan-checklist'
-
-/** Las plantillas que esta parada activa, ya leidas de disco (ADR-083, Fase 2). */
-export interface PlantillasDeParada {
-  readonly carpeta: string
-  readonly plantillas: readonly PlantillaDeModulo[]
-}
 
 /**
  * Peticion completa que recibe el agente al escanear un proyecto o una parada.
@@ -31,8 +24,7 @@ export function buildScanPrompt(
     rutas === undefined || rutas.length === 0 ? COMPLETO(projectName) : alcance(projectName, rutas)
   // Entre la checklist y las reglas: la de siempre manda y va primero (el ADR
   // fija que las plantillas refuerzan), y las reglas cierran sobre las dos.
-  const bloque =
-    temas === undefined ? '' : bloqueDePlantillas(temas.plantillas, temas.carpeta, projectName)
+  const bloque = temas === undefined ? '' : bloqueDePlantillas(temas, projectName)
 
   return [
     ...cabecera,

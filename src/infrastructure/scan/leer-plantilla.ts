@@ -28,8 +28,12 @@ const prefijoDe = (modulo: ModuloAuditoria): string => `PLANTILLA_MODULO_${modul
  * `import-attended`, que dice lo mismo del registro de atendidos.
  */
 export function leerPlantilla(modulo: ModuloAuditoria): string | null {
-  const carpeta = join(app.getPath('userData'), CARPETA)
   try {
+    // `app.getPath` DENTRO del try, no fuera: es la primera linea que puede
+    // fallar —lo hace en cuanto se llama sin un Electron vivo— y dejarla fuera
+    // convertia la ausencia en una excepcion, que es justo lo contrario de lo
+    // que este modulo promete.
+    const carpeta = join(app.getPath('userData'), CARPETA)
     const fichero = readdirSync(carpeta).find((n) => n.startsWith(prefijoDe(modulo)))
     return fichero === undefined ? null : readFileSync(join(carpeta, fichero), 'utf8')
   } catch {

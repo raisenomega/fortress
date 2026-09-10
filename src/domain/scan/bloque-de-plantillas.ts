@@ -1,4 +1,7 @@
-import { resumenDeModulo, type PlantillaDeModulo } from './resumen-de-modulo'
+import { SIN_GUIA } from './plantilla-ausente'
+import { repartirPlantillas, type PlantillasDeParada } from './reparto-de-plantillas'
+
+export type { PlantillasDeParada }
 
 /**
  * Lo que la campana ANADE a esta parada, encima de la checklist de siempre. El
@@ -13,26 +16,23 @@ const CABECERA = [
 ].join('\n')
 
 /**
- * El bloque de plantillas de una parada, o cadena VACIA si no hay ninguno.
+ * El bloque de plantillas de una parada, o cadena VACIA si no aplica ninguno.
  *
- * Cadena vacia y no un aviso, molde `buildDocsFirst`: quien la recibe no
- * escribe el bloque, y asi un proyecto sin plantillas sembradas compone el
- * mismo prompt que componia ayer. Callar es honesto; lo que no seria honesto es
- * anunciar profundidad tematica y no traer ninguna.
+ * Vacia SOLO cuando no hay nada que decir. Un modulo que no aplica no se
+ * nombra —seria ruido sobre lo que no toca— pero uno que aplica y no trae
+ * plantilla se confiesa: seguir en silencio dejaria un escaneo sin profundidad
+ * indistinguible de uno con ella, y el operador creeria que la tiene.
  *
- * Las plantillas que no encajan con el contrato se caen una a una: que M8 este
- * corrupta no puede llevarse por delante el bloque de M9, que si esta bien.
+ * Las plantillas rotas se caen UNA A UNA: que M8 no encaje no puede llevarse
+ * por delante el bloque de M9, que esta bien.
  */
-export function bloqueDePlantillas(
-  plantillas: readonly PlantillaDeModulo[],
-  carpeta: string,
-  projectName: string
-): string {
-  const resumenes = plantillas
-    .map((plantilla) => resumenDeModulo(plantilla, carpeta, projectName))
-    .filter((resumen): resumen is string => resumen !== null)
+export function bloqueDePlantillas(temas: PlantillasDeParada, projectName: string): string {
+  const { resumenes, avisos } = repartirPlantillas(temas, projectName)
+  if (resumenes.length === 0 && avisos.length === 0) return ''
 
-  if (resumenes.length === 0) return ''
+  const guia = resumenes.length === 0 ? [] : [CABECERA, '', ...resumenes]
+  const falta = avisos.length === 0 ? [] : [SIN_GUIA, ...avisos]
+  const separador = guia.length > 0 && falta.length > 0 ? [''] : []
 
-  return [CABECERA, '', ...resumenes].join('\n')
+  return [...guia, ...separador, ...falta].join('\n')
 }

@@ -28,6 +28,6 @@ export function promptDeParada(request: ScanRequest): string {
 
   // Sin ruta, la parada es el proyecto entero: la raiz es su carpeta.
   const carpeta = request.rutas?.[0] ?? RAIZ
-  const temas = { carpeta, plantillas: sembradas(modulos) }
+  const temas = { carpeta, modulos, plantillas: sembradas(modulos) }
   return buildScanPrompt(request.projectName, corpus, request.rutas, temas)
 }

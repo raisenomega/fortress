@@ -38,7 +38,10 @@ describe('ningun hueco sobrevive al prompt', () => {
   })
 
   it('el bloque entero tampoco: es lo que de verdad llega al agente', () => {
-    const bloque = bloqueDePlantillas([delKit('M3'), delKit('M8')], 'src/api', 'Proyecto')
+    const bloque = bloqueDePlantillas(
+      { carpeta: 'src/api', modulos: ['M3', 'M8'], plantillas: [delKit('M3'), delKit('M8')] },
+      'Proyecto'
+    )
 
     expect(bloque.match(/\{\{[A-Z_]+\}\}/g)).toBeNull()
   })

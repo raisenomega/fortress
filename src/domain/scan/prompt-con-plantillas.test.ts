@@ -8,28 +8,22 @@ const SIN_CORPUS = { docs: [], directories: [] }
 const prompt = (temas?: Parameters<typeof buildScanPrompt>[3]): string =>
   buildScanPrompt('Proyecto', SIN_CORPUS, ['src/api'], temas)
 
-describe('sin plantillas sembradas el escaneo corre igual', () => {
-  it('sin modulos, el prompt es EXACTAMENTE el de siempre', () => {
-    expect(prompt()).toBe(prompt(undefined))
-    expect(prompt()).toContain(SECURITY_CHECKLIST)
-  })
+describe('sin modulos que apliquen, el prompt es el de siempre', () => {
+  it('nada que decir: ni bloque ni aviso', () => {
+    const pelado = prompt({ carpeta: 'src/api', modulos: [], plantillas: [] })
 
-  it('con modulos pero SIN plantillas en disco: bloque vacio, no revienta', () => {
-    // El lector devolvio null para las tres, asi que no llega ninguna.
-    const conModulos = prompt({ carpeta: 'src/api', plantillas: [] })
-
-    expect(conModulos).toBe(prompt())
-    expect(conModulos).toContain(SECURITY_CHECKLIST)
-    expect(conModulos).not.toContain('modulos de la campana')
+    expect(pelado).toBe(prompt())
+    expect(pelado).toContain(SECURITY_CHECKLIST)
+    expect(pelado).not.toContain('modulos de la campana')
   })
 })
 
 describe('solo viaja lo que aplica a ESTA parada', () => {
-  it('con M9 aplicable y M8 no, el prompt lleva M9 y no M8', () => {
-    const soloM9 = prompt({ carpeta: 'src/ui', plantillas: [delKit('M9')] })
+  it('con M9 aplicable y M8 no, el prompt lleva M9 y no menciona M8', () => {
+    const soloM9 = prompt({ carpeta: 'src/ui', modulos: ['M9'], plantillas: [delKit('M9')] })
 
     expect(soloM9).toContain('M9 Accesibilidad')
-    expect(soloM9).not.toContain('M8 Integridad de negocio')
+    expect(soloM9).not.toContain('M8')
   })
 
   it('los modulos de TEMA no bajan a la parada: son otra fase', () => {
@@ -39,14 +33,14 @@ describe('solo viaja lo que aplica a ESTA parada', () => {
 })
 
 describe('el orden del prompt', () => {
-  it('el bloque va DESPUES de la checklist y ANTES de las reglas', () => {
-    const con = prompt({ carpeta: 'src/api', plantillas: [delKit('M8')] })
+  const con = prompt({ carpeta: 'src/api', modulos: ['M8'], plantillas: [delKit('M8')] })
 
+  it('el bloque va DESPUES de la checklist y ANTES de las reglas', () => {
     expect(con.indexOf(SECURITY_CHECKLIST)).toBeLessThan(con.indexOf('M8 Integridad'))
     expect(con.indexOf('M8 Integridad')).toBeLessThan(con.indexOf('Reglas:'))
   })
 
   it('la checklist de siempre llega intacta, no la sustituye', () => {
-    expect(prompt({ carpeta: 'src/api', plantillas: [delKit('M8')] })).toContain(SECURITY_CHECKLIST)
+    expect(con).toContain(SECURITY_CHECKLIST)
   })
 })
