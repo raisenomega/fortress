@@ -1,9 +1,9 @@
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
+import { esFuente } from '@domain/scan/fuente'
 import { runCommand } from './run-command'
 
-const SOURCE = /\.(ts|tsx|js|jsx|py|go|rs|java|rb)$/
 const LIMIT = 400
 
 function lineCount(projectPath: string, file: string): number {
@@ -27,7 +27,7 @@ async function todoDebt(projectPath: string): Promise<number> {
 export async function maintainabilityProbe(projectPath: string): Promise<DetectedFinding[]> {
   const out: DetectedFinding[] = []
   const listed = await runCommand('git', ['ls-files'], projectPath)
-  const files = listed.out.split('\n').filter((f) => SOURCE.test(f))
+  const files = listed.out.split('\n').filter(esFuente)
   const large = files.filter((file) => lineCount(projectPath, file) > LIMIT)
   for (const file of large.slice(0, 6)) {
     out.push({ severity: 'LOW', title: `Archivo largo (>${LIMIT} lineas)`, file, line: null })
