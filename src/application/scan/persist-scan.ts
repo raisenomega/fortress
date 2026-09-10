@@ -1,4 +1,6 @@
 import type { Project } from '@domain/project/project'
+import type { ScanLogWriter } from '@domain/scan/scan-log'
+import { SIN_LOG } from '@domain/scan/scan-log'
 import type { ScanOutcome } from '@domain/scan/scanner'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
@@ -22,7 +24,8 @@ import type { ScanSummary } from './scan-types'
 export async function persistScan(
   context: AppContext,
   project: Project,
-  outcome: ScanOutcome
+  outcome: ScanOutcome,
+  scanLog: ScanLogWriter = SIN_LOG
 ): Promise<ScanSummary> {
   const { findings, durationMs, usage, tools, edits } = outcome
   const at = nowIso()
@@ -37,6 +40,8 @@ export async function persistScan(
   })
 
   await asentarHallazgos(context, project, abierto.id, findings, at)
+  // La transcripcion queda tambien en el camino de una pieza.
+  scanLog.write(abierto.id, outcome.texto)
 
   return cerrarEscaneo(context, project, {
     scanId: abierto.id,

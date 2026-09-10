@@ -3,8 +3,9 @@ import type { Scanner } from '@domain/scan/scanner'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { persistScan } from './persist-scan'
-import type { ProgresoDelRecorrido } from './progreso-del-recorrido'
-import { recorrerParadas, type RecorridoDeps } from './recorrer-paradas'
+import type { SalidasDelRecorrido } from './progreso-del-recorrido'
+import { recorrerParadas } from './recorrer-paradas'
+import type { RecorridoDeps } from './recorrido-deps'
 import type { ScanSummary } from './scan-types'
 
 const NO_SCANNER =
@@ -37,7 +38,7 @@ export async function runScan(
   context: AppContext,
   scanner: Scanner,
   projectId: string,
-  progreso: ProgresoDelRecorrido,
+  salidas: SalidasDelRecorrido,
   deps: ScanDeps
 ): Promise<Result<ScanSummary>> {
   const project = context.projects.findById(projectId)
@@ -51,14 +52,14 @@ export async function runScan(
 
   const manifiesto = await deps.medir(project.path)
   if (manifiesto.paradas.length > 1) {
-    return recorrerParadas(context, scanner, project, manifiesto, progreso, deps)
+    return recorrerParadas(context, scanner, project, manifiesto, salidas, deps)
   }
 
   const outcome = await scanner.scan(
     { projectPath: project.path, projectName: project.name, projectId: project.id },
-    progreso.texto
+    salidas.progreso.texto
   )
   if (!outcome.ok) return err(outcome.error)
 
-  return ok(await persistScan(context, project, outcome.value))
+  return ok(await persistScan(context, project, outcome.value, salidas.scanLog))
 }

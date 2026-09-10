@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { recorrerParadas } from '@application/scan/recorrer-paradas'
-import { SIN_PROGRESO } from '@application/scan/progreso-del-recorrido'
+import { SIN_SALIDAS } from '@application/scan/progreso-del-recorrido'
 import { crearBench, PROJECT, PROYECTO, type Bench } from './cierre-partido-fixture'
 import { CUATRO, scannerFalso, type ScannerFalso } from './recorrido-fixture'
 
@@ -15,7 +15,7 @@ beforeEach(() => {
 })
 
 const recorrer = (): ReturnType<typeof recorrerParadas> =>
-  recorrerParadas(bench.context, scanner, PROJECT, CUATRO, SIN_PROGRESO, SIEMPRE_SIGUE)
+  recorrerParadas(bench.context, scanner, PROJECT, CUATRO, SIN_SALIDAS, SIEMPRE_SIGUE)
 
 const fila = (): ReturnType<Bench['context']['scans']['listByProject']>[number] =>
   bench.context.scans.listByProject(PROYECTO, 10)[0]

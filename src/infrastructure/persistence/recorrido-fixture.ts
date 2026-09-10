@@ -51,7 +51,8 @@ export function scannerFalso(alEmpezar: (carpeta: string) => void = () => undefi
         durationMs: 1234,
         usage: SIN_FACTURA,
         tools: [],
-        edits: []
+        edits: [],
+        texto: `informe de ${carpeta}`
       })
     }
   }

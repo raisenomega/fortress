@@ -43,7 +43,10 @@ export function escribirFilasDelCierre(
     if (!cerrada) return
 
     context.projects.updateScan(project.id, score, datos.at)
-    context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs: datos.durationMs, failed: false, usage: datos.usage, tools: datos.tools }) // prettier-ignore
+    // `failed` sale del MOTIVO y ya no va escrito a mano: un recorrido que el
+    // operador paro, o que reventó, no es una corrida que salio bien. Contarlo
+    // como exito era la otra mitad de la mentira que dejaba el dia en 0 fallos.
+    context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs: datos.durationMs, failed: datos.motivo !== 'completo', usage: datos.usage, tools: datos.tools }) // prettier-ignore
     context.activity.recordMany(scanActivity(project.id, SCANNER_AGENT, datos.reportados, counts, datos.edits)) // prettier-ignore
   })
 }

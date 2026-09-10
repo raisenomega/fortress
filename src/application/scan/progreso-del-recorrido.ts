@@ -1,3 +1,5 @@
+import type { ScanLogWriter } from '@domain/scan/scan-log'
+import { SIN_LOG } from '@domain/scan/scan-log'
 import type { ParadaEnCurso } from '@domain/scan/scan-chunk'
 
 /**
@@ -22,3 +24,15 @@ export const SIN_PROGRESO: ProgresoDelRecorrido = {
   texto: () => undefined,
   parada: () => undefined
 }
+
+/**
+ * Donde escribe el recorrido lo que NO es base de datos. Va aparte de los
+ * frenos a proposito: `RecorridoDeps` tiene que seguir gritando que lo unico
+ * que puede pararlo es cancelar, y una salida no para nada.
+ */
+export interface SalidasDelRecorrido {
+  readonly progreso: ProgresoDelRecorrido
+  readonly scanLog: ScanLogWriter
+}
+
+export const SIN_SALIDAS: SalidasDelRecorrido = { progreso: SIN_PROGRESO, scanLog: SIN_LOG }

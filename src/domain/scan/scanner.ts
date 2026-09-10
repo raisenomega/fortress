@@ -28,6 +28,12 @@ export interface ScanOutcome {
   readonly tools: readonly string[]
   /** Rutas escritas. Un escaneo en modo plan no deberia traer ninguna. */
   readonly edits: readonly string[]
+  /**
+   * La salida CRUDA del agente, entera. Viaja para poder quedar en disco: hasta
+   * ahora la unica copia iba al renderer para pintarse y moria con la ventana,
+   * y por eso de un escaneo perdido no quedaba ni el analisis.
+   */
+  readonly texto: string
 }
 
 /**

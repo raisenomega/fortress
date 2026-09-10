@@ -31,7 +31,7 @@ export function escanearParada(
   )
 }
 
-export type Cerrar = (motivo: MotivoCierre, acumulado: Acumulado) => ScanSummary
+export type Cerrar = (motivo: MotivoCierre, acumulado: Acumulado, extra?: string) => ScanSummary
 
 /**
  * El cierre del recorrido, con la fila ya elegida. La cobertura sale del
