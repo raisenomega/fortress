@@ -18,7 +18,8 @@ const REPARTO: Readonly<Record<string, string>> = {
   'e2e-runner': 'sonnet',
   'refactor-cleaner': 'haiku',
   'code-simplifier': 'haiku',
-  'opensource-sanitizer': 'haiku'
+  'opensource-sanitizer': 'haiku',
+  'scope-classifier': 'haiku'
 }
 
 const cuenta = (modelo: string): number =>
@@ -29,17 +30,17 @@ describe('cada agente declara con que modelo corre', () => {
     expect({ id, model: findAgent(id)?.model }).toEqual({ id, model: REPARTO[id] })
   })
 
-  it('los ONCE lo declaran: ninguno se queda heredando por descuido', () => {
+  it('los DOCE lo declaran: ninguno se queda heredando por descuido', () => {
     // Heredar es legitimo para un agente auto-propuesto; para los del catalogo
     // seria un olvido, y un olvido aqui se paga en dinero o en criterio.
-    expect(AGENT_CATALOG.filter((agent) => agent.model !== undefined)).toHaveLength(11)
+    expect(AGENT_CATALOG.filter((agent) => agent.model !== undefined)).toHaveLength(12)
   })
 
-  it('cuatro juzgan, cuatro ejecutan y tres barren', () => {
+  it('cuatro juzgan, cuatro ejecutan y cuatro barren', () => {
     expect({ opus: cuenta('opus'), sonnet: cuenta('sonnet'), haiku: cuenta('haiku') }).toEqual({
       opus: 4,
       sonnet: 4,
-      haiku: 3
+      haiku: 4
     })
   })
 

@@ -47,25 +47,27 @@ export const POR_PATRON: TablaDeSenales = [
   ['helm/', 'M2']
 ]
 
-/** Por PREFIJO de la dependencia: `@anthropic-ai/sdk` cuenta como `@anthropic-ai`. */
+/**
+ * Por PREFIJO de la dependencia: `@anthropic-ai/sdk` cuenta como `@anthropic-ai`.
+ *
+ * Las de M8 son senal de UN SOLO SENTIDO, y ahi esta el matiz que el ADR pide
+ * con razon: «"toca valor" no es una dependencia». Cierto al reves —un sistema
+ * de creditos internos mueve valor y no tiene pasarela— asi que la AUSENCIA de
+ * `stripe` no descarta nada. Su PRESENCIA, en cambio, no admite duda. Por eso
+ * M8 esta en `MODULOS_A_JUICIO`: sin la senal no cae a descartado, va al
+ * juicio. Que la ausencia no pruebe nada es una propiedad de la cascada, no de
+ * esta tabla.
+ */
 export const POR_DEPENDENCIA: TablaDeSenales = [
   ['openai', 'M5'],
   ['@anthropic-ai', 'M5'],
   ['langchain', 'M5'],
   ['@google/generative-ai', 'M5'],
-  ['ollama', 'M5']
+  ['ollama', 'M5'],
+  ['stripe', 'M8'],
+  ['@stripe', 'M8'],
+  ['braintree', 'M8'],
+  ['paypal', 'M8'],
+  ['mercadopago', 'M8'],
+  ['square', 'M8']
 ]
-
-const TODAS: TablaDeSenales = [
-  ...POR_EXTENSION,
-  ...POR_FICHERO_RAIZ,
-  ...POR_PATRON,
-  ...POR_DEPENDENCIA
-]
-
-/** Los modulos que ESTAS tablas saben decidir. Derivado, nunca escrito aparte. */
-export const MODULOS_CON_SENAL: readonly ModuloAuditoria[] = [...new Set(TODAS.map(([, m]) => m))]
-
-/** Las senales de un modulo, para que su descarte diga QUE se busco y no habia. */
-export const senalesDe = (modulo: ModuloAuditoria): readonly string[] =>
-  TODAS.filter(([, m]) => m === modulo).map(([senal]) => senal)

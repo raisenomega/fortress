@@ -2,16 +2,11 @@ import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { runScan } from '@application/scan/run-scan'
 import type { ScanSummary } from '@application/scan/scan-types'
 import { err, type Result } from '@domain/shared/result'
-import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
-import { usesApiKey } from '@application/settings/read-auth-source'
-import { readBudget } from '@application/settings/read-budget'
 import { getAppContext } from '../persistence/app-context'
 import { guardRun } from '../run-guard'
 import { cancelRun, endRun, isCancelled } from '../run-control'
-import { createClaudeScanner } from '../scan/claude-scanner'
-import { medirProyecto } from '../scan/medir-proyecto'
+import { armarEscaneo } from '../scan/armar-escaneo'
 import { scanLogWriter } from '../scan/write-scan-log'
-import { asentarIntentoFallido } from '@application/scan/asentar-intento-fallido'
 import { IPC } from './channels'
 import { progresoDeEscaneo } from './scan-progress'
 import { registerFindingDecisionHandlers } from './finding-decision-handlers'
@@ -27,18 +22,17 @@ async function handleRun(
   // Dentro del try: leer el presupuesto y armar el escaner puede fallar, y
   // fuera ese fallo dejaba el carril tomado hasta reiniciar.
   try {
-    const budget = readBudget(context)
-    // El callback ve el intento con su FACTURA antes de que el fallo se
-    // convierta en `err(string)` y deje de haber nada que asentar.
-    const scanner = createClaudeScanner(
-      createClaudeCodeAgent(context.apiKeys, budget, usesApiKey(context)),
-      (intento) => asentarIntentoFallido(context, intento)
-    )
+    // El escaner y el juez del alcance, del mismo agente y el mismo presupuesto.
+    // El juicio corre DENTRO del carril: `guardRun` ya paso y `endRun` espera en
+    // el finally, asi que su proceso no se escapa del candado.
+    const { scanner, medir } = armarEscaneo(context, projectId)
     // El carril se toma UNA vez para todo el recorrido: las XX paradas son un
     // solo trabajo, y trocearlo dejaria colar otro escaneo entre dos de ellas.
     const salidas = { progreso: progresoDeEscaneo(event, projectId), scanLog: scanLogWriter }
-    const deps = { cancelado: () => isCancelled(projectId), medir: medirProyecto }
-    return await runScan(context, scanner, projectId, salidas, deps)
+    return await runScan(context, scanner, projectId, salidas, {
+      cancelado: () => isCancelled(projectId),
+      medir
+    })
   } catch (error) {
     return err(error instanceof Error ? error.message : 'Fallo inesperado al escanear')
   } finally {

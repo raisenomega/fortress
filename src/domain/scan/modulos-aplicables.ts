@@ -1,8 +1,8 @@
-import { MODULOS_AUDITORIA, type ModuloAuditoria } from './modulo-auditoria'
+import { decidir, type Caja } from './cascada-de-modulos'
 import { SIN_DECLARACION, type DeclaracionDeModulos } from './declaracion-de-modulos'
+import { MODULOS_AUDITORIA, type ModuloAuditoria } from './modulo-auditoria'
 import { modulosDetectados, type EvidenciaDeModulos } from './modulos-detectados'
-import { razonDeclaradoNo, razonNoSeDecide, razonSinSenal } from './razon-de-modulo'
-import { MODULOS_CON_SENAL } from './senales-de-modulo'
+import { MODULOS_A_JUICIO, type VeredictoAplicabilidad } from './veredicto-de-aplicabilidad'
 
 /** Un modulo que NO entra, con la razon por la que no entra. Nunca sin ella. */
 export interface ModuloConRazon {
@@ -22,52 +22,52 @@ export interface VeredictoDeModulos {
   readonly sinConstancia: readonly ModuloConRazon[]
 }
 
-interface Cajas {
-  readonly aplicables: ModuloAuditoria[]
-  readonly descartados: ModuloConRazon[]
-  readonly sinConstancia: ModuloConRazon[]
-}
+type Cajas = Record<Caja, ModuloConRazon[]>
 
 /**
- * Un modulo cae en UNA caja, y siempre en alguna: no hay salida sin veredicto.
+ * Que modulos de la campana aplican a este proyecto (ADR-083). Puro: la
+ * evidencia la reune la infraestructura y el juicio lo trae YA RESUELTO quien
+ * pudo gastar un proceso. Aqui solo se decide, y por eso se prueba con objetos
+ * en memoria y sin lanzar nada.
  *
- * La declaracion se mira ANTES que la deteccion, en los dos sentidos. Si el
- * operador dice que no, no importa que haya un `.tsx`: el que sabe si esa UI
- * entra en el alcance es el, y una senal de fichero no puede desdecirle. Ese es
- * el orden de `readCorpusConfig`, que sustituye lo descubierto y no al reves.
- */
-function repartir(
-  cajas: Cajas,
-  modulo: ModuloAuditoria,
-  detectado: boolean,
-  declarado: boolean | undefined
-): void {
-  if (declarado === false) cajas.descartados.push({ modulo, razon: razonDeclaradoNo(modulo) })
-  else if (declarado === true || detectado) cajas.aplicables.push(modulo)
-  else if (MODULOS_CON_SENAL.includes(modulo))
-    cajas.descartados.push({ modulo, razon: razonSinSenal(modulo) })
-  else cajas.sinConstancia.push({ modulo, razon: razonNoSeDecide(modulo) })
-}
-
-/**
- * Que modulos de la campana aplican a este proyecto (ADR-083, Fase 1). Puro:
- * la evidencia la reune la infraestructura, aqui solo se decide.
- *
- * La declaracion del operador SUSTITUYE lo descubierto, en los dos sentidos
- * —tambien para decir que no—: es la doctrina de `readCorpusConfig`, quien
- * declara sabe mejor. Y no recorta: al contrario que `detectStack`, que se
- * queda con tres etiquetas, aqui salen los DOCE, cada uno en su caja y con su
- * razon. Un hueco seria un descuido, no una decision (decision 4).
+ * No recorta: al contrario que `detectStack`, que se queda con tres etiquetas,
+ * aqui salen los DOCE, cada uno en su caja y con su razon. Un hueco seria un
+ * descuido, no una decision (decision 4).
  */
 export function modulosAplicables(
   evidencia: EvidenciaDeModulos,
-  declaracion: DeclaracionDeModulos = SIN_DECLARACION
+  declaracion: DeclaracionDeModulos = SIN_DECLARACION,
+  veredictos: readonly VeredictoAplicabilidad[] = []
 ): VeredictoDeModulos {
   const detectados = modulosDetectados(evidencia)
   const cajas: Cajas = { aplicables: [], descartados: [], sinConstancia: [] }
 
   for (const modulo of MODULOS_AUDITORIA) {
-    repartir(cajas, modulo, detectados.has(modulo), declaracion[modulo])
+    const { caja, razon } = decidir({
+      modulo,
+      declarado: declaracion[modulo],
+      detectado: detectados.has(modulo),
+      veredicto: veredictos.find((v) => v.modulo === modulo)
+    })
+    cajas[caja].push({ modulo, razon })
   }
-  return cajas
+
+  return {
+    aplicables: cajas.aplicables.map((m) => m.modulo),
+    descartados: cajas.descartados,
+    sinConstancia: cajas.sinConstancia
+  }
+}
+
+/**
+ * Los que quedan sin resolver GRATIS y justifican el spawn. Se calcula con la
+ * misma cascada que decide —no con una copia de sus reglas— para que ahorrar
+ * un juicio y concederlo no puedan discrepar nunca.
+ */
+export function pendientesDeJuicio(
+  evidencia: EvidenciaDeModulos,
+  declaracion: DeclaracionDeModulos = SIN_DECLARACION
+): readonly ModuloAuditoria[] {
+  const { sinConstancia } = modulosAplicables(evidencia, declaracion)
+  return sinConstancia.map((m) => m.modulo).filter((m) => MODULOS_A_JUICIO.includes(m))
 }

@@ -33,5 +33,16 @@ export const OPTIONAL_AGENTS: readonly Agent[] = [
     purpose: 'Prepara el repo para publicarse sin filtrar nada',
     enabledByDefault: false,
     model: 'haiku'
+  },
+  {
+    // `haiku` a proposito: solo tiene que leer el arbol y responder dos
+    // preguntas con una cita. El modelo caro es para auditar, no para
+    // clasificar, y este corre en CADA escaneo que deje algo sin resolver.
+    id: 'scope-classifier',
+    iconName: 'shield',
+    name: 'Scope Classifier',
+    purpose: 'Decide que modulos de la campana de auditoria aplican, con evidencia',
+    enabledByDefault: false,
+    model: 'haiku'
   }
 ]

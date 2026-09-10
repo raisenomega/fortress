@@ -12,7 +12,8 @@ describe('categoryForAgent', () => {
   it('manda al modelo de amenazas a quien juzga lo que se protege o se publica', () => {
     // opensource-sanitizer prepara el repo para publicarse: sin esta variante
     // no recibia la doctrina que le dice justamente que NO debe filtrar.
-    for (const id of ['security-reviewer', 'opensource-sanitizer', 'sentinel-omega'] as const) {
+    // prettier-ignore
+    for (const id of ['security-reviewer', 'opensource-sanitizer', 'sentinel-omega', 'scope-classifier'] as const) {
       expect(categoryForAgent(id)).toBe('security')
     }
   })
@@ -28,7 +29,7 @@ describe('categoryForAgent', () => {
   it('cada agente del catalogo cae en una de las tres, y ninguna otra', () => {
     // Si manana entra un agente nuevo al catalogo, este caso obliga a decidir
     // su documentacion en vez de dejarlo caer al default sin pensarlo.
-    expect(AGENT_IDS).toHaveLength(11)
+    expect(AGENT_IDS).toHaveLength(12)
     for (const id of AGENT_IDS) {
       expect(['security', 'structural', 'general']).toContain(categoryForAgent(id))
     }

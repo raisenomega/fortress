@@ -33,7 +33,7 @@ module.exports = async function omegaScoreChecks(window) {
   check('overall bajo -> banda no-usar', score.ok && score.value.band === 'no-usar')
 
   const agents = await run(`window.api.omega.agents('${idS}')`)
-  check('la salud macro cubre los 11 agentes del catalogo', agents.length === 11)
+  check('la salud macro cubre los 12 agentes del catalogo', agents.length === 12)
   check(
     'incluye a sentinel-omega en la tabla',
     agents.some((a) => a.agentId === 'sentinel-omega')
