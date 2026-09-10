@@ -189,6 +189,104 @@ para no ganar nada. La verdad «este número es provisional» la porta `estado =
 `ScanHistoryRepository` gana un método de cierre. Hoy es append-only —`record`,
 `listByProject`, `listSince`— y no sabe actualizar una fila.
 
+## Enmienda (2026-09-09): lo que el inventario del commit 4 corrigió
+
+Antes de escribir la orquestación se midió el terreno, y dos frases de la
+decisión resultaron ser **promesas que el código de hoy no puede cumplir**. Se
+corrigen aquí en vez de construirlas a medias y llamarlas hechas, que es
+exactamente lo que este ADR existe para impedir.
+
+### 1. La priorización NO es por grafo: es por heurística de nombres
+
+La decisión decía «priorizada por el **GRAFO** cuando existe (`has_graph = 1`)».
+**No se puede.** La aplicación no tiene por dónde preguntarle nada al grafo:
+
+- `read-graph-index.ts` es lo único que abre el índice, y solo **cuenta filas**
+  —`nodes`, `edges`, `file_hashes`, `indexed_at`—. No consulta contenido.
+- No existe ningún puerto de dominio de consulta. `GRAPH_CORE_TOOLS` es una
+  lista de **nombres** para comprobar que las tools llegaron al agente.
+- Todo lo demás (`verify-graph`, `ab-graph`) **spawnea `claude -p`**: el grafo
+  llega por MCP al agente, nunca a FORTRESS.
+- `has_graph` y `graph_nodes` dicen **si** hay grafo y **cuánto** tiene. Nunca
+  **qué**.
+
+`GRAPH_FIRST_SECURITY` sigue siendo real y sigue valiendo, pero es orientación
+**dentro** de una parada —«empieza por auth, sesión, configuración y acceso a
+datos»— y una sugerencia que el agente atiende o no. No es un orden de paradas,
+y no podía serlo.
+
+**Corregido: el orden de paradas lo decide una heurística de NOMBRES de
+carpeta.** `auth`, `payment`, `identity`, `security`, `migrations` y sus
+hermanas, primero. Es determinista, auditable, no cuesta un spawn extra, y
+—esto es lo que decide— **funciona igual en un proyecto sin grafo**. Health Flow
+tiene `has_graph = 0`: la única priorización que el ADR original prometía habría
+estado apagada justo en el proyecto que motivó el arco entero.
+
+Cumple la **intención** —las zonas sensibles primero— con lo que hoy existe. Y
+la prioridad sigue cambiando qué se audita **antes**, nunca qué se audita: la
+última parada se hace igual. Priorizar consultando el grafo queda como futuro, y
+requiere primero un puerto de consulta que nadie ha escrito.
+
+### 2. La frontera del alcance es BLANDA, y el manifiesto es quien la verifica
+
+La decisión daba por hecho que una parada se puede acotar a una carpeta. Se
+puede pedir; no se puede imponer.
+
+**El `cwd` se queda en la raíz del proyecto.** Moverlo a la subcarpeta —lo
+aparentemente obvio— rompería tres cosas a la vez: el grafo está indexado por la
+**raíz**, `discoverCorpus` dejaría de encontrar la doctrina del proyecto, y los
+`file` de los hallazgos saldrían relativos a la subcarpeta, de modo que
+`identity` cambiaría **para todos los hallazgos existentes** y cada uno abriría
+fila nueva. Es el mismo destrozo que
+[ADR-081](adr-081-el-vocabulario-de-tipos-cubre-codigo-ajeno.md) documentó al
+cambiar el vocabulario, y por la misma razón.
+
+Así que acotar es una **petición en el prompt**, de la misma clase que la regla
+que `SCAN_RULES` ya usa («Ignora `node_modules`, `dist`, `build`, `.git`»): el
+agente la cumple en la práctica, y nada la verifica. **No hay flag del CLI que
+acote por ruta** — `--allowedTools` filtra herramientas, no directorios.
+
+**El manifiesto cierra ese hueco a posteriori, y esa es su segunda razón de
+ser.** Con la lista de ficheros de cada parada se puede comprobar si lo
+reportado cayó dentro. Y la regla cuando no cae:
+
+> **Un hallazgo que aparece fuera de su parada NO se tira: es real.** Se cuenta
+> en la cobertura de la parada a la que le tocaba ese fichero.
+
+Tirarlo sería fabricar una ausencia por un tecnicismo de reparto, que es la
+misma mentira por omisión que [ADR-065](adr-065-nada-muere-sin-juicio.md)
+prohibió. **Frontera blanda del prompt + verificación dura del manifiesto =
+cobertura declarada honesta.** El número final sigue significando lo que dice.
+
+### 3. Dos frenos que pasan a ser innegociables del commit 4
+
+El inventario destapó dos huecos que no estaban escritos y que la orquestación
+no puede dejar abiertos.
+
+**Freno de gasto POR PARADA.** Cada parada es un **spawn**, y el tope por
+corrida viaja en cada spawn (`--max-budget-usd`, hoy $50). Doce paradas son doce
+topes de $50: el tope «por corrida» **nunca dispararía**, porque cada parada
+*es* una corrida a ojos del CLI. Y el tope del día se consulta **una sola vez**,
+en `guardRun`, antes de empezar. Un recorrido largo puede gastar $120 con los
+dos topes intactos.
+
+Es **literalmente el agujero que el drenaje del motor ya cerró** el 2026-09-06:
+«el drenaje consulta el tope diario cada vuelta, no solo al arrancar». Repetirlo
+con otro nombre sería no haber aprendido nada. El commit 4 consulta, **antes de
+cada parada**, `topeDiarioAlcanzado()` y `gastado() >= costCapUsd`, con el molde
+de `drenar-hasta-omega`. `topeDiarioAlcanzado` ya está exportado aparte
+precisamente para consumirse desde fuera, así que se llama sin tocar el
+innegociable.
+
+**Botón DETENER.** `isCancelled` y `cancelRun` existen, y el escaneo **no los
+usa**: no hay canal de parada. Mientras el escaneo duraba como mucho 15 minutos
+eso era tolerable; **un recorrido sin techo de tiempo y sin Detener es peor que
+uno corto**, porque quita el techo sin dar el freno. El commit 4 —o el suyo
+propio— añade la cancelación, y el sitio natural es entre paradas: una parada
+termina limpia, y ahí se comprueba si el operador pidió parar. El recorrido se
+cierra `ABORTADO` con la cobertura que alcanzó, que es exactamente para lo que
+existen `estado` y `motivo_cierre`.
+
 ## Consecuencias
 
 - **El techo de 15 minutos desaparece para el escaneo, y solo para él.** Los
