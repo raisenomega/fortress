@@ -260,6 +260,12 @@ cobertura declarada honesta.** El número final sigue significando lo que dice.
 
 ### 3. Dos frenos que pasan a ser innegociables del commit 4
 
+> **El freno de gasto de esta sección quedó RETIRADO por la Enmienda 2 (más
+> abajo).** El botón DETENER sigue en pie. Lo que sigue se conserva porque el
+> diagnóstico del gasto es correcto y hay que saberlo para entender el riesgo
+> que la Enmienda 2 acepta a sabiendas; lo que cambia es la decisión, no la
+> medida.
+
 El inventario destapó dos huecos que no estaban escritos y que la orquestación
 no puede dejar abiertos.
 
@@ -286,6 +292,64 @@ propio— añade la cancelación, y el sitio natural es entre paradas: una parad
 termina limpia, y ahí se comprueba si el operador pidió parar. El recorrido se
 cierra `ABORTADO` con la cobertura que alcanzó, que es exactamente para lo que
 existen `estado` y `motivo_cierre`.
+
+## Enmienda 2 (2026-09-09): el compromiso es con las paradas, no con el presupuesto
+
+La Enmienda 1 dejó como condición del commit 4 un **freno de gasto por parada**
+—consultar `topeDiarioAlcanzado()` y `gastado() >= costCapUsd` antes de arrancar
+cada una—. El operador corrigió la regla. Esta enmienda la fija.
+
+### La regla
+
+**El reconocimiento fija XX paradas antes de empezar. El escaneo se COMPROMETE
+con esas XX y las completa TODAS**, cueste el tiempo que cueste y el dinero que
+cueste. El compromiso es con el **número de paradas que el manifiesto
+determinó**, no con un presupuesto ni con un reloj.
+
+### Por qué se retira el freno de gasto
+
+- **Una parada siempre termina completa.** Audita su carpeta entera y se guarda;
+  nunca queda a mitad. Eso ya estaba en la decisión original y no cambia.
+- **Un freno de gasto ENTRE paradas contradice el compromiso con XX.** Dejaría
+  el escaneo incompleto por dinero, cuando la regla es terminar el trabajo que
+  el reconocimiento determinó. Un recorrido que se detiene en la parada 7 de 12
+  porque cruzó un umbral no es un recorrido con salvaguarda: es un recorrido que
+  no cumplió lo que dijo que iba a hacer.
+- **El operador decide explícitamente.** Cuenta Max y criterio propio: «escanea
+  de verdad, haz lo que tiene que hacer». **El escaneo no negocia con la cuenta;
+  negocia con el manifiesto.**
+
+### El único corte: el botón DETENER
+
+Antes de las XX paradas, lo único que para el recorrido es el operador
+(`scanStop` → `cancelRun`). Y aun así **respeta la regla de completitud**:
+
+- la parada **en curso** termina limpia;
+- solo la **siguiente** no arranca;
+- el recorrido se cierra `ABORTADO` con la **cobertura que alcanzó**, que es
+  honesta: nunca dice 100 % de lo que no miró.
+
+`estado` y `motivo_cierre` existen exactamente para esto.
+
+### Lo que el techo de tiempo perdió, y con qué se sustituye
+
+El techo de 15 minutos desaparece para el escaneo y **no se sustituye por otro
+tope automático**. La salvaguarda contra un proceso colgado es la que ya nombra
+la decisión: **cada parada es finita por construcción** —un pedazo de código se
+acaba— más el **manifiesto**, porque una parada que no avanza sobre su lista
+conocida de ficheros es detectable sin cronómetro.
+
+### Riesgo aceptado, escrito para que conste
+
+Sin freno de gasto automático, **si un fallo hiciera que una parada entrara en
+bucle y se reintentara sola, el escaneo podría gastar mucho antes de que el
+operador lo note y apriete Detener.** La red contra ese accidente raro es el
+operador vigilando más el botón, no un tope automático.
+
+Es decisión deliberada del operador —cuenta Max, criterio propio— y se escribe
+aquí porque un riesgo aceptado a sabiendas y anotado no es lo mismo que un
+riesgo que nadie vio. Una red contra el **desbocado** que no estrangule el
+trabajo legítimo queda como posible arco futuro; no es parte de éste.
 
 ## Consecuencias
 
