@@ -1,7 +1,7 @@
 import type { Project } from '@domain/project/project'
 import type { ScanLogWriter } from '@domain/scan/scan-log'
 import type { AppContext } from '../context'
-import { crearCierre, type Cerrar } from './pasos-del-recorrido'
+import { crearCierre, type Cerrar, type TotalesDelRecorrido } from './pasos-del-recorrido'
 
 /**
  * El cierre, dejando SIEMPRE la transcripcion en disco: termine bien, lo pare
@@ -15,9 +15,10 @@ export function crearCierreConLog(
   context: AppContext,
   project: Project,
   scanId: string,
-  scanLog: ScanLogWriter
+  scanLog: ScanLogWriter,
+  totales: TotalesDelRecorrido
 ): Cerrar {
-  const cerrar = crearCierre(context, project, scanId)
+  const cerrar = crearCierre(context, project, scanId, totales)
   return (motivo, acumulado, extra = '') => {
     scanLog.write(scanId, acumulado.texto + extra)
     return cerrar(motivo, acumulado)

@@ -20,6 +20,7 @@ export const ICON_NAMES = [
   'alert-triangle',
   'x-circle',
   'circle',
+  'square',
   'eye',
   'zap',
   'gauge',

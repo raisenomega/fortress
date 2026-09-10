@@ -36,7 +36,10 @@ export async function recorrerParadas(
     paradasTotal: paradas.length,
     ficherosTotal: manifiesto.ficherosTotal
   }).id
-  const cerrar = crearCierreConLog(context, project, scanId, salidas.scanLog)
+  const cerrar = crearCierreConLog(context, project, scanId, salidas.scanLog, {
+    paradasTotal: paradas.length,
+    ficherosTotal: manifiesto.ficherosTotal
+  })
 
   let acumulado = NADA_RECORRIDO
 

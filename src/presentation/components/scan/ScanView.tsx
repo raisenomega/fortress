@@ -7,7 +7,10 @@ import { dismissFinding, mitigateFinding, reopenFinding, unmitigateFinding } fro
 import { proposeRepair } from '../../services/repair-service'
 import { EmptyState } from '../common/EmptyState'
 import { Notice } from '../common/Notice'
+import { CoberturaNotice } from './CoberturaNotice'
 import { FindingsTable } from './FindingsTable'
+import { ParadaEnVivo } from './ParadaEnVivo'
+import { hayParadaQueEnsenar } from './parada-linea'
 import { ScanHeader } from './ScanHeader'
 import { ScanProgress } from './ScanProgress'
 
@@ -17,6 +20,8 @@ export function ScanView(): React.JSX.Element {
   const findings = useProjectFindings(projectId)
   const running = useScanStore((state) => state.runningProjectId) === projectId
   const progress = useScanStore((state) => state.progress)
+  const parada = useScanStore((state) => state.parada)
+  const summary = useScanStore((state) => state.lastSummary)
   const error = useScanError(projectId)
   const push = usePushResult(projectId)
 
@@ -37,6 +42,10 @@ export function ScanView(): React.JSX.Element {
       <div className="space-y-3 px-4 py-3">
         {error ? <Notice tone="error">{error}</Notice> : null}
         {push ? <Notice tone={push.failed ? 'error' : 'ok'}>{push.output}</Notice> : null}
+        {summary?.projectId === project.id && !running ? (
+          <CoberturaNotice cobertura={summary.cobertura} />
+        ) : null}
+        {hayParadaQueEnsenar(running, parada) ? <ParadaEnVivo parada={parada} /> : null}
         {running ? <ScanProgress text={progress} /> : null}
 
         <FindingsTable
