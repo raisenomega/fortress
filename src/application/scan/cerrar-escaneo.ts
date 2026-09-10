@@ -52,6 +52,14 @@ export function cerrarEscaneo(
     score: calculado.score,
     scannedAt: datos.at,
     durationMs: datos.durationMs,
-    counts: calculado.counts
+    counts: calculado.counts,
+    cobertura: {
+      estado: datos.motivo === 'completo' ? 'CERRADO' : 'ABORTADO',
+      motivoCierre: datos.motivo,
+      paradasHechas: datos.paradasHechas,
+      paradasTotal: datos.paradasTotal,
+      ficherosCubiertos: datos.ficherosCubiertos,
+      ficherosTotal: datos.ficherosTotal
+    }
   }
 }

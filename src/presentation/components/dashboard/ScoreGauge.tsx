@@ -1,4 +1,5 @@
 import { scoreBand } from '@domain/project/fortress-score'
+import { arcoLleno, EN_CURSO_LABEL, loQueEnsena } from './gauge-look'
 
 const BAND_CLASS = {
   solido: 'text-success',
@@ -15,13 +16,20 @@ interface ScoreGaugeProps {
   readonly score: number
   /** Sin escaneo previo el arco se pinta vacio y atenuado. */
   readonly scanned: boolean
+  /** Hay un recorrido EN MARCHA: el score de la fila es el anterior. */
+  readonly enCurso?: boolean
 }
 
-export function ScoreGauge({ score, scanned }: ScoreGaugeProps): React.JSX.Element {
-  const progress = scanned ? score / 100 : 0
+export function ScoreGauge({
+  score,
+  scanned,
+  enCurso = false
+}: ScoreGaugeProps): React.JSX.Element {
+  const ensena = loQueEnsena(scanned, enCurso)
+  const lleno = arcoLleno(ensena)
 
   return (
-    <div className={`relative ${scanned ? BAND_CLASS[scoreBand(score)] : 'text-muted-foreground'}`}>
+    <div className={`relative ${lleno ? BAND_CLASS[scoreBand(score)] : 'text-muted-foreground'}`}>
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden>
         <circle
           cx={SIZE / 2}
@@ -40,13 +48,19 @@ export function ScoreGauge({ score, scanned }: ScoreGaugeProps): React.JSX.Eleme
           strokeLinecap="round"
           stroke="currentColor"
           strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={CIRCUMFERENCE * (1 - progress)}
+          strokeDashoffset={CIRCUMFERENCE * (lleno ? 1 - score / 100 : 1)}
           transform={`rotate(-90 ${SIZE / 2} ${SIZE / 2})`}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-semibold">
-        {scanned ? score : '—'}
-      </span>
+      {ensena === 'en-curso' ? (
+        <span className="absolute inset-0 flex items-center justify-center px-1 text-center text-[9px] leading-tight font-semibold">
+          {EN_CURSO_LABEL}
+        </span>
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center font-mono text-sm font-semibold">
+          {ensena === 'score' ? score : '—'}
+        </span>
+      )}
     </div>
   )
 }

@@ -38,13 +38,26 @@ export type Cerrar = (motivo: MotivoCierre, acumulado: Acumulado, extra?: string
  * ACUMULADO —lo que de verdad se auditó— y no del manifiesto, que es lo que
  * hace que un recorrido cortado no pueda decir 100 %.
  */
-export function crearCierre(context: AppContext, project: Project, scanId: string): Cerrar {
+/** Los totales que el manifiesto fijo: la Y de «X de Y», y las XX prometidas. */
+export interface TotalesDelRecorrido {
+  readonly paradasTotal: number
+  readonly ficherosTotal: number | null
+}
+
+export function crearCierre(
+  context: AppContext,
+  project: Project,
+  scanId: string,
+  totales: TotalesDelRecorrido
+): Cerrar {
   return (motivo, acumulado) =>
     cerrarEscaneo(context, project, {
       scanId,
       reportados: acumulado.reportados,
       paradasHechas: acumulado.hechas,
+      paradasTotal: totales.paradasTotal,
       ficherosCubiertos: acumulado.cubiertos,
+      ficherosTotal: totales.ficherosTotal,
       motivo,
       at: nowIso(),
       durationMs: acumulado.durationMs,

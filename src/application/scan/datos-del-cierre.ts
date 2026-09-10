@@ -12,8 +12,12 @@ export interface DatosDelCierre {
   readonly scanId: string
   readonly reportados: readonly DetectedFinding[]
   readonly paradasHechas: number
+  /** Las XX que el manifiesto fijo. 1 en un escaneo de una pieza. */
+  readonly paradasTotal: number
   /** Null mientras no haya manifiesto que declarar. */
   readonly ficherosCubiertos: number | null
+  /** La Y de «audite X de Y». Null sin manifiesto. */
+  readonly ficherosTotal: number | null
   readonly motivo: MotivoCierre
   readonly at: string
   readonly durationMs: number

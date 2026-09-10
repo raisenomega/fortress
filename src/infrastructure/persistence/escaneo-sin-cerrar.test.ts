@@ -8,7 +8,9 @@ const UNO = [{ severity: 'HIGH' as const, title: 'Algo', file: 'a.ts', line: 1 }
 
 const cierre = {
   paradasHechas: 4,
+  paradasTotal: 12,
   ficherosCubiertos: 700,
+  ficherosTotal: 2108,
   at: AT,
   durationMs: 900_000,
   usage: SIN_FACTURA,
