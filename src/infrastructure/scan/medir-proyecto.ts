@@ -1,17 +1,36 @@
 import { dividirEnParadas } from '@domain/scan/dividir-en-paradas'
+import type { DeclaracionDeModulos } from '@domain/scan/declaracion-de-modulos'
 import type { Manifiesto } from '@domain/scan/manifiesto'
+import { modulosAplicables } from '@domain/scan/modulos-aplicables'
+import { readDependencies } from '../system/read-dependencies'
 import { listarFuente } from './listar-fuente'
+import { listarSenales } from './listar-senales'
 
 /**
- * El reconocimiento de ADR-082: mide el proyecto ANTES de escanear nada y
- * devuelve las XX paradas con las que el escaneo se va a comprometer.
+ * El reconocimiento de ADR-082, ampliado por ADR-083: mide el proyecto ANTES
+ * de escanear nada y devuelve las XX paradas con las que el escaneo se va a
+ * comprometer, y los modulos de la campana que le aplican.
  *
- * Junta las dos mitades y no hace nada mas: enumerar es I/O (git) y repartir es
- * logica pura, y estan separadas para que la segunda se pruebe sin repositorio.
- *
- * Todavia no lo llama nadie. Es la capacidad, como lo fueron `abrir` y `cerrar`
- * antes de que el cierre partido las usara; quien la cablea es el recorrido.
+ * Junta las piezas y no hace nada mas. Enumerar es I/O (git, disco) y decidir
+ * es logica pura, y estan separadas para que la segunda se pruebe sin
+ * repositorio. La declaracion del operador entra por parametro y no se lee
+ * aqui: quien la tiene es el proyecto, y este modulo solo conoce una ruta.
  */
-export async function medirProyecto(projectPath: string): Promise<Manifiesto> {
-  return dividirEnParadas(await listarFuente(projectPath))
+export async function medirProyecto(
+  projectPath: string,
+  declaracion: DeclaracionDeModulos
+): Promise<Manifiesto> {
+  const reparto = dividirEnParadas(await listarFuente(projectPath))
+  const evidencia = {
+    ficheros: await listarSenales(projectPath),
+    dependencias: readDependencies(projectPath)
+  }
+  const veredicto = modulosAplicables(evidencia, declaracion)
+
+  return {
+    ...reparto,
+    modulosAplicables: veredicto.aplicables,
+    modulosDescartados: veredicto.descartados,
+    modulosSinConstancia: veredicto.sinConstancia
+  }
 }

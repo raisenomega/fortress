@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { runScan, type ScanDeps } from '@application/scan/run-scan'
 import { SIN_SALIDAS } from '@application/scan/progreso-del-recorrido'
-import type { Manifiesto } from '@domain/scan/manifiesto'
+import { MANIFIESTO_VACIO, type Manifiesto } from '@domain/scan/manifiesto'
 import { caminoSoldado } from './camino-soldado'
 import { corrida, crearBench, PROJECT, PROYECTO } from './cierre-partido-fixture'
 import { hallazgoDe, scannerFalso } from './recorrido-fixture'
 
 /** Un proyecto de una sola carpeta: el escaneo monolitico de siempre. */
 const UNA: Manifiesto = {
+  ...MANIFIESTO_VACIO,
   paradas: [{ carpeta: 'src', ficheros: ['src/a.ts', 'src/b.ts'] }],
   ficherosTotal: 2
 }
@@ -51,7 +52,7 @@ describe('un proyecto de UNA parada da lo mismo que el escaneo monolitico', () =
 
   it('un proyecto SIN fuente versionada tambien va por el camino de siempre', async () => {
     const bench = crearBench()
-    const vacio: Manifiesto = { paradas: [], ficherosTotal: 0 }
+    const vacio: Manifiesto = MANIFIESTO_VACIO
     const scanner = scannerFalso()
 
     await runScan(bench.context, scanner, PROYECTO, SIN_SALIDAS, conManifiesto(vacio))

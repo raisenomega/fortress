@@ -1,4 +1,4 @@
-import type { Manifiesto, Parada } from '@domain/scan/manifiesto'
+import { MANIFIESTO_VACIO, type Manifiesto, type Parada } from '@domain/scan/manifiesto'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
 import type { ScanRequest, Scanner } from '@domain/scan/scanner'
 import { ok } from '@domain/shared/result'
@@ -6,6 +6,7 @@ import { SIN_FACTURA } from './cierre-partido-fixture'
 
 /** Cuatro carpetas con una sensible y otra de pagos, para probar la prioridad. */
 export const CUATRO: Manifiesto = {
+  ...MANIFIESTO_VACIO,
   paradas: [
     { carpeta: 'web', ficheros: ['web/a.ts', 'web/b.ts'] },
     { carpeta: 'auth', ficheros: ['auth/login.ts'] },

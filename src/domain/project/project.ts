@@ -1,3 +1,4 @@
+import type { DeclaracionDeModulos } from '../scan/declaracion-de-modulos'
 import type { DimensionScores } from '../score/dimension'
 import type { ConfigState } from './config-state'
 export type { Finding } from './finding'
@@ -48,6 +49,12 @@ export interface Project {
    * y escrito; el chat trabaja normal. Ver `config-state.ts`.
    */
   readonly configState: ConfigState
+  /**
+   * Lo que el operador declara sobre M8 (dinero) y M3 (privacidad), que no se
+   * detectan por fichero (ADR-083). Vacio = no declarado, que no es «no
+   * aplica»: eso lo dira el juicio con evidencia.
+   */
+  readonly modulosDeclarados: DeclaracionDeModulos
   readonly createdAt: string
 }
 

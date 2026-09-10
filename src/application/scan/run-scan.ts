@@ -1,3 +1,4 @@
+import type { DeclaracionDeModulos } from '@domain/scan/declaracion-de-modulos'
 import type { Manifiesto } from '@domain/scan/manifiesto'
 import type { Scanner } from '@domain/scan/scanner'
 import { err, ok, type Result } from '@domain/shared/result'
@@ -21,7 +22,7 @@ const NO_SCANNER =
  * llevando solo eso (ADR-082, Enmienda 2).
  */
 export interface ScanDeps extends RecorridoDeps {
-  readonly medir: (projectPath: string) => Promise<Manifiesto>
+  readonly medir: (path: string, declaracion: DeclaracionDeModulos) => Promise<Manifiesto>
 }
 
 /**
@@ -50,7 +51,9 @@ export async function runScan(
   const problem = scanner.precheck(project.path)
   if (problem) return err(problem)
 
-  const manifiesto = await deps.medir(project.path)
+  // La declaracion viaja con el proyecto, no con la ruta: `medir` conoce una
+  // carpeta y quien sabe lo que el operador declaro es la fila (ADR-083).
+  const manifiesto = await deps.medir(project.path, project.modulosDeclarados)
   if (manifiesto.paradas.length > 1) {
     return recorrerParadas(context, scanner, project, manifiesto, salidas, deps)
   }

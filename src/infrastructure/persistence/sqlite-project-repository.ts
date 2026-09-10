@@ -4,14 +4,9 @@ import type { NewProject, Project } from '@domain/project/project'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import { newId, nowIso } from '@domain/shared/id'
 import type { Db } from './database'
+import { COLUMNS, type ProjectRow } from './project-columns'
 import { makeExtraWrites } from './project-writes'
-import { toProject, type ProjectRow } from './project-row'
-
-const COLUMNS = `id, name, path, stack, git_remote, git_branch, fortress_score, general_quality,
-  quality_partial, dim_seguridad, dim_correctitud, dim_tests, dim_mantenibilidad, dim_dependencias,
-  dim_operacion, last_scan, has_claude, has_graph, graph_nodes, graph_edges, graph_indexed_at,
-  has_fortress, trusted, loop_enabled, contaminated_at, contamination_detail, config_state,
-  created_at`
+import { toProject } from './project-row'
 
 /** Parametros del INSERT. trusted no va: nace en 0 (no confiable) por defecto. */
 function toInsertParams(project: NewProject): Record<string, string | number | null> {

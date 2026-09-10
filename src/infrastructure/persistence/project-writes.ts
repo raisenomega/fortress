@@ -1,4 +1,6 @@
 import { normalizeScore } from '@domain/project/fortress-score'
+// prettier-ignore
+import { escribirDeclaracion, type DeclaracionDeModulos } from '@domain/scan/declaracion-de-modulos'
 import type { DimensionScores } from '@domain/score/dimension'
 import { nowIso } from '@domain/shared/id'
 import type { Db } from './database'
@@ -10,6 +12,7 @@ const QUALITY_SQL = `UPDATE projects SET general_quality = ?, quality_partial = 
   dim_operacion = ? WHERE id = ?`
 const CONTAMINATE_SQL = `UPDATE projects SET contaminated_at = ?, contamination_detail = ?
   WHERE id = ?`
+const MODULOS_SQL = 'UPDATE projects SET modulos_declarados = ? WHERE id = ?'
 // Las dos columnas se limpian JUNTAS: `contaminated` nace de que la fecha sea
 // NULL, pero el detalle forense viaja al renderer por su cuenta. Dejarlo atras
 // daria un proyecto que ya no esta contaminado y sigue contando por que lo estuvo.
@@ -21,6 +24,7 @@ export interface ExtraWrites {
   setQuality: (id: string, global: number, dims: DimensionScores, partial: boolean) => void
   markContaminated: (id: string, detail: string) => void
   markClean: (id: string) => void
+  setModulosDeclarados: (id: string, declaracion: DeclaracionDeModulos) => void
 }
 
 /** Los writers grandes de projects (grafo + score integral), fuera del repo por tamano. */
@@ -29,10 +33,13 @@ export function makeExtraWrites(db: Db): ExtraWrites {
   const quality = db.prepare(QUALITY_SQL)
   const contaminate = db.prepare(CONTAMINATE_SQL)
   const clean = db.prepare(CLEAN_SQL)
+  const modulos = db.prepare(MODULOS_SQL)
   return {
     setGraph: (id, nodes, edges, indexedAt) => graph.run(nodes, edges, indexedAt, id),
     markContaminated: (id, detail) => contaminate.run(nowIso(), detail, id),
     markClean: (id) => clean.run(id),
+    // Se sanea al ESCRIBIR: lo que entra en la columna ya esta en vocabulario.
+    setModulosDeclarados: (id, declaracion) => modulos.run(escribirDeclaracion(declaracion), id),
     setQuality: (id, global, dims, partial) =>
       quality.run(
         normalizeScore(global),

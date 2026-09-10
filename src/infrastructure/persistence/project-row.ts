@@ -1,39 +1,10 @@
 import { isConfigState } from '@domain/project/config-state'
 import { normalizeScore } from '@domain/project/fortress-score'
 import type { Project } from '@domain/project/project'
+import { aDeclaracion } from '@domain/scan/declaracion-de-modulos'
 import type { DimensionScores } from '@domain/score/dimension'
+import type { ProjectRow } from './project-columns'
 
-/** Fila cruda de la tabla projects. SQLite no tiene boolean: usa 0/1. */
-export interface ProjectRow {
-  readonly id: string
-  readonly name: string
-  readonly path: string
-  readonly stack: string
-  readonly git_remote: string | null
-  readonly git_branch: string | null
-  readonly fortress_score: number
-  readonly general_quality: number | null
-  readonly quality_partial: number | null
-  readonly dim_seguridad: number | null
-  readonly dim_correctitud: number | null
-  readonly dim_tests: number | null
-  readonly dim_mantenibilidad: number | null
-  readonly dim_dependencias: number | null
-  readonly dim_operacion: number | null
-  readonly last_scan: string | null
-  readonly has_claude: number
-  readonly has_graph: number
-  readonly graph_nodes: number | null
-  readonly graph_edges: number | null
-  readonly graph_indexed_at: string | null
-  readonly has_fortress: number
-  readonly trusted: number
-  readonly loop_enabled: number
-  readonly contaminated_at: string | null
-  readonly contamination_detail: string | null
-  readonly config_state: string
-  readonly created_at: string
-}
 function toDimensions(row: ProjectRow): DimensionScores | null {
   if (row.general_quality === null) return null
   return {
@@ -70,6 +41,7 @@ export function toProject(row: ProjectRow): Project {
     contaminated: row.contaminated_at !== null,
     contaminationDetail: row.contamination_detail,
     configState: isConfigState(row.config_state) ? row.config_state : 'CONFIGURADO',
+    modulosDeclarados: aDeclaracion(row.modulos_declarados),
     createdAt: row.created_at
   }
 }
