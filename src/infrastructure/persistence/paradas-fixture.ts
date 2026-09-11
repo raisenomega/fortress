@@ -60,6 +60,7 @@ export function abrirRecorrido(paradasTotal = 3): Recorrido {
         motivo,
         at: AT,
         durationMs: 5400,
+        transcurridoMs: 900_000,
         usage: SIN_FACTURA,
         tools: [],
         edits: []

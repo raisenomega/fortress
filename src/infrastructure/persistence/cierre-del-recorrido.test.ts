@@ -20,6 +20,7 @@ describe('el cierre puntua el recorrido COMPLETO, no la ultima parada', () => {
       motivo: 'completo',
       at: AT,
       durationMs: 5400,
+      transcurridoMs: 900_000,
       usage: SIN_FACTURA,
       tools: [],
       edits: []

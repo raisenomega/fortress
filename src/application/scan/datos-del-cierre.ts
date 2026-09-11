@@ -28,7 +28,19 @@ export interface DatosDelCierre {
   readonly modulos: ModulosDelCierre
   readonly motivo: MotivoCierre
   readonly at: string
+  /**
+   * Lo que costo AUDITAR: la suma de las paradas terminadas. Es tiempo de
+   * agente, y es lo que se factura en `agent_runs`.
+   */
   readonly durationMs: number
+  /**
+   * Lo que duro el ESCANEO, de reloj de pared: de que se abrio la fila a que se
+   * cerro. Es otra cosa que `durationMs`, y la diferencia importa — un escaneo
+   * que murio en su primera parada tiene CERO auditado y quince minutos
+   * transcurridos, y decir que «duro 0» de algo que ardio un cuarto de hora es
+   * la clase de cifra que hace dudar de todas las demas.
+   */
+  readonly transcurridoMs: number
   readonly usage: TokenUsage
   readonly tools: readonly string[]
   readonly edits: readonly string[]

@@ -56,6 +56,8 @@ export async function persistScan(
     motivo: 'completo',
     at,
     durationMs,
+    // Una pieza: lo auditado y lo transcurrido son la misma pasada.
+    transcurridoMs: durationMs,
     usage,
     tools,
     edits

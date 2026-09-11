@@ -15,6 +15,7 @@ const cierre = {
   ficherosTotal: 2108,
   at: AT,
   durationMs: 900_000,
+  transcurridoMs: 900_000,
   usage: SIN_FACTURA,
   tools: [],
   edits: []
