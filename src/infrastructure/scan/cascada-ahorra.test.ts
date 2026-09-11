@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { SIN_DECLARACION } from '@domain/scan/declaracion-de-modulos'
 import type { ModuloAuditoria } from '@domain/scan/modulo-auditoria'
 import type { Juez } from './juez-de-aplicabilidad'
+import { SIN_MEDIDA } from './medir-deps'
 import { medirProyecto } from './medir-proyecto'
 import { repoCon } from './repo-fixture'
 
@@ -34,7 +35,7 @@ describe('la cascada ahorra el spawn cuando ya sabe la respuesta', () => {
   it('con stripe, al juez NO se le pregunta por M8', async () => {
     const { juez, llamadas } = espia()
 
-    await medirProyecto(conDependencia('stripe'), SIN_DECLARACION, juez)
+    await medirProyecto(conDependencia('stripe'), SIN_DECLARACION, { ...SIN_MEDIDA, juzgar: juez })
 
     expect(llamadas).toEqual([['M3']])
   })
@@ -42,7 +43,7 @@ describe('la cascada ahorra el spawn cuando ya sabe la respuesta', () => {
   it('sin pasarela, se le pregunta por los dos', async () => {
     const { juez, llamadas } = espia()
 
-    await medirProyecto(conDependencia(null), SIN_DECLARACION, juez)
+    await medirProyecto(conDependencia(null), SIN_DECLARACION, { ...SIN_MEDIDA, juzgar: juez })
 
     expect(llamadas).toEqual([['M3', 'M8']])
   })
@@ -50,7 +51,11 @@ describe('la cascada ahorra el spawn cuando ya sabe la respuesta', () => {
   it('con los dos declarados, el juez NO se invoca ni una vez', async () => {
     const { juez, llamadas } = espia()
 
-    await medirProyecto(conDependencia(null), { M3: true, M8: false }, juez)
+    await medirProyecto(
+      conDependencia(null),
+      { M3: true, M8: false },
+      { ...SIN_MEDIDA, juzgar: juez }
+    )
 
     expect(llamadas).toEqual([])
   })
@@ -58,7 +63,11 @@ describe('la cascada ahorra el spawn cuando ya sabe la respuesta', () => {
   it('la declaracion manda aunque stripe este ahi: M8 fuera, y sin juicio', async () => {
     const { juez, llamadas } = espia()
 
-    const manifiesto = await medirProyecto(conDependencia('stripe'), { M8: false }, juez)
+    const manifiesto = await medirProyecto(
+      conDependencia('stripe'),
+      { M8: false },
+      { ...SIN_MEDIDA, juzgar: juez }
+    )
 
     expect(manifiesto.modulosAplicables).not.toContain('M8')
     expect(llamadas).toEqual([['M3']])

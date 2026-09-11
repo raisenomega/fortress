@@ -1,3 +1,4 @@
+import type { EscritoresDeFichero } from './escritores-de-fichero'
 import type { ChatRepository } from '@domain/chat/chat-repository'
 import type { ConnectorRepository } from '@domain/connectors/connector-repository'
 import type { LoopSessionRepository } from '@domain/loop/loop-session-repository'
@@ -19,7 +20,6 @@ import type { QualityHistoryRepository } from '@domain/score/quality-record'
 import type { ScanHistoryRepository } from '@domain/scan/scan-history-repository'
 import type { ApiKeyStore, ApiKeyValidator } from '@domain/settings/api-key-store'
 import type { SettingsRepository } from '@domain/settings/settings-repository'
-import type { CognitionWriter } from '@domain/cognition/cognition-writer'
 import type { FilesystemProbe } from '@domain/omega/filesystem-probe'
 import type { OmegaLog } from '@domain/omega/omega-log'
 import type { ActivityRepository } from '@domain/telemetry/activity'
@@ -31,7 +31,7 @@ import type { RunInTransaction } from '@domain/shared/transaction'
  * interfaces; quien las implementa (SQLite, Anthropic, safeStorage) es cosa
  * de la infraestructura.
  */
-export interface AppContext {
+export interface AppContext extends EscritoresDeFichero {
   readonly projects: ProjectRepository
   /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
   readonly corpus: CorpusReader
@@ -57,7 +57,6 @@ export interface AppContext {
   readonly chat: ChatRepository
   readonly runs: AgentRunRepository
   readonly activity: ActivityRepository
-  readonly cognitionWriter: CognitionWriter
   readonly omegaLog: OmegaLog
   readonly filesystemProbe: FilesystemProbe
   readonly connectors: ConnectorRepository

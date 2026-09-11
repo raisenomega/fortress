@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { SIN_CAMPANA } from '@domain/scan/modulos-del-cierre'
 import { cerrarEscaneo } from '@application/scan/cerrar-escaneo'
 import { asentarHallazgos } from '@application/scan/asentar-hallazgos'
 import { crearBench, PROJECT, PROYECTO, SIN_FACTURA, type Bench } from './cierre-partido-fixture'
@@ -7,6 +8,7 @@ const AT = '2026-09-09T22:00:00.000Z'
 const UNO = [{ severity: 'HIGH' as const, title: 'Algo', file: 'a.ts', line: 1 }]
 
 const cierre = {
+  modulos: SIN_CAMPANA,
   paradasHechas: 4,
   paradasTotal: 12,
   ficherosCubiertos: 700,

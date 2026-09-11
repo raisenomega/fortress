@@ -4,6 +4,7 @@ import { SIN_LOG } from '@domain/scan/scan-log'
 import type { ScanOutcome } from '@domain/scan/scanner'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
+import { SIN_CAMPANA } from '@domain/scan/modulos-del-cierre'
 import { cerrarEscaneo } from './cerrar-escaneo'
 import { asentarHallazgos } from './asentar-hallazgos'
 import type { ScanSummary } from './scan-types'
@@ -50,6 +51,8 @@ export async function persistScan(
     paradasTotal: 1,
     ficherosCubiertos: null,
     ficherosTotal: null,
+    // Un escaneo de una pieza no mide campana: no consta, que no es «ninguna».
+    modulos: SIN_CAMPANA,
     motivo: 'completo',
     at,
     durationMs,

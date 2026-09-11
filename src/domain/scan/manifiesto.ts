@@ -38,6 +38,17 @@ export interface Manifiesto {
   readonly modulosAplicables: readonly ModuloAuditoria[]
   readonly modulosDescartados: readonly ModuloConRazon[]
   readonly modulosSinConstancia: readonly ModuloConRazon[]
+  /**
+   * De los que aplican, los que NO tienen su plantilla sembrada. Se mide AQUI,
+   * con el resto del reconocimiento, y no al componer el informe: el operador
+   * puede sembrarla mañana, y entonces el informe de hoy diria que la tuvo.
+   *
+   * En la Fase 2 este dato se quedo fuera del manifiesto por ser un hecho de la
+   * maquina del operador y no del proyecto auditado. Lo que cambia es para que
+   * sirve: ya no describe el proyecto, describe con cuanta profundidad se le
+   * audito — y eso es justo lo que el manifiesto promete y el cierre declara.
+   */
+  readonly plantillasAusentes: readonly ModuloAuditoria[]
 }
 
 export const REPARTO_VACIO: Reparto = { paradas: [], ficherosTotal: 0 }
@@ -46,5 +57,6 @@ export const MANIFIESTO_VACIO: Manifiesto = {
   ...REPARTO_VACIO,
   modulosAplicables: [],
   modulosDescartados: [],
-  modulosSinConstancia: []
+  modulosSinConstancia: [],
+  plantillasAusentes: []
 }

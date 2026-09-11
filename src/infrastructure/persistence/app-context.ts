@@ -1,3 +1,4 @@
+import { informeWriter } from '../scan/escribir-informe'
 import type { AppContext } from '@application/context'
 import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
@@ -55,6 +56,7 @@ export function getAppContext(): AppContext {
     runs: createSqliteAgentRunRepository(db),
     activity: createSqliteActivityRepository(db),
     cognitionWriter: { writeScan },
+    informeWriter,
     omegaLog: createSqliteOmegaLog(db),
     filesystemProbe: createFsProbe(),
     connectors: createSqliteConnectorRepository(db),

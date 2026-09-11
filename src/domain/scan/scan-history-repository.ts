@@ -36,6 +36,8 @@ export interface CierreDeScan {
   /** Null por lo mismo que `ficherosTotal`: sin manifiesto no hay cobertura. */
   readonly ficherosCubiertos: number | null
   readonly motivoCierre: MotivoCierre
+  /** La campana serializada. El informe la transcribe de aqui, no la recalcula. */
+  readonly modulos: string
   readonly at: string
 }
 

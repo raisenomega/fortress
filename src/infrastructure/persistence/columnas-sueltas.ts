@@ -34,6 +34,12 @@ export const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   ['scans', 'ficheros_total', 'ALTER TABLE scans ADD COLUMN ficheros_total INTEGER'],
   ['scans', 'ficheros_cubiertos', 'ALTER TABLE scans ADD COLUMN ficheros_cubiertos INTEGER'], // prettier-ignore
   ['scans', 'motivo_cierre', 'ALTER TABLE scans ADD COLUMN motivo_cierre TEXT'],
+  // La campana de auditoria de ese escaneo (ADR-083, Fase 5): que modulos
+  // aplicaron, cuales se descartaron y por que, que temas corrieron y que
+  // plantillas faltaban. TEXT con su JSON y NULL por defecto: las filas
+  // anteriores a la campana no la tuvieron, y null es «no consta» — el informe
+  // de un escaneo viejo dice eso, no inventa una campana que nadie corrio.
+  ['scans', 'modulos', 'ALTER TABLE scans ADD COLUMN modulos TEXT'],
   // La declaracion del operador sobre los modulos de la campana (ADR-083). TEXT
   // con el JSON de {M8?:bool, M3?:bool} y NULL por defecto, que es el lado
   // honesto: sin declarar no es «no aplica», es «no consta».

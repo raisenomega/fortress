@@ -1,4 +1,5 @@
-import { ficherosDe, type Parada } from '@domain/scan/parada'
+import type { ModuloAuditoria } from '@domain/scan/modulo-auditoria'
+import { esDeTema, ficherosDe, type Parada } from '@domain/scan/parada'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
 import type { ScanOutcome } from '@domain/scan/scanner'
 import { addUsage, EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
@@ -22,6 +23,12 @@ export interface Acumulado {
    * mentira dicha al reves. Los temas se cuentan en `hechas`, no aqui.
    */
   readonly cubiertos: number
+  /**
+   * Los modulos de TEMA cuya parada se completo. No los que APLICABAN: si el
+   * operador para antes de llegar a ellos, aplicaban igual y no se auditaron, y
+   * el informe tiene que poder decir esa diferencia.
+   */
+  readonly temas: readonly ModuloAuditoria[]
   readonly durationMs: number
   readonly usage: TokenUsage
   readonly tools: readonly string[]
@@ -34,6 +41,7 @@ export const NADA_RECORRIDO: Acumulado = {
   reportados: [],
   hechas: 0,
   cubiertos: 0,
+  temas: [],
   durationMs: 0,
   usage: EMPTY_USAGE,
   tools: [],
@@ -47,6 +55,7 @@ export function sumarParada(previo: Acumulado, parada: Parada, salida: ScanOutco
     reportados: [...previo.reportados, ...salida.findings],
     hechas: previo.hechas + 1,
     cubiertos: previo.cubiertos + ficherosDe(parada),
+    temas: esDeTema(parada) ? [...previo.temas, parada.modulo] : previo.temas,
     durationMs: previo.durationMs + salida.durationMs,
     usage: addUsage(previo.usage, salida.usage),
     tools: [...previo.tools, ...salida.tools],

@@ -3,7 +3,7 @@ import type { DeclaracionDeModulos } from '@domain/scan/declaracion-de-modulos'
 import type { Manifiesto } from '@domain/scan/manifiesto'
 import { modulosAplicables, pendientesDeJuicio } from '@domain/scan/modulos-aplicables'
 import { paradasDeTema } from '@domain/scan/modulos-de-tema'
-import { SIN_JUEZ, type Juez } from './juez-de-aplicabilidad'
+import { SIN_MEDIDA, type MedirDeps } from './medir-deps'
 import { readDependencies } from '../system/read-dependencies'
 import { listarFuente } from './listar-fuente'
 import { listarSenales } from './listar-senales'
@@ -31,7 +31,7 @@ import { listarSenales } from './listar-senales'
 export async function medirProyecto(
   projectPath: string,
   declaracion: DeclaracionDeModulos,
-  juzgar: Juez = SIN_JUEZ
+  deps: MedirDeps = SIN_MEDIDA
 ): Promise<Manifiesto> {
   const reparto = dividirEnParadas(await listarFuente(projectPath))
   const evidencia = {
@@ -40,7 +40,8 @@ export async function medirProyecto(
   }
   const pendientes = pendientesDeJuicio(evidencia, declaracion)
   const carpetas = reparto.paradas.map((parada) => parada.carpeta)
-  const juicios = pendientes.length === 0 ? [] : await juzgar(projectPath, pendientes, carpetas)
+  const juicios =
+    pendientes.length === 0 ? [] : await deps.juzgar(projectPath, pendientes, carpetas)
   const veredicto = modulosAplicables(evidencia, declaracion, juicios)
 
   return {
@@ -48,6 +49,7 @@ export async function medirProyecto(
     paradas: [...reparto.paradas, ...paradasDeTema(veredicto.aplicables)],
     modulosAplicables: veredicto.aplicables,
     modulosDescartados: veredicto.descartados,
-    modulosSinConstancia: veredicto.sinConstancia
+    modulosSinConstancia: veredicto.sinConstancia,
+    plantillasAusentes: veredicto.aplicables.filter((m) => !deps.haySembrada(m))
   }
 }

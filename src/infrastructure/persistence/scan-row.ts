@@ -4,7 +4,7 @@ import type { ScanRecord } from '@domain/scan/scan-record'
 /** Las columnas de `scans`, en un solo sitio: el insert y los selects las comparten. */
 export const SCAN_COLUMNS =
   'id, project_id, score, finding_count, dossier_count, critical_count, duration_ms, at, ' +
-  'estado, started_at, paradas_total, paradas_hechas, ficheros_total, ficheros_cubiertos, motivo_cierre' // prettier-ignore
+  'estado, started_at, paradas_total, paradas_hechas, ficheros_total, ficheros_cubiertos, motivo_cierre, modulos' // prettier-ignore
 
 /** Las ocho de siempre: lo que escribe un escaneo de una pieza. */
 export const SCAN_COLUMNS_BASE =
@@ -26,6 +26,7 @@ export interface ScanRow {
   readonly ficheros_total: number | null
   readonly ficheros_cubiertos: number | null
   readonly motivo_cierre: string | null
+  readonly modulos: string | null
 }
 
 /**
@@ -49,6 +50,7 @@ export function toRecord(row: ScanRow): ScanRecord {
     paradasHechas: row.paradas_hechas,
     ficherosTotal: row.ficheros_total,
     ficherosCubiertos: row.ficheros_cubiertos,
-    motivoCierre: row.motivo_cierre
+    motivoCierre: row.motivo_cierre,
+    modulos: row.modulos
   }
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { SIN_CAMPANA } from '@domain/scan/modulos-del-cierre'
 import { cerrarEscaneo } from '@application/scan/cerrar-escaneo'
 import { PROJECT, PROYECTO, SIN_FACTURA } from './cierre-partido-fixture'
 import { abrirRecorrido, AT, PARADAS } from './paradas-fixture'
@@ -15,6 +16,7 @@ describe('el cierre puntua el recorrido COMPLETO, no la ultima parada', () => {
       paradasTotal: 3,
       ficherosCubiertos: 2108,
       ficherosTotal: 2108,
+      modulos: SIN_CAMPANA,
       motivo: 'completo',
       at: AT,
       durationMs: 5400,
