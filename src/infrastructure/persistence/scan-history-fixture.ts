@@ -23,6 +23,7 @@ export const CIERRE: CierreDeScan = {
   paradasHechas: 12,
   ficherosCubiertos: 2108,
   motivoCierre: 'completo',
+  modulos: '{}',
   at: '2026-09-09T21:30:00Z'
 }
 

@@ -5,6 +5,7 @@ import { asentarVocabulario } from './asentar-vocabulario'
 import type { DatosDelCierre } from './datos-del-cierre'
 import { calcularExpediente } from './expediente-del-cierre'
 import { escribirFilasDelCierre } from './filas-del-cierre'
+import { emitirInforme } from './emitir-informe'
 import type { ScanSummary } from './scan-types'
 
 /**
@@ -30,6 +31,8 @@ export function cerrarEscaneo(
   // cuanto no se supo clasificar (ADR-081).
   asentarSeveridadDerivada(context, project, datos.reportados)
   asentarVocabulario(context, project, datos.reportados)
+
+  emitirInforme(context, project, datos, calculado)
 
   // Cognition registra lo aprendido en la memoria del proyecto. Fuera de la
   // transaccion: es un archivo, y perderlo no debe invalidar el escaneo.

@@ -8,6 +8,7 @@ import type { Scanner } from '@domain/scan/scanner'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { createClaudeScanner } from './claude-scanner'
 import { crearJuez } from './juez-de-aplicabilidad'
+import { conKitSembrado } from './medir-deps'
 import { medirProyecto } from './medir-proyecto'
 
 export interface EscaneoArmado {
@@ -31,6 +32,6 @@ export function armarEscaneo(context: AppContext, projectId: string): EscaneoArm
 
   return {
     scanner: createClaudeScanner(agente, (intento) => asentarIntentoFallido(context, intento)),
-    medir: (path, declaracion) => medirProyecto(path, declaracion, juez)
+    medir: (path, declaracion) => medirProyecto(path, declaracion, conKitSembrado(juez))
   }
 }

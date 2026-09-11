@@ -34,6 +34,8 @@ export function escribirFilasDelCierre(
       paradasHechas: datos.paradasHechas,
       ficherosCubiertos: datos.ficherosCubiertos,
       motivoCierre: datos.motivo,
+      // La campana entera, serializada: es lo que el informe transcribe.
+      modulos: JSON.stringify(datos.modulos),
       at: datos.at
     })
 

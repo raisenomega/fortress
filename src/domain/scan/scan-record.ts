@@ -32,6 +32,11 @@ export interface ScanRecord {
   readonly ficherosCubiertos?: number | null
   /** Por que dejo de correr. Null mientras sigue ABIERTO. */
   readonly motivoCierre?: string | null
+  /**
+   * La campana de auditoria de ese escaneo, en JSON (ADR-083, Fase 5). Null en
+   * las filas anteriores a la campana: no consta, que no es «ninguna».
+   */
+  readonly modulos?: string | null
 }
 
 export type NewScanRecord = Omit<ScanRecord, 'id'>

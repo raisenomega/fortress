@@ -1,5 +1,6 @@
 import type { SeverityCounts } from '@domain/project/severity-counts'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
+import type { ModulosDelCierre } from '@domain/scan/modulos-del-cierre'
 import type { MotivoCierre } from '@domain/scan/motivo-cierre'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 
@@ -18,6 +19,13 @@ export interface DatosDelCierre {
   readonly ficherosCubiertos: number | null
   /** La Y de «audite X de Y». Null sin manifiesto. */
   readonly ficherosTotal: number | null
+  /**
+   * La campana con la que este escaneo se comprometio y lo que de ella corrio
+   * (ADR-083, Fase 5). Viaja hasta aqui porque el informe la TRANSCRIBE: si se
+   * quedara en el manifiesto moriria al terminar el recorrido, y el entregable
+   * tendria que volver a medir un arbol que ya no es el que se audito.
+   */
+  readonly modulos: ModulosDelCierre
   readonly motivo: MotivoCierre
   readonly at: string
   readonly durationMs: number

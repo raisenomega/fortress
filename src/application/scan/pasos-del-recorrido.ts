@@ -1,4 +1,5 @@
 import type { Project } from '@domain/project/project'
+import type { CampanaDeclarada } from '@domain/scan/campana-declarada'
 import type { MotivoCierre } from '@domain/scan/motivo-cierre'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
@@ -17,6 +18,8 @@ export type Cerrar = (motivo: MotivoCierre, acumulado: Acumulado, extra?: string
 export interface TotalesDelRecorrido {
   readonly paradasTotal: number
   readonly ficherosTotal: number | null
+  /** La campana declarada, del mismo manifiesto que fijo los totales. */
+  readonly campana: CampanaDeclarada
 }
 
 export function crearCierre(
@@ -33,6 +36,8 @@ export function crearCierre(
       paradasTotal: totales.paradasTotal,
       ficherosCubiertos: acumulado.cubiertos,
       ficherosTotal: totales.ficherosTotal,
+      // Lo declarado por el manifiesto MAS lo que de verdad corrio.
+      modulos: { ...totales.campana, temasCorridos: acumulado.temas },
       motivo,
       at: nowIso(),
       durationMs: acumulado.durationMs,

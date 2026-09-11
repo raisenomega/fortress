@@ -1,5 +1,6 @@
 import type { Project } from '@domain/project/project'
 import type { Manifiesto } from '@domain/scan/manifiesto'
+import { campanaDe } from '@domain/scan/campana-declarada'
 import { modulosDeParada } from '@domain/scan/modulos-de-carpeta'
 import { ordenDelRecorrido } from '@domain/scan/orden-del-recorrido'
 import { rotuloDe } from '@domain/scan/parada'
@@ -35,7 +36,8 @@ export async function recorrerParadas(
   const temas = modulosDeParada(manifiesto.modulosAplicables)
   const { scanId, at, cerrar } = abrirRecorrido(context, project, salidas, {
     paradasTotal: paradas.length,
-    ficherosTotal: manifiesto.ficherosTotal
+    ficherosTotal: manifiesto.ficherosTotal,
+    campana: campanaDe(manifiesto)
   })
 
   let acumulado = NADA_RECORRIDO

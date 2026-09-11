@@ -37,7 +37,9 @@ export function createSqliteScanHistoryRepository(db: Db): ScanHistoryRepository
         paradasHechas: null,
         ficherosTotal: apertura.ficherosTotal,
         ficherosCubiertos: null,
-        motivoCierre: null
+        motivoCierre: null,
+        // Una fila recien abierta no tiene campana: se declara al cerrar.
+        modulos: null
       }
     },
 

@@ -55,6 +55,9 @@ export function crearBench(): Bench {
     runs: createSqliteAgentRunRepository(db),
     fileHistory: { changedSince: () => Promise.resolve(false) },
     cognitionWriter: { writeScan: (): void => void (escrituras += 1) },
+    informeWriter: { write: (): void => undefined },
+    // El banco no tiene repo git: null es la verdad, y el informe la dice.
+    headSha: () => null,
     transaction: (work: () => void) => db.transaction(work)()
   } as unknown as AppContext
 

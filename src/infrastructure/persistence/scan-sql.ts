@@ -31,7 +31,8 @@ export const SCAN_SQL = {
        estado = @estado, score = @score, finding_count = @findingCount,
        dossier_count = @dossierCount, critical_count = @criticalCount,
        duration_ms = @durationMs, paradas_hechas = @paradasHechas,
-       ficheros_cubiertos = @ficherosCubiertos, motivo_cierre = @motivoCierre, at = @at
+       ficheros_cubiertos = @ficherosCubiertos, motivo_cierre = @motivoCierre,
+       modulos = @modulos, at = @at
      WHERE id = @id`,
 
   BY_PROJECT: `SELECT ${SCAN_COLUMNS} FROM scans WHERE project_id = ? ORDER BY at DESC LIMIT ?`,

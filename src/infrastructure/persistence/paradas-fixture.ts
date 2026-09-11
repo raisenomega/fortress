@@ -1,4 +1,5 @@
 import { cerrarEscaneo } from '@application/scan/cerrar-escaneo'
+import { SIN_CAMPANA } from '@domain/scan/modulos-del-cierre'
 import { asentarHallazgos } from '@application/scan/asentar-hallazgos'
 import type { AppContext } from '@application/context'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
@@ -55,6 +56,7 @@ export function abrirRecorrido(paradasTotal = 3): Recorrido {
         paradasTotal,
         ficherosCubiertos,
         ficherosTotal: 2108,
+        modulos: SIN_CAMPANA,
         motivo,
         at: AT,
         durationMs: 5400,
