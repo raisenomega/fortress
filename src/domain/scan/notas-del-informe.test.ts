@@ -4,7 +4,7 @@ import { parseScanOutput } from './parse-scan-output'
 
 const HALLAZGO =
   '{"severity":"HIGH","title":"clave en el repo","file":"a.ts","line":4,"tipo":"secreto-versionado","simbolo":"K"}' // prettier-ignore
-const NOTA = '{"kind":"limitacion","area":"grafo","note":"no pude trazar el simbolo"}'
+const NOTA = '{"kind":"limitacion","area":"consulta-del-grafo","note":"no pude trazar el simbolo"}'
 
 const informe = (extra: string): string => `He revisado el modulo.
 
@@ -23,7 +23,7 @@ describe('el informe del escaner lleva hallazgos Y notas en el MISMO bloque', ()
 
   it('y la nota sale del mismo bloque, sin segunda regex', () => {
     expect(notasDelInforme(informe(`,"notes":[${NOTA}]`))).toEqual([
-      { kind: 'limitacion', area: 'grafo', note: 'no pude trazar el simbolo' }
+      { kind: 'limitacion', area: 'consulta-del-grafo', note: 'no pude trazar el simbolo' }
     ])
   })
 
@@ -38,10 +38,10 @@ describe('el informe del escaner lleva hallazgos Y notas en el MISMO bloque', ()
   })
 
   it('gana el ULTIMO bloque, como los hallazgos: el agente puede citar json antes', () => {
-    const conCita = `Ejemplo:\n\`\`\`json\n{"notes":[{"kind":"bug","area":"x","note":"citado"}]}\n\`\`\`\n${informe(`,"notes":[${NOTA}]`)}` // prettier-ignore
+    const conCita = `Ejemplo:\n\`\`\`json\n{"notes":[{"kind":"bug","area":"otro","note":"citado"}]}\n\`\`\`\n${informe(`,"notes":[${NOTA}]`)}` // prettier-ignore
 
     expect(notasDelInforme(conCita)).toEqual([
-      { kind: 'limitacion', area: 'grafo', note: 'no pude trazar el simbolo' }
+      { kind: 'limitacion', area: 'consulta-del-grafo', note: 'no pude trazar el simbolo' }
     ])
   })
 })

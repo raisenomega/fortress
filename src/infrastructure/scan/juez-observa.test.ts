@@ -5,7 +5,7 @@ import type { SelfNoteDraft } from '@domain/system/self-observation'
 import { crearJuez } from './juez-de-aplicabilidad'
 
 const APLICA = 'APLICA:[{"modulo":"M8","aplica":"si","porque":"src/pagos.ts:31 cobra"}]:END-APLICA'
-const NOTAS = 'NOTAS:[{"kind":"falta","area":"juicio","note":"sin grafo no pude confirmarlo"}]:END-NOTAS' // prettier-ignore
+const NOTAS = 'NOTAS:[{"kind":"falta","area":"analisis-y-triaje","note":"sin grafo no pude confirmarlo"}]:END-NOTAS' // prettier-ignore
 
 const agente = (texto: string): CodeAgent => ({
   isAvailable: () => true,
@@ -26,7 +26,7 @@ describe('el juez responde DOS bloques: su veredicto y lo que noto', () => {
 
     expect(veredictos).toBe(1)
     expect(notas).toEqual([
-      { kind: 'falta', area: 'juicio', note: 'sin grafo no pude confirmarlo' }
+      { kind: 'falta', area: 'analisis-y-triaje', note: 'sin grafo no pude confirmarlo' }
     ])
   })
 

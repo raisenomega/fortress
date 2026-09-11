@@ -3,7 +3,15 @@ import type { NewSelfObservation, ObservationStatus, SelfObservation } from './s
 /** Puerto del backlog de auto-mejora de FORTRESS. Sobrevive a que se quite el
  *  proyecto origen: es sobre FORTRESS, no sobre el proyecto. */
 export interface SelfObservationRepository {
+  /**
+   * Asienta lo que un agente noto. NO siempre abre fila: si ya hay una PENDIENTE
+   * del mismo `kind` y `area` le anade un AVISTAMIENTO en vez de duplicarla
+   * (ADR-085, Fase 4). Devuelve la fila que quedo, nueva o existente.
+   */
   add(observation: NewSelfObservation): SelfObservation
+  /** En cuantos PROYECTOS distintos se ha visto. La senal que ordena el backlog:
+   *  tres clientes con el mismo hueco valen mas que treinta avisos de uno. */
+  vistaEn(observationId: string): number
   /** Pendientes (no atendidas ni descartadas), del mas reciente al mas antiguo. */
   listOpen(): readonly SelfObservation[]
   /**

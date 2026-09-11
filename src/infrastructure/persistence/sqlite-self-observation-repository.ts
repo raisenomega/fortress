@@ -1,7 +1,7 @@
-import { redactarObservacion } from '@domain/system/cerco-de-observacion'
-import { newId, nowIso } from '@domain/shared/id'
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
 import { toObs, type Row } from './self-observation-row'
+import * as SQL from './self-observation-sql'
+import { asentar } from './asentar-observacion'
 import type { Db } from './database'
 
 /**
@@ -15,10 +15,10 @@ import type { Db } from './database'
  * tenia que acordarse.
  */
 export function createSqliteSelfObservationRepository(db: Db): SelfObservationRepository {
-  const insert = db.prepare(
-    `INSERT INTO self_observations (id, source_project, kind, area, note, resolved, created_at)
-     VALUES (?, ?, ?, ?, ?, 0, ?)`
-  )
+  const insert = db.prepare(SQL.INSERT_OBS)
+  const mismaObs = db.prepare(SQL.MISMA_OBS)
+  const avistar = db.prepare(SQL.INSERT_SIGHTING)
+  const vistaEn = db.prepare(SQL.VISTA_EN)
   const byId = db.prepare('SELECT * FROM self_observations WHERE id = ?')
   const open = db.prepare(
     "SELECT * FROM self_observations WHERE status = 'pendiente' ORDER BY created_at DESC"
@@ -38,15 +38,8 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
     update.run(entrada).changes > 0
 
   return {
-    add: (o) => {
-      const id = newId()
-      // El `area` tambien: es texto del agente y una de las ocho fugas reales
-      // llevaba la ruta ahi, no en la nota.
-      const area = redactarObservacion(o.area, o.projectPath)
-      const note = redactarObservacion(o.note, o.projectPath)
-      insert.run(id, o.sourceProject, o.kind, area, note, nowIso())
-      return toObs(byId.get(id) as Row)
-    },
+    add: asentar(db, { insert, mismaObs, avistar, byId }),
+    vistaEn: (id) => (vistaEn.get(id) as { n: number }).n,
     listOpen: () => (open.all() as Row[]).map(toObs),
     listClosed: (limite) => (closed.all(limite) as Row[]).map(toObs),
     listAll: () => (all.all() as Row[]).map(toObs),

@@ -1,6 +1,7 @@
 import type { Db } from './database'
 import { barrerConRed } from './barrido-con-red'
 import { reidentificarConRed } from './reidentificar-con-red'
+import { SEMBRAR_AVISTAMIENTOS } from './self-observation-sql'
 
 /**
  * Las migraciones que NO tocan el esquema sino los DATOS, juntas y al final.
@@ -19,4 +20,9 @@ export function migrarDatos(db: Db): void {
   reidentificarConRed(db)
   // ADR-085: las citas del cliente fuera del backlog de auto-mejora.
   barrerConRed(db)
+
+  // ADR-085, Fase 4: el primer avistamiento de las filas que existian antes de
+  // que la tabla existiera. `OR IGNORE` la hace idempotente, y sin ella las 350
+  // saldrian con `vistaEn: 0` y el orden las hundiria bajo cualquier fila nueva.
+  db.exec(SEMBRAR_AVISTAMIENTOS)
 }

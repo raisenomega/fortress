@@ -12,7 +12,8 @@ const URGENCIA: Readonly<Record<ObservationKind, number>> = {
   oportunidad: 4
 }
 
-/** Cuantas observaciones comparten cada valor LITERAL de `area`. */
+/** Cuantas observaciones comparten cada `area`. Desde que el vocabulario esta
+ *  cerrado esto agrupa de verdad; antes contaba formas de escribir. */
 export function areaFrequencies(
   observations: readonly SelfObservation[]
 ): ReadonlyMap<string, number> {
@@ -21,34 +22,41 @@ export function areaFrequencies(
   return cuenta
 }
 
-/** Una observacion con la frecuencia que la ordeno, para que el fichero la lleve. */
+/** Una observacion con lo que la ordeno, para que el fichero lo lleve. */
 export interface ObservationConFrecuencia extends SelfObservation {
   readonly areaFrequency: number
+  /** En cuantos PROYECTOS distintos se ha visto (ADR-085, Fase 4). */
+  readonly vistaEn: number
 }
 
 /**
- * El orden del backlog: lo que MAS agentes repitieron primero, y dentro de un
- * mismo `area` lo mas urgente y lo mas reciente.
+ * El orden del backlog: lo que se topo MAS CLIENTES primero.
  *
- * La frecuencia se cuenta sobre el `area` LITERAL, y eso INFRAVALORA los temas
- * reales: el campo es texto libre del agente, asi que "permisos" aparece
- * escrito de veintiuna formas distintas y ninguna suma las otras veinte. El
- * orden sigue siendo util —lo repetido sube— pero no es el mapa de temas, y por
- * eso el fichero exportado lo dice de su puno y letra en vez de callarlo.
+ * `vistaEn` manda, y ese cambio es el arco entero (ADR-085, Fase 4). Antes
+ * mandaba la frecuencia del `area` LITERAL, y eso premiaba el ruido: una queja
+ * repetida treinta veces en UN proyecto subia por encima de una que tres
+ * clientes distintos se habian encontrado. La segunda dice «esto le falta a
+ * FORTRESS en todos los stacks»; la primera solo dice que un escaneo tiene doce
+ * paradas. El orden viejo no las distinguia porque el esquema tampoco.
  *
- * Agrupar de verdad exige cerrar el vocabulario de `area`, como se hizo con los
- * tipos de defecto (ADR-067). Eso es otra pieza; esto solo entrega las notas.
+ * `areaFrequency` sigue detras y ahora SI agrupa: con el vocabulario cerrado,
+ * las veintiseis formas de escribir «permisos» suman entre ellas en vez de
+ * contar por separado. Las filas anteriores al vocabulario conservan su texto
+ * libre y por eso no agrupan — su reclasificacion es otro gesto.
  */
 export function ordenarObservaciones(
-  observations: readonly SelfObservation[]
+  observations: readonly SelfObservation[],
+  vistaEn: (id: string) => number = () => 0
 ): readonly ObservationConFrecuencia[] {
   const frecuencia = areaFrequencies(observations)
-  const conFrecuencia = observations.map((o) => ({
+  const conOrden = observations.map((o) => ({
     ...o,
-    areaFrequency: frecuencia.get(o.area) ?? 0
+    areaFrequency: frecuencia.get(o.area) ?? 0,
+    vistaEn: vistaEn(o.id)
   }))
 
-  return [...conFrecuencia].sort((a, b) => {
+  return [...conOrden].sort((a, b) => {
+    if (a.vistaEn !== b.vistaEn) return b.vistaEn - a.vistaEn
     if (a.areaFrequency !== b.areaFrequency) return b.areaFrequency - a.areaFrequency
     if (URGENCIA[a.kind] !== URGENCIA[b.kind]) return URGENCIA[a.kind] - URGENCIA[b.kind]
     return b.createdAt.localeCompare(a.createdAt)
