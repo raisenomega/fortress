@@ -1,38 +1,19 @@
+import { redactarObservacion } from '@domain/system/cerco-de-observacion'
 import { newId, nowIso } from '@domain/shared/id'
-import type { ObservationKind, ObservationStatus, SelfObservation } from '@domain/system/self-observation' // prettier-ignore
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
+import { toObs, type Row } from './self-observation-row'
 import type { Db } from './database'
 
-interface Row {
-  readonly id: string
-  readonly source_project: string
-  readonly kind: string
-  readonly area: string
-  readonly note: string
-  readonly status: string
-  readonly reason: string | null
-  readonly attended_by: string | null
-  readonly attended_at: string | null
-  readonly created_at: string
-}
-
-/** `resolved` no se lee: sigue en la tabla por ADR-036, no en el modelo. */
-function toObs(row: Row): SelfObservation {
-  return {
-    id: row.id,
-    sourceProject: row.source_project,
-    kind: row.kind as ObservationKind,
-    area: row.area,
-    note: row.note,
-    status: row.status as ObservationStatus,
-    reason: row.reason,
-    attendedBy: row.attended_by,
-    attendedAt: row.attended_at,
-    createdAt: row.created_at
-  }
-}
-
-/** Backlog de auto-mejora de FORTRESS. Parametrizado; sin cascada de proyectos. */
+/**
+ * Backlog de auto-mejora de FORTRESS. Parametrizado; sin cascada de proyectos.
+ *
+ * El CERCO de ADR-085 vive en `add` y no en el parser, a proposito: `add` es el
+ * UNICO sitio por el que pasan TODAS las observaciones, vengan del JSON de un
+ * analisis, de un bloque en prosa o de un agente que aun no existe. Ponerlo en
+ * `toSelfNotes` dejaria fuera al primero que llegue por otra puerta — la misma
+ * leccion que los seis agentes que gastaban sin constar porque cada llamante
+ * tenia que acordarse.
+ */
 export function createSqliteSelfObservationRepository(db: Db): SelfObservationRepository {
   const insert = db.prepare(
     `INSERT INTO self_observations (id, source_project, kind, area, note, resolved, created_at)
@@ -59,7 +40,11 @@ export function createSqliteSelfObservationRepository(db: Db): SelfObservationRe
   return {
     add: (o) => {
       const id = newId()
-      insert.run(id, o.sourceProject, o.kind, o.area, o.note, nowIso())
+      // El `area` tambien: es texto del agente y una de las ocho fugas reales
+      // llevaba la ruta ahi, no en la nota.
+      const area = redactarObservacion(o.area, o.projectPath)
+      const note = redactarObservacion(o.note, o.projectPath)
+      insert.run(id, o.sourceProject, o.kind, area, note, nowIso())
       return toObs(byId.get(id) as Row)
     },
     listOpen: () => (open.all() as Row[]).map(toObs),

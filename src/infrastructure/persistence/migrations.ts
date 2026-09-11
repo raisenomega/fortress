@@ -4,7 +4,7 @@ import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
 import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
-import { reidentificarConRed } from './reidentificar-con-red'
+import { migrarDatos } from './migraciones-de-datos'
 import { SUELTAS } from './columnas-sueltas'
 import { FINDING_COLUMNS } from './columnas-de-findings'
 import type { Db } from './database'
@@ -64,10 +64,6 @@ export function runMigrations(db: Db): void {
   // ALTER de arriba debe encontrarselas a medio sustituir.
   addRepairProjectFk(db)
 
-  // Y la unica que no toca el esquema sino los DATOS: la clave nueva de
-  // ADR-084. Va despues de todas porque necesita las columnas ya puestas
-  // —`tipo` la anade `addFindingMemory`— y aqui dentro porque aqui es donde
-  // corre antes de que la app pueda escanear: la ventana de duplicado no
-  // existe si no hay instante en que la formula haya cambiado y la base no.
-  reidentificarConRed(db)
+  // Y las que no tocan el esquema sino los DATOS, juntas y las ultimas.
+  migrarDatos(db)
 }
