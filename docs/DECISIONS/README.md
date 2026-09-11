@@ -122,6 +122,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-081](adr-081-el-vocabulario-de-tipos-cubre-codigo-ajeno.md) | El vocabulario de tipos cubre código ajeno, y elegir de él se guía | 2026-09-07 | Aceptada | Escaneo |
 | [ADR-082](adr-082-escaneo-por-paradas-con-cobertura-declarada.md) | El escaneo avanza por paradas, y declara su cobertura | 2026-09-09 | Aceptada | Escaneo |
 | [ADR-083](adr-083-campana-de-auditoria-por-plantillas.md) | La campaña de auditoría: las 17 plantillas refuerzan el escaneo, no lo sustituyen | 2026-09-10 | Aceptada | Escaneo |
+| [ADR-084](adr-084-identidad-por-linea-el-simbolo-sale.md) | La identidad de un hallazgo lleva la LÍNEA, y el símbolo sale | 2026-09-11 | Aceptada | Escaneo |
 
 ## Referencias
 
