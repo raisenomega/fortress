@@ -29,12 +29,20 @@ export const SIN_JUEZ: Juez = () => Promise.resolve([])
  */
 export function crearJuez(
   codeAgent: CodeAgent,
+  /**
+   * De quien es el proceso. NO es opcional desde que el escaneo corre sin techo
+   * (ADR-082, Enmienda 3): `trackChild` registra al hijo con este id y
+   * `killChildrenOf` solo alcanza a los que lo llevan. Sin el, un juez colgado
+   * no lo mataba ni el reloj —que ya no existe— ni Detener.
+   */
+  projectId: string,
   onVeredicto: (veredicto: VeredictoAplicabilidad) => void = () => undefined
 ): Juez {
   return async (projectPath, modulos, carpetas) => {
     const reply = await codeAgent.run(
       {
         projectPath,
+        projectId,
         prompt: buildJuicioPrompt(modulos, carpetas),
         permissionMode: 'plan',
         agentId: 'scope-classifier',

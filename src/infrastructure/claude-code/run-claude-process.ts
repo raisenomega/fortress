@@ -3,29 +3,57 @@ import { createInterface } from 'readline'
 import type { CodeAgentReply } from '@domain/chat/code-agent'
 import { createRunAccumulator } from './run-accumulator'
 
-/** Un scan sobre un repo grande tarda; pasado esto se asume proceso colgado. */
-const MAX_DURATION_MS = 15 * 60 * 1000
+/**
+ * Lo que espera un camino SIN otra red que el reloj: chat/Terminal, Build,
+ * Genesis, el borrador de agente y los episodios. Ahi un proceso colgado no
+ * tiene manifiesto que lo mida ni barra de paradas que delate que no avanza, y
+ * el cronometro es lo unico que hay.
+ */
+export const TECHO_POR_DEFECTO = 15 * 60 * 1000
+
+/**
+ * Sin techo (ADR-082, Enmienda 3). Lo pide el ESCANEO, que si tiene otra red:
+ * el manifiesto mide, las paradas son finitas por construccion, y el boton
+ * Detener escala a SIGKILL —que no se ignora— mientras el reloj solo mandaba
+ * SIGTERM, una peticion que un proceso de verdad colgado se salta.
+ *
+ * El techo no distinguia un cuelgue de una parada grande porque no sabe nada
+ * del codigo. Medido el 2026-09-10: Health Flow murio en su PRIMERA parada a
+ * los 901.727 ms con un hallazgo real a medias.
+ */
+export const SIN_TECHO = 0
+
+/** Arma el techo y devuelve como desarmarlo. Sin techo no hay nada que armar ni
+ *  que cancelar: la funcion vacia es la ausencia, no un caso especial. */
+function armarTecho(child: ChildProcessWithoutNullStreams, techoMs: number): () => void {
+  if (techoMs <= 0) return () => undefined
+
+  const timer = setTimeout(() => child.kill('SIGTERM'), techoMs)
+  return () => clearTimeout(timer)
+}
 
 /** Consume la salida NDJSON del CLI y resuelve al cerrarse el proceso. */
 export function collectRun(
   child: ChildProcessWithoutNullStreams,
-  onChunk: (delta: string) => void
+  onChunk: (delta: string) => void,
+  /** Default: el de siempre. Quien no pasa nada se comporta como antes. */
+  techoMs: number = TECHO_POR_DEFECTO
 ): Promise<CodeAgentReply> {
   return new Promise((resolve) => {
     const accumulator = createRunAccumulator(onChunk)
-    const timer = setTimeout(() => child.kill('SIGTERM'), MAX_DURATION_MS)
+    const desarmar = armarTecho(child, techoMs)
 
     createInterface({ input: child.stdout }).on('line', (line) => accumulator.absorb(line))
     child.stderr.on('data', (chunk: Buffer) => accumulator.addStderr(chunk.toString()))
 
     child.on('error', (error) => {
-      clearTimeout(timer)
+      desarmar()
       accumulator.addStderr(`No se pudo ejecutar Claude Code: ${error.message}`)
       resolve(accumulator.toReply(null))
     })
 
     child.on('close', (code) => {
-      clearTimeout(timer)
+      desarmar()
       resolve(accumulator.toReply(code))
     })
   })
