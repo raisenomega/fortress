@@ -27,7 +27,7 @@ function conTestigo(b: Bench): { ctx: Bench['context']; consultas: () => number 
 }
 
 const conVerdicto = (verdict: OmegaVerdict): Bench =>
-  bench({ result: { ok: true, verdict, runMeta: META } })
+  bench({ result: { ok: true, verdict, runMeta: META, notas: [] } })
 
 /** El proyecto NO es el repo de FORTRESS: el camino de cualquier otro. */
 const AJENO = { esRepoPropio: (): boolean => false }

@@ -28,7 +28,7 @@ const VETO_QUE_NO_VETA = {
  */
 describe('el veredicto que se persiste es el del motor, no el del agente', () => {
   it('agente VETADO por PARCIAL, reglas APROBADO: la transicion guarda APROBADO', async () => {
-    const b = bench({ result: { ok: true, verdict: VETO_QUE_NO_VETA, runMeta: META } })
+    const b = bench({ result: { ok: true, verdict: VETO_QUE_NO_VETA, runMeta: META, notas: [] } })
 
     const r = await runOmega(b.context, 'prop-1', b.deps)
 
@@ -41,7 +41,7 @@ describe('el veredicto que se persiste es el del motor, no el del agente', () =>
   })
 
   it('los EJES se conservan enteros: solo cambia la conclusion', async () => {
-    const b = bench({ result: { ok: true, verdict: VETO_QUE_NO_VETA, runMeta: META } })
+    const b = bench({ result: { ok: true, verdict: VETO_QUE_NO_VETA, runMeta: META, notas: [] } })
     await runOmega(b.context, 'prop-1', b.deps)
 
     // El PARCIAL es la evidencia que el humano mira antes de firmar; sustituirlo
@@ -52,7 +52,7 @@ describe('el veredicto que se persiste es el del motor, no el del agente', () =>
   })
 
   it('el desacuerdo NO se borra: queda asentado en el libro', async () => {
-    const b = bench({ result: { ok: true, verdict: VETO_QUE_NO_VETA, runMeta: META } })
+    const b = bench({ result: { ok: true, verdict: VETO_QUE_NO_VETA, runMeta: META, notas: [] } })
     await runOmega(b.context, 'prop-1', b.deps)
 
     const mismatch = b.events.find((e) => e.reason === 'omega_verdict_mismatch')

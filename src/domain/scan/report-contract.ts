@@ -1,3 +1,4 @@
+import { NOTAS_COMO_CLAVE } from '../system/peticion-de-notas'
 import { BLOQUE_DE_TIPOS } from './bloque-de-tipos'
 import { ALCANCES, EFECTOS } from './ejes-de-severidad'
 
@@ -46,6 +47,8 @@ ${BLOQUE_DE_TIPOS}
   sin que haya hoy un camino de explotacion (cabeceras, rate limiting, un
   error.message crudo).
 - Si no encuentras nada en tu especialidad, el bloque es {"findings":[]}.
+
+${NOTAS_COMO_CLAVE}
 
 \`tipo\` y \`simbolo\` son lo que permite reconocer un mismo defecto entre
 escaneos: el titulo se redacta distinto cada vez, esos dos no. Dos defectos

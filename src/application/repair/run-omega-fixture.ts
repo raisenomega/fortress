@@ -57,7 +57,7 @@ export function bench(opts: Opciones = {}): Bench {
     omega: {
       run: () => {
         calls.push('omega')
-        return Promise.resolve(opts.result ?? { ok: true, verdict: APROBADO, runMeta: META })
+        return Promise.resolve(opts.result ?? { ok: true, verdict: APROBADO, runMeta: META, notas: [] })
       }
     },
     enqueue: (job) => job(),

@@ -15,8 +15,10 @@ const UNREADABLE =
   'El escaneo termino pero no devolvio un informe legible, asi que no se guarda ' +
   'ningun resultado. Vuelve a intentarlo.'
 
-/** El informe va al final, pero el agente puede citar JSON antes: gana el ultimo. */
-function lastJsonBlock(output: string): string | null {
+/** El informe va al final, pero el agente puede citar JSON antes: gana el ultimo.
+ *  Exportada porque el MISMO bloque lleva las notas de ADR-085, y buscarlo dos
+ *  veces con dos regex seria dos verdades sobre donde esta el informe. */
+export function lastJsonBlock(output: string): string | null {
   const blocks = [...output.matchAll(JSON_FENCE)].map((match) => match[1].trim())
   return blocks.at(-1) ?? null
 }

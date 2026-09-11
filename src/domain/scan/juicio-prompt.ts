@@ -1,3 +1,4 @@
+import { NOTAS_COMO_BLOQUE } from '../system/peticion-de-notas'
 import { NOMBRE_MODULO, type ModuloAuditoria } from './modulo-auditoria'
 
 /** Que se le pregunta de cada modulo, en una linea y sin margen. */
@@ -38,7 +39,12 @@ export function buildJuicioPrompt(
     'que la respalde. Sin cita comprobable responde "no-consta": una afirmacion',
     'sin prueba no se puede auditar y se descarta igual.',
     '',
-    'Responde SOLO con el bloque siguiente, sin texto fuera de el:',
-    'APLICA:[{"modulo":"M8","aplica":"si|no|no-consta","porque":"fichero.ext:linea"}]:END-APLICA'
+    'Responde con el bloque siguiente, y nada de prosa suelta:',
+    'APLICA:[{"modulo":"M8","aplica":"si|no|no-consta","porque":"fichero.ext:linea"}]:END-APLICA',
+    '',
+    // Su payload es un ARRAY: no hay clave hermana donde colgar las notas, asi
+    // que van en un bloque propio. Es la unica de las tres formas que necesita
+    // pieza nueva, y por eso el extractor la trae (ADR-085, Fase 2).
+    NOTAS_COMO_BLOQUE
   ].join('\n')
 }

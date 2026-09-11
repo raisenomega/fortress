@@ -1,5 +1,7 @@
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { parseOmegaResponse } from '@domain/repair/omega-parse'
+import { notasDeObjeto } from '@domain/system/extraer-notas'
+import type { SelfNoteDraft } from '@domain/system/self-observation'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { processOmegaOut } from './omega-out'
@@ -14,7 +16,7 @@ import { processOmegaOut } from './omega-out'
  * las tres puertas del parser habia fallado.
  */
 export type OmegaRunResult =
-  | { ok: true; verdict: OmegaVerdict; runMeta: AnalystRunMeta }
+  | { ok: true; verdict: OmegaVerdict; runMeta: AnalystRunMeta; notas: readonly SelfNoteDraft[] }
   | {
       ok: false
       error: string
@@ -47,5 +49,22 @@ export function toOmegaOutcome(
     // prettier-ignore
     return { ok: false, error: 'omega_response_invalid', detail: parsed.error, raw: text, timedOut: false, runMeta: meta(usage) }
   }
-  return { ok: true, verdict: parsed.verdict, runMeta: meta(usage) }
+  // Las notas se leen del MISMO bloque pero por la puerta TOLERANTE, nunca por
+  // `parseOmegaResponse`: ahi un campo desconocido invalida el veredicto entero
+  // —«no se inventan ejes»— y una nota mal escrita tumbaria el juicio que la
+  // acompana. Son dos contratos con dureza distinta a proposito (ADR-085).
+  return { ok: true, verdict: parsed.verdict, runMeta: meta(usage), notas: notasDelVerdict(text) }
+}
+
+/** El objeto del VERDICT, releido solo para sus notas. Si no se entiende, no hay
+ *  notas y no pasa nada mas: el veredicto ya se leyo por su cuenta. */
+function notasDelVerdict(text: string): readonly SelfNoteDraft[] {
+  const match = /VERDICT:\s*(\{[\s\S]*?\})\s*:END-VERDICT/.exec(text)
+  if (match === null) return []
+
+  try {
+    return notasDeObjeto(JSON.parse(match[1]))
+  } catch {
+    return []
+  }
 }

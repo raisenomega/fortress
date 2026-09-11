@@ -17,13 +17,13 @@ describe('runOmega (I4) — guardas', () => {
   })
 
   it('VETADO por resuelve=NO: GATE -> RECHAZADO omega_vetado, worktree intacto', async () => {
-    const b = bench({ result: { ok: true, verdict: { ...APROBADO, resuelve_el_hallazgo: 'NO', veredicto_global: 'VETADO' }, runMeta: META } }) // prettier-ignore
+    const b = bench({ result: { ok: true, verdict: { ...APROBADO, resuelve_el_hallazgo: 'NO', veredicto_global: 'VETADO' }, runMeta: META, notas: [] } }) // prettier-ignore
     expect(await runOmega(b.context, 'prop-1', b.deps)).toMatchObject({ ok: false, reason: 'omega_vetado' }) // prettier-ignore
     expect(b.patches.at(-1)?.analysisReason).toContain('omega_vetado')
   })
 
   it('agente dice APROBADO pero las reglas dicen VETADO: mismatch + motor manda', async () => {
-    const b = bench({ result: { ok: true, verdict: { ...APROBADO, respeta_scope: 'NO' }, runMeta: META } }) // prettier-ignore
+    const b = bench({ result: { ok: true, verdict: { ...APROBADO, respeta_scope: 'NO' }, runMeta: META, notas: [] } }) // prettier-ignore
     expect(await runOmega(b.context, 'prop-1', b.deps)).toMatchObject({ ok: false, reason: 'omega_vetado' }) // prettier-ignore
     const mismatch = b.events.find((e) => e.reason === 'omega_verdict_mismatch')
     expect(mismatch?.eventType).toBe('DECISION')
