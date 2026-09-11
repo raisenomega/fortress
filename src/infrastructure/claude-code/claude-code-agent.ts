@@ -1,5 +1,4 @@
 import { spawn } from 'child_process'
-import { existsSync, statSync } from 'fs'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
@@ -11,19 +10,8 @@ import { buildEnv } from './build-env'
 import { buildArgs, CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { readProjectMcpServers } from './project-mcp'
 import { readProjectScripts } from './project-scripts'
-import { collectRun } from './run-claude-process'
-
-/** La carpeta del proyecto tiene que existir y ser una carpeta antes de spawnear. */
-function precheckProjectPath(projectPath: string): string | null {
-  try {
-    if (statSync(projectPath).isDirectory()) return null
-    return `La ruta del proyecto no es una carpeta: ${projectPath}`
-  } catch {
-    return existsSync(projectPath)
-      ? `No se puede acceder a la carpeta del proyecto: ${projectPath}`
-      : `La carpeta del proyecto ya no existe: ${projectPath}`
-  }
-}
+import { precheckProjectPath } from './precheck-project-path'
+import { collectRun, TECHO_POR_DEFECTO } from './run-claude-process'
 
 /**
  * Ejecuta Claude Code dentro de la carpeta del proyecto. A diferencia del chat
@@ -39,7 +27,12 @@ export function createClaudeCodeAgent(
    *  los argumentos salen identicos a como salian antes de existir esto. */
   mcpConfig: string | null = null,
   /** Agentes auto-propuestos ACTIVOS a inyectar. Default vacio: sin cambios. */
-  customAgents: Readonly<Record<string, AgentDefinition>> = {}
+  customAgents: Readonly<Record<string, AgentDefinition>> = {},
+  /**
+   * Cuanto se espera antes de dar el proceso por colgado. `SIN_TECHO` para el
+   * escaneo (ADR-082, Enmienda 3); quien no pasa nada conserva los 15 minutos.
+   */
+  techoMs: number = TECHO_POR_DEFECTO
 ): CodeAgent {
   return {
     isAvailable: isClaudeInstalled,
@@ -69,7 +62,7 @@ export function createClaudeCodeAgent(
       })
       trackChild(child, request.projectId ?? null)
 
-      return collectRun(child, onChunk)
+      return collectRun(child, onChunk, techoMs)
     }
   }
 }
