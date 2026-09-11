@@ -20,7 +20,13 @@ export interface TotalesDelRecorrido {
   readonly ficherosTotal: number | null
   /** La campana declarada, del mismo manifiesto que fijo los totales. */
   readonly campana: CampanaDeclarada
+  /** Cuando se abrio la fila. De aqui sale el reloj de pared del escaneo. */
+  readonly startedAt: string
 }
+
+/** El reloj de pared. Nunca negativo: un reloj que retrocede no resta tiempo. */
+const transcurrido = (desde: string, hasta: string): number =>
+  Math.max(0, Date.parse(hasta) - Date.parse(desde))
 
 export function crearCierre(
   context: AppContext,
@@ -28,8 +34,9 @@ export function crearCierre(
   scanId: string,
   totales: TotalesDelRecorrido
 ): Cerrar {
-  return (motivo, acumulado) =>
-    cerrarEscaneo(context, project, {
+  return (motivo, acumulado) => {
+    const at = nowIso()
+    return cerrarEscaneo(context, project, {
       scanId,
       reportados: acumulado.reportados,
       paradasHechas: acumulado.hechas,
@@ -39,10 +46,12 @@ export function crearCierre(
       // Lo declarado por el manifiesto MAS lo que de verdad corrio.
       modulos: { ...totales.campana, temasCorridos: acumulado.temas },
       motivo,
-      at: nowIso(),
+      at,
       durationMs: acumulado.durationMs,
+      transcurridoMs: transcurrido(totales.startedAt, at),
       usage: acumulado.usage,
       tools: acumulado.tools,
       edits: acumulado.edits
     })
+  }
 }

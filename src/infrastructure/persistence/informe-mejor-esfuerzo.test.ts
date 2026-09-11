@@ -32,6 +32,7 @@ describe('perder el informe no cuesta la auditoria', () => {
         motivo: 'completo',
         at: '2026-09-10T00:00:00.000Z',
         durationMs: 1,
+        transcurridoMs: 900_000,
         usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0, costUsd: 0, numTurns: 0 }, // prettier-ignore
         tools: [],
         edits: []

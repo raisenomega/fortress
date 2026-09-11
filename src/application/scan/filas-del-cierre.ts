@@ -1,4 +1,5 @@
 import type { Project } from '@domain/project/project'
+import { yaHayFactura } from '@domain/scan/factura-del-cierre'
 import type { AppContext } from '../context'
 import { scanActivity } from '../telemetry/scan-activity'
 import type { Calculado, DatosDelCierre } from './datos-del-cierre'
@@ -30,7 +31,11 @@ export function escribirFilasDelCierre(
       findingCount: datos.reportados.length,
       dossierCount: calculado.expediente.length,
       criticalCount: counts.CRITICAL,
-      durationMs: datos.durationMs,
+      // El reloj de PARED, no la suma de paradas: un escaneo que murio en su
+      // primera parada tiene cero auditado y quince minutos de vida, y la fila
+      // tiene que decir cuanto duro el escaneo, no cuanto se alcanzo a auditar
+      // —eso ya lo dicen `paradas_hechas` y `ficheros_cubiertos`—.
+      durationMs: datos.transcurridoMs,
       paradasHechas: datos.paradasHechas,
       ficherosCubiertos: datos.ficherosCubiertos,
       motivoCierre: datos.motivo,
@@ -45,10 +50,17 @@ export function escribirFilasDelCierre(
     if (!cerrada) return
 
     context.projects.updateScan(project.id, score, datos.at)
-    // `failed` sale del MOTIVO y ya no va escrito a mano: un recorrido que el
+    // La corrida se asienta UNA vez. Si el intento ya la asento con su factura
+    // real (`yaHayFactura`), esta seria una segunda con ceros — y una factura
+    // de ceros afirma que la corrida salio gratis, que es justo lo que
+    // `asentarIntentoFallido` advierte que no se puede decir.
+    //
+    // `failed` sale del MOTIVO y no va escrito a mano: un recorrido que el
     // operador paro, o que reventó, no es una corrida que salio bien. Contarlo
     // como exito era la otra mitad de la mentira que dejaba el dia en 0 fallos.
-    context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs: datos.durationMs, failed: datos.motivo !== 'completo', usage: datos.usage, tools: datos.tools }) // prettier-ignore
+    if (!yaHayFactura(datos.motivo)) {
+      context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs: datos.durationMs, failed: datos.motivo !== 'completo', usage: datos.usage, tools: datos.tools }) // prettier-ignore
+    }
     context.activity.recordMany(scanActivity(project.id, SCANNER_AGENT, datos.reportados, counts, datos.edits)) // prettier-ignore
   })
 }

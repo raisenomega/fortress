@@ -25,7 +25,7 @@ export function abrirRecorrido(
   context: AppContext,
   project: Project,
   salidas: SalidasDelRecorrido,
-  totales: TotalesDelRecorrido
+  totales: Omit<TotalesDelRecorrido, 'startedAt'>
 ): Recorrido {
   const at = nowIso()
   const scanId = context.scans.abrir({
@@ -38,6 +38,9 @@ export function abrirRecorrido(
   return {
     scanId,
     at,
-    cerrar: crearCierreConLog(context, project, scanId, salidas.scanLog, totales)
+    cerrar: crearCierreConLog(context, project, scanId, salidas.scanLog, {
+      ...totales,
+      startedAt: at
+    })
   }
 }
