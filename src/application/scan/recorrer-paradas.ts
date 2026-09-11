@@ -7,6 +7,7 @@ import { rotuloDe } from '@domain/scan/parada'
 import type { Scanner } from '@domain/scan/scanner'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { notasDelRecorrido } from './notas-del-recorrido'
 import type { RecorridoDeps } from './recorrido-deps'
 import { NADA_RECORRIDO, sumarParada } from './acumulador-del-recorrido'
 import { asentarLaParada } from './asentar-la-parada'
@@ -42,31 +43,33 @@ export async function recorrerParadas(
 
   let acumulado = NADA_RECORRIDO
   let indice = 0
+  const notas = notasDelRecorrido(context, project)
 
   for (const parada of paradas) {
-    if (deps.cancelado()) return ok(cerrar('abortado', acumulado))
+    if (deps.cancelado()) {
+      notas.volcar()
+      return ok(cerrar('abortado', acumulado))
+    }
 
     const salida = await escanearParada(scanner, project, parada, salidas.progreso, temas)
-    // Un fallo del escaner cierra el recorrido ABORTADO con lo que SI se
-    // audito, en vez de dejar la fila ABIERTA para siempre. El rastro fino del
-    // fallo —su factura, su motivo propio— es la pieza que le falta al arco.
-    // `fallo` y no `abortado`: el operador no paro nada, la maquina se rompio, y
-    // juntarlos haria invisible cuantas veces revienta el escaner. La factura
-    // del intento ya quedo asentada aparte (asentarIntentoFallido).
+    // Un fallo del escaner cierra el recorrido con lo que SI se audito, en vez
+    // de dejar la fila ABIERTA para siempre. `fallo` y no `abortado`: el
+    // operador no paro nada, la maquina se rompio, y juntarlos haria invisible
+    // cuantas veces revienta el escaner. La factura del intento ya quedo
+    // asentada aparte (asentarIntentoFallido).
     if (!salida.ok) {
+      notas.volcar()
       cerrar('fallo', acumulado, salida.error)
       return err(salida.error)
     }
 
+    notas.suma(salida.value.notas)
     indice += 1
     await asentarLaParada(context, project, parada, { scanId, indice, at }, salida.value)
     acumulado = sumarParada(acumulado, parada, salida.value)
-    salidas.progreso.parada({
-      hecha: acumulado.hechas,
-      total: paradas.length,
-      carpeta: rotuloDe(parada)
-    })
+    salidas.progreso.parada({ hecha: acumulado.hechas, total: paradas.length, carpeta: rotuloDe(parada) }) // prettier-ignore
   }
 
+  notas.volcar()
   return ok(cerrar('completo', acumulado))
 }

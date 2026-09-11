@@ -2,6 +2,7 @@ import type { ModuloAuditoria } from './modulo-auditoria'
 import type { Result } from '../shared/result'
 import type { TokenUsage } from '../telemetry/token-usage'
 import type { DetectedFinding } from './detected-finding'
+import type { SelfNoteDraft } from '../system/self-observation'
 
 export interface ScanRequest {
   /** Carpeta del proyecto: el escaneo se ejecuta dentro de ella. */
@@ -41,6 +42,13 @@ export interface ScanOutcome {
    * y por eso de un escaneo perdido no quedaba ni el analisis.
    */
   readonly texto: string
+  /**
+   * Lo que el agente noto de FORTRESS en ESTA pasada (ADR-085). Viaja con la
+   * pasada y no se asienta aqui: el escaner corre una vez por parada, y quien
+   * sabe cuantas paradas hay —y por tanto cuantas copias hay que fundir— es el
+   * recorrido.
+   */
+  readonly notas: readonly SelfNoteDraft[]
 }
 
 /**

@@ -10,6 +10,7 @@ import { closeOmega, emitOmegaMismatch, emitOmegaRun } from './run-omega-emit'
 import type { OmegaDeps, RunOmegaResult } from './run-omega'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { evidenciaOmega, falloDeOmega } from './omega-autopsia'
+import { asentarNotasDelProyecto } from '../system/asentar-notas'
 
 /**
  * El juicio en si, ya dentro de la cola: inputs -> agente -> veredicto.
@@ -55,6 +56,7 @@ export async function judgeProposal(
     const fallo = falloDeOmega(result)
     return veto(fallo.reason, fallo.detalle, fallo.evidencia)
   }
+  asentarNotasDelProyecto(ctx, proposal.projectId, result.notas)
   // D19 — el motor recomputa: los ejes son evidencia, la regla es codigo.
   const computed = computeGlobalVerdict(result.verdict)
   if (computed !== result.verdict.veredicto_global) {

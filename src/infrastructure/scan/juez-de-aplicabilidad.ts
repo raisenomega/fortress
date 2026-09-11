@@ -1,6 +1,8 @@
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { buildJuicioPrompt } from '@domain/scan/juicio-prompt'
 import { parseJuicio } from '@domain/scan/juicio-parse'
+import { notasDeBloque } from '@domain/system/extraer-notas'
+import type { SelfNoteDraft } from '@domain/system/self-observation'
 import type { ModuloAuditoria } from '@domain/scan/modulo-auditoria'
 import type { VeredictoAplicabilidad } from '@domain/scan/veredicto-de-aplicabilidad'
 
@@ -36,7 +38,10 @@ export function crearJuez(
    * no lo mataba ni el reloj —que ya no existe— ni Detener.
    */
   projectId: string,
-  onVeredicto: (veredicto: VeredictoAplicabilidad) => void = () => undefined
+  onVeredicto: (veredicto: VeredictoAplicabilidad) => void = () => undefined,
+  /** Lo que noto de FORTRESS, en su SEGUNDO bloque (ADR-085): su payload es un
+   *  array y no hay clave hermana donde colgarlo. */
+  onNotas: (notas: readonly SelfNoteDraft[]) => void = () => undefined
 ): Juez {
   return async (projectPath, modulos, carpetas) => {
     const reply = await codeAgent.run(
@@ -52,6 +57,10 @@ export function crearJuez(
     )
     if (reply.failed) return []
 
+    // Las notas ANTES del veredicto: son independientes, y un juicio vacio
+    // —que es lo normal cuando el modelo no encuentra con que respaldar— no
+    // puede llevarse por delante lo que el agente si supo decir de FORTRESS.
+    onNotas(notasDeBloque(reply.text))
     const veredictos = parseJuicio(reply.text)
     veredictos.forEach(onVeredicto)
     return veredictos

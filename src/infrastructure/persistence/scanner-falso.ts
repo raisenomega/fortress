@@ -55,7 +55,7 @@ export function scannerFalso(
         usage: suya.usage,
         tools: [],
         edits: [],
-        texto: `informe de ${carpeta}`
+        texto: `informe de ${carpeta}`, notas: []
       })
     }
   }

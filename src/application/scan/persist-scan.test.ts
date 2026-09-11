@@ -15,7 +15,7 @@ describe('persistScan', () => {
       usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0, costUsd: 0, numTurns: 0 }, // prettier-ignore
       tools: [],
       edits: [],
-      texto: ''
+      texto: '', notas: []
     })
 
     // Los DOS HIGH siguen vivos y cuentan, aunque la corrida no los nombre y
@@ -38,7 +38,7 @@ describe('persistScan', () => {
       usage: { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0, costUsd: 0, numTurns: 0 }, // prettier-ignore
       tools: [],
       edits: [],
-      texto: ''
+      texto: '', notas: []
     })
 
     // Uno reportado, TRES puntuados (el nuevo + los dos que siguen vivos). Sin

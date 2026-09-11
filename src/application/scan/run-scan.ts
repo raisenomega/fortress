@@ -3,6 +3,7 @@ import type { Manifiesto } from '@domain/scan/manifiesto'
 import type { Scanner } from '@domain/scan/scanner'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { asentarNotas } from '../system/asentar-notas'
 import { persistScan } from './persist-scan'
 import type { SalidasDelRecorrido } from './progreso-del-recorrido'
 import { recorrerParadas } from './recorrer-paradas'
@@ -64,5 +65,8 @@ export async function runScan(
   )
   if (!outcome.ok) return err(outcome.error)
 
+  // El camino de UNA parada observa igual que el recorrido: son la misma cosa
+  // con N=1, y dejarlo fuera haria que un proyecto pequeno no ensenara nada.
+  asentarNotas(context, project, outcome.value.notas)
   return ok(await persistScan(context, project, outcome.value, salidas.scanLog))
 }

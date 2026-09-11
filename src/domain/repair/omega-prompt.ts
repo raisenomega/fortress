@@ -1,5 +1,6 @@
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { categoryForAgent } from '../settings/docs-first'
+import { NOTAS_COMO_CLAVE } from '../system/peticion-de-notas'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import type { Analysis } from './analysis'
 
@@ -64,6 +65,10 @@ export function buildOmegaPrompt(input: OmegaPromptInput): string {
     'VERDICT:{"resuelve_el_hallazgo":"SI|NO|PARCIAL","respeta_scope":"SI|NO",',
     '"respeta_doNotTouch":"SI|NO","calidad_del_diff":"BUENO|ACEPTABLE|RUIDOSO",',
     '"riesgo_residual":"NINGUNO|MENOR|MAYOR","veredicto_global":"APROBADO|VETADO",',
-    '"razon":"1-3 lineas"}:END-VERDICT'
+    '"razon":"1-3 lineas"}:END-VERDICT',
+    '',
+    NOTAS_COMO_CLAVE,
+    'Es OPCIONAL y NO afecta a tu veredicto: si la escribes mal se descarta sola,',
+    'y el veredicto se lee igual.'
   ].join('\n')
 }

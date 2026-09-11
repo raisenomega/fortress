@@ -1,4 +1,5 @@
 import { asentarAplicabilidad } from '@application/scan/asentar-aplicabilidad'
+import { asentarNotasDelProyecto } from '@application/system/asentar-notas'
 import { asentarIntentoFallido } from '@application/scan/asentar-intento-fallido'
 import type { AppContext } from '@application/context'
 import type { ScanDeps } from '@application/scan/run-scan'
@@ -40,8 +41,11 @@ export function armarEscaneo(context: AppContext, projectId: string): EscaneoArm
   // cerrar y su intento fallido—, el juez no tenia quien lo hiciera. Envolver
   // al escaner aqui le pondria una segunda fila por parada, que es justo lo que
   // `scan_parada_runs` evito para no mover el score de OMEGA.
-  const juez = crearJuez(agenteQueAsientaCorrida(agente, context, 'sistema'), projectId, (v) =>
-    asentarAplicabilidad(context, projectId, v)
+  const juez = crearJuez(
+    agenteQueAsientaCorrida(agente, context, 'sistema'),
+    projectId,
+    (v) => asentarAplicabilidad(context, projectId, v),
+    (notas) => asentarNotasDelProyecto(context, projectId, notas)
   )
 
   return {

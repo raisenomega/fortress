@@ -22,7 +22,7 @@ function conProyecto(b: Bench, path: string | null): Bench['context'] {
   return { ...b.context, projects: { findById: () => project } } as unknown as Bench['context']
 }
 
-const aprobado = (): Bench => bench({ result: { ok: true, verdict: APROBADO, runMeta: META } })
+const aprobado = (): Bench => bench({ result: { ok: true, verdict: APROBADO, runMeta: META, notas: [] } })
 
 describe('el codigo propio no se integra solo, por NINGUNA via', () => {
   it('repo propio: JUZGA, y no se plantea siquiera integrar', async () => {

@@ -1,6 +1,7 @@
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { computeSpent, MAX_TOKENS_PER_PROPOSAL, MIN_OMEGA_BUDGET } from '@domain/repair/budget'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+import type { SelfNoteDraft } from '@domain/system/self-observation'
 import type { AppContext } from '../context'
 import { cursorFrom } from './book-cursor'
 import { loadAnalysis } from './load-analysis'
@@ -9,7 +10,10 @@ import type { OmegaReads } from './run-omega-inputs'
 import { judgeProposal } from './run-omega-judge'
 
 export type OmegaAgentResult =
-  | { ok: true; verdict: OmegaVerdict; runMeta: AnalystRunMeta }
+  /** `notas` es lo que OMEGA noto de FORTRESS (ADR-085). Viaja aparte del
+   *  veredicto y con otra dureza: se lee por la puerta TOLERANTE, asi que una
+   *  nota mal escrita se descarta sola y el juicio se lee igual. */
+  | { ok: true; verdict: OmegaVerdict; runMeta: AnalystRunMeta; notas: readonly SelfNoteDraft[] }
   /** `error` clasifica (razon cerrada); `detail` y `raw` son la autopsia. */
   | {
       ok: false
