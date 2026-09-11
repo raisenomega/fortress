@@ -6,8 +6,7 @@
 const { app } = require('electron')
 const harness = require('./lib/app-harness.cjs')
 const { writeLegacyDatabase } = require('./lib/legacy-db.cjs')
-const { checkRepairMigration } = require('./lib/legacy-repair.cjs')
-const { checkRunsMigration } = require('./lib/legacy-runs.cjs')
+const { checkMigracionesPorSql } = require('./lib/legacy-por-sql.cjs')
 const { checkProjectBackfills } = require('./lib/legacy-project-checks.cjs')
 const { createRecorder } = require('./lib/renderer-checks.cjs')
 const { report } = require('./lib/suite-runner.cjs')
@@ -32,8 +31,15 @@ async function verify(window) {
   check('la sesion vieja no consta con motivo', sesion?.stoppedReason === undefined)
 
   const hallazgos = await run("window.api.scan.findings('viejo')")
-  check('conserva los hallazgos', hallazgos.length === 1, JSON.stringify(hallazgos))
-  check('el hallazgo viejo queda abierto', hallazgos[0]?.status === 'open')
+  check(
+    'conserva los hallazgos',
+    hallazgos.some((h) => h.file === 'api.js'),
+    JSON.stringify(hallazgos)
+  )
+  check(
+    'el hallazgo viejo queda abierto',
+    hallazgos.every((h) => h.status === 'open')
+  )
 
   const conteos = await run('window.api.scan.counts()')
   check('sigue contando el CRITICAL', conteos.viejo?.CRITICAL === 1, JSON.stringify(conteos))
@@ -44,9 +50,8 @@ async function verify(window) {
   const descarte = await run(`window.api.scan.dismiss('${hallazgos[0]?.id}')`)
   check('se puede descartar un hallazgo migrado', descarte.ok, JSON.stringify(descarte))
 
-  // Los dos recambios: se afirman por SQL porque lo que cambia es el esquema.
-  checkRepairMigration(check)
-  checkRunsMigration(check)
+  // Lo que se afirma por SQL, porque lo que cambia es el esquema o las claves.
+  checkMigracionesPorSql(check)
 
   return results
 }

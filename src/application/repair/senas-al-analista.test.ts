@@ -4,15 +4,23 @@ import { bench, hallazgo } from './plan-repair-fixture'
 import { objetivo } from './plan-repair-dirigido-fixture'
 import { planRepair } from './plan-repair'
 
-const NUEVA = { ...hallazgo('f1', 'a.ts'), identity: 'a.ts|path-traversal|handleverify' }
-const VIEJA = { ...hallazgo('f1', 'a.ts'), identity: 'LOW|a.ts|permite reenviar correos' }
+const NUEVA = {
+  ...hallazgo('f1', 'a.ts'),
+  identity: 'a.ts|1|path-traversal',
+  simbolo: 'handleVerify'
+}
+const VIEJA = {
+  ...hallazgo('f1', 'a.ts'),
+  identity: 'LOW|a.ts|permite reenviar correos',
+  simbolo: null
+}
 
 describe('el objetivo llega al analista CON sus dos senas', () => {
-  it('la clave actual le da tipo y simbolo, que antes se quedaban en la base', async () => {
+  it('el tipo sale de la clave y el simbolo de su columna (ADR-084)', async () => {
     const b = bench({ findings: [NUEVA] })
     await planRepair(b.context, 'p1')
 
-    expect(objetivo(b)).toMatchObject({ tipo: 'path-traversal', simbolo: 'handleverify' })
+    expect(objetivo(b)).toMatchObject({ tipo: 'path-traversal', simbolo: 'handleVerify' })
   })
 
   it('la clave VIEJA no inventa ninguna: null y el prompt calla', async () => {

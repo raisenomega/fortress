@@ -31,7 +31,7 @@ export const COUNTS_BY_PROJECT = `SELECT project_id, severity, COUNT(*) AS total
   GROUP BY project_id, severity`
 
 /** El expediente completo: TODO lo que la base recuerda, extintos incluidos. */
-export const SELECT_MEMORY = `SELECT id, identity, severity, title, file, line, status,
+export const SELECT_MEMORY = `SELECT id, identity, severity, title, file, line, simbolo, status,
   lifecycle, first_seen, last_seen, resolved_at, mitigated_at FROM findings
   WHERE project_id = ? ORDER BY ${BY_URGENCY}`
 

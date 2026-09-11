@@ -17,6 +17,10 @@ export interface FindingMemory {
   readonly title: string
   readonly file: string
   readonly line: number | null
+  /** El nombre del bloque donde vive el defecto, o `null` si no consta. Salio de
+   *  la CLAVE en ADR-084 —no discriminaba— pero sigue siendo el dato con el que
+   *  el analista encuentra el sitio cuando la linea ya se movio. */
+  readonly simbolo: string | null
   readonly status: FindingStatus
   readonly lifecycle: FindingLifecycle
   /** Cuando se vio por primera vez. NUNCA se reescribe: es su historia. */

@@ -16,15 +16,15 @@ describe('memoria de hallazgos: la historia se preserva', () => {
     expect(bench.memoryOf(SSRF.title)?.lastSeen).toBe('2026-08-11T10:00:00Z')
   })
 
-  it('el codigo se mueve de linea y sigue siendo la MISMA fila', () => {
+  it('la redaccion cambia y sigue siendo la MISMA fila', () => {
     bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z')
     const antes = bench.memoryOf(SSRF.title)?.id
 
-    bench.repo.syncFromScan(PROJECT, 's2', [{ ...SSRF, line: 41 }], '2026-08-09T10:00:00Z')
+    const otroTexto = { ...SSRF, title: 'SSRF: el filtro no valida la IP que resuelve el DNS' }
+    bench.repo.syncFromScan(PROJECT, 's2', [otroTexto], '2026-08-09T10:00:00Z')
 
     expect(bench.rows()).toBe(1)
-    expect(bench.memoryOf(SSRF.title)?.id).toBe(antes)
-    expect(bench.memoryOf(SSRF.title)?.line).toBe(41) // se refresca la posicion nueva
+    expect(bench.memoryOf(otroTexto.title)?.id).toBe(antes)
   })
 
   it('un hallazgo nuevo de verdad entra con su propia fecha, sin heredar la ajena', () => {
@@ -54,5 +54,20 @@ describe('memoria de hallazgos: la historia se preserva', () => {
     const memoria = bench.memoryOf(SSRF.title)
     expect(memoria?.status).toBe('false_positive') // decision del operador
     expect(memoria?.lifecycle).toBe('ACTIVE') // el problema sigue en el codigo
+  })
+})
+
+describe('el precio de llevar la linea en la clave', () => {
+  it('un defecto que se MUEVE de linea abre fila nueva: el precio de ADR-084', () => {
+    // El coste declarado de meter la linea en la clave, escrito para que nadie
+    // lo descubra por sorpresa. Se acepta porque la linea NO baila: medido
+    // sobre el corpus, los 15 sitios con mismo fichero+tipo y lineas distintas
+    // son defectos DISTINTOS —`awardPoints:47` y `deductPoints:57`, cuatro
+    // secretos distintos del mismo `.env`—, y ninguno el mismo dos veces.
+    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z')
+
+    bench.repo.syncFromScan(PROJECT, 's2', [{ ...SSRF, line: 41 }], '2026-08-09T10:00:00Z')
+
+    expect(bench.rows()).toBe(2)
   })
 })

@@ -8,7 +8,7 @@ import type { SelfNoteDraft } from '@domain/system/self-observation'
 /** Un hallazgo ACTIVE y abierto, listo para ser candidato de C1. */
 export function hallazgo(id: string, file: string): FindingMemory {
   return {
-    id, identity: `LOW|${file}|t-${id}`, severity: 'LOW', title: `t-${id}`, file, line: 1,
+    id, identity: `LOW|${file}|t-${id}`, simbolo: null, severity: 'LOW', title: `t-${id}`, file, line: 1,
     status: 'open', lifecycle: 'ACTIVE',
     firstSeen: '2026-08-08T10:00:00Z', lastSeen: '2026-08-08T10:00:00Z', resolvedAt: null, mitigatedAt: null
   } // prettier-ignore

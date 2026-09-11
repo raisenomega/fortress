@@ -11,6 +11,7 @@ export interface MemoryRow {
   readonly title: string
   readonly file: string
   readonly line: number | null
+  readonly simbolo: string
   readonly status: string
   readonly lifecycle: string
   readonly first_seen: string
@@ -31,6 +32,9 @@ export function toMemory(row: MemoryRow): FindingMemory {
     severity: isSeverity(row.severity) ? row.severity : 'MEDIUM',
     title: row.title,
     file: row.file,
+    // Vacio es AUSENCIA, no cadena vacia: `senasDelHallazgo` distingue «no
+    // consta» de un simbolo real y calla en vez de escribir comillas vacias.
+    simbolo: row.simbolo === '' ? null : row.simbolo,
     line: row.line,
     status: isFindingStatus(row.status) ? row.status : 'open',
     lifecycle: isFindingLifecycle(row.lifecycle) ? row.lifecycle : 'ACTIVE',

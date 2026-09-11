@@ -3,7 +3,7 @@ import type { FindingMemory } from '../project/finding-memory'
 import { ausentes, confirmadoPorUltimoEscaneo } from './ausencia'
 
 const hallazgo = (identity: string, lifecycle: FindingMemory['lifecycle'] = 'ACTIVE'): FindingMemory =>
-  ({ id: identity, identity, severity: 'HIGH', title: 't', file: 'a.ts', line: 1, status: 'open', lifecycle, firstSeen: '2026-08-01T00:00:00Z', lastSeen: '2026-08-01T00:00:00Z', resolvedAt: null, mitigatedAt: null }) // prettier-ignore
+  ({ id: identity, identity, simbolo: null, severity: 'HIGH', title: 't', file: 'a.ts', line: 1, status: 'open', lifecycle, firstSeen: '2026-08-01T00:00:00Z', lastSeen: '2026-08-01T00:00:00Z', resolvedAt: null, mitigatedAt: null }) // prettier-ignore
 
 describe('la ausencia ya no mata', () => {
   it('un vivo que el escaneo no nombro sigue vivo, sin mirar git', () => {

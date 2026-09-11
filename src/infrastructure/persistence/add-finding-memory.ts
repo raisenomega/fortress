@@ -11,6 +11,7 @@ interface LegacyRow {
   readonly severity: string
   readonly title: string
   readonly file: string
+  readonly line: number | null
   readonly created_at: string
 }
 
@@ -29,7 +30,7 @@ const COLUMNS: ReadonlyArray<readonly [string, string]> = [
   ['simbolo', "ALTER TABLE findings ADD COLUMN simbolo TEXT NOT NULL DEFAULT ''"]
 ]
 
-const PENDING = `SELECT id, severity, title, file, created_at FROM findings WHERE identity = ''`
+const PENDING = `SELECT id, severity, title, file, line, created_at FROM findings WHERE identity = ''`
 
 const FILL = `UPDATE findings SET identity = @identity, first_seen = @at, last_seen = @at
   WHERE id = @id`
@@ -45,6 +46,12 @@ function hasColumn(db: Db, column: string): boolean {
  * recien visto algo que lleva semanas.
  *
  * Idempotente: solo toca las filas sin clave, asi que repetirla no hace nada.
+ *
+ * La LINEA se lee de su columna y se le pasa de verdad. Hasta ADR-084 iba
+ * `line: null` a proposito, porque la formula la ignoraba; con la linea dentro
+ * de la clave, seguir pasando null daria `fichero│-│tipo` a estas filas y
+ * `fichero│linea│tipo` a todas las demas — dos formulas conviviendo, y el
+ * desajuste solo se veria como duplicados meses despues.
  */
 export function addFindingMemory(db: Db): void {
   for (const [column, statement] of COLUMNS) {
@@ -55,7 +62,7 @@ export function addFindingMemory(db: Db): void {
   const backfill = db.transaction((rows: readonly LegacyRow[]) => {
     for (const row of rows) {
       const severity = isSeverity(row.severity) ? row.severity : 'MEDIUM'
-      const identity = findingIdentity({ ...row, severity, line: null })
+      const identity = findingIdentity({ ...row, severity })
       fill.run({ id: row.id, identity, at: row.created_at })
     }
   })

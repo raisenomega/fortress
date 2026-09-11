@@ -4,7 +4,7 @@ import type { Selection } from '@domain/repair/select-target'
 import type { AppContext } from '../context'
 import { hermanosDelHallazgo } from '@domain/repair/hermanos-del-hallazgo'
 import { intentosPrevios } from '@domain/repair/intentos-previos'
-import { senasDeIdentidad } from '@domain/project/finding-identity'
+import { tipoDeLaIdentidad } from '@domain/project/finding-identity'
 import { loYaAtendido } from '../system/lo-ya-atendido'
 import { analyzeTarget } from './analyze-target'
 
@@ -36,7 +36,7 @@ export function estudiar(
   const abiertos = ctx.findings
     .listMemory(project.id)
     .filter((f) => f.status === 'open' && f.lifecycle === 'ACTIVE')
-    .map((f) => ({ id: f.id, file: f.file, line: f.line, title: f.title, ...senasDeIdentidad(f.identity) })) // prettier-ignore
+    .map((f) => ({ id: f.id, file: f.file, line: f.line, title: f.title, tipo: tipoDeLaIdentidad(f.identity) })) // prettier-ignore
   const target = {
     ...selection.target,
     intentos: intentosPrevios(suyas),
