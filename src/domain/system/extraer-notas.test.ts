@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { notasDeBloque, notasDeObjeto, sinRepetidas } from './extraer-notas'
 import type { SelfNoteDraft } from './self-observation'
 
-const NOTA: SelfNoteDraft = { kind: 'limitacion', area: 'grafo', note: 'no pude trazar el simbolo' }
+const NOTA: SelfNoteDraft = { kind: 'limitacion', area: 'consulta-del-grafo', note: 'no pude trazar el simbolo' }
 
 describe('las dos puertas entregan lo mismo al mismo parser', () => {
   it('del OBJETO: `notes` como clave hermana (escaner, OMEGA)', () => {
@@ -26,7 +26,7 @@ describe('las dos puertas entregan lo mismo al mismo parser', () => {
   })
 
   it('y una nota mal formada se cae SOLA, sin llevarse las buenas', () => {
-    const mezcla = { notes: [NOTA, { kind: 'inventado', area: 'x', note: 'y' }, { area: 'sin kind' }] } // prettier-ignore
+    const mezcla = { notes: [NOTA, { kind: 'inventado', area: 'otro', note: 'y' }, { area: 'sin kind' }] } // prettier-ignore
 
     expect(notasDeObjeto(mezcla)).toEqual([NOTA])
   })
@@ -46,7 +46,7 @@ describe('las copias se funden: el escaner corre 12 veces', () => {
   })
 
   it('el area tambien cuenta: mismo texto en dos zonas son dos observaciones', () => {
-    const enOtraZona = { ...NOTA, area: 'escaner' }
+    const enOtraZona: SelfNoteDraft = { ...NOTA, area: 'contrato-del-hallazgo' }
 
     expect(sinRepetidas([NOTA, enOtraZona])).toHaveLength(2)
   })

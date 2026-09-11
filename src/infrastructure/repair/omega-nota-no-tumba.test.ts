@@ -13,13 +13,13 @@ const verdict = (extra = ''): string => `VERDICT:{${EJES}${extra}}:END-VERDICT`
 describe('OMEGA: el veredicto y la nota tienen DUREZAS distintas', () => {
   it('una nota buena viaja con el veredicto', () => {
     const out = toOmegaOutcome(
-      verdict(',"notes":[{"kind":"gap","area":"worktree","note":"no pude leer el diff base"}]'),
+      verdict(',"notes":[{"kind":"gap","area":"motor-de-reparacion","note":"no pude leer el diff base"}]'),
       META
     )
 
     expect(out.ok).toBe(true)
     expect(out.ok && out.notas).toEqual([
-      { kind: 'gap', area: 'worktree', note: 'no pude leer el diff base' }
+      { kind: 'gap', area: 'motor-de-reparacion', note: 'no pude leer el diff base' }
     ])
   })
 

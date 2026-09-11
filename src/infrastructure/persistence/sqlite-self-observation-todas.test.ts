@@ -7,9 +7,9 @@ const AT = '2026-09-04T02:10:00.000Z'
 
 function conEstados(): SelfObservationRepository {
   const r = createSqliteSelfObservationRepository(createMemoryDb())
-  const p = r.add({ sourceProject: 'p', kind: 'gap', area: 'sigue-abierta', note: 'n' })
-  const a = r.add({ sourceProject: 'p', kind: 'gap', area: 'se-arreglo', note: 'n' })
-  const d = r.add({ sourceProject: 'p', kind: 'gap', area: 'no-procede', note: 'n' })
+  const p = r.add({ sourceProject: 'p', kind: 'gap', area: 'consulta-del-grafo', note: 'n' })
+  const a = r.add({ sourceProject: 'p', kind: 'gap', area: 'indice-del-grafo', note: 'n' })
+  const d = r.add({ sourceProject: 'p', kind: 'gap', area: 'cognicion', note: 'n' })
   r.setStatus({ id: a.id, status: 'atendido', reason: 'hecho', attendedBy: 'x', attendedAt: AT })
   r.setStatus({ id: d.id, status: 'descartado', reason: 'no aplica', attendedBy: 'x', attendedAt: AT }) // prettier-ignore
   void p

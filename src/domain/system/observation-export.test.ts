@@ -22,14 +22,15 @@ describe('el fichero exportado se explica a si mismo', () => {
     expect(out.areasDistintas).toBe(2)
   })
 
-  it('DECLARA que su orden infravalora los temas reales', () => {
-    // La advertencia no es adorno: sin ella el fichero se lee como un mapa de
-    // temas, que es justo lo que no es.
-    const { sesgoDelOrden } = buildObservationExport([obs('a', 'x', 'gap')], AT)
+  it('DECLARA por que esta en ese orden: proyectos, no repeticiones', () => {
+    // Hasta ADR-085 Fase 4 esto era una ADVERTENCIA —el orden salia del `area`
+    // literal y el fichero tenia que confesar que infravaloraba los temas—. Con
+    // el vocabulario cerrado dejo de ser verdad, asi que se retiro: un aviso que
+    // ya no aplica ensena a no leer los avisos.
+    const { comoOrdena } = buildObservationExport([obs('a', 'x', 'gap')], AT)
 
-    expect(sesgoDelOrden).toContain('INFRAVALORA')
-    expect(sesgoDelOrden).toContain('texto libre')
-    expect(sesgoDelOrden).toContain('NO es un mapa de temas')
+    expect(comoOrdena).toContain('PROYECTOS distintos')
+    expect(comoOrdena).not.toContain('INFRAVALORA')
   })
 
   it('dice que no agrupa a proposito, y por que', () => {

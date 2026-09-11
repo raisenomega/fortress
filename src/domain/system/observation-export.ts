@@ -3,15 +3,19 @@ import type { SelfObservation } from './self-observation'
 
 /**
  * Lo que el fichero declara de si mismo. No es adorno: quien lo lee —Claude Code
- * en la terminal, o el operador dentro de seis meses— tiene que saber que el
- * orden es una aproximacion y por que, o lo tomara por un mapa de temas.
+ * en la terminal, o el operador dentro de seis meses— tiene que saber por que
+ * esta en ese orden.
+ *
+ * Hasta ADR-085 Fase 4 esto era una ADVERTENCIA: el orden salia de contar el
+ * `area` literal, el campo era texto libre y el fichero tenia que confesar que
+ * infravaloraba los temas. Con el vocabulario cerrado y `vistaEn` esa
+ * advertencia dejo de ser verdad, asi que se retira en vez de arrastrarse: un
+ * aviso que ya no aplica ensena a no leer los avisos.
  */
-const SESGO = [
-  'El orden usa la frecuencia del campo `area` LITERAL, y eso INFRAVALORA los',
-  'temas reales: `area` es texto libre del agente, asi que un mismo tema aparece',
-  'escrito de muchas formas y ninguna suma a las otras. Lo repetido sube, pero',
-  'esto NO es un mapa de temas: agruparlos de verdad exige cerrar el vocabulario',
-  'de `area`, como se hizo con los tipos de defecto (ADR-067).'
+const COMO_ORDENA = [
+  'Ordenado por `vistaEn`: en cuantos PROYECTOS distintos se topo el mismo hueco.',
+  'Eso es la senal —lo que le falta a FORTRESS en todos los stacks— y no la',
+  'repeticion: una queja treinta veces en un proyecto sigue siendo una.'
 ].join(' ')
 
 const COMO_USARLO = [
@@ -22,9 +26,10 @@ const COMO_USARLO = [
 export interface ObservationExport {
   readonly generadoEl: string
   readonly total: number
-  /** Cuantos valores distintos tiene `area`: la medida del despiece. */
+  /** Cuantos valores distintos tiene `area`. Con el vocabulario cerrado deberia
+   *  tender a doce; lo que pase de ahi son filas anteriores a ADR-085 Fase 4. */
   readonly areasDistintas: number
-  readonly sesgoDelOrden: string
+  readonly comoOrdena: string
   readonly comoUsarlo: string
   readonly observaciones: readonly ObservationConFrecuencia[]
 }
@@ -32,14 +37,15 @@ export interface ObservationExport {
 /** El backlog entero, ordenado, con su propia advertencia dentro. */
 export function buildObservationExport(
   observations: readonly SelfObservation[],
-  at: string
+  at: string,
+  vistaEn: (id: string) => number = () => 0
 ): ObservationExport {
-  const ordenadas = ordenarObservaciones(observations)
+  const ordenadas = ordenarObservaciones(observations, vistaEn)
   return {
     generadoEl: at,
     total: ordenadas.length,
     areasDistintas: new Set(observations.map((o) => o.area)).size,
-    sesgoDelOrden: SESGO,
+    comoOrdena: COMO_ORDENA,
     comoUsarlo: COMO_USARLO,
     observaciones: ordenadas
   }

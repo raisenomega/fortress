@@ -25,7 +25,11 @@ const FICHERO = 'auto-mejora.json'
 export function exportObservations(context: AppContext): Result<string> {
   const destino = join(app.getPath('userData'), FICHERO)
   try {
-    const backlog = buildObservationExport(context.selfObservations.listOpen(), nowIso())
+    // `vistaEn` viaja: es el campo que PRIORIZA para quien trabaja el backlog
+    // —«esto le falta a FORTRESS en todos los stacks»— y el que ordena el
+    // fichero (ADR-085, Fase 4).
+    const repo = context.selfObservations
+    const backlog = buildObservationExport(repo.listOpen(), nowIso(), (id) => repo.vistaEn(id))
     writeFileSync(destino, `${JSON.stringify(backlog, null, 2)}\n`)
     return ok(destino)
   } catch (error) {

@@ -16,7 +16,7 @@ const FUGA = {
   sourceProject: 'Cliente ACME',
   projectPath: '/media/disco/Cliente ACME',
   kind: 'gap' as const,
-  area: 'search_graph en supabase/functions/_shared',
+  area: 'consulta-del-grafo' as const,
   note: "trace_path devolvio ambiguous: el simbolo existe en src/lib/sanitize-html.ts:12 y el proyecto entero vive en /media/disco/Cliente ACME" // prettier-ignore
 }
 

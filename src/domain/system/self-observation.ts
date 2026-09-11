@@ -1,3 +1,4 @@
+import type { AreaDeObservacion } from './area-de-observacion'
 /**
  * Observacion que un agente hace sobre FORTRESS MISMO mientras trabaja en OTRO
  * proyecto: un limite, un bug, un gap, algo que le falto (incluidos bloqueos de
@@ -48,7 +49,9 @@ export interface SelfObservation {
  */
 export interface SelfNoteDraft {
   readonly kind: ObservationKind
-  readonly area: string
+  /** Del vocabulario cerrado desde ADR-085, Fase 4. Las 350 filas escritas antes
+   *  conservan su texto libre hasta que un agente las reclasifique. */
+  readonly area: AreaDeObservacion
   readonly note: string
 }
 

@@ -24,7 +24,7 @@ describe('el asiento comun de los tres agentes', () => {
     const b = banco()
 
     asentarNotas(b.context, PROYECTO, [
-      { kind: 'gap', area: 'grafo', note: 'no hay nodo para supabase/functions/x.ts:40' }
+      { kind: 'gap', area: 'consulta-del-grafo', note: 'no hay nodo para supabase/functions/x.ts:40' }
     ])
 
     const [nota] = b.leer()
@@ -37,7 +37,7 @@ describe('el asiento comun de los tres agentes', () => {
     const b = banco()
 
     asentarNotas(b.context, PROYECTO, [
-      { kind: 'bug', area: 'escaner', note: 'no pudo leer /media/disco/ACME entero' }
+      { kind: 'bug', area: 'contrato-del-hallazgo', note: 'no pudo leer /media/disco/ACME entero' }
     ])
 
     expect(b.leer()[0].note).not.toContain('/media/disco/ACME')
@@ -49,7 +49,7 @@ describe('el escaner no inunda: doce paradas, una fila', () => {
     const b = banco()
     const doce = Array.from({ length: 12 }, () => ({
       kind: 'limitacion' as const,
-      area: 'grafo',
+      area: 'consulta-del-grafo' as const,
       note: 'el grafo no modela politicas RLS'
     }))
 
@@ -61,7 +61,7 @@ describe('el escaner no inunda: doce paradas, una fila', () => {
     const b = banco()
     const distintas = Array.from({ length: 12 }, (_, i) => ({
       kind: 'gap' as const,
-      area: `zona-${i}`,
+      area: 'otro' as const,
       note: `limite ${i}`
     }))
 

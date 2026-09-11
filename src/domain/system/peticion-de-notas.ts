@@ -1,6 +1,20 @@
-/** La forma de una nota, igual para todos: `kind` de vocabulario cerrado. */
+import { AREAS_DE_OBSERVACION } from './area-de-observacion'
+
+/** La forma de una nota: los DOS campos de vocabulario cerrado y la prosa. */
 export const FORMA_DE_NOTA =
-  '{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note":"que paso"}'
+  '{"kind":"limitacion|bug|gap|falta|oportunidad","area":"de la lista","note":"que paso"}'
+
+/**
+ * El `area` se ELIGE de la lista, no se redacta — misma regla que el `tipo` de
+ * un hallazgo, y por el mismo motivo: el campo era texto libre y tenia 190
+ * formas para doce conceptos, asi que dos agentes que se topaban con el MISMO
+ * limite escribian dos cosas y nadie podia sumarlas. Enumerarlas en el prompt es
+ * lo que convierte el backlog en algo contable.
+ */
+const LISTA_DE_AREAS = [
+  'El "area" se ELIGE de esta lista, no se inventa. Si ninguna encaja, "otro":',
+  AREAS_DE_OBSERVACION.join(', ')
+]
 
 /**
  * Lo que se le pide a un agente para que observe FORTRESS mientras trabaja en
@@ -28,6 +42,8 @@ export const NOTAS_COMO_CLAVE = [
   `Clave OPCIONAL "notes": ${PORQUE[0]}`,
   ...PORQUE.slice(1),
   '',
+  ...LISTA_DE_AREAS,
+  '',
   `"notes" va DENTRO del objeto, como una clave mas, NUNCA en un bloque aparte:`,
   `"notes":[${FORMA_DE_NOTA}]`
 ].join('\n')
@@ -36,6 +52,8 @@ export const NOTAS_COMO_CLAVE = [
 export const NOTAS_COMO_BLOQUE = [
   `Y OPCIONALMENTE un SEGUNDO bloque, aparte del anterior: ${PORQUE[0]}`,
   ...PORQUE.slice(1),
+  '',
+  ...LISTA_DE_AREAS,
   '',
   `NOTAS:[${FORMA_DE_NOTA}]:END-NOTAS`
 ].join('\n')

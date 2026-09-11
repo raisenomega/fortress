@@ -36,31 +36,3 @@ describe('toAnalysis: el analisis de siempre', () => {
     expect(leer({ ...BASE, where: 42 }).where).toBe('')
   })
 })
-
-describe('toAnalysis: los apuntes sobre FORTRESS', () => {
-  it('viajan como una clave mas del mismo objeto', () => {
-    // Un bloque aparte con su propio JSON haria que el barrido codicioso se
-    // tragara los dos y el analisis entero reventara.
-    const a = leer({ ...BASE, notes: [{ kind: 'gap', area: 'motor', note: 'falto X' }] })
-
-    expect(a.status).toBe('REAL') // el analisis sobrevive intacto
-    expect(a.notes).toEqual([{ kind: 'gap', area: 'motor', note: 'falto X' }])
-  })
-
-  it('un apunte mal escrito se descarta y los buenos se quedan', () => {
-    const a = leer({
-      ...BASE,
-      notes: [
-        { kind: 'inventado', area: 'x', note: 'n' },
-        { kind: 'bug', area: 'grafo', note: 'se colgo' },
-        { kind: 'gap', area: 'x', note: '   ' }
-      ]
-    })
-
-    expect(a.notes).toEqual([{ kind: 'bug', area: 'grafo', note: 'se colgo' }])
-  })
-
-  it('una clave que no es lista tampoco rompe nada', () => {
-    expect(leer({ ...BASE, notes: 'me falto una herramienta' }).notes).toBeUndefined()
-  })
-})

@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest'
 import { bench, hallazgo } from './plan-repair-fixture'
 import { planRepair } from './plan-repair'
 
-const NOTA = { kind: 'gap' as const, area: 'grafo', note: 'no pude trazar el simbolo' }
+import type { SelfNoteDraft } from '@domain/system/self-observation'
+
+const NOTA: SelfNoteDraft = {
+  kind: 'gap',
+  area: 'consulta-del-grafo',
+  note: 'no pude trazar el simbolo'
+}
 
 describe('planRepair: lo que el analista nota de FORTRESS', () => {
   it('se asienta etiquetado con el NOMBRE del proyecto, no con su id', () => {

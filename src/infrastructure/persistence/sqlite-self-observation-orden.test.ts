@@ -8,7 +8,7 @@ const TANDA = '2026-09-04T02:10:00.000Z'
 /** Una tanda: N observaciones cerradas EN EL MISMO INSTANTE, como pasa de verdad. */
 function tanda(r: SelfObservationRepository, cuantas: number): void {
   for (let i = 0; i < cuantas; i += 1) {
-    const o = r.add({ sourceProject: 'p', kind: 'gap', area: `a${i}`, note: 'n' })
+    const o = r.add({ sourceProject: 'p', kind: 'gap', area: 'otro', note: 'n' })
     r.setStatus({ id: o.id, status: 'atendido', reason: 'x', attendedBy: 'y', attendedAt: TANDA })
   }
 }
@@ -38,10 +38,10 @@ describe('y el orden sigue significando lo que dice', () => {
   it('la recencia del CIERRE manda por encima del desempate', () => {
     const r = createSqliteSelfObservationRepository(createMemoryDb())
     tanda(r, 3)
-    const tarde = r.add({ sourceProject: 'p', kind: 'gap', area: 'la-ultima', note: 'n' })
+    const tarde = r.add({ sourceProject: 'p', kind: 'gap', area: 'cognicion', note: 'n' })
     r.setStatus({ id: tarde.id, status: 'atendido', reason: 'x', attendedBy: 'y', attendedAt: '2026-09-05T00:00:00.000Z' }) // prettier-ignore
 
-    expect(r.listClosed(40)[0].area).toBe('la-ultima')
+    expect(r.listClosed(40)[0].area).toBe('cognicion')
   })
 
   it('dentro de la tanda, primero lo observado mas fresco', () => {

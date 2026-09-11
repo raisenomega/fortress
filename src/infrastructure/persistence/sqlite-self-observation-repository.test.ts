@@ -7,7 +7,7 @@ const AT = '2026-09-03T10:00:00.000Z'
 
 function repo(): SelfObservationRepository {
   const r = createSqliteSelfObservationRepository(createMemoryDb())
-  r.add({ sourceProject: 'p', kind: 'gap', area: 'grafo', note: 'falta algo' })
+  r.add({ sourceProject: 'p', kind: 'gap', area: 'consulta-del-grafo', note: 'falta algo' })
   return r
 }
 
