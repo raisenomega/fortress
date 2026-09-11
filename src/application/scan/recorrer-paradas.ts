@@ -9,7 +9,7 @@ import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import type { RecorridoDeps } from './recorrido-deps'
 import { NADA_RECORRIDO, sumarParada } from './acumulador-del-recorrido'
-import { asentarHallazgos } from './asentar-hallazgos'
+import { asentarLaParada } from './asentar-la-parada'
 import { abrirRecorrido } from './abrir-recorrido'
 import { escanearParada } from './escanear-parada'
 import type { SalidasDelRecorrido } from './progreso-del-recorrido'
@@ -41,6 +41,7 @@ export async function recorrerParadas(
   })
 
   let acumulado = NADA_RECORRIDO
+  let indice = 0
 
   for (const parada of paradas) {
     if (deps.cancelado()) return ok(cerrar('abortado', acumulado))
@@ -57,8 +58,9 @@ export async function recorrerParadas(
       return err(salida.error)
     }
 
+    indice += 1
+    await asentarLaParada(context, project, parada, { scanId, indice, at }, salida.value)
     acumulado = sumarParada(acumulado, parada, salida.value)
-    await asentarHallazgos(context, project, scanId, salida.value.findings, at)
     salidas.progreso.parada({
       hecha: acumulado.hechas,
       total: paradas.length,

@@ -1,3 +1,4 @@
+import type { Telemetria } from './telemetria'
 import type { EscritoresDeFichero } from './escritores-de-fichero'
 import type { ChatRepository } from '@domain/chat/chat-repository'
 import type { ConnectorRepository } from '@domain/connectors/connector-repository'
@@ -31,7 +32,7 @@ import type { RunInTransaction } from '@domain/shared/transaction'
  * interfaces; quien las implementa (SQLite, Anthropic, safeStorage) es cosa
  * de la infraestructura.
  */
-export interface AppContext extends EscritoresDeFichero {
+export interface AppContext extends EscritoresDeFichero, Telemetria {
   readonly projects: ProjectRepository
   /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
   readonly corpus: CorpusReader

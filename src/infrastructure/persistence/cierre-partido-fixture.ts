@@ -1,3 +1,4 @@
+import { createSqliteParadaRunRepository } from './sqlite-parada-run-repository'
 import type { AppContext } from '@application/context'
 import type { Project } from '@domain/project/project'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
@@ -53,6 +54,7 @@ export function crearBench(): Bench {
     scans: createSqliteScanHistoryRepository(db),
     activity: createSqliteActivityRepository(db),
     runs: createSqliteAgentRunRepository(db),
+    paradaRuns: createSqliteParadaRunRepository(db),
     fileHistory: { changedSince: () => Promise.resolve(false) },
     cognitionWriter: { writeScan: (): void => void (escrituras += 1) },
     informeWriter: { write: (): void => undefined },

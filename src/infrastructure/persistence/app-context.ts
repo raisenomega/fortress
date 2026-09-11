@@ -1,3 +1,4 @@
+import { createSqliteParadaRunRepository } from './sqlite-parada-run-repository'
 import { informeWriter } from '../scan/escribir-informe'
 import type { AppContext } from '@application/context'
 import { createAnthropicKeyValidator } from '../ai/anthropic-key-validator'
@@ -54,6 +55,7 @@ export function getAppContext(): AppContext {
     graphState: createSqliteGraphStateRepository(db),
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
+    paradaRuns: createSqliteParadaRunRepository(db),
     activity: createSqliteActivityRepository(db),
     cognitionWriter: { writeScan },
     informeWriter,

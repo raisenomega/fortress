@@ -6,10 +6,12 @@
  * puede dejar telemetria huerfana contando tokens de algo que ya no existe.
  */
 import { AGENT_RUNS_COLUMNS, AGENT_RUNS_INDEXES } from './schema-agent-runs'
+import { PARADA_RUNS_SCHEMA } from './schema-parada-runs'
 
 export const TELEMETRY_SCHEMA = `
 CREATE TABLE IF NOT EXISTS agent_runs (${AGENT_RUNS_COLUMNS});
 ${AGENT_RUNS_INDEXES}
+${PARADA_RUNS_SCHEMA}
 
 -- El recorrido por paradas (ADR-082) vive aqui para las bases nuevas y en
 -- columnas-sueltas para las que ya existen. Las dos listas dicen lo mismo.
