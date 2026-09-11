@@ -9,6 +9,7 @@ import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import type { AgentDraft } from '@domain/system/agent-draft'
 import { err } from '@domain/shared/result'
+import { agenteQueAsientaCorrida } from '../claude-code/agente-que-asienta'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
@@ -43,7 +44,11 @@ export function registerAgentDraftHandlers(): void {
     let sandbox: string | null = null
     try {
       sandbox = mkdtempSync(join(tmpdir(), 'fortress-draft-'))
-      const agent = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context))
+      const agent = agenteQueAsientaCorrida(
+        createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context)),
+        context,
+        'sistema'
+      )
       return await draftAgentAuto(context, id, agent, sandbox)
     } finally {
       if (sandbox !== null) rmSync(sandbox, { recursive: true, force: true })

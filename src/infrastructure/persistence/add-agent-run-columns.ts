@@ -12,11 +12,16 @@ import type { Db } from './database'
  * bandera". Clasificar las viejas seria inferir, y las que estan a cero son
  * justamente las que no se pueden clasificar sin adivinar.
  *
- * NO vive en `AGENT_RUNS_COLUMNS`. Esa constante la reusa `expandAgentRunsKind`
- * para recrear la tabla con un `INSERT ... SELECT *`, que exige el mismo numero
- * y orden de columnas en las dos; anadirla alli haria que una base vieja
- * intentara meter quince valores en dieciseis y fallara al abrir. Por eso este
- * ALTER va DESPUES de aquel recambio en `runMigrations`.
+ * YA vive en `AGENT_RUNS_COLUMNS` (2026-09-11). Estuvo fuera mientras el
+ * recambio copiaba con `INSERT ... SELECT *`, que exige el mismo numero y orden
+ * de columnas; con ella dentro, una base vieja habria intentado meter quince
+ * valores en dieciseis y no habria abierto. El precio de aquella salida era que
+ * el recambio solo servia UNA vez. Ahora copia por nombre, la constante vuelve
+ * a describir la tabla entera, y este ALTER va ANTES del recambio para que toda
+ * base llegue a el con las mismas columnas.
+ *
+ * Sigue haciendo falta: una base anterior a la bandera no la tiene, y el
+ * recambio no la anadiria —copia lo comun, no inventa columnas—.
  */
 const COLUMNS = ['usage_known INTEGER']
 

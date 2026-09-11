@@ -1,9 +1,18 @@
 import type { AgentId } from '../agent/agent'
 import type { TokenUsage } from './token-usage'
 
-/** Que provoco la ejecucion: un mensaje del chat, un escaneo, o una fase del
- *  motor de reparacion (analista, generador o revisor). */
-export type RunKind = 'chat' | 'scan' | 'repair'
+/**
+ * Que provoco la ejecucion: un mensaje del chat, un escaneo, una fase del motor
+ * de reparacion (analista, generador o revisor), o un agente auxiliar.
+ *
+ * `sistema` son los que trabajan para FORTRESS y no para una conversacion ni
+ * para el expediente: el juez de aplicabilidad, el build, genesis, los
+ * episodios de capacidad, el borrador de agente y el grafo A/B. Clase propia
+ * porque `averageRun`, `episodeTally` y `tokensPerRun` se calculan por `kind`:
+ * meterlos en `chat` habria corrompido en silencio las metricas del chat con
+ * corridas que no son chat.
+ */
+export type RunKind = 'chat' | 'scan' | 'repair' | 'sistema'
 
 export interface NewAgentRun {
   readonly projectId: string

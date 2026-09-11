@@ -5,12 +5,19 @@ import type { CodeAgent } from '@domain/chat/code-agent'
 import type { Project } from '@domain/project/project'
 import { buildMcpConfig } from '@domain/connectors/mcp-config'
 import { err, ok, type Result } from '@domain/shared/result'
+import { agenteQueAsientaCorrida } from '../claude-code/agente-que-asienta'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { isFortressRepo } from '../system/self-project'
 
+/**
+ * El agente del Ejecutor, el Plan, la Investigacion y el A/B del grafo. Sale
+ * envuelto: ninguno de esos tiene orquestador que asiente su corrida, y sin el
+ * decorador gastaban sin constar en `agent_runs`.
+ */
 export function agentFor(context: AppContext): CodeAgent {
   const cfg = buildMcpConfig(context.connectors.list())
-  return createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context), cfg)
+  const base = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context), cfg)
+  return agenteQueAsientaCorrida(base, context, 'sistema')
 }
 
 /**

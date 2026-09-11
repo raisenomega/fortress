@@ -8,34 +8,8 @@ const { app } = require('electron')
 const { join } = require('path')
 const Database = require('better-sqlite3')
 const { writeLegacyRepair } = require('./legacy-repair.cjs')
-
-const LEGACY_SCHEMA = `CREATE TABLE projects (
-  id TEXT PRIMARY KEY, name TEXT NOT NULL, path TEXT NOT NULL UNIQUE,
-  stack TEXT NOT NULL DEFAULT '', git_remote TEXT, git_branch TEXT,
-  fortress_score INTEGER NOT NULL DEFAULT 0, last_scan TEXT,
-  has_claude INTEGER NOT NULL DEFAULT 0, has_graph INTEGER NOT NULL DEFAULT 0,
-  has_fortress INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL);
-
-CREATE TABLE findings (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  severity TEXT NOT NULL CHECK (severity IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')),
-  title TEXT NOT NULL, file TEXT NOT NULL DEFAULT '', line INTEGER,
-  created_at TEXT NOT NULL);
-
-CREATE TABLE chat_messages (
-  id TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  role TEXT NOT NULL, content TEXT NOT NULL, agent_id TEXT, mode TEXT NOT NULL,
-  created_at TEXT NOT NULL);
-
-CREATE TABLE loop_sessions (
-  project_id TEXT PRIMARY KEY REFERENCES projects(id) ON DELETE CASCADE,
-  active INTEGER NOT NULL DEFAULT 0, cycles_done INTEGER NOT NULL DEFAULT 0,
-  recent_scores TEXT NOT NULL DEFAULT '[]', spent_baseline REAL NOT NULL DEFAULT 0,
-  updated_at TEXT NOT NULL);
-
-CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);`
+const { writeLegacyRuns } = require('./legacy-runs.cjs')
+const { LEGACY_SCHEMA } = require('./legacy-schema.cjs')
 
 const AT = '2026-08-01T05:00:00.000Z'
 
@@ -66,6 +40,10 @@ function writeLegacyDatabase() {
       `INSERT INTO chat_messages (id, project_id, role, content, agent_id, mode, created_at)
        VALUES ('m1', 'viejo', 'user', 'hola', NULL, 'supervisado', ?)`
     ).run(AT)
+
+    // Va la ULTIMA: `agent_runs` si cuelga del proyecto, y sus filas necesitan
+    // que 'viejo' ya exista.
+    writeLegacyRuns(db)
   } finally {
     db.close()
   }

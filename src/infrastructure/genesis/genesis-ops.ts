@@ -6,6 +6,7 @@ import { describeCapabilities } from '@application/system/describe-capabilities'
 import { runLearningEpisode } from '@application/system/run-learning-episode'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
+import { agenteQueAsientaCorrida } from '../claude-code/agente-que-asienta'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { costTrackingAgent } from '../claude-code/cost-tracking-agent'
 
@@ -27,7 +28,11 @@ export async function runGenesisEpisode(
 ): Promise<void> {
   const sandbox = mkdtempSync(join(tmpdir(), 'fortress-genesis-'))
   try {
-    const base = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context))
+    const base = agenteQueAsientaCorrida(
+      createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context)),
+      context,
+      'sistema'
+    )
     await runLearningEpisode(context, id, costTrackingAgent(base, onCost), sandbox)
   } finally {
     rmSync(sandbox, { recursive: true, force: true })

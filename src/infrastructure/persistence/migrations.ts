@@ -54,14 +54,16 @@ export function runMigrations(db: Db): void {
   // Stats del grafo + las 6 columnas del score integral (todas nullables).
   addProjectColumns(db)
 
-  // El motor de reparacion necesita su propio `kind`. Va antes que el ALTER de
-  // abajo porque recrea la tabla `agent_runs`, y su `INSERT ... SELECT *`
-  // exige que las dos tengan las MISMAS columnas: una de mas y no abre.
-  expandAgentRunsKind(db)
-
-  // La bandera de "esta factura no se pudo leer". Aditiva y despues del
-  // recambio, por lo anterior.
+  // La bandera de "esta factura no se pudo leer". Va ANTES del recambio desde
+  // que `usage_known` vive en `AGENT_RUNS_COLUMNS`: asi toda base llega al
+  // recambio con las mismas columnas que la tabla nueva. El orden era el
+  // contrario mientras la copia iba por `SELECT *`, y aquello hacia el
+  // recambio de un solo uso.
   addAgentRunColumns(db)
+
+  // Los `kind` que fueron llegando: `repair` para el motor, `sistema` para los
+  // agentes auxiliares. Recrea la tabla, asi que ningun ALTER debe ir despues.
+  expandAgentRunsKind(db)
 
   // El estado de tres valores del backlog de auto-mejora, con su backfill.
   addObservationStatus(db)
