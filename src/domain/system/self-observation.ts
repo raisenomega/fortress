@@ -52,5 +52,15 @@ export interface SelfNoteDraft {
   readonly note: string
 }
 
-/** Lo que aporta el parser antes de persistir (id/fecha/estado los pone la base). */
-export type NewSelfObservation = SelfNoteDraft & { readonly sourceProject: string }
+/**
+ * Lo que aporta el parser antes de persistir (id/fecha/estado los pone la base).
+ *
+ * `projectPath` es OPCIONAL y solo alimenta al cerco: una ruta absoluta delata
+ * al cliente aunque no lleve fichero detras, y quien asienta la observacion sabe
+ * sobre que carpeta trabajo el agente. Sin el, el cerco sigue tachando rutas
+ * relativas y citas, que es de donde salieron las ocho fugas reales.
+ */
+export type NewSelfObservation = SelfNoteDraft & {
+  readonly sourceProject: string
+  readonly projectPath?: string
+}

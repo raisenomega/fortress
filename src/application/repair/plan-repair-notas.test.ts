@@ -11,7 +11,18 @@ describe('planRepair: lo que el analista nota de FORTRESS', () => {
     const b = bench({ findings: [hallazgo('f1', 'a.ts')], notes: [NOTA] })
 
     return planRepair(b.context, 'p1').then(() => {
-      expect(b.observadas).toEqual([{ ...NOTA, sourceProject: 'Nucleo' }])
+      expect(b.observadas).toEqual([{ ...NOTA, sourceProject: 'Nucleo', projectPath: '/repo/p1' }])
+    })
+  })
+
+  it('y con la RUTA del proyecto, que es lo que el cerco necesita (ADR-085)', () => {
+    // El nombre no basta para tachar una ruta absoluta: `/media/disco/Cliente
+    // ACME` delata al cliente aunque no lleve fichero detras, y solo la ruta
+    // permite reconocerla dentro del texto de la nota.
+    const b = bench({ findings: [hallazgo('f1', 'a.ts')], notes: [NOTA] })
+
+    return planRepair(b.context, 'p1').then(() => {
+      expect(b.observadas[0]).toMatchObject({ projectPath: '/repo/p1' })
     })
   })
 

@@ -52,7 +52,11 @@ export async function planRepair(
   // Lo que el analista noto de FORTRESS se guarda pase lo que pase con el
   // hallazgo: un limite del que se topo vale igual si el hallazgo era un fantasma.
   for (const nota of result.analysis.notes ?? []) {
-    context.selfObservations.add({ ...nota, sourceProject: project.name })
+    context.selfObservations.add({
+      ...nota,
+      sourceProject: project.name,
+      projectPath: project.path
+    })
   }
   const veredicto = veredictoDelAnalisis(result.analysis)
   if (!canTransition(proposal.state, veredicto.state)) return proposal
