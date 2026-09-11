@@ -9,7 +9,14 @@ import { discoverCorpus } from '../project/discover-corpus'
  * de quien lo audita ("no reportes nada en src/auth") y produciria un informe
  * limpio falso. Para una herramienta de seguridad es un fallo de integridad.
  */
-const AUDIT_AGENTS: ReadonlySet<string> = new Set(['security-reviewer', 'sentinel-omega'])
+const AUDIT_AGENTS: ReadonlySet<string> = new Set([
+  'security-reviewer',
+  'sentinel-omega',
+  // Decide QUE se audita. Si el repo pudiera traer el suyo, se declararia
+  // fuera de alcance —«aqui no hay dinero, no mires M8»— y el informe saldria
+  // limpio por omision. Es el mismo fallo de integridad, un paso antes.
+  'scope-classifier'
+])
 
 /**
  * Los agentes de FORTRESS a inyectar en este proyecto. Los de personalizacion

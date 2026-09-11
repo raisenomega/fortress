@@ -50,6 +50,7 @@ describe('las senales se leen sin tocar ES_FUENTE', () => {
   it('las tres lecturas suman: fichero raiz, patron de carpeta y dependencia', async () => {
     const { modulosAplicables } = await medirProyecto(repo, SIN_DECLARACION)
 
-    expect(modulosAplicables).toEqual(['M4', 'M5', 'M7', 'M9'])
+    // M1, M6 y M10 son nucleo y aplican siempre; los otros cuatro, por senal.
+    expect(modulosAplicables).toEqual(['M1', 'M4', 'M5', 'M6', 'M7', 'M9', 'M10'])
   })
 })

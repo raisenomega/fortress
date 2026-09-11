@@ -7,11 +7,18 @@ import type { CorpusCategory } from '../project/corpus-descriptor'
  */
 const STRUCTURAL: ReadonlySet<AgentId> = new Set(['planner', 'refactor-cleaner', 'code-simplifier'])
 
-/** Quienes emiten juicio sobre lo que se protege o sobre lo que se publica. */
+/**
+ * Quienes emiten juicio sobre lo que se protege o sobre lo que se publica.
+ *
+ * `scope-classifier` decide QUE se audita —si el proyecto toca dinero o datos
+ * personales—, y el documento que mejor contesta eso es el modelo de amenazas
+ * del propio proyecto. Sin el juzgaria el alcance a ciegas.
+ */
 const SECURITY: ReadonlySet<AgentId> = new Set([
   'security-reviewer',
   'opensource-sanitizer',
-  'sentinel-omega'
+  'sentinel-omega',
+  'scope-classifier'
 ])
 
 /**

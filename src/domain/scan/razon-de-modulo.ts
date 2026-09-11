@@ -1,5 +1,5 @@
 import { NOMBRE_MODULO, type ModuloAuditoria } from './modulo-auditoria'
-import { senalesDe } from './senales-de-modulo'
+import { senalesDe } from './senales-derivadas'
 
 /**
  * Por que un modulo no entra. Existe porque la decision 4 de ADR-083 exige que
@@ -22,3 +22,11 @@ export const razonNoSeDecide = (modulo: ModuloAuditoria): string =>
 /** Quien declara sabe mejor, tambien para decir que no. */
 export const razonDeclaradoNo = (modulo: ModuloAuditoria): string =>
   `${nombrado(modulo)}: no aplica, declarado por el operador`
+
+/** Lo juzgo un agente y trajo la prueba: la razon la CITA, no la resume. */
+export const razonJuzgadoNo = (modulo: ModuloAuditoria, porque: string): string =>
+  `${nombrado(modulo)}: no aplica, juzgado con evidencia — ${porque}`
+
+/** Se juzgo y no se pudo concluir, o el juicio llego sin cita comprobable. */
+export const razonJuicioSinEvidencia = (modulo: ModuloAuditoria): string =>
+  `${nombrado(modulo)}: no consta, el juicio no trajo una cita de codigo que lo respalde`

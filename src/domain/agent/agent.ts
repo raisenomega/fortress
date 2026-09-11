@@ -10,7 +10,8 @@ export const AGENT_IDS = [
   'e2e-runner',
   'code-simplifier',
   'opensource-sanitizer',
-  'sentinel-omega'
+  'sentinel-omega',
+  'scope-classifier'
 ] as const
 
 export type AgentId = (typeof AGENT_IDS)[number]

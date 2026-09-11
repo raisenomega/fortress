@@ -4,6 +4,7 @@ import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { SIN_DECLARACION } from '@domain/scan/declaracion-de-modulos'
 import { MODULOS_AUDITORIA } from '@domain/scan/modulo-auditoria'
+import { MODULOS_SIEMPRE } from '@domain/scan/modulos-siempre'
 import { esDeCarpeta } from '@domain/scan/parada'
 import { REPARTO_VACIO } from '@domain/scan/manifiesto'
 import { medirProyecto } from './medir-proyecto'
@@ -33,14 +34,18 @@ describe('medirProyecto junta las tres lecturas', () => {
       SIN_DECLARACION
     )
 
-    expect(modulosAplicables).toEqual([])
-    expect(modulosDescartados.length + modulosSinConstancia.length).toBe(MODULOS_AUDITORIA.length)
+    expect(modulosAplicables).toEqual(MODULOS_SIEMPRE)
+    expect(modulosAplicables.length + modulosDescartados.length + modulosSinConstancia.length).toBe(
+      MODULOS_AUDITORIA.length
+    )
   })
 
   it('la declaracion del operador viaja hasta el manifiesto', async () => {
     const { modulosAplicables } = await medirProyecto(repo, { M8: true })
 
-    expect(modulosAplicables).toEqual(['M8'])
+    // Sobre el nucleo, que aplica siempre y no depende de nadie.
+    // En el orden del vocabulario, que es el que fija `MODULOS_AUDITORIA`.
+    expect(modulosAplicables).toEqual(['M1', 'M6', 'M8', 'M10'])
   })
 
   it('una carpeta sin repo git da manifiesto vacio de paradas, no un fallo', async () => {

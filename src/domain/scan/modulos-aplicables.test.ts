@@ -30,6 +30,7 @@ describe('deteccion determinista de modulos', () => {
     const otro = modulosAplicables(con(['src/App.tsx', 'package.json'], ['openai']))
 
     expect(uno).toEqual(otro)
-    expect(uno.aplicables).toEqual(['M4', 'M5', 'M9'])
+    // M1, M6 y M10 aplican SIEMPRE: salen sin senal que los delate.
+    expect(uno.aplicables).toEqual(['M1', 'M4', 'M5', 'M6', 'M9', 'M10'])
   })
 })
