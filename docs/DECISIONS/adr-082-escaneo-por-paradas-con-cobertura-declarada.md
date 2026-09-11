@@ -351,6 +351,126 @@ aquí porque un riesgo aceptado a sabiendas y anotado no es lo mismo que un
 riesgo que nadie vio. Una red contra el **desbocado** que no estrangule el
 trabajo legítimo queda como posible arco futuro; no es parte de éste.
 
+## Enmienda 3 (2026-09-10): el techo nunca se quitó, y ahora se quita de verdad
+
+Este ADR dijo dos veces que el escaneo no tiene techo de tiempo. El código nunca
+lo quitó. Un proyecto real lo destapó, y esta enmienda cierra la distancia entre
+lo escrito y lo que corre.
+
+### Lo que se prometió, y dónde
+
+La **Decisión 3** se titula «Escanea parada por parada, SIN TECHO DE TIEMPO» y
+razona que *«la seguridad no viene de un temporizador sino de que cada parada es
+finita por construcción»*. La **Enmienda 2** lo repitió sin margen: *«El techo de
+15 minutos desaparece para el escaneo y no se sustituye por otro tope
+automático.»* Y las **Consecuencias** llegaron a nombrar la implementación —
+*«Se hace por factory, el patrón que `graph-generator.ts:31` y `graph-omega.ts:24`
+ya usan: quien no pasa nada se queda con el de siempre»*.
+
+El molde, los ficheros y el llamante estaban escritos. No se construyó ninguno.
+
+### Lo que hay en el código
+
+```
+run-claude-process.ts:7   const MAX_DURATION_MS = 15 * 60 * 1000
+run-claude-process.ts:16  setTimeout(() => child.kill('SIGTERM'), MAX_DURATION_MS)
+```
+
+Constante de módulo, sin parámetro. `collectRun` tiene un solo llamante
+—`claude-code-agent.ts:72`— y ese agente lo crean **seis** sitios: el escaneo,
+chat/Terminal, Build, Génesis, el borrador de agente y los episodios de
+capacidad. El techo es de los seis a la vez, así que no había forma de quitarlo
+del escaneo sin quitárselo a todos. Por eso sobrevivió a dos enmiendas: nadie
+podía cumplirlas sin romper otra cosa.
+
+Esto es `doc-contradice-codigo` en su forma más cara: la decisión estaba tomada,
+argumentada y firmada, y el comportamiento era el contrario.
+
+### Lo medido: Health Flow, 21:52 del 2026-09-10
+
+Primer escaneo con la campaña completa (ADR-083) sobre el binario `cd79fd59`:
+
+| | |
+|---|---|
+| Arrancó / cerró | 01:37:52.201Z → 01:52:54.035Z |
+| Duración de la corrida | **901.727 ms** contra un techo de **900.000** |
+| Cierre | ABORTADO · `fallo` |
+| Cobertura | **0 de 12** paradas · **0 de 1730** ficheros |
+| Factura | **$16.29**, 62 turnos, 34.019 tokens de salida |
+
+Murió en la **primera** parada. El mismo proyecto aguantaba 80,8 minutos y
+cerraba `completo` cuando era **una sola pasada**: el techo se medía contra el
+escaneo entero. Al partirlo en paradas, cada una arranca su propio proceso y
+choca con el mismo muro — repartir el trabajo multiplicó las veces que se topa
+con él. El recorrido por paradas hizo el techo más estrecho, no más ancho.
+
+Y no murió inactivo. Su transcripción quedó en disco, a media frase:
+
+> *«Found leftover debug telemetry (`127.0.0.1:7242/ingest`)… Still waiting on
+> the three explorers… I'll verify what they report and then put together the
+> final report.»*
+
+Tenía un hallazgo real y esperaba a sus exploradores. El reloj no distinguió eso
+de un cuelgue, porque el reloj no sabe nada del código — que es exactamente lo
+que la Decisión 3 dijo y lo que el código siguió sin hacer.
+
+### La decisión: CERO techo para el escaneo
+
+**El escaneo no tiene límite de tiempo. Ninguno.** El compromiso es con las XX
+paradas del manifiesto (Enmienda 2) y cada una se toma lo que necesite. Un
+cronómetro que corta el trabajo va contra lo que la herramienta existe para
+hacer: auditar entero.
+
+### El techo no era la red que parecía
+
+Se creía salvaguarda contra un proceso colgado. Medido, no lo es. Compárense las
+dos muertes:
+
+```
+El TECHO   (run-claude-process.ts:16)  child.kill('SIGTERM')
+El BOTÓN   (child-registry.ts:44)      SIGTERM  →  SIGKILL a los 3 s
+```
+
+Y `child-registry` lo dice con fecha: *«SIGTERM es una PETICIÓN y claude puede
+ignorarla — pasó en vivo (2026-08-09): Detener "no funcionaba" porque el run
+seguía streameando tras recibirla.»*
+
+**El techo manda una petición que un proceso realmente colgado ignora; el botón
+la escala a una señal que no se puede ignorar.** Contra el cuelgue de verdad, la
+red que ya existe es estrictamente mejor que la que se retira. El techo sólo
+alcanzaba a lo que respondía — es decir, al trabajo legítimo.
+
+El escaneo ya está enganchado a esa red: `claude-code-agent.ts:70` registra cada
+hijo con su proyecto (`trackChild`), y `cancelRun` → `killChildrenOf` mata sólo
+los suyos. **La única red es el botón Detener, y es la correcta**: la aprieta el
+operador, mata de verdad, y respeta la completitud — la parada en curso termina
+y la siguiente no arranca (Enmienda 2).
+
+### Por qué CERO y no un techo muy alto
+
+Un techo de dos horas protegería del *zombi nocturno*: un escaneo huérfano
+gastando sin nadie delante. Se descarta, y es decisión deliberada del operador:
+**los escaneos profundos son eventos puntuales que se lanzan y se vigilan, no
+rutinas de madrugada.** Un tope contra un escenario que no se da es red muerta,
+y su único efecto real sería el que ya se midió: cortar trabajo bueno.
+
+La red de **gasto** sí se queda. `budget.perRun` sigue viajando a `buildArgs` y
+el tope por corrida no se toca: esa protege de lo que sí puede pasar —una parada
+que se desboque— sin mirar el reloj. Es la asimetría que este ADR viene
+sosteniendo desde la Enmienda 2: el dinero se acota, el tiempo no.
+
+### Alcance: sólo el escaneo
+
+`MAX_DURATION_MS` pasa a **parámetro con default**, el molde que las
+Consecuencias ya habían nombrado (`graph-omega.ts:24`). El escaneo pasa «sin
+límite» y no se arma el `setTimeout`; **los otros cinco caminos conservan sus 15
+minutos sin tocar una línea suya**, porque no pasan nada.
+
+Y la diferencia entre ellos y el escaneo no es de importancia, es de forma: un
+chat colgado no tiene manifiesto que lo mida, ni barra de paradas que delate que
+no avanza, ni un operador mirando doce números moverse. Ahí el reloj sigue siendo
+lo único que hay. Aquí hay algo mejor.
+
 ## Consecuencias
 
 - **El techo de 15 minutos desaparece para el escaneo, y solo para él.** Los
