@@ -10,6 +10,7 @@ const Database = require('better-sqlite3')
 const { writeLegacyRepair } = require('./legacy-repair.cjs')
 const { writeLegacyRuns } = require('./legacy-runs.cjs')
 const { LEGACY_SCHEMA } = require('./legacy-schema.cjs')
+const { writeLegacyIdentidades } = require('./legacy-identidades.cjs')
 
 const AT = '2026-08-01T05:00:00.000Z'
 
@@ -40,6 +41,9 @@ function writeLegacyDatabase() {
       `INSERT INTO chat_messages (id, project_id, role, content, agent_id, mode, created_at)
        VALUES ('m1', 'viejo', 'user', 'hola', NULL, 'supervisado', ?)`
     ).run(AT)
+
+    // Los duplicados que el backfill de ADR-084 tiene que fundir al arrancar.
+    writeLegacyIdentidades(db)
 
     // Va la ULTIMA: `agent_runs` si cuelga del proyecto, y sus filas necesitan
     // que 'viejo' ya exista.

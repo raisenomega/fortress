@@ -4,7 +4,9 @@ import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
 import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
+import { reidentificarConRed } from './reidentificar-con-red'
 import { SUELTAS } from './columnas-sueltas'
+import { FINDING_COLUMNS } from './columnas-de-findings'
 import type { Db } from './database'
 
 interface ColumnRow {
@@ -23,17 +25,6 @@ function hasColumn(db: Db, table: string, column: string): boolean {
  *
  * Los nombres de tabla y columna son literales del codigo, nunca input.
  */
-/**
- * Columnas nuevas de findings. Se anaden sin CHECK porque SQLite no lo admite
- * en un ALTER; la validacion la hace el dominio al leer (isFindingStatus).
- * severity si conserva su CHECK: es la que decide si un push se bloquea.
- */
-const FINDING_COLUMNS: ReadonlyArray<readonly [string, string]> = [
-  ['fingerprint', "ALTER TABLE findings ADD COLUMN fingerprint TEXT NOT NULL DEFAULT ''"],
-  ['status', "ALTER TABLE findings ADD COLUMN status TEXT NOT NULL DEFAULT 'open'"],
-  ['scan_id', 'ALTER TABLE findings ADD COLUMN scan_id TEXT']
-]
-
 export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'chat_messages', 'engine')) {
     db.exec("ALTER TABLE chat_messages ADD COLUMN engine TEXT NOT NULL DEFAULT 'api'")
@@ -69,7 +60,14 @@ export function runMigrations(db: Db): void {
   addObservationStatus(db)
 
   // El otro recambio: las dos tablas que colgaban del proyecto sin clave
-  // foranea. Va la ULTIMA — recrea tablas, y ningun ALTER de arriba debe
-  // encontrarselas a medio sustituir.
+  // foranea. Va la ULTIMA de las que tocan ESQUEMA — recrea tablas, y ningun
+  // ALTER de arriba debe encontrarselas a medio sustituir.
   addRepairProjectFk(db)
+
+  // Y la unica que no toca el esquema sino los DATOS: la clave nueva de
+  // ADR-084. Va despues de todas porque necesita las columnas ya puestas
+  // —`tipo` la anade `addFindingMemory`— y aqui dentro porque aqui es donde
+  // corre antes de que la app pueda escanear: la ventana de duplicado no
+  // existe si no hay instante en que la formula haya cambiado y la base no.
+  reidentificarConRed(db)
 }

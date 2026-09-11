@@ -20,15 +20,18 @@ const estado = (repo: ReturnType<typeof createSqliteFindingRepository>): string 
   repo.listByProject('p1')[0]?.lifecycle ?? ''
 
 describe('el escaneo que vuelve a ver un mitigado', () => {
-  it('conservandolo: sigue MITIGATED y aun asi se refresca la linea', () => {
+  it('conservandolo: sigue MITIGATED y aun asi se refresca el texto', () => {
     const { repo } = banco()
     const id = idDe(repo)
     repo.markMitigated(id, 'arreglado al lado', HOY)
 
-    repo.syncFromScan('p1', 's2', [{ ...DETECTADO, line: 41 }], HOY, new Set([id]))
+    // La LINEA no cambia: desde ADR-084 es parte de la clave, asi que moverla
+    // ya no es refrescar la misma fila sino nombrar otra. Lo que si se refresca
+    // es lo que no entra en la clave.
+    repo.syncFromScan('p1', 's2', [{ ...DETECTADO, title: 'otra redaccion' }], HOY, new Set([id]))
 
     expect(estado(repo)).toBe('MITIGATED')
-    expect(repo.listByProject('p1')[0]?.line).toBe(41)
+    expect(repo.listByProject('p1')[0]?.title).toBe('otra redaccion')
   })
 
   it('sin conservarlo: vuelve a ACTIVE, como siempre', () => {

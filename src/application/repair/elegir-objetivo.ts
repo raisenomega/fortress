@@ -1,13 +1,11 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
-import { senasDeIdentidad } from '@domain/project/finding-identity'
 import { dentroDelAlcance } from '@domain/repair/alcance'
+import { aCandidato } from './a-candidato'
 import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { hasBlockingRejection } from '@domain/repair/bloqueo-por-rechazo'
 import { selectTarget, type Candidate, type Selection } from '@domain/repair/select-target'
 import { dirigirA } from '@domain/repair/target-dirigido'
 import type { AppContext } from '../context'
-
-const aCandidato = ({ id, severity, title, file, line, firstSeen, identity }: FindingMemory): Candidate => ({ id, severity, title, file, line, firstSeen, ...senasDeIdentidad(identity) }) // prettier-ignore
 
 export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f.status === 'open'
 

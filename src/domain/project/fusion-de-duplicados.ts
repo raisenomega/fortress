@@ -16,7 +16,7 @@
 /** Lo minimo para decidir una fusion. Nada mas: decidir no necesita el resto. */
 export interface FilaAFusionar {
   readonly id: string
-  /** Ya en formato de hoy: fichero│tipo│simbolo. */
+  /** Ya en formato de hoy: fichero│linea│tipo (ADR-084). */
   readonly identidad: string
   readonly firstSeen: string
 }
@@ -43,10 +43,16 @@ function mayor(a: FilaAFusionar, b: FilaAFusionar): FilaAFusionar {
 }
 
 /**
- * Que fusionar y con quien. SOLO agrupa por identidad COMPLETA: fichero, tipo y
- * simbolo. Por fichero a secas fundiria defectos distintos del mismo archivo —
- * en `claude-cli.ts` hay cinco filas que son tres problemas—, y colapsar de mas
- * borra trabajo vivo, que es peor que no colapsar.
+ * Que fusionar y con quien. SOLO agrupa por identidad COMPLETA: fichero, LINEA
+ * y tipo. Por fichero a secas fundiria defectos distintos del mismo archivo —en
+ * `claude-cli.ts` hay tres problemas vivos—, y colapsar de mas borra trabajo
+ * vivo, que es peor que no colapsar.
+ *
+ * Aquel contraejemplo NO pedia el simbolo, aunque durante dos anos se leyo asi:
+ * los tres de `claude-cli.ts` estan en `:30`, `:51` y `:73`, y la LINEA los
+ * separa sola. Por eso el simbolo pudo salir de la clave en ADR-084 sin que
+ * esta funcion pierda nada. Lo que la linea NO separa —dos defectos reales en
+ * la misma linea, como `allowed-files.ts:45`— lo separa el tipo, que sigue aqui.
  *
  * Una identidad con una sola fila no sale en el plan: no hay nada que decidir.
  */
