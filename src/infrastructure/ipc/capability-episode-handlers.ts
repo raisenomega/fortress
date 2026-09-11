@@ -7,6 +7,7 @@ import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import { GRAPH_REQUIRED_MSG } from '@domain/graph/require-graph'
 import { err } from '@domain/shared/result'
+import { agenteQueAsientaCorrida } from '../claude-code/agente-que-asienta'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { selfGraphMissing } from '../graph/self-graph'
 import { getAppContext } from '../persistence/app-context'
@@ -27,7 +28,11 @@ export function registerCapabilityEpisodeHandlers(): void {
     let sandbox: string | null = null
     try {
       sandbox = mkdtempSync(join(tmpdir(), 'fortress-episode-'))
-      const agent = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context))
+      const agent = agenteQueAsientaCorrida(
+        createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context)),
+        context,
+        'sistema'
+      )
       return await runLearningEpisode(context, id, agent, sandbox)
     } finally {
       if (sandbox !== null) rmSync(sandbox, { recursive: true, force: true })

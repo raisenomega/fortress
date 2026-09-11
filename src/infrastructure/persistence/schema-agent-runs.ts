@@ -1,14 +1,27 @@
 /**
  * Las columnas de `agent_runs`, aparte para que la migracion que amplia el CHECK
  * recree la tabla desde ESTA definicion. Dos copias del mismo esquema acabarian
- * divergiendo, y el `INSERT ... SELECT *` del recambio depende de que el orden
- * de columnas sea identico.
+ * divergiendo.
+ *
+ * `usage_known` vive AQUI desde el segundo recambio (2026-09-11). Estaba fuera
+ * a proposito —el recambio copiaba con `INSERT ... SELECT *` y una columna de
+ * mas lo rompia— y esa decision hacia el recambio DE UN SOLO USO: bastaba un
+ * ALTER posterior para que el siguiente fallara al abrir la app. Se arreglo al
+ * reves: el recambio copia por NOMBRE, y esta constante vuelve a ser la unica
+ * verdad de como es la tabla.
+ *
+ * `sistema` es el cuarto `kind`: las corridas de los agentes auxiliares —el
+ * juez de aplicabilidad, el build, genesis, los episodios, el borrador y el
+ * grafo A/B— que hasta hoy gastaban sin constar. Clase propia y no `chat`
+ * porque `averageRun`, `episodeTally` y `tokensPerRun` se calculan por `kind`:
+ * meterlas en `chat` habria corrompido las metricas del chat con datos que no
+ * son chat, y en silencio.
  */
 export const AGENT_RUNS_COLUMNS = `
   id                    TEXT PRIMARY KEY,
   project_id            TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   agent_id              TEXT,
-  kind                  TEXT NOT NULL CHECK (kind IN ('chat', 'scan', 'repair')),
+  kind                  TEXT NOT NULL CHECK (kind IN ('chat', 'scan', 'repair', 'sistema')),
   duration_ms           INTEGER NOT NULL DEFAULT 0,
   failed                INTEGER NOT NULL DEFAULT 0,
   input_tokens          INTEGER NOT NULL DEFAULT 0,
@@ -19,7 +32,8 @@ export const AGENT_RUNS_COLUMNS = `
   num_turns             INTEGER NOT NULL DEFAULT 0,
   edits                 INTEGER NOT NULL DEFAULT 0,
   tools                 TEXT    NOT NULL DEFAULT '',
-  at                    TEXT    NOT NULL
+  at                    TEXT    NOT NULL,
+  usage_known           INTEGER
 `
 
 export const AGENT_RUNS_INDEXES = `

@@ -5,6 +5,7 @@ import type { ScanDeps } from '@application/scan/run-scan'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import { readBudget } from '@application/settings/read-budget'
 import type { Scanner } from '@domain/scan/scanner'
+import { agenteQueAsientaCorrida } from '../claude-code/agente-que-asienta'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
 import { SIN_TECHO } from '../claude-code/run-claude-process'
 import { createClaudeScanner } from './claude-scanner'
@@ -35,7 +36,13 @@ export function armarEscaneo(context: AppContext, projectId: string): EscaneoArm
   // y solo Detener lo para. Los otros cinco caminos que crean este agente no
   // pasan nada y conservan sus 15 minutos.
   const agente = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context), null, {}, SIN_TECHO) // prettier-ignore
-  const juez = crearJuez(agente, projectId, (v) => asentarAplicabilidad(context, projectId, v))
+  // El juez va ENVUELTO y el escaner no: el escaner ya asienta —su agregado al
+  // cerrar y su intento fallido—, el juez no tenia quien lo hiciera. Envolver
+  // al escaner aqui le pondria una segunda fila por parada, que es justo lo que
+  // `scan_parada_runs` evito para no mover el score de OMEGA.
+  const juez = crearJuez(agenteQueAsientaCorrida(agente, context, 'sistema'), projectId, (v) =>
+    asentarAplicabilidad(context, projectId, v)
+  )
 
   return {
     scanner: createClaudeScanner(agente, (intento) => asentarIntentoFallido(context, intento)),

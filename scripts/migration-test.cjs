@@ -7,6 +7,8 @@ const { app } = require('electron')
 const harness = require('./lib/app-harness.cjs')
 const { writeLegacyDatabase } = require('./lib/legacy-db.cjs')
 const { checkRepairMigration } = require('./lib/legacy-repair.cjs')
+const { checkRunsMigration } = require('./lib/legacy-runs.cjs')
+const { checkProjectBackfills } = require('./lib/legacy-project-checks.cjs')
 const { createRecorder } = require('./lib/renderer-checks.cjs')
 const { report } = require('./lib/suite-runner.cjs')
 
@@ -17,16 +19,7 @@ harness.bootMainProcess()
 async function verify(window) {
   const { results, check, run } = createRecorder(window)
 
-  const proyectos = await run('window.api.projects.list()')
-  check('conserva los proyectos', proyectos.length === 1, JSON.stringify(proyectos))
-  check('conserva el score anterior', proyectos[0]?.fortressScore === 64)
-  // Backfill del ciclo de vida: un proyecto que ya existia esta CONFIGURADO.
-  check('backfill de config_state a CONFIGURADO', proyectos[0]?.configState === 'CONFIGURADO')
-  // Backfill del score integral: sin auditar aun, dimensiones null y no parcial.
-  check('backfill score integral: sin dimensiones', proyectos[0]?.qualityDimensions === null)
-  check('backfill score integral: no parcial', proyectos[0]?.qualityPartial === false)
-  // Backfill del circuit breaker: un proyecto viejo no esta contaminado.
-  check('backfill circuit breaker: no contaminado', proyectos[0]?.contaminated === false)
+  checkProjectBackfills(check, await run('window.api.projects.list()'))
 
   const historial = await run("window.api.chat.history('viejo')")
   check('conserva el historial de chat', historial.length === 1, JSON.stringify(historial))
@@ -51,8 +44,9 @@ async function verify(window) {
   const descarte = await run(`window.api.scan.dismiss('${hallazgos[0]?.id}')`)
   check('se puede descartar un hallazgo migrado', descarte.ok, JSON.stringify(descarte))
 
-  // El recambio: se afirma por SQL porque lo que cambia es el esquema.
+  // Los dos recambios: se afirman por SQL porque lo que cambia es el esquema.
   checkRepairMigration(check)
+  checkRunsMigration(check)
 
   return results
 }
