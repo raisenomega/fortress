@@ -159,6 +159,83 @@ backfill manual. Funde por identidad completa, así que sobre la fórmula actual
 no tocaría ninguno de los 38 sitios. Es motor terminado esperando conexión, y
 este arco es esa conexión.
 
+## Enmienda 1 (2026-09-11): dos correcciones medidas al construir el código
+
+Las dos salieron de escribir el código de la decisión, y ninguna la invalida: la
+primera corrige un número mío, la segunda sustituye un argumento flojo por una
+medición — y de paso destapa un beneficio que la decisión original no vio.
+
+### Corrección 1 — el colapso de `mailbd` es 1, no 51
+
+La tabla de Consecuencias dice «mailbd: 128 → 77, colapsa 51». **Ese 51 está
+mal.** Se midió agrupando TODAS las filas vivas por `fichero+línea+tipo`, pero
+el backfill **se salta las 98 filas pre-ADR-067** —y eso lo decide este mismo
+ADR, tres párrafos más abajo: su `tipo` es el DEFAULT del ALTER y no una
+clasificación, así que su reclasificación necesita un agente y es la deuda
+`identidad-inestable-FASE-B-backfill`, aparte—. Contando solo lo que el backfill
+puede tocar, `mailbd` tiene 30 filas recomputables y colapsa **1**.
+
+Los otros tres números **son exactos**, verificados contra el backfill de verdad:
+
+| proyecto | vivas | pre-067 (se saltan) | recomputables | colapsa |
+|---|---|---|---|---|
+| fortress-command-center | 54 | 0 | 54 | **0** |
+| APT BY | 9 | 0 | 9 | **0** |
+| Health Flow V1_FINAL | 175 | 0 | 175 | **13** |
+| mailbd-main | 128 | **98** | 30 | **1** |
+
+**El total del corpus pasa de los 64 duplicados que la tabla implicaba a 14.**
+La diferencia no es que el backfill colapse menos de lo que debe: es que 50 de
+aquellos 64 están en filas que este arco decidió no tocar, y la tabla los contó
+igual. Lo que el arco promete sigue en pie —Health Flow, el proyecto del informe
+grado-bancario, colapsa sus 13— pero el corpus de `mailbd` no queda limpio hasta
+que corra el backfill del agente.
+
+### Corrección 2 — la línea no baila, y la fórmula vieja escondía secretos
+
+La Decisión aceptó el precio «un defecto que se mueve de línea abre fila nueva»
+diciendo que es «el mismo que `fingerprintOf` paga desde siempre». **Esa
+comparación era floja, y hay que decirlo.** En `fingerprintOf` el precio es que
+un descarte no se hereda: molesto y reversible. Aquí es peor, porque nada muere
+sin juicio ([ADR-065](adr-065-nada-muere-sin-juicio.md)): la fila vieja **sigue
+viva** al lado de la nueva, así que un defecto que cambiara de línea sería un
+**duplicado permanente** — exactamente el agujero que ADR-067 documentó cuando
+el mismo `graph:verify` entró con «tres líneas: 43, 49, 59».
+
+Así que se midió antes de firmar el código, que es lo que la decisión debería
+haber hecho antes de firmarse. Sobre el corpus vivo, los **15 sitios** con mismo
+`fichero+tipo` y líneas distintas:
+
+| sitio | líneas | ¿el mismo defecto? |
+|---|---|---|
+| `points.controller.ts` · `autorizacion-ausente` | `:47` `awardPoints` / `:57` `deductPoints` | no — dos endpoints |
+| `payments.controller.ts` · `confianza-en-datos-del-cliente` | `:39` `createPaymentIntent` / `:44` `createSubscription` | no |
+| `.env` · `secreto-versionado` | `:5` `DATABASE_URL` / `:9` service_role / `:18` `JWT_SECRET` / `:45` base clínica | no — **cuatro secretos distintos** |
+| `schema.graphql` · `autorizacion-ausente` | `:171` `MarketplaceItem.orders` / `:261` `Query.user` | no |
+
+**Cero casos del mismo defecto reportado en dos líneas.** La línea no baila: en
+este corpus apunta a sitios genuinamente distintos. El precio se acepta sobre
+esa medición, no sobre la analogía.
+
+### El beneficio que la decisión original no vio
+
+La cuarta fila de esa tabla dice más de lo que parece. Con la fórmula vieja
+—`fichero │ tipo │ símbolo`—, esos cuatro secretos del mismo `.env` colapsaban
+en **una sola fila** cada vez que el símbolo coincidía, y de hecho dos de ellos
+entraron con el símbolo vacío. La clave vieja no solo fabricaba duplicados:
+**escondía hallazgos reales**, y los escondía en la peor dirección posible —un
+secreto versionado que no se ve es un secreto que nadie rota—.
+
+Así que la identidad nueva hace dos cosas, no una: quita las 40 filas de ruido
+que el símbolo fabricaba **y destapa defectos que el símbolo fundía por error**.
+El argumento del ADR-067 —«sin el símbolo, dos defectos distintos colapsarían en
+uno»— resultó cierto al revés: era el símbolo, y no su ausencia, lo que
+colapsaba defectos distintos en uno.
+
+Esto refuerza la decisión en vez de matizarla, y por eso queda escrito: el
+siguiente que lea «el símbolo era ruido» debe saber que también era un
+escondite.
+
 ## Consecuencias
 
 ### Lo que colapsa el backfill, medido antes de escribirlo
@@ -168,7 +245,7 @@ este arco es esa conexión.
 | fortress-command-center | 54 | 54 | **0** |
 | APT BY | 9 | 9 | **0** |
 | Health Flow V1_FINAL | 175 | 162 | **13** |
-| mailbd-main | 128 | 77 | **51** |
+| mailbd-main | 128 | 77 | ~~51~~ **1** (ver Enmienda 1) |
 
 **Nuestro propio corpus colapsa cero**: 54 filas post-ADR-081, las más limpias,
 y la migración no las toca. Health Flow colapsa **13 y no 20**: los 7 sitios
@@ -209,8 +286,10 @@ obligatoria del arco** — queda escrito aquí para no descubrirlo a mitad.
 ### Negativas
 
 - **Un defecto que se mueve de línea abre fila nueva.** Es el precio de meter la
-  línea, y es el mismo que `fingerprintOf` paga desde siempre por la misma razón:
-  falla del lado de conservar, nunca del de borrar en silencio.
+  línea. La primera redacción lo comparó con lo que `fingerprintOf` paga desde
+  siempre; **la Enmienda 1 retira esa comparación** —allí el precio es reversible
+  y aquí la fila vieja sigue viva— y la sustituye por la medición que de verdad
+  lo justifica: en este corpus la línea NO baila.
 - La fórmula cambia por tercera vez (ADR-067, ADR-081 la dejó intacta, ésta). Cada
   cambio re-fragmenta la base una vez; por eso el backfill va pegado.
 
