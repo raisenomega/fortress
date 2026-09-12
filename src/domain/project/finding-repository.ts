@@ -1,3 +1,4 @@
+import type { ExtinguidoPor } from './extinguido-por'
 import type { MotivoExtincion } from './motivo-extincion'
 import type { DetectedFinding } from '../scan/detected-finding'
 import type { FindingMemory } from './finding-memory'
@@ -48,7 +49,11 @@ export interface FindingRepository {
    * ausencia en el escaneo Y archivo tocado desde la primera deteccion.
    */
   /** Extinguir exige DECIR por que: una muerte sin motivo no se puede auditar. */
-  markExtinct(ids: readonly string[], at: string, motivo: MotivoExtincion): void
+  /** `extinguidoPor` dice QUIEN; el motivo, POR QUE (ADR-087). */
+  markExtinct(ids: readonly string[], at: string, motivo: MotivoExtincion, extinguidoPor: ExtinguidoPor): void // prettier-ignore
+  /** El aviso sobre una fila que YA estaba mitigada: la re-verificacion no
+   *  probo la ausencia. Devuelve si escribio. */
+  anotarMitigado(findingId: string, note: string): boolean
 
   /**
    * El operador declara que un hallazgo ya esta ARREGLADO, con una nota que

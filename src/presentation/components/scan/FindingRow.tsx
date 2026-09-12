@@ -12,6 +12,8 @@ interface FindingRowProps {
   readonly onMitigate: (id: string, nota: string) => void
   readonly onUnmitigate: (id: string) => void
   readonly onRepair: (id: string) => void
+  readonly onVerificar: (id: string) => void
+  readonly ocupado: boolean
 }
 
 /** Sin archivo ni linea un hallazgo no es accionable, pero se muestra igual. */
@@ -26,7 +28,9 @@ export function FindingRow({
   onReopen,
   onMitigate,
   onUnmitigate,
-  onRepair
+  onRepair,
+  onVerificar,
+  ocupado
 }: FindingRowProps): React.JSX.Element {
   // Descartado se atenua pero NO se esconde: sigue estando ahi, y el operador
   // tiene que poder ver que decidio ignorarlo y por que ya no bloquea.
@@ -56,6 +60,8 @@ export function FindingRow({
           mitigado={mitigado}
           onMitigate={onMitigate}
           onUnmitigate={() => onUnmitigate(finding.id)}
+          onVerificar={() => onVerificar(finding.id)}
+          ocupado={ocupado}
         />
         <FindingActions
           dismissed={dismissed}

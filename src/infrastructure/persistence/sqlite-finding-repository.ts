@@ -45,7 +45,9 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
       )
     },
 
-    markExtinct: (ids, at, motivo) => writes.markExtinct(ids, at, motivo),
+    markExtinct: (ids, at, motivo, extinguidoPor) =>
+      writes.markExtinct(ids, at, motivo, extinguidoPor),
+    anotarMitigado: (findingId, note) => writes.anotarMitigado(findingId, note),
     markMitigated: (id, note, at) => writes.markMitigated(id, note, at),
     markActive: (id) => writes.markActive(id),
 

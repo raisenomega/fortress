@@ -27,7 +27,11 @@ const COLUMNS: ReadonlyArray<readonly [string, string]> = [
   ['resolved_at', 'ALTER TABLE findings ADD COLUMN resolved_at TEXT'],
   ['extinct_reason', 'ALTER TABLE findings ADD COLUMN extinct_reason TEXT'],
   ['tipo', "ALTER TABLE findings ADD COLUMN tipo TEXT NOT NULL DEFAULT 'otro'"],
-  ['simbolo', "ALTER TABLE findings ADD COLUMN simbolo TEXT NOT NULL DEFAULT ''"]
+  ['simbolo', "ALTER TABLE findings ADD COLUMN simbolo TEXT NOT NULL DEFAULT ''"],
+  // QUIEN lo cerro, aparte de por que (ADR-087). Sin DEFAULT a proposito: las
+  // filas ya extinguidas quedan en NULL, que significa «no consta» y es la
+  // verdad — a ninguna la cerro un juicio que sepamos quien pidio.
+  ['extinguido_por', 'ALTER TABLE findings ADD COLUMN extinguido_por TEXT']
 ]
 
 const PENDING = `SELECT id, severity, title, file, line, created_at FROM findings WHERE identity = ''`

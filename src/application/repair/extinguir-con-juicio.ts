@@ -1,4 +1,5 @@
 import type { Analysis } from '@domain/repair/analysis'
+import type { ExtinguidoPor } from '@domain/project/extinguido-por'
 import { estaProbado } from '@domain/repair/evidencia-obsolescencia'
 import type { Project } from '@domain/project/project'
 import type { Veredicto } from '@domain/repair/veredicto-del-analisis'
@@ -34,23 +35,34 @@ const SIN_PRUEBA = 'obsoleto segun el agente, sin prueba comprobable'
  * El `target` del analisis es el candidato que ESTE proceso le paso a `study()`,
  * no algo que el modelo elija: `toAnalysis` lo copia del parametro. Por eso el
  * fichero que se lee y el hallazgo que se cierra salen de ahi.
+ *
+ * `extinguidoPor` dice QUIEN lo pidio: la cola del motor o el operador sobre esa
+ * fila (ADR-087). El juicio es el mismo —un agente miro el fichero— y por eso el
+ * motivo no cambia; lo que cambia es de quien salio la pregunta.
+ *
+ * DEVUELVE si extinguio. El camino de reparacion no lo mira —siga vivo o no, ya
+ * hizo lo suyo—, pero la re-verificacion SI: cuando no extingue tiene que
+ * contarle al operador por que, y sin este `boolean` tendria que repetir la
+ * comprobacion del marcador para averiguarlo.
  */
 export function extinguirSiObsoleto(
   context: AppContext,
   project: Project,
   analysis: Analysis,
   veredicto: Veredicto,
-  at: string
-): void {
-  if (veredicto.verdict !== 'OBSOLETO') return
+  at: string,
+  extinguidoPor: ExtinguidoPor = 'agente'
+): boolean {
+  if (veredicto.verdict !== 'OBSOLETO') return false
 
   const { id, file } = analysis.target
   const contenido = context.filesystemProbe.contenido(project.path, file)
   const prueba = estaProbado(analysis.evidencia, contenido)
 
   if (prueba.probado) {
-    context.findings.markExtinct([id], at, 'juicio_obsoleto')
-    return
+    context.findings.markExtinct([id], at, 'juicio_obsoleto', extinguidoPor)
+    return true
   }
   context.findings.markMitigated(id, `${SIN_PRUEBA}: ${prueba.motivo} en ${file}`, at)
+  return false
 }

@@ -58,7 +58,7 @@ export const SELECT_FINDING = `SELECT project_id, fingerprint FROM findings WHER
 
 export const SET_STATUS = 'UPDATE findings SET status = ? WHERE id = ?'
 
-export { MARK_ACTIVE, MARK_EXTINCT, MARK_MITIGATED, TOUCH_CONSERVANDO } from './finding-lifecycle-sql' // prettier-ignore
+export { ANOTAR_MITIGADO, MARK_ACTIVE, MARK_EXTINCT, MARK_MITIGATED, TOUCH_CONSERVANDO } from './finding-lifecycle-sql' // prettier-ignore
 
 export const INSERT_DISMISSAL = `INSERT OR REPLACE INTO dismissals
   (project_id, fingerprint, at) VALUES (?, ?, ?)`

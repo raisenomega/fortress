@@ -19,8 +19,9 @@ export function bench(opts: Opciones): Bench {
   // Fase 4, y sin esto el bench no podria probar que el motor se la pasa.
   const memoria: Array<readonly string[]> = []
   const anclaDelDescuento: string[] = []
-  const extinguidos: Array<{ ids: readonly string[]; at: string; motivo: string }> = []
+  const extinguidos: Bench['extinguidos'] = []
   const mitigados: Array<{ id: string; note: string; at: string }> = []
+  const anotados: Array<{ id: string; note: string }> = []
   const analyst = analistaFake(opts.verdictStatus ?? 'REAL', opts.notes, opts.evidencia)
   const context = {
     projects: { findById: () => ({ id: 'p1', path: '/repo/p1', name: 'Nucleo' }) },
@@ -29,7 +30,7 @@ export function bench(opts: Opciones): Bench {
       listClosed: () => opts.cerradas ?? []
     },
     scans: { listByProject: () => [{ id: 'scan-1' }] },
-    ...cicloDeVida(opts, extinguidos, mitigados),
+    ...cicloDeVida(opts, extinguidos, mitigados, anotados),
     repairProposals: {
       insert: (p: Proposal): void => void inserted.push(p),
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch }),
@@ -57,5 +58,5 @@ export function bench(opts: Opciones): Bench {
     fortressConfig: () => opts.cerco ?? { kind: 'not-present' }
   } as unknown as AppContext
   // prettier-ignore
-  return { context, inserted, patches, events, observadas, memoria, anclaDelDescuento, extinguidos, mitigados }
+  return { context, inserted, patches, events, observadas, memoria, anclaDelDescuento, extinguidos, mitigados, anotados }
 }
