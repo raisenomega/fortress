@@ -1,23 +1,9 @@
 import { redactSecrets } from '../chat/tool-detail'
+import { CARPETA, CITA, RUTA, RUTA_ABSOLUTA } from './reglas-del-cerco'
 
 /** Lo que queda donde estaba la cita. Entre comillas angulares porque no es
  *  texto del agente: es una marca de que AQUI habia algo y se retiro. */
 export const RUTA_REDACTADA = '‹ruta del proyecto›'
-
-/** Una cita `fichero:linea`, con o sin carpetas delante. Va PRIMERA: si fuera
- *  despues, el patron de ruta se llevaria el fichero y dejaria el `:40` suelto. */
-const CITA = /(?:[\w.@~-]+\/)*[\w.@-]+\.\w{1,10}:\d+/g
-
-/** Una ruta con carpeta y extension. Exige la BARRA a proposito: `README.md` o
- *  `package.json` a secas no identifican a nadie —los tiene todo proyecto— y
- *  tacharlos solo destroza la nota. */
-const RUTA = /(?:[\w.@~-]+\/)+[\w.@-]+\.\w{1,10}/g
-
-/** Una carpeta de codigo sin fichero: `supabase/functions`, `apps/api/src`. Sin
- *  extension no la cazan las otras dos, y `supabase/functions/...` fue una de
- *  las ocho fugas reales. Anclada a prefijos conocidos para no tachar cualquier
- *  cosa con una barra dentro. */
-const CARPETA = /\b(?:src|apps|packages|services|supabase|lib|test|tests|docs|scripts|prisma|migrations)(?:\/[\w.@-]+)+/g // prettier-ignore
 
 /**
  * El cerco de ADR-085: ninguna observacion de auto-mejora puede llevarse codigo
@@ -29,6 +15,13 @@ const CARPETA = /\b(?:src|apps|packages|services|supabase|lib|test|tests|docs|sc
  * citaron el codigo que tenian delante para explicarse. El valor esta en la
  * observacion, no en la cita: tirar la nota entera perderia el aprendizaje y
  * ganaria lo mismo que tachar la ruta. Ante la duda se conserva (ADR-065).
+ *
+ * CUATRO reglas, y la de las rutas absolutas no sobra aunque exista
+ * `ocultarRaiz`: aquella taja la raiz EXACTA y solo cuando se sabe cual es, asi
+ * que no alcanza ni al barrido —una fila guardada no lleva su ruta— ni a una
+ * ruta de OTRO proyecto que la nota mencione de paso. Medido al abrir la app el
+ * 2026-09-11: 40 observaciones sobrevivieron al barrido con su ruta absoluta
+ * entera. Ninguna era de un cliente, pero por casualidad y no por diseno.
  *
  * Redacta SIEMPRE, sin mirar de que proyecto viene. Distinguir el repo propio
  * seria util —perdemos el localizador en nuestras propias notas— pero la
@@ -48,6 +41,7 @@ const CARPETA = /\b(?:src|apps|packages|services|supabase|lib|test|tests|docs|sc
 export function redactarObservacion(texto: string, projectPath?: string): string {
   const sinRutaAbsoluta = ocultarRaiz(texto, projectPath)
   const sinCitas = sinRutaAbsoluta
+    .replace(RUTA_ABSOLUTA, RUTA_REDACTADA)
     .replace(CITA, RUTA_REDACTADA)
     .replace(RUTA, RUTA_REDACTADA)
     .replace(CARPETA, RUTA_REDACTADA)
