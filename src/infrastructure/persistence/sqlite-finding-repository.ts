@@ -2,6 +2,7 @@ import type { FindingRepository } from '@domain/project/finding-repository'
 import { EMPTY_COUNTS, type SeverityCounts } from '@domain/project/severity-counts'
 import { isSeverity, type Severity } from '@domain/shared/severity'
 import type { Db } from './database'
+import { toHistoria, type HistoriaRow } from './finding-historia-row'
 import { toMemory, type MemoryRow } from './finding-memory-row'
 import { toFinding, toInsert, type FindingRow } from './finding-row'
 import * as SQL from './finding-sql'
@@ -17,6 +18,7 @@ interface CountRow {
 export function createSqliteFindingRepository(db: Db): FindingRepository {
   const byProject = db.prepare(SQL.SELECT_BY_PROJECT)
   const memoryOf = db.prepare(SQL.SELECT_MEMORY)
+  const historiaOf = db.prepare(SQL.SELECT_HISTORIA)
   const counts = db.prepare(SQL.COUNTS_BY_PROJECT)
   const writes = createFindingWrites(db)
 
@@ -24,6 +26,8 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
     listByProject: (projectId) => (byProject.all(projectId) as FindingRow[]).map(toFinding),
 
     listMemory: (projectId) => (memoryOf.all(projectId) as MemoryRow[]).map(toMemory),
+
+    listHistoria: (projectId) => (historiaOf.all(projectId) as HistoriaRow[]).map(toHistoria),
 
     countsByProject: () => {
       const totals: Record<string, Record<Severity, number>> = {}

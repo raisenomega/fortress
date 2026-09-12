@@ -1,6 +1,7 @@
 import type { ExtinguidoPor } from './extinguido-por'
 import type { MotivoExtincion } from './motivo-extincion'
 import type { DetectedFinding } from '../scan/detected-finding'
+import type { FindingHistoria } from './finding-historia'
 import type { FindingMemory } from './finding-memory'
 import type { Finding } from './project'
 import type { SeverityCounts } from './severity-counts'
@@ -12,10 +13,11 @@ export interface FindingRepository {
   /** Los mismos hallazgos con su expediente: clave, ciclo de vida y fechas. */
   listMemory(projectId: string): readonly FindingMemory[]
 
-  /**
-   * Conteos de todos los proyectos de una vez. Solo hallazgos abiertos: los
-   * descartados no cuentan para el score ni bloquean un push.
-   */
+  /** Solo lo CERRADO, con de que murio cada uno (ADR-087). */
+  listHistoria(projectId: string): readonly FindingHistoria[]
+
+  /** Conteos de todos los proyectos de una vez. Solo hallazgos abiertos: los
+   *  descartados no cuentan para el score ni bloquean un push. */
   countsByProject(): Readonly<Record<string, SeverityCounts>>
 
   /**
@@ -55,12 +57,10 @@ export interface FindingRepository {
    *  probo la ausencia. Devuelve si escribio. */
   anotarMitigado(findingId: string, note: string): boolean
 
-  /**
-   * El operador declara que un hallazgo ya esta ARREGLADO, con una nota que
-   * dice donde. No afirma que haya desaparecido —eso lo confirma el escaneo con
-   * su doble prueba—, asi que el hallazgo sigue en el tablero; lo que deja es de
-   * pedirle trabajo al motor. false si ya no estaba ACTIVE.
-   */
+  /** El operador declara que un hallazgo ya esta ARREGLADO, con una nota que
+   *  dice donde. No afirma que haya desaparecido —eso lo confirma un juicio—,
+   *  asi que sigue en el tablero; lo que deja es de pedirle trabajo al motor.
+   *  false si ya no estaba ACTIVE. */
   markMitigated(findingId: string, note: string, at: string): boolean
 
   /** El operador deshace su marca: el hallazgo vuelve a la cola. false si no

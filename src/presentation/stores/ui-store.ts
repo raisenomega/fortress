@@ -16,6 +16,7 @@ export type MainView =
   | 'firma'
   | 'genesis'
   | 'construir'
+  | 'historia'
   | 'docs'
 
 interface UiState {

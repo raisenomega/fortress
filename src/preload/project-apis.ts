@@ -23,6 +23,7 @@ export const projectApis: Pick<
   scan: {
     run: (projectId) => ipcRenderer.invoke(IPC.scanRun, projectId),
     findings: (projectId) => ipcRenderer.invoke(IPC.scanFindings, projectId),
+    historia: (projectId) => ipcRenderer.invoke(IPC.scanHistoria, projectId),
     counts: () => ipcRenderer.invoke(IPC.scanCounts),
     onProgress: (listener) => subscribe(IPC.scanProgress, listener),
     stop: (projectId) => ipcRenderer.invoke(IPC.scanStop, projectId),
