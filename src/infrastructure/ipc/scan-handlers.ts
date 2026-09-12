@@ -49,6 +49,12 @@ export function registerScanHandlers(): void {
 
   ipcMain.handle(IPC.scanCounts, () => getAppContext().findings.countsByProject())
 
+  // Lo CERRADO, que el tablero no ensena: `SELECT_BY_PROJECT` filtra los
+  // extintos a proposito. Su pantalla es la historia (ADR-087).
+  ipcMain.handle(IPC.scanHistoria, (_event, projectId: string) =>
+    getAppContext().findings.listHistoria(String(projectId))
+  )
+
   ipcMain.handle(IPC.scanHistory, (_event, projectId: string, limit: number) =>
     getAppContext().scans.listByProject(projectId, limit)
   )

@@ -25,18 +25,24 @@ function registros(): Array<{ handlers: number; manejaSuError: boolean }> {
  * de adorno: vender «los 110 observan» cuando son 94 es lo mismo que el juez que
  * decia haber auditado sin correr, y este proyecto ya pago ese error una vez.
  */
-describe('el embudo de IPC cubre 94 de 111, y se dice en voz alta', () => {
-  it('hay 111 handlers, y 17 viven en ficheros que manejan su propio error', () => {
-    // Eran 110 y 16. El de `finding:verify` (ADR-087) nacio manejando el suyo,
-    // como los otros diecisiete: el renderer necesita una respuesta y no una
-    // excepcion. Asi que la COBERTURA no se movio — sigue en 94— y este numero
-    // es el que obliga a mirar cuando alguien anade un handler.
+describe('el embudo de IPC cubre 94 de 112, y se dice en voz alta', () => {
+  it('hay 112 handlers, y 18 viven en ficheros que manejan su propio error', () => {
+    // Empezo en 110 y 16. Los dos de ADR-087 —`finding:verify` y
+    // `scan:historia`— cayeron del lado tapado, asi que la COBERTURA lleva tres
+    // arcos SIN MOVERSE de 94, y ese es el numero que se dice en voz alta.
+    //
+    // El recuento es POR FICHERO, no por handler: si el fichero tiene UN catch,
+    // sus handlers cuentan como tapados. Es conservador a proposito —`scan:
+    // historia` no tiene catch propio, lo tiene `handleRun` en el mismo
+    // fichero— asi que 94 es el SUELO de la cobertura, no su techo. Afinar por
+    // handler exigiria parsear cuerpos, y un numero prudente que obliga a mirar
+    // vale mas que uno exacto que se cree a si mismo.
     const todos = registros()
     const total = todos.reduce((n, r) => n + r.handlers, 0)
     const tapados = todos.filter((r) => r.manejaSuError).reduce((n, r) => n + r.handlers, 0)
 
-    expect(total).toBe(111)
-    expect(tapados).toBe(17)
+    expect(total).toBe(112)
+    expect(tapados).toBe(18)
     expect(total - tapados).toBe(94)
   })
 

@@ -1,6 +1,7 @@
 import type { ScanSummary } from '@application/scan/scan-types'
 import type { AgentId } from '@domain/agent/agent'
 import type { Finding } from '@domain/project/project'
+import type { FindingHistoria } from '@domain/project/finding-historia'
 import type { SeverityCounts } from '@domain/project/severity-counts'
 import type { ScanChunk } from '@domain/scan/scan-chunk'
 import type { ScanRecord } from '@domain/scan/scan-record'
@@ -14,6 +15,8 @@ export interface ScanApi {
   /** Audita la seguridad del proyecto en disco. Puede tardar minutos. */
   run(projectId: string): Promise<Result<ScanSummary>>
   findings(projectId: string): Promise<readonly Finding[]>
+  /** Lo CERRADO, que `findings` no trae: la historia del proyecto (ADR-087). */
+  historia(projectId: string): Promise<readonly FindingHistoria[]>
   /** Conteos de todos los proyectos a la vez, para las tarjetas. */
   counts(): Promise<Readonly<Record<string, SeverityCounts>>>
   onProgress(listener: (chunk: ScanChunk) => void): Unsubscribe

@@ -11,6 +11,7 @@ import { OmegaView } from '../omega/OmegaView'
 import { PerformanceView } from '../performance/PerformanceView'
 import { PostureView } from '../posture/PostureView'
 import { GenesisView } from '../genesis/GenesisView'
+import { HistoriaView } from '../historia/HistoriaView'
 import { ScanView } from '../scan/ScanView'
 import { SelfImprovementView } from '../system/SelfImprovementView'
 import { SettingsView } from '../settings/SettingsView'
@@ -22,6 +23,7 @@ import { TimelineView } from '../timeline/TimelineView'
  */
 const PANELS: Partial<Record<MainView, () => React.JSX.Element>> = {
   scan: () => <ScanView />,
+  historia: () => <HistoriaView />,
   actividad: () => <TimelineView />,
   cognition: () => <CognitionView />,
   exposicion: () => <PostureView />,

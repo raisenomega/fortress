@@ -12,6 +12,9 @@ const VIEWS: ReadonlyArray<{ view: MainView; iconName: IconName; label: string }
   // "Terminal" (antes el chat principal) = donde se ejecuta; va junto al Escaneo.
   // El "Chat" (planificacion, antes "Construir") vive en el pie, junto a Ajustes.
   { view: 'chat', iconName: 'hard-hat', label: 'Terminal' },
+  // Lo cerrado del proyecto: consulta, no accion, asi que va con el motor y
+  // la auto-mejora y no en la fila del trabajo diario (ADR-087).
+  { view: 'historia', iconName: 'file-text', label: 'Historia de hallazgos' },
   { view: 'actividad', iconName: 'zap', label: 'Actividad' },
   { view: 'cognition', iconName: 'brain', label: 'Cognition' },
   { view: 'docs', iconName: 'file-text', label: 'Documentacion' },

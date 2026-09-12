@@ -1,3 +1,4 @@
+import { FINDING_LIFECYCLE_CHANNELS } from './finding-lifecycle-channels'
 import { SYSTEM_CHANNELS } from './system-channels'
 import { TELEMETRY_CHANNELS } from './telemetry-channels'
 import { BUILD_CHANNELS } from './build-channels'
@@ -8,6 +9,7 @@ import { REPAIR_CHANNELS } from './repair-channels'
 
 /** Nombres de canal centralizados: main y preload comparten esta fuente. */
 export const IPC = {
+  ...FINDING_LIFECYCLE_CHANNELS,
   ...SYSTEM_CHANNELS,
   ...TELEMETRY_CHANNELS,
   ...BUILD_CHANNELS,
@@ -33,11 +35,6 @@ export const IPC = {
   scanCounts: 'scan:counts',
   scanHistory: 'scan:history',
   scanHistorySince: 'scan:history-since',
-  scanDismiss: 'scan:dismiss',
-  scanMitigate: 'scan:mitigate',
-  scanUnmitigate: 'scan:unmitigate',
-  findingVerify: 'finding:verify', // propio: verificar no propone (ADR-087)
-  scanReopen: 'scan:reopen',
   scanProgress: 'scan:progress',
   scanStop: 'scan:stop',
   qualityRun: 'quality:run',
