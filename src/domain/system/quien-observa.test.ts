@@ -19,15 +19,6 @@ const OBSERVAN: ReadonlyArray<readonly [string, string]> = [
   ['src/domain/repair/omega-prompt.ts', 'NOTAS_COMO_CLAVE']
 ]
 
-/** Interactivos: emiten en vivo y el bloque parpadearia en la conversacion. */
-const NO_OBSERVAN: readonly string[] = [
-  'src/application/chat/reply-from-chat.ts',
-  'src/application/chat/reply-from-configuration.ts',
-  'src/application/build/build-feature.ts',
-  'src/infrastructure/build/run-build-plan.ts',
-  'src/infrastructure/build/run-investigate.ts'
-]
-
 const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta), 'utf8')
 
 describe('los tres NO-interactivos piden sus notas', () => {
@@ -39,18 +30,6 @@ describe('los tres NO-interactivos piden sus notas', () => {
     const compartido = fuente('src/domain/system/peticion-de-notas.ts')
 
     expect(compartido).toContain('la herramienta que te ejecuta, NO el proyecto')
-    for (const [ruta] of OBSERVAN) expect(fuente(ruta)).toContain("peticion-de-notas")
-  })
-})
-
-describe('los cinco INTERACTIVOS no, y esperan su fase', () => {
-  it.each(NO_OBSERVAN)('%s no pide notas', (ruta) => {
-    expect(fuente(ruta)).not.toContain('NOTAS_COMO')
-    expect(fuente(ruta)).not.toContain('asentarNotas')
-  })
-
-  it('siguen siendo TRES y CINCO: ni un agente nuevo sin decidir', () => {
-    expect(OBSERVAN).toHaveLength(3)
-    expect(NO_OBSERVAN).toHaveLength(5)
+    for (const [ruta] of OBSERVAN) expect(fuente(ruta)).toContain('peticion-de-notas')
   })
 })

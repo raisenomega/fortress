@@ -1,5 +1,6 @@
 import type { ChatEngine } from '@domain/chat/code-agent'
 import type { ChatMessage } from '@domain/chat/chat-message'
+import { observacionesDeDenials } from '@domain/chat/observacion-de-denial'
 import { redactSecrets } from '@domain/chat/tool-detail'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
@@ -7,6 +8,7 @@ import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { persistQuality } from '../scan/persist-quality'
 import { recordChatRun } from '../telemetry/record-chat-run'
+import { asentarNotas } from '../system/asentar-notas'
 import { persistTurn } from './persist-message'
 import type { ReplyOutcome } from './reply-outcome'
 
@@ -42,6 +44,11 @@ export function finishTurn(input: FinishTurnInput): Result<ChatMessage> {
   if (!stored.ok) return err(stored.error)
 
   recordChatRun(context, { project, agentId, engine: meta.engine, outcome, startedAt: input.startedAt, prompt: input.prompt }) // prettier-ignore
+  // Lo que FORTRESS le nego a su propio agente, asentado como observacion
+  // (ADR-085). Aqui y no en el motor por lo mismo que el tachado: `finishTurn`
+  // es el unico paso por el que pasan todos los turnos del chat. Sin spawn
+  // extra y sin bloque en el stream — el dato ya estaba, solo se perdia.
+  asentarNotas(context, project, observacionesDeDenials(outcome.deniedTools ?? [], meta.mode))
   // Auditoria integral -> fija la CALIDAD GENERAL del proyecto (la tarjeta la muestra).
   if (outcome.comprehensive) persistQuality(context, project, outcome.findings)
 

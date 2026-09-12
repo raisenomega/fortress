@@ -27,6 +27,10 @@ export interface ReplyOutcome {
   readonly findings: readonly DetectedFinding[]
   /** True solo tras una auditoria integral (todas las dimensiones): fija la calidad general. */
   readonly comprehensive?: boolean
+  /** Los NOMBRES de las herramientas que el modo de permisos bloqueo. Viajan
+   *  como DATO —no como la nota de texto que ya lleva `text`— porque de ellos
+   *  sale lo que FORTRESS aprende de si misma (ADR-085). */
+  readonly deniedTools?: readonly string[]
 }
 
 /** Respuesta de solo texto: no hay herramientas ni archivos tocados. */

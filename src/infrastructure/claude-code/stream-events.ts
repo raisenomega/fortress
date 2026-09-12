@@ -1,5 +1,5 @@
-import { redactSecrets } from '@domain/chat/tool-detail'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
+import { describeDenial, nombreDeHerramienta } from './lectura-del-denial'
 import { parseAssistant, type AssistantEvent } from './parse-assistant'
 import { parseUsage } from './parse-usage'
 
@@ -12,6 +12,17 @@ export interface ParsedEvent extends AssistantEvent {
   readonly finalText?: string
   readonly failed?: boolean
   readonly denials?: readonly string[]
+  /**
+   * Solo los NOMBRES de las herramientas denegadas, sin el comando. Viaja
+   * aparte de `denials` —que es la nota de transparencia para el operador— y no
+   * en vez de el: son dos datos con dos usos y dos riesgos distintos.
+   *
+   * El nombre es GENERICO por naturaleza (`Bash`, `mcp__codebase-memory__...`) y
+   * por eso es seguro por construccion: no puede llevar codigo del cliente
+   * aunque nadie lo redacte. El comando SI lo lleva —los denials reales de la
+   * base traen `/home/jojo/Escritorio/...`— y por eso no sale de aqui.
+   */
+  readonly deniedTools?: readonly string[]
   /** Solo lo trae el evento final: tokens y coste de toda la ejecucion. */
   readonly usage?: TokenUsage
 }
@@ -43,20 +54,9 @@ function fromResult(event: Record<string, unknown>): ParsedEvent {
     finalText: typeof event.result === 'string' ? event.result : '',
     failed: event.is_error === true || event.subtype !== 'success',
     denials,
+    deniedTools: Array.isArray(event.permission_denials)
+      ? event.permission_denials.map((denial) => nombreDeHerramienta(denial))
+      : [],
     usage: parseUsage(event)
   }
-}
-
-/**
- * La denegacion es METADATO y acaba persistida en el historial de chat como
- * parte de la nota de transparencia, asi que el comando pasa por redactSecrets:
- * un `export ANTHROPIC_API_KEY=...` bloqueado no debe quedar en claro en la
- * base. El evento final trae el comando entero, asi que se redacta de una sola
- * vez y ninguna regex se queda a medias.
- */
-function describeDenial(denial: unknown): string {
-  const entry = denial as { tool_name?: string; tool_input?: { command?: string } }
-  const command = entry.tool_input?.command
-  if (typeof command === 'string') return redactSecrets(command)
-  return entry.tool_name ?? 'operacion bloqueada'
 }
