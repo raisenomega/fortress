@@ -124,6 +124,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-083](adr-083-campana-de-auditoria-por-plantillas.md) | La campaña de auditoría: las 17 plantillas refuerzan el escaneo, no lo sustituyen | 2026-09-10 | Aceptada | Escaneo |
 | [ADR-084](adr-084-identidad-por-linea-el-simbolo-sale.md) | La identidad de un hallazgo lleva la LÍNEA, y el símbolo sale | 2026-09-11 | Aceptada | Escaneo |
 | [ADR-085](adr-085-todo-agente-observa-y-nada-filtra.md) | Todo agente observa a FORTRESS, y ninguna observación filtra al cliente | 2026-09-11 | Aceptada | Auto-mejora |
+| [ADR-086](adr-086-los-fallos-se-observan-por-su-clase.md) | Los fallos de la app se observan por su CLASE, nunca por su mensaje | 2026-09-11 | Aceptada | Auto-mejora |
 
 ## Referencias
 
