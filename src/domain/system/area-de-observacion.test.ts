@@ -1,13 +1,23 @@
 import { describe, expect, it } from 'vitest'
-import { AREAS_DE_OBSERVACION, aArea } from './area-de-observacion'
+import { AREAS_DEL_CORPUS, AREAS_DE_OBSERVACION, aArea } from './area-de-observacion'
+import { AREAS_DE_FALLO } from './areas-de-fallo'
 
 describe('el vocabulario de areas, derivado del corpus', () => {
   it('son DOCE clases, y las dos escasas siguen dentro', () => {
     // `motor-de-reparacion` (2 obs) y `cognicion` (1) se conservan: su escasez
     // dice que los agentes aun no trabajan ahi, no que la clase no exista.
-    expect(AREAS_DE_OBSERVACION).toHaveLength(12)
+    expect([...AREAS_DEL_CORPUS, 'otro']).toHaveLength(12)
     expect(AREAS_DE_OBSERVACION).toContain('motor-de-reparacion')
     expect(AREAS_DE_OBSERVACION).toContain('cognicion')
+  })
+
+  it('y las de FALLO se SUMAN sin tocarlas: son otra cosa y otra regla', () => {
+    // Las doce salieron de 350 observaciones ya escritas y estan cerradas; las
+    // de fallo son provisionales y se cierran del corpus que el embudo genere
+    // (ADR-086). Mezclarlas en una sola lista escondería esa diferencia.
+    expect(AREAS_DE_OBSERVACION).toHaveLength(AREAS_DEL_CORPUS.length + AREAS_DE_FALLO.length + 1)
+    for (const clase of AREAS_DEL_CORPUS) expect(AREAS_DE_OBSERVACION).toContain(clase)
+    for (const clase of AREAS_DE_FALLO) expect(AREAS_DE_OBSERVACION).toContain(clase)
   })
 
   it('las tres clases que cubren la mitad del corpus estan', () => {
@@ -16,7 +26,9 @@ describe('el vocabulario de areas, derivado del corpus', () => {
     }
   })
 
-  it('`otro` es el ultimo y existe: el cajon se declara, no se improvisa', () => {
+  it('`otro` cierra la lista ENTERA: el cajon se declara, no se improvisa', () => {
+    // Y el ultimo de todas, no el ultimo del corpus: tambien recoge un fallo
+    // cuyo tipo no encaje en ninguna de las areas de rotura.
     expect(AREAS_DE_OBSERVACION.at(-1)).toBe('otro')
   })
 })

@@ -10,6 +10,8 @@ import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
 import { registerIpcHandlers } from '@infrastructure/ipc/register-handlers'
 import { closeDatabase } from '@infrastructure/persistence/database'
 import { augmentPath } from '@infrastructure/system/augment-path'
+import { capturarFallo, instalarEmbudoDeArranque } from '@infrastructure/system/embudo-de-arranque'
+import { sumideroDeFallos } from '@infrastructure/system/sumidero-de-fallos'
 
 const APP_USER_MODEL_ID = 'com.fortress.command-center'
 const DATA_DIR = 'fortress-command-center'
@@ -28,29 +30,40 @@ app.setName(DATA_DIR)
 // hereda un PATH minimo y no encontraria claude, gh ni otras herramientas.
 augmentPath()
 
+// Antes de ensamblar nada: si el ensamblado revienta, ya hay quien lo anote
+// (ADR-086). Hasta aqui, un fallo del arranque no dejaba rastro en ningun sitio.
+instalarEmbudoDeArranque(process, sumideroDeFallos)
+
 /** Composition root: unico lugar donde se ensamblan las capas. */
-app.whenReady().then(() => {
-  electronApp.setAppUserModelId(APP_USER_MODEL_ID)
-  app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
+app
+  .whenReady()
+  .then(() => {
+    electronApp.setAppUserModelId(APP_USER_MODEL_ID)
+    app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
 
-  registerIpcHandlers()
-  const mainWindow = createMainWindow()
-  bindLoopWindow(mainWindow)
-  bindGenesisWindow(mainWindow)
-  // Reanuda los loops que quedaron vivos: nada se pierde tras un reinicio.
-  resumeLoops()
-  // Alinea el grafo de cada proyecto con su HEAD, en background y de a uno.
-  reconcileAllOnBoot()
-  // Worktrees huerfanos de reparaciones interrumpidas: se reconcilian aqui.
-  reclaimRepairWorktrees()
-  // El candado que el operador dejo pedido vuelve solo: si lo encendio para un
-  // ejercicio largo, un reinicio a media faena no debe apagarselo en silencio.
-  restoreKeepAwake()
+    registerIpcHandlers()
+    const mainWindow = createMainWindow()
+    bindLoopWindow(mainWindow)
+    bindGenesisWindow(mainWindow)
+    // Reanuda los loops que quedaron vivos: nada se pierde tras un reinicio.
+    resumeLoops()
+    // Alinea el grafo de cada proyecto con su HEAD, en background y de a uno.
+    reconcileAllOnBoot()
+    // Worktrees huerfanos de reparaciones interrumpidas: se reconcilian aqui.
+    reclaimRepairWorktrees()
+    // El candado que el operador dejo pedido vuelve solo: si lo encendio para un
+    // ejercicio largo, un reinicio a media faena no debe apagarselo en silencio.
+    restoreKeepAwake()
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+    })
   })
-})
+  // ENCADENADO a ese mismo `.then`, no en una cadena nueva: si registerIpcHandlers
+  // o las migraciones lanzan, la promesa se rechazaba y la app quedaba a medio
+  // arrancar sin decirlo. Colgarlo de una llamada APARTE compila igual y no
+  // serviria: seria otra promesa, y esa no se rechaza nunca.
+  .catch((error) => capturarFallo(sumideroDeFallos, 'el ensamblado de la app', error))
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
