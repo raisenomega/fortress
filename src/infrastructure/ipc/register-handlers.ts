@@ -1,3 +1,6 @@
+import { ipcMain } from 'electron'
+import { envolverRegistroIpc } from './embudo-de-ipc'
+import { sumideroDeFallos } from '../system/sumidero-de-fallos'
 import { registerAccountHandlers } from './account-handlers'
 import { registerBuildHandlers } from './build-handlers'
 import { registerPostureHandlers } from './posture-handlers'
@@ -28,8 +31,18 @@ import { registerSettingsHandlers } from './settings-handlers'
 import { registerSystemHandlers } from './system-handlers'
 import { registerTelemetryHandlers } from './telemetry-handlers'
 
-/** Punto unico de registro IPC, invocado desde el composition root. */
+/**
+ * Punto unico de registro IPC, invocado desde el composition root.
+ *
+ * Y por eso el embudo del Nivel 2 se instala AQUI, antes de los 29: los 110
+ * handlers cuelgan de esta llamada, asi que envolver el registro los cubre a
+ * todos —incluido `settings-handlers`, que es innegociable— sin editar ninguno
+ * de los 36 ficheros, y cubre los que se anadan manana sin que nadie se acuerde
+ * (ADR-086, embudo 2).
+ */
 export function registerIpcHandlers(): void {
+  envolverRegistroIpc(ipcMain, sumideroDeFallos)
+
   registerProjectHandlers()
   registerChatHandlers()
   registerChatSendHandler()

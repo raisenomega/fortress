@@ -38,17 +38,17 @@ export function tipoDeFallo(nombre: unknown): string {
 /**
  * Que area le toca a un fallo, por el tipo del error. Molde de `POR_HERRAMIENTA`
  * en `observacion-de-denial`: un mapa determinista, sin juicio, porque el tipo
- * ya viene saneado y cerrado.
- *
- * `Sqlite*` es la familia que better-sqlite3 levanta —`SqliteError`—, y es la
- * unica que hoy tiene emisor propio: los tres `throw` de `persistence/`.
+ * ya viene saneado y cerrado. `Sqlite*` —lo que better-sqlite3 levanta— manda
+ * sobre el punto donde se atrapo: es una rotura de persistencia venga del
+ * arranque o de un canal. Si el tipo no dice nada decide `porDefecto`, que es
+ * el embudo que lo capturo.
  */
 const POR_TIPO: ReadonlyArray<readonly [RegExp, AreaDeObservacion]> = [
   [/^Sqlite/, 'fallo-de-persistencia']
 ]
 
-export function areaDeFallo(tipo: string): AreaDeObservacion {
-  return POR_TIPO.find(([re]) => re.test(tipo))?.[1] ?? 'fallo-de-arranque'
+export function areaDeFallo(tipo: string, porDefecto: AreaDeObservacion): AreaDeObservacion {
+  return POR_TIPO.find(([re]) => re.test(tipo))?.[1] ?? porDefecto
 }
 
 /**
@@ -69,7 +69,7 @@ export function observacionDeFallo(operacion: OperacionDeFallo, nombre: unknown)
   const tipo = tipoDeFallo(nombre)
   return {
     kind: 'bug',
-    area: areaDeFallo(tipo),
+    area: areaDeFallo(tipo, 'fallo-de-arranque'),
     note: `FORTRESS rompio durante ${operacion}: ${tipo}`
   }
 }
