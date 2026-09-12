@@ -14,13 +14,19 @@
  * completo. Una clase de mas, sin emisor, es exactamente lo que ADR-081 llama
  * inventar el vocabulario.
  *
- * Por eso son DOS y no cuatro. `fallo-de-ipc` nace con el envoltorio de los 110
- * handlers, y `fallo-de-render` el dia que el enganche del ErrorBoundary se
- * firme: mientras no haya quien las emita, serian nombres vacios.
+ * Por eso NACEN CUANDO NACE SU EMISOR, no antes. `fallo-de-ipc` entra con el
+ * envoltorio de los 110 handlers (embudo 2), que es lo que la emite; queda
+ * fuera `fallo-de-render`, porque el enganche del ErrorBoundary sigue sin
+ * firmar y una clase sin quien la emita es un nombre vacio.
  *
  * | area | quien la emite hoy |
  * |---|---|
  * | `fallo-de-arranque` | el embudo del proceso principal |
- * | `fallo-de-persistencia` | el mismo embudo, cuando el error viene de SQLite |
+ * | `fallo-de-persistencia` | cualquiera de los dos, si el error viene de SQLite |
+ * | `fallo-de-ipc` | el envoltorio de la raiz del registro IPC |
  */
-export const AREAS_DE_FALLO = ['fallo-de-arranque', 'fallo-de-persistencia'] as const
+export const AREAS_DE_FALLO = [
+  'fallo-de-arranque',
+  'fallo-de-persistencia',
+  'fallo-de-ipc'
+] as const

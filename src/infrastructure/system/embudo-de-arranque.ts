@@ -1,12 +1,7 @@
 import { observacionDeFallo, type OperacionDeFallo } from '@domain/system/observacion-de-fallo'
-import type { SelfNoteDraft } from '@domain/system/self-observation'
+import { conRed, nombreDelError, type SumideroDeFallos } from './red-del-embudo'
 
-/** Las dos salidas de un fallo: la que VIAJA (la clase) y la que se queda (el
- *  error entero). Inyectadas para que el embudo se pruebe sin Electron ni base. */
-export interface SumideroDeFallos {
-  readonly asentar: (nota: SelfNoteDraft) => void
-  readonly registrar: (operacion: OperacionDeFallo, error: unknown) => void
-}
+export type { SumideroDeFallos }
 
 /** Lo minimo de `process` que hace falta. Tipar el emisor, y no importar
  *  `process`, es lo que deja el embudo verificable en una prueba. */
@@ -16,33 +11,15 @@ export interface Emisor {
 
 export const EVENTOS_DEL_EMBUDO = ['uncaughtException', 'unhandledRejection'] as const
 
-let dentro = false
-
-/**
- * Captura UN fallo inesperado por sus dos salidas.
- *
- * El candado no es paranoia: esto corre dentro del manejador de un fallo, y
- * asentar la observacion abre la base. Si abrir la base es LO QUE FALLO,
- * asentar volveria a lanzar, el nuevo `uncaughtException` entraria aqui otra
- * vez, y el arranque roto se convertiria en un bucle. Se registra primero —lo
- * barato y lo que nunca lanza— y se asienta despues, tragando el error: un
- * fallo no puede multiplicarse por el intento de anotarlo.
- */
+/** Captura UN fallo del arranque por sus dos salidas. La red —el candado de
+ *  reentrada, el orden log-antes-que-base y el tragar— vive en `conRed`, que
+ *  comparten los embudos del Nivel 2. */
 export function capturarFallo(
   sumidero: SumideroDeFallos,
   operacion: OperacionDeFallo,
   error: unknown
 ): void {
-  if (dentro) return
-  dentro = true
-  try {
-    sumidero.registrar(operacion, error)
-    sumidero.asentar(observacionDeFallo(operacion, (error as { name?: unknown })?.name))
-  } catch {
-    // El fallo original ya esta en el log. Perder su observacion no lo empeora.
-  } finally {
-    dentro = false
-  }
+  conRed(sumidero, operacion, observacionDeFallo(operacion, nombreDelError(error)), error)
 }
 
 /**
