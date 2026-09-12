@@ -29,8 +29,12 @@ export interface CodeAgentRequest {
 export interface CodeAgentReply {
   readonly text: string
   readonly failed: boolean
-  /** Operaciones que el agente quiso hacer y el modo de permisos bloqueo. */
+  /** Operaciones que el agente quiso hacer y el modo de permisos bloqueo. Es la
+   *  nota de TRANSPARENCIA: lleva el comando, que el operador necesita leer. */
   readonly denials: readonly string[]
+  /** Los NOMBRES de esas herramientas, sin comando. Es de lo que FORTRESS
+   *  aprende (ADR-085): generico, agrupable y sin codigo del cliente dentro. */
+  readonly deniedTools?: readonly string[]
   /** Lo que costo la ejecucion, segun el propio CLI. */
   readonly usage: TokenUsage
   /** Herramientas usadas, en orden. De aqui salen los "fixes aplicados". */

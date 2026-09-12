@@ -35,6 +35,9 @@ export function singleAgentOutcome(
         tools: reply.tools
       }
     ],
-    findings: []
+    findings: [],
+    // Ademas de la nota que el operador lee: la nota es prosa para la pantalla,
+    // esto es dato para aprender. Los mismos bloqueos, dos usos.
+    deniedTools: reply.deniedTools ?? []
   }
 }
