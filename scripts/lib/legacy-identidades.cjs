@@ -59,6 +59,13 @@ function checkIdentidadesMigration(check) {
     check('la absorbida dice de quien es', String(muerta?.extinct_reason).startsWith('fusionada-con-'), JSON.stringify(muerta)) // prettier-ignore
     check('con el centinela, para no resucitar', String(muerta?.identity).startsWith('fusionada:'), JSON.stringify(muerta)) // prettier-ignore
     check('y sin fecha de resolucion: no se resolvio', muerta?.resolved_at === null, JSON.stringify(muerta)) // prettier-ignore
+
+    // ADR-087: la columna del QUIEN se anade sin tocar lo que habia, y la
+    // absorbida queda en NULL — fundir no es resolver, no la cerro nadie.
+    const columnas = db.prepare('PRAGMA table_info(findings)').all().map((c) => c.name) // prettier-ignore
+    check('la columna del quien esta', columnas.includes('extinguido_por'), columnas.join(','))
+    const quien = db.prepare("SELECT extinguido_por q FROM findings WHERE lifecycle = 'EXTINCT'").get() // prettier-ignore
+    check('y la absorbida por fusion no la cerro nadie', quien?.q === null, JSON.stringify(quien))
   })
 }
 

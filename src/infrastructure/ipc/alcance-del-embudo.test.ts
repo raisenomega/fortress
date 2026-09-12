@@ -25,14 +25,18 @@ function registros(): Array<{ handlers: number; manejaSuError: boolean }> {
  * de adorno: vender «los 110 observan» cuando son 94 es lo mismo que el juez que
  * decia haber auditado sin correr, y este proyecto ya pago ese error una vez.
  */
-describe('el embudo de IPC cubre 94 de 110, y se dice en voz alta', () => {
-  it('hay 110 handlers, y 16 viven en ficheros que manejan su propio error', () => {
+describe('el embudo de IPC cubre 94 de 111, y se dice en voz alta', () => {
+  it('hay 111 handlers, y 17 viven en ficheros que manejan su propio error', () => {
+    // Eran 110 y 16. El de `finding:verify` (ADR-087) nacio manejando el suyo,
+    // como los otros diecisiete: el renderer necesita una respuesta y no una
+    // excepcion. Asi que la COBERTURA no se movio — sigue en 94— y este numero
+    // es el que obliga a mirar cuando alguien anade un handler.
     const todos = registros()
     const total = todos.reduce((n, r) => n + r.handlers, 0)
     const tapados = todos.filter((r) => r.manejaSuError).reduce((n, r) => n + r.handlers, 0)
 
-    expect(total).toBe(110)
-    expect(tapados).toBe(16)
+    expect(total).toBe(111)
+    expect(tapados).toBe(17)
     expect(total - tapados).toBe(94)
   })
 

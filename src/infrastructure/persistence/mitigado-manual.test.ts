@@ -49,19 +49,19 @@ describe('el operador marca un hallazgo como ya arreglado', () => {
   it('un MITIGATED puede confirmarse EXTINCT: no queda atrapado', () => {
     const { db, repo } = banco()
     repo.markMitigated('f1', 'arreglado al lado', HOY)
-    repo.markExtinct(['f1'], HOY, 'juicio_obsoleto')
+    repo.markExtinct(['f1'], HOY, 'juicio_obsoleto', 'agente')
     expect(lifecycleDe(db, 'f1')).toBe('EXTINCT')
   })
 
   it('un ACTIVE sigue pudiendo extinguirse, como siempre', () => {
     const { db, repo } = banco()
-    repo.markExtinct(['f1'], HOY, 'juicio_obsoleto')
+    repo.markExtinct(['f1'], HOY, 'juicio_obsoleto', 'agente')
     expect(lifecycleDe(db, 'f1')).toBe('EXTINCT')
   })
 
   it('lo ya extinto no se puede mitigar hacia atras', () => {
     const { repo } = banco()
-    repo.markExtinct(['f1'], HOY, 'juicio_obsoleto')
+    repo.markExtinct(['f1'], HOY, 'juicio_obsoleto', 'agente')
     expect(repo.markMitigated('f1', 'tarde', HOY)).toBe(false)
   })
 

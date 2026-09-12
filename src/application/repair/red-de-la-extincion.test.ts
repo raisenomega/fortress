@@ -22,7 +22,9 @@ describe('un OBSOLETO extingue solo si su marcador cuadra con el fichero', () =>
       evidencia: { marcador: 'execFile(', forma: 'ausente' },
       contenido: 'await runCommand("npm", ["run", "typecheck"])'
     })
-    expect(b.extinguidos).toEqual([{ ids: ['f1'], at: expect.any(String), motivo: 'juicio_obsoleto' }]) // prettier-ignore
+    // `quien` es 'agente': lo eligio la COLA. El mismo juicio a peticion del
+    // operador escribe 'operador' y no cambia el motivo (ADR-087).
+    expect(b.extinguidos).toEqual([{ ids: ['f1'], at: expect.any(String), motivo: 'juicio_obsoleto', quien: 'agente' }]) // prettier-ignore
     expect(b.mitigados).toEqual([])
   })
 

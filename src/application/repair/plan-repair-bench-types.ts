@@ -18,10 +18,12 @@ export interface Bench {
   readonly memoria: Array<readonly string[]>
   /** Con que se pidio el descuento por obsoleto: debe ser el HEAD, no el escaneo. */
   readonly anclaDelDescuento: string[]
-  /** Extinciones pedidas por el motor: ids, cuando y con que motivo. */
-  readonly extinguidos: Array<{ ids: readonly string[]; at: string; motivo: string }>
+  /** Extinciones pedidas: ids, cuando, con que motivo y a peticion de QUIEN. */
+  readonly extinguidos: Array<{ ids: readonly string[]; at: string; motivo: string; quien: string }> // prettier-ignore
   /** Mitigados por el motor: el OBSOLETO que no pudo probar lo que decia. */
   readonly mitigados: Array<{ id: string; note: string; at: string }>
+  /** Avisos escritos sobre una fila que YA estaba mitigada (la re-verificacion). */
+  readonly anotados: Array<{ id: string; note: string }>
 }
 
 export interface Opciones {

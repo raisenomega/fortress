@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { RotateCcw, Wrench } from 'lucide-react'
+import { Wrench } from 'lucide-react'
 import type { Finding } from '@domain/project/finding'
+import { AccionesDelMitigado } from './AccionesDelMitigado'
 import { ConfirmMitigado } from './ConfirmMitigado'
 
 interface FindingMitigarActionProps {
@@ -9,6 +10,10 @@ interface FindingMitigarActionProps {
   readonly mitigado: boolean
   readonly onMitigate: (id: string, nota: string) => void
   readonly onUnmitigate: () => void
+  /** Pedir al analista que compruebe el arreglo (ADR-087). Ausente mientras el
+   *  motor esta ocupado: detras hay un solo carril y el main lo rechazaria. */
+  readonly onVerificar: () => void
+  readonly ocupado: boolean
 }
 
 const BOTON = 'tap mr-2 text-muted-foreground hover:text-foreground'
@@ -25,19 +30,16 @@ const BOTON = 'tap mr-2 text-muted-foreground hover:text-foreground'
  * que no era un problema— y el resto, la llave.
  */
 export function FindingMitigarAction(props: FindingMitigarActionProps): React.JSX.Element | null {
-  const { finding, dismissed, mitigado, onMitigate, onUnmitigate } = props
+  const { finding, dismissed, mitigado, onMitigate, onUnmitigate, onVerificar, ocupado } = props
   const [preguntando, setPreguntando] = useState(false)
 
   if (mitigado) {
     return (
-      <button
-        type="button"
-        onClick={onUnmitigate}
-        title="Deshacer: vuelve a la cola del motor"
-        className={BOTON}
-      >
-        <RotateCcw size={13} aria-hidden />
-      </button>
+      <AccionesDelMitigado
+        onVerificar={onVerificar}
+        onUnmitigate={onUnmitigate}
+        ocupado={ocupado}
+      />
     )
   }
   if (dismissed) return null

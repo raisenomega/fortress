@@ -11,17 +11,19 @@ import type { Bench, Opciones } from './plan-repair-bench-types'
 export function cicloDeVida(
   opts: Opciones,
   extinguidos: Bench['extinguidos'],
-  mitigados: Bench['mitigados']
+  mitigados: Bench['mitigados'],
+  anotados: Bench['anotados'] = []
 ): Record<string, unknown> {
   return {
     findings: {
       listMemory: () => opts.findings,
-      markExtinct: (ids: readonly string[], at: string, motivo: string): void =>
-        void extinguidos.push({ ids, at, motivo }),
+      markExtinct: (ids: readonly string[], at: string, motivo: string, quien: string): void =>
+        void extinguidos.push({ ids, at, motivo, quien }),
       markMitigated: (id: string, note: string, at: string): boolean => (
         mitigados.push({ id, note, at }),
         true
-      )
+      ),
+      anotarMitigado: (id: string, note: string): boolean => (anotados.push({ id, note }), true)
     },
     filesystemProbe: { contenido: () => (opts.contenido === undefined ? '' : opts.contenido) }
   }

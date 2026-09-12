@@ -2,16 +2,16 @@
  * Las transiciones del CICLO DE VIDA de un hallazgo, aparte de las consultas.
  *
  * Nacer y volver a verse ponen ACTIVE y viven con el resto del SQL de escaneo;
- * aqui estan las dos que CIERRAN: la que confirma la ausencia con evidencia y
- * la que el operador escribe a mano cuando ya lo arreglo. Juntas porque se leen
- * juntas: quien toque una tiene que ver la otra para no dejar un estado sin
- * salida, que es lo que pasaba antes con MITIGATED.
+ * aqui estan las que CIERRAN. Juntas porque se leen juntas: quien toque una
+ * tiene que ver la otra para no dejar un estado sin salida, que es lo que
+ * pasaba antes con MITIGATED.
  */
 
 /**
- * La transicion a extinto deja fecha Y MOTIVO: sin los dos no habria como
- * auditarla, y sin el motivo tampoco como distinguir una muerte con juicio de
- * una por descuido — que es exactamente lo que hubo que reconstruir a mano.
+ * La transicion a extinto deja fecha, MOTIVO y QUIEN: sin los tres no habria
+ * como auditarla, y sin el motivo tampoco como distinguir una muerte con juicio
+ * de una por descuido — que es exactamente lo que hubo que reconstruir a mano.
+ * El «quien» entro con ADR-087, cuando el juicio dejo de venir solo de la cola.
  *
  * Admite venir de ACTIVE o de MITIGATED. Mitigado es "hay un fix, falta
  * confirmar", asi que extinguirlo ES esa confirmacion: sin este segundo estado
@@ -21,7 +21,8 @@
  * decide un agente que miro el hallazgo.
  */
 export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved_at = @at,
-  extinct_reason = @motivo WHERE id = @id AND lifecycle IN ('ACTIVE', 'MITIGATED')`
+  extinct_reason = @motivo, extinguido_por = @extinguidoPor
+  WHERE id = @id AND lifecycle IN ('ACTIVE', 'MITIGATED')`
 
 /**
  * El operador declara que un hallazgo ya esta arreglado. No afirma que haya
@@ -58,3 +59,17 @@ export const TOUCH_CONSERVANDO = `UPDATE findings SET severity = @severity, titl
  */
 export const MARK_ACTIVE = `UPDATE findings SET lifecycle = 'ACTIVE',
   mitigated_at = NULL, mitigated_note = NULL WHERE id = @id AND lifecycle = 'MITIGATED'`
+
+/**
+ * La nota de un mitigado que YA estaba mitigado.
+ *
+ * `MARK_MITIGATED` exige venir de ACTIVE, y tiene razon: marcar lo ya marcado no
+ * significa nada. Pero la re-verificacion (ADR-087) trabaja sobre filas
+ * MITIGATED, y cuando el analista NO prueba la ausencia hay que contarselo al
+ * operador ahi mismo. Con `MARK_MITIGATED` ese aviso no cambiaba nada y el
+ * operador se quedaba sin saberlo: asi nacen los falsos negativos.
+ * No toca `mitigated_at`: esa fecha es de cuando el operador lo dio por
+ * arreglado, no de cuando se comprobo que no lo estaba.
+ */
+export const ANOTAR_MITIGADO = `UPDATE findings SET mitigated_note = @note
+  WHERE id = @id AND lifecycle = 'MITIGATED'`

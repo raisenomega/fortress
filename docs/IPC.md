@@ -114,6 +114,7 @@ Escaneo de seguridad con agentes reales.
 | `scan:reopen` | R/R | findingId → Result<null> | — |
 | `scan:mitigate` | R/R | (findingId, nota) → Result<null> (el operador declara que ya está arreglado) | solo desde ACTIVE; la nota es obligatoria |
 | `scan:unmitigate` | R/R | findingId → Result<null> (deshace la marca) | solo desde MITIGATED |
+| `finding:verify` | R/R | (projectId, findingId) → Result<DictamenDeVerificación \| null> (el analista lee el fichero y dictamina; NO crea propuesta) | guardRun; solo desde MITIGATED |
 | `scan:progress` | PUSH | ScanChunk (avance del escaneo) | — |
 
 > **El informe que devuelven los agentes** no cruza el IPC como tal: llega en el

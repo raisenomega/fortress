@@ -6,6 +6,7 @@ import { subscribe } from './subscribe'
 /** Grupo repair del puente, extraido de index.ts por el limite de 75. */
 export const repairApi: FortressApi['repair'] = {
   propose: (projectId, findingId) => ipcRenderer.invoke(IPC.repairPropose, projectId, findingId),
+  verify: (projectId, findingId) => ipcRenderer.invoke(IPC.findingVerify, projectId, findingId), // prettier-ignore
   list: (projectId) => ipcRenderer.invoke(IPC.repairList, projectId),
   cerco: (projectId) => ipcRenderer.invoke(IPC.repairCerco, projectId),
   get: (id) => ipcRenderer.invoke(IPC.repairGet, id),

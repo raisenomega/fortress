@@ -36,6 +36,7 @@ export const IPC = {
   scanDismiss: 'scan:dismiss',
   scanMitigate: 'scan:mitigate',
   scanUnmitigate: 'scan:unmitigate',
+  findingVerify: 'finding:verify', // propio: verificar no propone (ADR-087)
   scanReopen: 'scan:reopen',
   scanProgress: 'scan:progress',
   scanStop: 'scan:stop',
