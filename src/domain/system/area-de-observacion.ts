@@ -1,3 +1,5 @@
+import { AREAS_DE_FALLO } from './areas-de-fallo'
+
 /**
  * De QUE parte de FORTRESS habla una observacion. Vocabulario CERRADO, derivado
  * del corpus real y no inventado — molde de `tipo-de-defecto` (ADR-081).
@@ -35,7 +37,7 @@
  * `otro` al 4 % —frente al 33 % que ADR-081 midio en los tipos— es la prueba de
  * que estas clases salieron del corpus y no de una idea previa.
  */
-export const AREAS_DE_OBSERVACION = [
+export const AREAS_DEL_CORPUS = [
   'permisos-de-herramienta',
   'consulta-del-grafo',
   'indice-del-grafo',
@@ -46,9 +48,13 @@ export const AREAS_DE_OBSERVACION = [
   'anclaje-del-hallazgo',
   'analisis-y-triaje',
   'motor-de-reparacion',
-  'cognicion',
-  'otro'
+  'cognicion'
 ] as const
+
+/** Las once del corpus, las de FALLO —que crecen aparte y por otra regla
+ *  (ADR-086)— y `otro` cerrando la lista ENTERA: el cajon recoge lo que no
+ *  encaje, venga de un agente o de una rotura. */
+export const AREAS_DE_OBSERVACION = [...AREAS_DEL_CORPUS, ...AREAS_DE_FALLO, 'otro'] as const
 
 export type AreaDeObservacion = (typeof AREAS_DE_OBSERVACION)[number]
 
