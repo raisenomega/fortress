@@ -1,5 +1,4 @@
-import type { ExtinguidoPor } from './extinguido-por'
-import type { MotivoExtincion } from './motivo-extincion'
+import type { FindingLifecyclePort } from './finding-lifecycle-port'
 import type { DetectedFinding } from '../scan/detected-finding'
 import type { FindingHistoria } from './finding-historia'
 import type { FindingMemory } from './finding-memory'
@@ -7,7 +6,7 @@ import type { Finding } from './project'
 import type { SeverityCounts } from './severity-counts'
 
 /** Puerto de persistencia de hallazgos. La infraestructura lo implementa. */
-export interface FindingRepository {
+export interface FindingRepository extends FindingLifecyclePort {
   listByProject(projectId: string): readonly Finding[]
 
   /** Los mismos hallazgos con su expediente: clave, ciclo de vida y fechas. */
@@ -44,32 +43,4 @@ export interface FindingRepository {
      *  git; a nadie mas le consta que haya nada que conservar. */
     conservados?: ReadonlySet<string>
   ): void
-
-  /**
-   * Cierra el ciclo de vida de los hallazgos indicados, con fecha. Solo lo
-   * llama quien ya reunio la evidencia de las DOS pruebas de la extincion:
-   * ausencia en el escaneo Y archivo tocado desde la primera deteccion.
-   */
-  /** Extinguir exige DECIR por que: una muerte sin motivo no se puede auditar. */
-  /** `extinguidoPor` dice QUIEN; el motivo, POR QUE (ADR-087). */
-  markExtinct(ids: readonly string[], at: string, motivo: MotivoExtincion, extinguidoPor: ExtinguidoPor): void // prettier-ignore
-  /** El aviso sobre una fila que YA estaba mitigada: la re-verificacion no
-   *  probo la ausencia. Devuelve si escribio. */
-  anotarMitigado(findingId: string, note: string): boolean
-
-  /** El operador declara que un hallazgo ya esta ARREGLADO, con una nota que
-   *  dice donde. No afirma que haya desaparecido —eso lo confirma un juicio—,
-   *  asi que sigue en el tablero; lo que deja es de pedirle trabajo al motor.
-   *  false si ya no estaba ACTIVE. */
-  markMitigated(findingId: string, note: string, at: string): boolean
-
-  /** El operador deshace su marca: el hallazgo vuelve a la cola. false si no
-   *  estaba mitigado. */
-  markActive(findingId: string): boolean
-
-  /** Marca un hallazgo como falso positivo y recuerda la decision. */
-  dismiss(findingId: string): boolean
-
-  /** Deshace el descarte y vuelve a contar el hallazgo. */
-  reopen(findingId: string): boolean
 }

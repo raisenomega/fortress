@@ -20,6 +20,10 @@ export interface Finding {
   readonly lifecycle: FindingLifecycle
   /** Lo que el operador escribio al marcarlo arreglado, o null. */
   readonly mitigatedNote: string | null
+  /** Lo que el ANALISTA dictamino en la ultima re-verificacion, o null. Aparte
+   *  de la anterior porque son dos afirmaciones de dos autores, y porque esta
+   *  sobrevive cuando el hallazgo vuelve a la cola (ADR-087). */
+  readonly verificacionNote: string | null
   /** Ultimo escaneo que lo nombro. Comparado con el ultimo del proyecto dice si
    *  sigue RECONFIRMADO — que no cambia su estado: vivo esta igual. */
   readonly lastSeen: string

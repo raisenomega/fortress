@@ -14,14 +14,16 @@ export interface LifecycleWrites {
   markExtinct(ids: readonly string[], at: string, motivo: string, extinguidoPor: string | null): void // prettier-ignore
   markMitigated(findingId: string, note: string, at: string): boolean
   markActive(findingId: string): boolean
-  anotarMitigado(findingId: string, note: string): boolean
+  anotarVerificacion(findingId: string, note: string): boolean
+  devolverALaCola(findingId: string, note: string): boolean
 }
 
 export function createLifecycleWrites(db: Db): LifecycleWrites {
   const extinguish = db.prepare(SQL.MARK_EXTINCT)
   const mitigate = db.prepare(SQL.MARK_MITIGATED)
   const activate = db.prepare(SQL.MARK_ACTIVE)
-  const anotar = db.prepare(SQL.ANOTAR_MITIGADO)
+  const anotar = db.prepare(SQL.ANOTAR_VERIFICACION)
+  const devolver = db.prepare(SQL.DEVOLVER_A_LA_COLA)
 
   // Indivisible: media tanda dejaria el registro diciendo que unos problemas se
   // cerraron y otros no. El motivo y el quien van con cada fila, no en un log.
@@ -38,8 +40,9 @@ export function createLifecycleWrites(db: Db): LifecycleWrites {
     // que lo hizo.
     markMitigated: (findingId, note, at) => mitigate.run({ id: findingId, note, at }).changes > 0,
     markActive: (findingId) => activate.run({ id: findingId }).changes > 0,
-    // Devuelve si escribio: el WHERE exige MITIGATED, asi que quien lo llame
-    // sobre una fila ya extinta se entera en vez de creer que aviso.
-    anotarMitigado: (findingId, note) => anotar.run({ id: findingId, note }).changes > 0
+    // Las dos devuelven si escribieron: el WHERE exige MITIGATED, asi que quien
+    // las llame sobre una fila ya extinta se entera en vez de creer que aviso.
+    anotarVerificacion: (findingId, note) => anotar.run({ id: findingId, note }).changes > 0,
+    devolverALaCola: (findingId, note) => devolver.run({ id: findingId, note }).changes > 0
   }
 }

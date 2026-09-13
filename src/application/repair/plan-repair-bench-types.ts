@@ -22,8 +22,10 @@ export interface Bench {
   readonly extinguidos: Array<{ ids: readonly string[]; at: string; motivo: string; quien: string }> // prettier-ignore
   /** Mitigados por el motor: el OBSOLETO que no pudo probar lo que decia. */
   readonly mitigados: Array<{ id: string; note: string; at: string }>
-  /** Avisos escritos sobre una fila que YA estaba mitigada (la re-verificacion). */
+  /** Dictamenes escritos sobre una fila que SIGUE mitigada (`sin_prueba`). */
   readonly anotados: Array<{ id: string; note: string }>
+  /** Las que el analista devolvio a la cola: dijo que el problema sigue ahi. */
+  readonly devueltos: Array<{ id: string; note: string }>
 }
 
 export interface Opciones {

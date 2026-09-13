@@ -53,6 +53,13 @@ export function FindingMarks({
       {mitigado && finding.mitigatedNote ? (
         <div className="mt-0.5 text-[11px] text-muted-foreground">{finding.mitigatedNote}</div>
       ) : null}
+      {/* El dictamen del analista se ensena SIEMPRE que exista, mitigado o no:
+          cuando dice que el problema sigue, el hallazgo VUELVE a la cola y la
+          razon tiene que seguir delante — o el operador ve una fila activa
+          reaparecida sin saber por que (ADR-087). */}
+      {finding.verificacionNote ? (
+        <div className="mt-0.5 text-[11px] text-medium">{finding.verificacionNote}</div>
+      ) : null}
     </>
   )
 }
