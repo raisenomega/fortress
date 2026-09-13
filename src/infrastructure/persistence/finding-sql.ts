@@ -2,7 +2,7 @@
 // `lifecycle` y la nota cruzan al tablero: sin ellos un hallazgo mitigado seria
 // indistinguible de uno vivo, y marcarlo no se veria en ningun sitio.
 const COLUMNS =
-  'id, project_id, severity, title, file, line, status, lifecycle, mitigated_note, last_seen'
+  'id, project_id, severity, title, file, line, status, lifecycle, mitigated_note, verificacion_note, last_seen'
 
 /** Lo urgente arriba, y lo descartado al final: ya no requiere accion. */
 const BY_URGENCY = `CASE status WHEN 'open' THEN 0 ELSE 1 END,
@@ -58,7 +58,8 @@ export const SELECT_FINDING = `SELECT project_id, fingerprint FROM findings WHER
 
 export const SET_STATUS = 'UPDATE findings SET status = ? WHERE id = ?'
 
-export { ANOTAR_MITIGADO, MARK_ACTIVE, MARK_EXTINCT, MARK_MITIGATED, TOUCH_CONSERVANDO } from './finding-lifecycle-sql' // prettier-ignore
+export { MARK_ACTIVE, MARK_EXTINCT, MARK_MITIGATED, TOUCH_CONSERVANDO } from './finding-lifecycle-sql' // prettier-ignore
+export { ANOTAR_VERIFICACION, DEVOLVER_A_LA_COLA } from './finding-verificacion-sql'
 export { SELECT_HISTORIA } from './finding-historia-sql'
 
 export const INSERT_DISMISSAL = `INSERT OR REPLACE INTO dismissals

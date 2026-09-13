@@ -8,6 +8,7 @@ const base = {
   status: 'open',
   lifecycle: 'ACTIVE' as const,
   mitigatedNote: null,
+  verificacionNote: null,
   lastSeen: ''
 } as const
 

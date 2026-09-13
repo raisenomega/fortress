@@ -59,17 +59,3 @@ export const TOUCH_CONSERVANDO = `UPDATE findings SET severity = @severity, titl
  */
 export const MARK_ACTIVE = `UPDATE findings SET lifecycle = 'ACTIVE',
   mitigated_at = NULL, mitigated_note = NULL WHERE id = @id AND lifecycle = 'MITIGATED'`
-
-/**
- * La nota de un mitigado que YA estaba mitigado.
- *
- * `MARK_MITIGATED` exige venir de ACTIVE, y tiene razon: marcar lo ya marcado no
- * significa nada. Pero la re-verificacion (ADR-087) trabaja sobre filas
- * MITIGATED, y cuando el analista NO prueba la ausencia hay que contarselo al
- * operador ahi mismo. Con `MARK_MITIGATED` ese aviso no cambiaba nada y el
- * operador se quedaba sin saberlo: asi nacen los falsos negativos.
- * No toca `mitigated_at`: esa fecha es de cuando el operador lo dio por
- * arreglado, no de cuando se comprobo que no lo estaba.
- */
-export const ANOTAR_MITIGADO = `UPDATE findings SET mitigated_note = @note
-  WHERE id = @id AND lifecycle = 'MITIGATED'`

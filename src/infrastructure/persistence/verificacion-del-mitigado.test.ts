@@ -8,12 +8,20 @@ const nacer = (): string => {
   return bench.memoryOf(SSRF.title)?.id ?? ''
 }
 
-const fila = (id: string): { lifecycle: string; nota: string | null; quien: string | null } =>
+interface Fila {
+  lifecycle: string
+  nota: string | null
+  dictamen: string | null
+  quien: string | null
+}
+
+const fila = (id: string): Fila =>
   bench.db
     .prepare(
-      'SELECT lifecycle, mitigated_note AS nota, extinguido_por AS quien FROM findings WHERE id = ?'
+      `SELECT lifecycle, mitigated_note AS nota, verificacion_note AS dictamen,
+       extinguido_por AS quien FROM findings WHERE id = ?`
     )
-    .get(id) as { lifecycle: string; nota: string | null; quien: string | null }
+    .get(id) as Fila
 
 beforeEach(() => {
   bench = createBench()
@@ -30,17 +38,19 @@ describe('la re-verificacion escribe sobre una fila YA mitigada (ADR-087)', () =
     expect(fila(id).quien).toBe('operador')
   })
 
-  it('EL AVISO LLEGA: anotarMitigado escribe donde markMitigated no podia', () => {
+  it('EL AVISO LLEGA, y NO pisa la nota del operador', () => {
     // `markMitigated` exige venir de ACTIVE, asi que sobre una fila ya mitigada
     // no cambiaba nada y el operador se quedaba sin saber que su fix no valio.
+    // Y el dictamen va a SU columna: escribirlo en `mitigated_note` borraba lo
+    // que el operador habia declarado — paso de verdad, con el sha del fix.
     const id = nacer()
-    bench.repo.markMitigated(id, 'ya lo arregle', '2026-09-01T10:00:00Z')
+    bench.repo.markMitigated(id, 'ya lo arregle en 8bda921', '2026-09-01T10:00:00Z')
 
     expect(bench.repo.markMitigated(id, 'el aviso por la via vieja', '2026-09-12T10:00:00Z')).toBe(false) // prettier-ignore
-    expect(fila(id).nota).toBe('ya lo arregle')
 
-    expect(bench.repo.anotarMitigado(id, 'el marcador no esta')).toBe(true)
-    expect(fila(id).nota).toBe('el marcador no esta')
+    expect(bench.repo.anotarVerificacion(id, 'el marcador no esta')).toBe(true)
+    expect(fila(id).dictamen).toBe('el marcador no esta')
+    expect(fila(id).nota).toBe('ya lo arregle en 8bda921')
     expect(fila(id).lifecycle).toBe('MITIGATED')
   })
 
@@ -48,7 +58,8 @@ describe('la re-verificacion escribe sobre una fila YA mitigada (ADR-087)', () =
     const id = nacer()
     bench.repo.markExtinct([id], '2026-09-12T10:00:00Z', 'juicio_obsoleto', 'agente')
 
-    expect(bench.repo.anotarMitigado(id, 'tarde')).toBe(false)
+    expect(bench.repo.anotarVerificacion(id, 'tarde')).toBe(false)
+    expect(bench.repo.devolverALaCola(id, 'tarde')).toBe(false)
   })
 
   it('lo extinguido por la COLA queda como `agente`: quien pregunto se distingue', () => {

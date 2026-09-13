@@ -25,6 +25,7 @@ const open: Finding = {
   status: 'open',
   lifecycle: 'ACTIVE' as const,
   mitigatedNote: null,
+  verificacionNote: null,
   lastSeen: ''
 }
 const descartado: Finding = {
@@ -34,6 +35,7 @@ const descartado: Finding = {
   status: 'false_positive',
   lifecycle: 'ACTIVE' as const,
   mitigatedNote: null,
+  verificacionNote: null,
   lastSeen: ''
 }
 

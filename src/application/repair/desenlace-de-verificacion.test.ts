@@ -50,15 +50,9 @@ describe('los tres desenlaces de una re-verificacion (ADR-087)', () => {
     expect(banco.extinguidos).toHaveLength(0)
     expect(banco.anotados[0].id).toBe('f1')
     expect(banco.anotados[0].note).toContain('no pudo probarlo')
-  })
-
-  it('EL PROBLEMA SIGUE REAL: tampoco muere, y lo dice con otras palabras', async () => {
-    // `sin_prueba` es «puede que lo arreglaras y no se puede comprobar»;
-    // `sigue_vivo` es «esta ahi». Colapsarlos escondería cual de las dos es.
-    const { banco, dictamen } = await corrida({ ...base, verdictStatus: 'REAL' })
-
-    expect(dictamen?.desenlace).toBe('sigue_vivo')
-    expect(banco.extinguidos).toHaveLength(0)
-    expect(banco.anotados[0].note).toContain('SIGUE en el codigo')
+    // NO vuelve a la cola: el analista dijo obsoleto y no pudo probarlo, asi
+    // que no afirma que el problema siga. Actuar sobre una duda seria lo mismo
+    // que cerrar sobre una duda, en la otra direccion (ADR-065).
+    expect(banco.devueltos).toHaveLength(0)
   })
 })

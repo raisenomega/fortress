@@ -24,7 +24,8 @@ export function toFinding(row: FindingRow): Finding {
     status: isFindingStatus(row.status) ? row.status : 'open',
     lifecycle: isFindingLifecycle(row.lifecycle) ? row.lifecycle : 'ACTIVE',
     lastSeen: row.last_seen ?? '',
-    mitigatedNote: row.mitigated_note ?? null
+    mitigatedNote: row.mitigated_note ?? null,
+    verificacionNote: row.verificacion_note ?? null
   }
 }
 

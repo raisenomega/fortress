@@ -23,11 +23,11 @@ import type { AppContext } from '../context'
  * desenlace queda escrito en la propia fila —en `extinct_reason` y
  * `extinguido_por` si murio, en `mitigated_note` si no—.
  *
- * EL DESENLACE QUE JUSTIFICA TODO ESTO es el segundo: si el analista no prueba
- * la ausencia, el hallazgo NO muere y el operador se entera de que su fix no
- * cerro el problema. Es el sistema protegiendole de su propio error, y es
- * exactamente lo que faltaba el dia que dos hallazgos de la CSP murieron porque
- * alguien anadio un comentario.
+ * EL DESENLACE QUE JUSTIFICA TODO ESTO es que el hallazgo NO muere cuando la
+ * ausencia no se prueba: el sistema protege al operador de su propio error, que
+ * es lo que falto el dia que dos hallazgos de la CSP murieron porque alguien
+ * anadio un comentario. Y proteger no es solo avisar — si el analista dice que
+ * el problema SIGUE, la etiqueta de mitigado se retira y el motor lo recupera.
  */
 export async function verificarMitigado(
   context: AppContext,
@@ -58,9 +58,14 @@ export async function verificarMitigado(
 
   const desenlace = veredicto.verdict === 'OBSOLETO' ? 'sin_prueba' : 'sigue_vivo'
   const nota = notaDeVerificacion(desenlace, veredicto.reason)
-  // `anotarMitigado` y no `markMitigated`: aquel exige venir de ACTIVE, y esta
-  // fila lleva mitigada desde antes. Con el otro el aviso no se escribia y el
-  // operador se quedaba creyendo que su fix valio.
-  context.findings.anotarMitigado(findingId, nota)
+  // LA ASIMETRIA, y es de certeza contra duda. `sigue_vivo` es una AFIRMACION:
+  // el analista leyo el fichero y el problema esta ahi, asi que la marca del
+  // operador era falsa y el hallazgo vuelve a la cola —sin eso seguiria
+  // contando para el score y bloqueando el push mientras el motor no lo puede
+  // tocar, porque `vivo` exige ACTIVE: castigado y escondido a la vez—.
+  // `sin_prueba` es una DUDA: dijo obsoleto y no pudo probarlo, y ante la duda
+  // se conserva (ADR-065). Ahi la marca se queda y solo se anota el porque.
+  if (desenlace === 'sigue_vivo') context.findings.devolverALaCola(findingId, nota)
+  else context.findings.anotarVerificacion(findingId, nota)
   return { desenlace, razon: nota }
 }

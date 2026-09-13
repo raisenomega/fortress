@@ -47,5 +47,13 @@ export const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   // Nullables: sin marca no hay nada que contar, y `resolved_at` no sirve para
   // esto — ahi vive la extincion, que afirma otra cosa.
   ['findings', 'mitigated_at', 'ALTER TABLE findings ADD COLUMN mitigated_at TEXT'], // prettier-ignore
-  ['findings', 'mitigated_note', 'ALTER TABLE findings ADD COLUMN mitigated_note TEXT'] // prettier-ignore
+  ['findings', 'mitigated_note', 'ALTER TABLE findings ADD COLUMN mitigated_note TEXT'], // prettier-ignore
+  // El dictamen de la ultima re-verificacion (ADR-087). Columna PROPIA y no
+  // `mitigated_note`: aquella es lo que el OPERADOR declaro al marcarlo, y
+  // escribir el dictamen encima la borraba — paso de verdad el 13-sep, con una
+  // nota que llevaba el sha del fix. Son dos afirmaciones de dos autores, y
+  // ademas esta sobrevive al ciclo de vida: cuando el hallazgo vuelve a la cola
+  // porque el analista dijo que el problema sigue, la razon tiene que seguir
+  // legible. Nullable: sin verificacion no hay nada que contar.
+  ['findings', 'verificacion_note', 'ALTER TABLE findings ADD COLUMN verificacion_note TEXT'] // prettier-ignore
 ]

@@ -12,7 +12,8 @@ export function cicloDeVida(
   opts: Opciones,
   extinguidos: Bench['extinguidos'],
   mitigados: Bench['mitigados'],
-  anotados: Bench['anotados'] = []
+  anotados: Bench['anotados'] = [],
+  devueltos: Bench['devueltos'] = []
 ): Record<string, unknown> {
   return {
     findings: {
@@ -23,7 +24,8 @@ export function cicloDeVida(
         mitigados.push({ id, note, at }),
         true
       ),
-      anotarMitigado: (id: string, note: string): boolean => (anotados.push({ id, note }), true)
+      anotarVerificacion: (id: string, note: string): boolean => (anotados.push({ id, note }), true), // prettier-ignore
+      devolverALaCola: (id: string, note: string): boolean => (devueltos.push({ id, note }), true)
     },
     filesystemProbe: { contenido: () => (opts.contenido === undefined ? '' : opts.contenido) }
   }
