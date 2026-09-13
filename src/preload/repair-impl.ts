@@ -7,6 +7,8 @@ import { subscribe } from './subscribe'
 export const repairApi: FortressApi['repair'] = {
   propose: (projectId, findingId) => ipcRenderer.invoke(IPC.repairPropose, projectId, findingId),
   verify: (projectId, findingId) => ipcRenderer.invoke(IPC.findingVerify, projectId, findingId), // prettier-ignore
+  verifyAll: (projectId) => ipcRenderer.invoke(IPC.findingVerifyAll, projectId),
+  verifyAllStop: (projectId) => ipcRenderer.invoke(IPC.findingVerifyAllStop, projectId),
   list: (projectId) => ipcRenderer.invoke(IPC.repairList, projectId),
   cerco: (projectId) => ipcRenderer.invoke(IPC.repairCerco, projectId),
   get: (id) => ipcRenderer.invoke(IPC.repairGet, id),

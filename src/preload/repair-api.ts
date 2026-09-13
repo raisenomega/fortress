@@ -5,14 +5,14 @@ import type { AutoMergeResult } from '@application/repair/auto-merge-types'
 import type { DrenajeResultado } from '@application/repair/drenar-hasta-omega'
 import type { ResumenCerco } from '@application/repair/resumen-cerco'
 import type { JuicioConIntegracion } from '@application/repair/juicio-con-integracion'
-import type { DictamenDeVerificacion } from '@domain/repair/dictamen-de-verificacion'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { Result } from '@domain/shared/result'
 import type { Unsubscribe } from './api-types'
+import type { VerificacionApi } from './repair-verificacion-api'
 
 /** Motor de reparacion disciplinado: C1 elegir, C2 entender, C3 generar. */
-export interface RepairApi {
+export interface RepairApi extends VerificacionApi {
   /**
    * C1 elige el hallazgo mas contenido y C2 lo analiza con un agente real
    * (solo lectura, puede tardar). null si no hay candidato elegible. NO
@@ -23,10 +23,6 @@ export interface RepairApi {
    * o si su severidad cae fuera del estreno del motor.
    */
   propose(projectId: string, findingId?: string): Promise<Result<Proposal | null>>
-  /** Comprueba un hallazgo MITIGADO: el analista lee el fichero y dictamina
-   *  (ADR-087). NO propone nada y NO crea propuesta. `null` si no esta mitigado
-   *  o si ya hay una propuesta viva trabajandolo. */
-  verify(projectId: string, findingId: string): Promise<Result<DictamenDeVerificacion | null>>
   /** Expediente del proyecto, del mas reciente al mas antiguo. */
   list(projectId: string): Promise<readonly Proposal[]>
   /** Cuantos hallazgos vivos quedan fuera del cerco: la cola no los elige sola. */

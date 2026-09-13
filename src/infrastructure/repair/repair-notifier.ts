@@ -1,18 +1,13 @@
-import { BrowserWindow } from 'electron'
 import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
-import { IPC } from '../ipc/channels'
+import { avisarDelMotor } from './aviso-del-motor'
 
 /**
- * Empuja al renderer que el expediente de un proyecto se movio. Se manda SOLO
- * el id, como hace el reindexado del grafo: quien escucha relee de la base.
+ * Empuja al renderer que el expediente de un proyecto se movio, a partir de la
+ * PROPUESTA que se movio: el libro de vida conoce ids de propuesta, no de
+ * proyecto. Traducir aqui es todo lo que hace.
  *
- * Mandar el estado entero seria una segunda copia del mismo hecho viajando por
- * el puente, con su propio momento de quedarse vieja. La base ya es la fuente;
- * esto es un golpecito en el hombro.
- *
- * El aviso sale para CUALQUIER proyecto, tambien los que el operador no tiene
- * delante. Filtrar aqui dejaria al motor trabajando a oscuras sobre los demas;
- * quien pinta decide si le toca.
+ * El envio en si vive en `aviso-del-motor`, porque hay un segundo emisor que no
+ * tiene propuesta ninguna —el barrido de mitigados— y el golpecito es el mismo.
  */
 export function createRepairNotifier(
   proposals: RepairProposalRepository
@@ -21,8 +16,6 @@ export function createRepairNotifier(
     const projectId = proposals.findById(proposalId)?.projectId
     if (projectId === undefined) return
 
-    for (const win of BrowserWindow.getAllWindows()) {
-      if (!win.isDestroyed()) win.webContents.send(IPC.repairChanged, projectId)
-    }
+    avisarDelMotor(projectId)
   }
 }

@@ -9,6 +9,7 @@ import { useQualityStore } from '../../stores/quality-store'
 import { useProjectCounts, useProjectFindings } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
 import { AskChatButton } from './AskChatButton'
+import { BotonVerificarTodos } from './BotonVerificarTodos'
 import { botonDeEscaneo } from './boton-de-escaneo'
 import { DetenerScanButton } from './DetenerScanButton'
 import { PushButton } from './PushButton'
@@ -43,6 +44,11 @@ export function ScanActions({ project }: ScanActionsProps): React.JSX.Element {
         busyElsewhere={auditingProjectId !== null && auditingProjectId !== project.id}
         trusted={project.trusted}
         onAudit={() => void auditQuality(project.id)}
+      />
+      <BotonVerificarTodos
+        projectId={project.id}
+        mitigados={findings.filter((f) => f.lifecycle === 'MITIGATED').length}
+        disabled={boton === 'detener' || boton === 'ocupado'}
       />
       <AskChatButton projectName={project.name} findings={findings} />
       <PushButton
