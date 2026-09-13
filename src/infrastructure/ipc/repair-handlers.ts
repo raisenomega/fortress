@@ -9,12 +9,14 @@ import { guardRun } from '../run-guard'
 import { IPC } from './channels'
 import { registerDrainHandlers } from './repair-drain-handler'
 import { registerFindingVerifyHandler } from './finding-verify-handler'
+import { registerFindingVerifyAllHandler } from './finding-verify-all-handler'
 import { registerSignHandler } from './repair-sign-handler'
 
 export function registerRepairHandlers(): void {
   registerSignHandler()
   registerDrainHandlers()
   registerFindingVerifyHandler()
+  registerFindingVerifyAllHandler()
   // C2 spawnea un agente real (read-only): pasa por la misma guardia que
   // cualquier corrida — busy, tope diario y circuit breaker de contaminacion.
   //

@@ -17,6 +17,7 @@ export const ICON_NAMES = [
   'rocket',
   'play',
   'check-circle',
+  'check-check',
   'alert-triangle',
   'x-circle',
   'circle',
