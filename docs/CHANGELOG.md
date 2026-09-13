@@ -28,8 +28,58 @@ misma fecha —como el cierre documental del 2026-08-11— se registran tal cual
 sin distribuir artificialmente. Cada entrada apunta al documento donde el hito
 se narra o su decisión se registra: [HISTORY](HISTORY.md) ofrece la narrativa
 general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
-[DECISIONS/](DECISIONS/README.md) contiene las setenta y cinco decisiones
+[DECISIONS/](DECISIONS/README.md) contiene las ochenta y siete decisiones
 arquitectónicas.
+
+## 2026-09-13
+
+**[Motor]** El fix que **entra al repo marca su hallazgo**. Integrar no tocaba la
+fila: el motor proponía, OMEGA revisaba, el operador firmaba, el merge entraba —
+y el hallazgo seguía `ACTIVE`, contando para el score y pidiéndole trabajo al
+motor otra vez. Lo marcaba el operador a mano, una a una, con el sha del arreglo.
+Ahora lo hace `advanceProposal` al llegar a `MERGEADO`, que es donde convergen
+las **tres** vías: la firma, la integración automática y el reconciliador de
+huérfanos —ese tercero detecta con git un merge que entró sin que su propuesta se
+enterara, y marcar en el merge lo habría dejado fuera—. No extingue: que un fix
+entre no prueba que el defecto se fue, así que deja `MITIGATED`, el estado desde
+el que la re-verificación cierra
+([ADR-087](DECISIONS/adr-087-confirmar-un-hallazgo-exige-juicio.md)).
+
+## 2026-09-12
+
+**[Escaneo]** **Confirmar un hallazgo exige juicio.** El operador podía marcar
+«ya está arreglado» pero no confirmarlo: los veintiséis mitigados del tablero
+solo salían de su limbo pasando por el motor entero. Ahora un botón en la fila
+lanza al analista sobre ESA fila, y hay tres desenlaces honestos: con marcador
+comprobado el hallazgo **muere con juicio** y aterriza en su historia; sin
+marcador **no muere** y queda dicho por qué; y si el analista dice que el
+problema sigue, el hallazgo **vuelve solo a la cola del motor** —la marca era
+falsa, y dejarla puesta lo mantenía contando para el score mientras el motor no
+podía tocarlo—. Se separa la puerta de verificación de la de reparación sin
+tocar la guarda `vivo`, y se verifica **sin crear propuesta**: una propuesta que
+nunca quiso reparar ensucia la lista donde el operador mira lo que tiene que
+firmar ([ADR-087](DECISIONS/adr-087-confirmar-un-hallazgo-exige-juicio.md)).
+
+**[Escaneo]** **Lo cerrado tiene su página**, y dice de qué murió cada uno. El
+tablero filtra los extintos a propósito y no había dónde volver a verlos. La
+cabecera da **tres números y nunca uno**: de las cincuenta y seis extinciones de
+hoy solo **nueve** las cerró un juicio; veinte son duplicados absorbidos por
+ADR-084 y veintisiete se cerraron en agosto, cuando la ausencia extinguía —la
+regla que mató dos hallazgos de la CSP por un comentario—. Un total único diría
+«resuelto» de cuarenta y siete filas que nadie verificó. El clasificador va por
+prefijo del motivo, porque la fusión escribe veinte cadenas distintas y
+`ausencia_historica` tiene cero filas; y su cajón cae a `sin-prueba`, nunca a
+`verificado`: un motivo desconocido no puede convertirse en una afirmación.
+
+**[Sistema evolutivo]** El **Nivel 2 de la auto-mejora**: cuando la app se rompe,
+se captura. Tres embudos — el del proceso principal, el del IPC (que envuelve el
+registro en la raíz y cubre 94 de los 112 handlers sin editar ninguno de los 36
+ficheros, ni el innegociable de ajustes) y el del renderer, construido y
+**desconectado** porque su enganche cruza `preload/index.ts`. Se guarda la CLASE
+del fallo —dónde, de qué tipo, qué operación—, nunca el `message`: diecisiete de
+los que este código construye se interpolan y ocho concatenan hoy una ruta del
+cliente. El texto crudo va al log local, que no viaja
+([ADR-086](DECISIONS/adr-086-los-fallos-se-observan-por-su-clase.md)).
 
 ## 2026-09-02
 
@@ -315,6 +365,6 @@ Origen del proyecto.
 ## Referencias
 
 - [HISTORY](HISTORY.md) — la narrativa completa del proyecto.
-- [DECISIONS/](DECISIONS/README.md) — las sesenta decisiones
-  arquitectónicas (ADR-001 a ADR-060).
+- [DECISIONS/](DECISIONS/README.md) — las decisiones arquitectónicas
+  (ADR-001 a ADR-087).
 - [ROADMAP](ROADMAP.md) — las direcciones próximas.

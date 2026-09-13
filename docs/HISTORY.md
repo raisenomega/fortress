@@ -15,7 +15,7 @@ avanzó por capas superpuestas y no por etapas estancas. La sección
 **Presente**, al final, describe lo que se trabaja ahora sin comprometer
 fechas. La primera versión de este documento cortaba el 2026-08-11; las etapas
 posteriores se añaden por edición conforme cierran, y el relato llega hoy al
-2026-08-28.
+2026-09-13.
 
 Los tres primeros actos —el proyecto entero hasta aquel primer corte— caben en
 once días intensos: del 2026-08-01 al 2026-08-11.
@@ -680,6 +680,91 @@ sola, de modo que el gate pasaba sin probar nada—, y eso costó líneas:
 tenía un fichero al filo; ahora tiene dos, y el segundo sin margen ninguno. Se
 cerró una clase de defecto y se apretó otro.
 
+## Acto 8 — El ciclo del hallazgo se cierra, y la app aprende de sus roturas (2026-09-11 a 2026-09-13)
+
+Los siete actos anteriores construyeron un motor que repara y un escáner que
+encuentra. Este cierra el círculo por los dos extremos que faltaban: **qué le
+pasa a un hallazgo cuando deja de ser un problema**, y **qué pasa cuando la app
+misma se rompe**.
+
+### Nivel 2 de la auto-mejora: los fallos se observan por su clase (2026-09-11 a 2026-09-12)
+
+El Nivel 1 —los agentes observando sus propios límites— llevaba días produciendo
+solo. Lo que no existía era el otro lado: cuando la aplicación reventaba, no
+quedaba rastro en ninguna parte. Un inventario lo midió: ciento sesenta y un
+`catch` en producción, ciento diez handlers de IPC sueltos, cero wrapper, cero
+reportador de errores, cero `uncaughtException`. Veinte de esos `catch` llegaban
+a `console.error` — que en un AppImage va a un stdout que no lee nadie.
+
+La decisión que ordena el arco es **qué se guarda**
+([ADR-086](DECISIONS/adr-086-los-fallos-se-observan-por-su-clase.md)). En el
+Nivel 1 la confidencialidad salió gratis: un `tool_name` es `Bash`, y no puede
+contener nada del cliente. Un `message` sí: de los diecisiete que este código
+construye interpolando, **ocho concatenan hoy una ruta o una identidad del
+proyecto auditado**. Así que la observación se queda con la CLASE del fallo
+—dónde reventó, de qué tipo, qué operación— y el texto crudo va al log local,
+que no viaja. La señal ya estaba en el código sin que nadie la hubiera nombrado:
+ciento cincuenta y seis `err()` son la app funcionando, y siete `throw` son
+«esto no debería pasar».
+
+Tres embudos, y ninguno es un `try/catch` repetido. El del proceso principal
+escucha `uncaughtException` y `unhandledRejection` — y antes de tocarlos se
+**midió** que Electron ya tenía un oyente del primero y ninguno del segundo, así
+que escucharlos no le quita nada a nadie. El del IPC **envuelve el registro en la
+raíz** en vez de migrar ciento diez llamadas a un helper: eso habría obligado a
+editar el fichero de ajustes, que es innegociable, y a confiar en un test que
+avisa cuando alguien olvida el helper; envolver cubre los futuros sin que nadie
+se acuerde. Y el del renderer queda **construido y desconectado**: su componente
+pinta un fallback y `onUncaughtError` arma la observación, pero llevarla al
+backlog cruza el puente protegido, así que espera firma — y la desconexión la
+garantiza el sistema de tipos, no un comentario.
+
+### El ciclo de vida del hallazgo: confirmar exige juicio (2026-09-12 a 2026-09-13)
+
+Un inventario del tablero encontró veintiséis hallazgos «mitigados, pendientes de
+confirmar»: marcas que el operador había escrito a mano tras arreglar cada cosa,
+cada una con el sha de su commit. Y encontró que **no había forma de
+confirmarlos**. El destino final existía —`EXTINCT`, con su filtro ya puesto en
+la consulta del tablero— pero la única vía era el analista del motor. Los
+veintiséis estaban castigados y escondidos a la vez: contando para el score y
+bloqueando el push, mientras la guarda del motor los dejaba fuera de su cola.
+
+La decisión fue no aflojar nada
+([ADR-087](DECISIONS/adr-087-confirmar-un-hallazgo-exige-juicio.md)). La
+alternativa barata —un botón que extinguiera por palabra— es el incidente de la
+CSP otra vez: dos hallazgos cerrados porque alguien añadió un comentario, con el
+`unsafe-inline` que denunciaban todavía en `main`. Un falso positivo molesta; un
+falso negativo miente. Así que **el operador pide y el agente otorga**: un botón
+en la fila lanza al analista sobre ella, y el desenlace depende de lo que
+encuentre en el fichero.
+
+Los tres desenlaces son la pieza que hace el arco honesto. Con el marcador
+comprobado el hallazgo muere con juicio. Sin marcador **no muere**, y la razón se
+escribe. Y si el analista dice que el problema sigue ahí, el hallazgo **vuelve
+solo a la cola del motor**: esa asimetría —la certeza actúa, la duda conserva— se
+descubrió usándolo. La primera verificación real dictaminó «sigue vivo» sobre un
+hallazgo que el operador había dado por arreglado una semana antes, y dejó ver
+que avisar no bastaba: la etiqueta falsa seguía escondiéndolo del motor.
+
+El último eslabón cerró el otro extremo. Integrar un fix no tocaba la fila: el
+motor proponía, el operador firmaba, el merge entraba, y el hallazgo seguía
+`ACTIVE`. Ahora lo marca `advanceProposal` al llegar a `MERGEADO`, que es el
+punto donde convergen las tres vías —la firma, la automática, y el reconciliador
+que detecta con git un merge cuya propuesta quedó huérfana—. No extingue: que un
+fix entre no prueba que el defecto se fue.
+
+### Lo cerrado tiene su página, y no miente sobre sus muertos
+
+La historia de un proyecto era una consulta que ya existía sin pantalla. Al
+construirla apareció el matiz que la salvó de nacer torcida: **las extinciones no
+son todas resoluciones**. De las cincuenta y seis de hoy, nueve las cerró un
+juicio; veinte son duplicados absorbidos por la reidentificación de ADR-084, y
+veintisiete se cerraron en agosto, cuando la ausencia todavía extinguía. Una
+cabecera con un total único habría dicho «resuelto» de cuarenta y siete filas que
+nadie verificó — la mentira de la CSP repetida en una pantalla nueva. La página
+da tres números y distingue las tres clases, y su clasificador cae siempre del
+lado que no afirma.
+
 ## Presente
 
 El motor repara, el operador firma, el motor vuelve a mirar y cierra lo que ya
@@ -687,6 +772,18 @@ está arreglado diciendo por qué. La vuelta entera funciona sobre el propio
 repositorio, y el registro de lo que hizo dice lo que pasó. La identidad de los
 hallazgos de este repositorio está reconciliada; la de otros proyectos espera a
 que se los vuelva a escanear.
+
+**El ciclo de vida de un hallazgo está completo**, y las dos mitades que lo
+cerraban se probaron en vivo sobre el repositorio propio: una verificación
+dictaminó «sigue vivo» y devolvió su hallazgo a la cola, y otra probó la
+ausencia y lo mandó a la historia. Lo que falta para que el tablero se vacíe sin
+trabajo manual es **verificar en masa**: hoy se confirma de uno en uno, y los
+veintiséis mitigados heredados son declaraciones sin comprobar — la única que se
+comprobó resultó falsa.
+
+**La app observa sus propias roturas** desde el 2026-09-12, aunque todavía no
+haya tenido ninguna que contar. El embudo del renderer sigue construido y
+desconectado: conectarlo cruza el puente protegido y espera una firma.
 
 Ninguna propuesta queda atascada: las tres que lo estaban se cerraron el
 2026-08-28, cada una por su vía. Las que siguen vivas esperan firma, que es un
@@ -748,7 +845,7 @@ proyecto para publicarse. Sin fechas de compromiso, como todo aquí.
 ## Referencias
 
 - [DECISIONS/](DECISIONS/README.md) — los registros de decisión
-  arquitectónica (ADR-001 a ADR-077) que sostienen esta historia.
+  arquitectónica (ADR-001 a ADR-087) que sostienen esta historia.
 - [FLOWS/SELF-REPAIR](FLOWS/SELF-REPAIR.md), [FLOWS/RETRY](FLOWS/RETRY.md),
   [FLOWS/LOOP-VIEJO](FLOWS/LOOP-VIEJO.md),
   [FLOWS/CAPABILITIES](FLOWS/CAPABILITIES.md),
