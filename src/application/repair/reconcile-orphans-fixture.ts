@@ -9,6 +9,9 @@ export interface Banco {
   readonly deps: ReconcileDeps
   readonly patches: Array<ProposalPatch & { id: string }>
   readonly events: ProposalEvent[]
+  /** Hallazgos marcados al integrar. El reconciliador es la TERCERA via que
+   *  llega a MERGEADO, y sin esto su marca no se veria (ADR-087). */
+  readonly marcas: Array<{ id: string; note: string }>
 }
 
 export interface Opciones {
@@ -26,6 +29,7 @@ export interface Opciones {
 export function banco(opts: Opciones): Banco {
   const patches: Array<ProposalPatch & { id: string }> = []
   const events: ProposalEvent[] = []
+  const marcas: Array<{ id: string; note: string }> = []
   const sha = opts.commitSha === undefined ? 'c0ffee' : opts.commitSha
   const libro = sha === null ? [] : [{ seq: 1, evidenceJson: JSON.stringify({ commitSha: sha }) }]
   const proposal = { id: 'p-1', projectId: 'proj', findingId: 'f-1', baseSha: 'base', state: opts.state, createdAt: 1, updatedAt: 1 } as Proposal // prettier-ignore
@@ -35,6 +39,9 @@ export function banco(opts: Opciones): Banco {
     repairProposals: {
       listLive: () => [proposal],
       update: (id: string, patch: ProposalPatch): void => void patches.push({ id, ...patch })
+    },
+    findings: {
+      markMitigated: (id: string, note: string): boolean => (marcas.push({ id, note }), true)
     },
     eventLog: {
       list: () => Promise.resolve(libro as unknown as ProposalEvent[]),
@@ -49,5 +56,5 @@ export function banco(opts: Opciones): Banco {
     isMerged: () => opts.merged === true,
     now: () => 42
   }
-  return { context, deps, patches, events }
+  return { context, deps, patches, events, marcas }
 }
