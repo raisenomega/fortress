@@ -1,6 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { NewActivity } from '@domain/telemetry/activity'
 import type { ChatEngine } from '@domain/chat/code-agent'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import type { ReplyOutcome } from '../chat/reply-outcome'
 
 const MAX_SUMMARY = 90
@@ -24,11 +25,15 @@ export function chatActivity(
 ): readonly NewActivity[] {
   const motor = engine === 'claude-code' ? 'Claude Code' : 'solo texto'
 
+  // El prompt es texto literal del operador y puede llevar un token pegado. Se
+  // tacha ENTERO y despues se recorta: recortado antes, un secreto partido en el
+  // borde deja de casar con el patron y queda a medias en el timeline.
+  // El rotulo del motor queda fuera del tachado: es texto nuestro.
   const cabecera: NewActivity = {
     projectId,
     agentId,
     kind: 'chat',
-    summary: `${shorten(prompt)} (${motor})`,
+    summary: `${shorten(redactSecrets(prompt))} (${motor})`,
     severity: null,
     file: '',
     line: null
