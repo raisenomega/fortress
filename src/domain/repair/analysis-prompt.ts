@@ -23,7 +23,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
   const docs = buildDocsFirst('security', corpus)
   return [
     `Eres el analista de FORTRESS. ANALIZA (no arregles) este hallazgo ${t.severity}:`,
-    `"${sanearParaPrompt(t.title)}" en ${t.file}:${t.line}. Detectado el ${t.firstSeen.slice(0, 10)}.`,
+    `"${sanearParaPrompt(t.title)}" en ${sanearParaPrompt(t.file)}:${t.line}. Detectado el ${t.firstSeen.slice(0, 10)}.`,
     '',
     // La antiguedad es contexto para el veredicto: un hallazgo de hace semanas
     // ha tenido tiempo de arreglarse por otra via, y uno de hoy no. No decide
