@@ -3,11 +3,10 @@ import type { AppContext } from '@application/context'
 import type { GraphVerify } from '@domain/graph/graph-actions'
 
 type Handler = (event: unknown, id: string) => Promise<GraphVerify>
-
 const handlers = new Map<string, Handler>()
 const avisos: string[] = []
 let spawns = 0
-let contaminado = false
+const proyecto = { path: '/tmp/p', contaminated: false, trusted: true }
 
 vi.mock('electron', () => ({
   ipcMain: { handle: (canal: string, fn: Handler): void => void handlers.set(canal, fn) }
@@ -23,7 +22,7 @@ vi.mock('../graph/verify-graph', () => ({
 vi.mock('../persistence/app-context', () => ({
   getAppContext: (): AppContext =>
     ({
-      projects: { findById: () => ({ path: '/tmp/p', contaminated: contaminado }) },
+      projects: { findById: () => proyecto },
       settings: { get: () => null },
       apiKeys: { has: () => false, read: () => null },
       runs: { usageSince: () => ({ costUsd: 0 }) }
@@ -32,25 +31,29 @@ vi.mock('../persistence/app-context', () => ({
 
 const { registerGraphActionHandlers } = await import('./graph-action-handlers')
 const { endRun, isRunning, tryBeginRun } = await import('../run-control')
-
 registerGraphActionHandlers()
-
 const NADA: GraphVerify = { connected: false, tools: [] }
 const falta: Handler = () => Promise.reject(new Error('graph:verify sin registrar'))
 const send = (_canal: string, chunk: { delta: string }): void => void avisos.push(chunk.delta)
 const event = { sender: { isDestroyed: () => false, send } }
 const verify = (): Promise<GraphVerify> => (handlers.get('graph:verify') ?? falta)(event, 'p')
 
-describe('graph:verify pasa por guardRun', () => {
+describe('graph:verify pide confianza y pasa por guardRun', () => {
   beforeEach(() => {
     endRun('p')
     avisos.length = 0
     spawns = 0
-    contaminado = false
+    Object.assign(proyecto, { contaminated: false, trusted: true })
+  })
+
+  it('sin confianza no spawnea ni toma el carril, y avisa del motivo', async () => {
+    proyecto.trusted = false
+    expect([await verify(), spawns, isRunning('p')]).toEqual([NADA, 0, false])
+    expect(avisos[0]).toContain('sin confianza')
   })
 
   it('CAPA 4: un proyecto contaminado no llega a spawnear el CLI', async () => {
-    contaminado = true
+    proyecto.contaminated = true
     expect(await verify()).toEqual(NADA)
     expect(spawns).toBe(0)
     expect(avisos[0]).toContain('CONTAMINADO')
