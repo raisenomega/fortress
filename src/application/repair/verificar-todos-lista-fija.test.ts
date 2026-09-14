@@ -41,8 +41,11 @@ describe('dentro del bucle no hay mas freno que Detener', () => {
     expect(parte).toMatchObject({ fin: 'completado', total: 26, extinguidos: 26 })
   })
 
-  it('el fuente no nombra ningun tope: la ausencia es la decision, no un olvido', () => {
-    const fuente = readFileSync(join(process.cwd(), 'src/application/repair/verificar-todos.ts'), 'utf8') // prettier-ignore
+  it('el fuente del bucle no nombra ningun tope: la ausencia es la decision', () => {
+    // El bucle vive en `recorrer-verificaciones` desde que la seleccion manual
+    // lo reusa; `verificar-todos` solo decide que lista. El barrido sigue al
+    // bucle, como la lista innegociable sigue a la defensa que se muda.
+    const fuente = readFileSync(join(process.cwd(), 'src/application/repair/recorrer-verificaciones.ts'), 'utf8') // prettier-ignore
 
     expect(fuente).not.toMatch(/\b(maxVueltas|costCapUsd|topeDiario|gastado)\b/)
     // Y lo unico que se le pide a `deps` dentro del bucle son esas dos cosas.

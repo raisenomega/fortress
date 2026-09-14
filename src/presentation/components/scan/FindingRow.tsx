@@ -1,8 +1,8 @@
 import type { Finding } from '@domain/project/finding'
-import { FindingActions } from './FindingActions'
-import { FindingMitigarAction } from './FindingMitigarAction'
-import { FindingRepairAction } from './FindingRepairAction'
+import { verificable } from '@domain/project/verificable'
+import { CajitaDeSeleccion } from './CajitaDeSeleccion'
 import { FindingMarks } from './FindingMarks'
+import { FindingRowActions } from './FindingRowActions'
 import { SeverityBadge } from './SeverityBadge'
 
 interface FindingRowProps {
@@ -14,6 +14,8 @@ interface FindingRowProps {
   readonly onRepair: (id: string) => void
   readonly onVerificar: (id: string) => void
   readonly ocupado: boolean
+  readonly seleccionada: boolean
+  readonly onSeleccionar: (id: string) => void
 }
 
 /** Sin archivo ni linea un hallazgo no es accionable, pero se muestra igual. */
@@ -22,25 +24,30 @@ function location(finding: Finding): string {
   return finding.line === null ? finding.file : `${finding.file}:${finding.line}`
 }
 
-export function FindingRow({
-  finding,
-  onDismiss,
-  onReopen,
-  onMitigate,
-  onUnmitigate,
-  onRepair,
-  onVerificar,
-  ocupado
-}: FindingRowProps): React.JSX.Element {
+export function FindingRow(props: FindingRowProps): React.JSX.Element {
+  const { finding, seleccionada, onSeleccionar } = props
   // Descartado se atenua pero NO se esconde: sigue estando ahi, y el operador
   // tiene que poder ver que decidio ignorarlo y por que ya no bloquea.
   const dismissed = finding.status === 'false_positive'
   // Mitigado NO se atenua: el problema puede seguir ahi y el escaneo aun no lo
   // ha confirmado. Lo que cambia es que deja de pedir trabajo al motor.
   const mitigado = finding.lifecycle === 'MITIGATED'
+  // La cajita mira los DOS ejes, como el bucle y el contador: uno descartado ya
+  // no pide comprobacion, y ofrecerla gastaria una corrida en lo que su dueño
+  // dijo que no contaba.
+  const sePuedeVerificar = verificable(finding)
 
   return (
     <tr className={`border-b border-border/60 last:border-0 ${dismissed ? 'opacity-45' : ''}`}>
+      <td className="py-2 pr-2 align-top">
+        {sePuedeVerificar ? (
+          <CajitaDeSeleccion
+            marcada={seleccionada}
+            titulo={`Seleccionar: ${finding.title}`}
+            onToggle={() => onSeleccionar(finding.id)}
+          />
+        ) : null}
+      </td>
       <td className="py-2 pr-3 align-top">
         <SeverityBadge severity={finding.severity} />
       </td>
@@ -51,23 +58,7 @@ export function FindingRow({
         {location(finding)}
       </td>
       <td className="py-2 align-top text-right whitespace-nowrap">
-        {!dismissed && !mitigado ? (
-          <FindingRepairAction onRepair={() => onRepair(finding.id)} />
-        ) : null}
-        <FindingMitigarAction
-          finding={finding}
-          dismissed={dismissed}
-          mitigado={mitigado}
-          onMitigate={onMitigate}
-          onUnmitigate={() => onUnmitigate(finding.id)}
-          onVerificar={() => onVerificar(finding.id)}
-          ocupado={ocupado}
-        />
-        <FindingActions
-          dismissed={dismissed}
-          onDismiss={() => onDismiss(finding.id)}
-          onReopen={() => onReopen(finding.id)}
-        />
+        <FindingRowActions {...props} dismissed={dismissed} mitigado={mitigado} />
       </td>
     </tr>
   )

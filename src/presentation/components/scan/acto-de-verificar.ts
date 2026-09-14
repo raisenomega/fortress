@@ -1,3 +1,4 @@
+import { QUE, type AlcanceDeLaVerificacion } from './alcance-de-la-verificacion'
 /** Lo que hace el boton al pulsarlo, decidido antes de tocar nada. */
 export type ActoDeVerificar = 'parar' | 'nada-que-verificar' | 'preguntar'
 
@@ -42,16 +43,20 @@ export function actoDeVerificar(verificando: boolean, mitigados: number): ActoDe
  * Lo que el operador tiene que saber ANTES de autorizar. El parrafo del coste es
  * el importante: este gesto NO lleva techo de gasto —sigue la doctrina del
  * escaneo, que se compromete con el trabajo y no con un presupuesto— asi que
- * esta cifra es lo unico que hay entre el clic y la factura.
+ * esta cifra es lo unico que hay entre el clic y la factura. Por eso las DOS
+ * puertas pasan por aqui: una que no preguntara seria la unica sin barrera.
  *
  * Vive aparte del componente para poder probarse, y el componente lo consume:
  * asi el texto que se prueba es el que se pinta, no una copia que se desincroniza.
  */
-export function avisosDeLaVerificacion(mitigados: number): AvisosDeLaVerificacion {
+export function avisosDeLaVerificacion(
+  mitigados: number,
+  alcance: AlcanceDeLaVerificacion = 'todos'
+): AvisosDeLaVerificacion {
   const plural = mitigados === 1 ? '' : 's'
   return {
     trabajo:
-      `Un analista leera el fichero de cada uno de los ${mitigados} mitigado${plural} y ` +
+      `Un analista leera el fichero de cada una de ${QUE[alcance](mitigados, plural)} y ` +
       'dictaminara si el problema sigue ahi. Solo lee: no propone ni cambia nada.',
     coste:
       `Unos ${costeEstimado(mitigados)} y unas ${duracionEstimada(mitigados)}, medido sobre ` +

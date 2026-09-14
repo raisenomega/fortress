@@ -1,0 +1,42 @@
+import { ESTADOS_DEL_TABLERO } from '@domain/project/estado-del-tablero'
+// prettier-ignore
+import { TODAS, type FiltroDeEstado } from '@domain/project/filtro-del-tablero'
+import type { EstadoCounts } from '@domain/project/recuento-del-tablero'
+import { ChipDeFiltro } from './ChipDeFiltro'
+import { NOMBRE_DEL_ESTADO } from './nombre-del-estado'
+
+interface FilaDeEstadoProps {
+  readonly activo: FiltroDeEstado
+  readonly cuentas: EstadoCounts
+  readonly total: number
+  readonly onElegir: (valor: FiltroDeEstado) => void
+}
+
+/** El eje de EN QUE PUNTO ESTA. «Mitigados» es el que lleva a lo verificable. */
+export function FilaDeEstado(props: FilaDeEstadoProps): React.JSX.Element {
+  const { activo, cuentas, total, onElegir } = props
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <ChipDeFiltro
+        activo={activo === TODAS}
+        cuenta={total}
+        titulo="Todos los estados"
+        onClick={() => onElegir(TODAS)}
+      >
+        <span className="font-semibold tracking-wide uppercase">Todos</span>
+      </ChipDeFiltro>
+      {ESTADOS_DEL_TABLERO.map((estado) => (
+        <ChipDeFiltro
+          key={estado}
+          activo={activo === estado}
+          cuenta={cuentas[estado]}
+          titulo={NOMBRE_DEL_ESTADO[estado].ayuda}
+          onClick={() => onElegir(estado)}
+        >
+          {NOMBRE_DEL_ESTADO[estado].texto}
+        </ChipDeFiltro>
+      ))}
+    </div>
+  )
+}

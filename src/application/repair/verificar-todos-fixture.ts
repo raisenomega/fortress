@@ -16,8 +16,16 @@ export const mitigado = (id: string): FindingMemory => ({
  * probar que el bucle la toma UNA vez: si la tomara cada vuelta, un mitigado que
  * sigue mitigado volveria a salir.
  */
-export function banco(findings: readonly FindingMemory[]): AppContext {
-  return { findings: { listMemory: () => [...findings] } } as unknown as AppContext
+export function banco(
+  findings: readonly FindingMemory[],
+  conPropuestaViva: readonly string[] = []
+): AppContext {
+  return {
+    findings: { listMemory: () => [...findings] },
+    // Lo lee `motivoDeLaOmision` para repartir los que no se verificaron: sin
+    // esto, un `null` en el barrido no sabria a que casilla va.
+    repairProposals: { findLiveFindingIds: () => [...conPropuestaViva] }
+  } as unknown as AppContext
 }
 
 /** El verificador doblado: devuelve estos desenlaces en orden. `null` es «ya lo

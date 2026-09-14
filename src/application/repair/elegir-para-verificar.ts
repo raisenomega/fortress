@@ -1,11 +1,17 @@
 import { aCandidato } from './a-candidato'
 import type { FindingMemory } from '@domain/project/finding-memory'
+import { verificable } from '@domain/project/verificable'
 import { paraVerificar } from '@domain/repair/target-verificacion'
 import type { Selection } from '@domain/repair/select-target'
 import type { AppContext } from '../context'
 
-/** El limbo: lo que el operador dio por arreglado y nadie ha comprobado. */
-export const mitigado = (f: FindingMemory): boolean => f.lifecycle === 'MITIGATED'
+/**
+ * El limbo: lo que el operador dio por arreglado, nadie ha comprobado, y sigue
+ * contando. El criterio vive en el dominio —`verificable`— y aqui solo se le da
+ * el nombre con el que el motor lo llama: la cajita de la fila y el contador del
+ * boton preguntan a la MISMA funcion, y antes cada uno miraba lo suyo.
+ */
+export const mitigado = (f: FindingMemory): boolean => verificable(f)
 
 /**
  * La TERCERA manera de llegar a un objetivo, y es de otra especie que las dos de
@@ -14,7 +20,8 @@ export const mitigado = (f: FindingMemory): boolean => f.lifecycle === 'MITIGATE
  * Aquellas buscan algo que REPARAR y por eso pasan por `vivo` —ACTIVE y
  * abierto—, que rechaza los mitigados con razon: el operador ya dijo que hay un
  * fix, y repararlo otra vez seria inventar trabajo. Esta busca algo que
- * COMPROBAR, y acepta exactamente lo contrario: solo MITIGATED.
+ * COMPROBAR, y acepta exactamente lo contrario: solo MITIGATED —y solo mientras
+ * el operador no lo haya descartado, porque entonces ya dijo que no contaba—.
  *
  * Funcion aparte y no una bandera en la otra. Reparar y verificar son actos
  * distintos, y meterlos en la misma con un `modo` haria que verificar pareciera

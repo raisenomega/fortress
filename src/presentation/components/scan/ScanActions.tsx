@@ -1,4 +1,5 @@
 import type { Project } from '@domain/project/project'
+import { verificable } from '@domain/project/verificable'
 import { pushState } from '@domain/project/push-readiness'
 import { pushProject } from '../../services/push-service'
 import { auditQuality } from '../../services/quality-service'
@@ -47,7 +48,7 @@ export function ScanActions({ project }: ScanActionsProps): React.JSX.Element {
       />
       <BotonVerificarTodos
         projectId={project.id}
-        mitigados={findings.filter((f) => f.lifecycle === 'MITIGATED').length}
+        mitigados={findings.filter(verificable).length}
         disabled={boton === 'detener' || boton === 'ocupado'}
       />
       <AskChatButton projectName={project.name} findings={findings} />

@@ -30,15 +30,22 @@ export function BotonVerificarTodos({
   const hechos = useVerificacionMasivaStore((state) => state.hechos)
   const total = useVerificacionMasivaStore((state) => state.total)
   const verificando = corriendo === projectId
+  // Sin mitigados no hay nada que verificar. Se apaga en vez de ofrecer un clic
+  // que solo sirve para contestar que no hay nada: el (0) ya lo dijo.
+  const sinNada = mitigados === 0 && !verificando
   const confirmar = useConfirmarVerificacion(projectId, verificando, mitigados)
 
   return (
     <>
       <button
         type="button"
-        disabled={disabled || (corriendo !== null && !verificando)}
+        disabled={disabled || sinNada || (corriendo !== null && !verificando)}
         onClick={confirmar.alPulsar}
-        title="Un analista comprueba, uno a uno, si el problema sigue en el codigo"
+        title={
+          sinNada
+            ? 'No hay mitigados que verificar'
+            : 'Un analista comprueba, uno a uno, si el problema sigue en el codigo'
+        }
         className={BOTON}
       >
         <span className={verificando ? 'animate-spin' : ''}>
@@ -52,6 +59,7 @@ export function BotonVerificarTodos({
       {confirmar.preguntando ? (
         <ConfirmVerificarTodos
           mitigados={mitigados}
+          alcance="todos"
           onCancel={confirmar.cerrar}
           onConfirm={confirmar.arrancar}
         />

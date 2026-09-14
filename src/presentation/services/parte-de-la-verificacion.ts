@@ -24,7 +24,11 @@ const LINEAS: ReadonlyArray<readonly [keyof ResultadoVerificacionMasiva, (n: num
   ['extinguidos', (n) => `${n} extinguido${n > 1 ? 's' : ''} -> Historia`],
   ['sinPrueba', (n) => `${n} sin prueba`],
   ['siguenVivos', (n) => `${n} sigue${n > 1 ? 'n' : ''} vivo${n > 1 ? 's' : ''} -> cola`],
-  ['omitidos', (n) => `${n} omitido${n > 1 ? 's' : ''}: ya lo trabaja una propuesta`],
+  [
+    'noMitigados',
+    (n) => `${n} sin verificar: no estaba${n > 1 ? 'n' : ''} mitigado${n > 1 ? 's' : ''}`
+  ],
+  ['yaTrabajados', (n) => `${n} sin verificar: ya lo trabaja una propuesta`],
   ['sinClasificar', (n) => `${n} con un desenlace que no sabemos nombrar`]
 ]
 
@@ -46,7 +50,7 @@ export function parteDeLaVerificacion(r: ResultadoVerificacionMasiva): {
   const { texto: cierre, tono } = CIERRE[r.fin]
   const detalle = r.detalle === undefined ? '' : ` ${r.detalle}`
   const hechos = verificadosDe(r)
-  if (hechos === 0 && r.omitidos === 0) {
+  if (hechos === 0 && r.noMitigados === 0 && r.yaTrabajados === 0) {
     return { texto: `Sin verificar nada de ${r.total}: ${cierre}.${detalle}`, tono }
   }
   return { texto: `Verifique ${hechos} de ${r.total} · ${cierre}. ${reparto(r)}.${detalle}`, tono }

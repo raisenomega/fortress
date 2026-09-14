@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { verificadosDe } from '@domain/repair/verificacion-masiva'
 import { verificarTodos } from './verificar-todos'
 import { banco, deps, mitigado, verificador } from './verificar-todos-fixture'
 
@@ -19,7 +18,8 @@ describe('el parte reparte por desenlace, sin colapsar ninguno', () => {
       extinguidos: 3,
       siguenVivos: 2,
       sinPrueba: 1,
-      omitidos: 0,
+      noMitigados: 0,
+      yaTrabajados: 0,
       sinClasificar: 0
     })
   })
@@ -34,16 +34,6 @@ describe('el parte reparte por desenlace, sin colapsar ninguno', () => {
 
     expect(parte.sinPrueba).toBe(1)
     expect(parte.siguenVivos).toBe(1)
-  })
-
-  it('el que ya trabaja una propuesta va a omitidos, no a verificados', async () => {
-    verificador('extinguido', null, 'sigue_vivo')
-
-    const parte = await verificarTodos(banco(SEIS.slice(0, 3)), 'p1', deps())
-
-    expect(parte).toMatchObject({ omitidos: 1, extinguidos: 1, siguenVivos: 1 })
-    // A ese no lo miro ningun analista: contarlo diria que se verifico.
-    expect(verificadosDe(parte)).toBe(2)
   })
 
   it('un desenlace que no sabemos nombrar se anuncia, no se diluye', async () => {

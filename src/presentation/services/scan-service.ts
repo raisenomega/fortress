@@ -1,17 +1,28 @@
 import { api } from '../adapters/fortress-api'
-import { loadCognition } from './cognition-service'
-import { loadProjects } from './project-service'
-import { refreshSessionUsage } from './telemetry-service'
-import { loadTimeline } from './timeline-service'
+import { reloadAfterScan } from './recarga-tras-escaneo'
 import { useScanStore } from '../stores/scan-store'
+import { useTableroStore } from '../stores/tablero-store'
 
 /** Conteos de todos los proyectos: los pide el tablero al arrancar. */
 export async function loadCounts(): Promise<void> {
   useScanStore.getState().setCounts(await api().scan.counts())
 }
 
+/**
+ * Relee la tabla y PODA la seleccion con lo que vuelve.
+ *
+ * Un extinguido desaparece de la lista y su id se quedaria en el `Set` para
+ * siempre: la barra diria «9 seleccionados» con seis filas delante, y verificar
+ * gastaria corridas en fantasmas. La poda va pegada a la recarga —y no en un
+ * efecto de la vista— porque el hecho es el mismo: la tabla cambio.
+ */
 export async function loadFindings(projectId: string): Promise<void> {
-  useScanStore.getState().setFindings(projectId, await api().scan.findings(projectId))
+  const findings = await api().scan.findings(projectId)
+  useScanStore.getState().setFindings(projectId, findings)
+  useTableroStore.getState().podar(
+    projectId,
+    findings.map((f) => f.id)
+  )
 }
 
 /**
@@ -43,27 +54,5 @@ export async function runScan(projectId: string): Promise<void> {
   } finally {
     unsubscribe()
     await reloadAfterScan(projectId)
-  }
-}
-
-/**
- * Releer despues de un escaneo no puede tumbar el escaneo. Si algo aqui
- * fallara, el resultado ya esta guardado y en pantalla: lo unico que pasa es
- * que alguna cifra se ve vieja hasta el siguiente refresco.
- */
-export async function reloadAfterScan(projectId: string): Promise<void> {
-  try {
-    await Promise.all([
-      loadFindings(projectId),
-      loadCounts(),
-      loadProjects(),
-      refreshSessionUsage(),
-      loadTimeline(projectId),
-      // B2 escribe COGNITION-LOG.md al cerrar el escaneo; sin releerlo, el panel
-      // se queda con el estado vacio de antes hasta cambiar de proyecto.
-      loadCognition(projectId)
-    ])
-  } catch {
-    // Silencio deliberado: el escaneo si termino.
   }
 }

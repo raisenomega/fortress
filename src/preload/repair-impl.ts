@@ -8,6 +8,7 @@ export const repairApi: FortressApi['repair'] = {
   propose: (projectId, findingId) => ipcRenderer.invoke(IPC.repairPropose, projectId, findingId),
   verify: (projectId, findingId) => ipcRenderer.invoke(IPC.findingVerify, projectId, findingId), // prettier-ignore
   verifyAll: (projectId) => ipcRenderer.invoke(IPC.findingVerifyAll, projectId),
+  verifySelected: (projectId, ids) => ipcRenderer.invoke(IPC.findingVerifySelected, projectId, ids), // prettier-ignore
   verifyAllStop: (projectId) => ipcRenderer.invoke(IPC.findingVerifyAllStop, projectId),
   list: (projectId) => ipcRenderer.invoke(IPC.repairList, projectId),
   cerco: (projectId) => ipcRenderer.invoke(IPC.repairCerco, projectId),

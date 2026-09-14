@@ -1,4 +1,5 @@
 import type { DesenlaceDeVerificacion } from './dictamen-de-verificacion'
+import type { MotivoDeOmision } from './motivo-de-omision'
 import type { RepartoDeVerificacion } from './verificacion-masiva'
 
 /**
@@ -30,15 +31,34 @@ export function casillaDelDesenlace(desenlace: string): keyof RepartoDeVerificac
   return CASILLA[desenlace as DesenlaceDeVerificacion] ?? 'sinClasificar'
 }
 
-/**
- * Suma un mitigado atendido al reparto. `null` es el que no habia que verificar
- * —una propuesta viva ya lo trabaja— y tiene casilla propia: contarlo como
- * verificado diria que un analista lo miro, y no lo miro nadie.
- */
+/** La otra tabla, y por la misma razon: dos motivos, dos casillas, y un tercero
+ *  no compilaria hasta que alguien dijera donde va. */
+const CASILLA_DE_OMISION: Record<MotivoDeOmision, keyof RepartoDeVerificacion> = {
+  'no-mitigado': 'noMitigados',
+  'ya-trabajado': 'yaTrabajados'
+}
+
+const sumar = (
+  reparto: RepartoDeVerificacion,
+  casilla: keyof RepartoDeVerificacion
+): RepartoDeVerificacion => ({ ...reparto, [casilla]: reparto[casilla] + 1 })
+
+/** Suma un hallazgo VERIFICADO: un analista lo miro y dictamino. */
 export function sumarDesenlace(
   reparto: RepartoDeVerificacion,
-  desenlace: string | null
+  desenlace: string
 ): RepartoDeVerificacion {
-  const casilla = desenlace === null ? 'omitidos' : casillaDelDesenlace(desenlace)
-  return { ...reparto, [casilla]: reparto[casilla] + 1 }
+  return sumar(reparto, casillaDelDesenlace(desenlace))
+}
+
+/**
+ * Suma uno que NO se verifico. Funcion aparte de la anterior y no un `null` en
+ * su argumento: son dos hechos distintos —«lo miraron y dijo esto» contra «no
+ * habia nada que mirar»— y el tipo lo dice antes que el comentario.
+ */
+export function sumarOmision(
+  reparto: RepartoDeVerificacion,
+  motivo: MotivoDeOmision
+): RepartoDeVerificacion {
+  return sumar(reparto, CASILLA_DE_OMISION[motivo])
 }

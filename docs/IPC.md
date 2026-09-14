@@ -116,6 +116,7 @@ Escaneo de seguridad con agentes reales.
 | `scan:unmitigate` | R/R | findingId → Result<null> (deshace la marca) | solo desde MITIGATED |
 | `finding:verify` | R/R | (projectId, findingId) → Result<DictamenDeVerificación \| null> (el analista lee el fichero y dictamina; NO crea propuesta) | guardRun; solo desde MITIGATED |
 | `finding:verify-all` | R/R | projectId → ResultadoVerificaciónMasiva (TODOS los mitigados, uno detrás de otro; lista fija al arrancar, sin tope dentro, cobertura declarada al cerrar) | guardRun |
+| `finding:verify-selected` | R/R | (projectId, ids[]) → ResultadoVerificaciónMasiva (las que el operador marcó; mismo motor y mismo Detener, sólo cambia quién decide la lista) | guardRun |
 | `finding:verify-all-stop` | R/R | projectId → number (detiene el barrido: el mitigado en curso termina, el siguiente no arranca) | — |
 | `scan:historia` | R/R | projectId → FindingHistoria[] (lo CERRADO, con de qué murió cada uno; lo reciente arriba y lo que no se resolvió al final) | — |
 | `scan:progress` | PUSH | ScanChunk (avance del escaneo) | — |
