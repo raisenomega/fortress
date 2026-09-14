@@ -230,10 +230,11 @@ todos los proyectos.
 
 ## Lo que NO cubre este modelo
 
-- La forma de la raíz que el operador registra a mano: se exige que sea
-  absoluta, pero un `..` intermedio solo se rechaza en el alta de proyecto
-  nuevo, y ningún symlink de esa raíz se resuelve antes de guardarla. Queda
-  asentado como límite conocido, no como garantía.
+- La forma de la raíz registrada: todas las puertas de registro la exigen
+  absoluta y sin segmentos `..`, pero no se normaliza más allá del recorte
+  —esa cadena es la identidad del proyecto— y ningún symlink de esa raíz se
+  resuelve antes de guardarla. Queda asentado como límite conocido, no como
+  garantía.
 - Compromiso del sistema operativo del usuario.
 - Ataque físico al equipo.
 - Ingeniería social contra el operador.
