@@ -12,12 +12,20 @@ interface FilaDeSeveridadProps {
   readonly onElegir: (valor: FiltroDeSeveridad) => void
 }
 
-/** El eje de CUANTO URGE. Las cuentas llegan ya cruzadas con el otro eje. */
+/** El eje de CUANTO URGE. Las cuentas llegan ya cruzadas con el otro eje.
+ *
+ *  Se anuncia como GRUPO porque los dos ejes van en un solo flujo: la raya que
+ *  los separa es decorativa (`aria-hidden`), asi que sin esto un lector de
+ *  pantalla oiria nueve botones seguidos sin saber que son dos preguntas. */
 export function FilaDeSeveridad(props: FilaDeSeveridadProps): React.JSX.Element {
   const { activo, cuentas, total, onElegir } = props
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div
+      role="group"
+      aria-label="Filtrar por severidad"
+      className="flex flex-wrap items-center gap-1.5"
+    >
       <ChipDeFiltro
         activo={activo === TODAS}
         cuenta={total}

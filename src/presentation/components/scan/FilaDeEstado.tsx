@@ -12,12 +12,19 @@ interface FilaDeEstadoProps {
   readonly onElegir: (valor: FiltroDeEstado) => void
 }
 
-/** El eje de EN QUE PUNTO ESTA. «Mitigados» es el que lleva a lo verificable. */
+/** El eje de EN QUE PUNTO ESTA. «Mitigados» es el que lleva a lo verificable.
+ *
+ *  Grupo propio por lo mismo que su hermano: compartir linea no puede costar la
+ *  distincion entre los dos ejes, que es justo lo que hace util el cruce. */
 export function FilaDeEstado(props: FilaDeEstadoProps): React.JSX.Element {
   const { activo, cuentas, total, onElegir } = props
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div
+      role="group"
+      aria-label="Filtrar por estado"
+      className="flex flex-wrap items-center gap-1.5"
+    >
       <ChipDeFiltro
         activo={activo === TODAS}
         cuenta={total}
