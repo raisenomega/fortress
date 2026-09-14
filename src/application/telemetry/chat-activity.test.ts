@@ -24,9 +24,23 @@ describe('chatActivity', () => {
   })
 
   it('recorta prompts largos: el timeline es un indice, no un archivo', () => {
-    const largo = 'a'.repeat(300)
+    // 'x' y no 'a': una tira hexadecimal se tacharia entera y no se recortaria nada.
+    const largo = 'x'.repeat(300)
     const [entry] = chatActivity('p1', null, 'api', largo, outcome())
     expect(entry.summary.length).toBeLessThan(120)
+    expect(entry.summary).toContain('…')
+  })
+
+  it('tacha el token que el operador pega en el prompt', () => {
+    const prompt = 'usa GITHUB_TOKEN=ghp_abcdefghij1234567890 para el push'
+    const [entry] = chatActivity('p1', null, 'api', prompt, outcome())
+    expect(entry.summary).toBe('usa GITHUB_*** para el push (solo texto)')
+  })
+
+  it('tacha antes de recortar: un secreto en el borde no queda a medias', () => {
+    const hex = '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b'
+    const [entry] = chatActivity('p1', null, 'api', `${'x'.repeat(57)} ${hex}`, outcome())
+    expect(entry.summary).toBe(`${'x'.repeat(57)} *** (solo texto)`)
   })
 
   it('colapsa saltos de linea del prompt', () => {
