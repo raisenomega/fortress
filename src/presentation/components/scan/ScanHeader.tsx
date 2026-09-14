@@ -1,10 +1,8 @@
 import type { Project } from '@domain/project/project'
 import { scanStatus } from '@domain/project/scan-status'
 import { formatDuration, formatMoment } from '../../format/time'
-import { useProjectCounts } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
 import { ScoreGauge } from '../dashboard/ScoreGauge'
-import { CountsStrip } from './CountsStrip'
 import { ScanActions } from './ScanActions'
 
 interface ScanHeaderProps {
@@ -20,7 +18,6 @@ function describeLastScan(project: Project, durationMs: number | null): string {
 }
 
 export function ScanHeader({ project }: ScanHeaderProps): React.JSX.Element {
-  const counts = useProjectCounts(project.id)
   const summary = useScanStore((state) => state.lastSummary)
   const enCurso = useScanStore((state) => state.runningProjectId) === project.id
   const scanned = scanStatus(project) !== 'sin-escanear'
@@ -38,7 +35,6 @@ export function ScanHeader({ project }: ScanHeaderProps): React.JSX.Element {
         </p>
       </div>
 
-      <CountsStrip counts={counts} scanned={scanned} />
       <ScanActions project={project} />
     </header>
   )

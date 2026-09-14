@@ -31,8 +31,10 @@ export interface RepartoDeVerificacion {
   readonly sinPrueba: number
   /** El problema sigue: se les retira la marca y vuelven a la cola del motor. */
   readonly siguenVivos: number
-  /** No habia nada que verificar: una propuesta viva ya lo esta trabajando. */
-  readonly omitidos: number
+  /** No estaba mitigado: verificar no le aplica y no se gasto nada en el. */
+  readonly noMitigados: number
+  /** Mitigado, pero una propuesta viva ya lo tiene cogido. */
+  readonly yaTrabajados: number
   /** Desenlace fuera del vocabulario. Se anuncia a proposito: uno que no
    *  sabemos nombrar tiene que verse, no diluirse en la casilla de al lado. */
   readonly sinClasificar: number
@@ -42,7 +44,8 @@ export const NADA_VERIFICADO: RepartoDeVerificacion = {
   extinguidos: 0,
   sinPrueba: 0,
   siguenVivos: 0,
-  omitidos: 0,
+  noMitigados: 0,
+  yaTrabajados: 0,
   sinClasificar: 0
 }
 
@@ -59,7 +62,8 @@ export interface ResultadoVerificacionMasiva extends RepartoDeVerificacion {
  * Un contador propio al lado de las casillas es un segundo sitio donde la cuenta
  * puede quedarse vieja, y entonces la cobertura declarada dejaria de ser verdad.
  *
- * Los omitidos no cuentan: a esos no los miro ningun analista.
+ * Los omitidos —de los dos tipos— no cuentan: a esos no los miro ningun
+ * analista, y sumarlos diria que se verificaron.
  */
 export function verificadosDe(reparto: RepartoDeVerificacion): number {
   return reparto.extinguidos + reparto.sinPrueba + reparto.siguenVivos + reparto.sinClasificar

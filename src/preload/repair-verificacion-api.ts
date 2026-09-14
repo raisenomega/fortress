@@ -22,7 +22,11 @@ export interface VerificacionApi {
    * error, es un freno del sistema haciendo su trabajo.
    */
   verifyAll(projectId: string): Promise<ResultadoVerificacionMasiva>
-  /** Detiene el barrido. El mitigado en curso termina y queda escrito; el
-   *  siguiente no arranca. Una parada no es un fallo. */
+  /** Las que el operador marco a mano. Mismo motor, mismo Detener; lo unico que
+   *  cambia es quien decide la lista. Un id que no este mitigado no fuerza nada:
+   *  cae en su casilla del parte y no gasta corrida. */
+  verifySelected(projectId: string, ids: readonly string[]): Promise<ResultadoVerificacionMasiva>
+  /** Detiene el barrido, venga de la puerta que venga: detras hay un unico
+   *  carril. El que corre termina y queda escrito; el siguiente no arranca. */
   verifyAllStop(projectId: string): Promise<number>
 }

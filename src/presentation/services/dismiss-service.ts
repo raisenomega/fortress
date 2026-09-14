@@ -1,5 +1,5 @@
 import { api } from '../adapters/fortress-api'
-import { reloadAfterScan } from './scan-service'
+import { reloadAfterScan } from './recarga-tras-escaneo'
 
 /**
  * Descartar cambia el score y puede desbloquear un push, asi que despues hay

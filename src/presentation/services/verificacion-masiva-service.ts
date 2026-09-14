@@ -1,8 +1,10 @@
+import type { ResultadoVerificacionMasiva } from '@domain/repair/verificacion-masiva'
 import { api } from '../adapters/fortress-api'
 import { parteDeLaVerificacion } from './parte-de-la-verificacion'
-import { loadCounts, loadFindings } from './scan-service'
-import { loadProjects } from './project-service'
+import { loadFindings } from './scan-service'
 import { notify, reportError } from '../stores/toast-store'
+import { releerTrasElBarrido } from './recarga-tras-barrido'
+import { useTableroStore } from '../stores/tablero-store'
 import { useVerificacionMasivaStore } from '../stores/verificacion-masiva-store'
 
 /**
@@ -15,7 +17,21 @@ import { useVerificacionMasivaStore } from '../stores/verificacion-masiva-store'
  * desde el arranque. Un canal de progreso nuevo habria sido una cuarta copia del
  * mismo hecho.
  */
-export async function verificarTodosLosMitigados(projectId: string, total: number): Promise<void> {
+export function verificarTodosLosMitigados(projectId: string, total: number): Promise<void> {
+  return barrer(projectId, total, () => api().repair.verifyAll(projectId))
+}
+
+/** Las que el operador marco. Mismo barrido, misma barra, mismo parte: lo unico
+ *  que cambia es la lista, y de eso ya se encarga el main. */
+export function verificarSeleccionadas(projectId: string, ids: readonly string[]): Promise<void> {
+  return barrer(projectId, ids.length, () => api().repair.verifySelected(projectId, ids))
+}
+
+async function barrer(
+  projectId: string,
+  total: number,
+  lanzar: () => Promise<ResultadoVerificacionMasiva>
+): Promise<void> {
   if (useVerificacionMasivaStore.getState().projectId !== null) return
 
   useVerificacionMasivaStore.getState().arrancar(projectId, total)
@@ -26,7 +42,7 @@ export async function verificarTodosLosMitigados(projectId: string, total: numbe
   })
 
   try {
-    const { texto, tono } = parteDeLaVerificacion(await api().repair.verifyAll(projectId))
+    const { texto, tono } = parteDeLaVerificacion(await lanzar())
     if (tono === 'error') reportError(texto)
     else notify(texto, tono)
   } catch (error) {
@@ -34,21 +50,12 @@ export async function verificarTodosLosMitigados(projectId: string, total: numbe
   } finally {
     unsubscribe()
     useVerificacionMasivaStore.getState().terminar()
+    // La seleccion era «lo que voy a hacer», no «lo que hice». Los extinguidos
+    // se podan solos al salir de la tabla, pero los `sin_prueba` siguen
+    // MITIGADOS y seguirian marcados: la barra quedaria armada para regastar
+    // sobre los mismos que acaban de contestar que no se pudo comprobar.
+    useTableroStore.getState().limpiar(projectId)
     await releerTrasElBarrido(projectId)
-  }
-}
-
-/**
- * Releer despues del barrido no puede tumbar el barrido: lo verificado ya esta
- * en la base y el parte en pantalla. El score se toca —los extinguidos salen del
- * expediente y los que siguen vivos vuelven a la cola—, asi que la lista de
- * proyectos tambien queda vieja, no solo la tabla.
- */
-async function releerTrasElBarrido(projectId: string): Promise<void> {
-  try {
-    await Promise.all([loadFindings(projectId), loadCounts(), loadProjects()])
-  } catch {
-    // Silencio deliberado: el barrido si termino.
   }
 }
 

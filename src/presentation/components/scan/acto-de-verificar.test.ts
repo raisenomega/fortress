@@ -1,4 +1,8 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+
+const BOTON = join(process.cwd(), 'src/presentation/components/scan/BotonVerificarTodos.tsx')
 // prettier-ignore
 import { actoDeVerificar, avisosDeLaVerificacion, costeEstimado, duracionEstimada } from './acto-de-verificar'
 
@@ -9,8 +13,12 @@ describe('el gasto se autoriza, no se dispara con un clic', () => {
     expect(actoDeVerificar(false, 26)).toBe('preguntar')
   })
 
-  it('parado y sin mitigados: lo dice, no arranca un barrido sin a quien atender', () => {
+  it('parado y sin mitigados: el boton se apaga, no ofrece un clic vacio', () => {
+    // El (0) ya lo dijo; un clic que solo sirve para contestar «no hay nada» es
+    // peor affordance que un boton apagado con su razon en el title.
     expect(actoDeVerificar(false, 0)).toBe('nada-que-verificar')
+    expect(readFileSync(BOTON, 'utf8')).toContain('No hay mitigados que verificar')
+    expect(readFileSync(BOTON, 'utf8')).toMatch(/disabled=\{disabled \|\| sinNada/)
   })
 
   it('verificando: el mismo boton para, y parar no depende de cuantos queden', () => {

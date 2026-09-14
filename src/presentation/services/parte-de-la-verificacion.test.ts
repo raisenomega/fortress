@@ -8,7 +8,8 @@ const parte = (over: Partial<ResultadoVerificacionMasiva>): ResultadoVerificacio
   extinguidos: 0,
   sinPrueba: 0,
   siguenVivos: 0,
-  omitidos: 0,
+  noMitigados: 0,
+  yaTrabajados: 0,
   sinClasificar: 0,
   ...over
 })
@@ -45,7 +46,9 @@ describe('la cobertura declarada del barrido', () => {
     expect(parteDeLaVerificacion(roto)).toMatchObject({ tono: 'error' })
     expect(parteDeLaVerificacion(roto).texto).toContain('el CLI no arranca')
   })
+})
 
+describe('el parte solo nombra lo que paso', () => {
   it('las casillas vacias no se nombran: un parte lleno de ceros no se lee', () => {
     const { texto } = parteDeLaVerificacion(parte({ extinguidos: 26 }))
 
@@ -54,9 +57,18 @@ describe('la cobertura declarada del barrido', () => {
   })
 
   it('el omitido no cuenta como verificado: a ese no lo miro nadie', () => {
-    const { texto } = parteDeLaVerificacion(parte({ fin: 'detenido', extinguidos: 1, omitidos: 1 }))
+    const r = parte({ fin: 'detenido', extinguidos: 1, yaTrabajados: 1 })
 
-    expect(texto).toContain('Verifique 1 de 26')
-    expect(texto).toContain('1 omitido: ya lo trabaja una propuesta')
+    expect(parteDeLaVerificacion(r).texto).toContain('Verifique 1 de 26')
+    expect(parteDeLaVerificacion(r).texto).toContain('1 sin verificar: ya lo trabaja una propuesta')
+  })
+
+  it('los dos motivos de omision NO se funden: uno no aplicaba, el otro esta cogido', () => {
+    // Con una sola casilla, seleccionar a mano un hallazgo no mitigado se
+    // anunciaba como «ya lo trabaja una propuesta»: falso sobre algo intacto.
+    const { texto } = parteDeLaVerificacion(parte({ noMitigados: 2, yaTrabajados: 1 }))
+
+    expect(texto).toContain('2 sin verificar: no estaban mitigados')
+    expect(texto).toContain('1 sin verificar: ya lo trabaja una propuesta')
   })
 })
