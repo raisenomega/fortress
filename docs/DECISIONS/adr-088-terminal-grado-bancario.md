@@ -1,0 +1,376 @@
+# ADR-088: El Terminal es grado bancario: resuelve cualquier hallazgo sin topes de reparación, y cierra en Historia
+
+- **Fecha:** 2026-09-14
+- **Estado:** Aceptada
+- **Área:** Terminal · Ciclo de vida del hallazgo · Seguridad
+
+## Alcance
+
+**Este ADR decide SOLO sobre el Terminal del cliente**: la vista `chat`,
+rotulada «Terminal» (la conversación, los workflows y la entrevista de
+configuración, que comparten el agente de `buildChatEngines`).
+
+Queda **fuera de alcance, explícitamente**:
+
+- **El Motor de reparación en proyectos de cliente.** El Motor es de FORTRESS
+  reparándose a sí misma; que hoy se pueda operar sobre repos ajenos es un arco
+  futuro, con su propia decisión (deuda `motor-expuesto-en-proyectos-ajenos`).
+  **Aquí no se cambia nada del Motor**: ni DEBUT, ni sus topes, ni sus frenos,
+  ni su cola.
+- **El loop de mailbd-main**, encendido hoy. No se toca aquí.
+- **El Terminal sobre el repo propio.** Sigue en supervisado: los cambios en el
+  código de FORTRESS pasan por el Motor, con firma (`SELF_REPO_SUPERVISED`).
+- **Las degradaciones que no son de severidad.** Un proyecto sin confianza (el
+  Terminal no ejecuta código ajeno sin ella) y un proyecto sin git (ADR-079: sin
+  red no se escribe) siguen degradando a supervisado. Lo que cambia es que dejan
+  de ser mudas (Decisión 5).
+- **El paro de los workflows ante un CRITICAL** (`run-workflow.ts:65`). Queda
+  como deuda (`workflow-del-terminal-para-en-critical`); no se decide aquí.
+
+## Contexto
+
+### La doctrina de los dos mundos
+
+El 2026-09-14 el operador declaró la doctrina de producto (texto completo en
+`internal/DOCTRINA-PRODUCTO.md`, fuera del repositorio público):
+
+- **Mundo CLIENTE** — Escaneo · Terminal · Historial · Documentación ·
+  Superficie externa · Configuración. Flujo: escaneo profundo → **el Terminal
+  resuelve TODO, sin topes y sin límite por severidad** (CRITICAL y HIGH
+  incluidos) → el hallazgo aterriza en Historia. **Nada se queda en Escaneo.**
+- **Mundo FORTRESS-sobre-sí-misma** — Motor de reparación · Auto-mejora ·
+  Génesis · Cognición. El Motor existe para que FORTRESS se repare **sin tocar su
+  binario vivo**, y todos sus frenos (DEBUT, firma, `loopBlocked`, topes) existen
+  por eso. **DEBUT es correcto en el Motor y no aplica al Terminal.**
+
+La objeción «FORTRESS se queda a mitad en los críticos» miraba el Motor. El
+cliente usa el Terminal. Este ADR hace que el Terminal cumpla lo que la doctrina
+le pide.
+
+### Lo que el Terminal hace hoy (medido en `main@4dc26e8`)
+
+**Tres topes, y dos de ellos tiran trabajo pagado.**
+
+| Tope | Dónde | Qué pasa al saltar |
+|---|---|---|
+| Reloj de 15 min | `TECHO_POR_DEFECTO` (`run-claude-process.ts:12`). `buildChatEngines` no pasa `techoMs`. | Solo manda SIGTERM. El turno sale `failed` |
+| Por ejecución ($50 hoy, $3 por defecto) | `--max-budget-usd` (`claude-cli.ts:34`), global | El CLI cierra con `subtype != success` → `failed` (`stream-events.ts:55`) |
+| Diario ($500 hoy) | `guardRun` → `topeDiarioAlcanzado` (`run-guard.ts:21-45`), global | Impide **empezar** un turno; nunca corta uno en curso |
+
+Un turno autónomo va dentro de la red de ADR-079 (`con-red-de-reversion.ts`):
+**cuando sale `failed` se revierte entero**. Así que el reloj y el tope por
+ejecución no dejan un arreglo a medias: **lo tiran, ya pagado.**
+
+**Un freno por severidad, secreto.** En autónomo, `effectiveMode`
+(`modo-efectivo.ts`) degrada a supervisado si la **petición** nombra un área
+protegida (`protected-areas.ts:9-13`: auth, login, sesión, contraseña, pago,
+checkout, rls, permiso, política, seguridad, secreto, token, clave, cifrado…).
+Supervisado es `--permission-mode plan` (`permission-mode.ts:25`): **no puede
+escribir**. Tres defectos:
+
+- Filtra por **palabras del prompt, no por ficheros**. «Limpia el código muerto»
+  puede editar ficheros de auth sin freno, y «revisa la política de caché»
+  degrada por error.
+- Es **mudo**: `avisoDeDegradacion` solo avisa del repo propio y de la falta de
+  git (`operation-mode.ts`).
+- **No tiene salida**: no hay «aprobar y aplicar».
+
+Un CRITICAL casi siempre vive en esas áreas, así que pedirlo por su nombre lo
+deja en solo lectura. La regla viene del CLAUDE.md universal («en modo autónomo
+NUNCA tocar auth, payments, RLS ni seguridad sin pasar a supervisado») y el
+agente la lleva además en su propio prompt (`MODE_INSTRUCTION`,
+`operation-mode.ts`). **La intención es legítima; la implementación estorba.**
+
+**No sabe qué hallazgo resuelve.** El mensaje lleva `projectId`, `prompt`,
+`mode` y `excludedAgents` (`send-message-types.ts`). Los hallazgos le llegan
+como hasta 40 líneas de texto sin id (`known-findings.ts`). El único puente
+desde Escaneo es «Preguntar al Terminal», un botón global que pide explicar.
+
+**No cierra el ciclo.** El Terminal no escribe el ciclo de vida. Desde ADR-087
+el reescaneo no extingue por ausencia (`domain/scan/ausencia.ts`), y Historia es
+solo `EXTINCT` (`finding-historia-sql.ts`). Hoy, un arreglo hecho en el Terminal
+deja el hallazgo `ACTIVE` en Escaneo. Cerrarlo exige tres pasos:
+
+1. El operador lo marca a mano como arreglado.
+2. Pulsa Verificar.
+3. El analista, si prueba la ausencia, lo extingue.
+
+**El modelo lo decide una palabra.** `routeToAgent` (`agent-router.ts`)
+siempre elige un agente por palabras clave, y su modelo sale del catálogo
+(ADR-078). «Bug» va a code-reviewer (Sonnet) y «limpia» a refactor-cleaner
+(Haiku). **Un CRITICAL descrito como «bug» lo arregla Sonnet.**
+
+**No tiene memoria.** Cada mensaje es un `claude -p` nuevo, sin `--resume`:
+«propón» y después «aplícalo» son dos sesiones que no se conocen.
+
+## Decisión
+
+Seis piezas, **de la más barata a la más cara**. Cada una lleva su marca:
+**Libre** si no toca ningún fichero de la lista innegociable, **Innegociable**
+si la toca.
+
+### 1. Sin techo de tiempo — *Libre*
+
+El Terminal pasa a **`SIN_TECHO`, con el molde exacto del escaneo**.
+`armar-escaneo.ts:39` pasa `SIN_TECHO` como sexto parámetro de
+`createClaudeCodeAgent`; `buildChatEngines` (`chat-engines.ts:16-32`) hará lo
+mismo. Cubre conversación, workflows y entrevista, porque comparten el agente.
+Build, Génesis, los borradores de agente y los episodios de capacidad
+**conservan sus 15 minutos**.
+
+**La única red es Detener**, como en el escaneo: `chat:stop` → `cancelRun` →
+`killChildrenOf`, con SIGTERM y SIGKILL a los 3 s (`child-registry.ts`). El
+reloj solo mandaba SIGTERM, que un proceso colgado de verdad ignora.
+
+Esto **enmienda la Enmienda 3 de ADR-082**, que escribió que el chat conservaba
+su reloj. Ver su Enmienda 4.
+
+### 2. El Terminal sabe qué hallazgo resuelve — *Libre*
+
+- El mensaje del Terminal gana un **`findingId` opcional**
+  (`SendMessageInput` y el canal `chat:send`, que lo valida en el main).
+- Un turno con `findingId` es un **turno de resolución**. Su prompt lleva ese
+  hallazgo **completo** (fichero, línea, tipo, símbolo, título y evidencia del
+  escaneo) en lugar de la lista de 40.
+- **«Resolver en Terminal»** es una acción de cada fila del tablero de Escaneo:
+  abre el Terminal con el hallazgo fijado.
+- El chat libre sigue existiendo, sin `findingId`, como hoy.
+
+### 3. El cierre del ciclo, hasta Historia — *Libre*
+
+**No se reusa (A) tal cual.** (A) es parte de la máquina de estados de las
+propuestas del Motor, y ADR-087 (Decisión 3) prohíbe abrir propuestas que no
+quieren reparar. Se reusan **sus dos piezas**, que ya existen:
+
+1. **Marcar.** Al terminar un turno de resolución **verde** (la red de ADR-079
+   lo conservó y hubo ediciones), el hallazgo pasa a `MITIGATED` con
+   `markMitigatedFinding` (`dismiss-finding.ts:30`).
+2. **Verificar.** Acto seguido se lanza `verificarMitigado` (ADR-087): un
+   analista independiente, de solo lectura, que tiene que **probar** que el
+   problema ya no está. Se lanza como corrida propia, cuando el turno suelta el
+   carril.
+
+**La nota del mitigado NO lleva sha.** El Terminal no hace commit: el checkpoint
+transitorio se retira con `reset --soft` y deja las ediciones sin commit en el
+árbol, para que el operador las revise y las integre. La nota cita **el turno**
+(el id del mensaje del Terminal que lo cerró) y **los ficheros tocados** (los
+`edits` del turno). Por ejemplo: *«arreglado por el Terminal · turno `<id>` ·
+ficheros: `api/checkout.ts`, `api/checkout.test.ts`»*.
+
+**`extinguido_por` gana el valor `terminal`.** Hoy solo admite `agente` y
+`operador` (`extinguido-por.ts`). La verificación que dispara el Terminal
+extingue con `terminal`, para que Historia diga con honestidad qué vía cerró el
+hallazgo. La columna es `TEXT` sin restricción: basta con ampliar el vocabulario
+del dominio y pasar el valor por la vía de verificación.
+
+**Los tres desenlaces, y ninguno miente:**
+
+| La verificación dice | El hallazgo | Dónde se ve |
+|---|---|---|
+| El problema ya no está, **con prueba** | `EXTINCT`, `juicio_obsoleto`, `extinguido_por = terminal` | **Historia** (clase «verificado») |
+| No puede probar la ausencia | Sigue `MITIGATED`, con la nota **«arreglado por el Terminal, sin prueba»** | Escaneo, visible y re-verificable |
+| El problema **sigue** | Vuelve a `ACTIVE` con el dictamen del analista | Escaneo, en la cola |
+
+**«Todo aterriza en Historia» se afina con ADR-087.** Lo que no se puede probar
+**no se manda a Historia fingiendo**: sería la mentira que ADR-065 y ADR-087
+vinieron a impedir. Nada se queda en Escaneo **sin decir por qué**.
+
+La verificación es la de ADR-087, que ya es un gesto del mundo cliente (su botón
+vive en Escaneo). Que por dentro use el analista del motor no la convierte en
+Motor: no propone, no integra y no pasa por DEBUT.
+
+Se corrige también el texto del modal de mitigar (`ConfirmMitigado.tsx:45`):
+dice que «lo confirma un escaneo», y desde ADR-087 lo confirma la verificación.
+
+### 4. Opus fijo y memoria por hallazgo — *Libre*
+
+- **Un turno de resolución corre siempre con Opus**, sin pasar por el reparto
+  por palabras de `routeToAgent`. El chat libre conserva el router. Se decide
+  **un modelo fijo para resolver**, no subir de nivel a cada agente del
+  catálogo.
+- **Memoria por hallazgo.** Se captura el `session_id` que el CLI emite en su
+  stream y los siguientes turnos sobre ese mismo hallazgo se lanzan con
+  `--resume`. Así «propón» y «aplícalo» son la misma conversación.
+- **`--resume` se añade en `claude-code-agent.ts`, NO en `buildArgs`**:
+  `claude-cli.ts` es innegociable, y esta pieza no lo necesita.
+
+### 5. El freno de severidad se SUSTITUYE, no se elimina — *Innegociable*
+
+Quitarlo a pelo perdería su intención: un cambio que afloja un control de auth
+**compila en verde**, y el typecheck de la red de ADR-079 no lo detectaría. Se
+sustituye por un control que protege de verdad y no deja el turno sin salida:
+
+1. **No se degrada por severidad.** Un turno autónomo que nombra un área
+   protegida **edita**, dentro de la red de ADR-079, en lugar de caer a `plan`.
+2. **Revisión del diff antes de conservar.** Cuando el turno toca terreno
+   protegido, **antes de conservar el checkpoint**, un **revisor de seguridad
+   Opus** lee el diff. Es independiente del agente que editó y trabaja en solo
+   lectura. Si **aprueba**, el turno se conserva y sigue el cierre de la
+   Decisión 3. Si **rechaza**, se revierte y el operador ve sus razones; el
+   hallazgo no se marca. Si el revisor **no puede dictaminar** (falla, no
+   arranca), se revierte: **falla cerrado**.
+3. **La señal pasa a ser lo que el turno HIZO, no solo lo que se PIDIÓ.** Se
+   revisa si la petición nombra un área protegida **o si alguno de los ficheros
+   del diff la nombra en su ruta**. Esto cierra el falso negativo de hoy
+   («limpia el código muerto» que toca auth sin que nadie mire).
+4. **Ninguna degradación es muda.** Las que se quedan (proyecto sin confianza,
+   sin git, repo propio) se anuncian siempre, con su porqué.
+5. **`MODE_INSTRUCTION` cambia a la vez.** Si no, el agente se frenaría solo por
+   su prompt, que hoy le ordena no tocar seguridad en autónomo.
+
+Toca `protected-areas.ts` y `modo-efectivo.ts`, que son **innegociables**, y
+este ADR es su autorización. `permission-mode.ts` y `safe-commands.ts` (también
+innegociables) **no se tocan**: la traducción del modo y la allowlist no
+cambian. El fichero nuevo que decida conservar o revertir según el revisor es
+una defensa, así que **entra en la lista innegociable en el mismo commit que lo
+crea**, no después (la regla que ADR-082 ya fijó para partir `scan-handlers`).
+
+### 6. Dinero: fuera el tope por ejecución; el diario se queda como red de cartera
+
+**Se quita el tope POR EJECUCIÓN del Terminal** — *Libre*. La doctrina dice que
+el Terminal no lleva topes de reparación, y el dato dice que ese tope, al
+saltar, revierte trabajo ya pagado. `buildChatEngines` pasará el presupuesto con
+`perRun: 0`, y `buildArgs` omite `--max-budget-usd` cuando vale 0
+(`claude-cli.ts:34`, que no se toca). El resto de caminos conservan su tope por
+ejecución, **escaneo incluido**: ADR-082 Enm. 3 lo quiso así («el dinero se
+acota, el tiempo no»). Para el Terminal esta decisión va más allá de ese molde,
+y lo hace a propósito.
+
+**Se queda el tope DIARIO, como única red de cartera del Terminal.** Es
+cartera, no freno:
+
+- no mira severidades;
+- no corta ningún turno en curso;
+- solo impide **empezar** otro cuando el gasto del día pasó la cifra que el
+  operador fijó en Configuración.
+
+Vive en `run-guard.ts`, **innegociable**. Esta decisión **lo deja como está** —el
+Terminal sigue pasando por `guardRun`— y lo ratifica como la red de cartera del
+Terminal. Por tratarse de un innegociable, aunque sea para no cambiarlo, queda
+**ratificada con la firma del operador**.
+
+#### Riesgo aceptado, escrito para que conste
+
+Sin reloj (Decisión 1) y sin tope por ejecución, **un turno del Terminal que se
+desboque puede gastar sin límite hasta que el operador pulse Detener.** El tope
+diario no lo corta: solo impide empezar el siguiente. La red contra ese
+accidente es la misma que ADR-082 Enm. 2 aceptó para el escaneo: **el operador,
+que está delante**. El Terminal es interactivo por definición: se lanza y se
+mira. Es decisión deliberada del operador, con cuenta Max y criterio propio. Se
+escribe aquí porque un riesgo aceptado a sabiendas y anotado no es lo mismo que
+un riesgo que nadie vio.
+
+### Las seis piezas, de un vistazo
+
+| # | Pieza | Ficheros principales | Marca |
+|---|---|---|---|
+| 1 | Sin techo de tiempo | `chat-engines.ts` (+ enmienda de ADR-082) | **Libre** |
+| 2 | `findingId` + «Resolver en Terminal» | `send-message-types.ts`, handler de `chat:send`, `chat-prompt.ts`, acciones de fila de Escaneo | **Libre** |
+| 3 | Cierre del ciclo hasta Historia | la vía del turno (`con-red-de-reversion.ts`), `dismiss-finding.ts`, `verificar-mitigado.ts`, `extinguido-por.ts`, `ConfirmMitigado.tsx` | **Libre** |
+| 4 | Opus fijo + memoria por hallazgo | `reply-from-chat.ts` / router, `claude-code-agent.ts` | **Libre** |
+| 5 | Sustituir el freno de severidad | `protected-areas.ts`, `modo-efectivo.ts`, `operation-mode.ts`, revisor nuevo (entra en la lista) | **Innegociable** |
+| 6 | Sin tope por ejecución; el diario, ratificado | `chat-engines.ts` (y `run-guard.ts` sin cambios) | Por ejecución: **Libre**. Diario: **Innegociable** (se ratifica, no se cambia) |
+
+## Orden de construcción
+
+| Fase | Piezas | Por qué en ese orden |
+|---|---|---|
+| **1** | **1 y 2** | Las más baratas y libres. Quitar el reloj deja de tirar trabajo pagado desde el primer día, y el `findingId` es la base de todo lo demás |
+| **2** | **3 y 4** | El cierre necesita saber qué hallazgo se resolvió (pieza 2). Opus y la memoria hacen que el turno de resolución sea el que merece la pena cerrar |
+| **3** | **5 y 6** | La 5 toca innegociables y lleva la pieza nueva más delicada, el revisor del diff. La 6 cierra el arco con el riesgo aceptado ya firmado |
+
+Cada fase pasa el gate 5/5 y se integra con firma, como cualquier cambio.
+
+## Consecuencias
+
+- **El cliente resuelve CRITICAL y HIGH por el Terminal**, y el hallazgo
+  aterriza en Historia sin los tres pasos manuales de hoy: un clic en «Resolver
+  en Terminal», y opcionalmente revisar el diff antes de hacer commit.
+- **Historia gana un cuarto quién**, `terminal`, además de `agente`, `operador`
+  y «no consta».
+- **Escaneo deja de ser un sitio donde las cosas se quedan en silencio.** Lo que
+  sigue ahí dice por qué: vivo en la cola, o arreglado sin prueba.
+- **El coste de resolver no está medido.** Un turno de resolución Opus, más la
+  revisión del diff cuando toca terreno protegido (del orden de la de OMEGA,
+  unos $0,50), más la verificación (unos $2,30). Se mide con las primeras
+  resoluciones reales, como se midieron los $23,29 por fix del Motor, y se
+  anota.
+- **Un turno sin reloj y sin tope por ejecución puede gastar hasta Detener.** Es
+  el riesgo aceptado de la Decisión 6.
+- **Innegociables.** Se tocan `protected-areas.ts` y `modo-efectivo.ts` (fase
+  3), y entra en la lista el revisor nuevo. `run-guard.ts` y `claude-cli.ts`
+  **no se tocan**.
+- **El Motor no cambia.** DEBUT, sus topes, su cola y su presencia en proyectos
+  de cliente siguen como están hasta su propio arco.
+- **ADR-082 queda enmendado** (Enmienda 4): el Terminal ya no conserva su reloj.
+
+## Alternativas descartadas
+
+**Quitar el freno de severidad sin sustituto.** Cumple la letra de la doctrina y
+pierde su intención: un cambio que debilita la seguridad compila en verde, y
+nadie lo miraría antes de conservarlo.
+
+**Mantener el freno por palabras y añadir un botón «aprobar y aplicar».** Sigue
+filtrando por palabras (falsos negativos y positivos) y necesita la memoria de
+la pieza 4 para que «aplicar» sepa qué se propuso. El revisor Opus del diff mira
+lo que se hizo, que es lo que importa.
+
+**Reusar (A) creando una propuesta por cada turno del Terminal.** Daría el cierre
+gratis, pero llenaría la lista de firma de propuestas que nunca quisieron pasar
+por el Motor: la misma mentira sobre la intención que ADR-087 (Decisión 3)
+descartó para la verificación.
+
+**Mandar a Historia lo que no se pudo probar.** Cumpliría «todo aterriza en
+Historia» al pie de la letra, pero repetiría la mentira que ADR-065 y ADR-087
+existen para impedir: una pantalla diciendo que alguien comprobó lo que nadie
+comprobó.
+
+**Citar un sha en la nota haciendo commit en cada turno.** Rompería el diseño de
+ADR-079 (el checkpoint es transitorio y se retira) y le quitaría al operador el
+commit, que es donde revisa y decide. El turno y los ficheros bastan para
+encontrar el arreglo.
+
+**Subir de nivel a todo el catálogo de agentes.** Encarece todo, incluido el
+chat casual, para arreglar solo un caso: el turno de resolución, que es el que
+lleva el modelo fijo.
+
+**Quitar también el tope diario.** Es la única red de cartera que queda, no
+impide resolver ningún hallazgo y el operador la ajusta. Se queda.
+
+## Código
+
+Ninguno todavía: esta decisión precede a su implementación. El arco tocará,
+por fases:
+
+- **Fase 1:** `src/infrastructure/ipc/chat-engines.ts` ·
+  `src/application/chat/send-message-types.ts` ·
+  `src/infrastructure/ipc/chat-send-handler.ts` · `src/domain/chat/chat-prompt.ts`
+  · `src/application/chat/known-findings.ts` · las acciones de fila de
+  `src/presentation/components/scan/`.
+- **Fase 2:** `src/application/chat/con-red-de-reversion.ts` (o quien lo envuelva)
+  · `src/application/scan/dismiss-finding.ts` ·
+  `src/application/repair/verificar-mitigado.ts` ·
+  `src/domain/project/extinguido-por.ts` ·
+  `src/presentation/components/scan/ConfirmMitigado.tsx` ·
+  `src/application/chat/reply-from-chat.ts` ·
+  `src/infrastructure/claude-code/claude-code-agent.ts`.
+- **Fase 3:** `src/domain/settings/protected-areas.ts` *(innegociable)* ·
+  `src/domain/settings/modo-efectivo.ts` *(innegociable)* ·
+  `src/domain/settings/operation-mode.ts` · el revisor nuevo (entra en
+  `innegociables-defensa.ts` en el mismo commit) ·
+  `src/infrastructure/ipc/chat-engines.ts`.
+
+## Referencias
+
+- `internal/DOCTRINA-PRODUCTO.md` — la doctrina de los dos mundos (fuera del
+  repositorio público).
+- [ADR-065](adr-065-nada-muere-sin-juicio.md) — nada muere sin juicio: por qué lo
+  no probado no va a Historia.
+- [ADR-078](adr-078-modelo-por-agente-via-agents.md) — modelo por agente: el
+  reparto que el turno de resolución deja de usar.
+- [ADR-079](adr-079-editar-el-arbol-vivo-exige-red-de-reversion.md) — la red de
+  reversión dentro de la que edita el Terminal.
+- [ADR-082](adr-082-escaneo-por-paradas-con-cobertura-declarada.md) — el molde
+  del escaneo (Enmiendas 2 y 3) y su Enmienda 4, que nace de este ADR.
+- [ADR-087](adr-087-confirmar-un-hallazgo-exige-juicio.md) — la verificación y
+  la Historia que cierran el ciclo del Terminal.

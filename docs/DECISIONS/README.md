@@ -126,6 +126,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-085](adr-085-todo-agente-observa-y-nada-filtra.md) | Todo agente observa a FORTRESS, y ninguna observación filtra al cliente | 2026-09-11 | Aceptada | Auto-mejora |
 | [ADR-086](adr-086-los-fallos-se-observan-por-su-clase.md) | Los fallos de la app se observan por su CLASE, nunca por su mensaje | 2026-09-11 | Aceptada | Auto-mejora |
 | [ADR-087](adr-087-confirmar-un-hallazgo-exige-juicio.md) | Confirmar un hallazgo exige juicio, y lo confirmado aterriza en su historia | 2026-09-12 | Aceptada | Escaneo |
+| [ADR-088](adr-088-terminal-grado-bancario.md) | El Terminal es grado bancario: resuelve cualquier hallazgo sin topes de reparación, y cierra en Historia | 2026-09-14 | Aceptada | Terminal |
 
 ## Referencias
 

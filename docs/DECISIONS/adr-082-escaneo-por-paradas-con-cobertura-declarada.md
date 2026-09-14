@@ -471,13 +471,72 @@ chat colgado no tiene manifiesto que lo mida, ni barra de paradas que delate que
 no avanza, ni un operador mirando doce números moverse. Ahí el reloj sigue siendo
 lo único que hay. Aquí hay algo mejor.
 
+> **Enmendado el 2026-09-14** (Enmienda 4, ADR-088): el Terminal ya no conserva
+> su reloj; pasa a `SIN_TECHO` como el escaneo. Los otros cuatro caminos sí
+> conservan sus 15 minutos.
+
+## Enmienda 4 (2026-09-14): el Terminal pierde también su techo de 15 minutos
+
+Enmienda a la Enmienda 3, decidida en
+[ADR-088](adr-088-terminal-grado-bancario.md) (el Terminal grado bancario). El
+escaneo no cambia.
+
+### Lo que la Enmienda 3 dejó escrito
+
+En su «Alcance» fijó que los caminos distintos del escaneo conservaban sus 15
+minutos, y lo razonó para el chat: *«un chat colgado no tiene manifiesto que lo
+mida, ni barra de paradas que delate que no avanza, ni un operador mirando doce
+números moverse. Ahí el reloj sigue siendo lo único que hay.»*
+
+### Qué cambia
+
+El **Terminal** —la vista `chat`: la conversación, los workflows y la entrevista
+de configuración, que comparten el agente de `buildChatEngines`— pasa a
+**`SIN_TECHO`**, con el molde exacto del escaneo: `createClaudeCodeAgent(...,
+SIN_TECHO)`, como ya hace `armar-escaneo.ts:39`.
+
+Hoy crean ese agente seis sitios. Tras esta enmienda van sin techo **dos**
+(escaneo y Terminal), y **cuatro conservan sus 15 minutos** sin tocar una línea
+suya: Build, Génesis, los borradores de agente y los episodios de capacidad.
+
+### Por qué
+
+- **Grado bancario.** La doctrina de producto del 2026-09-14 hace del Terminal la
+  herramienta con la que el cliente resuelve cualquier hallazgo, CRITICAL
+  incluido. Un cronómetro que corta el trabajo va contra lo que la herramienta
+  existe para hacer: lo mismo que este ADR dijo del escaneo.
+- **El argumento de la Enmienda 3 le aplica entero.** El reloj manda SIGTERM, una
+  petición que un proceso colgado de verdad ignora; el botón escala a SIGKILL a
+  los 3 s. El Terminal tiene ese mismo botón (`chat:stop` → `cancelRun` →
+  `killChildrenOf`), así que la red contra el cuelgue real ya existe, y es la
+  mejor de las dos. El techo solo alcanzaba al trabajo legítimo.
+- **Lo que distinguía al chat ya no lo distingue.** El Terminal se ve avanzar en
+  vivo, porque su salida llega en streaming, y es interactivo por definición: el
+  operador está delante. Además, con ADR-088 un turno de resolución lleva UN
+  hallazgo fijado, finito en su alcance como una parada.
+- **El techo no dejaba un arreglo a medias: lo tiraba.** Un turno autónomo corre
+  dentro de la red de ADR-079. Al vencer el reloj sale `failed` y la red lo
+  revierte entero, ya pagado. Es el mismo daño que la Enmienda 3 midió en Health
+  Flow, en otra pantalla.
+
+### Lo que no cambia
+
+- **El escaneo**: sin techo y con su tope por corrida, como fijó la Enmienda 3.
+- **Los otros cuatro caminos** conservan sus 15 minutos.
+- **El dinero.** Esta enmienda es solo de tiempo. Que el Terminal pierda también
+  el tope por ejecución lo decide ADR-088 (Decisión 6), con su riesgo aceptado
+  escrito allí. Para el escaneo sigue en pie «el dinero se acota, el tiempo no».
+- **No cruza innegociable**: `chat-engines.ts`, `claude-code-agent.ts` y
+  `run-claude-process.ts` están fuera de la lista.
+
 ## Consecuencias
 
 - **El techo de 15 minutos desaparece para el escaneo, y solo para él.** Los
   otros cinco caminos que comparten `collectRun` —chat/Terminal, LOOP, Génesis,
   Build y el grafo A/B— conservan el suyo. Se hace por *factory*, el patrón que
   `graph-generator.ts:31` y `graph-omega.ts:24` ya usan: `scan-handlers` pasa su
-  valor y quien no pasa nada se queda con el de siempre.
+  valor y quien no pasa nada se queda con el de siempre. **Enmendado el
+  2026-09-14 (Enmienda 4):** el chat/Terminal también pasa a `SIN_TECHO`.
 - **No cruza innegociable**, con dos condiciones que son parte de la decisión:
   el carril se toma **una vez** para todo el arco de paradas, y el presupuesto
   **no se trocea**. Así `run-guard.ts` y `claude-cli.ts` —los dos únicos
@@ -564,4 +623,6 @@ Ninguno todavía: esta decisión precede a su implementación. El arco tocará
 - [ADR-080](adr-080-severidad-por-ejes-derivados.md),
   [ADR-081](adr-081-el-vocabulario-de-tipos-cubre-codigo-ajeno.md) — el contrato
   del escáner que las paradas reutilizan sin cambiar.
+- [ADR-088](adr-088-terminal-grado-bancario.md) — el Terminal grado bancario, del
+  que nace la Enmienda 4: el Terminal también pierde su techo de tiempo.
 - [FLOWS/SCAN](../FLOWS/SCAN.md) — el flujo que este ADR reescribe.
