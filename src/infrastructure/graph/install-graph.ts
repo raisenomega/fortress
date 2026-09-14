@@ -1,6 +1,7 @@
 import type { AppContext } from '@application/context'
 import { usesApiKey } from '@application/settings/read-auth-source'
 import type { GraphStatus } from '@domain/graph/graph-status'
+import { ejecutaConConfianza } from '@domain/repair/confianza'
 import { nowIso } from '@domain/shared/id'
 import { err, ok, type Result } from '@domain/shared/result'
 import { detectGraph } from './detect-graph'
@@ -21,6 +22,11 @@ export async function installGraph(
 ): Promise<Result<GraphStatus>> {
   const project = context.projects.findById(projectId)
   if (!project) return err('El proyecto ya no existe')
+  // Escribir su .mcp.json y abrir `claude -p` con cwd en el repo carga sus hooks,
+  // CLAUDE.md y servidores: es ejecutar lo que trae. Leer (reconcileGraph) no la pide.
+  if (!ejecutaConConfianza(project)) {
+    return err('Proyecto sin confianza: marcalo como de confianza para instalar el grafo')
+  }
 
   ensureGraphBinary(log)
   writeProjectMcp(project.path)
