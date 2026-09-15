@@ -22,4 +22,13 @@ describe('buildChatPrompt', () => {
     expect(prompt).toContain('MODO SUPERVISADO')
     expect(prompt).toContain('SQL injection')
   })
+
+  it('con un hallazgo a resolver, SU bloque sustituye a la lista (ADR-088)', () => {
+    const known = ['CRITICAL api.py:42 SQL injection']
+    const prompt = buildChatPrompt('x', { ...ctx, known, enFoco: '- id: f1' })
+    expect(prompt).toContain('Hallazgo a resolver')
+    expect(prompt).toContain('- id: f1')
+    expect(prompt).not.toContain('Hallazgos ya registrados')
+    expect(prompt).not.toContain('SQL injection')
+  })
 })

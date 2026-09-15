@@ -14,6 +14,7 @@ import { isFortressRepo } from '../system/self-project'
 import { RED_DE_REVERSION } from '../chat/red-de-reversion'
 import { buildChatEngines } from './chat-engines'
 import { IPC } from './channels'
+import { conFocoSaneado } from './foco-pedido'
 
 /** Solo si la ventana sigue viva, y tachado. `sendMessage` ya envuelve aguas
  *  arriba; se envuelve OTRA VEZ a proposito: tachar es idempotente y una puerta
@@ -46,7 +47,6 @@ export function registerChatSendHandler(): void {
 
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()
-
     // Tope diario y concurrencia, comprobados ANTES de gastar.
     const denegado = guardRun(context, input.projectId)
     if (denegado !== null) return err(denegado)
@@ -59,7 +59,7 @@ export function registerChatSendHandler(): void {
         context,
         assistant,
         codeAgent,
-        input,
+        conFocoSaneado(input),
         chunkSender(event, input.projectId),
         progressSender(event, input.projectId),
         () => isCancelled(input.projectId),
