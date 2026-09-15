@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from 'electron'
 import { addProject } from '@application/project/add-project'
-import { listProjects } from '@application/project/list-projects'
+import { proyectosEnVista } from '@application/project/proyectos-en-vista'
 import { removeProject } from '@application/project/remove-project'
 import { setProjectLoopEnabled } from '@application/project/set-project-loop-enabled'
 import { desbloquearContaminacion } from '@application/project/desbloquear-contaminacion'
@@ -10,13 +10,18 @@ import { aDeclaracion } from '@domain/scan/declaracion-de-modulos'
 import { startLoop, stopLoop } from '../loop/loop-controller'
 import { exportProjectRecord } from '../project/export-record'
 import type { NewProject } from '@domain/project/project'
+import { RED_DE_REVERSION } from '../chat/red-de-reversion'
 import { getAppContext } from '../persistence/app-context'
 import { pickProjectFolder } from '../system/folder-picker'
 import { isFortressRepo } from '../system/self-project'
 import { IPC } from './channels'
 
+// `resoluble` con las MISMAS sondas con las que `chat:send` decide el modo: la
+// casilla del lote y el turno no pueden discrepar sobre si aqui se edita.
+const SONDAS = { esRepoPropio: isFortressRepo, redGit: RED_DE_REVERSION.disponible }
+
 export function registerProjectHandlers(): void {
-  ipcMain.handle(IPC.projectsList, () => listProjects(getAppContext()))
+  ipcMain.handle(IPC.projectsList, () => proyectosEnVista(getAppContext(), SONDAS))
 
   ipcMain.handle(IPC.projectsAdd, (_event, input: NewProject) => addProject(getAppContext(), input))
 

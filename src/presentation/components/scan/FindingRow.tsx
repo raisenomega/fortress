@@ -1,5 +1,7 @@
 import type { Finding } from '@domain/project/finding'
 import { verificable } from '@domain/project/verificable'
+import type { LoteEnLaTabla } from '../../hooks/useLoteDelTablero'
+import { CajitaDelLote } from './CajitaDelLote'
 import { CajitaDeSeleccion } from './CajitaDeSeleccion'
 import { FindingMarks } from './FindingMarks'
 import { FindingRowActions } from './FindingRowActions'
@@ -17,6 +19,7 @@ interface FindingRowProps {
   readonly ocupado: boolean
   readonly seleccionada: boolean
   readonly onSeleccionar: (id: string) => void
+  readonly lote: LoteEnLaTabla | null
 }
 
 /** Sin archivo ni linea un hallazgo no es accionable, pero se muestra igual. */
@@ -47,7 +50,9 @@ export function FindingRow(props: FindingRowProps): React.JSX.Element {
             titulo={`Seleccionar: ${finding.title}`}
             onToggle={() => onSeleccionar(finding.id)}
           />
-        ) : null}
+        ) : (
+          <CajitaDelLote lote={props.lote} finding={finding} fila={{ dismissed, mitigado }} />
+        )}
       </td>
       <td className="py-2 pr-3 align-top">
         <SeverityBadge severity={finding.severity} />

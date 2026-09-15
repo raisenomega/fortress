@@ -1,8 +1,10 @@
 import type { Project } from '@domain/project/project'
+import { useLoteDelTablero } from '../../hooks/useLoteDelTablero'
 import { useTablero } from '../../hooks/useTablero'
 import { useSeleccionDelTablero } from '../../hooks/useSeleccionDelTablero'
 import { useRepairStore } from '../../stores/repair-store'
 import { propsDeLaTabla } from './props-de-la-tabla'
+import { BarraDelLote } from './BarraDelLote'
 import { BarraDeSeleccion } from './BarraDeSeleccion'
 import { ChipsDelTablero } from './ChipsDelTablero'
 import { ConfirmVerificarTodos } from './ConfirmVerificarTodos'
@@ -21,6 +23,7 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
   const tablero = useTablero(project.id)
   const seleccion = useSeleccionDelTablero(project.id, tablero)
   const motorOcupado = useRepairStore((state) => state.busy) // un solo carril
+  const lote = useLoteDelTablero(project.id)
 
   return (
     <>
@@ -41,6 +44,15 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
         />
       ) : null}
 
+      {lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null) ? (
+        <BarraDelLote
+          elegidos={lote.elegidos}
+          enCurso={lote.enCurso}
+          onResolver={lote.resolver}
+          onLimpiar={lote.limpiar}
+        />
+      ) : null}
+
       {seleccion.preguntando ? (
         <ConfirmVerificarTodos
           mitigados={tablero.seleccion.size}
@@ -50,7 +62,9 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
         />
       ) : null}
 
-      <FindingsTable {...propsDeLaTabla(project, tablero, seleccion, motorOcupado)} />
+      <FindingsTable
+        {...propsDeLaTabla(project, tablero, seleccion, motorOcupado, lote.enLaTabla)}
+      />
     </>
   )
 }

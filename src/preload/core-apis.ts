@@ -4,12 +4,14 @@ import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import type { LoopSession } from '@domain/loop/loop-session'
 import type { LoopStatus } from '@domain/loop/loop-status'
 import type { NewProject, Project } from '@domain/project/project'
+import type { ProyectoEnVista } from '@domain/project/proyecto-en-vista'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import type { Result } from '@domain/shared/result'
 import type { Unsubscribe } from './api-types'
 
 export interface ProjectsApi {
-  list(): Promise<readonly Project[]>
+  /** Con `resoluble` calculado en el proceso principal (mira disco y git). */
+  list(): Promise<readonly ProyectoEnVista[]>
   add(input: NewProject): Promise<Result<Project>>
   remove(id: string): Promise<Result<null>>
   pickFolder(): Promise<NewProject | null>
