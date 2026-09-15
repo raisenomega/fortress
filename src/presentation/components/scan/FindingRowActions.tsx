@@ -1,7 +1,9 @@
 import type { Finding } from '@domain/project/finding'
+import { seResuelveEnTerminal } from '@domain/project/se-resuelve-en-terminal'
 import { FindingActions } from './FindingActions'
 import { FindingMitigarAction } from './FindingMitigarAction'
 import { FindingRepairAction } from './FindingRepairAction'
+import { FindingResolverAction } from './FindingResolverAction'
 
 interface FindingRowActionsProps {
   readonly finding: Finding
@@ -12,6 +14,8 @@ interface FindingRowActionsProps {
   readonly onMitigate: (id: string, nota: string) => void
   readonly onUnmitigate: (id: string) => void
   readonly onRepair: (id: string) => void
+  /** Abre el Terminal con este hallazgo fijado (ADR-088, pieza 2). */
+  readonly onResolver: (id: string) => void
   readonly onVerificar: (id: string) => void
   readonly ocupado: boolean
 }
@@ -28,6 +32,9 @@ export function FindingRowActions(props: FindingRowActionsProps): React.JSX.Elem
     <>
       {!dismissed && !mitigado ? (
         <FindingRepairAction onRepair={() => props.onRepair(finding.id)} />
+      ) : null}
+      {seResuelveEnTerminal({ dismissed, mitigado }) ? (
+        <FindingResolverAction onResolver={() => props.onResolver(finding.id)} />
       ) : null}
       <FindingMitigarAction
         finding={finding}

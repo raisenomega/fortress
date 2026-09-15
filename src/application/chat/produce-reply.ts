@@ -2,12 +2,14 @@ import type { StepProgress } from '../workflow/step-progress'
 import type { AgentId } from '@domain/agent/agent'
 import type { Assistant } from '@domain/chat/assistant'
 import type { ChatEngine, CodeAgent } from '@domain/chat/code-agent'
+import { formatearHallazgo, type HallazgoAResolver } from '@domain/chat/hallazgo-a-resolver'
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AppContext } from '../context'
 import { knownFindings } from './known-findings'
 import type { ReplyOutcome } from './reply-outcome'
 import { replyFromApi } from './reply-from-api'
+import { replyFromChat } from './reply-from-chat'
 import { replyFromWorkflow } from './reply-from-workflow'
 import type { SendMessageInput } from './send-message-types'
 
@@ -22,6 +24,8 @@ export interface ReplyOptions {
   /** Agente que se hace cargo, ya enrutado. */
   /** Agentes excluidos por el operador desde el sidebar. */
   readonly excludedAgents: readonly AgentId[]
+  /** El hallazgo que resuelve este turno, ya releido de la base (ADR-088). */
+  readonly enFoco?: HallazgoAResolver | null
   /** Progreso del workflow, paso a paso. */
   readonly onStep: (progress: StepProgress) => void
   readonly isCancelled: () => boolean
@@ -33,7 +37,8 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
   const { assistant, codeAgent, project, input, mode, engine, onChunk } = options
 
   if (engine === 'claude-code') {
-    return replyFromWorkflow({
+    const foco = options.enFoco ?? null
+    const opciones = {
       codeAgent,
       project,
       corpus: options.context.corpus.of(project.path),
@@ -42,9 +47,14 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
       excludedAgents: options.excludedAgents,
       onStep: options.onStep,
       isCancelled: options.isCancelled,
-      known: knownFindings(options.context, project),
+      // Con foco la lista ni se lee: el bloque de ESE hallazgo la sustituye.
+      known: foco === null ? knownFindings(options.context, project) : [],
       onChunk
-    })
+    }
+    // Resolver un hallazgo es UN turno, no un workflow de revision: sin esto,
+    // «arregla … seguridad» dispararia el pipeline entero (ADR-088, pieza 2).
+    if (foco !== null) return replyFromChat({ ...opciones, enFoco: formatearHallazgo(foco) })
+    return replyFromWorkflow(opciones)
   }
 
   return replyFromApi({

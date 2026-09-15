@@ -2,14 +2,14 @@ import type { StepProgress } from '../workflow/step-progress'
 import type { Assistant } from '@domain/chat/assistant'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { SIN_RED, type RedDeReversion } from '@domain/chat/red-de-reversion'
-import { avisoDeDegradacion } from '@domain/settings/operation-mode'
-import { effectiveMode } from '@domain/settings/modo-efectivo'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
 import { conRedDeReversion } from './con-red-de-reversion'
 import { sinSecretosEnVivo } from './en-vivo-tachado'
 import { finishTurn } from './finish-turn'
+import { leerFoco } from './foco-del-turno'
+import { modoDelTurno } from './modo-del-turno'
 import { persistTurn } from './persist-message'
 import { produceReply } from './produce-reply'
 import type { ReplyOutcome } from './reply-outcome'
@@ -36,11 +36,10 @@ export async function sendMessage(
   if (project.configState === 'PENDIENTE_CONFIGURACION') {
     return runConfigurationTurn(context, codeAgent, project, input, enVivo)
   }
-  // Degrada a supervisado si toca un area protegida o si el objetivo es el repo propio.
-  const selfRepo = isSelfRepo(project.path)
+  const foco = leerFoco(context, project.id, input.findingId)
+  if (!foco.ok) return err(foco.error)
   const redGit = red.disponible(project.path)
-  const mode = effectiveMode({ mode: input.mode, request: input.prompt, selfRepo, project, redGit }) // prettier-ignore
-  const aviso = avisoDeDegradacion(input.mode, selfRepo, redGit)
+  const { mode, aviso } = modoDelTurno(project, input, foco.value, isSelfRepo(project.path), redGit)
 
   const chosen = chooseEngine(codeAgent, assistant, project)
   if (!chosen.ok) return err(chosen.error)
@@ -56,6 +55,7 @@ export async function sendMessage(
     produceReply({
       ...{ context, assistant, codeAgent, project, input, mode, engine },
       excludedAgents: input.excludedAgents,
+      enFoco: foco.value,
       onStep,
       isCancelled,
       onChunk: enVivo

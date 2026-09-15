@@ -10,11 +10,21 @@ export interface ChatContext {
   readonly corpus: CorpusDescriptor
   readonly known: readonly string[]
   readonly mode: OperationMode
+  /** El bloque del hallazgo que este turno resuelve, ya saneado (ADR-088). */
+  readonly enFoco?: string
 }
 
 function describeKnown(known: readonly string[]): string {
   if (known.length === 0) return 'FORTRESS no tiene escaneos previos de este proyecto.'
   return ['Hallazgos ya registrados de escaneos anteriores:', ...known.map((k) => `- ${k}`)].join(
+    '\n'
+  )
+}
+
+/** Con un hallazgo a resolver, SU bloque en vez de la lista: el turno es de ese. */
+function hallazgosDelTurno(ctx: ChatContext): string {
+  if (ctx.enFoco === undefined) return describeKnown(ctx.known)
+  return ['Hallazgo a resolver (lo mando el operador desde su fila del Escaneo):', ctx.enFoco].join(
     '\n'
   )
 }
@@ -42,7 +52,7 @@ export function buildChatPrompt(question: string, ctx: ChatContext): string {
     GRAPH_FIRST,
     '',
     ...docsFirst(ctx),
-    describeKnown(ctx.known),
+    hallazgosDelTurno(ctx),
     '',
     'Pregunta del operador:',
     question,

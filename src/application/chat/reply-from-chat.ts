@@ -7,13 +7,17 @@ import type { ReplyOutcome } from './reply-outcome'
 import type { WorkflowReplyOptions } from './reply-from-workflow'
 import { denialsNote, singleAgentOutcome } from './single-agent-outcome'
 
+/** Las opciones de siempre y, si el turno resuelve UN hallazgo, su bloque ya
+ *  formateado y saneado (ADR-088, pieza 2). Sin el, el prompt de siempre. */
+export type ChatReplyOptions = WorkflowReplyOptions & { readonly enFoco?: string }
+
 /**
  * Respuesta conversacional a una pregunta libre: un solo agente, elegido por el
  * tema del mensaje, contesta en prosa. Se separa del camino de workflow porque
  * una pregunta no es un escaneo: no lleva pasos ni informe consolidado, lleva
  * la respuesta del agente tal cual la escribio.
  */
-export async function replyFromChat(options: WorkflowReplyOptions): Promise<ReplyOutcome> {
+export async function replyFromChat(options: ChatReplyOptions): Promise<ReplyOutcome> {
   const enabled = AGENT_CATALOG.map((agent) => agent.id).filter(
     (id) => !options.excludedAgents.includes(id)
   )
@@ -30,7 +34,8 @@ export async function replyFromChat(options: WorkflowReplyOptions): Promise<Repl
         projectName: options.project.name,
         corpus: options.corpus,
         known: options.known,
-        mode: options.mode
+        mode: options.mode,
+        enFoco: options.enFoco
       }),
       permissionMode: permissionModeFor(options.mode),
       agentId,

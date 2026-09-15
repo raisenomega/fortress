@@ -12,6 +12,7 @@ interface FindingsTableProps {
   readonly onMitigate: (id: string, nota: string) => void
   readonly onUnmitigate: (id: string) => void
   readonly onRepair: (id: string) => void
+  readonly onResolver: (id: string) => void
   readonly onVerificar: (id: string) => void
   readonly ocupado: boolean
   readonly seleccion: ReadonlySet<string>
