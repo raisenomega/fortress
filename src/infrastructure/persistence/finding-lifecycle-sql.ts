@@ -26,8 +26,9 @@ export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved
 
 /**
  * El operador declara que un hallazgo ya esta arreglado. No afirma que haya
- * desaparecido —eso lo confirma el escaneo con su doble prueba— sino que hay un
- * fix aplicado, y por eso deja de pedirle trabajo al motor sin salir del tablero.
+ * desaparecido —eso lo confirma la verificacion dirigida (ADR-087): un analista
+ * lee el fichero y tiene que probarlo— sino que hay un fix aplicado, y por eso
+ * deja de pedirle trabajo al motor sin salir del tablero.
  *
  * Solo desde ACTIVE: marcar lo ya extinto no significaria nada. `status` no se
  * toca — descartar y arreglar son cosas distintas, y mezclarlas haria que
