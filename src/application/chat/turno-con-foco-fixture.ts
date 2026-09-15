@@ -5,7 +5,7 @@ import type { Project } from '@domain/project/project'
 import type { Result } from '@domain/shared/result'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { AppContext } from '../context'
-import { fakeContext, input, never, noop, PROJECT } from './chat-test-fixtures'
+import { fakeContext, input, noop, PROJECT } from './chat-test-fixtures'
 import { HALLAZGOS } from './hallazgos-del-turno-fixture'
 import { sendMessage } from './send-message'
 import type { SendMessageInput, SendMessageOutput } from './send-message-types'
@@ -25,6 +25,8 @@ export interface Turno {
 export interface Memoria {
   readonly sesion?: string | null
   readonly respuesta?: (pedido: CodeAgentRequest) => Partial<CodeAgentReply>
+  /** El operador pulso Detener durante el turno: `isCancelled` contesta que si. */
+  readonly detenido?: boolean
 }
 
 /** Red de ADR-079 siempre presente: el modo lo decide la regla, no la falta de git. */
@@ -60,6 +62,7 @@ export async function turno(
   }
   const ctx = { ...context, findings } as unknown as AppContext
   const envio = input({ mode: 'autonomo', ...over })
-  const r = await sendMessage(ctx, null, cli, envio, noop, noop, never, () => false, RED)
+  const detenido = (): boolean => memoria.detenido === true
+  const r = await sendMessage(ctx, null, cli, envio, noop, noop, detenido, () => false, RED)
   return { r, pedidos, added, recordadas, olvidadas }
 }

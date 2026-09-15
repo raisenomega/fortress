@@ -30,7 +30,13 @@ function resumeRoto(request: CodeAgentRequest, reply: CodeAgentReply): boolean {
  * GARANTIA 2: una memoria rota nunca bloquea resolver. Si la sesion guardada ya
  * no se puede reanudar —se borro, el proyecto se movio—, se marca para
  * olvidarla y el turno arranca con una sesion nueva. Salvo que el operador haya
- * pulsado Detener: entonces no se relanza nada, solo se olvida.
+ * pulsado Detener: entonces no se relanza nada.
+ *
+ * Y Detener no rompe la sesion. Parado, el CLI muere SIN evento final —medido en
+ * el 2.1.272: SIGTERM -> code 143, sin `result`— y eso tiene la forma de un roto,
+ * pero la guardada sigue valida: con `--fork-session` ni se toco. Con Detener,
+ * solo se olvida si el CLI llego a contestar el roto de verdad —su evento final
+ * con cero turnos—; si no, la memoria del hallazgo se deja intacta.
  */
 export async function correrConMemoria(
   codeAgent: CodeAgent,
@@ -40,7 +46,7 @@ export async function correrConMemoria(
 ): Promise<CorridaConMemoria> {
   const reply = await codeAgent.run(request, onChunk)
   if (!resumeRoto(request, reply)) return { reply, ...sesionUtil(reply), sesionRota: false }
-  if (isCancelled()) return { reply, sesionRota: true }
+  if (isCancelled()) return { reply, sesionRota: reply.turns === 0 }
 
   const nueva = await codeAgent.run({ ...request, reanudarSesion: undefined }, onChunk)
   return { reply: nueva, ...sesionUtil(nueva), sesionRota: true }
