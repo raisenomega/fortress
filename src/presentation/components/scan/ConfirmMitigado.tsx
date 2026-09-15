@@ -42,7 +42,8 @@ export function ConfirmMitigado(props: ConfirmMitigadoProps): React.JSX.Element 
         </label>
         <p className="text-muted-foreground text-xs">
           Sale de la cola del motor, que dejara de pedir trabajo por el. Sigue visible en el tablero
-          y sigue contando para la nota: que este arreglado lo confirma un escaneo, no esta marca.
+          y sigue contando para la nota: que este arreglado lo confirma la verificacion dirigida —un
+          analista lee el fichero y tiene que probarlo—, no esta marca.
         </p>
         <p className="text-medium text-xs">
           La nota se muestra bajo el hallazgo. Es la unica pista de donde esta el fix cuando vive en
