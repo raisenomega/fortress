@@ -184,6 +184,12 @@ dice que «lo confirma un escaneo», y desde ADR-087 lo confirma la verificació
 
 ### 4. Opus fijo y memoria por hallazgo — *Libre*
 
+> **Enmendada el 2026-09-15 (Enmienda 2): cambia el nivel, no la forma.** Sigue
+> siendo UN productor fijo para el turno de resolución, sin reparto por
+> palabras. Lo que cambia es «Opus» literal por una escalera de modelos
+> autoactualizable: OMEGA en la cima y el productor un peldaño por debajo. El
+> chat libre conserva el router. Ver la Enmienda 2.
+
 - **Un turno de resolución corre siempre con Opus**, sin pasar por el reparto
   por palabras de `routeToAgent`. El chat libre conserva el router. Se decide
   **un modelo fijo para resolver**, no subir de nivel a cada agente del
@@ -273,7 +279,7 @@ un riesgo que nadie vio.
 | 1 | Sin techo de tiempo | `chat-engines.ts` (+ enmienda de ADR-082) | **Libre** |
 | 2 | `findingId` + «Resolver en Terminal» | `send-message-types.ts`, handler de `chat:send`, `chat-prompt.ts`, acciones de fila de Escaneo | **Libre** |
 | 3 | Cierre del ciclo hasta Historia | la vía del turno (`con-red-de-reversion.ts`), `dismiss-finding.ts`, `verificar-mitigado.ts`, `extinguido-por.ts`, `ConfirmMitigado.tsx` | **Libre** |
-| 4 | Opus fijo + memoria por hallazgo | `reply-from-chat.ts` / router, `claude-code-agent.ts` | **Libre** |
+| 4 | Opus fijo + memoria por hallazgo — **enmendada por la Enmienda 2**: el nivel lo da una escalera autoactualizable, no «Opus» literal | `reply-from-chat.ts` / router, `claude-code-agent.ts` | **Libre** |
 | 5 | Sustituir el freno de severidad — **reescrita por la Enmienda 1**: producir con plenas capacidades + red que escala con el riesgo | `protected-areas.ts`, `modo-efectivo.ts`, `operation-mode.ts`, revisor nuevo (entra en la lista) | **Innegociable** |
 | 6 | Sin tope por ejecución; el diario, ratificado | `chat-engines.ts` (y `run-guard.ts` sin cambios) | Por ejecución: **Libre**. Diario: **Innegociable** (se ratifica, no se cambia) |
 
@@ -364,6 +370,109 @@ ninguna degradación que se quede es muda; `MODE_INSTRUCTION` cambia a la vez; e
 juez falla cerrado; y el fichero nuevo que decide conservar o revertir entra en
 la lista innegociable en el mismo commit que lo crea. Si el ADR de la pieza 5
 decide otra cosa sobre alguno de estos puntos, lo escribe allí.
+
+## Enmienda 2 (2026-09-15): el productor del Terminal — escalera de modelos autoactualizable
+
+Decisiones del operador, fijadas el 2026-09-15 con las piezas 1 a 3 ya
+integradas y antes de construir la 4. Deciden **con qué nivel de modelo
+produce** el turno de resolución y **cómo recuerda** entre mensajes.
+**Enmiendan la Decisión 4.** El resto del ADR, y la Enmienda 1, siguen en pie.
+
+### 1. Un productor fijo, con el nivel dado por una escalera
+
+La Decisión 4 decía «Opus fijo» para el turno de resolución. Se sustituye por
+**UN productor fijo**, que no se elige por palabra, cuyo **nivel de modelo lo da
+una escalera autoactualizable**: **OMEGA en la cima y el productor un peldaño
+por debajo**. Es la forma que toma la regla de la Enmienda 1 §1 («OMEGA siempre
+por encima del que produce»), escrita una sola vez en lugar de repetida en cada
+agente.
+
+Autoactualizable en dos sentidos:
+
+- Cada peldaño es un **alias**, no un id fijo (el molde de ADR-078): `opus`
+  apunta siempre al último Opus sin tocar código.
+- El productor **no se nombra, se deriva**: es el peldaño de debajo de la cima.
+  Cuando la cima sube, el productor sube con ella sin tocar nada más.
+
+### 2. Alcance: solo el turno con foco
+
+Esto vale solo para el turno que **resuelve un hallazgo**, el que llega con
+`findingId` (pieza 2). **El chat libre conserva `routeToAgent`**: en ese punto
+la Decisión 4 sigue vigente tal como estaba. Los workflows, el escaneo, Build y
+OMEGA no cambian ni de agente ni de modelo.
+
+### 3. La escalera vive en un solo sitio, pendiente de ADR-078
+
+La escalera es un **módulo puro del dominio**
+(`src/domain/agent/escalera-de-modelos.ts`) con una constante, **`CIMA`**, que es
+la **única fuente del nivel**. Ningún otro fichero nombra el modelo del
+productor.
+
+- **Default: `CIMA = 'fable'`.** El productor sale del peldaño de debajo:
+  **`'opus'` hoy**.
+- **PENDIENTE ADR-078.** El valor real de `CIMA` se confirma junto a la pieza 5,
+  cuando se resuelva la deuda `omega-fable-choca-con-adr-078`. Esta enmienda no
+  la resuelve, igual que la Enmienda 1: la registra.
+- **Por qué ese default.** Con `'fable'`, el productor sale `'opus'`, que es
+  igual o mejor que cualquier agente al que el reparto por palabras manda hoy el
+  turno: Opus, Sonnet o Haiku, según las palabras del título y de la ruta. Con
+  `'opus'`, el productor caería a `'sonnet'`, una **bajada** que no se quiere
+  introducir mientras se decide Fable.
+- **Esta pieza no hace correr nada con Fable.** `CIMA` solo fija el peldaño del
+  productor. OMEGA sigue con el modelo que declara hoy su catálogo
+  (`sentinel-omega.ts`) hasta la pieza 5, así que la tensión de ADR-078 no se
+  toca todavía.
+
+### 4. Transitorio hasta la pieza 5: productor y OMEGA coinciden
+
+Mientras OMEGA siga en `'opus'`, **el productor y OMEGA corren con el mismo
+modelo.** Es **inocuo**: OMEGA todavía no juzga los diffs del Terminal. Eso
+llega con la pieza 5, que es también la que conecta `CIMA` con OMEGA. **No es
+diseño final**: es el intervalo entre dos piezas, dicho aquí para que no
+parezca un descuido.
+
+### 5. La identidad del productor
+
+- Es un **agente nuevo del catálogo** y viaja por `--agents`, como el resto del
+  reparto de ADR-078: su modelo va en su definición. No se añade `--model`, que
+  sería un flag nuevo fuera de `buildArgs`. Así el turno lleva un agente con
+  nombre, visible en el chip, en la telemetría y para OMEGA.
+- **Está protegido en `AUDIT_AGENTS`** (`agents-for-project.ts`): un
+  `.claude/agents/*.md` del repositorio del cliente **no puede reescribir su
+  modelo ni su prompt**. Sin eso, un fichero del repo auditado decidiría con qué
+  nivel se arregla su propio código, y la escalera dejaría de ser la única
+  fuente.
+- **Se trata aparte en `AgentPanel`**: no es un interruptor del operador.
+  Apagarlo dejaría el turno de resolución sin productor, y la exclusión de
+  agentes del sidebar no le aplica.
+
+### 6. Memoria por hallazgo, con dos garantías
+
+El productor **recuerda entre mensajes sobre el MISMO hallazgo** (`--resume`),
+de modo que «propón» y «aplícalo» son la misma conversación. El `session_id`
+que emite el CLI se guarda con el hallazgo, en una columna nueva y aditiva de
+`findings` sin DEFAULT (NULL es «sin memoria»), y el siguiente turno con ese
+foco la reanuda. El chat libre no tiene memoria: sin hallazgo no hay a qué
+atarla.
+
+- **La sesión solo avanza si la red NO revirtió el turno.** Si ADR-079 deshizo
+  las ediciones, el productor no puede recordarlas como hechas: la memoria
+  guardada se queda en el último turno que sí se conservó.
+- **Si `--resume` falla** (la sesión se borró o el proyecto se movió), se limpia
+  y el turno arranca con una sesión nueva. Una memoria rota nunca bloquea
+  resolver.
+- **`--resume` va en `claude-code-agent.ts`, NUNCA en `buildArgs`**:
+  `claude-cli.ts` es innegociable, y esta pieza sigue sin necesitarlo.
+
+### Consecuencia: la Decisión 4 remite aquí
+
+La Decisión 4 y su fila de la tabla remiten a esta enmienda.
+
+Lo que **no cambia** de la Decisión 4: sigue siendo **UN productor fijo para el
+turno de resolución**, sin reparto por palabras, con memoria por hallazgo y con
+`--resume` fuera de `buildArgs`. Lo que **cambia** es que «Opus» literal pasa a
+ser **el peldaño de debajo de la cima de una escalera autoactualizable**, con
+`CIMA` pendiente de ADR-078.
 
 ## Consecuencias
 
