@@ -5,6 +5,7 @@ import type { Tablero } from '../../hooks/useTablero'
 // prettier-ignore
 import { dismissFinding, mitigateFinding, reopenFinding, unmitigateFinding } from '../../services/dismiss-service'
 import { proposeRepair } from '../../services/repair-service'
+import { resolverEnTerminal } from '../../services/resolver-en-terminal'
 import { verificarHallazgo } from '../../services/verificar-service'
 
 /**
@@ -36,6 +37,10 @@ export function propsDeLaTabla(
     onMitigate: (id, nota) => void mitigateFinding(project.id, id, nota),
     onUnmitigate: (id) => void unmitigateFinding(project.id, id),
     onRepair: (id) => void proposeRepair(project.id, id),
+    onResolver: (id) => {
+      const fila = tablero.visibles.find((f) => f.id === id)
+      if (fila !== undefined) resolverEnTerminal(project.id, fila)
+    },
     onVerificar: (id) => void verificarHallazgo(project.id, id),
     ocupado
   }
