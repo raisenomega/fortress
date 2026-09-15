@@ -11,15 +11,18 @@
  *
  *   agente     lo eligio la cola del motor y el analista lo dictamino
  *   operador   el operador pidio verificar ESA fila, y el analista la dictamino
+ *   terminal   un turno del Terminal edito con ESA fila en foco y se conservo, y
+ *              el analista la dictamino (ADR-088). No es el operador: el acto
+ *              que dispara la verificacion es del agente del Terminal
  *
- * NULL no es un tercer valor: es «no consta». Lo llevan las filas extinguidas
+ * NULL no es un valor mas: es «no consta». Lo llevan las filas extinguidas
  * antes de que esta columna existiera —27 de agosto, de la era en que la
  * ausencia extinguia— y las absorbidas por una fusion, que no las cerro nadie:
  * fundir no es resolver. Que se distingan importa, porque una pantalla que
  * pintara las tres clases como «resuelto» repetiria la mentira que ADR-065
  * vino a impedir.
  */
-export const EXTINGUIDO_POR = ['agente', 'operador'] as const
+export const EXTINGUIDO_POR = ['agente', 'operador', 'terminal'] as const
 
 export type ExtinguidoPor = (typeof EXTINGUIDO_POR)[number]
 

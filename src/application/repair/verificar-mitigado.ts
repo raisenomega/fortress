@@ -1,4 +1,4 @@
-import type { DictamenDeVerificacion } from '@domain/repair/dictamen-de-verificacion'
+import type { DictamenDeVerificacion, QuienVerifica } from '@domain/repair/dictamen-de-verificacion'
 import { notaDeVerificacion } from '@domain/repair/dictamen-de-verificacion'
 import { elegirParaVerificar } from './elegir-para-verificar'
 import { estudiar } from './estudiar-con-memoria'
@@ -28,11 +28,15 @@ import type { AppContext } from '../context'
  * es lo que falto el dia que dos hallazgos de la CSP murieron porque alguien
  * anadio un comentario. Y proteger no es solo avisar — si el analista dice que
  * el problema SIGUE, la etiqueta de mitigado se retira y el motor lo recupera.
+ *
+ * `quien` lo pide: el operador por defecto, o el Terminal al cerrar su turno
+ * (ADR-088). Va a `extinguido_por` y al aviso, que nombran al autor real.
  */
 export async function verificarMitigado(
   context: AppContext,
   projectId: string,
-  findingId: string
+  findingId: string,
+  quien: QuienVerifica = 'operador'
 ): Promise<DictamenDeVerificacion | null> {
   const project = context.projects.findById(projectId)
   if (project === null) return null
@@ -52,12 +56,12 @@ export async function verificarMitigado(
   }
 
   const veredicto = veredictoDelAnalisis(result.analysis)
-  if (extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso(), 'operador')) {
+  if (extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso(), quien)) {
     return { desenlace: 'extinguido', razon: veredicto.reason }
   }
 
   const desenlace = veredicto.verdict === 'OBSOLETO' ? 'sin_prueba' : 'sigue_vivo'
-  const nota = notaDeVerificacion(desenlace, veredicto.reason)
+  const nota = notaDeVerificacion(desenlace, veredicto.reason, quien)
   // LA ASIMETRIA, y es de certeza contra duda. `sigue_vivo` es una AFIRMACION:
   // el analista leyo el fichero y el problema esta ahi, asi que la marca del
   // operador era falsa y el hallazgo vuelve a la cola —sin eso seguiria

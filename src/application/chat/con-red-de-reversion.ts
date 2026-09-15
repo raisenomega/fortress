@@ -5,6 +5,9 @@ export interface TurnoProtegido {
   readonly outcome: ReplyOutcome
   /** Lo que se le anade al texto de la respuesta: vacio si no hubo que decir nada. */
   readonly aviso: string
+  /** La red estaba puesta y el turno se quedo en el arbol. Sin red es false: nada
+   *  garantiza lo que quedo, y el cierre del ciclo (ADR-088) solo se fia de esto. */
+  readonly conservado: boolean
 }
 
 /**
@@ -44,12 +47,13 @@ export async function conRedDeReversion(
     cp?.revertir()
     throw error
   }
-  if (cp === null) return { outcome, aviso: '' }
+  if (cp === null) return { outcome, aviso: '', conservado: false }
 
   const rojo = outcome.failed || (outcome.edits.length > 0 && !(await red.verificar(cwd)))
   const retirado = rojo ? cp.revertir() : cp.conservar()
   return {
     outcome,
-    aviso: (rojo ? REVERTIDO_POR_RED : '') + (retirado ? '' : CHECKPOINT_HUERFANO)
+    aviso: (rojo ? REVERTIDO_POR_RED : '') + (retirado ? '' : CHECKPOINT_HUERFANO),
+    conservado: !rojo
   }
 }
