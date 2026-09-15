@@ -196,6 +196,12 @@ dice que «lo confirma un escaneo», y desde ADR-087 lo confirma la verificació
 
 ### 5. El freno de severidad se SUSTITUYE, no se elimina — *Innegociable*
 
+> **Enmendada el 2026-09-14 (Enmienda 1): esta pieza se reescribe.** El juez es
+> OMEGA con el modelo más alto disponible, el productor trabaja con plenas
+> capacidades y la red escala con el riesgo del hallazgo (debate de varias
+> rondas para lo complejo o sensible). La degradación por palabra que dejó la
+> pieza 2 es andamio y muere aquí. Ver la Enmienda 1.
+
 Quitarlo a pelo perdería su intención: un cambio que afloja un control de auth
 **compila en verde**, y el typecheck de la red de ADR-079 no lo detectaría. Se
 sustituye por un control que protege de verdad y no deja el turno sin salida:
@@ -268,7 +274,7 @@ un riesgo que nadie vio.
 | 2 | `findingId` + «Resolver en Terminal» | `send-message-types.ts`, handler de `chat:send`, `chat-prompt.ts`, acciones de fila de Escaneo | **Libre** |
 | 3 | Cierre del ciclo hasta Historia | la vía del turno (`con-red-de-reversion.ts`), `dismiss-finding.ts`, `verificar-mitigado.ts`, `extinguido-por.ts`, `ConfirmMitigado.tsx` | **Libre** |
 | 4 | Opus fijo + memoria por hallazgo | `reply-from-chat.ts` / router, `claude-code-agent.ts` | **Libre** |
-| 5 | Sustituir el freno de severidad | `protected-areas.ts`, `modo-efectivo.ts`, `operation-mode.ts`, revisor nuevo (entra en la lista) | **Innegociable** |
+| 5 | Sustituir el freno de severidad — **reescrita por la Enmienda 1**: producir con plenas capacidades + red que escala con el riesgo | `protected-areas.ts`, `modo-efectivo.ts`, `operation-mode.ts`, revisor nuevo (entra en la lista) | **Innegociable** |
 | 6 | Sin tope por ejecución; el diario, ratificado | `chat-engines.ts` (y `run-guard.ts` sin cambios) | Por ejecución: **Libre**. Diario: **Innegociable** (se ratifica, no se cambia) |
 
 ## Orden de construcción
@@ -280,6 +286,84 @@ un riesgo que nadie vio.
 | **3** | **5 y 6** | La 5 toca innegociables y lleva la pieza nueva más delicada, el revisor del diff. La 6 cierra el arco con el riesgo aceptado ya firmado |
 
 Cada fase pasa el gate 5/5 y se integra con firma, como cualquier cambio.
+
+## Enmienda 1 (2026-09-14): la red del Terminal — OMEGA y la escala por riesgo
+
+Decisiones del operador, fijadas el 2026-09-14 con las piezas 1 y 2 ya
+construidas. Deciden quién juzga el trabajo del Terminal y cuánta red lleva, y
+**reescriben la pieza 5**. El resto del ADR sigue en pie.
+
+### 1. OMEGA es el modelo más alto disponible, siempre por encima del que produce
+
+- OMEGA corre con el **modelo más alto disponible**, declarado de forma que se
+  actualice solo cuando salga uno nuevo (hoy, Fable 5). Y va **siempre por
+  encima del agente que produce**: si el Terminal resuelve con Opus
+  (Decisión 4), quien juzga no puede ser Opus.
+- Es un **testigo desde afuera**: observa todo el código en trabajo, anota, y
+  emite su juicio **con evidencia** (`archivo:línea`).
+- Su carta queda intacta: **veta, nunca ejecuta ni aprueba a ciegas**.
+  Evidencia o silencio: lo que no puede señalar en el código, no lo afirma.
+
+**Pendiente antes de construir: la relación con ADR-078.** ADR-078 descartó
+Fable «por doctrina, no por capacidad»: su respaldo ante una petición de
+ciberseguridad cae a Opus 4.8 con retención de 30 días, y FORTRESS audita código
+ajeno bajo cero telemetría. Esta decisión pone a OMEGA justo en ese caso:
+juzgar diffs de seguridad de código de cliente. Antes de construir la pieza 5
+hay que resolver esa tensión de forma explícita —comprobar el comportamiento
+vigente o decidir qué garantía se afirma— y dejarlo escrito en ADR-078 o en el
+ADR de la pieza 5. Esta enmienda no la resuelve: la registra.
+
+### 2. La red escala con el riesgo del hallazgo
+
+| Riesgo del hallazgo | Red |
+|---|---|
+| **Por defecto:** LOW y MEDIUM, y CRITICAL/HIGH simples | **Productor + juez.** Un agente escribe con plenas capacidades; el **gate objetivo** (typecheck, lint, test: no puede mentir) y **OMEGA** revisan el diff. Si los dos dan verde, el turno se conserva; si no, la red git (ADR-079) lo revierte. |
+| **CRITICAL/HIGH complejos, o que tocan auth, pagos o secretos** | Se abre el **debate de varias rondas**: la defensa argumenta, OMEGA juzga, y gana quien sube el **score real**. La profundidad del juicio es proporcional al peligro. |
+
+El **criterio** de cuándo se abre el debate queda declarado aquí. Su **forma
+concreta** —cuántas rondas, cómo se mide «complejo», qué cuenta como score real—
+la fija el ADR o la implementación de la pieza 5.
+
+### 3. Paridad con `claude -p`
+
+El agente que produce tiene **las mismas capacidades que Claude Code** en la
+máquina del operador: leer el schema de la base de datos, mirar el despliegue,
+tocar cualquier fichero, cuando esa capacidad exista. FORTRESS **no se limita
+por debajo de su propio motor**. La misión es superar a Cursor y a Lovable, no
+igualarlos.
+
+### 4. Sin aprobación humana en el mundo cliente
+
+El cliente no es técnico: da órdenes en lenguaje normal. La seguridad la ponen
+**el gate, OMEGA y la red git que revierte**, **no un clic humano**. El humano
+vuelve solo por **su propio git**, fuera de FORTRESS.
+
+Esto es **mundo cliente (Terminal)**. En el mundo FORTRESS-sobre-sí-misma sigue
+la **firma humana** del Motor, y esta enmienda no la toca.
+
+### 5. La degradación por palabra es andamio temporal
+
+El tapón que dejó la pieza 2 —un hallazgo sensible baja a `plan` porque el
+texto que se juzga incluye su fichero, su título y su tipo (`textoParaElModo`)—
+es **andamio temporal**. Protege el intervalo hasta la pieza 5 y **muere cuando
+OMEGA revise el diff de verdad**. No es diseño final.
+
+### Consecuencia: la pieza 5 se reescribe
+
+De **«bloquear por palabra hasta tener revisor»** a **«producir con plenas
+capacidades + una red de agentes que escala con el riesgo»**. La Decisión 5 y la
+fila 5 de la tabla remiten aquí.
+
+Lo que **cambia**: el juez es OMEGA con el modelo más alto, no «un revisor de
+seguridad Opus»; el productor no se recorta; y para el riesgo alto el juicio es
+un debate, no una lectura.
+
+Lo que la Decisión 5 ya fijaba y **esta enmienda no contradice**: la revisión
+mira lo que el turno HIZO (los ficheros del diff), no solo lo que se pidió;
+ninguna degradación que se quede es muda; `MODE_INSTRUCTION` cambia a la vez; el
+juez falla cerrado; y el fichero nuevo que decide conservar o revertir entra en
+la lista innegociable en el mismo commit que lo crea. Si el ADR de la pieza 5
+decide otra cosa sobre alguno de estos puntos, lo escribe allí.
 
 ## Consecuencias
 
