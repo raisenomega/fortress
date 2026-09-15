@@ -207,6 +207,10 @@ dice que «lo confirma un escaneo», y desde ADR-087 lo confirma la verificació
 > capacidades y la red escala con el riesgo del hallazgo (debate de varias
 > rondas para lo complejo o sensible). La degradación por palabra que dejó la
 > pieza 2 es andamio y muere aquí. Ver la Enmienda 1.
+>
+> **Y el 2026-09-15 (Enmienda 3): el modelo y la independencia del juez.** OMEGA
+> es Opus 5, igual o por encima del productor, y juzga en sesión nueva, con solo
+> el diff y la evidencia. Ver la Enmienda 3.
 
 Quitarlo a pelo perdería su intención: un cambio que afloja un control de auth
 **compila en verde**, y el typecheck de la red de ADR-079 no lo detectaría. Se
@@ -280,7 +284,7 @@ un riesgo que nadie vio.
 | 2 | `findingId` + «Resolver en Terminal» | `send-message-types.ts`, handler de `chat:send`, `chat-prompt.ts`, acciones de fila de Escaneo | **Libre** |
 | 3 | Cierre del ciclo hasta Historia | la vía del turno (`con-red-de-reversion.ts`), `dismiss-finding.ts`, `verificar-mitigado.ts`, `extinguido-por.ts`, `ConfirmMitigado.tsx` | **Libre** |
 | 4 | Opus fijo + memoria por hallazgo — **enmendada por la Enmienda 2**: el nivel lo da una escalera autoactualizable, no «Opus» literal | `reply-from-chat.ts` / router, `claude-code-agent.ts` | **Libre** |
-| 5 | Sustituir el freno de severidad — **reescrita por la Enmienda 1**: producir con plenas capacidades + red que escala con el riesgo | `protected-areas.ts`, `modo-efectivo.ts`, `operation-mode.ts`, revisor nuevo (entra en la lista) | **Innegociable** |
+| 5 | Sustituir el freno de severidad — **reescrita por la Enmienda 1**: producir con plenas capacidades + red que escala con el riesgo; el modelo de OMEGA y su independencia, en la **Enmienda 3** | `protected-areas.ts`, `modo-efectivo.ts`, `operation-mode.ts`, revisor nuevo (entra en la lista) | **Innegociable** |
 | 6 | Sin tope por ejecución; el diario, ratificado | `chat-engines.ts` (y `run-guard.ts` sin cambios) | Por ejecución: **Libre**. Diario: **Innegociable** (se ratifica, no se cambia) |
 
 ## Orden de construcción
@@ -300,6 +304,12 @@ construidas. Deciden quién juzga el trabajo del Terminal y cuánta red lleva, y
 **reescriben la pieza 5**. El resto del ADR sigue en pie.
 
 ### 1. OMEGA es el modelo más alto disponible, siempre por encima del que produce
+
+> **Enmendado el 2026-09-15 (Enmienda 3): Opus 5, igual o por encima.** OMEGA
+> no corre con Fable sino con `MODELO_DE_OMEGA`, el peldaño más alto que la
+> cuenta permita (hoy Opus 5), y la regla se relaja a «igual o por encima» del
+> que produce. La tensión con ADR-078 que registra este apartado queda resuelta
+> allí. Ver la Enmienda 3.
 
 - OMEGA corre con el **modelo más alto disponible**, declarado de forma que se
   actualice solo cuando salga uno nuevo (hoy, Fable 5). Y va **siempre por
@@ -377,6 +387,12 @@ Decisiones del operador, fijadas el 2026-09-15 con las piezas 1 a 3 ya
 integradas y antes de construir la 4. Deciden **con qué nivel de modelo
 produce** el turno de resolución y **cómo recuerda** entre mensajes.
 **Enmiendan la Decisión 4.** El resto del ADR, y la Enmienda 1, siguen en pie.
+
+> **Enmendada el 2026-09-15 (Enmienda 3) en §1, §3 y §4.** OMEGA deja de ir en
+> la cima: tiene su propio valor, `MODELO_DE_OMEGA`, y `CIMA` se queda en
+> `'fable'` solo para anclar al productor, que sigue en `'opus'`. Que productor y
+> OMEGA coincidan en Opus deja de ser transitorio: es el diseño mientras la
+> cuenta no permita Fable. Ver la Enmienda 3.
 
 ### 1. Un productor fijo, con el nivel dado por una escalera
 
@@ -474,6 +490,158 @@ turno de resolución**, sin reparto por palabras, con memoria por hallazgo y con
 ser **el peldaño de debajo de la cima de una escalera autoactualizable**, con
 `CIMA` pendiente de ADR-078.
 
+## Enmienda 3 (2026-09-15): OMEGA = Opus 5, independencia estructural, y la resolución de ADR-078
+
+Decisiones del operador, fijadas el 2026-09-15 con las piezas 1 a 4 integradas y
+antes de construir la 5. Deciden **con qué modelo juzga OMEGA** el trabajo del
+Terminal y **qué garantiza su independencia**, y **resuelven la tensión con
+ADR-078** que la Enmienda 1 dejó registrada. **Enmiendan la Enmienda 1 §1 y la
+Enmienda 2 §1, §3 y §4.** El resto del ADR sigue en pie.
+
+Los hechos sobre modelos y retención se verificaron el 2026-09-15 contra fuentes
+oficiales de Anthropic, citadas al final de esta enmienda. Lo que cambia con el
+tiempo no se toma de memoria ni de un ADR anterior.
+
+### 1. OMEGA es Opus 5, no Fable
+
+- **Fable es un «Covered Model»**: exige **30 días de retención por sí mismo**,
+  en toda petición, y no está disponible bajo retención cero (ZDR) salvo
+  autorización expresa de Anthropic. **Opus 5 no es Covered Model**: sigue
+  disponible bajo ZDR.
+- **Corrige la premisa de ADR-078.** ADR-078 atribuía la retención al fallback
+  de Fable ante ciberseguridad («cae a Opus 4.8 con retención de 30 días») y no
+  citaba fuente. La retención viene del modelo, no del fallback. Y el fallback a
+  Opus 4.8 tampoco distingue a Fable: Opus 5 hace lo mismo (§3).
+- **Resuelve la deuda `omega-fable-choca-con-adr-078`.** Fable queda
+  **descartado como OMEGA mientras la cuenta no permita ZDR**, y se elige Opus 5.
+  La conclusión de ADR-078 —ningún agente en Fable— se mantiene; cambia su
+  porqué.
+
+### 2. La escalera lleva dos valores, no uno
+
+La Enmienda 2 hizo de `CIMA` el sitio de OMEGA y derivó de ella al productor. Con
+OMEGA en Opus, esa derivación bajaría al productor a Sonnet. Se separan:
+
+- **`CIMA`**, de la que sale el productor por `peldanoDeDebajo`: **se queda en
+  `'fable'`**, y el productor sigue en **`'opus'`**. No se toca. Deja de nombrar
+  el sitio de OMEGA: solo ancla al productor.
+- **`MODELO_DE_OMEGA`**, un valor propio: **el peldaño más alto que la cuenta
+  permita hoy**, que es **`'opus'`**. **No se deriva de `CIMA`.**
+
+El día que la cuenta permita Fable —Enterprise con ZDR **y** la autorización de
+Covered Models, que Anthropic abre con Enterprise Frontier Safeguards— lo que
+cambia es `MODELO_DE_OMEGA`, no `CIMA`, y el productor no se mueve. Es poco
+código, pero tiene que ser explícito: nadie debe subir a OMEGA tocando la cima y
+arrastrar con ella al productor.
+
+**Consecuencia:** la regla de la Enmienda 1 §1, «OMEGA estrictamente por encima
+del que produce», se **relaja a «igual o por encima»**. Hoy productor y OMEGA
+corren los dos con Opus 5: son **par**.
+
+### 3. «Igual o por encima» no se garantiza por petición
+
+Opus 5 cambia solo a **Opus 4.8** ante ciberseguridad ofensiva —generación de
+exploits, pentesting, escaneo de binarios—, también en Claude Code. Un veredicto
+de OMEGA sobre un diff de seguridad puede salir de Opus 4.8, **por debajo del
+productor**.
+
+Por eso la pieza 5 **registra qué modelo sirvió cada veredicto**, con el campo
+`model` de cada evento `assistant` del stream. Está por medir que un cambio de
+modelo quede reflejado en ese campo: la pieza lo mide antes de fiarse de él.
+
+**No se promete un juez superior. Se promete un juez INDEPENDIENTE, con
+evidencia.**
+
+### 4. La independencia es estructural, no solo otra carta
+
+Es la fuerza real del juez, y se garantiza por construcción:
+
+- OMEGA corre en **sesión nueva**. **Nunca reanuda ni bifurca la sesión del
+  productor** —el `--resume` de la pieza 4— ni lee su transcript.
+- Solo recibe **el diff y la evidencia**.
+- Es [ADR-059](adr-059-capas-de-estado-no-heredan.md): ninguna capa hereda
+  estado de otra.
+- Se fija con un test en la pieza 5: **la petición de OMEGA nunca lleva
+  `reanudarSesion`**.
+
+### 5. El alias se vuelve a comprobar cuando cambia de versión
+
+`'opus'` es un alias que sigue al último Opus (el molde de ADR-078), y esta
+enmienda se apoya en que **el Opus vigente no es Covered Model**. Cada vez que el
+alias cambie de versión, **se vuelve a verificar** contra la política vigente
+antes de dar la subida por buena. Si un Opus futuro pasara a ser Covered Model,
+la retención volvería sin tocar una línea.
+
+### 6. El modelo de OMEGA se fija, no se hereda
+
+Hoy «OMEGA corre en Opus» es cierto por dos caminos distintos, y uno es frágil:
+
+- El agente de catálogo **`sentinel-omega`** declara `model: 'opus'` en
+  `sentinel-omega.ts`, como un literal.
+- El **juez OMEGA del Motor** (`graph-omega.ts`) lanza su propio `claude -p` sin
+  `--agent` ni `--model`, y sin pasar por `buildArgs`: corre con el modelo por
+  defecto del terminal del operador (`~/.claude/settings.json`). Ahí «Opus» es
+  **solo herencia**. Si el operador cambia su default, el juez cambia de modelo
+  sin que FORTRESS lo sepa.
+
+La pieza 5 fija el modelo del OMEGA que juzga el Terminal **desde
+`MODELO_DE_OMEGA`**, explícito: ni un literal suelto ni la herencia del terminal
+del operador. Va por la misma vía que el productor (Enmienda 2 §5), y
+**`claude-cli.ts` y `buildArgs` no se tocan**. El juez del Motor es mundo
+FORTRESS y queda fuera del alcance de este ADR: aquí no se cambia nada del Motor.
+
+### Nota de alcance: el modelo no es la cuenta
+
+Esta enmienda decide el **modelo** y la **independencia** de OMEGA: el eje
+modelo. **No decide la credencial** con la que corre FORTRESS —el Eje 1:
+suscripción de consumo o Enterprise con ZDR—. Esa decisión gobierna la promesa
+de retención al cliente, sigue pendiente y queda ligada a la deuda
+`disclaimers-de-datos-en-configuracion`.
+
+Lo que hay que saber para no prometer de más:
+
+- FORTRESS corre por defecto con la **suscripción** del operador
+  (`auth-source.ts`). Si es un plan de consumo (Free, Pro o Max), la retención es
+  de **30 días**, o de **5 años con entrenamiento** si el operador lo tiene
+  activado, y no hay ZDR **con ningún modelo**.
+- En Claude Code, la ZDR se ofrece en **Claude for Enterprise**, a cuentas
+  cualificadas, y la habilita Anthropic organización a organización.
+- **Ni con ZDR es una promesa sin asterisco.** Anthropic retiene lo necesario
+  por ley o contra el mal uso, y una sesión marcada por violar la política de uso
+  puede guardarse **hasta 2 años**.
+
+La promesa «cero retención» **no es afirmable hoy con ningún modelo**. Elegir
+Opus 5 desbloquea la pieza 5; no arregla la cuenta.
+
+### Consecuencia: la pieza 5 remite también aquí
+
+La Decisión 5 y la fila 5 de la tabla, ya remitidas a la Enmienda 1, **remiten
+también aquí** para el modelo concreto de OMEGA y su independencia estructural.
+
+Lo que **cambia**: OMEGA pasa de «el modelo más alto disponible» a
+**`MODELO_DE_OMEGA`, el más alto que la cuenta permita** (hoy Opus 5); la regla
+pasa de «estrictamente por encima» a **«igual o por encima»**, sin promesa por
+petición; y la independencia se fija por construcción.
+
+Lo que **no cambia**: la carta de OMEGA (veta, nunca ejecuta; evidencia o
+silencio), la red que escala con el riesgo (Enmienda 1 §2), el productor en
+`'opus'` y `--resume` fuera de `buildArgs`.
+
+**Fuentes, consultadas el 2026-09-15:**
+
+- [Data retention practices for Covered Models](https://support.claude.com/en/articles/15425996-data-retention-practices-for-covered-models)
+  — Help Center de Claude: qué exige un Covered Model.
+- [Zero data retention](https://code.claude.com/docs/en/zero-data-retention) —
+  documentación de Claude Code: Covered Models bajo ZDR, los demás modelos
+  disponibles, y la excepción legal y de mal uso (hasta 2 años).
+- [Data usage](https://code.claude.com/docs/en/data-usage) — documentación de
+  Claude Code: la retención por tipo de cuenta.
+- [Why Claude switched models in your conversation with Opus 5](https://support.claude.com/en/articles/16049681-why-claude-switched-models-in-your-conversation-with-opus-5)
+  — Help Center, actualizado el 2026-08-06: el cambio a Opus 4.8, también en
+  Claude Code.
+- [Developing Enterprise Frontier Safeguards with our customers](https://www.anthropic.com/news/enterprise-frontier-safeguards)
+  — Anthropic, 2026-09-01: la vía de Fable bajo ZDR.
+
 ## Consecuencias
 
 - **El cliente resuelve CRITICAL y HIGH por el Terminal**, y el hallazgo
@@ -557,6 +725,8 @@ por fases:
 
 - `internal/DOCTRINA-PRODUCTO.md` — la doctrina de los dos mundos (fuera del
   repositorio público).
+- [ADR-059](adr-059-capas-de-estado-no-heredan.md) — ninguna capa hereda estado
+  de otra: por qué OMEGA juzga en sesión nueva (Enmienda 3).
 - [ADR-065](adr-065-nada-muere-sin-juicio.md) — nada muere sin juicio: por qué lo
   no probado no va a Historia.
 - [ADR-078](adr-078-modelo-por-agente-via-agents.md) — modelo por agente: el

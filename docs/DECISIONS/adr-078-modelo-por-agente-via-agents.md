@@ -60,6 +60,15 @@ casa lleva persiguiendo en las listas que se escriben a mano.
 
 ### Por qué ninguno en Fable
 
+> **Corregido el 2026-09-15 ([ADR-088](adr-088-terminal-grado-bancario.md),
+> Enmienda 3): la retención es del modelo, no del fallback.** Fable es un
+> «Covered Model»: exige 30 días de retención por sí mismo, en toda petición, y
+> no está disponible bajo retención cero salvo autorización expresa de Anthropic.
+> Tampoco el fallback a Opus 4.8 ante ciberseguridad ofensiva es propio de Fable:
+> Opus 5 hace lo mismo. La conclusión se mantiene —ningún agente en Fable—;
+> cambia su porqué. El texto de abajo se conserva tal como se escribió; la
+> resolución y sus fuentes, con fecha, están en la Enmienda 3 de ADR-088.
+
 Su fallback ante una petición de ciberseguridad cae a Opus 4.8 **con retención de
 30 días**. Este repositorio audita código ajeno bajo doctrina de cero telemetría,
 y un agente que a veces retiene y a veces no es peor que uno que nunca lo hace:
