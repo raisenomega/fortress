@@ -16,6 +16,9 @@ export function hijoFalso(): ChildProcessWithoutNullStreams & {
     stdout: { on, once: on, removeListener: () => undefined, resume: () => undefined },
     stderr: { on },
     on,
+    // `trackChild` y `terminar` se enganchan con `once`: sin el, registrar un
+    // hijo falso en el registro real revienta antes de poder matarlo.
+    once: on,
     cerrar: () => (listeners.close ?? []).forEach((h) => h(0))
   }
   return child as unknown as ChildProcessWithoutNullStreams & {

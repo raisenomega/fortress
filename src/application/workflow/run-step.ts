@@ -23,6 +23,9 @@ export async function runStep(
   const reply = await deps.codeAgent.run(
     {
       projectPath: deps.project.path,
+      // Con dueño, o Detener no lo alcanza: el hijo se registra con este id y
+      // `killChildrenOf` solo mata a los del proyecto que se para.
+      projectId: deps.project.id,
       prompt,
       permissionMode,
       agentId,
