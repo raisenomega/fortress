@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { describe, expect, it } from 'vitest'
+import { MODELO_DEL_PRODUCTOR } from '@domain/agent/escalera-de-modelos'
 import { agentsForProject } from './agents-for-project'
 
 /** Crea un repo con agentes propios en .claude/agents. */
@@ -27,5 +28,12 @@ describe('agentsForProject', () => {
 
   it('tampoco cede a sentinel-omega, el meta-auditor', () => {
     expect(agentsForProject(repoWithAgents('sentinel-omega'))['sentinel-omega']).toBeDefined()
+  })
+
+  it('ni al productor: un productor.md del repo no le cambia el modelo ni el prompt', () => {
+    // Sin esto, el codigo auditado decidiria con que nivel se arregla a si mismo.
+    const payload = agentsForProject(repoWithAgents('productor'))
+    expect(payload.productor?.model).toBe(MODELO_DEL_PRODUCTOR)
+    expect(payload.productor?.prompt).toContain('PRODUCTOR del Terminal')
   })
 })

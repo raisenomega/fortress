@@ -33,10 +33,15 @@ module.exports = async function omegaScoreChecks(window) {
   check('overall bajo -> banda no-usar', score.ok && score.value.band === 'no-usar')
 
   const agents = await run(`window.api.omega.agents('${idS}')`)
-  check('la salud macro cubre los 12 agentes del catalogo', agents.length === 12)
+  check('la salud macro cubre los 13 agentes del catalogo', agents.length === 13)
   check(
     'incluye a sentinel-omega en la tabla',
     agents.some((a) => a.agentId === 'sentinel-omega')
+  )
+  // ADR-088, Enmienda 2: el productor del Terminal es visible para OMEGA.
+  check(
+    'incluye al productor del Terminal',
+    agents.some((a) => a.agentId === 'productor')
   )
   check(
     'sin runs, el cumplimiento del agente es null (no cero)',

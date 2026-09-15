@@ -4,7 +4,9 @@ import { categoryForAgent } from './docs-first'
 
 describe('categoryForAgent', () => {
   it('manda a las decisiones firmadas a quien decide donde va un cambio', () => {
-    for (const id of ['planner', 'refactor-cleaner', 'code-simplifier'] as const) {
+    // El productor del Terminal (ADR-088) escribe el arreglo: sin las decisiones
+    // firmadas podria deshacer algo deliberado al cerrar un hallazgo.
+    for (const id of ['planner', 'refactor-cleaner', 'code-simplifier', 'productor'] as const) {
       expect(categoryForAgent(id)).toBe('structural')
     }
   })
@@ -29,7 +31,7 @@ describe('categoryForAgent', () => {
   it('cada agente del catalogo cae en una de las tres, y ninguna otra', () => {
     // Si manana entra un agente nuevo al catalogo, este caso obliga a decidir
     // su documentacion en vez de dejarlo caer al default sin pensarlo.
-    expect(AGENT_IDS).toHaveLength(12)
+    expect(AGENT_IDS).toHaveLength(13)
     for (const id of AGENT_IDS) {
       expect(['security', 'structural', 'general']).toContain(categoryForAgent(id))
     }

@@ -3,9 +3,11 @@ import type { CorpusCategory } from '../project/corpus-descriptor'
 
 /**
  * Quienes deciden DONDE va un cambio, no solo si esta bien: sin las decisiones
- * ya firmadas pueden borrar o "simplificar" algo que es deliberado.
+ * ya firmadas pueden borrar o "simplificar" algo que es deliberado. El productor
+ * del Terminal (ADR-088) es el que escribe el arreglo: lo mismo le aplica.
  */
-const STRUCTURAL: ReadonlySet<AgentId> = new Set(['planner', 'refactor-cleaner', 'code-simplifier'])
+// prettier-ignore
+const STRUCTURAL: ReadonlySet<AgentId> = new Set(['planner', 'refactor-cleaner', 'code-simplifier', 'productor'])
 
 /**
  * Quienes emiten juicio sobre lo que se protege o sobre lo que se publica.
