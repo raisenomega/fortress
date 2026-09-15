@@ -1,5 +1,6 @@
 import type { Finding } from '@domain/project/project'
 import type { Project } from '@domain/project/project'
+import type { LoteEnLaTabla } from '../../hooks/useLoteDelTablero'
 import { CajitaDeSeleccion } from './CajitaDeSeleccion'
 import { FindingRow } from './FindingRow'
 import { FindingsEmpty } from './FindingsEmpty'
@@ -20,6 +21,7 @@ interface FindingsTableProps {
   /** Los verificables de la VISTA. De aqui sale la cajita de la cabecera. */
   readonly visibles: readonly string[]
   readonly onTodasLasVisibles: () => void
+  readonly lote: LoteEnLaTabla | null // sin atajo en la cabecera: el lote es corto
   /** Hay hallazgos, pero ninguno pasa el filtro. No es lo mismo que no haberlos. */
   readonly filtrando: boolean
   readonly onQuitarFiltro: () => void

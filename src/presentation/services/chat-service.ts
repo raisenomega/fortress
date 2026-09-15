@@ -1,6 +1,7 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
+import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
 import { captureConfigDrafts } from './capture-config-drafts'
 import { refreshSessionUsage } from './telemetry-service'
@@ -67,6 +68,8 @@ export async function clearHistory(projectId: string): Promise<void> {
  * mas, el operador recupera el control; el finally del envio lo re-confirma.
  */
 export async function stopWorkflow(projectId: string): Promise<void> {
+  // ANTES de matar el turno: al volver su promesa, la cola ya lee el corte.
+  useColaDelLoteStore.getState().cortar(projectId)
   await api().chat.stop(projectId)
   useChatStore.getState().setStreaming(projectId, false)
 }

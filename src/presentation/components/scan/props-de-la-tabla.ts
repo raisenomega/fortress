@@ -1,5 +1,6 @@
 import { TODAS } from '@domain/project/filtro-del-tablero'
 import type { Project } from '@domain/project/project'
+import type { LoteEnLaTabla } from '../../hooks/useLoteDelTablero'
 import type { SeleccionDelTablero } from '../../hooks/useSeleccionDelTablero'
 import type { Tablero } from '../../hooks/useTablero'
 // prettier-ignore
@@ -18,10 +19,13 @@ export function propsDeLaTabla(
   project: Project,
   tablero: Tablero,
   seleccion: SeleccionDelTablero,
-  ocupado: boolean
+  ocupado: boolean,
+  /** El lote al Terminal, o null donde no se ofrece (ver `useLoteDelTablero`). */
+  lote: LoteEnLaTabla | null = null
 ): React.ComponentProps<typeof import('./FindingsTable').FindingsTable> {
   return {
     project,
+    lote,
     findings: tablero.visibles,
     seleccion: tablero.seleccion,
     onSeleccionar: seleccion.alternar,
