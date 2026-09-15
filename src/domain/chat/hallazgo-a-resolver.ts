@@ -15,6 +15,9 @@ export interface HallazgoAResolver {
   readonly simbolo: string | null
   readonly mitigatedNote: string | null
   readonly verificacionNote: string | null
+  /** La sesion del productor para este hallazgo (ADR-088, Enmienda 2), o null.
+   *  Viaja al CLI como `--resume`, NUNCA al prompt: `formatearHallazgo` no la pinta. */
+  readonly sesion: string | null
 }
 
 /**

@@ -1,7 +1,9 @@
 import type { Agent } from './agent'
+import { PRODUCTOR } from './productor'
 import { SENTINEL_OMEGA } from './sentinel-omega'
 
-/** Agentes activos al instalar: los seis de la spec + OMEGA, el meta-auditor. */
+/** Agentes activos al instalar: los seis de la spec + OMEGA, el meta-auditor, y
+ *  el productor del Terminal (ADR-088), que no se apaga. */
 export const DEFAULT_AGENTS: readonly Agent[] = [
   {
     id: 'security-reviewer',
@@ -51,5 +53,6 @@ export const DEFAULT_AGENTS: readonly Agent[] = [
     enabledByDefault: true,
     model: 'opus'
   },
-  SENTINEL_OMEGA
+  SENTINEL_OMEGA,
+  PRODUCTOR
 ]

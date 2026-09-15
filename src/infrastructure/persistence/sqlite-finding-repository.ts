@@ -7,6 +7,7 @@ import { toMemory, type MemoryRow } from './finding-memory-row'
 import { toFinding, toInsert, type FindingRow } from './finding-row'
 import * as SQL from './finding-sql'
 import { createFindingWrites } from './finding-writes'
+import { createMemoriaDelTerminal } from './memoria-del-terminal'
 
 interface CountRow {
   readonly project_id: string
@@ -57,6 +58,8 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
     markActive: (id) => writes.markActive(id),
 
     dismiss: (findingId) => writes.changeStatus(findingId, true),
-    reopen: (findingId) => writes.changeStatus(findingId, false)
+    reopen: (findingId) => writes.changeStatus(findingId, false),
+
+    ...createMemoriaDelTerminal(db)
   }
 }

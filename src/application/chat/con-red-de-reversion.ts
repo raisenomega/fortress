@@ -8,6 +8,10 @@ export interface TurnoProtegido {
   /** La red estaba puesta y el turno se quedo en el arbol. Sin red es false: nada
    *  garantiza lo que quedo, y el cierre del ciclo (ADR-088) solo se fia de esto. */
   readonly conservado: boolean
+  /** La red estaba puesta y DESHIZO el turno. NO es lo contrario de `conservado`:
+   *  sin red los dos son false —nadie conservo ni revirtio nada—, y la memoria
+   *  por hallazgo (ADR-088, Enmienda 2) necesita distinguir ese caso. */
+  readonly revertido: boolean
 }
 
 /**
@@ -47,13 +51,14 @@ export async function conRedDeReversion(
     cp?.revertir()
     throw error
   }
-  if (cp === null) return { outcome, aviso: '', conservado: false }
+  if (cp === null) return { outcome, aviso: '', conservado: false, revertido: false }
 
   const rojo = outcome.failed || (outcome.edits.length > 0 && !(await red.verificar(cwd)))
   const retirado = rojo ? cp.revertir() : cp.conservar()
   return {
     outcome,
     aviso: (rojo ? REVERTIDO_POR_RED : '') + (retirado ? '' : CHECKPOINT_HUERFANO),
-    conservado: !rojo
+    conservado: !rojo,
+    revertido: rojo
   }
 }

@@ -143,7 +143,9 @@ en su prompt son LA MISMA por construcción — no pueden divergir.
   a ningún otro; cada agente decide de forma independiente si aporta.
 - **Modo chat:** un router por palabras clave elige el agente según la
   intención del mensaje del operador ("revisa la seguridad" invoca al
-  revisor de seguridad, "el build falla" al resolutor de builds).
+  revisor de seguridad, "el build falla" al resolutor de builds). La
+  excepción es el turno con foco —«Resolver en Terminal» sobre un hallazgo—:
+  ese lo produce siempre el Productor, sin router (ver más abajo).
 
 En ambos modos, los agentes activos viajan a Claude Code como subagentes
 (payload de identificador → descripción + prompt, con la forma exacta que
@@ -309,6 +311,30 @@ una capacidad ni aprueba en solitario (`docs/DECISIONS/adr-046-sentinel-omega-ca
   de push por CRITICAL) y asientos en su registro eterno.
 - **NO confundir con claude-omega** (revisor de diffs del motor).
 
+### El Productor del Terminal (`productor`) — fuera del reparto
+
+No audita: **resuelve**. Es el agente que escribe el arreglo cuando el operador
+pulsa «Resolver en Terminal» sobre un hallazgo
+([ADR-088](DECISIONS/adr-088-terminal-grado-bancario.md), Decisión 4 y
+Enmienda 2).
+
+- **Cuándo se activa:** siempre en el turno con foco, sin router por palabras.
+  El chat libre sigue con el router.
+- **Carta propia:** confirma en el código de hoy que el problema sigue; arregla
+  la causa con el cambio más pequeño que la cierre; corre los tests antes y
+  después; explica con archivo:línea, porque después un analista independiente
+  tiene que **probar** que el problema ya no está.
+- **Modelo:** no es un literal del reparto de ADR-078. Lo da la **escalera de
+  modelos** (`escalera-de-modelos.ts`): un peldaño por debajo de la cima. Hoy
+  la cima es `fable`, pendiente de ADR-078, y el Productor corre con `opus`.
+- **Memoria por hallazgo:** recuerda entre mensajes sobre el mismo hallazgo
+  (`--resume`). La memoria no avanza si la red de reversión deshizo el turno, y
+  una sesión que ya no se puede reanudar se olvida sin bloquear el resolver.
+- **Protegido:** un `.claude/agents/productor.md` del repositorio del cliente no
+  puede reescribir su modelo ni su prompt.
+- **Sin toggle:** es fijo en la barra lateral; apagarlo dejaría el turno de
+  resolución sin quien produzca.
+
 ## Ciclo de vida común de todos los agentes
 
 - Todos los agentes LLM consumen tokens (el gate mecánico no).
@@ -316,13 +342,15 @@ una capacidad ni aprueba en solitario (`docs/DECISIONS/adr-046-sentinel-omega-ca
   propuesta; las de auditoría y chat en la telemetría de corridas, con su
   factura real (entrada, salida, cachés, coste y duración).
 - Todos operan bajo el marco de [SECURITY-MODEL](SECURITY-MODEL.md).
-- Todos son activables y desactivables por el operador.
+- Todos son activables y desactivables por el operador, salvo el Productor
+  del Terminal, que es fijo.
 
 ## Configuración y toggle
 
 - Panel lateral: toggle por agente, persistido.
 - Un agente desactivado NO se despacha, aunque un flujo lo incluyera.
 - Los toggles son independientes entre sí (sin cascade).
+- El Productor del Terminal no tiene toggle: se ve y se abre, pero no se apaga.
 - Los agentes auto-creados por el ciclo de capacidades son una categoría
   aparte (datos en la base, firma humana previa, toggle reversible) — ver
   [DATA-MODEL](DATA-MODEL.md), tabla de definiciones de agentes.

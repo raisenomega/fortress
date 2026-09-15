@@ -15,7 +15,11 @@ const AUDIT_AGENTS: ReadonlySet<string> = new Set([
   // Decide QUE se audita. Si el repo pudiera traer el suyo, se declararia
   // fuera de alcance —«aqui no hay dinero, no mires M8»— y el informe saldria
   // limpio por omision. Es el mismo fallo de integridad, un paso antes.
-  'scope-classifier'
+  'scope-classifier',
+  // El productor del Terminal (ADR-088, Enmienda 2). Si el repo trajera el suyo,
+  // un fichero del codigo auditado decidiria con que modelo y con que prompt se
+  // arregla ese mismo codigo, y la escalera dejaria de ser la unica fuente.
+  'productor'
 ])
 
 /**

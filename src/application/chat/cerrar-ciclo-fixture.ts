@@ -16,7 +16,7 @@ export const RESPUESTA: ChatMessage = { id: 'm-1', projectId: 'p1', role: 'assis
 export const turnoVerde = (
   edits: readonly string[],
   over: Partial<TurnoProtegido> = {}
-): TurnoProtegido => ({ outcome: { ...textOnly('hecho'), edits }, aviso: '', conservado: true, ...over }) // prettier-ignore
+): TurnoProtegido => ({ outcome: { ...textOnly('hecho'), edits }, aviso: '', conservado: true, revertido: false, ...over }) // prettier-ignore
 
 /** El OBSOLETO con marcador, y un fichero de hoy que SI lo prueba o que NO. */
 const OBSOLETO = { verdictStatus: 'OBSOLETO', evidencia: { marcador: 'execFile(', forma: 'ausente' } } as const // prettier-ignore

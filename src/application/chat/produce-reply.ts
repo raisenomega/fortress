@@ -53,7 +53,10 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
     }
     // Resolver un hallazgo es UN turno, no un workflow de revision: sin esto,
     // «arregla … seguridad» dispararia el pipeline entero (ADR-088, pieza 2).
-    if (foco !== null) return replyFromChat({ ...opciones, enFoco: formatearHallazgo(foco) })
+    // La sesion va aparte del bloque: al CLI como `--resume`, nunca al prompt.
+    if (foco !== null) {
+      return replyFromChat({ ...opciones, enFoco: formatearHallazgo(foco), sesion: foco.sesion })
+    }
     return replyFromWorkflow(opciones)
   }
 

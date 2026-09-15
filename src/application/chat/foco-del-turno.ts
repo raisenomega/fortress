@@ -41,6 +41,8 @@ export function leerFoco(
     tipo: tipoDeLaIdentidad(memoria.identity),
     simbolo: memoria.simbolo,
     mitigatedNote: fila?.mitigatedNote ?? null,
-    verificacionNote: fila?.verificacionNote ?? null
+    verificacionNote: fila?.verificacionNote ?? null,
+    // La memoria del productor: el turno anterior sobre ESTE hallazgo, si lo hubo.
+    sesion: context.findings.sesionDelTerminal(memoria.id)
   })
 }

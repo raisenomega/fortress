@@ -33,6 +33,17 @@ describe('la red dice si el turno se CONSERVO (ADR-088: el cierre se fia de esto
     expect((await conRedDeReversion(red(), '/p', false, con())).conservado).toBe(false)
   })
 
+  it('y REVERTIDO no es lo contrario: deshacer dice revertido, conservar no', async () => {
+    expect((await conRedDeReversion(red(), '/p', true, con({ failed: true }))).revertido).toBe(true)
+    expect((await conRedDeReversion(red(), '/p', true, con())).revertido).toBe(false)
+  })
+
+  it('sin red NADIE revirtio: revertido y conservado son false los dos', async () => {
+    // El caso que la memoria por hallazgo necesita distinguir (ADR-088, Enm. 2).
+    const t = await conRedDeReversion(red(), '/p', false, con({ failed: true }))
+    expect([t.conservado, t.revertido]).toEqual([false, false])
+  })
+
   it('el checkpoint quedo huerfano: las ediciones SI se quedaron, y lo dice el aviso', async () => {
     // `conservar()` devuelve si el commit se RETIRO, no si el arbol se quedo.
     const t = await conRedDeReversion(red(true, false), '/p', true, con())

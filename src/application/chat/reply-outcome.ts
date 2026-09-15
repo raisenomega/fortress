@@ -31,6 +31,10 @@ export interface ReplyOutcome {
    *  como DATO —no como la nota de texto que ya lleva `text`— porque de ellos
    *  sale lo que FORTRESS aprende de si misma (ADR-085). */
   readonly deniedTools?: readonly string[]
+  /** La sesion del CLI que merece recordarse, si la hay (ADR-088, Enmienda 2). */
+  readonly sesion?: string
+  /** La sesion que se pidio reanudar ya no existe: hay que olvidarla (Garantia 2). */
+  readonly sesionRota?: boolean
 }
 
 /** Respuesta de solo texto: no hay herramientas ni archivos tocados. */
