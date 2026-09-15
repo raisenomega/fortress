@@ -7,11 +7,17 @@ import { buildMcpConfig } from '@domain/connectors/mcp-config'
 import { resolveAssistant } from '../ai/assistant-factory'
 import { activeCustomAgents } from '../claude-code/active-custom-agents'
 import { createClaudeCodeAgent } from '../claude-code/claude-code-agent'
+import { SIN_TECHO } from '../claude-code/run-claude-process'
 
 /**
  * Motores del chat para un envio: el agente CLI (con los conectores MCP y los
  * agentes auto-propuestos activos) y, si hay API key, el asistente de solo
  * texto. Los conectores solo viajan al chat: un escaneo no necesita Figma.
+ *
+ * El agente CLI corre SIN techo de tiempo (ADR-088, pieza 1; ADR-082, Enmienda
+ * 4), con el molde del escaneo: solo Detener lo para. Es UN agente para los tres
+ * caminos del Terminal —conversacion, workflow y entrevista—, y los tres le
+ * pasan su projectId, que es lo que deja a Detener alcanzarlo.
  */
 export function buildChatEngines(context: AppContext): {
   codeAgent: CodeAgent
@@ -25,7 +31,8 @@ export function buildChatEngines(context: AppContext): {
     budget,
     usesApiKey(context),
     mcp,
-    customs
+    customs,
+    SIN_TECHO
   )
   const assistant = resolveAssistant(context.apiKeys)
   return { codeAgent, assistant: assistant.ok ? assistant.value : null }
