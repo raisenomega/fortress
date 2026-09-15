@@ -55,5 +55,9 @@ export const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   // ademas esta sobrevive al ciclo de vida: cuando el hallazgo vuelve a la cola
   // porque el analista dijo que el problema sigue, la razon tiene que seguir
   // legible. Nullable: sin verificacion no hay nada que contar.
-  ['findings', 'verificacion_note', 'ALTER TABLE findings ADD COLUMN verificacion_note TEXT'] // prettier-ignore
+  ['findings', 'verificacion_note', 'ALTER TABLE findings ADD COLUMN verificacion_note TEXT'], // prettier-ignore
+  // La memoria del productor por hallazgo (ADR-088, Enmienda 2): la sesion del
+  // CLI que reanuda el siguiente turno con ese foco. Sin DEFAULT: NULL es «sin
+  // memoria», que es la verdad de toda fila anterior a esta pieza.
+  ['findings', 'terminal_sesion', 'ALTER TABLE findings ADD COLUMN terminal_sesion TEXT'] // prettier-ignore
 ]

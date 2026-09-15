@@ -66,6 +66,8 @@ function checkIdentidadesMigration(check) {
     check('la columna del quien esta', columnas.includes('extinguido_por'), columnas.join(','))
     const quien = db.prepare("SELECT extinguido_por q FROM findings WHERE lifecycle = 'EXTINCT'").get() // prettier-ignore
     check('y la absorbida por fusion no la cerro nadie', quien?.q === null, JSON.stringify(quien))
+    // ADR-088, Enmienda 2: la memoria del productor llega aditiva y vacia en toda fila vieja.
+    check('la memoria del Terminal nace vacia', columnas.includes('terminal_sesion') && db.prepare('SELECT COUNT(*) n FROM findings WHERE terminal_sesion IS NOT NULL').get().n === 0) // prettier-ignore
   })
 }
 

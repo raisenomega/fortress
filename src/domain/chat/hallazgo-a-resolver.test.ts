@@ -10,7 +10,8 @@ const hallazgo: HallazgoAResolver = {
   tipo: 'confianza-en-datos-del-cliente',
   simbolo: 'cobrar',
   mitigatedNote: null,
-  verificacionNote: null
+  verificacionNote: null,
+  sesion: null
 }
 
 describe('el bloque de UN hallazgo para el Terminal', () => {
@@ -34,6 +35,10 @@ describe('el bloque de UN hallazgo para el Terminal', () => {
     expect(sinNada.split('\n')).toContain('- fichero: api/checkout.ts')
     expect(sinNada).not.toContain('- tipo:')
     expect(sinNada).not.toContain('- simbolo:')
+  })
+
+  it('la sesion del productor NUNCA entra al prompt: va al CLI como --resume', () => {
+    expect(formatearHallazgo({ ...hallazgo, sesion: 'ses-que-no-se-pinta' })).not.toContain('ses-')
   })
 
   it('lo que viene del repo auditado no mete saltos de linea en el prompt', () => {

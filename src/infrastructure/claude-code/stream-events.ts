@@ -25,7 +25,16 @@ export interface ParsedEvent extends AssistantEvent {
   readonly deniedTools?: readonly string[]
   /** Solo lo trae el evento final: tokens y coste de toda la ejecucion. */
   readonly usage?: TokenUsage
+  /** Del evento final, SOLO si lo trae: la sesion y cuantos turnos corrio. */
+  readonly sessionId?: string
+  readonly turns?: number
 }
+
+/** La sesion y los turnos de un evento final, sin llaves que valgan undefined. */
+export const memoriaDelCli = (e: ParsedEvent): Pick<ParsedEvent, 'sessionId' | 'turns'> => ({
+  ...(e.sessionId === undefined ? {} : { sessionId: e.sessionId }),
+  ...(e.turns === undefined ? {} : { turns: e.turns })
+})
 
 /** Una linea NDJSON del CLI. Devuelve null si no aporta nada a la UI. */
 export function parseStreamLine(line: string): ParsedEvent | null {
@@ -57,6 +66,9 @@ function fromResult(event: Record<string, unknown>): ParsedEvent {
     deniedTools: Array.isArray(event.permission_denials)
       ? event.permission_denials.map((denial) => nombreDeHerramienta(denial))
       : [],
-    usage: parseUsage(event)
+    usage: parseUsage(event),
+    // Nada inventado: si el evento no los trae, la llave ni aparece.
+    ...(typeof event.session_id === 'string' ? { sessionId: event.session_id } : {}),
+    ...(typeof event.num_turns === 'number' ? { turns: event.num_turns } : {})
   }
 }

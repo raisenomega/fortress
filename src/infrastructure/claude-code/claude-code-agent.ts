@@ -18,6 +18,10 @@ import { collectRun, TECHO_POR_DEFECTO } from './run-claude-process'
  * por API, este agente tiene acceso real: filesystem, bash, git, npm.
  *
  * El proyecto se fija con el cwd del proceso: el CLI no tiene flag --project.
+ *
+ * La memoria por hallazgo (ADR-088, Enmienda 2) se pone AQUI, tras `buildArgs` y
+ * nunca dentro: claude-cli.ts es innegociable. `--fork-session` reanuda en una
+ * sesion DERIVADA, asi la guardada solo cambia si el turno merece recordarse.
  */
 export function createClaudeCodeAgent(
   apiKeys: ApiKeyStore,
@@ -54,6 +58,7 @@ export function createClaudeCodeAgent(
         request.trusted,
         readProjectScripts(request.projectPath)
       )
+      if (request.reanudarSesion) args.push('--resume', request.reanudarSesion, '--fork-session')
 
       const child = spawn(CLAUDE_BIN, args, {
         cwd: request.projectPath,

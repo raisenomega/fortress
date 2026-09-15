@@ -4,7 +4,6 @@ import type { CodeAgent } from '@domain/chat/code-agent'
 import { SIN_RED, type RedDeReversion } from '@domain/chat/red-de-reversion'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
-import { cerrarYContar } from './cerrar-ciclo-terminal'
 import { chooseEngine } from './choose-engine'
 import { conRedDeReversion } from './con-red-de-reversion'
 import { sinSecretosEnVivo } from './en-vivo-tachado'
@@ -15,6 +14,7 @@ import { persistTurn } from './persist-message'
 import { produceReply } from './produce-reply'
 import type { ReplyOutcome } from './reply-outcome'
 import { runConfigurationTurn } from './run-configuration-turn'
+import { trasElTurno } from './tras-el-turno'
 import type { SendMessageInput, SendMessageOutput } from './send-message-types'
 
 export async function sendMessage(
@@ -62,8 +62,8 @@ export async function sendMessage(
   const turno = await conRedDeReversion(red, project.path, activa, producir)
   const stored = finishTurn({ context, project, meta, outcome: turno.outcome, aviso: aviso + turno.aviso, startedAt, prompt: input.prompt }) // prettier-ignore
   if (!stored.ok) return err(stored.error)
-  // Tras guardar la respuesta, que es el turno que la nota cita (ADR-088, pieza 3).
-  await cerrarYContar(context, foco.value?.id ?? null, turno, stored.value)
+  // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).
+  await trasElTurno(context, foco.value?.id ?? null, turno, stored.value)
 
   return ok({ user: user.value, assistant: stored.value, engine })
 }

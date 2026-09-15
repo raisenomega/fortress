@@ -1,7 +1,7 @@
 import type { CodeAgentReply } from '@domain/chat/code-agent'
 import { redactSecrets } from '@domain/chat/tool-detail'
-import { EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
-import { parseStreamLine } from './stream-events'
+import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
+import { memoriaDelCli, parseStreamLine, type ParsedEvent } from './stream-events'
 
 export interface RunAccumulator {
   absorb(line: string): void
@@ -23,11 +23,8 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
   const collected: string[] = []
   const tools: string[] = []
   const edits: string[] = []
-  let denials: readonly string[] = []
-  let deniedTools: readonly string[] = []
-  let usage: TokenUsage = EMPTY_USAGE
-  let finalText = ''
-  let failed = false
+  // El evento final ENTERO: de el salen texto, fallo, denials, coste y memoria.
+  let final: ParsedEvent = {}
   let stderr = ''
 
   return {
@@ -46,13 +43,7 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
         collected.push(event.text)
         onChunk(event.text)
       }
-      if (event.finalText !== undefined) {
-        finalText = event.finalText
-        failed = event.failed === true
-        denials = event.denials ?? []
-        deniedTools = event.deniedTools ?? []
-        usage = event.usage ?? EMPTY_USAGE
-      }
+      if (event.finalText !== undefined) final = event
     },
 
     addStderr(text) {
@@ -60,12 +51,14 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
     },
 
     toReply(exitCode) {
+      const { finalText = '', denials = [], deniedTools = [], usage = EMPTY_USAGE } = final
       const text = collected.join('') || finalText
-      if (exitCode === 0 && !failed) return { text, failed: false, denials, deniedTools, usage, tools, edits }
+      const comun = { denials, deniedTools, usage, tools, edits, ...memoriaDelCli(final) }
+      if (exitCode === 0 && final.failed !== true) return { text, failed: false, ...comun }
 
       const detail =
         redactSecrets(stderr).trim() || finalText || `el proceso termino con codigo ${exitCode}`
-      return { text: text || detail, failed: true, denials, deniedTools, usage, tools, edits }
+      return { text: text || detail, failed: true, ...comun }
     }
   }
 }

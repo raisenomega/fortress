@@ -24,6 +24,10 @@ export interface CodeAgentRequest {
    * autoverificacion, y solo al editar (acceptEdits). Ver selfVerifyRules.
    */
   readonly trusted: boolean
+  /** Sesion del CLI a reanudar: la memoria del productor por hallazgo (ADR-088,
+   *  Enmienda 2). Ausente = sesion nueva. Se reanuda en una DERIVADA, asi que la
+   *  guardada no cambia hasta que el turno demuestre que merece recordarse. */
+  readonly reanudarSesion?: string
 }
 
 export interface CodeAgentReply {
@@ -41,6 +45,11 @@ export interface CodeAgentReply {
   readonly tools: readonly string[]
   /** Rutas que el agente escribio. Nunca comandos: pueden llevar secretos. */
   readonly edits: readonly string[]
+  /** La sesion que el CLI dice haber usado, SOLO si su evento final la trae. */
+  readonly sessionId?: string
+  /** Cuantos turnos del modelo corrio. 0 = no llego a empezar: una sesion asi no
+   *  es una conversacion, y es la firma de un `--resume` que no encontro nada. */
+  readonly turns?: number
 }
 
 /**
