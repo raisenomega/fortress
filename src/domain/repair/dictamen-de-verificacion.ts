@@ -1,3 +1,5 @@
+import type { ExtinguidoPor } from '../project/extinguido-por'
+
 /**
  * En que queda una re-verificacion (ADR-087). Cerrado, y con TRES desenlaces
  * porque la realidad tiene tres, no dos.
@@ -21,20 +23,31 @@ export interface DictamenDeVerificacion {
   readonly razon: string
 }
 
+/** Quien pide confirmar un arreglo: el operador sobre su fila (ADR-087) o el
+ *  Terminal al conservar un turno que edito con el hallazgo en foco (ADR-088).
+ *  La cola del motor no re-verifica mitigados, y por eso `agente` no esta. */
+export type QuienVerifica = Exclude<ExtinguidoPor, 'agente'>
+
+/** El aviso nombra al autor REAL. Escribir «a peticion del operador» en un
+ *  cierre que disparo el Terminal le atribuiria al operador un acto que no hizo. */
+const A_PETICION: Record<QuienVerifica, string> = {
+  operador: 'verificado a peticion del operador',
+  terminal: 'verificado al cerrar un turno del Terminal'
+}
+
 const AVISO: Record<Exclude<DesenlaceDeVerificacion, 'extinguido'>, string> = {
   sin_prueba:
-    'verificado a peticion del operador: el analista lo dio por obsoleto pero no pudo probarlo ' +
-    'en el fichero, asi que el hallazgo NO se cierra',
-  sigue_vivo:
-    'verificado a peticion del operador: el analista dice que el problema SIGUE en el codigo. ' +
-    'El arreglo no lo cerro'
+    'el analista lo dio por obsoleto pero no pudo probarlo en el fichero, asi que el hallazgo ' +
+    'NO se cierra',
+  sigue_vivo: 'el analista dice que el problema SIGUE en el codigo. El arreglo no lo cerro'
 }
 
 /** La nota que se escribe en la fila que sigue mitigada. Lleva el detalle del
  *  analista detras del aviso: sin el, el operador sabe que fallo y no por que. */
 export function notaDeVerificacion(
   desenlace: Exclude<DesenlaceDeVerificacion, 'extinguido'>,
-  detalle: string
+  detalle: string,
+  quien: QuienVerifica = 'operador'
 ): string {
-  return `${AVISO[desenlace]} — ${detalle}`
+  return `${A_PETICION[quien]}: ${AVISO[desenlace]} — ${detalle}`
 }

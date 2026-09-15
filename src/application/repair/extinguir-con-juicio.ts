@@ -36,9 +36,10 @@ const SIN_PRUEBA = 'obsoleto segun el agente, sin prueba comprobable'
  * no algo que el modelo elija: `toAnalysis` lo copia del parametro. Por eso el
  * fichero que se lee y el hallazgo que se cierra salen de ahi.
  *
- * `extinguidoPor` dice QUIEN lo pidio: la cola del motor o el operador sobre esa
- * fila (ADR-087). El juicio es el mismo —un agente miro el fichero— y por eso el
- * motivo no cambia; lo que cambia es de quien salio la pregunta.
+ * `extinguidoPor` dice QUIEN lo pidio: la cola del motor, el operador sobre esa
+ * fila (ADR-087) o el Terminal al conservar un turno con ella en foco (ADR-088).
+ * El juicio es el mismo —un agente miro el fichero— y por eso el motivo no
+ * cambia; lo que cambia es de quien salio la pregunta.
  *
  * DEVUELVE si extinguio. El camino de reparacion no lo mira —siga vivo o no, ya
  * hizo lo suyo—, pero la re-verificacion SI: cuando no extingue tiene que
