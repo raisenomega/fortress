@@ -4,18 +4,24 @@ import type { CodeAgentReply } from '@domain/chat/code-agent'
 import { createRunAccumulator } from './run-accumulator'
 
 /**
- * Lo que espera un camino SIN otra red que el reloj: chat/Terminal, Build,
- * Genesis, el borrador de agente y los episodios. Ahi un proceso colgado no
- * tiene manifiesto que lo mida ni barra de paradas que delate que no avanza, y
- * el cronometro es lo unico que hay.
+ * Lo que espera un camino SIN otra red que el reloj: Build, Genesis, el borrador
+ * de agente y los episodios. Ahi un proceso colgado no tiene manifiesto que lo
+ * mida ni barra de paradas que delate que no avanza, y el cronometro es lo unico
+ * que hay. El Terminal ya no esta en esta lista: va sin techo, como el escaneo
+ * (ADR-088, pieza 1; ADR-082, Enmienda 4).
  */
 export const TECHO_POR_DEFECTO = 15 * 60 * 1000
 
 /**
- * Sin techo (ADR-082, Enmienda 3). Lo pide el ESCANEO, que si tiene otra red:
- * el manifiesto mide, las paradas son finitas por construccion, y el boton
- * Detener escala a SIGKILL —que no se ignora— mientras el reloj solo mandaba
- * SIGTERM, una peticion que un proceso de verdad colgado se salta.
+ * Sin techo. Lo piden los dos caminos de grado bancario, y los dos tienen otra
+ * red que el reloj:
+ * - el ESCANEO (ADR-082, Enmienda 3): el manifiesto mide y las paradas son
+ *   finitas por construccion;
+ * - el TERMINAL del cliente (ADR-088, pieza 1; ADR-082, Enmienda 4): se ve
+ *   avanzar en vivo y el operador esta delante.
+ * En los dos, el boton Detener escala a SIGKILL —que no se ignora— mientras el
+ * reloj solo mandaba SIGTERM, una peticion que un proceso de verdad colgado se
+ * salta.
  *
  * El techo no distinguia un cuelgue de una parada grande porque no sabe nada
  * del codigo. Medido el 2026-09-10: Health Flow murio en su PRIMERA parada a

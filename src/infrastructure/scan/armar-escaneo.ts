@@ -34,8 +34,9 @@ export interface EscaneoArmado {
  */
 export function armarEscaneo(context: AppContext, projectId: string): EscaneoArmado {
   // SIN TECHO (ADR-082, Enmienda 3): el escaneo se toma el tiempo que necesite
-  // y solo Detener lo para. Los otros cinco caminos que crean este agente no
-  // pasan nada y conservan sus 15 minutos.
+  // y solo Detener lo para. El Terminal tambien va sin techo (ADR-088, Enmienda
+  // 4); los otros cuatro caminos que crean este agente no pasan nada y
+  // conservan sus 15 minutos.
   const agente = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context), null, {}, SIN_TECHO) // prettier-ignore
   // El juez va ENVUELTO y el escaner no: el escaner ya asienta —su agregado al
   // cerrar y su intento fallido—, el juez no tenia quien lo hiciera. Envolver

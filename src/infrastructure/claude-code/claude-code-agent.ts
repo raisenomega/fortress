@@ -30,7 +30,8 @@ export function createClaudeCodeAgent(
   customAgents: Readonly<Record<string, AgentDefinition>> = {},
   /**
    * Cuanto se espera antes de dar el proceso por colgado. `SIN_TECHO` para el
-   * escaneo (ADR-082, Enmienda 3); quien no pasa nada conserva los 15 minutos.
+   * escaneo (ADR-082, Enmienda 3) y para el Terminal (ADR-088; ADR-082,
+   * Enmienda 4); quien no pasa nada conserva los 15 minutos.
    */
   techoMs: number = TECHO_POR_DEFECTO
 ): CodeAgent {
