@@ -6,57 +6,61 @@ import { describe, expect, it } from 'vitest'
 const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta), 'utf8')
 const SCAN = 'src/presentation/components/scan/'
 
-describe('los tres pisos fijos se apilan, cada uno bajo el anterior', () => {
-  it('1: la fila del proyecto —nombre y botones— se pega arriba del todo', () => {
-    const cabecera = fuente(`${SCAN}ScanHeader.tsx`)
+describe('el bloque de cabecera es UNO solo y se queda fijo', () => {
+  it('un unico contenedor sticky, no un sticky por piso', () => {
+    const cabecera = fuente(`${SCAN}CabeceraFija.tsx`)
 
-    expect(cabecera).toMatch(/bg-background sticky top-0 z-30/)
+    expect(cabecera).toMatch(/bg-background border-border sticky top-0 z-30/)
     expect(cabecera).toMatch(/<div ref=\{cabecera\} className=\{FIJA\}>/)
-    // Y en la fila fija van los botones, que es lo que el operador necesita.
-    expect(cabecera).toMatch(/className=\{FIJA\}>[\s\S]*<ScanActions project=\{project\} \/>/)
   })
 
-  it('el score de 64px y la ruta NO se fijan: se irian comiendo las filas', () => {
-    const cabecera = fuente(`${SCAN}ScanHeader.tsx`)
+  it('y lleva dentro, contiguos, score+nombre+botones, filtros y barras', () => {
+    const cabecera = fuente(`${SCAN}CabeceraFija.tsx`)
 
-    expect(cabecera).toMatch(/<header className="flex flex-wrap items-center gap-4 border-b/)
-    expect(cabecera).not.toMatch(/sticky[^"']*>\s*<ScoreGauge/)
+    for (const pieza of ['<ScanHeader', '<ChipsDelTablero', '<BarrasDelTablero']) {
+      expect(cabecera).toContain(pieza)
+    }
+    // El score es el ancla de la pantalla: viaja con el bloque fijo, no aparte.
+    expect(fuente(`${SCAN}ScanHeader.tsx`)).toContain('<ScoreGauge')
+    expect(fuente(`${SCAN}ScanHeader.tsx`)).not.toMatch(/sticky/)
   })
 
-  it('2: las barras se pegan bajo la cabecera, opacas', () => {
-    expect(fuente(`${SCAN}TableroDeHallazgos.tsx`)).toMatch(
-      /bg-background sticky top-\[var\(--cabecera,0px\)\] z-20/
-    )
+  it('la fila de columnas cuelga de UNA variable, no de un calc encadenado', () => {
+    const tabla = fuente(`${SCAN}FindingsTable.tsx`)
+
+    expect(tabla).toMatch(/bg-background sticky top-\[var\(--cabecera,0px\)\] z-20/)
+    expect(tabla).not.toMatch(/calc\(/)
   })
 
-  it('3: la fila de columnas se pega bajo la cabecera MAS las barras', () => {
-    expect(fuente(`${SCAN}FindingsTable.tsx`)).toMatch(
-      /sticky top-\[calc\(var\(--cabecera,0px\)_\+_var\(--franja,0px\)\)\] z-10/
-    )
-  })
-
-  it('el orden de apilado no deja que uno tape al de arriba: 30 > 20 > 10', () => {
-    expect(fuente(`${SCAN}ScanHeader.tsx`)).toContain('z-30')
-    expect(fuente(`${SCAN}TableroDeHallazgos.tsx`)).toContain('z-20')
-    expect(fuente(`${SCAN}FindingsTable.tsx`)).toContain('z-10')
-  })
-})
-
-describe('los altos se MIDEN: un numero fijo taparia filas', () => {
-  it('cada franja publica su alto real como variable CSS', () => {
+  it('el alto se MIDE: un numero fijo taparia filas', () => {
     const hook = fuente('src/presentation/hooks/useFranjaFija.ts')
 
     expect(hook).toMatch(/new ResizeObserver/)
     expect(hook).toMatch(/\{ \[nombre\]: `\$\{alto\}px` \}/)
     expect(fuente(`${SCAN}ScanView.tsx`)).toMatch(/useFranjaFija\('--cabecera'\)/)
-    expect(fuente(`${SCAN}TableroDeHallazgos.tsx`)).toMatch(/useFranjaFija\('--franja'\)/)
+  })
+})
+
+describe('lo que NO entra en el bloque fijo, y la excepcion', () => {
+  it('los avisos scrollean: crecen, y una cabecera que crece sola marea', () => {
+    const avisos = fuente(`${SCAN}AvisosDelEscaneo.tsx`)
+
+    for (const pieza of ['<Notice', '<CoberturaNotice', '<ParadaEnVivo']) {
+      expect(avisos).toContain(pieza)
+    }
+    expect(avisos).not.toContain('<ScanProgress')
+    expect(fuente(`${SCAN}CabeceraFija.tsx`)).not.toContain('<AvisosDelEscaneo')
   })
 
-  it('sin seleccion ni lote, la franja no ocupa NI UN PIXEL', () => {
+  it('EXCEPCION: el progreso va fijo, y SOLO mientras se escanea', () => {
+    const cabecera = fuente(`${SCAN}CabeceraFija.tsx`)
+
+    expect(cabecera).toMatch(/\{running \? <ScanProgress text=\{progress\} \/> : null\}/)
+  })
+
+  it('y los avisos viven en la zona que scrollea, con las filas', () => {
     const tablero = fuente(`${SCAN}TableroDeHallazgos.tsx`)
 
-    expect(tablero).toMatch(/const vacia = tablero\.seleccion\.size === 0 && !verLote/)
-    expect(tablero).toMatch(/className=\{vacia \? FRANJA : `\$\{FRANJA\} py-2`\}/)
-    expect(tablero).not.toMatch(/const FRANJA = '[^']*py-2/)
+    expect(tablero).toMatch(/<AvisosDelEscaneo project=\{project\} \/>[\s\S]*<FindingsTable/)
   })
 })

@@ -15,7 +15,7 @@ describe('la cola se engancha a Detener, y la barra va aparte', () => {
   })
 
   it('la barra del lote es otra; la de verificar se pinta como antes', () => {
-    const tablero = fuente(`${SCAN}TableroDeHallazgos.tsx`)
+    const tablero = fuente(`${SCAN}BarrasDelTablero.tsx`)
     expect(tablero).toMatch(/<BarraDelLote/)
     expect(tablero).toMatch(/<BarraDeSeleccion\s*seleccionados=\{tablero\.seleccion\.size\}/)
   })
