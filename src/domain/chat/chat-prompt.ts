@@ -1,32 +1,15 @@
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
+import { hallazgosDelTurno, type HallazgosDelTurno } from './hallazgos-del-prompt'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import { GRAPH_FIRST } from '../settings/graph-first'
 import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
 
-export interface ChatContext {
+export interface ChatContext extends HallazgosDelTurno {
   readonly projectName: string
   /** Lo que el proyecto documenta, ya mirado en su disco. */
   readonly corpus: CorpusDescriptor
-  readonly known: readonly string[]
   readonly mode: OperationMode
-  /** El bloque del hallazgo que este turno resuelve, ya saneado (ADR-088). */
-  readonly enFoco?: string
-}
-
-function describeKnown(known: readonly string[]): string {
-  if (known.length === 0) return 'FORTRESS no tiene escaneos previos de este proyecto.'
-  return ['Hallazgos ya registrados de escaneos anteriores:', ...known.map((k) => `- ${k}`)].join(
-    '\n'
-  )
-}
-
-/** Con un hallazgo a resolver, SU bloque en vez de la lista: el turno es de ese. */
-function hallazgosDelTurno(ctx: ChatContext): string {
-  if (ctx.enFoco === undefined) return describeKnown(ctx.known)
-  return ['Hallazgo a resolver (lo mando el operador desde su fila del Escaneo):', ctx.enFoco].join(
-    '\n'
-  )
 }
 
 /**

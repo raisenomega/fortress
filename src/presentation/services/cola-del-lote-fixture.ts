@@ -12,7 +12,8 @@ export interface Opciones {
   readonly tras?: (id: string) => Finding | undefined
   /** Tras cuantos turnos terminados pulsa el operador Detener. */
   readonly detenerTras?: number
-  /** El modo en la consulta n-esima. Por defecto, siempre autonomo. */
+  /** El modo del OPERADOR en la consulta n-esima. Por defecto supervisado, que
+   *  es donde hoy corre el lote: el humano aprueba el plan y la cola edita. */
   readonly modo?: (consulta: number) => OperationMode
   readonly ocupada?: boolean
 }
@@ -35,7 +36,7 @@ export function banco(o: Opciones = {}): Banco {
   let terminados = 0
   let cortado = false
   const p: PuertosDeLaCola = {
-    modo: () => (o.modo ?? (() => 'autonomo'))(consultas++),
+    modo: () => (o.modo ?? (() => 'supervisado'))(consultas++),
     excluidos: () => [],
     hallazgo: (id) => tabla.get(id),
     abrirTerminal: () => undefined,

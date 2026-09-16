@@ -24,11 +24,20 @@ describe('buildChatPrompt', () => {
   })
 
   it('con un hallazgo a resolver, SU bloque sustituye a la lista (ADR-088)', () => {
-    const known = ['CRITICAL api.py:42 SQL injection']
-    const prompt = buildChatPrompt('x', { ...ctx, known, enFoco: '- id: f1' })
+    // Un turno con foco y sin lote llega con la lista vacia: `listaDelTurno` no
+    // le pasa el historial del escaneo. Aqui se fija que solo se ve su bloque.
+    const prompt = buildChatPrompt('x', { ...ctx, known: [], enFoco: '- id: f1' })
     expect(prompt).toContain('Hallazgo a resolver')
     expect(prompt).toContain('- id: f1')
     expect(prompt).not.toContain('Hallazgos ya registrados')
-    expect(prompt).not.toContain('SQL injection')
+  })
+
+  it('con foco y lote, los hermanos van detras del bloque y como contexto', () => {
+    const known = ['CRITICAL api.py:42 SQL injection']
+    const prompt = buildChatPrompt('x', { ...ctx, known, enFoco: '- id: f1', deLote: true })
+
+    expect(prompt.indexOf('- id: f1')).toBeLessThan(prompt.indexOf('SQL injection'))
+    expect(prompt).toContain('NO los resuelvas en este turno')
+    expect(prompt).not.toContain('Hallazgos ya registrados')
   })
 })

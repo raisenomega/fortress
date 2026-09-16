@@ -6,7 +6,7 @@ import { formatearHallazgo, type HallazgoAResolver } from '@domain/chat/hallazgo
 import type { Project } from '@domain/project/project'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AppContext } from '../context'
-import { knownFindings } from './known-findings'
+import { listaDelTurno } from './lista-del-turno'
 import type { ReplyOutcome } from './reply-outcome'
 import { replyFromApi } from './reply-from-api'
 import { replyFromChat } from './reply-from-chat'
@@ -47,8 +47,9 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
       excludedAgents: options.excludedAgents,
       onStep: options.onStep,
       isCancelled: options.isCancelled,
-      // Con foco la lista ni se lee: el bloque de ESE hallazgo la sustituye.
-      known: foco === null ? knownFindings(options.context, project) : [],
+      known: listaDelTurno(options.context, project, input, foco),
+      // `known` son los hallazgos del lote (plan o hermanos), no el historial.
+      deLote: (options.input.lote ?? []).length > 0,
       onChunk
     }
     // Resolver un hallazgo es UN turno, no un workflow de revision: sin esto,
@@ -57,6 +58,9 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
     if (foco !== null) {
       return replyFromChat({ ...opciones, enFoco: formatearHallazgo(foco), sesion: foco.sesion })
     }
+    // Lote SIN foco: es el turno de PLAN. Lo produce el productor, no el router,
+    // y ve los N del lote en vez del historial del escaneo (ADR-088, arco 1).
+    if (opciones.deLote) return replyFromChat(opciones)
     return replyFromWorkflow(opciones)
   }
 

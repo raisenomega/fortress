@@ -13,19 +13,21 @@ import { denialsNote, singleAgentOutcome } from './single-agent-outcome'
 
 /** Las opciones de siempre y, si el turno resuelve UN hallazgo, su bloque ya
  *  saneado (ADR-088, pieza 2) y la sesion del productor para reanudarlo
- *  (Enmienda 2). Sin foco, el prompt de siempre y sin memoria. */
+ *  (Enmienda 2). `deLote`: `known` son los hallazgos del lote (arco 1). */
 export type ChatReplyOptions = WorkflowReplyOptions & {
   readonly enFoco?: string
   readonly sesion?: string | null
+  readonly deLote?: boolean
 }
 
 /**
  * Quien contesta. Con foco, SIEMPRE el productor: resolver un hallazgo no se
- * reparte por palabras (ADR-088, Enmienda 2). Sin foco, el chat libre conserva
+ * reparte por palabras (ADR-088, Enmienda 2). Con lote tambien: el plan lo
+ * escribe quien luego lo ejecuta (arco 1). Sin ninguno, el chat libre conserva
  * el router, entre los agentes que el operador no dejo fuera.
  */
 function quienContesta(options: ChatReplyOptions): AgentId {
-  if (options.enFoco !== undefined) return PRODUCTOR.id
+  if (options.enFoco !== undefined || options.deLote === true) return PRODUCTOR.id
   const enabled = AGENT_CATALOG.map((agent) => agent.id).filter(
     (id) => !options.excludedAgents.includes(id)
   )
@@ -40,7 +42,7 @@ function peticion(options: ChatReplyOptions, agentId: AgentId): CodeAgentRequest
     // Dueño del proceso EN LA PETICION: sin el, Detener no alcanzaria al hijo.
     projectId: options.project.id,
     // prettier-ignore
-    prompt: buildChatPrompt(options.prompt, { projectName: project.name, corpus: options.corpus, known: options.known, mode, enFoco: options.enFoco }),
+    prompt: buildChatPrompt(options.prompt, { projectName: project.name, corpus: options.corpus, known: options.known, mode, enFoco: options.enFoco, deLote: options.deLote }),
     permissionMode: permissionModeFor(mode),
     agentId,
     trusted: project.trusted,
@@ -48,12 +50,9 @@ function peticion(options: ChatReplyOptions, agentId: AgentId): CodeAgentRequest
   }
 }
 
-/**
- * Respuesta conversacional a una pregunta libre: un solo agente, elegido por el
- * tema del mensaje, contesta en prosa. Se separa del camino de workflow porque
- * una pregunta no es un escaneo: no lleva pasos ni informe consolidado, lleva
- * la respuesta del agente tal cual la escribio.
- */
+/** Respuesta conversacional: un agente contesta en prosa. Se separa del camino
+ *  de workflow porque una pregunta no es un escaneo: no lleva pasos ni informe
+ *  consolidado, lleva la respuesta del agente tal cual la escribio. */
 export async function replyFromChat(options: ChatReplyOptions): Promise<ReplyOutcome> {
   const agentId = quienContesta(options)
 
@@ -64,7 +63,7 @@ export async function replyFromChat(options: ChatReplyOptions): Promise<ReplyOut
   const corrida = await correrConMemoria(options.codeAgent, peticion(options, agentId), options.onChunk, options.isCancelled)
   const { reply } = corrida
 
-  // El consumo se conoce al terminar (el CLI lo reporta en el evento final): sin
+  // El consumo se conoce al terminar (lo reporta el evento final del CLI): sin
   // esto el medidor de un solo agente se quedaba en 0 todo el run.
   options.onStep({ index: 0, total: 1, tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd }) // prettier-ignore
 

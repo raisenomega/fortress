@@ -1,5 +1,3 @@
-import type { OperationMode } from '../settings/operation-mode'
-
 /** Cuantos hallazgos lleva un lote como mucho. Es para probar el Terminal con
  *  calma, no para vaciar el Escaneo: diez turnos seguidos ya son una tarde. */
 export const TOPE_DEL_LOTE = 10
@@ -9,13 +7,26 @@ export const SUGERIDO_DEL_LOTE = 5
 
 /**
  * Si el lote al Terminal se ofrece en este proyecto (ADR-088): donde el Terminal
- * PODRIA resolver —`resoluble`, calculado en el proceso principal— y el operador
- * trabaja en autonomo. En supervisado cada turno esperaria su Aprobar y el
- * productor no editaria: el lote no cerraria nada. En el repo propio de FORTRESS
- * `resoluble` es false y el lote no sale: alli se trabaja con el Motor.
+ * PODRIA resolver —`resoluble`, calculado en el proceso principal: de confianza,
+ * no es el repo propio y hay red git—.
+ *
+ * NO mira el modo: el modo decide el FLUJO, no si la casilla aparece. En
+ * supervisado el operador aprueba el plan y la cola resuelve; en autonomo el
+ * lote avisa de que su aprobador —OMEGA— llega con la pieza 5. Exigir autonomo
+ * aqui escondia la casilla justo en el unico modo donde hoy funciona.
  */
-export function loteDisponible(resoluble: boolean, mode: OperationMode): boolean {
-  return resoluble && mode === 'autonomo'
+export function loteDisponible(resoluble: boolean): boolean {
+  return resoluble
+}
+
+/** El mensaje de PLAN que se precarga en el borrador: lo lee el operador antes
+ *  de mandarlo, y es lo que el productor contesta con su orden de ejecucion. */
+export function textoDelPlan(projectName: string, cuantos: number): string {
+  return (
+    `Explicame los ${cuantos} hallazgos seleccionados abiertos del ultimo escaneo ` +
+    `de ${projectName}, dame tu plan y orden de ejecucion. No hace falta volver a ` +
+    'escanear, solo ejecuta.'
+  )
 }
 
 export interface AlternarEnLote {
