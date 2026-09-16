@@ -44,7 +44,7 @@ Todo entra por canales IPC registrados en un único agregador (`src/infrastructu
 
 ### 2.1 Escanear seguridad
 
-**Disparo:** `IPC.scanRun` (`scan-handlers.ts:52`), desde el botón de la página de Escaneo (`ScanActions.tsx:31`).
+**Disparo:** `IPC.scanRun` (`scan-handlers.ts:52`), desde el botón de la página de Escaneo (`ScanActions.tsx:36`).
 
 **Antes de gastar:** `guardRun` (`scan-handlers.ts:33`) comprueba tres cosas y reserva el turno del proyecto en la misma operación (`src/infrastructure/run-guard.ts:21-29`): que el proyecto no esté **contaminado** (circuit breaker), que no se haya alcanzado el **tope diario**, y que **no haya otra corrida** en ese proyecto.
 
@@ -52,9 +52,14 @@ Todo entra por canales IPC registrados en un único agregador (`src/infrastructu
 
 **Dónde caen los hallazgos:** `runScan` → `persistScan` (`src/application/scan/run-scan.ts:32`). `persistScan` **no cierra ningún hallazgo** (`persist-scan.ts:13-17`): calcula el score sobre el *expediente* —lo reportado más los ACTIVE que este escaneo no nombró— (`:28-35`), y escribe en **una transacción** el histórico, los hallazgos, el score, la telemetría y la actividad (`commit-scan-rows.ts:35-49`). La escritura de hallazgos es *insertar-o-refrescar*: busca por identidad y, si la fila existe, la toca en vez de insertar (`src/infrastructure/persistence/finding-writes.ts:29-33`). Después, fuera de la transacción, reescribe `COGNITION-LOG.md` **dentro de la carpeta del proyecto auditado** (`persist-scan.ts:47-59`; `src/infrastructure/cognition/write-cognition-log.ts:17-40`, con guarda contra enlaces que salgan del proyecto en `:22-24`). Es la única escritura del escaneo sobre el disco del proyecto.
 
-### 2.2 Preguntar al Terminal
+### 2.2 Hablar con el Terminal
 
 La vista etiquetada **"Terminal"** en la barra lateral es `view='chat'`; la etiquetada **"Chat"** es `view='construir'` (`src/presentation/components/layout/SidebarRail.tsx:9,13`). Están invertidas a sabiendas y así lo documentan `docs/PAGES/terminal.md` y `docs/PAGES/chat-planificacion.md`.
+
+**Los dos puentes desde Escaneo.** Hubo un tercero, un botón global «Preguntar al Terminal» que pedía explicar los hallazgos abiertos; se retiró porque confundía con el lote y no fijaba foco. Hoy son estos dos, y los dos **dejan el borrador escrito y no envían nada**: manda el operador.
+
+1. **Por fila — «Resolver en Terminal»** (ADR-088, pieza 2). El icono de terminal de cada hallazgo (`FindingResolverAction.tsx:23`) llama a `resolverEnTerminal` (`src/presentation/services/resolver-en-terminal.ts:23-28`): fija el **foco** (`projectId` + `findingId`), escribe el borrador y abre el Terminal. Lo que el agente recibe sale de la base por el `findingId`, no del texto del borrador (`:5-9`).
+2. **En lote — «Resolver lote en Terminal (N)»** (ADR-088, pieza del lote + Arco 1). Se marcan varios hallazgos **abiertos** con su casilla y la barra precarga un mensaje de **plan**. El Enter del operador manda ese turno en `supervisado` —solo lectura— y ahí **para**: `planDelLote` no arranca nada (`src/presentation/services/lote-por-enter.ts`). El humano lee el plan y un segundo gesto dispara la cola, que resuelve **un hallazgo por turno**, cada uno con su foco singular; Detener la corta. La casilla solo se ofrece donde el Terminal podría resolver de verdad —proyecto de confianza, que no sea el repo propio y con red git— (`src/domain/settings/terminal-puede-resolver.ts`).
 
 **Disparo:** `IPC.chatSend` (`src/infrastructure/ipc/chat-send-handler.ts:48`), con `guardRun` delante (`:52`) y `isFortressRepo` inyectado como puerto (`:67`).
 
@@ -103,7 +108,7 @@ const modo = params.hastaGate ? 'hasta-gate' : 'completo'
 
 ### 2.5 git push
 
-**Disparo:** solo el botón de Escaneo (`ScanActions.tsx:43` → `push-service.ts` → `IPC.pushRun`). **Ni el loop, ni el motor, ni la firma llaman al push**; el único `git push` del repo está en `src/infrastructure/git/git-push.ts:22` y su único llamador es `pushProject`.
+**Disparo:** solo el botón de Escaneo (`ScanActions.tsx:53` → `push-service.ts` → `IPC.pushRun`). **Ni el loop, ni el motor, ni la firma llaman al push**; el único `git push` del repo está en `src/infrastructure/git/git-push.ts:22` y su único llamador es `pushProject`.
 
 **Cuándo se bloquea** (`src/infrastructure/ipc/push-handlers.ts:56-74` y `src/application/push/push-project.ts:13-31`):
 
