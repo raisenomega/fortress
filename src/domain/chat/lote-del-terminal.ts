@@ -1,9 +1,19 @@
-/** Cuantos hallazgos lleva un lote como mucho. Es para probar el Terminal con
- *  calma, no para vaciar el Escaneo: diez turnos seguidos ya son una tarde. */
-export const TOPE_DEL_LOTE = 10
-
 /** Lo que se sugiere, sin forzarlo: cinco se revisan uno a uno sin perder el hilo. */
 export const SUGERIDO_DEL_LOTE = 5
+
+/** A partir de aqui la tanda es LARGA y la barra lo dice. No es un tope: quien
+ *  quiera lanzar treinta de noche puede, y es su decision, no la nuestra. */
+export const LOTE_LARGO = 10
+
+const NOTA_DE_TANDA =
+  'por tanda — los lotes grandes tardan mas; el Terminal trabaja mejor en tandas pequenas'
+
+/** Lo que dice la barra mientras se arma el lote: cuantos van, la sugerencia, y
+ *  —solo si la tanda es larga— por que conviene partirla. Avisa, no bloquea. */
+export function textoDeLaTanda(elegidos: number): string {
+  const base = `${elegidos} en el lote · sugerido ${SUGERIDO_DEL_LOTE}`
+  return elegidos > LOTE_LARGO ? `${base} ${NOTA_DE_TANDA}` : base
+}
 
 /**
  * Si el lote al Terminal se ofrece en este proyecto (ADR-088): donde el Terminal
@@ -29,36 +39,10 @@ export function textoDelPlan(projectName: string, cuantos: number): string {
   )
 }
 
-/**
- * Lo que queda escrito en el Terminal al aprobar el plan: el consentimiento,
- * dicho una vez y con todas las letras. Aprobar el plan NO es «vale, sigue
- * proponiendo»: es autorizar que la cola edite los ficheros sola.
- *
- * Nombra el unico freno que hay —Detener—, y dice lo que NO frena, porque
- * cambiar de modo a mitad no deshace una aprobacion ya dada.
- */
-export function avisoDeAprobacion(cuantos: number): string {
-  return (
-    `Plan aprobado. La cola va a resolver los ${cuantos} hallazgos EDITANDO los ficheros, ` +
-    'uno por turno y sin volver a preguntarte. Pulsa Detener para pararla: cambiar de ' +
-    'modo a mitad no la corta.'
-  )
-}
-
-export interface AlternarEnLote {
-  readonly seleccion: ReadonlySet<string>
-  /** El que se queria anadir pasaba del tope: la seleccion vuelve igual. */
-  readonly lleno: boolean
-}
-
-/** Alternar un hallazgo en el lote. Quitar siempre se puede; anadir el que
- *  pasaria del tope, no — y `lleno` lo dice para que la vista avise. */
-export function alternarEnLote(previo: ReadonlySet<string>, id: string): AlternarEnLote {
-  if (previo.has(id)) {
-    const siguiente = new Set(previo)
-    siguiente.delete(id)
-    return { seleccion: siguiente, lleno: false }
-  }
-  if (previo.size >= TOPE_DEL_LOTE) return { seleccion: previo, lleno: true }
-  return { seleccion: new Set([...previo, id]), lleno: false }
+/** Alternar un hallazgo en el lote. Sin tope: el cliente elige cuantos van, y la
+ *  barra solo le dice cuando la tanda se hace larga. */
+export function alternarEnLote(previo: ReadonlySet<string>, id: string): ReadonlySet<string> {
+  const siguiente = new Set(previo)
+  if (!siguiente.delete(id)) siguiente.add(id)
+  return siguiente
 }

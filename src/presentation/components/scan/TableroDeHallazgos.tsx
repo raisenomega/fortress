@@ -1,4 +1,5 @@
 import type { Project } from '@domain/project/project'
+import { useFranjaFija } from '../../hooks/useFranjaFija'
 import { useLoteDelTablero } from '../../hooks/useLoteDelTablero'
 import { useTablero } from '../../hooks/useTablero'
 import { useSeleccionDelTablero } from '../../hooks/useSeleccionDelTablero'
@@ -24,9 +25,10 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
   const seleccion = useSeleccionDelTablero(project.id, tablero)
   const motorOcupado = useRepairStore((state) => state.busy) // un solo carril
   const lote = useLoteDelTablero(project.id, project.name)
+  const [franja, bajoLaFranja] = useFranjaFija()
 
   return (
-    <>
+    <div className="space-y-3" style={bajoLaFranja}>
       <ChipsDelTablero
         filtro={tablero.filtro}
         recuento={tablero.recuento}
@@ -34,25 +36,23 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
         onEstado={seleccion.elegirEstado}
       />
 
-      {tablero.seleccion.size > 0 ? (
-        <BarraDeSeleccion
-          seleccionados={tablero.seleccion.size}
-          visiblesSeleccionados={tablero.visiblesSeleccionados}
-          verificando={seleccion.verificando}
-          onVerificar={seleccion.preguntar}
-          onLimpiar={seleccion.limpiar}
-        />
-      ) : null}
+      {/* Las barras se quedan fijas arriba; solo scrollean las filas. */}
+      <div ref={franja} className="bg-background sticky top-0 z-20 -mx-4 space-y-2 px-4 py-2">
+        {tablero.seleccion.size > 0 ? (
+          <BarraDeSeleccion
+            seleccionados={tablero.seleccion.size}
+            visiblesSeleccionados={tablero.visiblesSeleccionados}
+            verificando={seleccion.verificando}
+            onVerificar={seleccion.preguntar}
+            onLimpiar={seleccion.limpiar}
+          />
+        ) : null}
 
-      <BarraDelLote
-        visible={lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null)}
-        elegidos={lote.elegidos}
-        enCurso={lote.enCurso}
-        pendiente={lote.pendiente}
-        onPreparar={lote.preparar}
-        onAprobar={lote.aprobar}
-        onLimpiar={lote.limpiar}
-      />
+        <BarraDelLote
+          visible={lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null)}
+          lote={lote}
+        />
+      </div>
 
       {seleccion.preguntando ? (
         <ConfirmVerificarTodos
@@ -66,6 +66,6 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
       <FindingsTable
         {...propsDeLaTabla(project, tablero, seleccion, motorOcupado, lote.enLaTabla)}
       />
-    </>
+    </div>
   )
 }

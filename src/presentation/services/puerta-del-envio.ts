@@ -2,6 +2,7 @@ import type { AgentId } from '@domain/agent/agent'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import { useWorkflowStore } from '../stores/workflow-store'
 import { sendMessage } from './chat-service'
+import { lotePendienteDe, planDelLote } from './lote-por-enter'
 
 /** A quien y como se envia: lo que el hook sabe del proyecto activo. */
 export interface Envio {
@@ -31,9 +32,20 @@ export function ejecutar(envio: Envio, prompt: string): void {
   })
 }
 
-/** En supervisado el mensaje espera aprobacion; en autonomo sale directo. El
- *  foco NO se toca al esperar: vive aparte, y sale cuando salga el mensaje. */
+/**
+ * En supervisado el mensaje espera aprobacion; en autonomo sale directo. El foco
+ * NO se toca al esperar: vive aparte, y sale cuando salga el mensaje.
+ *
+ * EXCEPCION, el lote (ADR-088, arco 1): con un lote precargado, este Enter manda
+ * el turno de PLAN, que corre en solo lectura y PARA. No pasa por la plan-card
+ * —seria pedir dos veces lo mismo, y con una estimacion que no es la suya—, y
+ * tampoco ejecuta: la cola espera al disparo del operador sobre el plan ya leido.
+ */
 export function enviar(envio: Envio, prompt: string, configuring: boolean): void {
+  if (envio.projectId !== null && lotePendienteDe(envio.projectId)) {
+    void planDelLote(envio.projectId, prompt, envio.excludedAgents)
+    return
+  }
   if (envio.mode === 'supervisado' && !configuring) useWorkflowStore.getState().setPending(prompt)
   else ejecutar(envio, prompt)
 }
