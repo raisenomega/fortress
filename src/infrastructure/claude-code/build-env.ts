@@ -17,8 +17,25 @@ const SESION_VIVA: readonly string[] = ['SSH_AUTH_SOCK', 'GNOME_KEYRING_CONTROL'
  * Con key configurada se le pasa; sin ella `claude` usa las suyas (login OAuth).
  * LIMITE: la key SI viaja —es la eleccion de facturacion— y la ven los nietos.
  */
+/**
+ * Privacidad del hijo (ADR-088, arco 1). Dos caminos por los que el codigo del
+ * CLIENTE podria salir sin que FORTRESS lo decida:
+ * - `/feedback` —y `/bug` y `/share`, que van por el mismo sitio— envia la
+ *   conversacion CON el codigo, y eso se retiene 5 anos aunque el operador tenga
+ *   el entrenamiento apagado: el opt-out no cubre el feedback;
+ * - el trafico no esencial (encuestas, metricas, informes de error).
+ *
+ * Las fija FORTRESS, no el operador: se auditan repos ajenos, y ese camino no lo
+ * abre el producto. Van aqui porque `buildEnv` es el paso UNICO de todos los
+ * spawns del CLI, los del Terminal y los del Motor.
+ */
+const PRIVACIDAD = {
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+  DISABLE_FEEDBACK_COMMAND: '1'
+}
+
 export function buildEnv(apiKey: string | null): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = { ...process.env }
+  const env: NodeJS.ProcessEnv = { ...process.env, ...PRIVACIDAD }
   for (const clave of SESION_VIVA) delete env[clave]
   return apiKey ? { ...env, ANTHROPIC_API_KEY: apiKey } : env
 }
