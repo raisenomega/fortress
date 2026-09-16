@@ -1,4 +1,5 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
+import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import type { PuertosDeLaCola } from './cola-del-lote'
@@ -16,6 +17,8 @@ export interface Opciones {
    *  es donde hoy corre el lote: el humano aprueba el plan y la cola edita. */
   readonly modo?: (consulta: number) => OperationMode
   readonly ocupada?: boolean
+  /** La guarda que corto el cierre de ese turno, si corto alguna. */
+  readonly sinCierre?: (id: string) => SinCierre | null
 }
 
 export interface Banco {
@@ -49,6 +52,7 @@ export function banco(o: Opciones = {}): Banco {
       log.push(`fin:${id}`)
       terminados += 1
       if (terminados === o.detenerTras) cortado = true
+      return o.sinCierre?.(id) ?? null
     },
     recargar: async () => void log.push('recargar'),
     contar: async (resumen) => void resumenes.push(resumen),

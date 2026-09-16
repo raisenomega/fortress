@@ -17,7 +17,7 @@ describe('LA LINEA ROJA: marcar y no poder verificar NO deja un mitigado mudo', 
 
     const cierre = await cerrarCicloTerminal(b.context, 'p1', 'f1', TURNO, 'm-1')
 
-    expect(cierre).toEqual({ desenlace: 'pendiente', motivo: MATADO })
+    expect(cierre.cierre).toEqual({ desenlace: 'pendiente', motivo: MATADO })
     expect(b.mitigados).toHaveLength(1)
     expect(b.extinguidos).toHaveLength(0)
     expect(b.anotados).toEqual([{ id: 'f1', note: expect.stringMatching(/^pendiente de verificar: /) }]) // prettier-ignore
@@ -30,7 +30,7 @@ describe('LA LINEA ROJA: marcar y no poder verificar NO deja un mitigado mudo', 
 
     const cierre = await cerrarCicloTerminal(b.context, 'p1', 'f1', TURNO, 'm-1')
 
-    expect(cierre?.desenlace).toBe('pendiente')
+    expect(cierre.cierre?.desenlace).toBe('pendiente')
     expect(b.memoria).toHaveLength(0)
     expect(b.anotados[0].note).toMatch(/^pendiente de verificar: .*propuesta viva/)
   })
@@ -54,7 +54,7 @@ describe('lo que no se marco no se toca', () => {
     // Si el operador lo marco a mano mientras el turno trabajaba, su nota manda.
     const b = banco(CON_PRUEBA, { ...hallazgo('f1', 'src/api.ts'), lifecycle: 'MITIGATED' })
 
-    expect(await cerrarCicloTerminal(b.context, 'p1', 'f1', TURNO, 'm-1')).toEqual({ desenlace: 'no_vivo' }) // prettier-ignore
+    expect((await cerrarCicloTerminal(b.context, 'p1', 'f1', TURNO, 'm-1')).cierre).toEqual({ desenlace: 'no_vivo' }) // prettier-ignore
     expect(b.memoria).toHaveLength(0)
     expect(b.anotados).toHaveLength(0)
   })

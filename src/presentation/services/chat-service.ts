@@ -1,9 +1,11 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
+import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
 import { captureConfigDrafts } from './capture-config-drafts'
+import { escucharElTurno } from './escuchar-el-turno'
 import { conLoteDelPlan } from './lote-del-plan'
 import { refreshSessionUsage } from './telemetry-service'
 import { draftAssistantMessage, draftUserMessage } from './streaming-message'
@@ -15,8 +17,10 @@ export async function loadHistory(projectId: string): Promise<void> {
 }
 
 /** Envia la peticion a Claude pintando la respuesta segun llega; el finally
- *  recarga el historial persistido tanto si se completo como si fallo. */
-export async function sendMessage(input: SendMessageInput): Promise<void> {
+ *  recarga el historial persistido tanto si se completo como si fallo.
+ *  Devuelve la guarda que corto el cierre del ciclo, si corto: la cola del lote
+ *  la necesita para decir POR QUE no cerro en vez de agruparlo por descarte. */
+export async function sendMessage(input: SendMessageInput): Promise<SinCierre | null> {
   const store = useChatStore.getState()
   const draft = draftAssistantMessage(input.projectId, input.mode)
 
@@ -26,36 +30,30 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
   store.appendMessage(draftUserMessage(input.projectId, input.prompt, input.mode))
   store.appendMessage(draft)
 
-  let buffer = ''
-  const unsubscribe = api().chat.onChunk((chunk) => {
-    if (chunk.projectId !== input.projectId) return
-    buffer += chunk.delta
-    useChatStore.getState().replaceMessage(draft.id, { ...draft, content: buffer })
-  })
-  const unmeter = api().chat.onProgress((p) => {
-    if (p.projectId === input.projectId) {
-      useRunMeterStore.getState().progress(p.index, p.total, p.tokens, p.costUsd)
-    }
-  })
+  const dejarDeEscuchar = escucharElTurno(input.projectId, draft)
 
+  let sinCierre: SinCierre | null = null
   try {
     const result = await api().chat.send(conLoteDelPlan(input))
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
     // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
     // stream (que puede traer lineas de herramienta o venir vacio).
-    else captureConfigDrafts(input.projectId, result.value.assistant.content)
+    else {
+      sinCierre = result.value.sinCierre
+      captureConfigDrafts(input.projectId, result.value.assistant.content)
+    }
   } catch (error) {
     // Sin catch, un fallo del canal IPC seria un rechazo no manejado y el
     // finally recargaria el historial borrando el mensaje sin ninguna senal.
     const detail = error instanceof Error ? error.message : 'El chat se interrumpio'
     useChatStore.getState().setError(input.projectId, detail)
   } finally {
-    unsubscribe()
-    unmeter()
+    dejarDeEscuchar()
     useRunMeterStore.getState().end()
     useChatStore.getState().setStreaming(input.projectId, false)
     await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }
+  return sinCierre
 }
 
 export async function clearHistory(projectId: string): Promise<void> {

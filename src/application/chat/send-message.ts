@@ -63,7 +63,7 @@ export async function sendMessage(
   const stored = finishTurn({ context, project, meta, outcome: turno.outcome, aviso: aviso + turno.aviso, startedAt, prompt: input.prompt }) // prettier-ignore
   if (!stored.ok) return err(stored.error)
   // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).
-  await trasElTurno(context, foco.value?.id ?? null, turno, stored.value)
+  const sinCierre = await trasElTurno(context, foco.value?.id ?? null, turno, stored.value)
 
-  return ok({ user: user.value, assistant: stored.value, engine })
+  return ok({ user: user.value, assistant: stored.value, engine, sinCierre })
 }

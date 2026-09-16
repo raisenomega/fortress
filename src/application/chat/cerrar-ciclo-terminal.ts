@@ -1,4 +1,6 @@
 import { notaDelCierre, parteDelCierre, pendienteDeVerificar, type CierreDelCiclo } from '@domain/chat/cierre-del-ciclo' // prettier-ignore
+import { cerro, noCerro, type ResultadoDelCierre, type SinCierre } from '@domain/chat/motivo-sin-cierre' // prettier-ignore
+import { countEdits } from '@domain/telemetry/edit-tools'
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { AppContext } from '../context'
 import { verificarMitigado } from '../repair/verificar-mitigado'
@@ -17,6 +19,8 @@ const SIN_LANZAR = 'no se lanzo: una propuesta viva del motor lo trabaja, o ya n
  * GUARDAS: sin foco no hay hallazgo; sin la red que conservo el turno, nada
  * garantiza lo que quedo en el arbol; sin ediciones no se arreglo nada. El modo
  * no hace falta mirarlo: solo el autonomo con CLI tiene red, y solo el edita.
+ * Cuando una guarda corta DICE CUAL, como enum y con las dos cuentas de edits
+ * —nunca rutas—: antes devolvia null y no se distinguia de «ni se intento».
  *
  * LA LINEA ROJA: entre marcar y verificar no puede quedar un mitigado MUDO. Si
  * la verificacion lanza —el analista revienta, Detener lo mata— o no se lanza,
@@ -28,19 +32,23 @@ export async function cerrarCicloTerminal(
   findingId: string | null,
   turno: TurnoProtegido,
   messageId: string
-): Promise<CierreDelCiclo | null> {
-  const { edits } = turno.outcome
-  if (findingId === null || !turno.conservado || edits.length === 0) return null
+): Promise<ResultadoDelCierre> {
+  const { edits, tools } = turno.outcome
+  const cuenta = { porNombre: countEdits(tools), porRuta: edits.length }
+  if (findingId === null) return noCerro('sin-foco', cuenta)
+  if (!turno.conservado) return noCerro('no-conservado', cuenta)
+  if (cuenta.porRuta === 0) return noCerro('sin-ediciones', cuenta)
 
   const raiz = context.projects.findById(projectId)?.path ?? ''
   const marcado = markMitigatedFinding(context, findingId, notaDelCierre(messageId, edits, raiz))
-  if (!marcado.ok) return { desenlace: 'no_vivo' }
+  if (!marcado.ok) return cerro({ desenlace: 'no_vivo' })
   try {
     const dictamen = await verificarMitigado(context, projectId, findingId, 'terminal')
-    if (dictamen === null) return pendiente(context, findingId, SIN_LANZAR)
-    return { desenlace: dictamen.desenlace }
+    if (dictamen === null) return cerro(pendiente(context, findingId, SIN_LANZAR))
+    return cerro({ desenlace: dictamen.desenlace })
   } catch (error) {
-    return pendiente(context, findingId, error instanceof Error ? error.message : String(error))
+    const motivo = error instanceof Error ? error.message : String(error)
+    return cerro(pendiente(context, findingId, motivo))
   }
 }
 
@@ -50,16 +58,18 @@ function pendiente(context: AppContext, findingId: string, motivo: string): Cier
 }
 
 /** Cierra y lo CUENTA en el Terminal, como aviso del sistema: el turno no puede
- *  dejar creer que se cerro lo que no. `system` no entra en ningun prompt. */
+ *  dejar creer que se cerro lo que no. `system` no entra en ningun prompt.
+ *  Devuelve la guarda que corto, si corto: de ahi sale el parte del lote. */
 export async function cerrarYContar(
   context: AppContext,
   findingId: string | null,
   turno: TurnoProtegido,
   respuesta: ChatMessage
-): Promise<void> {
+): Promise<SinCierre | null> {
   const { id, projectId, mode, engine } = respuesta
-  const cierre = await cerrarCicloTerminal(context, projectId, findingId, turno, id)
-  if (cierre === null) return
+  const { cierre, sinCierre } = await cerrarCicloTerminal(context, projectId, findingId, turno, id)
+  if (cierre === null) return sinCierre
   const content = parteDelCierre(cierre)
   appendMessage(context, { projectId, role: 'system', content, agentId: null, mode, engine })
+  return null
 }

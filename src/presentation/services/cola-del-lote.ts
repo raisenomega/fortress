@@ -1,6 +1,7 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { AgentId } from '@domain/agent/agent'
 import { resumenDelLote, type DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
+import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import { turnoDelLote } from './turno-del-lote'
@@ -12,8 +13,9 @@ export interface PuertosDeLaCola {
   /** El hallazgo tal como esta ahora en el renderer; undefined si ya no esta vivo. */
   readonly hallazgo: (findingId: string) => Finding | undefined
   readonly abrirTerminal: () => void
-  /** `sendMessage` de chat-service: se resuelve con el turno ENTERO, cierre incluido. */
-  readonly enviar: (input: SendMessageInput) => Promise<void>
+  /** `sendMessage` de chat-service: se resuelve con el turno ENTERO, cierre
+   *  incluido, y devuelve la guarda que corto ese cierre si corto alguna. */
+  readonly enviar: (input: SendMessageInput) => Promise<SinCierre | null>
   readonly recargar: () => Promise<void>
   readonly contar: (resumen: string) => Promise<void>
   readonly cola: {
@@ -44,15 +46,18 @@ export async function correrLote(
   if (ids.length === 0 || p.modo() === 'autonomo' || p.cola.ocupada()) return null
   p.cola.arrancar(ids.length)
   const desenlaces: DesenlaceEnLote[] = []
+  const motivos: SinCierre[] = []
   try {
     for (const id of ids) {
       if (p.cola.cortado()) break
-      desenlaces.push(await turnoDelLote(projectId, id, ids, p))
+      const turno = await turnoDelLote(projectId, id, ids, p)
+      desenlaces.push(turno.desenlace)
+      if (turno.sinCierre !== null) motivos.push(turno.sinCierre)
       p.cola.avanzar()
     }
   } finally {
     p.cola.terminar()
-    await p.contar(resumenDelLote(desenlaces, ids.length))
+    await p.contar(resumenDelLote(desenlaces, ids.length, motivos))
   }
   return desenlaces
 }
