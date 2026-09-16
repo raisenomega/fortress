@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-// prettier-ignore
-import { alternarEnLote, loteDisponible, textoDelPlan, TOPE_DEL_LOTE } from './lote-del-terminal'
+import { alternarEnLote, loteDisponible, textoDelPlan } from './lote-del-terminal'
+import { LOTE_LARGO, SUGERIDO_DEL_LOTE, textoDeLaTanda } from './lote-del-terminal'
 
 describe('el lote se ofrece donde el Terminal resuelve, en los dos modos', () => {
   it('proyecto resoluble: si', () => {
@@ -28,26 +28,29 @@ describe('el mensaje de plan que se precarga', () => {
   })
 })
 
-describe(`el tope del lote: ${TOPE_DEL_LOTE}`, () => {
-  const diez = new Set(Array.from({ length: TOPE_DEL_LOTE }, (_, i) => `f${i}`))
+describe('sin tope duro: la barra avisa, no bloquea', () => {
+  const quince = new Set(Array.from({ length: 15 }, (_, i) => `f${i}`))
 
-  it('se anade hasta el tope', () => {
-    const r = alternarEnLote(new Set(['f0']), 'f1')
-    expect([...r.seleccion]).toEqual(['f0', 'f1'])
-    expect(r.lleno).toBe(false)
+  it('se pueden seleccionar mas de 10: el 16 entra igual', () => {
+    const siguiente = alternarEnLote(quince, 'f15')
+    expect(siguiente.size).toBe(16)
+    expect(siguiente.has('f15')).toBe(true)
   })
 
-  it('el 11 no entra: la seleccion vuelve igual y avisa', () => {
-    const r = alternarEnLote(diez, 'f10')
-    expect(r.lleno).toBe(true)
-    expect(r.seleccion).toBe(diez)
-    expect(r.seleccion.size).toBe(TOPE_DEL_LOTE)
+  it('quitar sigue funcionando con la tanda larga', () => {
+    expect(alternarEnLote(quince, 'f3').has('f3')).toBe(false)
   })
 
-  it('en el tope, quitar sigue pudiendose', () => {
-    const r = alternarEnLote(diez, 'f3')
-    expect(r.lleno).toBe(false)
-    expect(r.seleccion.has('f3')).toBe(false)
-    expect(r.seleccion.size).toBe(TOPE_DEL_LOTE - 1)
+  it('hasta 10 la barra solo cuenta y sugiere, sin la palabra «maximo»', () => {
+    const texto = textoDeLaTanda(LOTE_LARGO)
+    expect(texto).toBe(`${LOTE_LARGO} en el lote · sugerido ${SUGERIDO_DEL_LOTE}`)
+    expect(texto).not.toContain('maximo')
+  })
+
+  it('al pasar de 10 aparece la nota de tanda larga, y sigue sin ser un limite', () => {
+    const texto = textoDeLaTanda(LOTE_LARGO + 1)
+    expect(texto).toContain(`${LOTE_LARGO + 1} en el lote`)
+    expect(texto).toContain('tardan mas')
+    expect(texto).not.toContain('maximo')
   })
 })

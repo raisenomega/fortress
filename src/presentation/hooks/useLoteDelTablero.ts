@@ -1,11 +1,10 @@
-import { loteDisponible, SUGERIDO_DEL_LOTE, TOPE_DEL_LOTE } from '@domain/chat/lote-del-terminal'
+import { loteDisponible } from '@domain/chat/lote-del-terminal'
 import { prepararLote } from '../services/preparar-lote'
 import { resolverLotePendiente } from '../services/resolver-lote-en-terminal'
 import { useColaDelLoteStore, type LoteEnCurso } from '../stores/cola-del-lote-store'
 import { LOTE_VACIO, useLoteStore } from '../stores/lote-store'
 import { useProjectStore } from '../stores/project-store'
 import { useSettingsStore } from '../stores/settings-store'
-import { notify } from '../stores/toast-store'
 
 /** Lo que la tabla necesita del lote para pintar la cajita de cada fila. */
 export interface LoteEnLaTabla {
@@ -49,10 +48,7 @@ export function useLoteDelTablero(projectId: string, projectName: string): LoteD
   // prettier-ignore
   const planeado = useColaDelLoteStore((s) => s.pendiente?.projectId === projectId && s.pendiente.planeado)
 
-  const alternar = (findingId: string): void => {
-    if (useLoteStore.getState().alternar(projectId, findingId)) return
-    notify(`Un lote lleva como maximo ${TOPE_DEL_LOTE} hallazgos (sugerido: ${SUGERIDO_DEL_LOTE}).`)
-  }
+  const alternar = (findingId: string): void => useLoteStore.getState().alternar(projectId, findingId) // prettier-ignore
 
   return {
     enLaTabla: loteDisponible(resoluble) ? { seleccion, alternar } : null,

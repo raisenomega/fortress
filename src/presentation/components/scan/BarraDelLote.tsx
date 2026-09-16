@@ -1,4 +1,4 @@
-import { SUGERIDO_DEL_LOTE } from '@domain/chat/lote-del-terminal'
+import { textoDeLaTanda } from '@domain/chat/lote-del-terminal'
 import type { LoteDelTablero } from '../../hooks/useLoteDelTablero'
 import { Icon } from '../common/Icon'
 
@@ -16,7 +16,7 @@ function texto(l: LoteDelTablero): string {
   if (l.enAutonomo) return 'El lote resuelve en modo Supervisado'
   if (l.planeado) return 'Lee el plan en el Terminal'
   if (l.pendiente) return 'Mensaje listo en el Terminal: dale Enter'
-  return `${l.elegidos} en el lote · sugerido ${SUGERIDO_DEL_LOTE}`
+  return textoDeLaTanda(l.elegidos)
 }
 
 /**

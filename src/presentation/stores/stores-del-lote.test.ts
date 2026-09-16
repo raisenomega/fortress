@@ -1,20 +1,22 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { TOPE_DEL_LOTE } from '@domain/chat/lote-del-terminal'
 import { useColaDelLoteStore } from './cola-del-lote-store'
 import { useLoteStore } from './lote-store'
 
-describe('la seleccion del lote, por proyecto y con tope', () => {
+describe('la seleccion del lote, por proyecto y sin tope', () => {
   beforeEach(() => {
     useLoteStore.getState().limpiar('p1')
     useLoteStore.getState().limpiar('p2')
   })
 
-  it(`entran ${TOPE_DEL_LOTE}; el siguiente no, y alternar devuelve false para avisar`, () => {
-    for (let i = 0; i < TOPE_DEL_LOTE; i += 1) {
-      expect(useLoteStore.getState().alternar('p1', `f${i}`)).toBe(true)
-    }
-    expect(useLoteStore.getState().alternar('p1', `f${TOPE_DEL_LOTE}`)).toBe(false)
-    expect(useLoteStore.getState().seleccion.p1?.size).toBe(TOPE_DEL_LOTE)
+  it('entran mas de 10: cuantos van lo decide el cliente, no nosotros', () => {
+    for (let i = 0; i < 15; i += 1) useLoteStore.getState().alternar('p1', `f${i}`)
+    expect(useLoteStore.getState().seleccion.p1?.size).toBe(15)
+  })
+
+  it('alternar dos veces el mismo hallazgo lo quita', () => {
+    useLoteStore.getState().alternar('p1', 'a')
+    useLoteStore.getState().alternar('p1', 'a')
+    expect(useLoteStore.getState().seleccion.p1?.size).toBe(0)
   })
 
   it('es por proyecto: el lote de uno no toca el de otro', () => {
