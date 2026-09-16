@@ -4,6 +4,7 @@ import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
 import { captureConfigDrafts } from './capture-config-drafts'
+import { conLoteDelPlan } from './lote-del-plan'
 import { refreshSessionUsage } from './telemetry-service'
 import { draftAssistantMessage, draftUserMessage } from './streaming-message'
 
@@ -38,7 +39,7 @@ export async function sendMessage(input: SendMessageInput): Promise<void> {
   })
 
   try {
-    const result = await api().chat.send(input)
+    const result = await api().chat.send(conLoteDelPlan(input))
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
     // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
     // stream (que puede traer lineas de herramienta o venir vacio).
@@ -63,12 +64,11 @@ export async function clearHistory(projectId: string): Promise<void> {
 }
 
 /**
- * Detiene TODO lo del proyecto: el run en curso (chat o loop) y el loop si
- * corre. El input se libera YA: aunque un stream zombi suelte bytes un momento
- * mas, el operador recupera el control; el finally del envio lo re-confirma.
+ * Detiene TODO lo del proyecto: el run (chat o loop), el loop si corre, y el
+ * lote —el corte va ANTES de matar el turno, para que al volver su promesa la
+ * cola ya lo lea—. El input se libera YA; el finally del envio lo re-confirma.
  */
 export async function stopWorkflow(projectId: string): Promise<void> {
-  // ANTES de matar el turno: al volver su promesa, la cola ya lee el corte.
   useColaDelLoteStore.getState().cortar(projectId)
   await api().chat.stop(projectId)
   useChatStore.getState().setStreaming(projectId, false)

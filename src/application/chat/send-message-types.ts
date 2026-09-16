@@ -15,6 +15,12 @@ export interface SendMessageInput {
    * se fia de lo que diga el renderer. Sin el, el turno es el de siempre.
    */
   readonly findingId?: string
+  /**
+   * Los hallazgos del LOTE (ADR-088, arco 1). Sin `findingId` es el turno de
+   * PLAN: el productor los ve todos y propone su orden. Con `findingId` son los
+   * HERMANOS, solo contexto. Nunca sustituye al foco, que sigue siendo UNO.
+   */
+  readonly lote?: readonly string[]
 }
 
 export interface SendMessageOutput {

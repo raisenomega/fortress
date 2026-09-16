@@ -44,3 +44,23 @@ describe('Detener corta solo el lote de su proyecto', () => {
     expect(useColaDelLoteStore.getState().cortado).toBe(false)
   })
 })
+
+describe('el lote pendiente de aprobacion', () => {
+  beforeEach(() => {
+    useColaDelLoteStore.getState().descartar()
+    useColaDelLoteStore.getState().terminar()
+  })
+
+  it('preparar guarda proyecto e ids; descartar lo quita', () => {
+    useColaDelLoteStore.getState().preparar('p1', ['f1', 'f2'])
+    expect(useColaDelLoteStore.getState().pendiente).toEqual({ projectId: 'p1', ids: ['f1', 'f2'] })
+
+    useColaDelLoteStore.getState().descartar()
+    expect(useColaDelLoteStore.getState().pendiente).toBeNull()
+  })
+
+  it('preparar NO arranca la cola: precargar no es ejecutar', () => {
+    useColaDelLoteStore.getState().preparar('p1', ['f1'])
+    expect(useColaDelLoteStore.getState().enCurso).toBeNull()
+  })
+})

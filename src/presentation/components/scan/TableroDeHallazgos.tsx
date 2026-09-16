@@ -23,7 +23,7 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
   const tablero = useTablero(project.id)
   const seleccion = useSeleccionDelTablero(project.id, tablero)
   const motorOcupado = useRepairStore((state) => state.busy) // un solo carril
-  const lote = useLoteDelTablero(project.id)
+  const lote = useLoteDelTablero(project.id, project.name)
 
   return (
     <>
@@ -44,14 +44,15 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
         />
       ) : null}
 
-      {lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null) ? (
-        <BarraDelLote
-          elegidos={lote.elegidos}
-          enCurso={lote.enCurso}
-          onResolver={lote.resolver}
-          onLimpiar={lote.limpiar}
-        />
-      ) : null}
+      <BarraDelLote
+        visible={lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null)}
+        elegidos={lote.elegidos}
+        enCurso={lote.enCurso}
+        pendiente={lote.pendiente}
+        onPreparar={lote.preparar}
+        onAprobar={lote.aprobar}
+        onLimpiar={lote.limpiar}
+      />
 
       {seleccion.preguntando ? (
         <ConfirmVerificarTodos

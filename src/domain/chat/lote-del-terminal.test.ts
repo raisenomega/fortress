@@ -1,18 +1,45 @@
 import { describe, expect, it } from 'vitest'
-import { alternarEnLote, loteDisponible, TOPE_DEL_LOTE } from './lote-del-terminal'
+// prettier-ignore
+import { alternarEnLote, avisoDeAprobacion, loteDisponible, textoDelPlan, TOPE_DEL_LOTE } from './lote-del-terminal'
 
-describe('el lote se ofrece solo donde el Terminal resuelve de verdad', () => {
-  it('resoluble y en autonomo: si', () => {
-    expect(loteDisponible(true, 'autonomo')).toBe(true)
+describe('el lote se ofrece donde el Terminal resuelve, en los dos modos', () => {
+  it('proyecto resoluble: si', () => {
+    expect(loteDisponible(true)).toBe(true)
   })
 
-  it('el repo propio de FORTRESS (resoluble=false): no, ni en autonomo', () => {
-    expect(loteDisponible(false, 'autonomo')).toBe(false)
+  it('el repo propio de FORTRESS (resoluble=false): no', () => {
+    expect(loteDisponible(false)).toBe(false)
   })
 
-  it('en supervisado: no, cada turno esperaria su Aprobar y no editaria', () => {
-    expect(loteDisponible(true, 'supervisado')).toBe(false)
-    expect(loteDisponible(false, 'supervisado')).toBe(false)
+  it('el modo NO lo esconde: decide el flujo, no la casilla', () => {
+    // En supervisado es donde hoy resuelve; esconderlo ahi lo dejaba inutil.
+    expect(loteDisponible(true)).toBe(true)
+  })
+})
+
+describe('el mensaje de plan que se precarga', () => {
+  it('nombra el proyecto y cuantos son, y no pide volver a escanear', () => {
+    const texto = textoDelPlan('mailbd-main', 5)
+
+    expect(texto).toContain('los 5 hallazgos seleccionados')
+    expect(texto).toContain('de mailbd-main')
+    expect(texto).toContain('plan y orden de ejecucion')
+    expect(texto).toContain('No hace falta volver a escanear')
+  })
+})
+
+describe('el aviso que queda escrito al aprobar el plan', () => {
+  it('dice que va a EDITAR, cuantos, y que el freno es Detener', () => {
+    const aviso = avisoDeAprobacion(5)
+
+    expect(aviso).toContain('los 5 hallazgos')
+    expect(aviso).toContain('EDITANDO los ficheros')
+    expect(aviso).toContain('sin volver a preguntarte')
+    expect(aviso).toContain('Detener')
+  })
+
+  it('y avisa de lo que NO frena: cambiar de modo a mitad', () => {
+    expect(avisoDeAprobacion(2)).toContain('cambiar de modo a mitad no la corta')
   })
 })
 

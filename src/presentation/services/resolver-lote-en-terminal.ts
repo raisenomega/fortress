@@ -1,3 +1,4 @@
+import { avisoDeAprobacion } from '@domain/chat/lote-del-terminal'
 import { api } from '../adapters/fortress-api'
 import { useAgentStore } from '../stores/agent-store'
 import { useChatStore } from '../stores/chat-store'
@@ -44,12 +45,24 @@ function puertos(projectId: string): PuertosDeLaCola {
 }
 
 /**
- * «Resolver lote en Terminal»: corre la cola con los elegidos, en el orden en que
- * se eligieron, y limpia la seleccion al acabar —era «lo que voy a hacer», no
- * «lo que hice»—. Si la cola no arranca, la seleccion se queda como estaba.
+ * «Aprobar plan y resolver» (ADR-088, arco 1): la aprobacion del PLAN es la
+ * autorizacion, y con ella la cola corre los N turnos en EDICION sin volver a
+ * preguntar. No se re-aprueba cada turno: eso seria supervisar uno a uno, que es
+ * justo lo que un lote no es.
+ *
+ * Al acabar limpia la seleccion y el pendiente —eran «lo que voy a hacer», no
+ * «lo que hice»—. Si la cola no arranca, los dos se quedan como estaban.
  */
-export async function resolverLoteEnTerminal(projectId: string): Promise<void> {
-  const ids = [...(useLoteStore.getState().seleccion[projectId] ?? [])]
-  const hecho = await correrLote(projectId, ids, puertos(projectId))
-  if (hecho !== null) useLoteStore.getState().limpiar(projectId)
+export async function aprobarYResolver(projectId: string): Promise<void> {
+  const pendiente = useColaDelLoteStore.getState().pendiente
+  if (pendiente === null || pendiente.projectId !== projectId) return
+
+  const p = puertos(projectId)
+  // El consentimiento queda escrito ANTES de tocar nada: si luego se detiene, en
+  // el historial consta igual lo que se autorizo y con que freno.
+  await p.contar(avisoDeAprobacion(pendiente.ids.length))
+  const hecho = await correrLote(projectId, pendiente.ids, p)
+  if (hecho === null) return
+  useColaDelLoteStore.getState().descartar()
+  useLoteStore.getState().limpiar(projectId)
 }

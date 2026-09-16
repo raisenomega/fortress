@@ -11,9 +11,9 @@ const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta),
 const SCAN = 'src/presentation/components/scan/'
 
 describe('la casilla del lote sale solo donde el Terminal resuelve de verdad', () => {
-  it('el hook la ofrece solo con resoluble && autonomo; si no, la tabla recibe null', () => {
+  it('el hook la ofrece solo si el proyecto es resoluble; si no, la tabla recibe null', () => {
     expect(fuente('src/presentation/hooks/useLoteDelTablero.ts')).toMatch(
-      /enLaTabla: loteDisponible\(resoluble, mode\) \? \{ seleccion, alternar \} : null/
+      /enLaTabla: loteDisponible\(resoluble\) \? \{ seleccion, alternar \} : null/
     )
   })
 
@@ -33,19 +33,5 @@ describe('la casilla del lote sale solo donde el Terminal resuelve de verdad', (
     const cabecera = fuente(`${SCAN}FindingsTable.tsx`).split('<thead>')[1].split('</thead>')[0]
     expect(cabecera).toContain('onToggle={props.onTodasLasVisibles}')
     expect(cabecera).not.toMatch(/lote/i)
-  })
-})
-
-describe('la cola se engancha a Detener, y la barra va aparte', () => {
-  it('Detener corta el lote ANTES de matar el turno', () => {
-    expect(fuente('src/presentation/services/chat-service.ts')).toMatch(
-      /useColaDelLoteStore\.getState\(\)\.cortar\(projectId\)\s*await api\(\)\.chat\.stop\(projectId\)/
-    )
-  })
-
-  it('la barra del lote es otra; la de verificar se pinta como antes', () => {
-    const tablero = fuente(`${SCAN}TableroDeHallazgos.tsx`)
-    expect(tablero).toMatch(/<BarraDelLote/)
-    expect(tablero).toMatch(/<BarraDeSeleccion\s*seleccionados=\{tablero\.seleccion\.size\}/)
   })
 })

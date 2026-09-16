@@ -1,4 +1,5 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
+import { idsPedidos } from './ids-pedidos'
 
 /**
  * El `findingId` que llega del renderer, saneado: una cadena no vacia, o nada.
@@ -12,7 +13,15 @@ export function focoPedido(crudo: unknown): string | undefined {
   return id === '' ? undefined : id
 }
 
-/** El envio con su foco saneado. Sin foco, el turno sale como siempre. */
+/** El envio con su foco y su lote saneados. Del lote solo se limpia la FORMA
+ *  (molde de `idsPedidos`); que cada id exista, sea de este proyecto y siga vivo
+ *  lo decide la base, igual que el foco. Sin ninguno, el turno sale como siempre. */
 export function conFocoSaneado(input: SendMessageInput): SendMessageInput {
-  return { ...input, findingId: focoPedido(input.findingId) }
+  // El lote crudo se SACA del envio y solo vuelve ya limpio: dejarlo pasar con
+  // un spread devolvia tal cual lo que no fuera una lista.
+  const { lote, ...resto } = input
+  const limpio = idsPedidos(lote)
+  // Sin lote la llave ni aparece: un envio de siempre sale exactamente igual.
+  const foco = focoPedido(input.findingId)
+  return { ...resto, findingId: foco, ...(limpio.length > 0 ? { lote: limpio } : {}) }
 }

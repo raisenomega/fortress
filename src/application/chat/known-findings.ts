@@ -1,6 +1,6 @@
-import { sanearParaPrompt } from '@domain/shared/sanear-para-prompt'
 import type { Project } from '@domain/project/project'
 import type { AppContext } from '../context'
+import { lineaDelHallazgo } from './hallazgos-del-lote'
 
 const MAX = 40
 
@@ -20,8 +20,5 @@ export function knownFindings(context: AppContext, project: Project): readonly s
     .listByProject(project.id)
     .filter((finding) => finding.status === 'open')
     .slice(0, MAX)
-    .map((finding) => {
-      const loc = `${finding.file}${finding.line === null ? '' : `:${finding.line}`}`
-      return sanearParaPrompt(`${finding.severity} ${loc} — ${finding.title}`)
-    })
+    .map(lineaDelHallazgo)
 }

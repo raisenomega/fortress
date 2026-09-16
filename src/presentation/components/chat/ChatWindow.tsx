@@ -13,6 +13,7 @@ import { ConfigRedirect } from './ConfigRedirect'
 import { stopWorkflow } from '../../services/chat-service'
 import { ChatHeader } from './ChatHeader'
 import { ChatInput } from './ChatInput'
+import { IndicadorDelLote } from './IndicadorDelLote'
 
 interface ChatWindowProps {
   readonly onSend: (text: string) => void
@@ -52,6 +53,8 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
       ) : null}
 
       <ChatBody projectName={project.name} messages={messages} terminal />
+
+      <IndicadorDelLote projectId={project.id} />
 
       <ChatInput
         disabled={busy}

@@ -13,14 +13,16 @@ describe('la cola del lote: un turno con foco por hallazgo, en orden', () => {
     )
   })
 
-  it('cada peticion lleva su findingId, en autonomo, con el borrador de su fila', async () => {
+  it('cada peticion lleva su foco, va en EDICION y arrastra el lote de contexto', async () => {
     const b = banco()
     await correrLote('p1', IDS, b.p)
+    // Edicion aunque el operador este en supervisado: lo autorizo al aprobar el plan.
     expect(b.enviados.map((i) => `${i.projectId}/${i.findingId}/${i.mode}`)).toEqual([
       'p1/f1/autonomo',
       'p1/f2/autonomo',
       'p1/f3/autonomo'
     ])
+    expect(b.enviados.map((i) => i.lote)).toEqual([IDS, IDS, IDS])
     expect(b.enviados[0].prompt).toContain('t-f1')
   })
 
@@ -39,14 +41,14 @@ describe('lo que corta la cola, y lo que no la deja arrancar', () => {
     expect(b.resumenes[0]).toContain('Cortado: 2 sin lanzar.')
   })
 
-  it('salir de autonomo a mitad tambien la corta', async () => {
-    const b = banco({ modo: (n) => (n <= 1 ? 'autonomo' : 'supervisado') })
+  it('cambiar de modo a mitad NO la corta: el plan ya estaba aprobado', async () => {
+    const b = banco({ modo: (n) => (n === 0 ? 'supervisado' : 'autonomo') })
     await correrLote('p1', IDS, b.p)
-    expect(b.enviados.map((i) => i.findingId)).toEqual(['f1'])
+    expect(b.enviados.map((i) => i.findingId)).toEqual(IDS)
   })
 
-  it('en supervisado no arranca: ni envia ni cuenta', async () => {
-    const b = banco({ modo: () => 'supervisado' })
+  it('en autonomo no arranca: alli el plan lo aprueba OMEGA (pieza 5)', async () => {
+    const b = banco({ modo: () => 'autonomo' })
     expect(await correrLote('p1', IDS, b.p)).toBeNull()
     expect([b.enviados, b.resumenes]).toEqual([[], []])
   })
