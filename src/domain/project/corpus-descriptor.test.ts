@@ -9,9 +9,14 @@ import {
 } from './corpus-descriptor'
 
 describe('categoryOf', () => {
-  it('manda al modelo de amenazas los dos documentos que lo son', () => {
+  it('manda al modelo de amenazas los tres documentos que lo son', () => {
     expect(categoryOf('SECURITY-BASELINE.md')).toBe('security')
     expect(categoryOf('SECURITY-MODEL.md')).toBe('security')
+    // El nombre de GitHub. Faltaba, y en un proyecto con un charter firmado en
+    // la raiz el prompt llego a afirmar que no habia doctrina de seguridad.
+    expect(categoryOf('SECURITY.md')).toBe('security')
+    // Pero el REGISTRO DE PARCHES sigue fuera: no es doctrina.
+    expect(categoryOf('SECURITY-FIXES.md')).toBeNull()
   })
 
   it('manda a estructura los que deciden donde va un cambio', () => {

@@ -35,6 +35,13 @@ export const EMPTY_CORPUS: CorpusDescriptor = { docs: [], directories: [] }
 const CATEGORY: Readonly<Record<string, CorpusCategory>> = {
   'SECURITY-BASELINE.md': 'security',
   'SECURITY-MODEL.md': 'security',
+  // El nombre de GitHub, y el mas comun de los tres. Faltaba, y su ausencia hizo
+  // justo el dano que este mecanismo evita: en un proyecto con un charter
+  // firmado en la raiz, el prompt afirmo que no habia doctrina escrita y los
+  // hallazgos de contradiccion doc-codigo estuvieron a punto de perderse. No
+  // choca con la regla de arriba: `SECURITY.md` es la POLITICA, no el registro
+  // de parches que si sigue fuera (`SECURITY-FIXES.md`).
+  'SECURITY.md': 'security',
   'ARCHITECTURE.md': 'structural',
   'DDD-RULES.md': 'structural',
   'PRINCIPLES.md': 'structural',
