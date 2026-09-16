@@ -36,10 +36,11 @@ const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   generator_timeout: 'porTimeout',
   gate_timeout: 'porTimeout',
   omega_timeout: 'porTimeout',
-  // Las tres unicas para las que "mira el diff" es cierto.
+  // Las cuatro unicas para las que "mira el diff" es cierto.
   scope_violation: 'porCorrea',
   gate_failed: 'porCorrea',
   no_diff_produced: 'porCorrea',
+  solo_pruebas: 'porCorrea',
   // Nuestro techo de turnos. No dice NADA del fix: no hubo juicio.
   turnos_agotados: 'porLimitePropio',
   // Ni el fix ni nosotros: el repositorio o su worktree.

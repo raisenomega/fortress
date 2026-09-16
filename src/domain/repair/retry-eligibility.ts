@@ -24,6 +24,10 @@ export const RETRYABLE_REJECTION_REASONS = [
   'omega_vetado',
   'scope_violation',
   'no_diff_produced',
+  // Mismo criterio que sus dos hermanas de correa: es un fallo de RAZONAMIENTO
+  // del generador —entendio el arreglo como un test— y otra corrida puede dar
+  // un fix de verdad. El tope de dos intentos por causa pone el limite.
+  'solo_pruebas',
   'provider_error',
   'analisis_ilegible'
 ] as const

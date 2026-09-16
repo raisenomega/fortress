@@ -50,6 +50,7 @@ export const REJECTION_REASONS = [
   /** El analista corrio pero su salida no se dejo leer. No es obsolescencia. */
   'analisis_ilegible',
   'no_diff_produced',
+  /** Solo toco pruebas: el gate lo daria VERDE. Ver `solo-toca-pruebas`. */ 'solo_pruebas',
   'worktree_contaminated',
   'orphan_before_generate',
   'superseded',
