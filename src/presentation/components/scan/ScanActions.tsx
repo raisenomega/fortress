@@ -9,7 +9,6 @@ import { usePushStore } from '../../stores/push-store'
 import { useQualityStore } from '../../stores/quality-store'
 import { useProjectCounts, useProjectFindings } from '../../stores/scan-selectors'
 import { useScanStore } from '../../stores/scan-store'
-import { AskChatButton } from './AskChatButton'
 import { BotonVerificarTodos } from './BotonVerificarTodos'
 import { botonDeEscaneo } from './boton-de-escaneo'
 import { DetenerScanButton } from './DetenerScanButton'
@@ -51,7 +50,6 @@ export function ScanActions({ project }: ScanActionsProps): React.JSX.Element {
         mitigados={findings.filter(verificable).length}
         disabled={boton === 'detener' || boton === 'ocupado'}
       />
-      <AskChatButton projectName={project.name} findings={findings} />
       <PushButton
         state={pushState(project, counts)}
         pushing={pushingProjectId === project.id}

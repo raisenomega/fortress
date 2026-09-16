@@ -9,7 +9,7 @@ interface TransferBadgeProps {
 /**
  * Badge dentro de una respuesta del Chat: "Transferir" precarga esa conclusion
  * o instruccion en el input del Terminal (ejecucion) y salta alli, sin tener
- * que reescribirla. Mismo puente que AskChatButton (workflow-store.draft).
+ * que reescribirla. Mismo puente que «Resolver en Terminal» (workflow-store.draft).
  */
 export function TransferBadge({ text }: TransferBadgeProps): React.JSX.Element {
   const setView = useUiStore((state) => state.setView)

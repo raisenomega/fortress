@@ -1,4 +1,3 @@
-import type { RefObject } from 'react'
 import type { Project } from '@domain/project/project'
 import { scanStatus } from '@domain/project/scan-status'
 import { formatDuration, formatMoment } from '../../format/time'
@@ -8,12 +7,7 @@ import { ScanActions } from './ScanActions'
 
 interface ScanHeaderProps {
   readonly project: Project
-  /** Marca la fila FIJA para medir su alto real (ver `useFranjaFija`). */
-  readonly cabecera: RefObject<HTMLDivElement | null>
 }
-
-const FIJA =
-  'bg-background sticky top-0 z-30 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border px-4 py-2'
 
 /** Cuando dice "sin escanear" no hay score que mostrar: el 0 no significa malo. */
 function describeLastScan(project: Project, durationMs: number | null): string {
@@ -24,36 +18,30 @@ function describeLastScan(project: Project, durationMs: number | null): string {
 }
 
 /**
- * Dos pisos. El de arriba —nombre y botones— se queda FIJO: con 161 filas el
- * operador necesita Escanear, Verificar y Push sin volver arriba del todo. El de
- * abajo —score, ruta y fecha— se va con el scroll: es contexto que se lee una
- * vez, y el circulo de 64px robaria esa altura a las filas para siempre.
+ * La identidad del proyecto en UNA fila: el score ancla a la izquierda, nombre y
+ * ruta en medio, los botones a la derecha. Una sola linea porque vive dentro del
+ * bloque FIJO (`CabeceraFija`), y lo que aqui se apile lo pagan las filas.
+ *
+ * El nombre va discreto, no como titulo de pagina: el TopBar ya lo dice arriba y
+ * el ancla visual de esta pantalla es el circulo del score.
  */
-export function ScanHeader({ project, cabecera }: ScanHeaderProps): React.JSX.Element {
+export function ScanHeader({ project }: ScanHeaderProps): React.JSX.Element {
   const summary = useScanStore((state) => state.lastSummary)
   const enCurso = useScanStore((state) => state.runningProjectId) === project.id
   const scanned = scanStatus(project) !== 'sin-escanear'
   const duration = summary?.projectId === project.id ? summary.durationMs : null
 
   return (
-    <>
-      <div ref={cabecera} className={FIJA}>
-        <h2 className="min-w-0 flex-1 truncate font-display text-lg font-bold text-foreground">
-          {project.name}
-        </h2>
-        <ScanActions project={project} />
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <ScoreGauge score={project.fortressScore} scanned={scanned} enCurso={enCurso} />
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-foreground">{project.name}</p>
+        <p className="truncate font-mono text-[11px] text-muted-foreground">{project.path}</p>
+        <p className="text-[11px] text-muted-foreground">{describeLastScan(project, duration)}</p>
       </div>
 
-      <header className="flex flex-wrap items-center gap-4 border-b border-border px-4 py-3">
-        <ScoreGauge score={project.fortressScore} scanned={scanned} enCurso={enCurso} />
-
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-mono text-[11px] text-muted-foreground">{project.path}</p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            {describeLastScan(project, duration)}
-          </p>
-        </div>
-      </header>
-    </>
+      <ScanActions project={project} />
+    </div>
   )
 }

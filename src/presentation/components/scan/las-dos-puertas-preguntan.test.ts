@@ -7,7 +7,7 @@ import { TITULO } from './alcance-de-la-verificacion'
 const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta), 'utf8')
 
 const HOOK = 'src/presentation/hooks/useSeleccionDelTablero.ts'
-const TABLERO = 'src/presentation/components/scan/TableroDeHallazgos.tsx'
+const TABLERO = 'src/presentation/components/scan/BarrasDelTablero.tsx'
 const BOTON = 'src/presentation/components/scan/BotonVerificarTodos.tsx'
 
 /**

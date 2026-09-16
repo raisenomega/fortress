@@ -27,9 +27,9 @@ interface FindingsTableProps {
   readonly onQuitarFiltro: () => void
 }
 
-// Tercer piso: bajo cabecera + barras. Linea en sombra: border-collapse la dejaria atras.
+// Cuelga del bloque fijo (--cabecera). Linea en sombra: border-collapse la dejaria atras.
 const HEAD_CLASS =
-  'bg-background sticky top-[calc(var(--cabecera,0px)_+_var(--franja,0px))] z-10 py-2 text-left text-[11px] font-semibold tracking-widest uppercase shadow-[0_1px_0_0_hsl(var(--border))]'
+  'bg-background sticky top-[var(--cabecera,0px)] z-20 py-2 text-left text-[11px] font-semibold tracking-widest uppercase shadow-[0_1px_0_0_hsl(var(--border))]'
 
 export function FindingsTable(props: FindingsTableProps): React.JSX.Element {
   const { project, findings, seleccion, visibles } = props

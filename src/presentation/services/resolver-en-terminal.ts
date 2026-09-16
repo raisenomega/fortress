@@ -13,8 +13,8 @@ export function borradorDeResolucion(finding: Finding): string {
 }
 
 /**
- * «Resolver en Terminal» (ADR-088, pieza 2), con el molde de `AskChatButton`:
- * fija el foco, deja el borrador escrito y abre el Terminal. No envia nada: el
+ * «Resolver en Terminal» (ADR-088, pieza 2): fija el foco, deja el borrador
+ * escrito y abre el Terminal. No envia nada: el
  * operador lo lee y lo manda, y en supervisado todavia le queda Aprobar.
  *
  * Un mensaje que esperaba aprobacion se descarta: era de otra peticion, y si
