@@ -6,10 +6,12 @@ export interface LoteEnCurso {
   readonly total: number
 }
 
-/** El lote con su plan precargado, esperando que el operador lo apruebe. */
+/** El lote esperando en el punto de parada (ADR-088, arco 1). */
 export interface LotePendiente {
   readonly projectId: string
   readonly ids: readonly string[]
+  /** El productor ya dio su plan y el turno paro: falta el disparo que ejecuta. */
+  readonly planeado: boolean
 }
 
 interface ColaState {
@@ -17,9 +19,11 @@ interface ColaState {
   readonly enCurso: LoteEnCurso | null
   /** Detener lo levanta: la cola no lanza el siguiente. */
   readonly cortado: boolean
-  /** Esperando la aprobacion del plan (ADR-088, arco 1). */
+  /** Esperando en el punto de parada (ADR-088, arco 1). */
   readonly pendiente: LotePendiente | null
   preparar: (projectId: string, ids: readonly string[]) => void
+  /** El turno de plan termino: el lote queda listo para el disparo que ejecuta. */
+  marcarPlaneado: (projectId: string) => void
   descartar: () => void
   arrancar: (projectId: string, total: number) => void
   avanzar: () => void
@@ -36,7 +40,13 @@ export const useColaDelLoteStore = create<ColaState>((set) => ({
   cortado: false,
   pendiente: null,
 
-  preparar: (projectId, ids) => set({ pendiente: { projectId, ids } }),
+  preparar: (projectId, ids) => set({ pendiente: { projectId, ids, planeado: false } }),
+
+  marcarPlaneado: (projectId) =>
+    set((s) =>
+      s.pendiente?.projectId === projectId ? { pendiente: { ...s.pendiente, planeado: true } } : s
+    ),
+
   descartar: () => set({ pendiente: null }),
 
   arrancar: (projectId, total) => set({ enCurso: { projectId, hechos: 0, total }, cortado: false }),

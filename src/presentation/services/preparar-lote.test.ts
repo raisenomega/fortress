@@ -29,7 +29,11 @@ describe('pulsar «Resolver lote en Terminal» precarga el plan y espera', () =>
     expect(useWorkflowStore.getState().draft).toContain('los 2 hallazgos seleccionados')
     expect(useWorkflowStore.getState().draft).not.toContain(RESIDUO)
     expect(useWorkflowStore.getState().pendingPrompt).toBeNull()
-    expect(useColaDelLoteStore.getState().pendiente).toEqual({ projectId: 'p1', ids: ['f1', 'f2'] })
+    expect(useColaDelLoteStore.getState().pendiente).toEqual({
+      projectId: 'p1',
+      ids: ['f1', 'f2'],
+      planeado: false
+    })
     expect(useColaDelLoteStore.getState().enCurso).toBeNull()
     expect(useUiStore.getState().view).toBe('chat')
   })

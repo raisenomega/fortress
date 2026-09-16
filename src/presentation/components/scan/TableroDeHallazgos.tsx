@@ -46,12 +46,7 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
 
       <BarraDelLote
         visible={lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null)}
-        elegidos={lote.elegidos}
-        enCurso={lote.enCurso}
-        pendiente={lote.pendiente}
-        enAutonomo={lote.enAutonomo}
-        onPreparar={lote.preparar}
-        onLimpiar={lote.limpiar}
+        lote={lote}
       />
 
       {seleccion.preguntando ? (

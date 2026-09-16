@@ -1,8 +1,6 @@
-import type { OperationMode } from '@domain/settings/operation-mode'
 import type { AgentId } from '@domain/agent/agent'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { sendMessage } from './chat-service'
-import { resolverLotePendiente } from './resolver-lote-en-terminal'
 
 /** ¿Este proyecto tiene un lote precargado esperando el Enter del operador? */
 export function lotePendienteDe(projectId: string): boolean {
@@ -11,23 +9,27 @@ export function lotePendienteDe(projectId: string): boolean {
 }
 
 /**
- * El lote con UN solo gesto: el ENTER del operador sobre el mensaje precargado
- * (ADR-088, arco 1, simplificado).
+ * El turno de PLAN del lote (ADR-088, arco 1). El Enter del operador lo manda, y
+ * el turno PARA: el productor propone su orden de ejecucion y devuelve el
+ * control. La cola NO arranca aqui.
  *
- * Ese Enter es su aprobacion, asi que el mensaje NO pasa por la tarjeta de plan
- * de supervisado: pedir dos veces lo mismo —y con una estimacion de workflow que
- * este turno ni siquiera va a correr— solo asusta y estorba.
+ * Va SIEMPRE en `supervisado`, que es modo `plan` en el CLI: el turno lee,
+ * consulta el grafo y propone, pero no toca un fichero — ni siquiera si el
+ * proyecto corre en autonomo. Asi el productor puede decir «rota las llaves
+ * primero» sin haber tocado nada mientras lo dice.
  *
- * Primero sale el mensaje tal cual (el productor ve los N del lote, se los pone
- * `conLoteDelPlan`); cuando ese turno termina, arranca la cola y para sola. En
- * pantalla solo quedan el indicador y el parte final.
+ * PUNTO DE PARADA. Aqui espera el APROBADOR del lote:
+ * - hoy, en supervisado, es el OPERADOR: lee el plan y pulsa «Ejecutar plan»;
+ * - en la PIEZA 5 sera OMEGA quien apruebe en autonomo, y entra JUSTO AQUI:
+ *   en vez de marcar el lote como planeado y esperar, se le pasa el plan a
+ *   OMEGA y su veredicto dispara `resolverLotePendiente`. El flujo no cambia;
+ *   solo cambia quien aprueba.
  */
-export async function planYResolverLote(
+export async function planDelLote(
   projectId: string,
   prompt: string,
-  mode: OperationMode,
   excludedAgents: readonly AgentId[]
 ): Promise<void> {
-  await sendMessage({ projectId, prompt, mode, excludedAgents })
-  await resolverLotePendiente(projectId)
+  await sendMessage({ projectId, prompt, mode: 'supervisado', excludedAgents })
+  useColaDelLoteStore.getState().marcarPlaneado(projectId)
 }

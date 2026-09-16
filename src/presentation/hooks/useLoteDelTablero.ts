@@ -1,5 +1,6 @@
 import { loteDisponible, SUGERIDO_DEL_LOTE, TOPE_DEL_LOTE } from '@domain/chat/lote-del-terminal'
 import { prepararLote } from '../services/preparar-lote'
+import { resolverLotePendiente } from '../services/resolver-lote-en-terminal'
 import { useColaDelLoteStore, type LoteEnCurso } from '../stores/cola-del-lote-store'
 import { LOTE_VACIO, useLoteStore } from '../stores/lote-store'
 import { useProjectStore } from '../stores/project-store'
@@ -19,6 +20,10 @@ export interface LoteDelTablero {
   readonly enCurso: LoteEnCurso | null
   /** El mensaje ya esta precargado en el Terminal, esperando el Enter. */
   readonly pendiente: boolean
+  /** El plan ya esta escrito y el turno paro: falta el disparo que ejecuta. */
+  readonly planeado: boolean
+  /** Dispara la cola sobre el plan ya leido. */
+  readonly ejecutar: () => void
   /** En autonomo el lote no corre: su aprobador es OMEGA (pieza 5). */
   readonly enAutonomo: boolean
   /** Deja el mensaje escrito en el Terminal. NO envia ni arranca nada. */
@@ -41,6 +46,8 @@ export function useLoteDelTablero(projectId: string, projectName: string): LoteD
   )
   // prettier-ignore
   const pendiente = useColaDelLoteStore((s) => s.pendiente !== null && s.pendiente.projectId === projectId)
+  // prettier-ignore
+  const planeado = useColaDelLoteStore((s) => s.pendiente?.projectId === projectId && s.pendiente.planeado)
 
   const alternar = (findingId: string): void => {
     if (useLoteStore.getState().alternar(projectId, findingId)) return
@@ -52,8 +59,10 @@ export function useLoteDelTablero(projectId: string, projectName: string): LoteD
     elegidos: seleccion.size,
     enCurso,
     pendiente,
+    planeado,
     enAutonomo: mode === 'autonomo',
     preparar: () => prepararLote(projectId, projectName),
+    ejecutar: () => void resolverLotePendiente(projectId),
     // Limpiar se lleva tambien el plan pendiente: si no, el lote seguiria
     // viajando con los mensajes libres de este proyecto (ver `lote-del-plan`).
     limpiar: () => {
