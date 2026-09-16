@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 // prettier-ignore
-import { alternarEnLote, avisoDeAprobacion, loteDisponible, textoDelPlan, TOPE_DEL_LOTE } from './lote-del-terminal'
+import { alternarEnLote, loteDisponible, textoDelPlan, TOPE_DEL_LOTE } from './lote-del-terminal'
 
 describe('el lote se ofrece donde el Terminal resuelve, en los dos modos', () => {
   it('proyecto resoluble: si', () => {
@@ -25,21 +25,6 @@ describe('el mensaje de plan que se precarga', () => {
     expect(texto).toContain('de mailbd-main')
     expect(texto).toContain('plan y orden de ejecucion')
     expect(texto).toContain('No hace falta volver a escanear')
-  })
-})
-
-describe('el aviso que queda escrito al aprobar el plan', () => {
-  it('dice que va a EDITAR, cuantos, y que el freno es Detener', () => {
-    const aviso = avisoDeAprobacion(5)
-
-    expect(aviso).toContain('los 5 hallazgos')
-    expect(aviso).toContain('EDITANDO los ficheros')
-    expect(aviso).toContain('sin volver a preguntarte')
-    expect(aviso).toContain('Detener')
-  })
-
-  it('y avisa de lo que NO frena: cambiar de modo a mitad', () => {
-    expect(avisoDeAprobacion(2)).toContain('cambiar de modo a mitad no la corta')
   })
 })
 

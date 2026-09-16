@@ -34,15 +34,18 @@ describe('pulsar «Resolver lote en Terminal» precarga el plan y espera', () =>
     expect(useUiStore.getState().view).toBe('chat')
   })
 
-  it('en autonomo: avisa de que el plan lo aprueba OMEGA y no precarga nada', () => {
+  it('en autonomo no precarga nada, y no suelta un toast por cada clic', () => {
     useSettingsStore.getState().setMode('autonomo')
     useLoteStore.getState().alternar('p1', 'f1')
+    const avisosAntes = useToastStore.getState().toasts.length
 
+    prepararLote('p1', 'mailbd-main')
     prepararLote('p1', 'mailbd-main')
 
     expect(useColaDelLoteStore.getState().pendiente).toBeNull()
     expect(useWorkflowStore.getState().draft).toBe(RESIDUO)
-    expect(useToastStore.getState().toasts.at(-1)?.message).toContain('pieza 5')
+    // Lo dice la barra antes de pulsar; repetirlo aqui era lo que molestaba.
+    expect(useToastStore.getState().toasts).toHaveLength(avisosAntes)
   })
 
   it('sin nada elegido no hace nada', () => {

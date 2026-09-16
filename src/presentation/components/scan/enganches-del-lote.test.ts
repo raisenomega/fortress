@@ -26,25 +26,11 @@ describe('la cola se engancha a Detener, y la barra va aparte', () => {
     expect(preparar).not.toMatch(/correrLote/)
   })
 
-  it('el flujo de aprobacion general no se toca: la puerta del envio sigue igual', () => {
+  it('el resto de mensajes conserva su plan-card: el lote es la EXCEPCION', () => {
     const puerta = fuente('src/presentation/services/puerta-del-envio.ts')
-    expect(puerta).not.toMatch(/lote|Lote/)
-  })
-})
 
-describe('lo que se le dice al operador al aprobar el plan', () => {
-  it('el boton cambia de gesto: precargar el plan, o aprobarlo', () => {
-    expect(fuente(`${SCAN}BarraDelLote.tsx`)).toMatch(/onClick=\{pendiente \? onAprobar : onPreparar\}/) // prettier-ignore
-  })
-
-  it('y dice que autoriza EDICION sin mas preguntas', () => {
-    expect(fuente(`${SCAN}BarraDelLote.tsx`)).toContain('editara sin volver a preguntar')
-  })
-
-  it('el consentimiento se escribe en el chat ANTES de arrancar la cola', () => {
-    const servicio = fuente('src/presentation/services/resolver-lote-en-terminal.ts')
-    expect(servicio).toMatch(
-      /await p\.contar\(avisoDeAprobacion\(pendiente\.ids\.length\)\)\s*const hecho = await correrLote\(/
+    expect(puerta).toMatch(
+      /if \(envio\.mode === 'supervisado' && !configuring\) useWorkflowStore\.getState\(\)\.setPending\(prompt\)/
     )
   })
 })

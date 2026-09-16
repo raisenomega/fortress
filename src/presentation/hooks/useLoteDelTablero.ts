@@ -1,9 +1,9 @@
 import { loteDisponible, SUGERIDO_DEL_LOTE, TOPE_DEL_LOTE } from '@domain/chat/lote-del-terminal'
 import { prepararLote } from '../services/preparar-lote'
-import { aprobarYResolver } from '../services/resolver-lote-en-terminal'
 import { useColaDelLoteStore, type LoteEnCurso } from '../stores/cola-del-lote-store'
 import { LOTE_VACIO, useLoteStore } from '../stores/lote-store'
 import { useProjectStore } from '../stores/project-store'
+import { useSettingsStore } from '../stores/settings-store'
 import { notify } from '../stores/toast-store'
 
 /** Lo que la tabla necesita del lote para pintar la cajita de cada fila. */
@@ -17,12 +17,12 @@ export interface LoteDelTablero {
   readonly enLaTabla: LoteEnLaTabla | null
   readonly elegidos: number
   readonly enCurso: LoteEnCurso | null
-  /** Hay un plan precargado esperando aprobacion. */
+  /** El mensaje ya esta precargado en el Terminal, esperando el Enter. */
   readonly pendiente: boolean
-  /** Precarga el plan (o avisa en autonomo). NO arranca la cola. */
+  /** En autonomo el lote no corre: su aprobador es OMEGA (pieza 5). */
+  readonly enAutonomo: boolean
+  /** Deja el mensaje escrito en el Terminal. NO envia ni arranca nada. */
   readonly preparar: () => void
-  /** Aprueba el plan: la cola corre los N turnos en edicion. */
-  readonly aprobar: () => void
   readonly limpiar: () => void
 }
 
@@ -34,6 +34,7 @@ export interface LoteDelTablero {
 export function useLoteDelTablero(projectId: string, projectName: string): LoteDelTablero {
   // prettier-ignore
   const resoluble = useProjectStore((s) => s.projects.find((p) => p.id === projectId)?.resoluble === true)
+  const mode = useSettingsStore((s) => s.mode)
   const seleccion = useLoteStore((s) => s.seleccion[projectId] ?? LOTE_VACIO)
   const enCurso = useColaDelLoteStore((s) =>
     s.enCurso?.projectId === projectId ? s.enCurso : null
@@ -51,8 +52,8 @@ export function useLoteDelTablero(projectId: string, projectName: string): LoteD
     elegidos: seleccion.size,
     enCurso,
     pendiente,
+    enAutonomo: mode === 'autonomo',
     preparar: () => prepararLote(projectId, projectName),
-    aprobar: () => void aprobarYResolver(projectId),
     // Limpiar se lleva tambien el plan pendiente: si no, el lote seguiria
     // viajando con los mensajes libres de este proyecto (ver `lote-del-plan`).
     limpiar: () => {

@@ -1,64 +1,57 @@
-import { SUGERIDO_DEL_LOTE, TOPE_DEL_LOTE } from '@domain/chat/lote-del-terminal'
+import { SUGERIDO_DEL_LOTE } from '@domain/chat/lote-del-terminal'
 import type { LoteEnCurso } from '../../stores/cola-del-lote-store'
 import { Icon } from '../common/Icon'
 
 interface BarraDelLoteProps {
-  /** El lote se ofrece aqui y hay algo que enseñar. Decidirlo dentro deja el
-   *  tablero legible: alli eran diez lineas de condicion antes del componente. */
+  /** El lote se ofrece aqui y hay algo que enseñar. */
   readonly visible: boolean
   readonly elegidos: number
   readonly enCurso: LoteEnCurso | null
-  /** Hay un plan precargado esperando aprobacion. */
+  /** El mensaje ya esta precargado en el Terminal, esperando el Enter. */
   readonly pendiente: boolean
+  /** En autonomo el lote no corre todavia: lo dice antes de pulsar, no despues. */
+  readonly enAutonomo: boolean
   readonly onPreparar: () => void
-  readonly onAprobar: () => void
   readonly onLimpiar: () => void
 }
 
 const BOTON = 'tap rounded-md px-2.5 py-1 text-[11px] font-semibold disabled:opacity-50'
 
-function texto(props: BarraDelLoteProps): string {
-  if (props.enCurso !== null) {
-    return `Lote en curso: ${props.enCurso.hechos} de ${props.enCurso.total} · Detener lo corta`
-  }
-  if (props.pendiente) return 'Plan precargado en el Terminal: mandalo, leelo y aprueba'
-  return `${props.elegidos} en el lote · sugerido ${SUGERIDO_DEL_LOTE}, maximo ${TOPE_DEL_LOTE}`
+function texto(p: BarraDelLoteProps): string {
+  if (p.enCurso !== null) return `Lote: ${p.enCurso.hechos} de ${p.enCurso.total}`
+  if (p.enAutonomo) return 'El lote resuelve en modo Supervisado'
+  if (p.pendiente) return 'Mensaje listo en el Terminal: dale Enter'
+  return `${p.elegidos} en el lote · sugerido ${SUGERIDO_DEL_LOTE}`
 }
 
 /**
- * La barra del LOTE al Terminal (ADR-088). Aparte de la de «Verificar N» a
- * proposito: son dos acciones con dos costes. Tiene dos gestos, no uno —pedir el
- * plan y aprobarlo— porque el plan es lo que el operador autoriza: tras aprobar,
- * la cola edita sin volver a preguntar.
+ * La barra del LOTE. UN gesto y una linea: el resto del flujo vive donde el
+ * operador ya esta mirando —el Terminal—, y ahi su Enter es la aprobacion.
+ *
+ * Aparte de la de «Verificar N» a proposito: son dos acciones con dos costes.
  */
 export function BarraDelLote(props: BarraDelLoteProps): React.JSX.Element | null {
-  const { visible, elegidos, enCurso, pendiente, onPreparar, onAprobar, onLimpiar } = props
+  const { visible, elegidos, enCurso, enAutonomo, onPreparar, onLimpiar } = props
   if (!visible) return null
-  const corriendo = enCurso !== null
+  const ocupada = enCurso !== null || enAutonomo
 
   return (
     <div className="border-border bg-secondary/60 flex flex-wrap items-center gap-3 rounded-md border px-3 py-1.5">
       <span className="text-foreground text-xs">{texto(props)}</span>
       <button
         type="button"
-        onClick={pendiente ? onAprobar : onPreparar}
-        disabled={corriendo}
-        title={
-          pendiente
-            ? 'Aprobar el plan autoriza el lote entero: la cola edita los ficheros, un turno por hallazgo, sin mas aprobaciones. Detener la corta'
-            : 'Precarga en el Terminal el mensaje de plan. No envia nada todavia'
-        }
+        onClick={onPreparar}
+        disabled={ocupada}
+        title="Deja el mensaje escrito en el Terminal. Lo mandas tu"
         className={`${BOTON} bg-primary text-background flex items-center gap-1.5 hover:brightness-110`}
       >
         <Icon name="terminal" size={12} />
-        {pendiente
-          ? `Aprobar plan y resolver ${elegidos} — editara sin volver a preguntar`
-          : `Resolver lote en Terminal (${elegidos})`}
+        Resolver lote en Terminal ({elegidos})
       </button>
       <button
         type="button"
         onClick={onLimpiar}
-        disabled={corriendo}
+        disabled={enCurso !== null}
         className={`${BOTON} text-muted-foreground hover:text-foreground`}
       >
         Limpiar

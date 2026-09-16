@@ -49,8 +49,8 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
         elegidos={lote.elegidos}
         enCurso={lote.enCurso}
         pendiente={lote.pendiente}
+        enAutonomo={lote.enAutonomo}
         onPreparar={lote.preparar}
-        onAprobar={lote.aprobar}
         onLimpiar={lote.limpiar}
       />
 
