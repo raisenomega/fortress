@@ -15,6 +15,10 @@ interface TableroDeHallazgosProps {
   readonly project: Project
 }
 
+// Cuelga de la fila fija del proyecto (`--cabecera`). Sin `py`: cuando no hay
+// barras que enseñar la franja no debe ocupar ni un pixel.
+const FRANJA = 'bg-background sticky top-[var(--cabecera,0px)] z-20 -mx-4 space-y-2 px-4'
+
 /**
  * La tabla con sus dos ejes de chips y su barra de seleccion. Sale de `ScanView`
  * —que ya orquestaba avisos, cobertura y progreso— porque esto es una pieza con
@@ -25,7 +29,9 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
   const seleccion = useSeleccionDelTablero(project.id, tablero)
   const motorOcupado = useRepairStore((state) => state.busy) // un solo carril
   const lote = useLoteDelTablero(project.id, project.name)
-  const [franja, bajoLaFranja] = useFranjaFija()
+  const [franja, bajoLaFranja] = useFranjaFija('--franja')
+  const verLote = lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null)
+  const vacia = tablero.seleccion.size === 0 && !verLote
 
   return (
     <div className="space-y-3" style={bajoLaFranja}>
@@ -36,8 +42,8 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
         onEstado={seleccion.elegirEstado}
       />
 
-      {/* Las barras se quedan fijas arriba; solo scrollean las filas. */}
-      <div ref={franja} className="bg-background sticky top-0 z-20 -mx-4 space-y-2 px-4 py-2">
+      {/* Las barras se quedan fijas bajo la cabecera; solo scrollean las filas. */}
+      <div ref={franja} className={vacia ? FRANJA : `${FRANJA} py-2`}>
         {tablero.seleccion.size > 0 ? (
           <BarraDeSeleccion
             seleccionados={tablero.seleccion.size}
@@ -48,10 +54,7 @@ export function TableroDeHallazgos({ project }: TableroDeHallazgosProps): React.
           />
         ) : null}
 
-        <BarraDelLote
-          visible={lote.enLaTabla !== null && (lote.elegidos > 0 || lote.enCurso !== null)}
-          lote={lote}
-        />
+        <BarraDelLote visible={verLote} lote={lote} />
       </div>
 
       {seleccion.preguntando ? (
