@@ -1,6 +1,7 @@
 import { exceededBudget } from '@domain/repair/budget'
 import { canTransition } from '@domain/repair/proposal'
 import { checkScope } from '@domain/repair/scope-check'
+import { soloTocaPruebas } from '@domain/repair/solo-toca-pruebas'
 import { mensajeDelFix } from '@domain/repair/mensaje-del-fix'
 import type { AppContext } from '../context'
 import type { GenerateDeps, GenerateResult, Produced } from './generate-types'
@@ -27,6 +28,10 @@ export async function verifyAndCommit(
   const scope = checkScope(changed, p.allowed, p.allows)
   // CONSERVADO para autopsia: el generador produjo cambios FUERA de scope.
   if (!scope.ok) return fail('scope_violation', { violations: scope.violations }, true)
+  // Y antes de gastar el gate y el revisor: un fix que solo toca pruebas pasaria
+  // VERDE sin rozar el defecto. Se corta aqui, donde ya esta el diff de git.
+  // prettier-ignore
+  if (soloTocaPruebas(changed, a.analysis.target.file)) return fail('solo_pruebas', { changed }, true)
   // CONSERVADO: el commit del fix existiria pero el coste excedio; autopsia posible.
   if (exceededBudget(a.spent, p.cost)) return fail('budget_exceeded', { spent: a.spent, cost: p.cost }, true) // prettier-ignore
 

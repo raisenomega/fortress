@@ -25,13 +25,13 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   'src/infrastructure/git/git-env.ts',
   // El PERIMETRO del generador. `scope-check` ya estaba —juzga el diff—; estos
   // son la otra punta: `scope-groups` lee los globs del repo AUDITADO,
-  // `glob-de-alcance` rechaza los que apagarian la correa, y `allowed-files` con
-  // `path-hints` la DECIDEN. Proteger al que juzga y no al que decide dejaba
-  // fuera la mitad que importa.
+  // `glob-de-alcance` rechaza los que apagarian la correa, `allowed-files` con
+  // `path-hints` la DECIDEN, y `solo-toca-pruebas` juzga la NATURALEZA del diff.
   'src/domain/repair/scope-groups.ts',
   'src/domain/repair/glob-de-alcance.ts',
   'src/domain/repair/allowed-files.ts',
   'src/domain/repair/path-hints.ts',
+  'src/domain/repair/solo-toca-pruebas.ts',
   // El SANEADO de texto ajeno que entra en el prompt de un agente. `tool-detail`
   // ya estaba por `redactSecrets`; este es el mismo control para la otra puerta.
   'src/domain/shared/sanear-para-prompt.ts',
