@@ -1,6 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { ChatEngine } from '@domain/chat/code-agent'
+import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { OperationMode } from '@domain/settings/operation-mode'
 
 export interface SendMessageInput {
@@ -28,4 +29,7 @@ export interface SendMessageOutput {
   readonly assistant: ChatMessage
   /** Que respondio: el CLI con herramientas reales o solo la API de texto. */
   readonly engine: ChatEngine
+  /** La guarda que corto el cierre del ciclo, o null si no habia que cerrar o
+   *  se cerro. Enum y numeros: cruza el puente sin llevar nada del proyecto. */
+  readonly sinCierre: SinCierre | null
 }

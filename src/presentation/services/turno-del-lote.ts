@@ -1,8 +1,15 @@
 import { desenlaceEnLote, type DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
+import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
 import { seResuelveEnTerminal } from '@domain/project/se-resuelve-en-terminal'
 import type { PuertosDeLaCola } from './cola-del-lote'
 import { borradorDeResolucion } from './resolver-en-terminal'
+
+/** Como quedo el turno Y, si el cierre no llego a intentarse, que guarda corto. */
+export interface TurnoDelLote {
+  readonly desenlace: DesenlaceEnLote
+  readonly sinCierre: SinCierre | null
+}
 
 const pideTrabajo = (f: Finding): boolean =>
   seResuelveEnTerminal({ dismissed: f.status === 'false_positive', mitigado: f.lifecycle === 'MITIGATED' }) // prettier-ignore
@@ -23,12 +30,12 @@ export async function turnoDelLote(
   id: string,
   ids: readonly string[],
   p: PuertosDeLaCola
-): Promise<DesenlaceEnLote> {
+): Promise<TurnoDelLote> {
   const antes = p.hallazgo(id)
-  if (antes === undefined || !pideTrabajo(antes)) return 'omitido'
+  if (antes === undefined || !pideTrabajo(antes)) return { desenlace: 'omitido', sinCierre: null }
   p.abrirTerminal()
   const prompt = borradorDeResolucion(antes)
-  await p.enviar({ projectId, prompt, mode: 'autonomo', excludedAgents: p.excluidos(), findingId: id, lote: ids }) // prettier-ignore
+  const sinCierre = await p.enviar({ projectId, prompt, mode: 'autonomo', excludedAgents: p.excluidos(), findingId: id, lote: ids }) // prettier-ignore
   await p.recargar()
-  return desenlaceEnLote(antes, p.hallazgo(id))
+  return { desenlace: desenlaceEnLote(antes, p.hallazgo(id), sinCierre), sinCierre }
 }

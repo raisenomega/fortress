@@ -24,7 +24,7 @@ describe('el turno verde del Terminal cierra su ciclo (ADR-088, pieza 3)', () =>
   it('CON PRUEBA: verifica a nombre del Terminal y aterriza EXTINCT/terminal', async () => {
     const b = banco(CON_PRUEBA)
 
-    expect(await cerrar(b)).toEqual({ desenlace: 'extinguido' })
+    expect((await cerrar(b)).cierre).toEqual({ desenlace: 'extinguido' })
     expect(b.extinguidos).toEqual([
       { ids: ['f1'], at: expect.any(String), motivo: 'juicio_obsoleto', quien: 'terminal' }
     ])
@@ -33,7 +33,7 @@ describe('el turno verde del Terminal cierra su ciclo (ADR-088, pieza 3)', () =>
   it('SIN PRUEBA: sigue MITIGATED con la nota del Terminal, sin fingir Historia', async () => {
     const b = banco(SIN_PRUEBA)
 
-    expect(await cerrar(b)).toEqual({ desenlace: 'sin_prueba' })
+    expect((await cerrar(b)).cierre).toEqual({ desenlace: 'sin_prueba' })
     expect(b.extinguidos).toHaveLength(0)
     expect(b.devueltos).toHaveLength(0)
     // Una sola marca, la del Terminal: la del analista no la pisa (exige ACTIVE).
@@ -44,7 +44,7 @@ describe('el turno verde del Terminal cierra su ciclo (ADR-088, pieza 3)', () =>
   it('SIGUE VIVO: vuelve a la cola con su dictamen, que no nombra al operador', async () => {
     const b = banco({ verdictStatus: 'REAL' })
 
-    expect(await cerrar(b)).toEqual({ desenlace: 'sigue_vivo' })
+    expect((await cerrar(b)).cierre).toEqual({ desenlace: 'sigue_vivo' })
     expect(b.devueltos).toHaveLength(1)
     expect(b.devueltos[0].note).not.toContain('operador')
   })
@@ -58,7 +58,7 @@ describe('las guardas: sin foco, sin red o sin ediciones no se cierra nada', () 
   ])('%s: ni marca ni lanza al analista', async (_caso, foco, turno) => {
     const b = banco(CON_PRUEBA)
 
-    expect(await cerrarCicloTerminal(b.context, 'p1', foco, turno, 'm-1')).toBeNull()
+    expect((await cerrarCicloTerminal(b.context, 'p1', foco, turno, 'm-1')).cierre).toBeNull()
     expect(b.mitigados).toHaveLength(0)
     expect(b.memoria).toHaveLength(0)
   })

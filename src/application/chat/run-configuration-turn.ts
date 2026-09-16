@@ -32,5 +32,5 @@ export async function runConfigurationTurn(
   const stored = persistTurn(context, project.id, CONFIG_META, 'assistant', reply.text, null)
   if (!stored.ok) return err(stored.error)
 
-  return ok({ user: user.value, assistant: stored.value, engine: 'claude-code' })
+  return ok({ user: user.value, assistant: stored.value, engine: 'claude-code', sinCierre: null })
 }
