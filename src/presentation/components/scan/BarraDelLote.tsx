@@ -45,14 +45,14 @@ export function BarraDelLote(props: BarraDelLoteProps): React.JSX.Element | null
         disabled={corriendo}
         title={
           pendiente
-            ? 'Aprobar el plan autoriza el lote entero: la cola resuelve los N sin volver a preguntar'
+            ? 'Aprobar el plan autoriza el lote entero: la cola edita los ficheros, un turno por hallazgo, sin mas aprobaciones. Detener la corta'
             : 'Precarga en el Terminal el mensaje de plan. No envia nada todavia'
         }
         className={`${BOTON} bg-primary text-background flex items-center gap-1.5 hover:brightness-110`}
       >
         <Icon name="terminal" size={12} />
         {pendiente
-          ? `Aprobar plan y resolver (${elegidos})`
+          ? `Aprobar plan y resolver ${elegidos} — editara sin volver a preguntar`
           : `Resolver lote en Terminal (${elegidos})`}
       </button>
       <button

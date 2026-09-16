@@ -29,6 +29,22 @@ export function textoDelPlan(projectName: string, cuantos: number): string {
   )
 }
 
+/**
+ * Lo que queda escrito en el Terminal al aprobar el plan: el consentimiento,
+ * dicho una vez y con todas las letras. Aprobar el plan NO es «vale, sigue
+ * proponiendo»: es autorizar que la cola edite los ficheros sola.
+ *
+ * Nombra el unico freno que hay —Detener—, y dice lo que NO frena, porque
+ * cambiar de modo a mitad no deshace una aprobacion ya dada.
+ */
+export function avisoDeAprobacion(cuantos: number): string {
+  return (
+    `Plan aprobado. La cola va a resolver los ${cuantos} hallazgos EDITANDO los ficheros, ` +
+    'uno por turno y sin volver a preguntarte. Pulsa Detener para pararla: cambiar de ' +
+    'modo a mitad no la corta.'
+  )
+}
+
 export interface AlternarEnLote {
   readonly seleccion: ReadonlySet<string>
   /** El que se queria anadir pasaba del tope: la seleccion vuelve igual. */
