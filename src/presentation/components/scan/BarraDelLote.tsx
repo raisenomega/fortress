@@ -20,13 +20,15 @@ function texto(l: LoteDelTablero): string {
 }
 
 /**
- * La barra del LOTE, con los dos gestos del flujo y nada mas: pedir el plan, y
- * —cuando el plan ya esta escrito y leido— ejecutarlo. Entre los dos manda el
- * operador con su Enter, en el Terminal, que es donde esta mirando.
+ * La barra del LOTE, con UN gesto y nada mas: pedir el plan. A partir de ahi
+ * todo pasa en el Terminal —leer el plan, aprobarlo, ver la cola— y esta barra
+ * solo lo dice, porque aprobar desde aqui obligaba a volver del Terminal para
+ * firmar y era el unico salto que le quedaba al flujo. El boton de ejecutar
+ * vive al pie del plan (`BotonDelPlan`).
  */
 export function BarraDelLote({ visible, lote }: BarraDelLoteProps): React.JSX.Element | null {
   if (!visible) return null
-  const { elegidos, planeado, enAutonomo } = lote
+  const { elegidos, enAutonomo } = lote
   const corriendo = lote.enCurso !== null
 
   return (
@@ -34,17 +36,13 @@ export function BarraDelLote({ visible, lote }: BarraDelLoteProps): React.JSX.El
       <span className="text-foreground text-xs">{texto(lote)}</span>
       <button
         type="button"
-        onClick={planeado ? lote.ejecutar : lote.preparar}
-        disabled={corriendo || enAutonomo || (lote.pendiente && !planeado)}
-        title={
-          planeado
-            ? 'Resuelve los hallazgos del lote, uno por turno. Detener lo corta'
-            : 'Deja el mensaje escrito en el Terminal. Lo mandas tu'
-        }
+        onClick={lote.preparar}
+        disabled={corriendo || enAutonomo || lote.pendiente}
+        title="Deja el mensaje escrito en el Terminal. Lo mandas tu"
         className={`${BOTON} bg-primary text-background flex items-center gap-1.5 hover:brightness-110`}
       >
         <Icon name="terminal" size={12} />
-        {planeado ? `Ejecutar plan (${elegidos})` : `Resolver lote en Terminal (${elegidos})`}
+        Resolver lote en Terminal ({elegidos})
       </button>
       <button
         type="button"

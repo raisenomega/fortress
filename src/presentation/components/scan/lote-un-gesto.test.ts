@@ -7,12 +7,13 @@ const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta),
 const SCAN = 'src/presentation/components/scan/'
 
 describe('el lote es UN gesto: precarga, y el Enter del operador lo manda', () => {
-  it('la barra tiene un boton que cambia: pedir el plan, o ejecutarlo', () => {
+  it('la barra tiene UN gesto: pedir el plan. Aprobar ya no se hace aqui', () => {
     const barra = fuente(`${SCAN}BarraDelLote.tsx`)
 
-    expect(barra).toMatch(/onClick=\{planeado \? lote\.ejecutar : lote\.preparar\}/)
-    expect(barra).toMatch(/planeado \? `Ejecutar plan \(\$\{elegidos\}\)`/)
-    expect(barra).not.toMatch(/Aprobar plan/)
+    expect(barra).toMatch(/onClick=\{lote\.preparar\}/)
+    expect(barra).not.toMatch(/Ejecutar plan|Aprobar plan/)
+    // Lo DICE, pero no lo ofrece: la firma vive al pie del plan, en el Terminal.
+    expect(barra).toContain('Lee el plan en el Terminal')
   })
 
   it('sin leyendas que abrumen: ni costes, ni minutos, ni «sin preguntar»', () => {
@@ -52,12 +53,6 @@ describe('el turno de plan para, y el segundo gesto ejecuta', () => {
   it('el punto de parada deja escrito donde entra OMEGA en la pieza 5', () => {
     expect(fuente('src/presentation/services/lote-por-enter.ts')).toContain('PUNTO DE PARADA')
     expect(fuente('src/presentation/services/lote-por-enter.ts')).toMatch(/PIEZA 5 sera OMEGA/)
-  })
-
-  it('la cola la dispara el segundo gesto, desde el tablero', () => {
-    expect(fuente('src/presentation/hooks/useLoteDelTablero.ts')).toMatch(
-      /ejecutar: \(\) => void resolverLotePendiente\(projectId\)/
-    )
   })
 
   it('al aprobar ya no se escribe ningun aviso largo en el chat', () => {
