@@ -16,7 +16,6 @@ export function parseOperationMode(value: string | null): OperationMode {
     : DEFAULT_OPERATION_MODE
 }
 
-export { isProtectedArea, PROTECTED_AREAS } from './protected-areas'
 
 /**
  * Lo que se le dice al operador cuando el objetivo es el propio repo. No es un

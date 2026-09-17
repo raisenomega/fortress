@@ -40,7 +40,7 @@ export async function sendMessage(
   const foco = leerFoco(context, project.id, input.findingId)
   if (!foco.ok) return err(foco.error)
   const redGit = red.disponible(project.path)
-  const { mode, aviso } = modoDelTurno(project, input, foco.value, isSelfRepo(project.path), redGit)
+  const { mode, aviso } = modoDelTurno(project, input, isSelfRepo(project.path), redGit)
 
   const chosen = chooseEngine(codeAgent, assistant, project)
   if (!chosen.ok) return err(chosen.error)

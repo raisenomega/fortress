@@ -1,13 +1,11 @@
 import { ejecutaConConfianza } from '../repair/confianza'
 import type { Project } from '../project/project'
 import type { OperationMode } from './operation-mode'
-import { isProtectedArea } from './protected-areas'
 
 /** Lo que decide el modo efectivo. Objeto y no cinco posicionales: dos banderas
  *  seguidas se intercambian sin que el compilador se entere. */
 export interface ModoPedido {
   readonly mode: OperationMode
-  readonly request: string
   /** El objetivo es el propio repo de FORTRESS. */
   readonly selfRepo: boolean
   /** El proyecto sobre el que se va a trabajar. Ausente degrada: sin proyecto no
@@ -20,9 +18,23 @@ export interface ModoPedido {
 }
 
 /**
- * El modo efectivo degrada a supervisado si la peticion toca un area protegida,
- * si el objetivo es el propio repo de FORTRESS, si el proyecto no es de
- * confianza, o si no hay red de reversion.
+ * El modo efectivo degrada a supervisado por TRES razones, y las tres son
+ * ESTRUCTURALES: el objetivo es el propio repo de FORTRESS, el proyecto no es de
+ * confianza, o no hay red de reversion.
+ *
+ * Habia una cuarta —que el TEXTO de la peticion mencionara un area protegida— y
+ * se retiro (ADR-089). Miraba palabras: «security», «token», «auth». En una
+ * herramienta cuyos hallazgos son de seguridad por definicion, degradaba la
+ * mayoria de lo que encuentra: un hallazgo llamado «falta Content-Security-
+ * Policy» no se podia resolver porque contenia «security». El freno impedia al
+ * producto hacer aquello para lo que existe.
+ *
+ * Lo que lo sustituye no es nada: es lo que ya habia debajo. La firma humana
+ * —el operador eligio autonomo y marco el proyecto de confianza—, el criterio
+ * del propio modelo, el gate, y git, que revierte. El Motor, que trabaja SIN
+ * humano delante, nunca tuvo freno de palabras y se defiende asi desde siempre.
+ *
+ * Las tres que quedan no son listas: son hechos del terreno.
  *
  * El repo propio degrada por la misma razon que existe el motor disciplinado:
  * los guards del sistema (este archivo, el gate del loop, el allowlist de
@@ -45,9 +57,6 @@ export interface ModoPedido {
 export function effectiveMode(pedido: ModoPedido): OperationMode {
   if (pedido.mode !== 'autonomo') return pedido.mode
   const degrada =
-    pedido.selfRepo ||
-    isProtectedArea(pedido.request) ||
-    !ejecutaConConfianza(pedido.project) ||
-    !pedido.redGit
+    pedido.selfRepo || !ejecutaConConfianza(pedido.project) || !pedido.redGit
   return degrada ? 'supervisado' : pedido.mode
 }

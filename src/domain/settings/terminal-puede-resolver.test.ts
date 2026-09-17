@@ -1,13 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import type { Project } from '../project/project'
 import { effectiveMode } from './modo-efectivo'
-import { isProtectedArea } from './protected-areas'
 import { terminalPuedeResolver } from './terminal-puede-resolver'
 
 const CONFIABLE = { id: 'p1', trusted: true } as Project
 const AJENO = { id: 'p2', trusted: false } as Project
 // Sin palabra de area protegida: esa parte es de cada turno, no del proyecto.
-const NEUTRA = 'formatea los archivos'
 
 describe('el Terminal podria resolver aqui: confianza, no es el repo propio, hay red git', () => {
   it('de confianza, ajeno y con red git: si', () => {
@@ -32,13 +30,12 @@ describe('el Terminal podria resolver aqui: confianza, no es el repo propio, hay
 
 describe('es la parte por proyecto de effectiveMode, no una regla nueva', () => {
   it('coincide con effectiveMode en autonomo en las ocho combinaciones', () => {
-    expect(isProtectedArea(NEUTRA)).toBe(false)
     for (const project of [CONFIABLE, AJENO]) {
       for (const selfRepo of [false, true]) {
         for (const redGit of [false, true]) {
           const hechos = { project, selfRepo, redGit }
           const edita =
-            effectiveMode({ mode: 'autonomo', request: NEUTRA, ...hechos }) === 'autonomo'
+            effectiveMode({ mode: 'autonomo', ...hechos }) === 'autonomo'
           expect(terminalPuedeResolver(hechos)).toBe(edita)
         }
       }

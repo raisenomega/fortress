@@ -1,7 +1,7 @@
 # ADR-089: La garantía es la firma humana, no una lista de palabras — muere el freno por palabra del Terminal
 
 - **Fecha:** 2026-09-17
-- **Estado:** Propuesta (pendiente de firma del operador)
+- **Estado:** Aceptada (firmada por el operador el 2026-09-17)
 - **Área:** Terminal · Modo efectivo · Seguridad
 - **Retira:** la degradación por área protegida (`modo-efectivo.ts:49`)
 

@@ -8,7 +8,6 @@ const AJENO = { id: 'p2', trusted: false } as Project
 /** Todo a favor: es lo unico que deja al autonomo seguir siendo autonomo. */
 const SANO: ModoPedido = {
   mode: 'autonomo',
-  request: 'formatea los archivos',
   selfRepo: false,
   project: CONFIABLE,
   redGit: true
@@ -28,11 +27,7 @@ describe('effectiveMode: las cuatro razones, cada una por separado', () => {
     expect(effectiveMode({ ...SANO, selfRepo: true })).toBe('supervisado')
   })
 
-  it('2. la peticion toca un area protegida', () => {
-    expect(effectiveMode({ ...SANO, request: 'toca el login' })).toBe('supervisado')
-  })
-
-  it('3. el proyecto no es de confianza', () => {
+  it('2. el proyecto no es de confianza', () => {
     expect(effectiveMode({ ...SANO, project: AJENO })).toBe('supervisado')
   })
 
