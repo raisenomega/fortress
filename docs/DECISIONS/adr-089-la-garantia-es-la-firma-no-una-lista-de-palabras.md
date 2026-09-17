@@ -110,8 +110,29 @@ Se documenta para que no vuelva a discutirse.
 **Fase 1 — Retirar el freno.** Una condición de un `||`. Libera el Terminal de
 inmediato.
 
-**Fase 2 — Enganchar OMEGA al Terminal.** El revisor del diff, hoy solo en el
-Motor.
+**Fase 2 — Traer al Terminal las capas que el Motor ya tiene.** No es solo
+enganchar OMEGA. La lectura dejó claro que el Motor se defiende con **tres**
+capas que el Terminal no tiene, y la Fase 2 las evalúa **una por una**:
+
+- **(a) OMEGA revisa el diff con evidencia.** Se trae. Es el revisor que hoy
+  falta y el que cierra el hueco del intervalo.
+- **(b) La correa de alcance.** Se **evalúa**: en el Motor limita qué ficheros
+  puede tocar el generador (`checkScope`, `allowed-files`, los grupos del repo
+  auditado). En el Terminal no existe. Hay que decidir si un productor que
+  resuelve un hallazgo de `vercel.json` debe poder tocar cualquier fichero del
+  proyecto, o solo el terreno del hallazgo. Tiene tensión con la doctrina —una
+  correa es otro tapón— pero no es lo mismo: limita el **alcance** del cambio,
+  no **si el modelo puede pensar** en seguridad. La decisión se toma en la
+  Fase 2, con su lectura.
+- **(c) El worktree aislado.** Queda **fuera de alcance por diseño**. El
+  Terminal edita el árbol del cliente a propósito: ese es su producto —el
+  operador ve los cambios en su repo y los integra con su git—. Aislarlo lo
+  convertiría en el Motor, que es otra herramienta. Aquí la red es git + la
+  firma humana.
+
+La Fase 2 **documentará cuál de estas capas se trae y cuál no, y por qué**. Lo
+que este ADR NO decide es que el Terminal se quede sin ellas para siempre: la
+Fase 1 abre un intervalo con menos capas, y la Fase 2 decide cuáles se cierran.
 
 **Fase 3 — El debate para lo crítico.** Varias rondas cuando el riesgo lo pide
 (ADR-088, Enmienda 1).
@@ -142,6 +163,14 @@ git**, no «firma + gate + git». Medido: de los siete proyectos registrados,
 
 Y en cualquier proyecto, git revierte lo que **falla**, no lo que **compila y
 es malo**. Ese es exactamente el hueco que la Fase 2 viene a cerrar.
+
+**El intervalo NO es «donde el Motor ya vive», y conviene no contárselo así.**
+El Motor trabaja sin humano delante, sí, pero con **tres** capas que el Terminal
+no tendrá en la Fase 1: worktree aislado (no toca el árbol vivo), correa de
+alcance (limita qué ficheros puede tocar) y OMEGA. El Terminal en el intervalo
+edita el árbol de trabajo del operador, sin correa y sin revisor. Lo compensa
+con la firma humana y con git —y por eso la doctrina se sostiene— pero es
+**menos capas con un humano encima**, no lo mismo probado en otro sitio.
 
 El operador acepta este intervalo a sabiendas. Queda firmado, no implícito.
 
@@ -203,11 +232,20 @@ Cambiar un innegociable exige que la firma sea informada de **qué** cambia:
 Tras el cambio, `effectiveMode` degrada por: **repo propio**, **falta de
 confianza**, **falta de red git**. Ninguna es una lista de palabras.
 
-**Decisión pendiente para la Fase 1:** si `protected-areas.ts` se **borra** o se
-**conserva sin uso**. Conservarlo deja código muerto, que el propio CLAUDE.md
-manda eliminar; borrarlo pierde la lista por si algún día se quiere para otra
-cosa (marcar un hallazgo como sensible, por ejemplo, sin degradar por ello). Se
-decide al construir.
+**Decidido: `protected-areas.ts` se BORRA en la Fase 1.**
+
+No solo porque CLAUDE.md mande eliminar código muerto. La razón de fondo es que
+ese fichero **es la prueba del delito**: nació sin decisión escrita y creció
+hasta contradecir el propósito del producto. Conservarlo sin uso deja **la misma
+condición que lo hizo posible** — código sin decisión detrás, esperando que
+alguien lo reconecte «porque ya estaba». El repo tiene esa cicatriz escrita en
+`innegociables-defensa.ts`: *«la lista sigue al fichero y la defensa se mudó»*.
+Un fichero fantasma con una lista de palabras de seguridad es exactamente lo que
+un día alguien vuelve a enchufar.
+
+Si algún día se quiere **marcar** un hallazgo como sensible sin degradar por
+ello, será una decisión nueva con su propio ADR, no un fichero esperando en la
+oscuridad.
 
 ## Alternativas descartadas
 
