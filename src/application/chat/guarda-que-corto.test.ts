@@ -1,3 +1,4 @@
+import { SIN_JUZGAR } from '@domain/chat/veredicto-del-turno'
 import { describe, expect, it } from 'vitest'
 import { banco, CON_PRUEBA, turnoVerde } from './cerrar-ciclo-fixture'
 import { cerrarCicloTerminal } from './cerrar-ciclo-terminal'
@@ -10,7 +11,8 @@ const sinRutas = (tools: readonly string[]): TurnoProtegido => ({
   outcome: { ...textOnly('hecho'), edits: [], tools },
   aviso: '',
   conservado: true,
-  revertido: false
+  revertido: false,
+  veredicto: SIN_JUZGAR
 })
 
 /**

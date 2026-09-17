@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { TrabajoDelTurno } from '@domain/chat/red-de-reversion'
 import { git } from './git-snapshot'
 
@@ -20,9 +22,19 @@ export function leerTrabajo(cwd: string, sha: string): TrabajoDelTurno | null {
     const diffText = git(cwd, ['diff'])
     const listado = git(cwd, ['diff', '--name-only']).trim()
     const tocados = listado === '' ? [] : listado.split('\n')
-    return { diffText, tocados, previo: (rel) => contenidoEn(cwd, sha, rel) }
+    const previo = (rel: string): string => contenidoEn(cwd, sha, rel)
+    return { diffText, tocados, previo, actual: (rel) => enDisco(cwd, rel) }
   } catch {
     return null
+  }
+}
+
+/** Como quedo el fichero tras el turno. Vacio si el turno lo borro. */
+function enDisco(cwd: string, relPath: string): string {
+  try {
+    return readFileSync(join(cwd, relPath), 'utf8')
+  } catch {
+    return ''
   }
 }
 

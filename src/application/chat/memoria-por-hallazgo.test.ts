@@ -1,3 +1,4 @@
+import { SIN_JUZGAR } from '@domain/chat/veredicto-del-turno'
 import { describe, expect, it } from 'vitest'
 import type { AppContext } from '../context'
 import type { TurnoProtegido } from './con-red-de-reversion'
@@ -15,12 +16,12 @@ function banco(): { context: AppContext; recordadas: string[]; olvidadas: string
 }
 
 // prettier-ignore
-const turno = (red: Pick<TurnoProtegido, 'conservado' | 'revertido'>, outcome: Partial<ReplyOutcome> = { sesion: 'ses-2' }): TurnoProtegido =>
+const turno = (red: Pick<TurnoProtegido, 'conservado' | 'revertido' | 'veredicto'>, outcome: Partial<ReplyOutcome> = { sesion: 'ses-2' }): TurnoProtegido =>
   ({ outcome: { ...textOnly('hecho'), ...outcome }, aviso: '', ...red })
 
-const REVIRTIO = { conservado: false, revertido: true }
-const CONSERVO = { conservado: true, revertido: false }
-const SIN_RED = { conservado: false, revertido: false }
+const REVIRTIO = { conservado: false, revertido: true, veredicto: SIN_JUZGAR }
+const CONSERVO = { conservado: true, revertido: false, veredicto: SIN_JUZGAR }
+const SIN_RED = { conservado: false, revertido: false, veredicto: SIN_JUZGAR }
 
 describe('GARANTIA 1: la sesion NO avanza SOLO cuando la red REVIRTIO', () => {
   it('(i) la red revirtio: NO avanza, el arbol ya no tiene lo que recordaria', () => {

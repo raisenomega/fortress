@@ -1,9 +1,6 @@
-import { ipcMain, type IpcMainInvokeEvent } from 'electron'
-import { sinSecretosEnVivo } from '@application/chat/en-vivo-tachado'
+import { ipcMain } from 'electron'
 import { sendMessage } from '@application/chat/send-message'
 import type { SendMessageInput } from '@application/chat/send-message-types'
-import type { StepProgress } from '@application/workflow/step-progress'
-import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import { err, type Result } from '@domain/shared/result'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
@@ -11,30 +8,12 @@ import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { isFortressRepo } from '../system/self-project'
+import { omegaDelTerminal } from '../chat/omega-del-terminal'
 import { RED_DE_REVERSION } from '../chat/red-de-reversion'
 import { buildChatEngines } from './chat-engines'
+import { chunkSender, progressSender } from './chat-send-senders'
 import { IPC } from './channels'
 import { conFocoSaneado } from './foco-pedido'
-
-/** Solo si la ventana sigue viva, y tachado. `sendMessage` ya envuelve aguas
- *  arriba; se envuelve OTRA VEZ a proposito: tachar es idempotente y una puerta
- *  que se protege sola no depende de que quien la llame se acuerde. */
-function chunkSender(event: IpcMainInvokeEvent, projectId: string): (d: string) => void {
-  return sinSecretosEnVivo((delta: string): void => {
-    if (event.sender.isDestroyed()) return
-    const chunk: ChatChunk = { projectId, delta }
-    event.sender.send(IPC.chatChunk, chunk)
-  })
-}
-
-/** Manda el avance del workflow para el medidor en vivo (agentes/tokens/coste). */
-function progressSender(event: IpcMainInvokeEvent, projectId: string) {
-  return (p: StepProgress): void => {
-    if (event.sender.isDestroyed()) return
-    const message: ChatProgress = { projectId, ...p }
-    event.sender.send(IPC.chatProgress, message)
-  }
-}
 
 export function registerChatSendHandler(): void {
   // Detener TOTAL del proyecto: marca el loop (su espera corta en <=2s) Y corta
@@ -64,7 +43,8 @@ export function registerChatSendHandler(): void {
         progressSender(event, input.projectId),
         () => isCancelled(input.projectId),
         isFortressRepo,
-        RED_DE_REVERSION
+        RED_DE_REVERSION,
+        omegaDelTerminal(input.projectId)
       )
     } catch (error) {
       return err(describeAssistantError(error))

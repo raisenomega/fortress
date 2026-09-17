@@ -5,7 +5,15 @@ import type { CierreDelCiclo } from './cierre-del-ciclo'
  * nunca texto libre: se persiste en el parte del lote, asi que no puede llevar
  * rutas de ficheros, comandos ni nada del proyecto del cliente.
  */
-export type MotivoSinCierre = 'sin-foco' | 'no-conservado' | 'sin-ediciones'
+export type MotivoSinCierre =
+  | 'sin-foco'
+  | 'no-conservado'
+  | 'sin-ediciones'
+  /** ADR-090: OMEGA veto y el reintento dejo de avanzar. NO es un error mudo ni
+   *  un «no se intento»: se intento, se juzgo y no salio. La razon del ultimo
+   *  veto NO viaja en el enum —seria texto del proyecto auditado—: va a la nota
+   *  de la fila y al parte del turno, que es donde el operador la lee. */
+  | 'no-convergio'
 
 /**
  * Las DOS cuentas de «hubo ediciones», que deberian coincidir:

@@ -14,6 +14,8 @@ export interface TrabajoDelTurno {
   readonly tocados: readonly string[]
   /** El contenido de un fichero ANTES del turno. Cadena vacia si no existia. */
   readonly previo: (relPath: string) => string
+  /** Y como quedo DESPUES. Vacia si el turno lo borro. */
+  readonly actual: (relPath: string) => string
 }
 
 export interface CheckpointDelTurno {
@@ -23,10 +25,8 @@ export interface CheckpointDelTurno {
   revertir(): boolean
   /**
    * Lo editado hasta ahora, para juzgarlo ANTES de conservarlo (ADR-090, Fase
-   * A). `null` si no se pudo leer. OPCIONAL solo mientras no tenga llamante:
-   * exigirlo hoy romperia las redes de mentira sin que nada lo pida. En A.1b,
-   * cuando el turno lo use, pasa a obligatorio — que es cuando esas redes
-   * tienen algo que contestar.
+   * A). `null` si no se pudo leer, y entonces decide el gate: no se inventa un
+   * veredicto. Opcional porque una red de mentira no tiene diff que ensenar.
    */
   diff?(): TrabajoDelTurno | null
 }
