@@ -42,4 +42,23 @@ describe('el slug nombra el .db igual que el servidor', () => {
   it('y las mayusculas tambien: el nombre no se pone en minusculas', () => {
     expect(graphSlug('/media/APT BY')).toBe('media-APT-BY')
   })
+
+  it('una barra final no deja el guion colgando', () => {
+    // Venia del gemelo `slugDelGrafo`, que ya no existe: su unico caso propio
+    // se conserva aqui para que unificar no se llevara una garantia por delante.
+    expect(graphSlug('/a/b/')).toBe('a-b')
+  })
+})
+
+describe('hay UNA sola regla, y no puede volver a haber dos', () => {
+  it('nadie mas la reimplementa: el gemelo se borro, no se sincronizo', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs')
+    const dir = 'src/domain/connectors'
+    const copias = readdirSync(dir).filter((f) => /slug/i.test(f))
+
+    expect(copias).toEqual([])
+    // Y el unico consumidor del prompt tira de esta, no de una copia suya.
+    const analista = readFileSync('src/infrastructure/repair/graph-analyst.ts', 'utf8')
+    expect(analista).toContain("import { graphSlug } from '@domain/graph/graph-slug'")
+  })
 })

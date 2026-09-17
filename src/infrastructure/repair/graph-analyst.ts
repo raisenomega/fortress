@@ -2,7 +2,7 @@ import { TOOLS_LECTURA } from './motor-tools'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
-import { slugDelGrafo } from '@domain/connectors/slug-del-grafo'
+import { graphSlug } from '@domain/graph/graph-slug'
 import { discoverCorpus } from '../project/discover-corpus'
 import { readCognitionLog } from '../cognition/read-cognition-log'
 import type { Analyst } from '@domain/repair/analysis'
@@ -57,7 +57,7 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       // El corpus y el COGNITION-LOG se leen en cada estudio, no al crear el
       // analista: entre dos propuestas el proyecto puede haber ganado un ADR, y
       // el log se reescribe entero en cada escaneo.
-      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, slugDelGrafo(projectPath), readCognitionLog(projectPath).patterns)
+      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, graphSlug(projectPath), readCognitionLog(projectPath).patterns)
       const out = await run(claudeBin, projectPath, prompt, projectId)
       const analysis = toAnalysis(target, out)
       return {
