@@ -5,14 +5,14 @@ import { SIN_RED, type RedDeReversion } from '@domain/chat/red-de-reversion'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
-import { conRedDeReversion } from './con-red-de-reversion'
+import { SIN_OMEGA, type OmegaDelTurno } from './omega-del-turno'
+import { turnoDelTerminal } from './turno-del-terminal'
+import { productorDelTurno } from './productor-del-turno'
 import { sinSecretosEnVivo } from './en-vivo-tachado'
 import { finishTurn } from './finish-turn'
 import { leerFoco } from './foco-del-turno'
 import { modoDelTurno } from './modo-del-turno'
 import { persistTurn } from './persist-message'
-import { produceReply } from './produce-reply'
-import type { ReplyOutcome } from './reply-outcome'
 import { runConfigurationTurn } from './run-configuration-turn'
 import { trasElTurno } from './tras-el-turno'
 import type { SendMessageInput, SendMessageOutput } from './send-message-types'
@@ -27,8 +27,10 @@ export async function sendMessage(
   isCancelled: () => boolean,
   /** Lo inyecta la infra (leer package.json del disco es su terreno). */
   isSelfRepo: (path: string) => boolean = () => false,
-  /** La red del ADR-079; tambien de la infra (es git). Sin ella no hay checkpoint. */
-  red: RedDeReversion = SIN_RED
+  /** De la infra las dos: la red del ADR-079 (git) y el revisor del ADR-090.
+   *  Sin red no se edita; sin revisor decide el gate, como antes de existir. */
+  red: RedDeReversion = SIN_RED,
+  omega: OmegaDelTurno = SIN_OMEGA
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
@@ -52,14 +54,12 @@ export async function sendMessage(
 
   const startedAt = Date.now()
   const activa = mode === 'autonomo' && engine === 'claude-code'
-  const producir = (): Promise<ReplyOutcome> =>
-    produceReply({
-      ...{ context, assistant, codeAgent, project, input, mode, engine, onStep, isCancelled },
-      excludedAgents: input.excludedAgents,
-      enFoco: foco.value,
-      onChunk: enVivo
-    })
-  const turno = await conRedDeReversion(red, project.path, activa, producir)
+  const producir = productorDelTurno({
+    ...{ context, assistant, codeAgent, project, input, mode, engine, onStep, isCancelled },
+    foco: foco.value,
+    onChunk: enVivo
+  })
+  const { turno } = await turnoDelTerminal({ context, project, red, activa, foco: foco.value, input, producir, omega }) // prettier-ignore
   const stored = finishTurn({ context, project, meta, outcome: turno.outcome, aviso: aviso + turno.aviso, startedAt, prompt: input.prompt }) // prettier-ignore
   if (!stored.ok) return err(stored.error)
   // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).
