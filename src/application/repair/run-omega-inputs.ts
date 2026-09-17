@@ -1,4 +1,4 @@
-import type { Analysis } from '@domain/repair/analysis'
+import type { HallazgoJuzgado } from '@domain/repair/hallazgo-juzgado'
 import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { OmegaPromptInput } from '@domain/repair/omega-prompt'
 
@@ -19,7 +19,7 @@ export async function buildOmegaInput(
   reads: OmegaReads,
   worktreePath: string,
   baseSha: string,
-  analysis: Analysis,
+  analysis: HallazgoJuzgado,
   corpus: CorpusDescriptor
 ): Promise<{ input: OmegaPromptInput; files: readonly string[] }> {
   const files = await reads.changedFiles(worktreePath, baseSha)
