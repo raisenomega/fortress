@@ -38,7 +38,9 @@ describe('los bordes de la red del Terminal', () => {
     expect(cli.peticiones[0].permissionMode).toBe('plan')
     expect(red.abiertos()).toBe(0)
     expect(existe(dir, 'b.txt')).toBe(false)
-    expect(textos[1]).toContain('Sin repositorio git no hay red de reversion')
+    // El aviso nombra las DOS causas: sin repo, o sin identidad de git.
+    expect(textos[1]).toContain('No puedo editar aqui sin red de seguridad')
+    expect(textos[1]).toContain('user.email / user.name')
   })
 
   it('f) Detener: el hijo muerto resuelve con failed, y eso revierte lo que dejo a medias', async () => {
