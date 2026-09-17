@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatearHallazgo, textoParaElModo, type HallazgoAResolver } from './hallazgo-a-resolver'
+import { formatearHallazgo, type HallazgoAResolver } from './hallazgo-a-resolver'
 
 const hallazgo: HallazgoAResolver = {
   id: 'f1',
@@ -48,17 +48,4 @@ describe('el bloque de UN hallazgo para el Terminal', () => {
   })
 })
 
-describe('el texto con el que se decide el modo', () => {
-  it('sin foco es el prompt tal cual', () => {
-    expect(textoParaElModo('hola', null)).toBe('hola')
-  })
 
-  it('con foco suma fichero, titulo y tipo al prompt', () => {
-    const texto = textoParaElModo('resuelvelo', hallazgo)
-
-    expect(texto).toContain('resuelvelo')
-    expect(texto).toContain('api/checkout.ts')
-    expect(texto).toContain('El checkout cobra')
-    expect(texto).toContain('confianza-en-datos-del-cliente')
-  })
-})

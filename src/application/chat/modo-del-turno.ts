@@ -1,4 +1,3 @@
-import { textoParaElModo, type HallazgoAResolver } from '@domain/chat/hallazgo-a-resolver'
 import type { Project } from '@domain/project/project'
 import { effectiveMode } from '@domain/settings/modo-efectivo'
 import { avisoDeDegradacion, type OperationMode } from '@domain/settings/operation-mode'
@@ -11,24 +10,22 @@ export interface ModoDelTurno {
 }
 
 /**
- * El modo con el que corre el turno y su aviso. Degrada a supervisado si toca un
- * area protegida o si el objetivo es el repo propio (y, dentro de la regla, si
- * falta confianza o red de reversion).
+ * El modo con el que corre el turno y su aviso. Degrada a supervisado por las
+ * tres razones estructurales: repo propio, falta de confianza, o falta de red de
+ * reversion.
  *
- * Con foco, lo que se juzga es el prompt MAS el hallazgo (ADR-088, pieza 2): un
- * «resuelvelo» neutro no puede esconder un hallazgo de auth. La regla que decide
- * (`modo-efectivo`, innegociable) no se toca: solo cambia el texto que se le da.
+ * Ya NO mira el texto de la peticion (ADR-089). Antes se le pasaba el prompt mas
+ * el hallazgo para que el freno de palabras los juzgara; retirado el freno, ese
+ * texto no lo lee nadie, y por eso el foco tampoco entra ya por aqui.
  */
 export function modoDelTurno(
   project: Project,
   input: SendMessageInput,
-  foco: HallazgoAResolver | null,
   selfRepo: boolean,
   redGit: boolean
 ): ModoDelTurno {
-  const request = textoParaElModo(input.prompt, foco)
   return {
-    mode: effectiveMode({ mode: input.mode, request, selfRepo, project, redGit }),
+    mode: effectiveMode({ mode: input.mode, selfRepo, project, redGit }),
     aviso: avisoDeDegradacion(input.mode, selfRepo, redGit)
   }
 }

@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-import { PROTECTED_AREAS } from '@domain/settings/operation-mode'
 import { useSettingsStore } from '../../stores/settings-store'
 import { useUiStore } from '../../stores/ui-store'
 import { Icon } from '../common/Icon'
@@ -23,9 +22,10 @@ export function AutonomousNotice(): React.JSX.Element | null {
     <div className="flex shrink-0 items-center gap-2 border-b border-medium/30 bg-medium/10 px-4 py-1.5">
       <Icon name="zap" size={13} className="shrink-0 text-medium" />
       <p className="flex-1 text-[11px] text-foreground">
-        Modo autonomo: los cambios se aplican sin confirmacion. Toda peticion que mencione{' '}
-        <span className="font-semibold">{PROTECTED_AREAS.join(', ')}</span> vuelve a supervisado
-        automaticamente.
+        Modo autonomo: los cambios se aplican sin confirmacion, en los proyectos que marcaste de
+        confianza, y <span className="font-semibold">se deshacen solos si rompen el arbol</span>.
+        Vuelve a supervisado sobre el codigo de FORTRESS, sin confianza, o sin git con el que
+        revertir.
       </p>
       <button
         type="button"

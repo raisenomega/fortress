@@ -27,10 +27,12 @@ describe('sendMessage cierra el ciclo DESPUES de guardar la respuesta (ADR-088, 
     expect(espia.mock.calls[0][1]).toBeNull()
   })
 
-  it('un turno degradado a plan no tiene red: llega NO conservado', async () => {
-    // `src/auth/…` degrada a plan; sin red nada garantiza lo que quedo en el arbol.
+  it('un turno en supervisado no tiene red: llega NO conservado', async () => {
+    // Antes se forzaba con `src/auth/…`, que degradaba por la palabra (ADR-089:
+    // ya no). Lo que se prueba es lo mismo: sin modo de edicion no hay
+    // checkpoint, y sin checkpoint nada garantiza lo que quedo en el arbol.
     const espia = vi.spyOn(cierre, 'cerrarYContar').mockResolvedValue(null)
-    await turno({ prompt: NEUTRO, findingId: 'f-auth' })
+    await turno({ prompt: NEUTRO, findingId: 'f-neutro', mode: 'supervisado' })
 
     expect(espia.mock.calls[0][2].conservado).toBe(false)
   })

@@ -16,13 +16,14 @@ describe('el Terminal recibe UN hallazgo por id (ADR-088, pieza 2)', () => {
   })
 })
 
-describe('la degradacion se preserva: un prompt neutro no esconde el hallazgo', () => {
-  it('un hallazgo en fichero sensible degrada a plan aunque el prompt sea neutro', async () => {
-    // «Resuelve este hallazgo» no nombra ningun area protegida; `src/auth/…` si.
-    // Si solo se juzgara el prompt, este turno editaria auth sin supervision.
+describe('el modo ya no depende de lo que diga el hallazgo (ADR-089)', () => {
+  it('un hallazgo en `src/auth/…` YA edita: es justo lo que FORTRESS existe para arreglar', async () => {
+    // Este test probaba lo contrario —que `src/auth/…` degradaba a plan— y esa
+    // era la linea que impedia a una herramienta de seguridad tocar seguridad.
+    // La garantia ahora es la firma: autonomo elegido y proyecto de confianza.
     const { pedidos } = await turno({ prompt: NEUTRO, findingId: 'f-auth' })
 
-    expect(pedidos[0].permissionMode).toBe('plan')
+    expect(pedidos[0].permissionMode).toBe('acceptEdits')
   })
 
   it('control: el mismo prompt neutro con un hallazgo neutro SI edita', async () => {

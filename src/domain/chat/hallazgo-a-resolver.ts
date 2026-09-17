@@ -43,14 +43,6 @@ export function formatearHallazgo(h: HallazgoAResolver): string {
   ].join('\n')
 }
 
-/**
- * El texto con el que se decide el modo del turno: lo que escribio el operador
- * MAS de que va el hallazgo (fichero, titulo y tipo). Con foco, el prompt puede
- * ser un «resuelvelo» neutro; si solo se juzgara ese texto, un hallazgo de auth
- * dejaria de degradar a supervisado. Se compone aqui, en quien llama, para no
- * tocar la regla que decide (`modo-efectivo`, innegociable).
- */
-export function textoParaElModo(prompt: string, foco: HallazgoAResolver | null): string {
-  if (foco === null) return prompt
-  return [prompt, foco.file, foco.title, foco.tipo ?? ''].join('\n')
-}
+// `textoParaElModo` vivia aqui: componia prompt + hallazgo para que el freno de
+// palabras lo juzgara. Retirado el freno (ADR-089) no lo lee nadie, y un
+// fichero que nadie llama es justo como nacio el problema que ese ADR cierra.
