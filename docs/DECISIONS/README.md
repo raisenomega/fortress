@@ -128,6 +128,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-087](adr-087-confirmar-un-hallazgo-exige-juicio.md) | Confirmar un hallazgo exige juicio, y lo confirmado aterriza en su historia | 2026-09-12 | Aceptada | Escaneo |
 | [ADR-088](adr-088-terminal-grado-bancario.md) | El Terminal es grado bancario: resuelve cualquier hallazgo sin topes de reparación, y cierra en Historia | 2026-09-14 | Aceptada | Terminal |
 | [ADR-089](adr-089-la-garantia-es-la-firma-no-una-lista-de-palabras.md) | La garantía es la firma humana, no una lista de palabras — muere el freno por palabra del Terminal | 2026-09-17 | Aceptada | Terminal |
+| [ADR-090](adr-090-el-terminal-autonomo-juzga-debate-y-reintenta-sin-parar.md) | El Terminal autónomo juzga, debate y reintenta sin parar — grado bancario sin frenos disfrazados | 2026-09-17 | Aceptada | Terminal |
 
 ## Referencias
 
