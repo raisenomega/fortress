@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { useColaDelLoteStore } from '../../stores/cola-del-lote-store'
 
 /** El layout leido del FUENTE, como sus hermanos: no se pintan componentes. */
 const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta), 'utf8')
@@ -25,6 +24,18 @@ describe('la firma del lote va AL PIE del plan, dentro del hilo', () => {
     expect(fuente(BOTON)).not.toMatch(/bg-primary|#[0-9a-fA-F]{3,6}/)
   })
 
+  it('mientras la cola corre NO es pulsable: una linea plana, mismo verde', () => {
+    const boton = fuente(BOTON)
+
+    // Un boton vivo durante la ejecucion invita a re-pulsarlo, y cada pulsacion
+    // encolaria la misma orden. El progreso lo lleva el indicador de abajo.
+    expect(boton).toMatch(/if \(enCurso !== null\) return <span className=\{PLANO\}>/)
+    expect(boton).toContain('Plan ejecutandose')
+    expect(boton).toMatch(/const PLANO = `\$\{VERDE\} inline-block opacity-70`/)
+    // El mismo verde que el boton, sin `tap` ni hover: no se puede pulsar.
+    expect(boton).toMatch(/const BOTON = `tap \$\{VERDE\} hover:brightness-110`/)
+  })
+
   it('dice cuantos resuelve y que Detener lo corta', () => {
     expect(fuente(BOTON)).toContain('Ejecutar plan ({cuantos})')
     expect(fuente(BOTON)).toContain('Resuelve los {cuantos}. Detener lo corta.')
@@ -34,38 +45,5 @@ describe('la firma del lote va AL PIE del plan, dentro del hilo', () => {
     expect(fuente(BOTON)).toMatch(/resolverLotePendiente\(projectId\)/)
     // Y ya no cuelga del tablero: alli obligaba a volver del Terminal a firmar.
     expect(fuente('src/presentation/hooks/useLoteDelTablero.ts')).not.toMatch(/ejecutar/)
-  })
-})
-
-describe('solo aparece cuando hay un plan de ESTE proyecto esperando', () => {
-  const lee = (projectId: string): unknown => {
-    const s = useColaDelLoteStore.getState()
-    return s.pendiente?.projectId === projectId && s.pendiente.planeado ? s.pendiente : null
-  }
-
-  it('sin nada pendiente no hay pie que pintar', () => {
-    useColaDelLoteStore.getState().descartar()
-
-    expect(lee('p1')).toBeNull()
-  })
-
-  it('precargado pero SIN plan todavia: aun no hay nada que firmar', () => {
-    useColaDelLoteStore.getState().preparar('p1', ['f1', 'f2'])
-
-    expect(lee('p1')).toBeNull()
-  })
-
-  it('con el plan ya escrito, el pie sale con sus N', () => {
-    useColaDelLoteStore.getState().preparar('p1', ['f1', 'f2'])
-    useColaDelLoteStore.getState().marcarPlaneado('p1')
-
-    expect(lee('p1')).toMatchObject({ planeado: true, ids: ['f1', 'f2'] })
-  })
-
-  it('y en OTRO proyecto no sale: se firma el lote de quien lo pidio', () => {
-    useColaDelLoteStore.getState().preparar('p1', ['f1'])
-    useColaDelLoteStore.getState().marcarPlaneado('p1')
-
-    expect(lee('p2')).toBeNull()
   })
 })

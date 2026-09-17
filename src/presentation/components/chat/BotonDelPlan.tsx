@@ -5,8 +5,10 @@ interface BotonDelPlanProps {
   readonly projectId: string
 }
 
-const BOTON =
-  'tap bg-success text-background rounded-md px-3 py-1.5 text-xs font-semibold hover:brightness-110'
+const VERDE = 'bg-success text-background rounded-md px-3 py-1.5 text-xs font-semibold'
+const BOTON = `tap ${VERDE} hover:brightness-110`
+/** El mismo verde, sin `tap` ni hover: se ve que es el boton, ya pulsado. */
+const PLANO = `${VERDE} inline-block opacity-70`
 
 /**
  * El punto de FIRMA del lote, al pie del plan recien leido (ADR-088, arco 1).
@@ -21,12 +23,19 @@ const BOTON =
  * VERDE y no dorado: el dorado es el color de marca, y lo que se dice aqui es
  * «adelante». Es la unica accion del flujo en este punto, asi que destaca a
  * proposito — esconderla devolveria el problema de no encontrar donde aprobar.
+ *
+ * Y en cuanto la cola arranca DEJA DE SER PULSABLE: se queda como linea plana.
+ * Un boton vivo mientras corre invita a pulsarlo otra vez, y cada pulsacion
+ * encolaria la misma orden. El progreso lo lleva el indicador de abajo.
  */
 export function BotonDelPlan({ projectId }: BotonDelPlanProps): React.JSX.Element | null {
-  const pendiente = useColaDelLoteStore((s) =>
-    s.pendiente?.projectId === projectId && s.pendiente.planeado ? s.pendiente : null
-  )
-  if (pendiente === null) return null
+  const mio = <T extends { projectId: string }>(x: T | null): T | null =>
+    x !== null && x.projectId === projectId ? x : null
+  const enCurso = useColaDelLoteStore((s) => mio(s.enCurso))
+  const pendiente = useColaDelLoteStore((s) => mio(s.pendiente))
+
+  if (enCurso !== null) return <span className={PLANO}>Plan ejecutandose…</span>
+  if (pendiente === null || !pendiente.planeado) return null
   const cuantos = pendiente.ids.length
 
   return (
