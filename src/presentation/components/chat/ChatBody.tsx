@@ -7,10 +7,17 @@ interface ChatBodyProps {
   readonly messages: readonly ChatMessage[]
   /** Terminal: el historial se pinta como salida de consola. */
   readonly terminal?: boolean
+  /** Al pie del hilo, dentro del scroll (ver `ChatMessageList`). */
+  readonly pie?: React.ReactNode
 }
 
 /** El cuerpo del chat: el historial, o el vacio inicial de un proyecto sin turnos. */
-export function ChatBody({ projectName, messages, terminal }: ChatBodyProps): React.JSX.Element {
+export function ChatBody({
+  projectName,
+  messages,
+  terminal,
+  pie
+}: ChatBodyProps): React.JSX.Element {
   if (messages.length === 0) {
     return (
       <div className="flex-1">
@@ -22,5 +29,5 @@ export function ChatBody({ projectName, messages, terminal }: ChatBodyProps): Re
       </div>
     )
   }
-  return <ChatMessageList messages={messages} terminal={terminal} />
+  return <ChatMessageList messages={messages} terminal={terminal} pie={pie} />
 }

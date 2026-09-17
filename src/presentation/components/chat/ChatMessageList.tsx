@@ -9,12 +9,17 @@ interface ChatMessageListProps {
   readonly terminal?: boolean
   /** Muestra el badge "Transferir" al pie de cada respuesta del agente. */
   readonly transfer?: boolean
+  /** Lo que se pinta AL PIE del hilo, dentro del scroll: hoy, el boton de
+   *  aprobar el plan del lote. Va aqui y no sobre el input para que sea el pie
+   *  del documento —scrollea con el— en vez de una franja fija que lo tape. */
+  readonly pie?: React.ReactNode
 }
 
 export function ChatMessageList({
   messages,
   terminal,
-  transfer
+  transfer,
+  pie
 }: ChatMessageListProps): React.JSX.Element {
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -34,6 +39,7 @@ export function ChatMessageList({
           <ChatMessageItem key={message.id} message={message} transfer={transfer} />
         )
       )}
+      {pie}
       <div ref={bottomRef} />
     </div>
   )

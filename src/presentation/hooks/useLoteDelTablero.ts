@@ -1,6 +1,5 @@
 import { loteDisponible } from '@domain/chat/lote-del-terminal'
 import { prepararLote } from '../services/preparar-lote'
-import { resolverLotePendiente } from '../services/resolver-lote-en-terminal'
 import { useColaDelLoteStore, type LoteEnCurso } from '../stores/cola-del-lote-store'
 import { LOTE_VACIO, useLoteStore } from '../stores/lote-store'
 import { useProjectStore } from '../stores/project-store'
@@ -19,10 +18,10 @@ export interface LoteDelTablero {
   readonly enCurso: LoteEnCurso | null
   /** El mensaje ya esta precargado en el Terminal, esperando el Enter. */
   readonly pendiente: boolean
-  /** El plan ya esta escrito y el turno paro: falta el disparo que ejecuta. */
+  /** El plan ya esta escrito y el turno paro: falta el disparo que ejecuta, y
+   *  ese vive al pie del plan, en el Terminal (`BotonDelPlan`). Aqui solo se
+   *  usa para DECIRLO: desde el Escaneo ya no se aprueba. */
   readonly planeado: boolean
-  /** Dispara la cola sobre el plan ya leido. */
-  readonly ejecutar: () => void
   /** En autonomo el lote no corre: su aprobador es OMEGA (pieza 5). */
   readonly enAutonomo: boolean
   /** Deja el mensaje escrito en el Terminal. NO envia ni arranca nada. */
@@ -58,7 +57,6 @@ export function useLoteDelTablero(projectId: string, projectName: string): LoteD
     planeado,
     enAutonomo: mode === 'autonomo',
     preparar: () => prepararLote(projectId, projectName),
-    ejecutar: () => void resolverLotePendiente(projectId),
     // Limpiar se lleva tambien el plan pendiente: si no, el lote seguiria
     // viajando con los mensajes libres de este proyecto (ver `lote-del-plan`).
     limpiar: () => {
