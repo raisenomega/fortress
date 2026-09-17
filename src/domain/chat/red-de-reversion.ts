@@ -4,11 +4,31 @@
  * salidas, y las dos dicen si el commit del checkpoint quedo RETIRADO del
  * historial: `false` es un checkpoint huerfano en la rama del operador.
  */
+/**
+ * Lo que el agente dejo escrito en este turno, leido SIN saber que detras hay
+ * git: el texto del diff, que ficheros toco, y como estaba cada uno antes.
+ * Es lo que un revisor necesita para juzgar el trabajo sin navegar el proyecto.
+ */
+export interface TrabajoDelTurno {
+  readonly diffText: string
+  readonly tocados: readonly string[]
+  /** El contenido de un fichero ANTES del turno. Cadena vacia si no existia. */
+  readonly previo: (relPath: string) => string
+}
+
 export interface CheckpointDelTurno {
   /** Exito: el arbol se queda con las ediciones del agente. */
   conservar(): boolean
   /** Fallo: las ediciones se descartan y el arbol vuelve a como estaba. */
   revertir(): boolean
+  /**
+   * Lo editado hasta ahora, para juzgarlo ANTES de conservarlo (ADR-090, Fase
+   * A). `null` si no se pudo leer. OPCIONAL solo mientras no tenga llamante:
+   * exigirlo hoy romperia las redes de mentira sin que nada lo pida. En A.1b,
+   * cuando el turno lo use, pasa a obligatorio — que es cuando esas redes
+   * tienen algo que contestar.
+   */
+  diff?(): TrabajoDelTurno | null
 }
 
 export interface RedDeReversion {

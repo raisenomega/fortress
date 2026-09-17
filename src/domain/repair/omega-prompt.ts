@@ -2,7 +2,7 @@ import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { categoryForAgent } from '../settings/docs-first'
 import { NOTAS_COMO_CLAVE } from '../system/peticion-de-notas'
 import { buildDocsFirst } from '../settings/docs-first-compose'
-import type { Analysis } from './analysis'
+import type { HallazgoJuzgado } from './hallazgo-juzgado'
 
 export interface OmegaFile {
   readonly path: string
@@ -12,7 +12,7 @@ export interface OmegaFile {
 export interface OmegaPromptInput {
   /** La doctrina del proyecto auditado, para juzgar con lo que el ya firmo. */
   readonly corpus: CorpusDescriptor
-  readonly analysis: Analysis
+  readonly analysis: HallazgoJuzgado
   readonly diffText: string
   readonly filesPost: readonly OmegaFile[]
   readonly filesPre: readonly OmegaFile[]

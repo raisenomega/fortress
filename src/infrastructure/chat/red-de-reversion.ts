@@ -1,6 +1,7 @@
-import type { RedDeReversion } from '@domain/chat/red-de-reversion'
+import type { CheckpointDelTurno, RedDeReversion } from '@domain/chat/red-de-reversion'
 import { verificarArbol } from '../build/build-verify'
 import { abrirCheckpoint, redDisponible } from '../git/checkpoint-transitorio'
+import { leerTrabajo } from '../git/trabajo-del-turno'
 
 /**
  * La red real del Terminal (ADR-079): el checkpoint transitorio de git y el
@@ -11,6 +12,18 @@ import { abrirCheckpoint, redDisponible } from '../git/checkpoint-transitorio'
  */
 export const RED_DE_REVERSION: RedDeReversion = {
   disponible: redDisponible,
-  abrir: abrirCheckpoint,
+  abrir: conElTrabajoALaVista,
   verificar: verificarArbol
+}
+
+/**
+ * Abrir y cerrar es una cosa; LEER lo que el agente dejo escrito es otra, y vive
+ * en su propio modulo. Se componen aqui, que es donde la infraestructura se
+ * vuelve puerto, y no dentro del checkpoint: alli `redDisponible` y
+ * `abrirCheckpoint` comparten fichero por invariante del ADR-079, y meterles un
+ * tercer asunto es justo lo que esa invariante existe para evitar.
+ */
+function conElTrabajoALaVista(cwd: string): CheckpointDelTurno | null {
+  const cp = abrirCheckpoint(cwd)
+  return cp === null ? null : { ...cp, diff: () => leerTrabajo(cwd, cp.sha) }
 }
