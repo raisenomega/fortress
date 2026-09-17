@@ -1,4 +1,5 @@
 import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
+import { DEFENSAS_DE_LA_RED } from './innegociables-red'
 /**
  * La TERCERA familia del criterio innegociable: ficheros que IMPLEMENTAN una
  * defensa, sin gobernar la autonomia ni validar una entrada. Ver
@@ -8,16 +9,15 @@ import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
  * corte se hace por familia y no por tamano: quien venga a proteger una defensa
  * nueva encuentra aqui a sus hermanas.
  *
- * Casi todas nacieron el 04 y el 05 de septiembre, cerrando el frente de
- * seguridad, y NINGUNA estaba protegida: es la cuarta vez que la lista se queda
- * corta por lo mismo que ya avisaba su criterio —"al partir un modulo, la mitad
- * que decidia se quedaba fuera"—. `buildEnv` salio de `claude-cli`, que SI
- * estaba; `sanearParaPrompt` salio de `knownFindings`; el turno del arbol salio
- * de `apply-auto-merge`. Cada extraccion dejo la defensa fuera de la lista sin
- * que nadie lo notara, porque la lista sigue al fichero y la defensa se mudo.
+ * La lista se queda corta por lo mismo una y otra vez —"al partir un modulo, la
+ * mitad que decidia se quedaba fuera"—: `buildEnv` salio de `claude-cli`,
+ * `sanearParaPrompt` de `knownFindings`, el turno del arbol de
+ * `apply-auto-merge`. Cada extraccion dejo la defensa fuera sin que nadie lo
+ * notara, porque la lista sigue al fichero y la defensa se mudo.
  */
 export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   ...DEFENSAS_DEL_DISCO,
+  ...DEFENSAS_DE_LA_RED,
   // El ENTORNO de todo hijo: `build-env` recorta la sesion viva del operador
   // —agente ssh, keyring, GPG— y `git-env` hace lo propio para los cinco `git`
   // que corren en el repo auditado y ejecutan sus hooks.

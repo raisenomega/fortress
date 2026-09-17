@@ -1,5 +1,5 @@
-import { CHECKPOINT_HUERFANO, REVERTIDO_POR_RED, type RedDeReversion } from '@domain/chat/red-de-reversion' // prettier-ignore
-import type { ReplyOutcome } from './reply-outcome'
+import { CHECKPOINT_HUERFANO, REVERTIDO_POR_RED, SIN_RED_NO_SE_EDITA, type RedDeReversion } from '@domain/chat/red-de-reversion' // prettier-ignore
+import { textOnly, type ReplyOutcome } from './reply-outcome'
 
 export interface TurnoProtegido {
   readonly outcome: ReplyOutcome
@@ -43,6 +43,15 @@ export async function conRedDeReversion(
   producir: () => Promise<ReplyOutcome>
 ): Promise<TurnoProtegido> {
   const cp = activa ? red.abrir(cwd) : null
+  // Se pidio red y no se pudo montar: NO se produce. El turno iba a EDITAR, y
+  // sin checkpoint no habria vuelta — justo lo que ADR-079 existe para impedir.
+  // `disponible` adelanta la causa conocida (identidad); esto tapa las que no
+  // puede prever: indice bloqueado, permisos, disco. La invariante deja de ser
+  // una promesa: si debia haber red y no la hay, no se escribe nada.
+  if (activa && cp === null) {
+    const outcome = { ...textOnly(SIN_RED_NO_SE_EDITA), failed: true }
+    return { outcome, aviso: '', conservado: false, revertido: false }
+  }
 
   let outcome: ReplyOutcome
   try {

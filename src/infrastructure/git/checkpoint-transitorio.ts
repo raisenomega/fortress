@@ -1,25 +1,25 @@
-import { execFileSync } from 'child_process'
-import { gitRevert, gitSnapshot, isRepoRoot } from './git-snapshot'
+import { git, gitRevert, gitSnapshot, isRepoRoot } from './git-snapshot'
 
-/** git contra el repo real, salida en texto; lanza si git falla. */
-function git(cwd: string, args: readonly string[]): string {
-  return execFileSync('git', [...args], { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }) // prettier-ignore
-}
-
-/** Sin un commit al que devolver el puntero no hay checkpoint que retirar. */
-function tieneHistoria(cwd: string): boolean {
+/** Si el comando responde sin reventar: asi se contestan las dos preguntas. */
+function gitResponde(cwd: string, args: readonly string[]): boolean {
   try {
-    git(cwd, ['rev-parse', '--verify', 'HEAD'])
+    git(cwd, args)
     return true
   } catch {
     return false
   }
 }
 
-/** Si aqui HAY red: la UNICA verdad de cuando `abrirCheckpoint` devolveria null,
- *  sin efectos, para que el modo efectivo degrade ANTES de abrir nada. */
+/** Sin commit al que volver no hay checkpoint que retirar. */
+const tieneHistoria = (cwd: string): boolean => gitResponde(cwd, ['rev-parse', '--verify', 'HEAD'])
+/** Git puede FIRMAR el checkpoint: sin identidad sale con 128, y `abrir` daba
+ *  null mientras `redDisponible` decia que si — se editaba sin vuelta. */
+const puedeCommitear = (cwd: string): boolean => gitResponde(cwd, ['var', 'GIT_COMMITTER_IDENT'])
+
+/** Si aqui HAY red: la UNICA verdad de cuando `abrirCheckpoint` daria null, sin
+ *  efectos, para que el modo degrade ANTES de abrir nada. */
 export function redDisponible(cwd: string): boolean {
-  return isRepoRoot(cwd) && tieneHistoria(cwd)
+  return isRepoRoot(cwd) && tieneHistoria(cwd) && puedeCommitear(cwd)
 }
 
 /**

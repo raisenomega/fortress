@@ -28,11 +28,19 @@ export const SELF_REPO_SUPERVISED =
   'y propongo, pero no aplico. Los cambios en el codigo propio pasan por el motor ' +
   'de Auto-mejora (worktree aislado + gate + revisor + firma humana).'
 
-/** La otra degradacion que se explica (ADR-079): sin red no se escribe. */
+/**
+ * La otra degradacion que se explica (ADR-079): sin red no se escribe.
+ *
+ * Nombra las DOS causas porque decia solo la primera, y en un repo que YA tenia
+ * git —lo que le faltaba era identidad— el consejo «inicia git» mandaba al
+ * cliente a hacer algo que no arreglaba nada. Un aviso que da el remedio
+ * equivocado gasta mas tiempo que uno que no dice nada.
+ */
 export const SIN_RED_GIT_SUPERVISADO =
-  '\n\n---\nSin repositorio git no hay red de reversion, asi que sobre este proyecto ' +
-  'trabajo en supervisado: analizo y propongo, no edito. Inicia git en la raiz del ' +
-  'proyecto para volver al autonomo.'
+  '\n\n---\nNo puedo editar aqui sin red de seguridad, asi que trabajo en supervisado: ' +
+  'analizo y propongo, no edito. O no hay repositorio git en la raiz del proyecto, o ' +
+  'git no tiene identidad configurada (user.email / user.name). Configuralo y podre ' +
+  'resolver.'
 
 /**
  * Por que no se tuvo el autonomo que se pidio, dicho al final de la respuesta.
