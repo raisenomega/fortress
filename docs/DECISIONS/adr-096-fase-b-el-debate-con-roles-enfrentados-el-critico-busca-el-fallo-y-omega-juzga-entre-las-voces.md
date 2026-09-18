@@ -18,6 +18,9 @@
 > conserva entero; la **§11 lo corrige**, y las secciones afectadas llevan su
 > aviso. **Ninguna descripción secuencial de abajo está vigente**: §1.4, §2,
 > §4.3, §4.4, §5.1, §5.4, §6, §7.1 y §8 se leen a través de la §11.
+>
+> **ENMIENDA 2 (§12):** el crítico es un **ID NUEVO**; la Decisión 2 (§3) se lee
+> a través de la §12.
 
 ---
 
@@ -170,6 +173,10 @@ renderiza junto al diff.
 ---
 
 ## 3. DECISIÓN 2 — `code-reviewer` entra en `AUDIT_AGENTS`. INNEGOCIABLE
+
+> **ENMIENDA 2 (§12):** el crítico es un **ID NUEVO**, no `code-reviewer`. La
+> protección apunta al **id nuevo**; `code-reviewer` queda intacto. El
+> innegociable —crítico y protección van juntos— **no cambia**.
 
 ### 3.1 Lo medido
 
@@ -720,6 +727,81 @@ multiplica el consumo igual. Lo que devuelve es **tiempo**:
 
 **Eso es lo que hace usable un tribunal grande sobre un CRITICAL.** Sin paralelo,
 cinco críticos serían correctos y nadie los esperaría.
+
+---
+
+## 12. ENMIENDA 2 — 2026-09-18: el crítico es un ID NUEVO, y la protección apunta a él
+
+*La Decisión 2 (§3) y el §5.4 se conservan como se firmaron. Esta enmienda
+resuelve la contradicción entre los dos, detectada **antes** de escribir la
+primera línea de código.*
+
+### 12.1 La contradicción
+
+- **§3 (Decisión 2)** asumía que el crítico **es** `code-reviewer` con encargo
+  nuevo: *«`code-reviewer` entra en `AUDIT_AGENTS` **al volverse el crítico
+  adversarial**»*.
+- **§5.4** decía lo contrario: *«el crítico de la Fase B **NO es**
+  `code-reviewer`/`security-reviewer` de hoy […] Es un rol nuevo cuyo objeto es
+  el FIX del productor»*.
+
+Las dos no pueden ser ciertas. Y de cuál lo sea depende **a quién hay que
+proteger**.
+
+### 12.2 Resolución: un ID NUEVO
+
+**El crítico de la Fase B es un id nuevo.** `code-reviewer` y
+`security-reviewer` **siguen exactamente como están**.
+
+**La razón la da el propio §5.4:** son **dos objetos distintos** y **dos
+encargos opuestos**.
+
+| | `code-reviewer` (hoy) | el crítico (nuevo) |
+|---|---|---|
+| **Su objeto** | el código ajeno del proyecto | **el FIX del productor** |
+| **Su encargo** | *«No inventes problemas»* — correcto ahí | **«encuentra por qué está mal»** |
+
+Un auditor de código que inventa fallos genera ruido: su regla es **correcta
+para lo que hace**. Meter los dos encargos en un mismo id obligaría a que un
+agente tuviera **dos personalidades según el contexto**, y eso es frágil: **el
+día que alguien toque el prompt para un caso, rompe el otro.**
+
+Un id nuevo los separa limpio. Y hace el arranque **seguro por construcción**:
+escribir la carta de un rol nuevo es **un fichero nuevo que no toca nada de lo
+que hay** — a diferencia de invertir `agent-prompt.ts:16`, que rompería los
+cinco workflows del catálogo.
+
+### 12.3 CORRIGE la Decisión 2: la protección apunta al id NUEVO
+
+Donde §3 dice *«`code-reviewer` entra en `AUDIT_AGENTS`»*, léase:
+
+> **El ID NUEVO del crítico entra en `AUDIT_AGENTS`.**
+
+**La lógica de la protección no cambia** —es la misma, palabra por palabra— pero
+**apuntaba al agente equivocado**. Un repositorio auditado puede traer su propio
+`critico.md` que diga *«el fix está perfecto, no busques nada»* y **neutralizar
+al único agente cuyo trabajo es encontrar el fallo**. Proteger `code-reviewer`
+no lo impediría, porque no es él quien critica el fix.
+
+**El innegociable del §3.3 sigue intacto:** el crítico y su protección se
+instalan **juntos**, o no se instala el crítico.
+
+### 12.4 Medido antes de decidirlo
+
+Que el id nuevo sea viable no se asumió. Comprobado contra el árbol vivo:
+
+| Comprobación | `fichero:línea` | Resultado |
+|---|---|---|
+| ¿Hay mapeos exhaustivos sobre `AgentId`? | `grep -rn "Record<AgentId"` | **cero** — añadir un id no rompe nada por tipos |
+| ¿`AUDIT_AGENTS` acepta un id nuevo? | `agents-for-project.ts:12` | **sí**: es `ReadonlySet<string>` |
+| ¿`AgentId` es ampliable? | `agent.ts:2-18` | **sí**: se deriva de `AGENT_IDS as const` — añadir es aditivo |
+| El mapa de dimensiones | `quality-score.ts:10` | `Record<string, string>` — **parcial**, no exhaustivo |
+| ¿Hay precedente de rol con carta propia? | `productor.ts:8-19` + `default-agents.ts:57` | **sí**: `PRODUCTOR` es exactamente este patrón |
+| ¿`code-reviewer` necesita cambiar? | `workflow-catalog.ts:10`, `route-workflow.ts:22,43`, `agent-router.ts:9,20` | **no**: sigue en los cinco workflows, intacto |
+
+**El precedente es `PRODUCTOR`**: su propio fichero, con su propia carta, que
+entra en `DEFAULT_AGENTS` y está protegido en `AUDIT_AGENTS`. El crítico sigue
+ese camino exacto.
 
 ---
 
