@@ -31,27 +31,26 @@ describe('el verify corre el script del repo AJENO con el entorno acotado', () =
     process.env.SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
     const dir = proyecto('test -n "$SSH_AUTH_SOCK" && exit 3\nexit 0')
 
-    expect(await verificarArbol(dir)).toBe(true)
+    expect(await verificarArbol(dir)).toBe('verde')
   }, 20_000)
 
   it('CI viaja: sin ella un vitest a secas se queda en modo watch', async () => {
     const dir = proyecto('test "$CI" = "true" && exit 0\nexit 3')
-    expect(await verificarArbol(dir)).toBe(true)
+    expect(await verificarArbol(dir)).toBe('verde')
   }, 20_000)
 })
 
 describe('no-regresion: el veredicto no cambia', () => {
   it('typecheck verde da por bueno el arbol', async () => {
-    expect(await verificarArbol(proyecto('exit 0'))).toBe(true)
+    expect(await verificarArbol(proyecto('exit 0'))).toBe('verde')
   }, 20_000)
 
   it('typecheck rojo lo tumba', async () => {
-    expect(await verificarArbol(proyecto('echo "error TS2304" >&2\nexit 1'))).toBe(false)
+    expect(await verificarArbol(proyecto('echo "error TS2304" >&2\nexit 1'))).toBe('rojo')
   }, 20_000)
 
   it('un proyecto sin ese script se da por bueno, no se bloquea la construccion', async () => {
-    expect(await verificarArbol(proyecto('echo "Missing script: typecheck" >&2\nexit 1'))).toBe(
-      true
-    )
+    // ADR-091 lo movera a 'desconocida' en la pieza 2; aqui sigue como estaba.
+    expect(await verificarArbol(proyecto('echo "Missing script: typecheck" >&2\nexit 1'))).toBe('verde') // prettier-ignore
   }, 20_000)
 })

@@ -3,6 +3,7 @@ import { buildFeature } from '@application/build/build-feature'
 import type { AppContext } from '@application/context'
 import { err, ok, type Result } from '@domain/shared/result'
 import { gitRevert, gitSnapshot } from '../git/git-snapshot'
+import { cortaElTurno } from '@domain/chat/verificacion-del-arbol'
 import { verificarArbol } from './build-verify'
 import { agentFor, resolveEditTarget } from './build-target'
 
@@ -26,7 +27,10 @@ export async function runBuild(
     {
       snapshot: () => gitSnapshot(project.path, 'build: checkpoint'),
       revert: (sha) => gitRevert(project.path, sha),
-      verify: () => verificarArbol(project.path)
+      // El Ejecutor revierte con `false` (build-feature.ts:57). Su booleano
+      // siempre quiso decir «no esta roto», y eso es exactamente `!cortaElTurno`:
+      // una fase que no se pudo medir no revierte una construccion (ADR-091).
+      verify: async () => !cortaElTurno(await verificarArbol(project.path))
     },
     () => {}
   )

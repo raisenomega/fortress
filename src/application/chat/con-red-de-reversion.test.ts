@@ -18,7 +18,7 @@ function redFalsa(verde = true, retirado = true): { red: RedDeReversion; pasos: 
     },
     verificar: () => {
       pasos.push('verificar')
-      return Promise.resolve(verde)
+      return Promise.resolve(verde ? 'verde' : 'rojo')
     }
   }
   return { red, pasos }

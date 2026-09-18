@@ -7,7 +7,7 @@ import { textOnly, type ReplyOutcome } from './reply-outcome'
 const red = (verde = true, retirado = true): RedDeReversion => ({
   disponible: () => true,
   abrir: () => ({ conservar: () => retirado, revertir: () => retirado }),
-  verificar: () => Promise.resolve(verde)
+  verificar: () => Promise.resolve(verde ? 'verde' : 'rojo')
 })
 
 const con =

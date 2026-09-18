@@ -35,7 +35,7 @@ export function redReal(verde = true): RedDeReversion & { abiertos: () => number
       n += 1
       return abrirCheckpoint(cwd)
     },
-    verificar: () => Promise.resolve(verde),
+    verificar: () => Promise.resolve(verde ? 'verde' : 'rojo'),
     abiertos: () => n
   }
 }
