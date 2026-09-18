@@ -1,3 +1,4 @@
+import { noSePudoVerificar } from '@domain/chat/no-se-pudo-verificar'
 import type { VerificacionDelArbol } from '@domain/chat/verificacion-del-arbol'
 import { runCommand } from '../probe/run-command'
 
@@ -25,7 +26,6 @@ const TIMEOUT_MS = 180_000
 export async function verificarArbol(cwd: string): Promise<VerificacionDelArbol> {
   const salida = await runCommand('npm', ['run', 'typecheck'], cwd, TIMEOUT_MS)
   if (salida.code === 0) return 'verde'
-  // Sin script que correr no hay nada que verificar, y eso no es un fallo del
-  // fix. `runCommand` junta stdout y stderr, asi que se busca en los dos.
-  return /missing script/i.test(salida.out) ? 'verde' : 'rojo'
+  // `runCommand` junta stdout y stderr, asi que la senal se busca en los dos.
+  return noSePudoVerificar(salida) ? 'desconocida' : 'rojo'
 }

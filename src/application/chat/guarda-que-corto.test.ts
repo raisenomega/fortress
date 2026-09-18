@@ -12,7 +12,8 @@ const sinRutas = (tools: readonly string[]): TurnoProtegido => ({
   aviso: '',
   conservado: true,
   revertido: false,
-  veredicto: SIN_JUZGAR
+  veredicto: SIN_JUZGAR,
+  arbol: 'verde'
 })
 
 /**

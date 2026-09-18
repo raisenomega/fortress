@@ -49,8 +49,17 @@ describe('no-regresion: el veredicto no cambia', () => {
     expect(await verificarArbol(proyecto('echo "error TS2304" >&2\nexit 1'))).toBe('rojo')
   }, 20_000)
 
-  it('un proyecto sin ese script se da por bueno, no se bloquea la construccion', async () => {
-    // ADR-091 lo movera a 'desconocida' en la pieza 2; aqui sigue como estaba.
-    expect(await verificarArbol(proyecto('echo "Missing script: typecheck" >&2\nexit 1'))).toBe('verde') // prettier-ignore
+  it('sin ese script no se bloquea, pero tampoco se finge verde: DESCONOCIDA', async () => {
+    // ADR-091: antes devolvia `true`, que se leia como «lo comprobe y esta
+    // bien». Nadie habia comprobado nada. No revierte, pero consta.
+    expect(await verificarArbol(proyecto('echo "Missing script: typecheck" >&2\nexit 1'))).toBe('desconocida') // prettier-ignore
+  }, 20_000)
+
+  it('el caso del ensayo: el script existe y la herramienta no (rc 127)', async () => {
+    // Medido en raisen-nucleo el 18-sep: `tsc: not found` NO casa con
+    // «missing script», y por esa rendija el turno revertia.
+    const sinHerramienta = proyecto('echo "sh: 1: tsc: not found" >&2\nexit 127')
+
+    expect(await verificarArbol(sinHerramienta)).toBe('desconocida')
   }, 20_000)
 })

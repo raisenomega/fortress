@@ -1,22 +1,11 @@
 import { CHECKPOINT_HUERFANO, REVERTIDO_POR_RED, SIN_RED_NO_SE_EDITA, type RedDeReversion } from '@domain/chat/red-de-reversion' // prettier-ignore
-import { SIN_JUZGAR, type VeredictoDelTurno } from '@domain/chat/veredicto-del-turno'
+import { CONSERVADO_SIN_VERIFICAR } from '@domain/chat/no-se-pudo-verificar'
+import { SIN_JUZGAR } from '@domain/chat/veredicto-del-turno'
 import { arbitrar, seDescarta, type Arbitro } from './desenlace-del-turno'
 import { textOnly, type ReplyOutcome } from './reply-outcome'
+import type { TurnoProtegido } from './turno-protegido'
 
-export interface TurnoProtegido {
-  readonly outcome: ReplyOutcome
-  /** Lo que se le anade al texto de la respuesta: vacio si no hubo que decir nada. */
-  readonly aviso: string
-  /** La red estaba puesta y el turno se quedo en el arbol. Sin red es false: nada
-   *  garantiza lo que quedo, y el cierre del ciclo (ADR-088) solo se fia de esto. */
-  readonly conservado: boolean
-  /** La red estaba puesta y DESHIZO el turno. NO es lo contrario de `conservado`:
-   *  sin red los dos son false —nadie conservo ni revirtio nada—, y la memoria
-   *  por hallazgo (ADR-088, Enmienda 2) necesita distinguir ese caso. */
-  readonly revertido: boolean
-  /** Lo que OMEGA dictamino, si hubo juicio (ADR-090). Sin juez: `juzgado:false`. */
-  readonly veredicto: VeredictoDelTurno
-}
+export type { TurnoProtegido }
 
 /**
  * Un turno del Terminal dentro de la red del ADR-079. La UNIDAD es el turno:
@@ -48,7 +37,7 @@ export async function conRedDeReversion(
   // indice bloqueado, permisos, disco. Si debia haber red y no la hay, no se escribe.
   if (activa && cp === null) {
     const outcome = { ...textOnly(SIN_RED_NO_SE_EDITA), failed: true }
-    return { outcome, aviso: '', conservado: false, revertido: false, veredicto: SIN_JUZGAR }
+    return { outcome, aviso: '', conservado: false, revertido: false, veredicto: SIN_JUZGAR, arbol: 'verde' } // prettier-ignore
   }
 
   let outcome: ReplyOutcome
@@ -58,7 +47,7 @@ export async function conRedDeReversion(
     cp?.revertir()
     throw error
   }
-  if (cp === null) return { outcome, aviso: '', conservado: false, revertido: false, veredicto: SIN_JUZGAR } // prettier-ignore
+  if (cp === null) return { outcome, aviso: '', conservado: false, revertido: false, veredicto: SIN_JUZGAR, arbol: 'verde' } // prettier-ignore // prettier-ignore
 
   // ADR-090: el gate ya no decide solo. Con juez, OMEGA mira lo editado ANTES
   // de que se conserve; sin juez —supervisado— manda el gate, como siempre.
@@ -67,9 +56,14 @@ export async function conRedDeReversion(
   const retirado = descartar ? cp.revertir() : cp.conservar()
   return {
     outcome,
-    aviso: (arbitraje.rojo ? REVERTIDO_POR_RED : '') + (retirado ? '' : CHECKPOINT_HUERFANO),
+    // ADR-091: lo que se conserva sin haberse compilado NO se queda mudo.
+    aviso:
+      (arbitraje.rojo ? REVERTIDO_POR_RED : '') +
+      (!descartar && arbitraje.arbol === 'desconocida' ? CONSERVADO_SIN_VERIFICAR : '') +
+      (retirado ? '' : CHECKPOINT_HUERFANO),
     conservado: !descartar,
     revertido: descartar,
-    veredicto: arbitraje.veredicto
+    veredicto: arbitraje.veredicto,
+    arbol: arbitraje.arbol
   }
 }

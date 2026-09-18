@@ -9,7 +9,8 @@ export const REVERTIDO: TurnoProtegido = {
   aviso: '',
   conservado: false,
   revertido: true,
-  veredicto: SIN_JUZGAR
+  veredicto: SIN_JUZGAR,
+  arbol: 'verde'
 }
 
 export const RESPUESTA = { id: 'm1', projectId: 'p1', mode: 'autonomo', engine: 'claude-code' } as ChatMessage // prettier-ignore
