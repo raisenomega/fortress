@@ -373,6 +373,68 @@ invariante del §4.2.
 modifica—, no `trabajo-del-turno.ts`. El fichero tiene hoy 48 líneas: cabe bajo
 el límite de 75 sin partirlo.
 
+### ENMIENDA — 2026-09-18: la decisión cubría UN campo y el diagnóstico eran DOS
+
+*El §4.1 y el §4.4 de arriba se conservan como se firmaron. Esta enmienda los
+corrige, y se escribió **antes** de tocar `src/`, al medir la pieza.*
+
+**Lo que el §4.1 diagnosticó**, correctamente:
+
+> *«Un fichero que el agente CREA no aparece ni en `tocados` **ni en
+> `diffText`**»*
+
+**Lo que el §4.4 decidió**: *«unir su salida a `tocados`»*. **Un solo campo.**
+Diagnostiqué dos y decidí sobre uno.
+
+**Lo que esa omisión dejaba abierto.** `diffText` no es un campo decorativo: de
+él sale la huella de convergencia.
+
+- `juez-del-turno.ts:57` — `createHash('sha1').update(trabajo.diffText)`
+- `ciclo-de-convergencia.ts:60-61` — `if (vistos.has(v.huella)) return { convergio: false }`
+
+Con solo `tocados` arreglado, **un reintento cuyo único cambio viva en un
+fichero nuevo daría una huella idéntica a la del intento anterior**, y el ciclo
+lo leería como *«está dando vueltas»*: cerraría sin resolver un turno que sí
+avanzó. Se habría conseguido que OMEGA mirase el fichero nuevo y, a la vez, que
+el ciclo mandase al productor a casa por vago. **Medio arreglo que introduce una
+incoherencia nueva.**
+
+Son **dos agujeros del mismo origen**, y el segundo es el grave:
+
+| Campo | Qué rompía | Dónde |
+|---|---|---|
+| `tocados` | un turno que solo crea ficheros sale **SIN_JUZGAR** | `juez-del-turno.ts:39` |
+| `diffText` | la **huella no se mueve** aunque el fichero nuevo cambie entero | `juez-del-turno.ts:57` |
+
+**Corrección:** la pieza cubre **los dos campos**. El **nombre** va a `tocados`;
+el **contenido** del fichero creado va a `diffText`, con forma de alta. El
+contenido y no solo el nombre: con el nombre a secas, dos versiones distintas
+del mismo fichero nuevo volverían a dar la misma huella — la misma ceguera, más
+sutil.
+
+**INNEGOCIABLE DE MÉTODO.** La sección se compone a mano y **nunca con
+`git add -N`** ni ningún comando que mute el índice. Daría un diff nativo, pero
+el checkpoint dejó ahí el WIP del operador stageado a propósito
+(`checkpoint-transitorio.ts:43-45`), y tocarlo arriesga `conservar()` y
+`revertir()` — la red entera del ADR-079. **Nunca se cambia el estado de git
+para mejorar un formato de lectura.**
+
+**Alcance verificado.** Los únicos consumidores de `diffText` son
+`juez-del-turno.ts:43` (lo que se le pasa a OMEGA) y `:57` (la huella). El
+`repair-deps.ts:57` del Motor usa otro camino —`showHead`— y **no se toca**.
+
+**El invariante del §4.2, medido y no asumido.** `leerTrabajo` tiene un único
+llamador de producción, `red-de-reversion.ts:26-28`:
+
+```ts
+const cp = abrirCheckpoint(cwd)
+return cp === null ? null : { ...cp, diff: () => leerTrabajo(cwd, cp.sha) }
+```
+
+Si el checkpoint no abrió **no existe un `diff()` que devuelva datos malos: no
+existe `diff()`**. No hace falta guarda — el WIP untracked del operador no puede
+colarse, porque sin `add -A` previo no hay a quién preguntárselo.
+
 ---
 
 ## 5. PIEZA 3 — Bash libre
