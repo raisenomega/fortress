@@ -378,10 +378,11 @@ sin arreglar el debate.
 
 ### 7.1 El tope: una FRONTERA de dos tandas, no un contador
 
-> **ENMIENDA 1 (§11.9):** la ESTRUCTURA se mantiene; **el NÚMERO no está
-> vigente**. «Ronda» pasa a ser **tanda paralela**, y el «5» se eligió para un
-> crítico secuencial. Pendiente de que el operador lo cierre con la aritmética
-> del §11.6 y los topes del §11.7 delante.
+> **ENMIENDA 1 (§11.9 y §11.10):** la ESTRUCTURA se mantiene y **el número queda
+> CERRADO** — pero no como tope de gasto. «Ronda» pasa a ser **tanda paralela**,
+> y el «5» es la **FORMA esperada**, no un techo: si el juicio sigue moviéndose,
+> más tandas. **El debate no tiene tope de presupuesto ni de tiempo** (ADR-090
+> §0). Solo cortan la convergencia y la ausencia de verdad técnica.
 
 La convergencia del §4.3 corta el caso normal: cuando el juicio deja de moverse,
 se cierra. **Pero no acota el caso patológico** — tres agentes que se mueven un
@@ -616,7 +617,109 @@ Con la aritmética del §11.6 y los topes del §11.7 delante, el operador decide
 severidad** —o directamente **por presupuesto**, que es una frontera medible y
 no un número inventado (§7.1, salida 3).
 
-**Hasta que lo cierre, el número del §7.1 no está vigente.**
+### 11.10 CIERRE del §7.1 — lo único que corta es la verdad, nunca el dinero
+
+*Cerrado el 2026-09-18, por la ley que faltaba citar.*
+
+**ADR-090 §0, textual:**
+
+> **FORTRESS no mide cuánto gasta — mide cuán grande, profundo, robusto y
+> preciso resuelve.**
+>
+> Los agentes exploran todo lo que necesiten. **«No dejar explorar para
+> abaratar» es un freno disfrazado, y está prohibido.**
+
+Y su regla de desempate, del mismo §0:
+
+> *«Cada vez que una decisión de diseño pueda leerse como «más barato» o «más
+> profundo», gana **más profundo**. Si alguien encuentra en este documento una
+> frase que contradiga el párrafo de arriba, **la frase está mal y el párrafo
+> manda**.»*
+
+**DECISIÓN: el debate NO tiene tope de presupuesto ni de tiempo.**
+
+Solo dos cosas lo cortan:
+
+1. **CONVERGENCIA** — el juicio deja de moverse: la huella de los cinco ejes
+   **+** el diff se repite entre tandas (§4.3, §11.4). **La verdad se resolvió.**
+2. **Las dos tandas frescas agotadas sin converger** → «decisión abierta» en
+   Historia. **No es un freno de coste:** es admitir que falta una decisión
+   humana de negocio, como las D1/D2 del ensayo del 18-sep —*«¿CSP en enforcing
+   o report-only?»* no tiene respuesta técnica.
+
+**El «5» es la FORMA esperada de una tanda, no un tope de gasto.** Si el juicio
+sigue moviéndose, se permiten más: lo que cierra es la huella, no el número.
+
+### 11.11 DESCARTADA con su razón: «el tope debería ser de presupuesto»
+
+*Se deja escrita porque la propuse yo, midiendo bien, y la ley la prohíbe.*
+
+El §11.7 midió que `budget_per_run_usd = 50` muerde antes que cualquier tope de
+tandas, y de ahí concluí que **quizá el tope debería ser de presupuesto**.
+
+**Esa conclusión está prohibida por §0.** Un tope de presupuesto que corta el
+debate a mitad **no detiene el debate porque la verdad se resolviera: lo detiene
+porque se acabó el dinero.** Eso es medir por gasto — exactamente lo que la ley
+llama freno disfrazado.
+
+Y no es la primera vez: ADR-090 §6 ya registra una propuesta mía de no dejar
+navegar a los críticos para abaratar, **rechazada por el operador por lo mismo**.
+
+**La lección, escrita para que no haga falta aprenderla una tercera vez:** una
+medición exacta puede sostener una conclusión que la doctrina prohíbe. Los
+$16.93 por crítico son reales; la aritmética hasta $878 es real; **y ninguna de
+las dos decide el tope.** Quien lo decide es §0.
+
+### 11.12 MEDIDO: dónde muerden hoy los topes de presupuesto
+
+Los dos aplican al Terminal, y **uno corta en caliente**.
+
+| Tope | Dónde muerde | Cómo |
+|---|---|---|
+| **`budget_per_day_usd`** = 500 | `chat-send-handler.ts:30` → `run-guard.ts:21,25` | **Rechaza ANTES de arrancar**: si el gasto de hoy llega al tope, el turno no empieza — *«Tope diario alcanzado […] Subelo en Configuracion o espera a manana»* |
+| **`budget_per_run_usd`** = 50 | `chat-engines.ts:3` → `claude-code-agent.ts:56` → `claude-cli.ts:34` | **Corta EN CALIENTE**: se pasa como `--max-budget-usd 50` a cada `claude -p`. El CLI aborta la corrida al alcanzarlo |
+
+El segundo es el grave: **no rechaza un turno, mata uno a mitad**. Un crítico
+navegando un repo grande se corta por dinero, no por haber terminado — la
+definición literal de *«no dejar explorar para abaratar»*.
+
+**Son anteriores a la ley.** Sus valores por defecto lo delatan
+(`run-budget.ts:12-13`): `DEFAULT_PER_RUN = 3`, `DEFAULT_PER_DAY = 10`. Con **3
+dólares por corrida**, el `security-reviewer` real —que promedia **$16.93**— se
+cortaría **cinco veces** antes de terminar. Ese default no es de un mundo sin
+topes: es de uno donde el gasto mandaba.
+
+**La palanca ya existe y no hace falta código.** `claude-cli.ts:32-34` lo dice:
+
+> *«Red de seguridad: sin tope, un agente sobre un repo enorme sigue leyendo
+> hasta agotar la cuota. **Cero lo desactiva, si el operador lo decide asi.**»*
+
+Y el diario igual — `run-budget.ts`: `if (budget.perDay <= 0) return null`.
+
+**No se toca nada aquí.** Queda **medido y nombrado** como lo que es: **deuda de
+un freno de bolsillo heredado que contradice §0 sobre proyecto de confianza**.
+Si aplica al camino del debate —y aplica— hay que quitarlo del camino, **no
+encoger el debate para caber dentro**. Es su propia enmienda o su propio arco, y
+el operador decide cuándo.
+
+### 11.13 Lo que la aritmética SÍ aporta, y se queda
+
+Medir no fue en balde. Dos cosas legítimas salen de ahí, **y ninguna es un
+freno**:
+
+**1. Transparencia — el recibo, no el tope.** El operador **ve** lo que cuesta:
+agentes, tokens y dinero, en la barra que ya existe (`RunMeter.tsx`). Un
+CRITICAL que cuesta $878 **lo cuesta, y se muestra**. Ver el coste es la otra
+mitad del grado bancario (ADR-091 §0), no una excusa para cortarlo.
+
+**2. El reloj — la razón de ser del paralelo.** El paralelo **no abarata**:
+multiplica el consumo igual. Lo que devuelve es **tiempo**:
+
+- **Secuencial**, 5 críticos: 5 × 32 min ≈ **2,7 h por tanda**
+- **Paralelo**, 5 críticos: ≈ **32 min** — lo que tarde el más lento
+
+**Eso es lo que hace usable un tribunal grande sobre un CRITICAL.** Sin paralelo,
+cinco críticos serían correctos y nadie los esperaría.
 
 ---
 
