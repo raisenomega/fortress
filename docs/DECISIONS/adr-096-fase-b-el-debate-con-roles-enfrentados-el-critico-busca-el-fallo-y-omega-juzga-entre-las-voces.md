@@ -21,6 +21,9 @@
 >
 > **ENMIENDA 2 (§12):** el crítico es un **ID NUEVO**; la Decisión 2 (§3) se lee
 > a través de la §12.
+>
+> **ENMIENDA 3 (§13):** el escaneo **no se toca**. El §1.4 y el §5.3 clasificaban
+> como «INVERTIR» tres frases que son del ESCANEO; se leen a través de la §13.
 
 ---
 
@@ -104,9 +107,9 @@ hallazgos— es **invisible** para todos los pasos posteriores.
 | `vetoComoPedido` — el veto como mensaje | `veto-como-pedido.ts:15-21` | **SE REUSA** (molde de la réplica) |
 | El productor | `productor.ts:8-19` | **SE REUSA TAL CUAL** |
 | Canal de progreso + IPC | `step-progress.ts` → `chat-send-senders.ts:19` | **SE REUSA** |
-| *«No inventes problemas»* | `agent-prompt.ts:16` | **COLABORATIVO → INVERTIR** |
-| *«Aporta solo lo tuyo»* | `step-prompt.ts:33` | **ANTI-DEBATE → INVERTIR** |
-| `summarize()` tira la prosa | `run-workflow.ts:26-28` | **INVERTIR: la prosa debe cruzar** |
+| *«No inventes problemas»* | `agent-prompt.ts:16` | ~~COLABORATIVO → INVERTIR~~ **NO SE TOCA (§13)** |
+| *«Aporta solo lo tuyo»* | `step-prompt.ts:33` | ~~ANTI-DEBATE → INVERTIR~~ **NO SE TOCA — es del ESCANEO (§13)** |
+| `summarize()` tira la prosa | `run-workflow.ts:26-28` | ~~INVERTIR~~ **NO SE TOCA — es del ESCANEO (§13)** |
 | Converger por huella del diff | `ciclo-de-convergencia.ts:60` | **REDEFINIR** (§4) |
 | El rol crítico adversarial | — | **NO EXISTE** |
 | Las rondas | — | **NO EXISTE** |
@@ -336,6 +339,11 @@ Estados nuevos: **«Consultando al juez…»** y **«Debate · X agentes…»**.
 colores se deciden en §7.2, porque uno de los dos no existe.
 
 ### 5.3 Se invierte — las tres frases
+
+> **ENMIENDA 3 (§13):** esta tabla **no está vigente**. Las tres frases viven en
+> el camino del ESCANEO y el debate nunca las lee: se quedan **intactas**.
+> Invertirlas donde están **rompería los cinco workflows**. Lo que la pieza hace
+> es CONSTRUIR el encadenado del debate, que no existe.
 
 | Hoy | En el debate |
 |---|---|
@@ -802,6 +810,83 @@ Que el id nuevo sea viable no se asumió. Comprobado contra el árbol vivo:
 **El precedente es `PRODUCTOR`**: su propio fichero, con su propia carta, que
 entra en `DEFAULT_AGENTS` y está protegido en `AUDIT_AGENTS`. El crítico sigue
 ese camino exacto.
+
+---
+
+## 13. ENMIENDA 3 — 2026-09-18: el escaneo NO se toca. El debate no invierte: CONSTRUYE
+
+*El §1.4 y el §5.3 se conservan como se firmaron. Esta enmienda los corrige, y
+se escribió **antes** de tocar `src/`, al medir la pieza 2.*
+
+### 13.1 Lo que el §1.4 y el §5.3 clasificaron mal
+
+Los dos marcaron estas dos frases como **«COLABORATIVO → INVERTIR»**:
+
+| Frase | Dónde |
+|---|---|
+| *«NO vuelvas a reportar esos hallazgos. Aporta solo lo tuyo.»* | `step-prompt.ts:33` |
+| `summarize()` — solo cruza `severidad fichero: título` | `run-workflow.ts:26-28` |
+
+**Están en el camino del ESCANEO, no en el del debate.** Y el debate **nunca las
+lee**.
+
+### 13.2 La medición: son dos caminos separados
+
+La bifurcación está en `produce-reply.ts:58-64`, con su razón escrita en `:55-56`
+—*«Resolver un hallazgo es UN turno, no un workflow de revision»*—:
+
+| Caso | Camino | Prompt |
+|---|---|---|
+| **Con foco** — resolver un hallazgo: **el debate** | `replyFromChat` → `turnoDelTerminal:33-47` → `hastaConverger` | **`buildChatPrompt`** |
+| Lote sin foco (turno de plan) | `replyFromChat` | `buildChatPrompt` |
+| Sin foco — los cinco workflows | `replyFromWorkflow` → `runWorkflow` | `buildStepPrompt` |
+
+Y cada frase tiene **un único consumidor**, medido:
+
+- `step-prompt.ts:33` → **solo** `run-workflow.ts:53`
+- `summarize()` → **solo** `reply-from-workflow.ts:42`
+
+`reply-from-chat.ts:5` importa `buildChatPrompt`. **No importa `step-prompt.ts`
+en ningún punto.**
+
+### 13.3 CORRECCIÓN: las dos frases se quedan INTACTAS
+
+**No se invierten. Son correctas donde están**: un auditor que repite los
+hallazgos del anterior produce ruido, y el escaneo necesita justo eso —no
+duplicar entre agentes—.
+
+**Y esto protege el escaneo de una corrección futura mal dirigida.** Quien
+leyera el §1.4 original iría a invertir frases del escaneo **y lo rompería**:
+los cinco workflows empezarían a duplicar hallazgos y a arrastrar prosa que su
+informe descarta. La clasificación equivocada era, ella misma, el riesgo.
+
+### 13.4 La pieza real: CONSTRUIR el encadenado que no existe
+
+El camino del debate **hoy no tiene encadenado**. `hastaConverger` llama a
+`producir`, y el **único puente entre vueltas** es `vetoComoPedido`
+(`veto-como-pedido.ts:13-21`): el veto de OMEGA convertido en el mensaje
+siguiente.
+
+**No hay `previous`, no hay `summarize`, no hay nada que tire la prosa** — porque
+hasta ahora no había nadie más de quien recibirla. Con el crítico (pieza 1) sí lo
+hay.
+
+Lo que se construye es **cómo llega la objeción del crítico al productor**, y el
+molde exacto ya existe:
+
+> *«Tu cambio anterior fue REVISADO y VETADO. La objecion, literal: […] Corrige
+> el fix atendiendo a ESA objecion concreta.»*
+
+**La pieza es el mismo patrón con N objeciones de críticos en vez de un veto.**
+
+Y la prosa **sí viaja** aquí: la objeción es la sustancia que el productor
+responde y que OMEGA juzga. Es lo contrario de `summarize()`, **y por eso vive en
+el camino del debate y no en el del escaneo** — dos mundos, dos reglas, otra vez.
+
+### 13.5 Lo que esta enmienda cambia del alcance
+
+La pieza 2 **no toca `src/application/workflow/` ni `src/domain/workflow/`**. El
+riesgo que se temía —romper los cinco workflows— **no existe en esta pieza**.
 
 ---
 
