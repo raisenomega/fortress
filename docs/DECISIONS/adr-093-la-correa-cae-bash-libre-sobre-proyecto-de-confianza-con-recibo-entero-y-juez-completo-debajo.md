@@ -544,6 +544,8 @@ código de otro. La Pieza 1 haría que **quedara registrado qué corrió** — p
 **registrar no es impedir**.
 
 **DECISIÓN: la Pieza 3 queda BLOQUEADA hasta ADR-094**, la frontera de dueño.
+*(Corregido por la ENMIENDA 2, abajo: no es ADR-094 ni frontera de dueño — es
+**ADR-092, el sandbox**. No hay campo de dueño ni clasificación de proyectos.)*
 
 **Por qué esto NO viola el §9** *(«este ADR se cumple entero o no se cumple»)*.
 Esa cláusula prohíbe **la Pieza 3 sin las otras dos** — abrir sin recibo y sin
@@ -556,7 +558,7 @@ parcial que es seguro, y es justo el que el §9 protegía.
 |---|---|
 | 1 · Recibo entero | **CUMPLIDA** — gate 5/5 |
 | 2 · Juez completo | **CUMPLIDA** — gate 5/5 |
-| 3 · Bash libre | **BLOQUEADA** — espera a ADR-094 |
+| 3 · Bash libre | **BLOQUEADA** — espera a **ADR-092, el sandbox** (ver ENMIENDA 2) |
 
 **Lo que esto enseña, y por lo que se escribe entero.** El §5.4 se firmó
 diciendo *«nombrado, no resuelto»* en vez de fingir que estaba resuelto. Esa
@@ -570,6 +572,67 @@ dueño no es una dependencia de Bash libre — es la raíz de la que cuelgan los
 dos arcos que quedaban.** ADR-094 la define; ADR-092 la necesita para saber qué
 aislar; el arco de privacidad la necesita para saber qué tachar y qué no. Era la
 pieza que los otros dos daban por construida.
+
+### ENMIENDA 2 — 2026-09-18: no era una frontera de dueño. Era el sandbox.
+
+*La enmienda anterior se conserva entera. Esta la corrige, y descarta el ADR-094
+que aquella proponía.*
+
+**Lo que la enmienda anterior concluyó bien:** que `trusted` no distingue de
+quién es el código, y que por eso la Pieza 3 no podía construirse. Eso sigue
+medido y sigue en pie.
+
+**De dónde saltó mal:** de ahí dedujo que hacía falta **declarar el dueño** —un
+campo nuevo, un ADR-094, una casilla que marcar por proyecto—. Eso es **una
+complicación equivocada, y contradice lo que FORTRESS es**: la herramienta se
+apunta a un proyecto y trabaja. Pedirle al operador que clasifique de quién es
+cada código es **fricción administrativa ajena al propósito del producto**, y
+además una defensa que depende de que alguien se acuerde de marcar.
+
+**El problema real, releído.** No es *«de quién es este código»*. Es que un
+proceso en autónomo **ve el disco entero** — `gate-env.ts:32-36`, que ya lo
+decía y que esta enmienda anterior citó sin extraer la conclusión correcta:
+
+> *«LIMITE, que conviene no confundir: esto ACOTA EL ENTORNO, no encierra al
+> proceso. El codigo del repo sigue corriendo con el usuario y ve el disco
+> entero: puede leer `~/.ssh`, `~/.aws` o lo que haya. […] Contener de verdad
+> exige un sandbox, y eso es otra pieza de otro tamano.»*
+
+Saber de quién es un proyecto **no impide** que su `postinstall` lea el de al
+lado. Solo permitiría *decidir a quién dejamos hacerlo*. **Eso es clasificar el
+riesgo, no quitarlo.** Lo que lo quita es el aislamiento.
+
+**CORRECCIÓN, y decisión:**
+
+- **NO hay campo de dueño. NO hay clasificación de proyectos. NO hay ADR-094.**
+  Queda descartado con su razón escrita, para que nadie lo reviva: clasificar
+  dueños es fricción administrativa ajena al propósito de FORTRESS, y una
+  defensa que se olvida no es una defensa.
+- FORTRESS sigue siendo **indiferente a la propiedad del código**: se añade un
+  proyecto igual que hoy y trabaja, sin nada nuevo que marcar.
+- **La Pieza 3 (Bash libre) queda BLOQUEADA hasta ADR-092 — el sandbox— que es
+  su ÚNICA dependencia.** Aislamiento estricto end-to-end: cada proyecto en su
+  caja, sin poder ver ni tocar otro. Automático e invisible para quien lo usa.
+
+**La regla puente del §6, reformulada.** Su contenido operativo no cambia; su
+**razón** sí, y la razón es lo que decide cuándo cae:
+
+| | Antes (§6) | Ahora |
+|---|---|---|
+| Por qué espera | *porque el código es de un cliente* | **porque sin aislamiento un proceso ve el disco entero** |
+| Qué la levanta | saber de quién es cada proyecto | **el sandbox de ADR-092** |
+| Después | libre solo sobre lo propio | **libre sobre cualquier proyecto de confianza** |
+
+Con el sandbox, el aislamiento garantiza que un proyecto **no toca otro**, y esa
+garantía **no depende de quién sea el dueño** — que es justo lo que la hace
+sólida. La ley §0 se cumple entera sin que nadie tenga que etiquetar nada.
+
+**Lo que esto enseña.** La medición fue correcta; la conclusión que le colgué,
+no. Medir bien y concluir mal se parece mucho a acertar, y es la equivocación
+más cara de detectar — porque los datos que la sostienen son de verdad. Aquí la
+pista estaba en la propia cita: `gate-env.ts` decía *«contener de verdad exige
+un sandbox»* y yo la usé para argumentar un campo. **La respuesta llevaba tres
+párrafos citada en el mismo documento.**
 
 ---
 
@@ -598,14 +661,24 @@ ADR-092.
 Es una **frontera provisional, no un freno a la ley** (ADR-090 §3: un freno
 limita lo que se puede hacer; una frontera es saber qué se hizo y dónde).
 
+> **ENMIENDA 2 — 2026-09-18.** Lo de arriba se conserva como se firmó, y lo que
+> *hace* no cambia: en autónomo, Bash libre espera. Cambia **por qué**, y eso
+> decide cuándo cae. No espera porque el código sea de un cliente —FORTRESS no
+> clasifica proyectos ni va a hacerlo— sino porque **sin aislamiento un proceso
+> ve el disco entero** (`gate-env.ts:32-36`). Por tanto no la levanta saber de
+> quién es cada proyecto: la levanta **el sandbox de ADR-092**, y cuando lo
+> haga, Bash libre vale sobre **cualquier** proyecto de confianza. Detalle
+> completo en la ENMIENDA 2 del §5.4.
+
 ---
 
 ## 7. Lo que NO está en este ADR
 
 - **El sandbox.** Es ADR-092, su propio arco. No se construye aquí.
 - **Resolver la deuda de `trusted`.** Queda nombrada en §5.4, no resuelta.
-  *(Enmienda 18-sep: medida y elevada a **ADR-094**, la frontera de dueño, que
-  además bloquea la Pieza 3 de este ADR. Ver la enmienda del §5.4.)*
+  *(Enmienda 18-sep: medida — la frontera de dueño **no existe** en código. Y
+  ENMIENDA 2 del mismo día: tampoco hace falta. No se clasifica al dueño; lo
+  que la Pieza 3 necesita es el **aislamiento de ADR-092**. Ver §5.4.)*
 - **Bash libre sobre código de cliente en autónomo.** Espera al ADR-092; hasta
   entonces rige la regla puente del §6.
 - **Las Fases B y C de ADR-090** (debate por roles opuestos, paralelo por
