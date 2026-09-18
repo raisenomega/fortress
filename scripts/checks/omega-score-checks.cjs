@@ -1,10 +1,14 @@
 /**
- * SENTINEL OMEGA a traves del stack real (II): la puntuacion con datos reales,
- * la salud macro de los agentes, y el veto de push respaldado por evidencia.
- * El Libro y la verificacion contra disco viven en omega-checks.cjs.
+ * SENTINEL OMEGA a traves del stack real (II): la puntuacion con datos reales
+ * y la salud macro de los agentes.
+ *
+ * El VETO DE PUSH vivia aqui y salio el 18-sep, al entrar el critico en la
+ * salud macro: el fichero paso de 75 lineas. La costura la marcaba el propio
+ * codigo —dos bloques con su cabecera— y son dos preguntas distintas: cuanto
+ * vale un agente, y si un CRITICAL bloquea el push. El Libro y la verificacion
+ * contra disco siguen en omega-checks.cjs.
  */
 const { createRecorder } = require('../lib/renderer-checks.cjs')
-const { markScanned } = require('../lib/findings-seed.cjs')
 const { seedFinding, addExpr, makeRepo } = require('../lib/omega-seed.cjs')
 
 module.exports = async function omegaScoreChecks(window) {
@@ -52,25 +56,6 @@ module.exports = async function omegaScoreChecks(window) {
   check(
     'sin runs, el cumplimiento del agente es null (no cero)',
     agents.every((a) => a.compliance === null)
-  )
-
-  // --- Veto de push respaldado por evidencia ---
-  const dirD = makeRepo('fortress-omega-push-', 'x\ny\n')
-  const d = await run(addExpr('OmegaPush', dirD, 'git@example.com:acme/omega.git'))
-  const idD = d.ok ? d.value.id : ''
-  seedFinding(idD, 'CRITICAL', 'src/real.ts', 1)
-  markScanned(idD, 40)
-
-  const push = await run(`window.api.push.run('${idD}')`)
-  check('el push queda bloqueado por CRITICAL', !push.ok, JSON.stringify(push))
-  const vetoLog = await run(`window.api.omega.list('${idD}')`)
-  check(
-    'OMEGA registra un VETO con evidencia del CRITICAL',
-    vetoLog.some((e) => e.verdict === 'veto' && e.evidence.includes('src/real.ts:1'))
-  )
-  check(
-    'el veto dice que el CRITICAL esta verificado en disco',
-    vetoLog.some((e) => e.verdict === 'veto' && e.summary.includes('1 verificados'))
   )
 
   return results
