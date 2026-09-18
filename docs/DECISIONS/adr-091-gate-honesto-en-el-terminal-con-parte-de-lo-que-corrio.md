@@ -81,6 +81,70 @@ ADR habría «arreglado» algo que no estaba roto, dejando el fallo real intacto
 
 ---
 
+### ENMIENDA — 2026-09-18: el §1 se equivocó. La correa SÍ existe.
+
+*El §1 de arriba se conserva como se firmó. Esta enmienda lo corrige.*
+
+**Lo que el §1 afirmaba:** que el agente ya corría `Bash` libre y `npm install`, y
+que «no hay correa que quitar» — registrado incluso como *causa falsa
+descartada*.
+
+**Lo que el re-ensayo del 18-sep midió:** el agente intentó
+`npm ci --no-audit --no-fund`, dijo por pantalla *«instalo dependencias para
+poder verificar»*, y **el sandbox lo bloqueó**. Sin `node_modules`, el gate quedó
+en `desconocida`.
+
+**Por qué el §1 concluyó mal:** dedujo el permiso de la columna `tools` de
+`agent_runs`. Esa columna se llena en `run-accumulator.ts:39` con **cada evento
+del stream, denegados incluidos** — registra lo que el modelo **intentó**, no lo
+que se le permitió. Las ~160 `Bash` del ensayo del 17-sep eran intentos.
+
+**La correa, localizada:** `safe-commands.ts:9-13` define tres intenciones
+(typecheck/lint/test); `:38` construye la única regla, `Bash(npm run <script>)`;
+`build-allowed-tools.ts:23` no añade más. **`npm install` y `npm ci` no aparecen
+en ningún punto del camino del Terminal** — los únicos usos están en el Motor
+(`gate-guards.ts:31`, `run-gate-fixture.ts:30`).
+
+**Consecuencia sobre la LEY §0:** *«el Terminal corre lo que necesite para
+preparar su terreno»* **NO se cumple en código**. Es el freno disfrazado que la
+propia ley prohíbe, vivo. Este ADR lo daba por resuelto y no lo estaba: queda
+como **el trabajo que ADR-091 abrió y no cerró**.
+
+**Lo que sí deja recibo:** el bloqueo se registró en el backlog de auto-mejora
+(`permisos-de-herramienta`, avistamiento del 18-sep 05:02): *«Dos comandos Bash
+compuestos fueron bloqueados pidiendo aprobación a mitad de cadena»*. La correa
+incumple la ley, **pero lo dice**. No es invisible, que habría sido peor.
+
+---
+
+### DEUDA MEDIDA EL 18-sep: el juez recibe un diff INCOMPLETO
+
+No la vio ningún test, y no podía: los tests le daban a OMEGA un diff de mentira.
+La encontró **el propio juez**, en su primer contacto con datos reales, y la dejó
+escrita en el backlog de auto-mejora (avistamientos de las 04:53 y 05:02, las dos
+horas exactas de sus dos corridas):
+
+> *«El DIFF DEL FIX solo mostró `vercel.json`, pero el worktree traía además un
+> archivo NUEVO sin trackear que codifica la CSP como código.»*
+
+**Qué falla:** `cp.diff()` —el puerto `TrabajoDelTurno` de la Fase A.1a,
+implementado en `trabajo-del-turno.ts`— usa `git diff` y `git diff --name-only`,
+que por definición **no ven los ficheros untracked**. Un fichero que el agente
+CREA no aparece ni en `tocados` ni en `diffText`, así que OMEGA no lo lee.
+
+**El riesgo, dicho entero:** el juez puede **aprobar un fix cuyo efecto real está
+en el fichero que no vio**. En este turno no hizo daño —el fichero nuevo era un
+test que reforzaba el fix—, pero la garantía que ADR-090 promete («OMEGA revisa
+EXACTAMENTE lo que el fix tocó») hoy es falsa: revisa exactamente lo que el fix
+tocó **de lo ya trackeado**.
+
+**No se arregla aquí.** Es deuda de `juez-del-turno.ts` y del puerto `diff()`, y
+va en la misma cola que la correa. Queda anotada con su evidencia para que se
+decida cuándo — y con la observación de OMEGA como prueba de que el sistema
+encuentra sus propios defectos cuando se le deja mirar datos de verdad.
+
+---
+
 ## 2. La causa real: el gate castiga al agente por el árbol que encontró
 
 En el ensayo el turno **instaló, editó 3 ficheros y no falló** — `failed=0` en
