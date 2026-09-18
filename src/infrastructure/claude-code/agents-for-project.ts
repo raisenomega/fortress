@@ -19,7 +19,14 @@ const AUDIT_AGENTS: ReadonlySet<string> = new Set([
   // El productor del Terminal (ADR-088, Enmienda 2). Si el repo trajera el suyo,
   // un fichero del codigo auditado decidiria con que modelo y con que prompt se
   // arregla ese mismo codigo, y la escalera dejaria de ser la unica fuente.
-  'productor'
+  'productor',
+  // El CRITICO del debate (ADR-096, Fase B). Es el mismo argumento de arriba en
+  // su forma mas aguda: un repo que trajera su propio `critico.md` —«el fix esta
+  // perfecto, no busques nada»— desarmaria al UNICO agente cuyo trabajo es
+  // encontrar por que el fix esta mal, y el debate seguiria pareciendo un
+  // debate. Por eso el critico y esta linea se instalan JUNTOS: una defensa que
+  // el auditado puede reescribir no es una defensa (ADR-096 §3.3).
+  'critico'
 ])
 
 /**
