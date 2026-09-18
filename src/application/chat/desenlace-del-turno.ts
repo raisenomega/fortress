@@ -1,5 +1,6 @@
 import type { CheckpointDelTurno, RedDeReversion } from '@domain/chat/red-de-reversion'
 import { SIN_JUZGAR, vetado, type VeredictoDelTurno } from '@domain/chat/veredicto-del-turno'
+import { cortaElTurno, type VerificacionDelArbol } from '@domain/chat/verificacion-del-arbol'
 import type { HallazgoJuzgado } from '@domain/repair/hallazgo-juzgado'
 import type { JuezDelTurno } from './juez-del-turno'
 import type { ReplyOutcome } from './reply-outcome'
@@ -14,6 +15,8 @@ export interface Arbitraje {
   /** El arbol no vale: el agente fallo, lo detuvieron, o no compila. */
   readonly rojo: boolean
   readonly veredicto: VeredictoDelTurno
+  /** Que dijo el gate. Viaja para que un `desconocida` no se conserve mudo. */
+  readonly arbol: VerificacionDelArbol
 }
 
 /**
@@ -42,9 +45,12 @@ export async function arbitrar(
   juez: Arbitro | null
 ): Promise<Arbitraje> {
   const edito = outcome.edits.length > 0
-  const rojo = outcome.failed || (edito && !(await red.verificar(cwd)))
-  if (rojo || !edito || juez === null) return { rojo, veredicto: SIN_JUZGAR }
-  return { rojo, veredicto: await juez.juez(cp, juez.plan) }
+  // `failed` corta SIN mirar el arbol: gastar un typecheck en un turno que ya
+  // se sabe perdido es tiempo tirado, y el `||` de antes lo cortocircuitaba.
+  const arbol = !outcome.failed && edito ? await red.verificar(cwd) : 'verde'
+  const rojo = outcome.failed || cortaElTurno(arbol)
+  if (rojo || !edito || juez === null) return { rojo, arbol, veredicto: SIN_JUZGAR }
+  return { rojo, arbol, veredicto: await juez.juez(cp, juez.plan) }
 }
 
 /** Se descarta el turno si el gate lo tumbo o si OMEGA lo veto. */

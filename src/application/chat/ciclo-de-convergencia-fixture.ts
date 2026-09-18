@@ -31,7 +31,7 @@ export function redDeMentira(verde = true): RedDeReversion & { pasos: string[] }
   return {
     pasos,
     disponible: () => true,
-    verificar: () => Promise.resolve(verde),
+    verificar: () => Promise.resolve(verde ? 'verde' : 'rojo'),
     abrir: () => ({
       conservar: () => (pasos.push('conservar'), true),
       revertir: () => (pasos.push('revertir'), true),

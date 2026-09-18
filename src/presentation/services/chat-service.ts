@@ -1,5 +1,5 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
-import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
+import { ENVIO_SIN_DATO, type DesenlaceDelEnvio } from '@domain/chat/desenlace-del-envio'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
@@ -20,7 +20,7 @@ export async function loadHistory(projectId: string): Promise<void> {
  *  recarga el historial persistido tanto si se completo como si fallo.
  *  Devuelve la guarda que corto el cierre del ciclo, si corto: la cola del lote
  *  la necesita para decir POR QUE no cerro en vez de agruparlo por descarte. */
-export async function sendMessage(input: SendMessageInput): Promise<SinCierre | null> {
+export async function sendMessage(input: SendMessageInput): Promise<DesenlaceDelEnvio> {
   const store = useChatStore.getState()
   const draft = draftAssistantMessage(input.projectId, input.mode)
 
@@ -32,14 +32,14 @@ export async function sendMessage(input: SendMessageInput): Promise<SinCierre | 
 
   const dejarDeEscuchar = escucharElTurno(input.projectId, draft)
 
-  let sinCierre: SinCierre | null = null
+  let desenlace: DesenlaceDelEnvio = ENVIO_SIN_DATO
   try {
     const result = await api().chat.send(conLoteDelPlan(input))
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
     // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
     // stream (que puede traer lineas de herramienta o venir vacio).
     else {
-      sinCierre = result.value.sinCierre
+      desenlace = { sinCierre: result.value.sinCierre, sinVerificar: result.value.sinVerificar }
       captureConfigDrafts(input.projectId, result.value.assistant.content)
     }
   } catch (error) {
@@ -53,7 +53,7 @@ export async function sendMessage(input: SendMessageInput): Promise<SinCierre | 
     useChatStore.getState().setStreaming(input.projectId, false)
     await Promise.all([loadHistory(input.projectId), refreshSessionUsage()])
   }
-  return sinCierre
+  return desenlace
 }
 
 export async function clearHistory(projectId: string): Promise<void> {

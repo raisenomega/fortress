@@ -33,7 +33,7 @@ export interface Memoria {
 const RED: RedDeReversion = {
   disponible: () => true,
   abrir: () => ({ conservar: () => true, revertir: () => true }),
-  verificar: () => Promise.resolve(true)
+  verificar: () => Promise.resolve('verde')
 }
 
 const HECHO: CodeAgentReply = { text: 'hecho', failed: false, denials: [], usage: EMPTY_USAGE, tools: [], edits: [] } // prettier-ignore

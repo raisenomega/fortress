@@ -8,7 +8,7 @@ import { textOnly } from './reply-outcome'
 const REVIENTA: RedDeReversion = {
   disponible: () => true,
   abrir: () => null,
-  verificar: () => Promise.resolve(true)
+  verificar: () => Promise.resolve('verde')
 }
 
 describe('si debia haber red y no la hay, NO se edita', () => {

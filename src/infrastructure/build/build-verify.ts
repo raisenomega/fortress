@@ -1,3 +1,5 @@
+import { noSePudoVerificar } from '@domain/chat/no-se-pudo-verificar'
+import type { VerificacionDelArbol } from '@domain/chat/verificacion-del-arbol'
 import { runCommand } from '../probe/run-command'
 
 /** El typecheck de un proyecto ajeno no deberia tardar mas que esto. */
@@ -21,10 +23,9 @@ const TIMEOUT_MS = 180_000
  * crudo MENOS en el codigo, que es la unica prevencion que no depende de que
  * alguien se acuerde.
  */
-export async function verificarArbol(cwd: string): Promise<boolean> {
+export async function verificarArbol(cwd: string): Promise<VerificacionDelArbol> {
   const salida = await runCommand('npm', ['run', 'typecheck'], cwd, TIMEOUT_MS)
-  if (salida.code === 0) return true
-  // Sin script que correr no hay nada que verificar, y eso no es un fallo del
-  // fix. `runCommand` junta stdout y stderr, asi que se busca en los dos.
-  return /missing script/i.test(salida.out)
+  if (salida.code === 0) return 'verde'
+  // `runCommand` junta stdout y stderr, asi que la senal se busca en los dos.
+  return noSePudoVerificar(salida) ? 'desconocida' : 'rojo'
 }

@@ -9,6 +9,8 @@ import { borradorDeResolucion } from './resolver-en-terminal'
 export interface TurnoDelLote {
   readonly desenlace: DesenlaceEnLote
   readonly sinCierre: SinCierre | null
+  /** Se conservo, pero nadie pudo compilar el proyecto (ADR-091). */
+  readonly sinVerificar: boolean
 }
 
 const pideTrabajo = (f: Finding): boolean =>
@@ -32,10 +34,11 @@ export async function turnoDelLote(
   p: PuertosDeLaCola
 ): Promise<TurnoDelLote> {
   const antes = p.hallazgo(id)
-  if (antes === undefined || !pideTrabajo(antes)) return { desenlace: 'omitido', sinCierre: null }
+  if (antes === undefined || !pideTrabajo(antes)) return { desenlace: 'omitido', sinCierre: null, sinVerificar: false }
   p.abrirTerminal()
   const prompt = borradorDeResolucion(antes)
-  const sinCierre = await p.enviar({ projectId, prompt, mode: 'autonomo', excludedAgents: p.excluidos(), findingId: id, lote: ids }) // prettier-ignore
+  const envio = await p.enviar({ projectId, prompt, mode: 'autonomo', excludedAgents: p.excluidos(), findingId: id, lote: ids }) // prettier-ignore
   await p.recargar()
-  return { desenlace: desenlaceEnLote(antes, p.hallazgo(id), sinCierre), sinCierre }
+  const desenlace = desenlaceEnLote(antes, p.hallazgo(id), envio.sinCierre)
+  return { desenlace, sinCierre: envio.sinCierre, sinVerificar: envio.sinVerificar }
 }

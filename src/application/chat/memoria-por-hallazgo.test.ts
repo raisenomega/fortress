@@ -16,12 +16,12 @@ function banco(): { context: AppContext; recordadas: string[]; olvidadas: string
 }
 
 // prettier-ignore
-const turno = (red: Pick<TurnoProtegido, 'conservado' | 'revertido' | 'veredicto'>, outcome: Partial<ReplyOutcome> = { sesion: 'ses-2' }): TurnoProtegido =>
+const turno = (red: Pick<TurnoProtegido, 'conservado' | 'revertido' | 'veredicto' | 'arbol'>, outcome: Partial<ReplyOutcome> = { sesion: 'ses-2' }): TurnoProtegido =>
   ({ outcome: { ...textOnly('hecho'), ...outcome }, aviso: '', ...red })
 
-const REVIRTIO = { conservado: false, revertido: true, veredicto: SIN_JUZGAR }
-const CONSERVO = { conservado: true, revertido: false, veredicto: SIN_JUZGAR }
-const SIN_RED = { conservado: false, revertido: false, veredicto: SIN_JUZGAR }
+const REVIRTIO = { conservado: false, revertido: true, veredicto: SIN_JUZGAR, arbol: 'verde' as const }
+const CONSERVO = { conservado: true, revertido: false, veredicto: SIN_JUZGAR, arbol: 'verde' as const }
+const SIN_RED = { conservado: false, revertido: false, veredicto: SIN_JUZGAR, arbol: 'verde' as const }
 
 describe('GARANTIA 1: la sesion NO avanza SOLO cuando la red REVIRTIO', () => {
   it('(i) la red revirtio: NO avanza, el arbol ya no tiene lo que recordaria', () => {

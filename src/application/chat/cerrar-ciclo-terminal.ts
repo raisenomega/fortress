@@ -40,7 +40,7 @@ export async function cerrarCicloTerminal(
   if (cuenta.porRuta === 0) return noCerro('sin-ediciones', cuenta)
 
   const raiz = context.projects.findById(projectId)?.path ?? ''
-  const marcado = markMitigatedFinding(context, findingId, notaDelCierre(messageId, edits, raiz))
+  const marcado = markMitigatedFinding(context, findingId, notaDelCierre(messageId, edits, raiz, turno.arbol))
   if (!marcado.ok) return cerro({ desenlace: 'no_vivo' })
   try {
     const dictamen = await verificarMitigado(context, projectId, findingId, 'terminal')

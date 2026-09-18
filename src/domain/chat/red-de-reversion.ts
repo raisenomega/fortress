@@ -1,9 +1,5 @@
-/**
- * Lo que el Terminal necesita de la red de reversion del ADR-079, sin saber que
- * detras hay git. Un checkpoint abierto sobre el arbol vivo tiene dos unicas
- * salidas, y las dos dicen si el commit del checkpoint quedo RETIRADO del
- * historial: `false` es un checkpoint huerfano en la rama del operador.
- */
+import type { VerificacionDelArbol } from './verificacion-del-arbol'
+
 /**
  * Lo que el agente dejo escrito en este turno, leido SIN saber que detras hay
  * git: el texto del diff, que ficheros toco, y como estaba cada uno antes.
@@ -18,6 +14,11 @@ export interface TrabajoDelTurno {
   readonly actual: (relPath: string) => string
 }
 
+/**
+ * El checkpoint del ADR-079, sin saber que detras hay git. Tiene dos unicas
+ * salidas, y las dos dicen si el commit quedo RETIRADO del historial: `false`
+ * es un checkpoint huerfano en la rama del operador.
+ */
 export interface CheckpointDelTurno {
   /** Exito: el arbol se queda con las ediciones del agente. */
   conservar(): boolean
@@ -38,14 +39,14 @@ export interface RedDeReversion {
   /** null = no hay red posible: sin git, sin raiz de repo, o sin commits. */
   readonly abrir: (cwd: string) => CheckpointDelTurno | null
   /** El typecheck del proyecto tras el turno: true si el arbol compila. */
-  readonly verificar: (cwd: string) => Promise<boolean>
+  readonly verificar: (cwd: string) => Promise<VerificacionDelArbol>
 }
 
 /** Sin red: lo que hay cuando nadie la inyecta. `disponible` en false degrada. */
 export const SIN_RED: RedDeReversion = {
   disponible: () => false,
   abrir: () => null,
-  verificar: () => Promise.resolve(true)
+  verificar: () => Promise.resolve('verde')
 }
 
 /** Lo que lee el operador cuando el turno se deshizo. Es texto nuestro, no del agente. */
