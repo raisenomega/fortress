@@ -61,8 +61,13 @@ describe('el turno de plan para, y el segundo gesto ejecuta', () => {
     expect(servicio).not.toMatch(/avisoDeAprobacion/)
   })
 
-  it('en autonomo la barra lo dice ANTES de pulsar, y no repite toasts', () => {
-    expect(fuente(`${SCAN}BarraDelLote.tsx`)).toContain('El lote resuelve en modo Supervisado')
+  it('la barra ya NO manda a supervisado: el lote corre en los dos modos', () => {
+    // ADR-090, A.1c. El boton estaba `disabled` en autonomo y la barra lo
+    // explicaba; se pulsaba y no pasaba nada, que es como se vivia el candado.
+    const barra = fuente(`${SCAN}BarraDelLote.tsx`)
+
+    expect(barra).not.toContain('El lote resuelve en modo Supervisado')
+    expect(barra).not.toContain('enAutonomo')
     expect(fuente('src/presentation/services/preparar-lote.ts')).not.toMatch(
       /notify|AVISO_AUTONOMO/
     )

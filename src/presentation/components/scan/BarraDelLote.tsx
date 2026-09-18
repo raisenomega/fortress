@@ -13,7 +13,6 @@ const BOTON = 'tap rounded-md px-2.5 py-1 text-[11px] font-semibold disabled:opa
 
 function texto(l: LoteDelTablero): string {
   if (l.enCurso !== null) return `Lote: ${l.enCurso.hechos} de ${l.enCurso.total}`
-  if (l.enAutonomo) return 'El lote resuelve en modo Supervisado'
   if (l.planeado) return 'Lee el plan en el Terminal'
   if (l.pendiente) return 'Mensaje listo en el Terminal: dale Enter'
   return textoDeLaTanda(l.elegidos)
@@ -28,7 +27,7 @@ function texto(l: LoteDelTablero): string {
  */
 export function BarraDelLote({ visible, lote }: BarraDelLoteProps): React.JSX.Element | null {
   if (!visible) return null
-  const { elegidos, enAutonomo } = lote
+  const { elegidos } = lote
   const corriendo = lote.enCurso !== null
 
   return (
@@ -37,7 +36,7 @@ export function BarraDelLote({ visible, lote }: BarraDelLoteProps): React.JSX.El
       <button
         type="button"
         onClick={lote.preparar}
-        disabled={corriendo || enAutonomo || lote.pendiente}
+        disabled={corriendo || lote.pendiente}
         title="Deja el mensaje escrito en el Terminal. Lo mandas tu"
         className={`${BOTON} bg-primary text-background flex items-center gap-1.5 hover:brightness-110`}
       >

@@ -20,10 +20,9 @@ export function textoDeLaTanda(elegidos: number): string {
  * PODRIA resolver —`resoluble`, calculado en el proceso principal: de confianza,
  * no es el repo propio y hay red git—.
  *
- * NO mira el modo: el modo decide el FLUJO, no si la casilla aparece. En
- * supervisado el operador aprueba el plan y la cola resuelve; en autonomo el
- * lote avisa de que su aprobador —OMEGA— llega con la pieza 5. Exigir autonomo
- * aqui escondia la casilla justo en el unico modo donde hoy funciona.
+ * NO mira el modo: el modo decide el FLUJO, no si la casilla aparece. En los dos
+ * el operador aprueba el plan y la cola resuelve; lo que cambia es quien juzga
+ * cada fix — en autonomo, OMEGA antes de conservar (ADR-090, Fase A).
  */
 export function loteDisponible(resoluble: boolean): boolean {
   return resoluble

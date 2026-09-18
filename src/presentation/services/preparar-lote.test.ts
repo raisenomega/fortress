@@ -38,7 +38,7 @@ describe('pulsar «Resolver lote en Terminal» precarga el plan y espera', () =>
     expect(useUiStore.getState().view).toBe('chat')
   })
 
-  it('en autonomo no precarga nada, y no suelta un toast por cada clic', () => {
+  it('en autonomo TAMBIEN precarga: el modo decide el flujo, no el permiso', () => {
     useSettingsStore.getState().setMode('autonomo')
     useLoteStore.getState().alternar('p1', 'f1')
     const avisosAntes = useToastStore.getState().toasts.length
@@ -46,8 +46,10 @@ describe('pulsar «Resolver lote en Terminal» precarga el plan y espera', () =>
     prepararLote('p1', 'mailbd-main')
     prepararLote('p1', 'mailbd-main')
 
-    expect(useColaDelLoteStore.getState().pendiente).toBeNull()
-    expect(useWorkflowStore.getState().draft).toBe(RESIDUO)
+    // ADR-090, A.1c: antes esto se cortaba en seco y el boton quedaba muerto.
+    expect(useColaDelLoteStore.getState().pendiente?.ids).toEqual(['f1'])
+    expect(useWorkflowStore.getState().draft).not.toBe(RESIDUO)
+    expect(useUiStore.getState().view).toBe('chat')
     // Lo dice la barra antes de pulsar; repetirlo aqui era lo que molestaba.
     expect(useToastStore.getState().toasts).toHaveLength(avisosAntes)
   })
