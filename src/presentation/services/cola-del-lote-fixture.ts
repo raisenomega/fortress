@@ -15,6 +15,8 @@ export interface Opciones {
   readonly ocupada?: boolean
   /** La guarda que corto el cierre de ese turno, si corto alguna. */
   readonly sinCierre?: (id: string) => SinCierre | null
+  /** Ese turno se conservo sin que nadie pudiera compilar (ADR-091). */
+  readonly sinVerificar?: (id: string) => boolean
 }
 
 export interface Banco {
@@ -46,7 +48,7 @@ export function banco(o: Opciones = {}): Banco {
       log.push(`fin:${id}`)
       terminados += 1
       if (terminados === o.detenerTras) cortado = true
-      return o.sinCierre?.(id) ?? null
+      return { sinCierre: o.sinCierre?.(id) ?? null, sinVerificar: o.sinVerificar?.(id) ?? false }
     },
     recargar: async () => void log.push('recargar'),
     contar: async (resumen) => void resumenes.push(resumen),

@@ -32,3 +32,12 @@ export interface TurnoProtegido {
    */
   readonly arbol: VerificacionDelArbol
 }
+
+/**
+ * El turno se quedo escrito y NADIE pudo compilar el proyecto (ADR-091). Las dos
+ * condiciones juntas: un turno revertido no conserva nada, y uno verificado en
+ * verde no tiene nada que avisar. Vive aqui, con el tipo del que se deduce.
+ */
+export function seConservoSinCompilar(t: TurnoProtegido): boolean {
+  return t.conservado && t.arbol === 'desconocida'
+}

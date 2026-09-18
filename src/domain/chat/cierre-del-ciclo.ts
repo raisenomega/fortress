@@ -1,4 +1,5 @@
 import type { DesenlaceDeVerificacion } from '../repair/dictamen-de-verificacion'
+import type { VerificacionDelArbol } from './verificacion-del-arbol'
 
 /**
  * En que queda el cierre del ciclo de un turno del Terminal (ADR-088, pieza 3).
@@ -21,9 +22,18 @@ const relativa = (ruta: string, raiz: string): string =>
  * retira y las ediciones quedan en el arbol para que el operador las integre—,
  * asi que cita el turno y los ficheros, relativos a la raiz y sin repetir.
  */
-export function notaDelCierre(messageId: string, edits: readonly string[], raiz: string): string {
+export function notaDelCierre(
+  messageId: string,
+  edits: readonly string[],
+  raiz: string,
+  arbol: VerificacionDelArbol = 'verde'
+): string {
   const ficheros = [...new Set(edits.map((ruta) => relativa(ruta, raiz)))]
-  return `arreglado por el Terminal · turno ${messageId} · ficheros: ${ficheros.join(', ')}`
+  // ADR-091: si nadie pudo compilarlo, la fila lo dice. Esta nota es lo que el
+  // operador ve al volver al Escaneo, y es donde «se arreglo» tiene que dejar
+  // de parecerse a «se arreglo y compila».
+  const sinVerificar = arbol === 'desconocida' ? ' · SIN VERIFICAR: no habia con que compilar' : ''
+  return `arreglado por el Terminal · turno ${messageId} · ficheros: ${ficheros.join(', ')}${sinVerificar}` // prettier-ignore
 }
 
 /** Lo que queda en la fila cuando no hubo dictamen: que NO se lea como verificado. */

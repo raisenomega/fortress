@@ -6,6 +6,7 @@ import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
 import { SIN_OMEGA, type OmegaDelTurno } from './omega-del-turno'
+import { seConservoSinCompilar } from './turno-protegido'
 import { turnoDelTerminal } from './turno-del-terminal'
 import { productorDelTurno } from './productor-del-turno'
 import { sinSecretosEnVivo } from './en-vivo-tachado'
@@ -64,6 +65,6 @@ export async function sendMessage(
   if (!stored.ok) return err(stored.error)
   // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).
   const sinCierre = await trasElTurno(context, foco.value?.id ?? null, ciclo.turno, stored.value, ciclo)
-
-  return ok({ user: user.value, assistant: stored.value, engine, sinCierre })
+  const sinVerificar = seConservoSinCompilar(ciclo.turno)
+  return ok({ user: user.value, assistant: stored.value, engine, sinCierre, sinVerificar }) // prettier-ignore
 }

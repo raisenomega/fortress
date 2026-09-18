@@ -32,4 +32,7 @@ export interface SendMessageOutput {
   /** La guarda que corto el cierre del ciclo, o null si no habia que cerrar o
    *  se cerro. Enum y numeros: cruza el puente sin llevar nada del proyecto. */
   readonly sinCierre: SinCierre | null
+  /** El turno se conservo SIN que nadie pudiera compilar el proyecto (ADR-091).
+   *  Un booleano: cruza el puente sin llevar nada del codigo del cliente. */
+  readonly sinVerificar: boolean
 }

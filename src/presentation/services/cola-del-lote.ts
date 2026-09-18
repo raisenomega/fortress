@@ -1,6 +1,7 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { AgentId } from '@domain/agent/agent'
 import { resumenDelLote, type DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
+import type { DesenlaceDelEnvio } from '@domain/chat/desenlace-del-envio'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
 import { turnoDelLote } from './turno-del-lote'
@@ -13,7 +14,7 @@ export interface PuertosDeLaCola {
   readonly abrirTerminal: () => void
   /** `sendMessage` de chat-service: se resuelve con el turno ENTERO, cierre
    *  incluido, y devuelve la guarda que corto ese cierre si corto alguna. */
-  readonly enviar: (input: SendMessageInput) => Promise<SinCierre | null>
+  readonly enviar: (input: SendMessageInput) => Promise<DesenlaceDelEnvio>
   readonly recargar: () => Promise<void>
   readonly contar: (resumen: string) => Promise<void>
   readonly cola: {
@@ -47,17 +48,19 @@ export async function correrLote(
   p.cola.arrancar(ids.length)
   const desenlaces: DesenlaceEnLote[] = []
   const motivos: SinCierre[] = []
+  let sinVerificar = 0
   try {
     for (const id of ids) {
       if (p.cola.cortado()) break
       const turno = await turnoDelLote(projectId, id, ids, p)
       desenlaces.push(turno.desenlace)
       if (turno.sinCierre !== null) motivos.push(turno.sinCierre)
+      if (turno.sinVerificar) sinVerificar += 1
       p.cola.avanzar()
     }
   } finally {
     p.cola.terminar()
-    await p.contar(resumenDelLote(desenlaces, ids.length, motivos))
+    await p.contar(resumenDelLote(desenlaces, ids.length, motivos, sinVerificar))
   }
   return desenlaces
 }
