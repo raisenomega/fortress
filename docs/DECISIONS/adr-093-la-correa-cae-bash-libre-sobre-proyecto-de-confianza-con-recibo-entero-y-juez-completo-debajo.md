@@ -497,6 +497,80 @@ Este ADR **lo dice y no lo frena**: nombrarlo es la mitad honesta; resolverlo es
 otro arco. Lo que no se admite es abrir sin dejarlo escrito, que es cómo un hilo
 se convierte en un agujero.
 
+### ENMIENDA — 2026-09-18: el hilo `trusted` se cobró la Pieza 3
+
+*El §5 y el §5.4 de arriba se conservan como se firmaron. Esta enmienda los
+corrige, y se escribió **antes** de tocar `src/`, al medir la frontera.*
+
+**Lo que el §5.4 dijo:** que Bash libre cuelga de `trusted`, que hay deuda
+abierta sobre si `trusted` defiende, y que este ADR *«lo dice y no lo frena»*.
+
+**Lo que la medición del 18-sep encontró:** no es que `trusted` defienda mal.
+Es que **la frontera no existe en código**.
+
+`project.ts:33-36` dice qué significa `trusted`, con sus palabras:
+
+> *«Proyecto de confianza. Por defecto false: un repo no confiable NUNCA
+> auto-ejecuta sus scripts. Solo si es true el agente puede autoverificarse
+> (typecheck/lint/test), porque `npm run X` corre codigo del propio repo.»*
+
+Y `confianza.ts:19-21` es literalmente un campo:
+
+```ts
+export function ejecutaConConfianza(project) {
+  return project?.trusted === true
+}
+```
+
+**`trusted` significa «el operador dejó que este repo ejecute sus scripts». NO
+significa «este código es de Jojo».** Un proyecto de cliente marcado `trusted`
+—que es exactamente para lo que la marca existe— es hoy indistinguible de uno
+propio.
+
+Las tres puertas de `effectiveMode` (`modo-efectivo.ts:57-62`) son `selfRepo`,
+`ejecutaConConfianza` y `redGit`: *es el repo de FORTRESS*, *puede ejecutar*,
+*hay checkpoint*. **Ninguna es «de quién es el código».** Búsqueda de
+`owner` / `propietario` / `cliente` / `dueño` en `domain/` y `application/`:
+cero aciertos fuera de los docblocks del cerco de privacidad, que hablan de
+**tachar** rutas de cliente, no de declarar dueño. `Project` tiene 20 campos y
+ninguno lo declara.
+
+**Consecuencia sobre la Pieza 3.** Retirar la correa hoy abriría Bash libre
+sobre **todo** proyecto `trusted`, cliente incluido, y la **regla puente del §6
+quedaría en papel justo donde más falta**: `gate-env.ts:32-36` deja constancia
+de que el proceso *«ve el disco entero: puede leer `~/.ssh`, `~/.aws` o lo que
+haya»*. El `postinstall` de un cliente correría en la máquina donde vive el
+código de otro. La Pieza 1 haría que **quedara registrado qué corrió** — pero
+**registrar no es impedir**.
+
+**DECISIÓN: la Pieza 3 queda BLOQUEADA hasta ADR-094**, la frontera de dueño.
+
+**Por qué esto NO viola el §9** *(«este ADR se cumple entero o no se cumple»)*.
+Esa cláusula prohíbe **la Pieza 3 sin las otras dos** — abrir sin recibo y sin
+juez. No prohíbe lo contrario. Las piezas 1 y 2 instaladas **sin** la 3 dejan el
+sistema estrictamente mejor que antes: el recibo registra qué corrió y OMEGA ve
+lo que el agente crea, **con la correa todavía puesta**. Es el único orden
+parcial que es seguro, y es justo el que el §9 protegía.
+
+| Pieza | Estado |
+|---|---|
+| 1 · Recibo entero | **CUMPLIDA** — gate 5/5 |
+| 2 · Juez completo | **CUMPLIDA** — gate 5/5 |
+| 3 · Bash libre | **BLOQUEADA** — espera a ADR-094 |
+
+**Lo que esto enseña, y por lo que se escribe entero.** El §5.4 se firmó
+diciendo *«nombrado, no resuelto»* en vez de fingir que estaba resuelto. Esa
+frase es la que hizo que alguien fuera a mirar antes de borrar la correa, en
+lugar de descubrirlo con Bash libre ya abierto sobre el código de un cliente.
+**Un hilo nombrado es un hilo que alguien tira.** Uno silenciado es un agujero
+con fecha.
+
+Y deja ver el orden real del terreno, que nadie había visto: **la frontera de
+dueño no es una dependencia de Bash libre — es la raíz de la que cuelgan los
+dos arcos que quedaban.** ADR-094 la define; ADR-092 la necesita para saber qué
+aislar; el arco de privacidad la necesita para saber qué tachar y qué no. Era la
+pieza que los otros dos daban por construida.
+
 ---
 
 ## 6. REGLA PUENTE — se mantiene y se endurece
@@ -530,6 +604,8 @@ limita lo que se puede hacer; una frontera es saber qué se hizo y dónde).
 
 - **El sandbox.** Es ADR-092, su propio arco. No se construye aquí.
 - **Resolver la deuda de `trusted`.** Queda nombrada en §5.4, no resuelta.
+  *(Enmienda 18-sep: medida y elevada a **ADR-094**, la frontera de dueño, que
+  además bloquea la Pieza 3 de este ADR. Ver la enmienda del §5.4.)*
 - **Bash libre sobre código de cliente en autónomo.** Espera al ADR-092; hasta
   entonces rige la regla puente del §6.
 - **Las Fases B y C de ADR-090** (debate por roles opuestos, paralelo por
