@@ -11,6 +11,14 @@
   **no es maquinaria nueva sino una inversión de encargo** — y que el sistema no
   es que carezca de debate: **está instruido para impedirlo**.
 
+> ### ⚠ ENMIENDA 1 — 2026-09-18: el debate es PARALELO
+>
+> **Este documento se firmó describiendo un debate SECUENCIAL.** La decisión de
+> la arquitectura paralela llegó **después de la firma**. El cuerpo original se
+> conserva entero; la **§11 lo corrige**, y las secciones afectadas llevan su
+> aviso. **Ninguna descripción secuencial de abajo está vigente**: §1.4, §2,
+> §4.3, §4.4, §5.1, §5.4, §6, §7.1 y §8 se leen a través de la §11.
+
 ---
 
 ## §0 — La ley aplicable
@@ -242,6 +250,9 @@ detrás.
 
 ### 4.3 La decisión
 
+> **ENMIENDA 1 (§11.4):** el principio no cambia; la UNIDAD sí. OMEGA puntúa
+> **tras leer todas las objeciones de la tanda**, no ronda a ronda.
+
 La huella de convergencia del debate se compone **SOLO de lo que el modelo elige
 de listas cerradas**:
 
@@ -272,6 +283,10 @@ lo que decide cuándo un debate ha terminado.
 ## 5. Lo que se construye, y lo que se invierte
 
 ### 5.1 De cero — las RONDAS
+
+> **ENMIENDA 1 (§11.1):** el ciclo de abajo es SECUENCIAL y **no está vigente**.
+> El debate corre en PARALELO: productor + N críticos a la vez, sin verse entre
+> sí, y OMEGA arbitra. «Ronda» es **tanda paralela**.
 
 Hoy `runWorkflow` es **pasada única**: `for (const [index, step] of
 plan.active.entries())` (`run-workflow.ts:47`), sin bucle externo ni concepto de
@@ -349,7 +364,9 @@ sin arreglar el debate.
 
 ## 6. Lo que NO está en este ADR
 
-- **La Fase C** (paralelo por severidad, ADR-090 §2). Otro arco.
+- ~~**La Fase C** (paralelo por severidad, ADR-090 §2). Otro arco.~~
+  **ENMIENDA 1 (§11.2): FUSIONADA aquí.** El paralelismo por severidad nace
+  dentro del debate; no hay Fase C posterior.
 - **Bash libre** (ADR-093 Pieza 3): sigue bloqueada por ADR-092.
 - **El aislamiento entre proyectos**: ADR-095 y ADR-092.
 - **Tocar `computeGlobalVerdict`**: la Decisión 1 existe precisamente para no
@@ -360,6 +377,11 @@ sin arreglar el debate.
 ## 7. La estructura del debate y sus estados
 
 ### 7.1 El tope: una FRONTERA de dos tandas, no un contador
+
+> **ENMIENDA 1 (§11.9):** la ESTRUCTURA se mantiene; **el NÚMERO no está
+> vigente**. «Ronda» pasa a ser **tanda paralela**, y el «5» se eligió para un
+> crítico secuencial. Pendiente de que el operador lo cierre con la aritmética
+> del §11.6 y los topes del §11.7 delante.
 
 La convergencia del §4.3 corta el caso normal: cuando el juicio deja de moverse,
 se cierra. **Pero no acota el caso patológico** — tres agentes que se mueven un
@@ -443,6 +465,158 @@ Por eso el azul entra **como token del catálogo** (§5.2, patrón
 `graph-tones.ts:4-10`) y **nunca como color escrito a mano**: CLAUDE.md es
 explícito —*«Nunca colores hardcodeados. Siempre tokens»*— y un estado de
 proceso no es excusa para saltárselo.
+
+---
+
+## 11. ENMIENDA 1 — 2026-09-18: el debate es PARALELO, por severidad, y aprende
+
+*Todo lo de arriba se conserva como se firmó. Esta enmienda lo corrige. La
+decisión llegó **después** de la firma: el cuerpo no se equivocó, describía lo
+que se había decidido hasta entonces.*
+
+### 11.1 Orquestación — PARALELA, y los críticos no se ven entre sí
+
+**Productor + N críticos a la vez** (`Promise.all`), **no** el `for...of`
+secuencial que §1.4 marcaba como «SE REUSA».
+
+**Los críticos NO se leen entre sí.** Es un **tribunal, no un coro**. Cada uno
+ataca el fix por su cuenta y entrega su objeción; **OMEGA es el único que lee
+todas las voces juntas** y arbitra.
+
+**Por qué esa separación es el corazón del arco.** Si los críticos se leyeran
+entre sí, convergerían — y convergerían en coro, que es exactamente lo que
+ADR-091 §0 rechaza:
+
+> *«Son el mismo `claude -p` con Opus, con el mismo sesgo, repetido: trece
+> copias cometen los mismos errores trece veces, en coro.»*
+
+**Lo que multiplica no es el número: es que las voces sigan siendo distintas.**
+Un tribunal que delibera entre sí antes de votar produce **una** opinión con
+apariencia de cinco. El desacuerdo se preserva porque **quien arbitra es OMEGA,
+no los críticos**.
+
+### 11.2 N por severidad — las Fases B y C se FUSIONAN
+
+| Severidad | Tribunal |
+|---|---|
+| CRITICAL / HIGH | **grande** — varios críticos simultáneos |
+| MEDIUM / LOW | **uno o pocos** |
+
+**El coste escala con el riesgo**, que es la forma correcta de gastar: un LOW no
+merece el mismo tribunal que un CRITICAL.
+
+**Corrige el §6.** Allí se lee *«La Fase C (paralelo por severidad, ADR-090 §2).
+Otro arco.»* — **ya no.** El paralelismo por severidad nace **dentro** del
+debate; **no hay una Fase C posterior separada**. B y C son un solo arco.
+
+### 11.3 Aprende entre tandas — cada crítico su línea, OMEGA todas
+
+- **Cada crítico se reanuda con `--resume`** y recuerda **SU PROPIA línea**: su
+  objeción anterior y cómo la respondió el productor. Afina **su** ataque tanda
+  tras tanda.
+- **Nunca ve lo que dijeron los otros críticos.** Ni en esta tanda ni en las
+  anteriores.
+- **OMEGA sí lo ve todo**, y es el único.
+
+Es la forma de **aprender sin fundir las voces**: el productor responde a N
+frentes que **siguen siendo N**, tanda tras tanda, en vez de a un frente único
+que se formó por contagio.
+
+### 11.4 Convergencia — corrige §4.3 y §4.4
+
+**El principio no cambia**: la huella se compone solo de **campos que el modelo
+no redacta** — los cinco ejes de OMEGA (vocabulario cerrado) **+ la huella del
+diff**. La prosa sigue viajando como contexto y **no entra en la huella**.
+
+**Lo que cambia es la unidad.** Donde §4.3 dice *«Un fix idéntico que OMEGA
+ahora puntúa distinto es progreso»* comparando **ronda con ronda**, léase:
+
+> **OMEGA puntúa tras leer TODAS las objeciones de la tanda.** Si el diff y los
+> cinco ejes se repiten **entre tanda y tanda**, el debate da vueltas y cierra.
+> Si cambia cualquiera, avanzó.
+
+Y funciona **mejor** en paralelo, no peor: los cinco ejes **ya absorben todas las
+objeciones a la vez**, porque OMEGA las puntúa juntas. No hace falta una huella
+por crítico.
+
+### 11.5 La Decisión 1 — corrige §2
+
+Donde §2 dice *«la objeción del crítico»* en singular, léase **«las objeciones
+de los críticos, que OMEGA lee juntas»**. La Decisión 1 no cambia: el debate
+sigue siendo **entrada al juicio**, no eje del veredicto, y `computeGlobalVerdict`
+sigue intacto (D19).
+
+El campo nuevo en `juzgar()` pasa de ser una objeción a ser **una lista de
+objeciones**. Sigue siendo aditivo.
+
+### 11.6 El coste — corrige §8, y es la parte que duele
+
+§8 decía *«el turno cuesta al menos el triple»*. **Ese cálculo era del mundo
+secuencial con un crítico.** La aritmética real, medida sobre `agent_runs` en la
+base del operador (solo corridas facturadas), es otra:
+
+| Agente | Coste medio | Duración | n |
+|---|---|---|---|
+| `security-reviewer` (navega el repo) | **$16.93** | 32 min | 22 |
+| `productor` | $2.67 | 10 min | 16 |
+| `sentinel-omega` (**no** navega) | **$0.52** | 83 s | 26 |
+
+**La diferencia entre $16.93 y $0.52 es navegar o no navegar.** Y ADR-090 §2
+**exige** que el crítico navegue: *«un crítico que no puede leer el resto del
+código no es un crítico: es un corrector de estilo»*. Por tanto **el crítico
+cuesta del orden de `security-reviewer`, no de OMEGA.**
+
+Una **tanda** = productor + N críticos + OMEGA:
+
+| N críticos | Coste por tanda | × 5 tandas | × 2 intentos |
+|---|---|---|---|
+| 1 (LOW) | ~$20 | ~$101 | **~$201** |
+| 3 (HIGH) | ~$54 | ~$270 | **~$540** |
+| 5 (CRITICAL) | ~$88 | ~$439 | **~$878** |
+
+**Por UN hallazgo.**
+
+### 11.7 Y choca con los topes que ya existen
+
+Medido en `settings` de la base: **`budget_per_run_usd = 50`** y
+**`budget_per_day_usd = 500`**.
+
+- Una tanda con **3 críticos (~$54) ya excede el tope por corrida**.
+- Un solo CRITICAL agotado hasta el final (**~$878**) **supera el tope diario
+  entero**, con un único hallazgo.
+
+**El tope de tandas no es la primera frontera que se encuentra el debate: el
+presupuesto llega antes.** Cualquier número que se fije en §7.1 tiene que
+convivir con estos dos, o serán los topes quienes decidan el debate en silencio.
+
+### 11.8 Lo que el paralelo SÍ mejora: el reloj
+
+Bajo credencial de suscripción, el dólar es nocional pero **el consumo es real**,
+y se paga en **tiempo**. Ahí el paralelo gana:
+
+- **Secuencial**, 5 críticos: 5 × 32 min = **~2,7 h por tanda**.
+- **Paralelo**, 5 críticos: **~32 min por tanda** — lo que tarde el más lento.
+
+**El paralelismo no multiplica el reloj; multiplica el consumo.** Es la
+arquitectura correcta para el tiempo del operador, y la cara para la cuota.
+
+### 11.9 El tope del §7.1 — PENDIENTE de que el operador lo cierre
+
+Todo lo demás del §7.1 **se mantiene**: frontera y no freno, reprogramación
+fresca una vez, y la admisión honesta de que hay decisiones que ningún debate
+técnico resuelve. **Solo cambia la unidad —ronda → tanda paralela— y el
+número.**
+
+**El «5» NO se hereda.** Se eligió para un mundo de un crítico secuencial;
+arrastrarlo a una aritmética donde una tanda dispara hasta seis agentes sería
+exactamente la cita heredada que esta sesión aprendió a no dar por buena.
+
+Con la aritmética del §11.6 y los topes del §11.7 delante, el operador decide si
+**5 tandas valen para todos los niveles**, o si **el tope se mide distinto por
+severidad** —o directamente **por presupuesto**, que es una frontera medible y
+no un número inventado (§7.1, salida 3).
+
+**Hasta que lo cierre, el número del §7.1 no está vigente.**
 
 ---
 
