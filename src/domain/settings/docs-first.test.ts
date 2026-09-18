@@ -6,7 +6,10 @@ describe('categoryForAgent', () => {
   it('manda a las decisiones firmadas a quien decide donde va un cambio', () => {
     // El productor del Terminal (ADR-088) escribe el arreglo: sin las decisiones
     // firmadas podria deshacer algo deliberado al cerrar un hallazgo.
-    for (const id of ['planner', 'refactor-cleaner', 'code-simplifier', 'productor'] as const) {
+    // El critico (ADR-096) tambien: sin las firmadas denunciaria como defecto lo
+    // que un ADR decidio a proposito — el falso positivo que su carta prohibe.
+    // prettier-ignore
+    for (const id of ['planner', 'refactor-cleaner', 'code-simplifier', 'productor', 'critico'] as const) {
       expect(categoryForAgent(id)).toBe('structural')
     }
   })
@@ -31,7 +34,7 @@ describe('categoryForAgent', () => {
   it('cada agente del catalogo cae en una de las tres, y ninguna otra', () => {
     // Si manana entra un agente nuevo al catalogo, este caso obliga a decidir
     // su documentacion en vez de dejarlo caer al default sin pensarlo.
-    expect(AGENT_IDS).toHaveLength(13)
+    expect(AGENT_IDS).toHaveLength(14)
     for (const id of AGENT_IDS) {
       expect(['security', 'structural', 'general']).toContain(categoryForAgent(id))
     }
