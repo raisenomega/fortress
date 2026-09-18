@@ -6,8 +6,15 @@ import type { CorpusCategory } from '../project/corpus-descriptor'
  * ya firmadas pueden borrar o "simplificar" algo que es deliberado. El productor
  * del Terminal (ADR-088) es el que escribe el arreglo: lo mismo le aplica.
  */
+/**
+ * El CRITICO (ADR-096) entra aqui aunque no cambie nada, y es por su encargo:
+ * su carta le prohibe inventar fallos, y la unica forma de saber que algo es
+ * DELIBERADO —y no un defecto— son las decisiones firmadas del proyecto. Un
+ * critico sin ellas denunciaria como bug lo que un ADR decidio a proposito, que
+ * es justo el ruido que se le prohibe producir.
+ */
 // prettier-ignore
-const STRUCTURAL: ReadonlySet<AgentId> = new Set(['planner', 'refactor-cleaner', 'code-simplifier', 'productor'])
+const STRUCTURAL: ReadonlySet<AgentId> = new Set(['planner', 'refactor-cleaner', 'code-simplifier', 'productor', 'critico'])
 
 /**
  * Quienes emiten juicio sobre lo que se protege o sobre lo que se publica.

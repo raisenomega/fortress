@@ -9,7 +9,9 @@ import { MODELO_DEL_PRODUCTOR } from './escalera-de-modelos'
  * ajuste". Cambiar con que modelo juzga el Security Reviewer no es un ajuste.
  *
  * El productor del Terminal NO esta aqui: su nivel no es un literal sino el de
- * la escalera (ADR-088, Enmienda 2), y fijarlo en esta tabla lo congelaria.
+ * la escalera (ADR-088, Enmienda 2), y fijarlo en esta tabla lo congelaria. El
+ * CRITICO del debate (ADR-096) tampoco, y por lo mismo: su modelo tambien sale
+ * de la escalera, porque un critico mas barato que el productor aprobaria.
  */
 const REPARTO: Readonly<Record<string, string>> = {
   'security-reviewer': 'opus',
@@ -26,8 +28,11 @@ const REPARTO: Readonly<Record<string, string>> = {
   'scope-classifier': 'haiku'
 }
 
-const FIJOS = AGENT_IDS.filter((id) => id !== 'productor')
-const DEL_REPARTO = AGENT_CATALOG.filter((agent) => agent.id !== 'productor')
+/** Los dos que derivan su modelo de la escalera quedan fuera de la tabla. */
+const POR_ESCALERA: ReadonlySet<string> = new Set(['productor', 'critico'])
+
+const FIJOS = AGENT_IDS.filter((id) => !POR_ESCALERA.has(id))
+const DEL_REPARTO = AGENT_CATALOG.filter((agent) => !POR_ESCALERA.has(agent.id))
 
 const cuenta = (modelo: string): number =>
   DEL_REPARTO.filter((agent) => agent.model === modelo).length
@@ -55,8 +60,10 @@ describe('cada agente declara con que modelo corre', () => {
     expect(Object.keys(REPARTO).sort()).toEqual([...FIJOS].sort())
   })
 
-  it('el productor no esta en el reparto: declara el modelo que le da la escalera', () => {
+  it('los de la escalera no estan en el reparto: declaran el modelo que ella les da', () => {
     expect(REPARTO.productor).toBeUndefined()
+    expect(REPARTO.critico).toBeUndefined()
+    expect(findAgent('critico')?.model).toBe(MODELO_DEL_PRODUCTOR)
     expect(findAgent('productor')?.model).toBe(MODELO_DEL_PRODUCTOR)
   })
 })

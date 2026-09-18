@@ -27,8 +27,19 @@ export interface NewAgentRun {
    * que salio gratis. La corrida se asienta igual, y su duracion con ella.
    */
   readonly usage?: TokenUsage
-  /** Herramientas usadas, en orden de uso. */
+  /** Herramientas usadas, en orden de uso. NOMBRES: es lo que FORTRESS aprende. */
   readonly tools: readonly string[]
+  /**
+   * El RECIBO (ADR-093 §3): que corrio cada herramienta, no solo cual se uso.
+   * Llega SIN tachar y se tacha en la ultima puerta antes del disco
+   * (`toRunInsert`), nunca por el camino: un tachado que dependa de quien llama
+   * se salta enhebrando por otro lado.
+   *
+   * Opcional a proposito. Una corrida sin recibo es una corrida de la que no se
+   * capturo —un motor viejo, un fixture—, y eso es `null` en la columna: «no lo
+   * se», que no es lo mismo que «no corrio nada».
+   */
+  readonly recibo?: readonly string[]
 }
 
 /**

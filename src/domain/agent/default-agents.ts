@@ -1,4 +1,5 @@
 import type { Agent } from './agent'
+import { CRITICO } from './critico'
 import { PRODUCTOR } from './productor'
 import { SENTINEL_OMEGA } from './sentinel-omega'
 
@@ -54,5 +55,6 @@ export const DEFAULT_AGENTS: readonly Agent[] = [
     model: 'opus'
   },
   SENTINEL_OMEGA,
-  PRODUCTOR
+  PRODUCTOR,
+  CRITICO
 ]

@@ -24,6 +24,7 @@ export function singleAgentOutcome(
     failed: reply.failed,
     usage: reply.usage,
     tools: reply.tools,
+    recibo: reply.recibo,
     edits: reply.edits,
     agents: [agentId],
     runs: [
@@ -32,7 +33,8 @@ export function singleAgentOutcome(
         usage: reply.usage,
         failed: reply.failed,
         durationMs: Date.now() - startedAt,
-        tools: reply.tools
+        tools: reply.tools,
+        recibo: reply.recibo
       }
     ],
     findings: [],

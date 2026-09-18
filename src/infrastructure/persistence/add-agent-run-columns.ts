@@ -22,8 +22,13 @@ import type { Db } from './database'
  *
  * Sigue haciendo falta: una base anterior a la bandera no la tiene, y el
  * recambio no la anadiria —copia lo comun, no inventa columnas—.
+ *
+ * `recibo` (ADR-093 §3.3) es la segunda, y por las MISMAS razones: nullable
+ * porque `NULL` es «de esta corrida no se capturo» —distinto de «no corrio
+ * nada»—, sin relleno hacia atras porque inventarlo seria mentir, y aqui ademas
+ * de en `AGENT_RUNS_COLUMNS` para que toda base llegue igual al recambio.
  */
-const COLUMNS = ['usage_known INTEGER']
+const COLUMNS = ['usage_known INTEGER', 'recibo TEXT']
 
 function has(db: Db, column: string): boolean {
   const rows = db.pragma('table_info(agent_runs)') as { name: string }[]

@@ -252,6 +252,52 @@ nada que tachar. **Ahora lo llevará.**
 Esta decisión es **innegociable**: ninguna de las otras dos piezas se instala si
 esta no está puesta primero.
 
+### 3.5 Decisión (d) — INNEGOCIABLE: el recibo es LOCAL. No viaja a auto-mejora
+
+*Añadida el 2026-09-18 al construir la Pieza 1. El §3.4 la rozó sin nombrarla, y
+la nombró el propio dominio.*
+
+`code-agent.ts:36-47` ya tiene **exactamente este reparto**, escrito antes que
+este ADR:
+
+```ts
+/** Operaciones que el agente quiso hacer y el modo de permisos bloqueo. Es la
+ *  nota de TRANSPARENCIA: lleva el comando, que el operador necesita leer. */
+readonly denials: readonly string[]
+/** Los NOMBRES de esas herramientas, sin comando. Es de lo que FORTRESS
+ *  aprende (ADR-085): generico, agrupable y sin codigo del cliente dentro. */
+readonly deniedTools?: readonly string[]
+...
+/** Rutas que el agente escribio. Nunca comandos: pueden llevar secretos. */
+readonly edits: readonly string[]
+```
+
+**Dos destinos con dos permisos distintos.** Lo que el operador lee lleva el
+comando; lo que FORTRESS aprende lleva solo el nombre. El recibo es de la
+primera clase, y por tanto:
+
+- El recibo entero vive **donde el operador lo lee** — su fila en `agent_runs`.
+- **No entra en el camino de auto-mejora**: ni en `chatActivity`, ni en
+  observaciones, ni en ningún export. Ahí siguen viajando **solo nombres**.
+- `tools` **no se contamina**: sigue siendo la lista de nombres de la que
+  FORTRESS aprende. El recibo va en columna aparte, y por eso va aparte.
+
+**Por qué es innegociable y no una preferencia.** Un comando de un proyecto de
+cliente que entrara al backlog de auto-mejora **cruzaría el cerco de ADR-085 y
+saldría de la máquina** en el export. Es la misma fuga que el arco de privacidad
+de `auto-mejora.json` dejó abierta, y abrirla por aquí sería peor: allí se
+escapan `sourceProject` y prosa; aquí se escaparían **comandos ejecutados sobre
+código ajeno**.
+
+**Verificado al instalarlo** (2026-09-18): `chat-activity.ts` consume del
+`ReplyOutcome` únicamente `outcome.edits` —rutas— y el prompt tachado. El recibo
+llega solo a `recordChatRun` → `runs.record` → la fila. Ningún otro camino lo
+toca.
+
+Este ADR **conecta con el arco de privacidad pendiente**: cuando ese arco se
+escriba, esta decisión ya es su primera regla — *el recibo entero es local, y no
+viaja a ningún export*.
+
 ---
 
 ## 4. PIEZA 2 — El diff completo
@@ -327,6 +373,68 @@ invariante del §4.2.
 modifica—, no `trabajo-del-turno.ts`. El fichero tiene hoy 48 líneas: cabe bajo
 el límite de 75 sin partirlo.
 
+### ENMIENDA — 2026-09-18: la decisión cubría UN campo y el diagnóstico eran DOS
+
+*El §4.1 y el §4.4 de arriba se conservan como se firmaron. Esta enmienda los
+corrige, y se escribió **antes** de tocar `src/`, al medir la pieza.*
+
+**Lo que el §4.1 diagnosticó**, correctamente:
+
+> *«Un fichero que el agente CREA no aparece ni en `tocados` **ni en
+> `diffText`**»*
+
+**Lo que el §4.4 decidió**: *«unir su salida a `tocados`»*. **Un solo campo.**
+Diagnostiqué dos y decidí sobre uno.
+
+**Lo que esa omisión dejaba abierto.** `diffText` no es un campo decorativo: de
+él sale la huella de convergencia.
+
+- `juez-del-turno.ts:57` — `createHash('sha1').update(trabajo.diffText)`
+- `ciclo-de-convergencia.ts:60-61` — `if (vistos.has(v.huella)) return { convergio: false }`
+
+Con solo `tocados` arreglado, **un reintento cuyo único cambio viva en un
+fichero nuevo daría una huella idéntica a la del intento anterior**, y el ciclo
+lo leería como *«está dando vueltas»*: cerraría sin resolver un turno que sí
+avanzó. Se habría conseguido que OMEGA mirase el fichero nuevo y, a la vez, que
+el ciclo mandase al productor a casa por vago. **Medio arreglo que introduce una
+incoherencia nueva.**
+
+Son **dos agujeros del mismo origen**, y el segundo es el grave:
+
+| Campo | Qué rompía | Dónde |
+|---|---|---|
+| `tocados` | un turno que solo crea ficheros sale **SIN_JUZGAR** | `juez-del-turno.ts:39` |
+| `diffText` | la **huella no se mueve** aunque el fichero nuevo cambie entero | `juez-del-turno.ts:57` |
+
+**Corrección:** la pieza cubre **los dos campos**. El **nombre** va a `tocados`;
+el **contenido** del fichero creado va a `diffText`, con forma de alta. El
+contenido y no solo el nombre: con el nombre a secas, dos versiones distintas
+del mismo fichero nuevo volverían a dar la misma huella — la misma ceguera, más
+sutil.
+
+**INNEGOCIABLE DE MÉTODO.** La sección se compone a mano y **nunca con
+`git add -N`** ni ningún comando que mute el índice. Daría un diff nativo, pero
+el checkpoint dejó ahí el WIP del operador stageado a propósito
+(`checkpoint-transitorio.ts:43-45`), y tocarlo arriesga `conservar()` y
+`revertir()` — la red entera del ADR-079. **Nunca se cambia el estado de git
+para mejorar un formato de lectura.**
+
+**Alcance verificado.** Los únicos consumidores de `diffText` son
+`juez-del-turno.ts:43` (lo que se le pasa a OMEGA) y `:57` (la huella). El
+`repair-deps.ts:57` del Motor usa otro camino —`showHead`— y **no se toca**.
+
+**El invariante del §4.2, medido y no asumido.** `leerTrabajo` tiene un único
+llamador de producción, `red-de-reversion.ts:26-28`:
+
+```ts
+const cp = abrirCheckpoint(cwd)
+return cp === null ? null : { ...cp, diff: () => leerTrabajo(cwd, cp.sha) }
+```
+
+Si el checkpoint no abrió **no existe un `diff()` que devuelva datos malos: no
+existe `diff()`**. No hace falta guarda — el WIP untracked del operador no puede
+colarse, porque sin `add -A` previo no hay a quién preguntárselo.
+
 ---
 
 ## 5. PIEZA 3 — Bash libre
@@ -389,6 +497,143 @@ Este ADR **lo dice y no lo frena**: nombrarlo es la mitad honesta; resolverlo es
 otro arco. Lo que no se admite es abrir sin dejarlo escrito, que es cómo un hilo
 se convierte en un agujero.
 
+### ENMIENDA — 2026-09-18: el hilo `trusted` se cobró la Pieza 3
+
+*El §5 y el §5.4 de arriba se conservan como se firmaron. Esta enmienda los
+corrige, y se escribió **antes** de tocar `src/`, al medir la frontera.*
+
+**Lo que el §5.4 dijo:** que Bash libre cuelga de `trusted`, que hay deuda
+abierta sobre si `trusted` defiende, y que este ADR *«lo dice y no lo frena»*.
+
+**Lo que la medición del 18-sep encontró:** no es que `trusted` defienda mal.
+Es que **la frontera no existe en código**.
+
+`project.ts:33-36` dice qué significa `trusted`, con sus palabras:
+
+> *«Proyecto de confianza. Por defecto false: un repo no confiable NUNCA
+> auto-ejecuta sus scripts. Solo si es true el agente puede autoverificarse
+> (typecheck/lint/test), porque `npm run X` corre codigo del propio repo.»*
+
+Y `confianza.ts:19-21` es literalmente un campo:
+
+```ts
+export function ejecutaConConfianza(project) {
+  return project?.trusted === true
+}
+```
+
+**`trusted` significa «el operador dejó que este repo ejecute sus scripts». NO
+significa «este código es de Jojo».** Un proyecto de cliente marcado `trusted`
+—que es exactamente para lo que la marca existe— es hoy indistinguible de uno
+propio.
+
+Las tres puertas de `effectiveMode` (`modo-efectivo.ts:57-62`) son `selfRepo`,
+`ejecutaConConfianza` y `redGit`: *es el repo de FORTRESS*, *puede ejecutar*,
+*hay checkpoint*. **Ninguna es «de quién es el código».** Búsqueda de
+`owner` / `propietario` / `cliente` / `dueño` en `domain/` y `application/`:
+cero aciertos fuera de los docblocks del cerco de privacidad, que hablan de
+**tachar** rutas de cliente, no de declarar dueño. `Project` tiene 20 campos y
+ninguno lo declara.
+
+**Consecuencia sobre la Pieza 3.** Retirar la correa hoy abriría Bash libre
+sobre **todo** proyecto `trusted`, cliente incluido, y la **regla puente del §6
+quedaría en papel justo donde más falta**: `gate-env.ts:32-36` deja constancia
+de que el proceso *«ve el disco entero: puede leer `~/.ssh`, `~/.aws` o lo que
+haya»*. El `postinstall` de un cliente correría en la máquina donde vive el
+código de otro. La Pieza 1 haría que **quedara registrado qué corrió** — pero
+**registrar no es impedir**.
+
+**DECISIÓN: la Pieza 3 queda BLOQUEADA hasta ADR-094**, la frontera de dueño.
+*(Corregido por la ENMIENDA 2, abajo: no es ADR-094 ni frontera de dueño — es
+**ADR-092, el sandbox**. No hay campo de dueño ni clasificación de proyectos.)*
+
+**Por qué esto NO viola el §9** *(«este ADR se cumple entero o no se cumple»)*.
+Esa cláusula prohíbe **la Pieza 3 sin las otras dos** — abrir sin recibo y sin
+juez. No prohíbe lo contrario. Las piezas 1 y 2 instaladas **sin** la 3 dejan el
+sistema estrictamente mejor que antes: el recibo registra qué corrió y OMEGA ve
+lo que el agente crea, **con la correa todavía puesta**. Es el único orden
+parcial que es seguro, y es justo el que el §9 protegía.
+
+| Pieza | Estado |
+|---|---|
+| 1 · Recibo entero | **CUMPLIDA** — gate 5/5 |
+| 2 · Juez completo | **CUMPLIDA** — gate 5/5 |
+| 3 · Bash libre | **BLOQUEADA** — espera a **ADR-092, el sandbox** (ver ENMIENDA 2) |
+
+**Lo que esto enseña, y por lo que se escribe entero.** El §5.4 se firmó
+diciendo *«nombrado, no resuelto»* en vez de fingir que estaba resuelto. Esa
+frase es la que hizo que alguien fuera a mirar antes de borrar la correa, en
+lugar de descubrirlo con Bash libre ya abierto sobre el código de un cliente.
+**Un hilo nombrado es un hilo que alguien tira.** Uno silenciado es un agujero
+con fecha.
+
+Y deja ver el orden real del terreno, que nadie había visto: **la frontera de
+dueño no es una dependencia de Bash libre — es la raíz de la que cuelgan los
+dos arcos que quedaban.** ADR-094 la define; ADR-092 la necesita para saber qué
+aislar; el arco de privacidad la necesita para saber qué tachar y qué no. Era la
+pieza que los otros dos daban por construida.
+
+### ENMIENDA 2 — 2026-09-18: no era una frontera de dueño. Era el sandbox.
+
+*La enmienda anterior se conserva entera. Esta la corrige, y descarta el ADR-094
+que aquella proponía.*
+
+**Lo que la enmienda anterior concluyó bien:** que `trusted` no distingue de
+quién es el código, y que por eso la Pieza 3 no podía construirse. Eso sigue
+medido y sigue en pie.
+
+**De dónde saltó mal:** de ahí dedujo que hacía falta **declarar el dueño** —un
+campo nuevo, un ADR-094, una casilla que marcar por proyecto—. Eso es **una
+complicación equivocada, y contradice lo que FORTRESS es**: la herramienta se
+apunta a un proyecto y trabaja. Pedirle al operador que clasifique de quién es
+cada código es **fricción administrativa ajena al propósito del producto**, y
+además una defensa que depende de que alguien se acuerde de marcar.
+
+**El problema real, releído.** No es *«de quién es este código»*. Es que un
+proceso en autónomo **ve el disco entero** — `gate-env.ts:32-36`, que ya lo
+decía y que esta enmienda anterior citó sin extraer la conclusión correcta:
+
+> *«LIMITE, que conviene no confundir: esto ACOTA EL ENTORNO, no encierra al
+> proceso. El codigo del repo sigue corriendo con el usuario y ve el disco
+> entero: puede leer `~/.ssh`, `~/.aws` o lo que haya. […] Contener de verdad
+> exige un sandbox, y eso es otra pieza de otro tamano.»*
+
+Saber de quién es un proyecto **no impide** que su `postinstall` lea el de al
+lado. Solo permitiría *decidir a quién dejamos hacerlo*. **Eso es clasificar el
+riesgo, no quitarlo.** Lo que lo quita es el aislamiento.
+
+**CORRECCIÓN, y decisión:**
+
+- **NO hay campo de dueño. NO hay clasificación de proyectos. NO hay ADR-094.**
+  Queda descartado con su razón escrita, para que nadie lo reviva: clasificar
+  dueños es fricción administrativa ajena al propósito de FORTRESS, y una
+  defensa que se olvida no es una defensa.
+- FORTRESS sigue siendo **indiferente a la propiedad del código**: se añade un
+  proyecto igual que hoy y trabaja, sin nada nuevo que marcar.
+- **La Pieza 3 (Bash libre) queda BLOQUEADA hasta ADR-092 — el sandbox— que es
+  su ÚNICA dependencia.** Aislamiento estricto end-to-end: cada proyecto en su
+  caja, sin poder ver ni tocar otro. Automático e invisible para quien lo usa.
+
+**La regla puente del §6, reformulada.** Su contenido operativo no cambia; su
+**razón** sí, y la razón es lo que decide cuándo cae:
+
+| | Antes (§6) | Ahora |
+|---|---|---|
+| Por qué espera | *porque el código es de un cliente* | **porque sin aislamiento un proceso ve el disco entero** |
+| Qué la levanta | saber de quién es cada proyecto | **el sandbox de ADR-092** |
+| Después | libre solo sobre lo propio | **libre sobre cualquier proyecto de confianza** |
+
+Con el sandbox, el aislamiento garantiza que un proyecto **no toca otro**, y esa
+garantía **no depende de quién sea el dueño** — que es justo lo que la hace
+sólida. La ley §0 se cumple entera sin que nadie tenga que etiquetar nada.
+
+**Lo que esto enseña.** La medición fue correcta; la conclusión que le colgué,
+no. Medir bien y concluir mal se parece mucho a acertar, y es la equivocación
+más cara de detectar — porque los datos que la sostienen son de verdad. Aquí la
+pista estaba en la propia cita: `gate-env.ts` decía *«contener de verdad exige
+un sandbox»* y yo la usé para argumentar un campo. **La respuesta llevaba tres
+párrafos citada en el mismo documento.**
+
 ---
 
 ## 6. REGLA PUENTE — se mantiene y se endurece
@@ -416,12 +661,24 @@ ADR-092.
 Es una **frontera provisional, no un freno a la ley** (ADR-090 §3: un freno
 limita lo que se puede hacer; una frontera es saber qué se hizo y dónde).
 
+> **ENMIENDA 2 — 2026-09-18.** Lo de arriba se conserva como se firmó, y lo que
+> *hace* no cambia: en autónomo, Bash libre espera. Cambia **por qué**, y eso
+> decide cuándo cae. No espera porque el código sea de un cliente —FORTRESS no
+> clasifica proyectos ni va a hacerlo— sino porque **sin aislamiento un proceso
+> ve el disco entero** (`gate-env.ts:32-36`). Por tanto no la levanta saber de
+> quién es cada proyecto: la levanta **el sandbox de ADR-092**, y cuando lo
+> haga, Bash libre vale sobre **cualquier** proyecto de confianza. Detalle
+> completo en la ENMIENDA 2 del §5.4.
+
 ---
 
 ## 7. Lo que NO está en este ADR
 
 - **El sandbox.** Es ADR-092, su propio arco. No se construye aquí.
 - **Resolver la deuda de `trusted`.** Queda nombrada en §5.4, no resuelta.
+  *(Enmienda 18-sep: medida — la frontera de dueño **no existe** en código. Y
+  ENMIENDA 2 del mismo día: tampoco hace falta. No se clasifica al dueño; lo
+  que la Pieza 3 necesita es el **aislamiento de ADR-092**. Ver §5.4.)*
 - **Bash libre sobre código de cliente en autónomo.** Espera al ADR-092; hasta
   entonces rige la regla puente del §6.
 - **Las Fases B y C de ADR-090** (debate por roles opuestos, paralelo por

@@ -10,6 +10,12 @@
  * reves: el recambio copia por NOMBRE, y esta constante vuelve a ser la unica
  * verdad de como es la tabla.
  *
+ * `recibo` es la columna del ADR-093 §3.3: QUE corrio cada herramienta, no solo
+ * cual. Va APARTE de `tools` y no dentro, porque `tools` es una lista unida por
+ * comas y un comando lleva comas; y es NULLABLE porque `null` significa «de esta
+ * corrida no se capturo», que no es lo mismo que «no corrio nada». Vive aqui,
+ * en la constante, y no en un ALTER suelto: esa es justo la leccion de arriba.
+ *
  * `sistema` es el cuarto `kind`: las corridas de los agentes auxiliares —el
  * juez de aplicabilidad, el build, genesis, los episodios, el borrador y el
  * grafo A/B— que hasta hoy gastaban sin constar. Clase propia y no `chat`
@@ -33,7 +39,8 @@ export const AGENT_RUNS_COLUMNS = `
   edits                 INTEGER NOT NULL DEFAULT 0,
   tools                 TEXT    NOT NULL DEFAULT '',
   at                    TEXT    NOT NULL,
-  usage_known           INTEGER
+  usage_known           INTEGER,
+  recibo                TEXT
 `
 
 export const AGENT_RUNS_INDEXES = `

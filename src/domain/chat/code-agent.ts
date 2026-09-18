@@ -1,6 +1,6 @@
 import type { AgentId } from '../agent/agent'
 import type { ClaudePermissionMode } from '../settings/permission-mode'
-import type { TokenUsage } from '../telemetry/token-usage'
+import type { CodeAgentReply } from './code-agent-reply'
 
 /** Quien contesto: el CLI con herramientas reales, o solo la API de texto. */
 export type ChatEngine = 'claude-code' | 'api'
@@ -30,27 +30,7 @@ export interface CodeAgentRequest {
   readonly reanudarSesion?: string
 }
 
-export interface CodeAgentReply {
-  readonly text: string
-  readonly failed: boolean
-  /** Operaciones que el agente quiso hacer y el modo de permisos bloqueo. Es la
-   *  nota de TRANSPARENCIA: lleva el comando, que el operador necesita leer. */
-  readonly denials: readonly string[]
-  /** Los NOMBRES de esas herramientas, sin comando. Es de lo que FORTRESS
-   *  aprende (ADR-085): generico, agrupable y sin codigo del cliente dentro. */
-  readonly deniedTools?: readonly string[]
-  /** Lo que costo la ejecucion, segun el propio CLI. */
-  readonly usage: TokenUsage
-  /** Herramientas usadas, en orden. De aqui salen los "fixes aplicados". */
-  readonly tools: readonly string[]
-  /** Rutas que el agente escribio. Nunca comandos: pueden llevar secretos. */
-  readonly edits: readonly string[]
-  /** La sesion que el CLI dice haber usado, SOLO si su evento final la trae. */
-  readonly sessionId?: string
-  /** Cuantos turnos del modelo corrio. 0 = no llego a empezar: una sesion asi no
-   *  es una conversacion, y es la firma de un `--resume` que no encontro nada. */
-  readonly turns?: number
-}
+export type { CodeAgentReply } from './code-agent-reply'
 
 /**
  * Puerto del agente que ejecuta de verdad dentro del proyecto: filesystem,

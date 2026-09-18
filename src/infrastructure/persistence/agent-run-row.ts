@@ -1,7 +1,6 @@
 import type { AgentId } from '@domain/agent/agent'
-import type { AgentRun, NewAgentRun, RunKind } from '@domain/telemetry/agent-run'
-import { countEdits } from '@domain/telemetry/edit-tools'
-import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
+import type { AgentRun, RunKind } from '@domain/telemetry/agent-run'
+import { RECIBO_SEPARATOR, SEPARATOR } from './agent-run-separators'
 import { usageFromRow, type UsageColumns } from './usage-row'
 
 export interface AgentRunRow extends UsageColumns {
@@ -14,14 +13,13 @@ export interface AgentRunRow extends UsageColumns {
   readonly tools: string
   readonly at: string
   readonly usage_known: number | null
+  readonly recibo: string | null
 }
 
 /** El CHECK de la tabla ya los acota; esto protege de una base tocada a mano. */
 const isRunKind = (value: string): value is RunKind =>
   value === 'chat' || value === 'scan' || value === 'repair'
 
-/** Las herramientas se guardan separadas por coma: son nombres, no texto libre. */
-const SEPARATOR = ','
 
 export function toAgentRun(row: AgentRunRow): AgentRun {
   return {
@@ -34,34 +32,13 @@ export function toAgentRun(row: AgentRunRow): AgentRun {
     usage: usageFromRow(row),
     tools: row.tools === '' ? [] : row.tools.split(SEPARATOR),
     at: row.at,
-    usageKnown: row.usage_known === null ? null : row.usage_known === 1
+    usageKnown: row.usage_known === null ? null : row.usage_known === 1,
+    // `null` se lee como AUSENTE, no como lista vacia: una corrida sin recibo
+    // es una de la que no se capturo, no una que no corrio nada.
+    recibo: row.recibo === null ? undefined : row.recibo.split(RECIBO_SEPARATOR)
   }
 }
 
-/**
- * Sin factura los contadores van a cero igual —la columna es NOT NULL— pero
- * `usage_known = 0` los convierte en "no se" en vez de "gratis". La duracion NO
- * se toca: esa si esta medida, y es el unico dato cuantitativo que queda de una
- * corrida que murio antes de facturar.
- */
-export function toRunInsert(id: string, run: NewAgentRun, at: string): Record<string, unknown> {
-  const usage = run.usage ?? EMPTY_USAGE
-  return {
-    id,
-    projectId: run.projectId,
-    agentId: run.agentId,
-    kind: run.kind,
-    durationMs: run.durationMs,
-    failed: run.failed ? 1 : 0,
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    cacheReadTokens: usage.cacheReadTokens,
-    cacheCreationTokens: usage.cacheCreationTokens,
-    costUsd: usage.costUsd,
-    numTurns: usage.numTurns,
-    usageKnown: run.usage === undefined ? 0 : 1,
-    edits: countEdits(run.tools),
-    tools: run.tools.join(SEPARATOR),
-    at
-  }
-}
+/** La mitad de escritura vive en `agent-run-insert`; se reexporta para que los
+ *  llamadores no tengan que saber que el fichero se partio. */
+export { toRunInsert } from './agent-run-insert'

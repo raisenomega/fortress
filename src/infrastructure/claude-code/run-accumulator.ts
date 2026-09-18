@@ -1,4 +1,5 @@
 import type { CodeAgentReply } from '@domain/chat/code-agent'
+import { entradaDelRecibo } from '@domain/chat/recibo-de-herramientas'
 import { redactSecrets } from '@domain/chat/tool-detail'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import { memoriaDelCli, parseStreamLine, type ParsedEvent } from './stream-events'
@@ -22,6 +23,7 @@ export interface RunAccumulator {
 export function createRunAccumulator(onChunk: (delta: string) => void): RunAccumulator {
   const collected: string[] = []
   const tools: string[] = []
+  const recibo: string[] = []
   const edits: string[] = []
   // El evento final ENTERO: de el salen texto, fallo, denials, coste y memoria.
   let final: ParsedEvent = {}
@@ -34,9 +36,12 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
 
       if (event.editedFile) edits.push(event.editedFile)
       if (event.tool) {
-        // Solo el NOMBRE se persiste; el detalle (ruta/comando redactado) va
-        // por onChunk para leerse en vivo, pero nunca entra en `collected`.
+        // `tools` sigue siendo solo NOMBRES: es lo que FORTRESS aprende, y va
+        // sin codigo del cliente dentro (ADR-085). El detalle ya no se tira —era
+        // el recibo, computado y descartado una linea antes de guardarse
+        // (ADR-093 §3.1)—: viaja aparte y se tacha al persistir.
         tools.push(event.tool)
+        recibo.push(entradaDelRecibo(event.tool, event.detail))
         onChunk(`\n· ${event.tool}${event.detail ? ': ' + event.detail : ''}\n`)
       }
       if (event.text) {
@@ -53,7 +58,7 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
     toReply(exitCode) {
       const { finalText = '', denials = [], deniedTools = [], usage = EMPTY_USAGE } = final
       const text = collected.join('') || finalText
-      const comun = { denials, deniedTools, usage, tools, edits, ...memoriaDelCli(final) }
+      const comun = { denials, deniedTools, usage, tools, recibo, edits, ...memoriaDelCli(final) }
       if (exitCode === 0 && final.failed !== true) return { text, failed: false, ...comun }
 
       const detail =

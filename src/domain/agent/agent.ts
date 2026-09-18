@@ -12,7 +12,12 @@ export const AGENT_IDS = [
   'opensource-sanitizer',
   'sentinel-omega',
   'scope-classifier',
-  'productor'
+  'productor',
+  // El critico del debate (ADR-096, Fase B). Va aparte de `code-reviewer` a
+  // proposito: aquel audita el CODIGO del proyecto y su regla «no inventes
+  // problemas» es correcta ahi; este audita EL FIX del productor y su encargo
+  // es el contrario. Dos objetos, dos encargos: dos ids (ADR-096 §12.2).
+  'critico'
 ] as const
 
 export type AgentId = (typeof AGENT_IDS)[number]
