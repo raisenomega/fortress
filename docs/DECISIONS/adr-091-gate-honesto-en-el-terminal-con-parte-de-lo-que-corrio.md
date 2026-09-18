@@ -185,6 +185,59 @@ $2.72, es ruido.
 
 ---
 
+### ENMIENDA — 2026-09-18: la Pieza 2 del §3 queda DIFERIDA
+
+*Lo de arriba se conserva tal como se firmó. Esta enmienda dice qué se construyó
+y qué no, y por qué — un ADR que se corrige en silencio no deja aprender del
+error.*
+
+**Al intentar construirla, la medición desmintió dos cosas que este ADR daba por
+buenas.** Los tests existentes cazaron las dos antes de que llegaran a `main`.
+
+**(a) «Cuesta una corrida de gate por turno […] es ruido» era optimismo, no un
+dato.** El párrafo de arriba se escribió pensando en raisen-nucleo, donde `tsc`
+muere en menos de un segundo porque no hay dependencias. En un proyecto que **sí**
+compila, `tsc` tarda entre 30 y 180 s, y medir la base antes de cada turno lo
+**duplica**: en un lote de diez hallazgos son hasta media hora de espera, y el
+90 % tirada — la base solo importa cuando el gate posterior sale rojo, que es el
+caso raro. No es un freno (no limita nada), pero es un peaje real que entró en un
+ADR firmado sin medirse.
+
+**(b) Y lo grave: «heredado conserva» afloja una defensa de ADR-079.** Con base
+roja y resultado rojo se conserva; en un proyecto que no compila de base —o sea,
+en **todos** sus turnos— el gate deja de opinar por completo y OMEGA queda como
+juez único de algo que nadie compiló. El test `typecheck en rojo: revierte`
+pasaba a conservar.
+
+Eso **no es traer la doctrina del Motor: es traer media**. El Motor puede
+conservar un heredado con seguridad porque compara el TEXTO de los dos rojos
+(`ruidoPropio`, `gate-baseline.ts`): sabe si el fix añadió ruido en los ficheros
+que tocó. El Terminal no puede hacer esa comparación sin volver a visitar la base
+**después** de editar, que es el `git checkout` sobre el árbol vivo que ADR-079
+prohíbe. Sin ella, «heredado conserva» es ciego: conservaría igual un fix que
+**empeoró** un árbol ya roto.
+
+**Y el caso que motivó este ADR no era un rojo heredado: era un `desconocida`.**
+`tsc: not found` lo cubre la Pieza 1 del §3, construida y en verde. La Pieza 2
+resolvía un caso **que no hemos visto ni una vez**, y para resolverlo pagaba el
+doble gate y aflojaba una garantía real.
+
+**DECISIÓN ENMENDADA.** En el Terminal, **el rojo SIEMPRE revierte**, como hoy.
+`FASE_DESCONOCIDA` cubre el único caso real observado (herramienta o script
+ausente). La distinción heredado/propio **queda diferida**.
+
+**Condición de activación, explícita para que no vuelva por costumbre:** reaparece
+solo si surge un proyecto con rojo heredado REAL, donde importe distinguir «el
+fix lo empeoró» de «ya estaba así». Entonces se vuelve **con la medición de ese
+caso** y se decide entre `ruidoPropio` en el Terminal, un worktree con
+dependencias cacheadas, u otra vía — **nunca** `git checkout` sobre el árbol vivo.
+
+**Lo que SÍ se construyó y queda:** el vocabulario de tres estados
+(`VerificacionDelArbol`) y `FASE_DESCONOCIDA` con su recibo. Lo diferido es
+únicamente heredado/propio.
+
+---
+
 ## 4. El recibo (innegociable)
 
 **Todo lo que el agente corre sin el operador delante queda en el parte del lote
