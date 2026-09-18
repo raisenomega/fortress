@@ -252,6 +252,52 @@ nada que tachar. **Ahora lo llevará.**
 Esta decisión es **innegociable**: ninguna de las otras dos piezas se instala si
 esta no está puesta primero.
 
+### 3.5 Decisión (d) — INNEGOCIABLE: el recibo es LOCAL. No viaja a auto-mejora
+
+*Añadida el 2026-09-18 al construir la Pieza 1. El §3.4 la rozó sin nombrarla, y
+la nombró el propio dominio.*
+
+`code-agent.ts:36-47` ya tiene **exactamente este reparto**, escrito antes que
+este ADR:
+
+```ts
+/** Operaciones que el agente quiso hacer y el modo de permisos bloqueo. Es la
+ *  nota de TRANSPARENCIA: lleva el comando, que el operador necesita leer. */
+readonly denials: readonly string[]
+/** Los NOMBRES de esas herramientas, sin comando. Es de lo que FORTRESS
+ *  aprende (ADR-085): generico, agrupable y sin codigo del cliente dentro. */
+readonly deniedTools?: readonly string[]
+...
+/** Rutas que el agente escribio. Nunca comandos: pueden llevar secretos. */
+readonly edits: readonly string[]
+```
+
+**Dos destinos con dos permisos distintos.** Lo que el operador lee lleva el
+comando; lo que FORTRESS aprende lleva solo el nombre. El recibo es de la
+primera clase, y por tanto:
+
+- El recibo entero vive **donde el operador lo lee** — su fila en `agent_runs`.
+- **No entra en el camino de auto-mejora**: ni en `chatActivity`, ni en
+  observaciones, ni en ningún export. Ahí siguen viajando **solo nombres**.
+- `tools` **no se contamina**: sigue siendo la lista de nombres de la que
+  FORTRESS aprende. El recibo va en columna aparte, y por eso va aparte.
+
+**Por qué es innegociable y no una preferencia.** Un comando de un proyecto de
+cliente que entrara al backlog de auto-mejora **cruzaría el cerco de ADR-085 y
+saldría de la máquina** en el export. Es la misma fuga que el arco de privacidad
+de `auto-mejora.json` dejó abierta, y abrirla por aquí sería peor: allí se
+escapan `sourceProject` y prosa; aquí se escaparían **comandos ejecutados sobre
+código ajeno**.
+
+**Verificado al instalarlo** (2026-09-18): `chat-activity.ts` consume del
+`ReplyOutcome` únicamente `outcome.edits` —rutas— y el prompt tachado. El recibo
+llega solo a `recordChatRun` → `runs.record` → la fila. Ningún otro camino lo
+toca.
+
+Este ADR **conecta con el arco de privacidad pendiente**: cuando ese arco se
+escriba, esta decisión ya es su primera regla — *el recibo entero es local, y no
+viaja a ningún export*.
+
 ---
 
 ## 4. PIEZA 2 — El diff completo
