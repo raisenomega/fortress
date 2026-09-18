@@ -4,7 +4,6 @@ import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { useLoteStore } from '../stores/lote-store'
 import { useScanStore } from '../stores/scan-store'
-import { useSettingsStore } from '../stores/settings-store'
 import { useUiStore } from '../stores/ui-store'
 import { useWorkflowStore } from '../stores/workflow-store'
 import { loadHistory, sendMessage } from './chat-service'
@@ -15,7 +14,6 @@ import { loadFindings } from './scan-service'
 function puertos(projectId: string): PuertosDeLaCola {
   const cola = useColaDelLoteStore.getState
   return {
-    modo: () => useSettingsStore.getState().mode,
     excluidos: () => useAgentStore.getState().excluded,
     hallazgo: (id) => (useScanStore.getState().byProject[projectId] ?? []).find((f) => f.id === id),
     abrirTerminal: () => {

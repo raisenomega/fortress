@@ -3,7 +3,6 @@ import { prepararLote } from '../services/preparar-lote'
 import { useColaDelLoteStore, type LoteEnCurso } from '../stores/cola-del-lote-store'
 import { LOTE_VACIO, useLoteStore } from '../stores/lote-store'
 import { useProjectStore } from '../stores/project-store'
-import { useSettingsStore } from '../stores/settings-store'
 
 /** Lo que la tabla necesita del lote para pintar la cajita de cada fila. */
 export interface LoteEnLaTabla {
@@ -23,7 +22,6 @@ export interface LoteDelTablero {
    *  usa para DECIRLO: desde el Escaneo ya no se aprueba. */
   readonly planeado: boolean
   /** En autonomo el lote no corre: su aprobador es OMEGA (pieza 5). */
-  readonly enAutonomo: boolean
   /** Deja el mensaje escrito en el Terminal. NO envia ni arranca nada. */
   readonly preparar: () => void
   readonly limpiar: () => void
@@ -37,7 +35,6 @@ export interface LoteDelTablero {
 export function useLoteDelTablero(projectId: string, projectName: string): LoteDelTablero {
   // prettier-ignore
   const resoluble = useProjectStore((s) => s.projects.find((p) => p.id === projectId)?.resoluble === true)
-  const mode = useSettingsStore((s) => s.mode)
   const seleccion = useLoteStore((s) => s.seleccion[projectId] ?? LOTE_VACIO)
   const enCurso = useColaDelLoteStore((s) =>
     s.enCurso?.projectId === projectId ? s.enCurso : null
@@ -55,7 +52,6 @@ export function useLoteDelTablero(projectId: string, projectName: string): LoteD
     enCurso,
     pendiente,
     planeado,
-    enAutonomo: mode === 'autonomo',
     preparar: () => prepararLote(projectId, projectName),
     // Limpiar se lleva tambien el plan pendiente: si no, el lote seguiria
     // viajando con los mensajes libres de este proyecto (ver `lote-del-plan`).

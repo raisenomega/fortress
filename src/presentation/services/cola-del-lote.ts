@@ -3,12 +3,10 @@ import type { AgentId } from '@domain/agent/agent'
 import { resumenDelLote, type DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
-import type { OperationMode } from '@domain/settings/operation-mode'
 import { turnoDelLote } from './turno-del-lote'
 
 /** Lo que la cola usa del mundo, inyectado: asi se prueba sin IPC ni React. */
 export interface PuertosDeLaCola {
-  readonly modo: () => OperationMode
   readonly excluidos: () => readonly AgentId[]
   /** El hallazgo tal como esta ahora en el renderer; undefined si ya no esta vivo. */
   readonly hallazgo: (findingId: string) => Finding | undefined
@@ -35,15 +33,17 @@ export interface PuertosDeLaCola {
  * No para por un desenlace: cada hallazgo es independiente. La corta Detener, y
  * solo eso: una vez aprobado el plan, cambiar de modo no deshace la aprobacion.
  *
- * NO arranca en autonomo: alli el plan lo aprueba OMEGA, que llega con la pieza
- * 5. Tampoco con otro lote o un turno en marcha. Si no arranca, devuelve null.
+ * Arranca en LOS DOS modos (ADR-090, Fase A.1c). En autonomo cada turno pasa por
+ * OMEGA antes de conservar y reintenta hasta converger, asi que la cola ya no
+ * necesita un aprobador por hallazgo: lo tiene dentro. No arranca con otro lote
+ * o un turno en marcha —el carril del proyecto es uno—; entonces devuelve null.
  */
 export async function correrLote(
   projectId: string,
   ids: readonly string[],
   p: PuertosDeLaCola
 ): Promise<readonly DesenlaceEnLote[] | null> {
-  if (ids.length === 0 || p.modo() === 'autonomo' || p.cola.ocupada()) return null
+  if (ids.length === 0 || p.cola.ocupada()) return null
   p.cola.arrancar(ids.length)
   const desenlaces: DesenlaceEnLote[] = []
   const motivos: SinCierre[] = []

@@ -1,7 +1,6 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
-import type { OperationMode } from '@domain/settings/operation-mode'
 import type { PuertosDeLaCola } from './cola-del-lote'
 
 // prettier-ignore
@@ -13,9 +12,6 @@ export interface Opciones {
   readonly tras?: (id: string) => Finding | undefined
   /** Tras cuantos turnos terminados pulsa el operador Detener. */
   readonly detenerTras?: number
-  /** El modo del OPERADOR en la consulta n-esima. Por defecto supervisado, que
-   *  es donde hoy corre el lote: el humano aprueba el plan y la cola edita. */
-  readonly modo?: (consulta: number) => OperationMode
   readonly ocupada?: boolean
   /** La guarda que corto el cierre de ese turno, si corto alguna. */
   readonly sinCierre?: (id: string) => SinCierre | null
@@ -35,11 +31,9 @@ export function banco(o: Opciones = {}): Banco {
   const resumenes: string[] = []
   const inicial = o.tabla ?? [fila('f1'), fila('f2'), fila('f3')]
   const tabla = new Map<string, Finding | undefined>(inicial.map((f) => [f.id, f]))
-  let consultas = 0
   let terminados = 0
   let cortado = false
   const p: PuertosDeLaCola = {
-    modo: () => (o.modo ?? (() => 'supervisado'))(consultas++),
     excluidos: () => [],
     hallazgo: (id) => tabla.get(id),
     abrirTerminal: () => undefined,

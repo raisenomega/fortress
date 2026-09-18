@@ -41,16 +41,14 @@ describe('lo que corta la cola, y lo que no la deja arrancar', () => {
     expect(b.resumenes[0]).toContain('Cortado: 2 sin lanzar.')
   })
 
-  it('cambiar de modo a mitad NO la corta: el plan ya estaba aprobado', async () => {
-    const b = banco({ modo: (n) => (n === 0 ? 'supervisado' : 'autonomo') })
+  it('la cola YA NO mira el modo: corre igual, y el juicio lo pone cada turno', async () => {
+    // ADR-090, Fase A.1c. El candado de autonomo se fue con su puerto: `modo`
+    // ya no existe en `PuertosDeLaCola`, asi que no hay nada que consultar.
+    const b = banco({})
     await correrLote('p1', IDS, b.p)
-    expect(b.enviados.map((i) => i.findingId)).toEqual(IDS)
-  })
 
-  it('en autonomo no arranca: alli el plan lo aprueba OMEGA (pieza 5)', async () => {
-    const b = banco({ modo: () => 'autonomo' })
-    expect(await correrLote('p1', IDS, b.p)).toBeNull()
-    expect([b.enviados, b.resumenes]).toEqual([[], []])
+    expect(b.enviados.map((i) => i.findingId)).toEqual(IDS)
+    expect(Object.keys(b.p)).not.toContain('modo')
   })
 
   it('con otro lote o un turno en marcha, no arranca', async () => {
