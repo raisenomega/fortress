@@ -10,6 +10,8 @@ export interface StepRun {
   readonly durationMs: number
   /** Herramientas del agente, en orden. Persiste el uso del grafo por agente. */
   readonly tools: readonly string[]
+  /** Su recibo: las mismas herramientas con lo que corrieron (ADR-093). */
+  readonly recibo?: readonly string[]
 }
 
 /** Lo que produjo una respuesta, con la traza de lo que costo y lo que toco. */
@@ -18,6 +20,15 @@ export interface ReplyOutcome {
   readonly failed: boolean
   readonly usage: TokenUsage
   readonly tools: readonly string[]
+  /**
+   * El RECIBO (ADR-093): que corrio cada herramienta. Opcional porque no todo
+   * motor lo trae, y ausente NO es vacio: es «de esto no se capturo».
+   *
+   * Es para el OPERADOR. No entra en `chatActivity` ni en ninguna observacion
+   * de auto-mejora: ahi solo viajan nombres, que es el reparto que `denials` y
+   * `deniedTools` ya establecen (`code-agent.ts:36-41`, cerco ADR-085).
+   */
+  readonly recibo?: readonly string[]
   readonly edits: readonly string[]
   /** Agentes que participaron. De aqui salen los chips del mensaje. */
   readonly agents: readonly AgentId[]

@@ -35,7 +35,8 @@ export function recordChatRun(context: AppContext, input: ChatRunInput): void {
             durationMs: run.durationMs,
             failed: run.failed,
             usage: run.usage,
-            tools: run.tools
+            tools: run.tools,
+            recibo: run.recibo
           })
         }
       } else {
@@ -46,7 +47,8 @@ export function recordChatRun(context: AppContext, input: ChatRunInput): void {
           durationMs: Date.now() - startedAt,
           failed: outcome.failed,
           usage: outcome.usage,
-          tools: outcome.tools
+          tools: outcome.tools,
+          recibo: outcome.recibo
         })
       }
 
