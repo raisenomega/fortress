@@ -1,17 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { PLAN, META } from '../repair/juicio-de-omega-fixture'
+import { META } from '../repair/juicio-de-omega-fixture'
 import type { AppContext } from '../context'
+import { contextoQueApunta, LOTE } from './juez-del-plan-fixture'
 import { juezDelPlan } from './juez-del-plan'
 import type { CorridaDelCritico } from './tribunal-con-critico'
-
-/** Contexto que apunta lo facturado: juzgar un plan cuesta y debe constar. */
-function contextoQueApunta(): { context: AppContext; filas: () => readonly boolean[] } {
-  const filas: boolean[] = []
-  const context = {
-    runs: { record: (r: { failed: boolean }) => filas.push(r.failed) }
-  } as unknown as AppContext
-  return { context, filas: () => filas }
-}
 
 const juezQueRecibe = (corrida: CorridaDelCritico, context: AppContext): ReturnType<typeof juezDelPlan> =>
   juezDelPlan({ context, projectId: 'p1', cwd: '/p', omega: { run: () => Promise.resolve(corrida) } }) // prettier-ignore
@@ -26,19 +18,19 @@ describe('cuando OMEGA no juzga', () => {
     const { context } = contextoQueApunta()
     const fallo = { ok: false as const, error: 'sin revisor', timedOut: false, runMeta: META }
 
-    expect(await juezQueRecibe(fallo, context)(PLAN, 'un plan')).toBeNull()
+    expect(await juezQueRecibe(fallo, context)(LOTE, 'un plan')).toBeNull()
   })
 
   it('si contesta algo ilegible: tambien null', async () => {
     const { context } = contextoQueApunta()
     const juez = juezQueRecibe({ ok: true, texto: 'me parece bien', runMeta: META }, context)
 
-    expect(await juez(PLAN, 'un plan')).toBeNull()
+    expect(await juez(LOTE, 'un plan')).toBeNull()
   })
 
   it('y la corrida CONSTA igual, marcada como fallida: hubo gasto', async () => {
     const { context, filas } = contextoQueApunta()
-    await juezQueRecibe({ ok: true, texto: 'ilegible', runMeta: META }, context)(PLAN, 'x')
+    await juezQueRecibe({ ok: true, texto: 'ilegible', runMeta: META }, context)(LOTE, 'x')
 
     expect(filas()).toEqual([true])
   })

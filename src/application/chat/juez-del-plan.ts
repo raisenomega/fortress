@@ -1,9 +1,9 @@
 import { parsePlanResponse } from '@domain/chat/plan-parse'
 import { buildPlanPrompt } from '@domain/chat/plan-prompt'
 import type { JuicioDelPlan } from '@domain/chat/juicio-del-plan'
-import type { HallazgoJuzgado } from '@domain/repair/hallazgo-juzgado'
 import type { AppContext } from '../context'
 import { recordMotorRun } from '../repair/record-motor-run'
+import { lineasDelLote } from './hallazgos-del-lote'
 import type { CorridaDelCritico } from './tribunal-con-critico'
 
 export interface JuezDelPlanDeps {
@@ -25,13 +25,25 @@ export interface JuezDelPlanDeps {
  * FACTURA como cualquier otro: juzgar un plan cuesta y consta en `agent_runs`.
  * Un juicio que no se factura es un juicio que no existio para las cuentas.
  *
+ * Recibe los IDS del lote, no los hallazgos ya escritos, y los relee el mismo
+ * con `lineasDelLote` (ADR-097 ENMIENDA 1). Por lo de siempre: una lista que le
+ * llega hecha es una lista que quien llama pudo componer, y lo que se juzga
+ * tiene que salir de la base. De paso lee LA MISMA lista que leyo el productor
+ * al escribir el plan (`lista-del-turno.ts:22`), que es lo que hace que el
+ * veredicto signifique algo: juzga la direccion sobre el conjunto que la motivo.
+ *
  * `null` cuando no se pudo juzgar —el agente no arranco, o su respuesta no se
  * dejo leer—. NO se inventa un ADELANTE: aprobar por no haber podido mirar
- * seria justo lo contrario de lo que este filtro existe para hacer.
+ * seria justo lo contrario de lo que este filtro existe para hacer. Un lote sin
+ * ningun hallazgo vivo cae ahi mismo, antes de gastar una corrida: si no queda
+ * nada que juzgar tampoco hay nada que aprobar, y la puerta sigue cerrada.
  */
 export function juezDelPlan(deps: JuezDelPlanDeps) {
-  return async (plan: HallazgoJuzgado, propuesta: string): Promise<JuicioDelPlan | null> => {
-    const corrida = await deps.omega.run(deps.cwd, buildPlanPrompt(plan, propuesta))
+  return async (ids: readonly string[], propuesta: string): Promise<JuicioDelPlan | null> => {
+    const hallazgos = lineasDelLote(deps.context, deps.projectId, ids)
+    if (hallazgos.length === 0) return null
+
+    const corrida = await deps.omega.run(deps.cwd, buildPlanPrompt(hallazgos, propuesta))
 
     const leido = corrida.ok ? parsePlanResponse(corrida.texto) : { error: corrida.error }
     const fallo = 'error' in leido
