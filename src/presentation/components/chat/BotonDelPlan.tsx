@@ -1,5 +1,8 @@
+import { pieDelLote } from '@domain/chat/pie-del-lote'
 import { resolverLotePendiente } from '../../services/resolver-lote-en-terminal'
 import { useColaDelLoteStore } from '../../stores/cola-del-lote-store'
+import { useSettingsStore } from '../../stores/settings-store'
+import { PlanSinAprobar } from './PlanSinAprobar'
 
 interface BotonDelPlanProps {
   readonly projectId: string
@@ -27,15 +30,29 @@ const PLANO = `${VERDE} inline-block opacity-70`
  * Y en cuanto la cola arranca DEJA DE SER PULSABLE: se queda como linea plana.
  * Un boton vivo mientras corre invita a pulsarlo otra vez, y cada pulsacion
  * encolaria la misma orden. El progreso lo lleva el indicador de abajo.
+ *
+ * EN AUTONOMO NO SE PINTA (ADR-097 §3): alli el aprobador es OMEGA, y su
+ * ADELANTE ya disparo la ejecucion sin pasar por aqui. El boton no solo sobraba:
+ * desde que la puerta del §4 existe era un boton MUERTO — pulsarlo mandaba un
+ * turno que `guardPlanAprobado` rechazaba, y el operador veia un error por cada
+ * hallazgo del lote. Si el lote llego a `planeado` en autonomo es que OMEGA NO
+ * aprobo, y lo que toca es decirlo, no ofrecer un clic que va a fallar.
+ *
+ * Esto es PRESENTACION, no seguridad: la garantia vive en el main y no se
+ * duplica aqui. Ocultar el boton no impide nada — impedirlo ya lo hace la
+ * puerta; ocultarlo evita ofrecer lo que no se puede hacer.
  */
 export function BotonDelPlan({ projectId }: BotonDelPlanProps): React.JSX.Element | null {
   const mio = <T extends { projectId: string }>(x: T | null): T | null =>
     x !== null && x.projectId === projectId ? x : null
   const enCurso = useColaDelLoteStore((s) => mio(s.enCurso))
   const pendiente = useColaDelLoteStore((s) => mio(s.pendiente))
+  const autonomo = useSettingsStore((s) => s.mode === 'autonomo')
+  const pie = pieDelLote({ enCurso: enCurso !== null, planeado: pendiente?.planeado === true, autonomo }) // prettier-ignore
 
-  if (enCurso !== null) return <span className={PLANO}>Plan ejecutandose…</span>
-  if (pendiente === null || !pendiente.planeado) return null
+  if (pie === 'ejecutando') return <span className={PLANO}>Plan ejecutandose…</span>
+  if (pie === 'nada' || pendiente === null) return null
+  if (pie === 'sin-aprobar') return <PlanSinAprobar veredicto={pendiente.veredicto} />
   const cuantos = pendiente.ids.length
 
   return (

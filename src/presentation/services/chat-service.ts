@@ -39,7 +39,9 @@ export async function sendMessage(input: SendMessageInput): Promise<DesenlaceDel
     // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
     // stream (que puede traer lineas de herramienta o venir vacio).
     else {
-      desenlace = { sinCierre: result.value.sinCierre, sinVerificar: result.value.sinVerificar }
+      // `plan` solo viene en el turno de plan de un lote en autonomo; en todo lo
+      // demas el main no lo pone, y ausente significa «nadie lo juzgo».
+      desenlace = { sinCierre: result.value.sinCierre, sinVerificar: result.value.sinVerificar, plan: result.value.plan ?? null } // prettier-ignore
       captureConfigDrafts(input.projectId, result.value.assistant.content)
     }
   } catch (error) {

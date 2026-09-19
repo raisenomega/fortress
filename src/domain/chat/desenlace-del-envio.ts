@@ -1,3 +1,4 @@
+import type { VeredictoDelPlan } from './juicio-del-plan'
 import type { SinCierre } from './motivo-sin-cierre'
 
 /**
@@ -12,6 +13,17 @@ import type { SinCierre } from './motivo-sin-cierre'
 export interface DesenlaceDelEnvio {
   readonly sinCierre: SinCierre | null
   readonly sinVerificar: boolean
+  /**
+   * Como juzgo OMEGA la DIRECCION del plan del lote, o `null` —que es lo normal:
+   * solo un turno de plan en autonomo se juzga, y ahi `null` significa que no se
+   * pudo juzgar (ADR-097 §2.2-bis). En supervisado siempre es `null`: alli
+   * aprueba el operador con su Enter.
+   *
+   * Cruza el puente SOLO el enum, nunca la razon de OMEGA: la razon habla del
+   * codigo del cliente, y esa es la misma linea que `sinCierre` respeta. Cuando
+   * el bucle de replanteo la necesite (4b) la leera en el main, sin cruzarla.
+   */
+  readonly plan: VeredictoDelPlan | null
 }
 
-export const ENVIO_SIN_DATO: DesenlaceDelEnvio = { sinCierre: null, sinVerificar: false }
+export const ENVIO_SIN_DATO: DesenlaceDelEnvio = { sinCierre: null, sinVerificar: false, plan: null } // prettier-ignore

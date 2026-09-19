@@ -35,24 +35,21 @@ describe('el turno de plan para, y el segundo gesto ejecuta', () => {
     )
   })
 
-  it('el turno de plan PARA: manda el mensaje y NO arranca la cola', () => {
+  it('PARA en supervisado; en autonomo lo dispara el ADELANTE (ADR-097 §3)', () => {
     const plan = fuente('src/presentation/services/lote-por-enter.ts')
-    // El CODIGO, sin los comentarios (que si nombran a quien disparara luego).
     const codigo = plan.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '')
 
-    expect(codigo).toMatch(
-      /await sendMessage\(\{ projectId, prompt, mode: 'supervisado', excludedAgents \}\)\s*useColaDelLoteStore\.getState\(\)\.marcarPlaneado\(projectId\)/
-    )
-    expect(codigo).not.toMatch(/correrLote|resolverLotePendiente/)
-  })
-
-  it('y va SIEMPRE en solo lectura, aunque el proyecto corra en autonomo', () => {
-    expect(fuente('src/presentation/services/lote-por-enter.ts')).toMatch(/mode: 'supervisado'/)
-  })
-
-  it('el punto de parada deja escrito donde entra OMEGA en la pieza 5', () => {
-    expect(fuente('src/presentation/services/lote-por-enter.ts')).toContain('PUNTO DE PARADA')
-    expect(fuente('src/presentation/services/lote-por-enter.ts')).toMatch(/PIEZA 5 sera OMEGA/)
+    // Sin ADELANTE queda esperando el clic; con el, OMEGA ocupa esa silla.
+    expect(codigo).toMatch(/if \(plan === 'ADELANTE'\) return resolverLotePendiente\(projectId\)/)
+    expect(codigo).toMatch(/marcarPlaneado\(projectId, plan\)/)
+    // La cola no se arranca desde aqui en ningun modo: la corre el resolvedor.
+    expect(codigo).not.toMatch(/correrLote/)
+    // Y va SIEMPRE en solo lectura, aunque el proyecto corra en autonomo.
+    expect(codigo).toMatch(/mode: 'supervisado'/)
+    // El punto de parada ya no PROMETE a OMEGA: lo nombra sentado.
+    expect(plan).toContain('PUNTO DE PARADA')
+    expect(plan).not.toMatch(/PIEZA 5 sera OMEGA/)
+    expect(plan).toMatch(/en AUTONOMO es OMEGA/)
   })
 
   it('al aprobar ya no se escribe ningun aviso largo en el chat', () => {

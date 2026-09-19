@@ -18,7 +18,14 @@ import { useTelemetryStore } from '../../stores/telemetry-store'
  * como se ve. Es lo que obligo a elegir el azul del juicio en vez de dejarlo
  * heredando el color de al lado sin que nadie lo notara.
  */
-const TONO: Record<FaseDelTurno, string> = { debate: 'text-high', juicio: 'text-proceso' }
+// El azul es «OMEGA esta pensando», y por eso el plan lo comparte con el juicio:
+// es la misma cabeza haciendo lo mismo, en dos momentos. Lo que los separa es la
+// etiqueta —un plan no es un diff—, no el color.
+const TONO: Record<FaseDelTurno, string> = {
+  debate: 'text-high',
+  juicio: 'text-proceso',
+  plan: 'text-proceso'
+}
 
 export function RunMeter(): React.JSX.Element | null {
   const startedAt = useRunMeterStore((state) => state.startedAt)

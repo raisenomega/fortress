@@ -1,6 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { sendMessage } from './chat-service'
+import { resolverLotePendiente } from './resolver-lote-en-terminal'
 
 /** ¿Este proyecto tiene un lote precargado esperando el Enter del operador? */
 export function lotePendienteDe(projectId: string): boolean {
@@ -18,18 +19,24 @@ export function lotePendienteDe(projectId: string): boolean {
  * proyecto corre en autonomo. Asi el productor puede decir «rota las llaves
  * primero» sin haber tocado nada mientras lo dice.
  *
- * PUNTO DE PARADA. Aqui espera el APROBADOR del lote:
- * - hoy, en supervisado, es el OPERADOR: lee el plan y pulsa «Ejecutar plan»;
- * - en la PIEZA 5 sera OMEGA quien apruebe en autonomo, y entra JUSTO AQUI:
- *   en vez de marcar el lote como planeado y esperar, se le pasa el plan a
- *   OMEGA y su veredicto dispara `resolverLotePendiente`. El flujo no cambia;
- *   solo cambia quien aprueba.
+ * PUNTO DE PARADA. Aqui espera el APROBADOR del lote, y quien se sienta ahi
+ * depende del modo (ADR-097 §3):
+ * - en SUPERVISADO es el OPERADOR: el lote queda planeado, aparece «Ejecutar
+ *   plan» y su clic lo dispara. `plan` llega null y nada de esto cambia;
+ * - en AUTONOMO es OMEGA: el main juzgo la direccion antes de devolver, y su
+ *   ADELANTE dispara la ejecucion SIN pasar por ningun boton.
+ *
+ * El disparo de aqui NO es la garantia: solo ahorra el clic. La garantia vive en
+ * el main —`guardPlanAprobado` no deja correr un hallazgo del lote sin que
+ * `aprobarLote` lo haya autorizado—, asi que llamar a `resolverLotePendiente`
+ * sin ADELANTE no ejecutaria nada; simplemente fallaria en la puerta.
  */
 export async function planDelLote(
   projectId: string,
   prompt: string,
   excludedAgents: readonly AgentId[]
 ): Promise<void> {
-  await sendMessage({ projectId, prompt, mode: 'supervisado', excludedAgents })
-  useColaDelLoteStore.getState().marcarPlaneado(projectId)
+  const { plan } = await sendMessage({ projectId, prompt, mode: 'supervisado', excludedAgents })
+  if (plan === 'ADELANTE') return resolverLotePendiente(projectId)
+  useColaDelLoteStore.getState().marcarPlaneado(projectId, plan)
 }

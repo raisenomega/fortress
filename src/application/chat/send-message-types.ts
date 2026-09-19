@@ -1,6 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { ChatEngine } from '@domain/chat/code-agent'
+import type { VeredictoDelPlan } from '@domain/chat/juicio-del-plan'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { OperationMode } from '@domain/settings/operation-mode'
 
@@ -35,4 +36,13 @@ export interface SendMessageOutput {
   /** El turno se conservo SIN que nadie pudiera compilar el proyecto (ADR-091).
    *  Un booleano: cruza el puente sin llevar nada del codigo del cliente. */
   readonly sinVerificar: boolean
+  /**
+   * El veredicto de OMEGA sobre la DIRECCION del plan del lote (ADR-097 §2).
+   *
+   * OPCIONAL y lo pone la INFRA, no `sendMessage`: el juicio del plan corre
+   * DESPUES del turno —necesita la prosa que el turno produjo— y desde su propia
+   * costura, en `chat-send-handler`. Ponerlo aqui obligaria a `sendMessage` a
+   * conocer un juicio que no es suyo, y esa funcion ya carga once parametros.
+   */
+  readonly plan?: VeredictoDelPlan | null
 }

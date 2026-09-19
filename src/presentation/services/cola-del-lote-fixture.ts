@@ -48,7 +48,9 @@ export function banco(o: Opciones = {}): Banco {
       log.push(`fin:${id}`)
       terminados += 1
       if (terminados === o.detenerTras) cortado = true
-      return { sinCierre: o.sinCierre?.(id) ?? null, sinVerificar: o.sinVerificar?.(id) ?? false }
+      // `plan: null` — los turnos de la COLA llevan foco, y esos no se juzgan
+      // como plan: los juzga el fix, con el diff delante (ADR-097 §2).
+      return { sinCierre: o.sinCierre?.(id) ?? null, sinVerificar: o.sinVerificar?.(id) ?? false, plan: null } // prettier-ignore
     },
     recargar: async () => void log.push('recargar'),
     contar: async (resumen) => void resumenes.push(resumen),

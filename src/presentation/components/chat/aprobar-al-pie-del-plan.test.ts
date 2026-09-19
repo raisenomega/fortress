@@ -29,7 +29,7 @@ describe('la firma del lote va AL PIE del plan, dentro del hilo', () => {
 
     // Un boton vivo durante la ejecucion invita a re-pulsarlo, y cada pulsacion
     // encolaria la misma orden. El progreso lo lleva el indicador de abajo.
-    expect(boton).toMatch(/if \(enCurso !== null\) return <span className=\{PLANO\}>/)
+    expect(boton).toMatch(/if \(pie === 'ejecutando'\) return <span className=\{PLANO\}>/)
     expect(boton).toContain('Plan ejecutandose')
     expect(boton).toMatch(/const PLANO = `\$\{VERDE\} inline-block opacity-70`/)
     // El mismo verde que el boton, sin `tap` ni hover: no se puede pulsar.

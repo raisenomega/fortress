@@ -32,7 +32,8 @@ describe('pulsar «Resolver lote en Terminal» precarga el plan y espera', () =>
     expect(useColaDelLoteStore.getState().pendiente).toEqual({
       projectId: 'p1',
       ids: ['f1', 'f2'],
-      planeado: false
+      planeado: false,
+      veredicto: null
     })
     expect(useColaDelLoteStore.getState().enCurso).toBeNull()
     expect(useUiStore.getState().view).toBe('chat')

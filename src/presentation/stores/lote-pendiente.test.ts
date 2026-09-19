@@ -12,7 +12,8 @@ describe('el lote esperando en el punto de parada', () => {
     expect(useColaDelLoteStore.getState().pendiente).toEqual({
       projectId: 'p1',
       ids: ['f1', 'f2'],
-      planeado: false
+      planeado: false,
+      veredicto: null
     })
 
     useColaDelLoteStore.getState().descartar()
@@ -22,10 +23,10 @@ describe('el lote esperando en el punto de parada', () => {
   it('el turno de plan lo marca planeado; el de otro proyecto no lo toca', () => {
     useColaDelLoteStore.getState().preparar('p1', ['f1'])
 
-    useColaDelLoteStore.getState().marcarPlaneado('p2')
+    useColaDelLoteStore.getState().marcarPlaneado('p2', null)
     expect(useColaDelLoteStore.getState().pendiente?.planeado).toBe(false)
 
-    useColaDelLoteStore.getState().marcarPlaneado('p1')
+    useColaDelLoteStore.getState().marcarPlaneado('p1', null)
     expect(useColaDelLoteStore.getState().pendiente?.planeado).toBe(true)
   })
 

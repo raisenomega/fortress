@@ -1,21 +1,48 @@
-import { ipcMain } from 'electron'
-import { sendMessage } from '@application/chat/send-message'
+import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import { err, type Result } from '@domain/shared/result'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
 import { cancelLoop } from '../loop/loop-registry'
-import { cancelRun, endRun, isCancelled } from '../run-control'
+import { cancelRun, endRun } from '../run-control'
 import { guardPlanAprobado } from '../plan-guard'
 import { guardRun } from '../run-guard'
-import { isFortressRepo } from '../system/self-project'
-import { criticoDelTerminal } from '../chat/critico-del-terminal'
-import { omegaDelTerminal } from '../chat/omega-del-terminal'
-import { RED_DE_REVERSION } from '../chat/red-de-reversion'
-import { buildChatEngines } from './chat-engines'
-import { chunkSender, progressSender } from './chat-send-senders'
 import { IPC } from './channels'
-import { conFocoSaneado } from './foco-pedido'
+import { turnoConJuicio } from './turno-con-juicio'
+
+/**
+ * Las dos puertas del envio, y detras el turno. Vive AQUI —junto al registro— y
+ * no en `turno-con-juicio` porque quien lee este fichero para saber que protege
+ * `chat:send` tiene que verlo sin saltar de archivo, y porque `guards-del-codigo`
+ * solo sigue ayudantes del MISMO fichero: sacarlas cegaria a la tabla de
+ * docs/IPC.md sobre el unico canal que mas turno toma.
+ */
+async function atenderEnvio(
+  event: IpcMainInvokeEvent,
+  input: SendMessageInput
+): Promise<Result<unknown>> {
+  const context = getAppContext()
+  // Tope diario y concurrencia, comprobados ANTES de gastar.
+  // ADR-097 §4: en autonomo, un hallazgo del lote no corre sin el ADELANTE de
+  // OMEGA. Aqui y no en el renderer: quien ejecuta es este proceso. Y ANTES de
+  // `guardRun`, que RESERVA el carril: negar despues de reservar lo dejaria
+  // tomado para siempre (`carril-se-suelta`).
+  const sinAprobar = guardPlanAprobado(context, input)
+  if (sinAprobar !== null) return err(sinAprobar)
+
+  const denegado = guardRun(context, input.projectId)
+  if (denegado !== null) return err(denegado)
+
+  // DENTRO del try: armar los motores lee la base y puede fallar, y fuera ese
+  // fallo saltaba por encima del `finally` y dejaba el carril TOMADO.
+  try {
+    return await turnoConJuicio(context, input, event)
+  } catch (error) {
+    return err(describeAssistantError(error))
+  } finally {
+    endRun(input.projectId)
+  }
+}
 
 export function registerChatSendHandler(): void {
   // Detener TOTAL del proyecto: marca el loop (su espera corta en <=2s) Y corta
@@ -26,40 +53,7 @@ export function registerChatSendHandler(): void {
     return cancelRun(id)
   })
 
-  ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
-    const context = getAppContext()
-    // Tope diario y concurrencia, comprobados ANTES de gastar.
-    // ADR-097 §4: en autonomo, un hallazgo del lote no corre sin el ADELANTE de
-    // OMEGA. Aqui y no en el renderer: quien ejecuta es este proceso. Y ANTES de
-    // `guardRun`, que RESERVA el carril: negar despues de reservar lo dejaria
-    // tomado para siempre (`carril-se-suelta`).
-    const sinAprobar = guardPlanAprobado(context, input)
-    if (sinAprobar !== null) return err(sinAprobar)
-
-    const denegado = guardRun(context, input.projectId)
-    if (denegado !== null) return err(denegado)
-
-    // DENTRO del try: armar los motores lee la base y puede fallar, y fuera ese
-    // fallo saltaba por encima del `finally` y dejaba el carril TOMADO.
-    try {
-      const { codeAgent, assistant } = buildChatEngines(context)
-      return await sendMessage(
-        context,
-        assistant,
-        codeAgent,
-        conFocoSaneado(input),
-        chunkSender(event, input.projectId),
-        progressSender(event, input.projectId),
-        () => isCancelled(input.projectId),
-        isFortressRepo,
-        RED_DE_REVERSION,
-        omegaDelTerminal(input.projectId),
-        criticoDelTerminal(input.projectId)
-      )
-    } catch (error) {
-      return err(describeAssistantError(error))
-    } finally {
-      endRun(input.projectId)
-    }
-  })
+  // Se LLAMA, no se pasa por referencia: `guards-del-codigo` busca `ayudante(`
+  // dentro del registro para seguirle la pista, y `, atenderEnvio)` no lo es.
+  ipcMain.handle(IPC.chatSend, (event, input: SendMessageInput) => atenderEnvio(event, input))
 }

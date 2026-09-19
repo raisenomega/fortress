@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { VeredictoDelPlan } from '@domain/chat/juicio-del-plan'
 
 export interface LoteEnCurso {
   readonly projectId: string
@@ -12,6 +13,10 @@ export interface LotePendiente {
   readonly ids: readonly string[]
   /** El productor ya dio su plan y el turno paro: falta el disparo que ejecuta. */
   readonly planeado: boolean
+  /** Lo que OMEGA dijo de la direccion, o `null` (ADR-097). En supervisado es
+   *  SIEMPRE null: alli aprueba el operador. En autonomo, un ADELANTE no llega
+   *  a guardarse aqui — dispara la ejecucion y el pendiente nunca se marca. */
+  readonly veredicto: VeredictoDelPlan | null
 }
 
 interface ColaState {
@@ -22,8 +27,9 @@ interface ColaState {
   /** Esperando en el punto de parada (ADR-088, arco 1). */
   readonly pendiente: LotePendiente | null
   preparar: (projectId: string, ids: readonly string[]) => void
-  /** El turno de plan termino: el lote queda listo para el disparo que ejecuta. */
-  marcarPlaneado: (projectId: string) => void
+  /** El turno de plan termino: el lote queda listo para el disparo que ejecuta.
+   *  Lleva lo que OMEGA dijo, para que el autonomo pueda ENSENAR por que no. */
+  marcarPlaneado: (projectId: string, veredicto: VeredictoDelPlan | null) => void
   descartar: () => void
   arrancar: (projectId: string, total: number) => void
   avanzar: () => void
@@ -40,11 +46,14 @@ export const useColaDelLoteStore = create<ColaState>((set) => ({
   cortado: false,
   pendiente: null,
 
-  preparar: (projectId, ids) => set({ pendiente: { projectId, ids, planeado: false } }),
+  preparar: (projectId, ids) =>
+    set({ pendiente: { projectId, ids, planeado: false, veredicto: null } }),
 
-  marcarPlaneado: (projectId) =>
+  marcarPlaneado: (projectId, veredicto) =>
     set((s) =>
-      s.pendiente?.projectId === projectId ? { pendiente: { ...s.pendiente, planeado: true } } : s
+      s.pendiente?.projectId === projectId
+        ? { pendiente: { ...s.pendiente, planeado: true, veredicto } }
+        : s
     ),
 
   descartar: () => set({ pendiente: null }),
