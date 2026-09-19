@@ -1,3 +1,5 @@
+import { INNEGOCIABLES_DEL_AUTOMERGE } from './innegociables-del-automerge'
+
 import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
 import { DEFENSAS_DE_LA_RED } from './innegociables-red'
 /**
@@ -40,24 +42,16 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // aplica al bucle autonomo. Sin ellos el guard existe y nadie lo pide.
   'src/application/repair/carril-del-merge.ts',
   'src/infrastructure/loop/loop-fix.ts',
+  // La PUERTA del plan (ADR-097 §4): en autonomo, un hallazgo del lote no corre
+  // sin el ADELANTE de OMEGA. Y quien GUARDA la aprobacion, que vive en el main
+  // porque un campo en el mensaje lo escribiria quien pide pasar. Si el
+  // auto-merge pudiera tocarlos, el autonomo se abriria a si mismo la puerta.
+  'src/infrastructure/plan-guard.ts',
+  'src/infrastructure/aprobacion-del-plan.ts',
   // Las HERRAMIENTAS del motor, derivadas del vocabulario del grafo.
   'src/infrastructure/repair/motor-tools.ts',
-  // La MEDIDA del arbol integrado: quien decide si hay que volver a medir antes
-  // de tocar el arbol vivo, quien lo mide, y quien lo cuenta sin exagerar el
-  // alcance. `apply-auto-merge` entra con ellas porque es donde se INVOCA el
-  // freno: protegerlo a el y no al sitio que lo llama dejaria quitar la llamada
-  // sin tocar un solo fichero protegido, que es el hueco de siempre.
-  'src/domain/repair/arbol-que-se-movio.ts',
-  'src/domain/repair/asiento-de-la-medida.ts',
-  'src/application/repair/integrar-midiendo-el-arbol.ts',
-  'src/infrastructure/repair/medir-arbol-integrado.ts',
-  'src/application/repair/apply-auto-merge.ts',
-  // La garantia del CODIGO PROPIO: sobre el repo de FORTRESS la puerta
-  // automatica no vale, la pida quien la pida. `loop-gate` —donde vive la
-  // regla— ya estaba; estos dos son quien la consulta y quien la aplica, que es
-  // por donde se escapo la vez anterior.
-  'src/application/repair/integrable-sin-firma.ts',
-  'src/application/repair/judge-and-integrate.ts',
+  // Lo que el AUTO-MERGE no puede integrar, aparte por tamano y por asunto.
+  ...INNEGOCIABLES_DEL_AUTOMERGE,
   // El AISLAMIENTO DEL RENDERER, dos mitades de una sola garantia: `main-window`
   // fuerza `sandbox`, `contextIsolation` y `nodeIntegration: false`, y
   // `preload/index` es la UNICA superficie que cruza ese puente. Cambiar
@@ -71,5 +65,6 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // este es quien lo APLICA, y sin el la funcion existe y nadie la llama.
   'src/application/chat/en-vivo-tachado.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
-  'src/domain/repair/innegociables-defensa.ts'
+  'src/domain/repair/innegociables-defensa.ts',
+  'src/domain/repair/innegociables-del-automerge.ts'
 ]
