@@ -12,6 +12,14 @@
 - **Nace de**: el primer ensayo en vivo del debate (raisen-núcleo, 18-sep), que
   probó que la Fase B **funciona** y que es **muda**.
 
+> ### ⚠ ENMIENDA 1 — 2026-09-19: el plan del lote es de N hallazgos, no de uno
+>
+> **El §2.2 se escribió en singular** —*«la estructura del hallazgo»*— arrastrando
+> el caso del ensayo del 18-sep, que fue de **1** hallazgo. Un plan de lote cubre
+> **N**: el botón dice literalmente `Ejecutar plan (N)`. El §2.2 se lee a través
+> de la **§2.2-bis**, y el código que lo ejecuta (`plan-prompt.ts`,
+> `juez-del-plan.ts`) va con ella.
+
 ---
 
 ## §0 — La ley aplicable
@@ -144,6 +152,54 @@ preguntas, dos momentos, el mismo juez.
 La **estructura** del hallazgo —`target`, `whatToChange`, `doNotTouch`— **más la
 prosa del productor**. La estructura porque es lo único que no redacta el
 modelo; la prosa porque es lo que hay que juzgar.
+
+### 2.2-bis — CORRECCIÓN (ENMIENDA 1, 2026-09-19): son N, y `HallazgoJuzgado` no existe aquí
+
+**El §2.2 de encima dice «el hallazgo» en singular. Es incorrecto, y lo escribí
+yo** arrastrando el ensayo del 18-sep, que fue de 1. Lo medido:
+
+**a) Un plan de lote cubre N.** El botón dice `Ejecutar plan (N)`. Lo que el
+productor propone en el turno de plan **no es cómo arreglar un hallazgo: es en
+qué ORDEN y con qué enfoque atacar los N**. Juzgar esa prosa contra la estructura
+de uno es **juzgar la cosa equivocada** — el veredicto hablaría de un hallazgo
+mientras el plan habla de cinco, y nada fallaría visiblemente.
+
+**b) Y el tipo que el §2.2 pedía NO PUEDE EXISTIR en ese momento.** El singular no
+fue solo una imprecisión de redacción: llevó a construir
+`buildPlanPrompt(plan: HallazgoJuzgado, …)`, y en el Terminal el **único**
+productor de `HallazgoJuzgado` es `planDelTerminal(foco, pedido)`
+(`plan-del-terminal.ts:19`), **que exige un foco**. El turno de plan **no tiene
+foco por construcción**: `conLoteDelPlan` solo adjunta el lote cuando
+`findingId === undefined` (`lote-del-plan.ts:19`). Los campos `whatToChange`,
+`where`, `doNotTouch` y `risk` salen del analista del Motor, y en el turno de plan
+**no ha corrido ningún analista todavía** — ese es justo el punto del turno.
+
+> **Por qué no se vio:** `juezDelPlan` no tenía todavía ningún llamador de
+> producción — solo tests, que le pasaban el fixture `PLAN` del Motor. **El
+> fixture real de OTRO flujo tapó que el tipo era inalcanzable en éste.**
+
+**CORRECCIÓN.** Al juicio del plan se le pasan:
+
+- **los N hallazgos del lote** —severidad, fichero:línea y título de cada uno—,
+  que son los campos que el modelo **no redacta** (ADR-084: la identidad estable
+  del hallazgo es lo que no depende de cómo se escriba);
+- **más la prosa del productor**, que es lo que hay que juzgar.
+
+Y **releídos de la base**, no tomados del mensaje: del renderer solo se aceptan
+los ids, exactamente como con el foco.
+
+**La pregunta pasa a ser: «¿es sensata esta dirección para estos N?»**
+
+**Se reusa `lineasDelLote`** (`hallazgos-del-lote.ts:29`), que ya hace las cuatro
+cosas: relee de la base, comprueba que son de ESTE proyecto, descarta los que ya
+no están vivos, y sanea. **Con eso el juez lee LA MISMA LISTA que leyó el
+productor** al escribir su plan (`lista-del-turno.ts:22`) — que es la propiedad
+que hace que el juicio signifique algo: juzga la dirección sobre el mismo
+conjunto que la motivó, no sobre una lista paralela que podría desincronizarse.
+
+**Lo que NO cambia:** el vocabulario del veredicto (`ADELANTE` / `REPLANTEA`) y
+la honestidad del §2.3. Sigue siendo un **cedazo suave sobre la dirección** —
+ampliarlo a N lo hace *correcto*, no lo hace *duro*.
 
 ### 2.3 HONESTIDAD INNEGOCIABLE: es un cedazo, no una garantía
 
