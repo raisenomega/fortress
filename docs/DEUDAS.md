@@ -75,14 +75,56 @@ del Terminal (`tras-el-turno.ts` y `finish-turn.ts` no mencionan el grafo).
 ### (5) Un proceso cayó sin dejar rastro, y un hallazgo corrió sin debate
 
 **(a)** La corrida que el operador vio caer **no dejó ninguna fila**: ni en
-`agent_runs`, ni en `chat_messages`, ni en `activity`, después de
-`2026-09-19T09:42:49Z`. Presupuesto descartado como causa ($28,02 gastados de un
-tope de $500/día). **`failed = 0` en las 17 filas del día**: ninguna corrida se
-marcó nunca como fallida.
+`agent_runs`, ni en `chat_messages`, ni en `activity`. La ventana entre el fin
+del lote (`09:42:49Z`) y el arranque del Motor (`10:25Z`) tiene **0 filas**.
+Presupuesto descartado como causa ($28,02 gastados de un tope de $500/día), y
+las **17 corridas anteriores al ensayo cerraron con `failed = 0`**.
 
 **(b)** En el lote que sí funcionó, el hallazgo 2 —el único que no se cerró—
 **no tuvo crítico ni OMEGA**; los hallazgos 1 y 3 sí. Sin explicación medida
 todavía.
+
+#### Lo que la avería del Motor enseñó sobre este bug (19-sep, medido)
+
+Ese mismo día el Motor cortó un drenaje con `cli_no_arranco`. **No es el mismo
+fallo que (a), y la base lo prueba: `cli_no_arranco` SÍ deja fila** —
+`11:43:21Z`, `failed=1`, **0 s, $0,00**—, el registro honesto de un proceso que
+nunca existió. El bug 5 no dejó ninguna.
+
+**Y no fue fallo de FORTRESS ni de la máquina.** En esa tanda **arrancaron 13
+procesos `claude` seguidos en 78 minutos (10:25→11:43Z); falló el 14.º**. Si
+fuera PATH o autenticación no habría arrancado ninguno: apunta a **agotamiento
+transitorio del sistema** (memoria, descriptores, límite de procesos).
+
+FORTRESS lo manejó bien: lo cazó, lo clasificó como **avería** (`averia.ts:30`),
+**cortó la tanda**, **no lo reintentó** (`retry-eligibility.ts:10-12`) y dejó
+fila. Los seis `RECHAZADO (REAL)` de la pantalla son el veredicto del
+**ANALISTA** —el hallazgo es real—, **no un rechazo de fix**: cero de los seis
+llegó a un juicio de calidad.
+
+##### Deuda A — la causa de `cli_no_arranco` se pierde
+
+`motivo-del-generador.ts:27` devuelve el motivo **pelado**, mientras
+`veredicto-del-analisis.ts:44` sí guarda `cli_no_arranco: ${causa}`. El
+`child.on('error')` tenía `error.message` **en la mano** y se tiró, así que hoy
+**no sabemos** si fue memoria, descriptores o límite de procesos. El Motor cazó
+el fallo, lo clasificó bien… y perdió la única pista que lo explicaría.
+
+##### Deuda B — el Terminal no tiene el vocabulario tipado del Motor
+
+Los dos lados tienen manejador de spawn, pero producen cosas distintas:
+
+| | manejador | qué produce |
+|---|---|---|
+| Motor | `graph-generator.ts:61`, `graph-analyst.ts:44`, `graph-omega.ts:59` | `noArranco: true` → **motivo tipado con consecuencias** |
+| Terminal | `run-claude-process.ts:55` | una línea de stderr dentro de un fallo **genérico** |
+
+`cli_no_arranco` es **inalcanzable desde el Terminal**: cero apariciones en
+`application/chat/` e `infrastructure/chat/`.
+
+**Relevante al arreglar el bug 5, no antes.** Lo que falta no es el manejador —
+existe— sino el **vocabulario**: un motivo con nombre y consecuencias (corta, no
+reintenta, queda escrito) en vez de un `failed` indistinguible de cualquier otro.
 
 ---
 
