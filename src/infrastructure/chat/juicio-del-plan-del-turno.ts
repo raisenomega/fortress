@@ -4,6 +4,7 @@ import { esAutonomoDeVerdad } from '@application/settings/modo-guardado'
 import type { StepProgress } from '@application/workflow/step-progress'
 import type { AppContext } from '@application/context'
 import type { VeredictoDelPlan } from '@domain/chat/juicio-del-plan'
+import { olvidarAprobacion } from '../aprobacion-del-plan'
 import { correrElCicloDelPlan } from './ciclo-del-plan-del-turno'
 
 export interface JuicioDelPlanDelTurno {
@@ -52,6 +53,12 @@ export async function juzgarElPlanDelLote(
   if (!esTurnoDePlan(d.input) || !esAutonomoDeVerdad(d.context)) return null
   const project = d.context.projects.findById(d.input.projectId)
   if (!project) return null
+
+  // (a) Un plan NUEVO invalida el permiso viejo ANTES de juzgar nada (BUG 1).
+  // Va aqui y no al arrancar el turno porque la ventana que queda la cierra el
+  // carril: `guardRun` lo toma antes del turno y lo suelta en su `finally`, asi
+  // que ningun turno de ejecucion se cuela mientras el plan se escribe.
+  olvidarAprobacion(project.id)
 
   return correrElCicloDelPlan({
     context: d.context,

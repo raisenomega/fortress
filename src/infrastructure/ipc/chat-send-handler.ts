@@ -5,6 +5,7 @@ import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
 import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun } from '../run-control'
+import { gastarAprobacion } from '../aprobacion-del-plan'
 import { guardPlanAprobado } from '../plan-guard'
 import { guardRun } from '../run-guard'
 import { IPC } from './channels'
@@ -32,6 +33,12 @@ async function atenderEnvio(
 
   const denegado = guardRun(context, input.projectId)
   if (denegado !== null) return err(denegado)
+
+  // (b) El permiso se GASTA aqui, con las dos puertas ya pasadas: el mismo
+  // hallazgo no corre dos veces con una sola aprobacion. DESPUES de `guardRun`
+  // y no antes — gastarlo y que el carril lo deniegue quemaria un permiso por
+  // un turno que no llego a existir.
+  if (input.findingId !== undefined) gastarAprobacion(input.projectId, input.findingId)
 
   // DENTRO del try: armar los motores lee la base y puede fallar, y fuera ese
   // fallo saltaba por encima del `finally` y dejaba el carril TOMADO.
