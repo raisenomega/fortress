@@ -35,7 +35,7 @@ const omegaQueDice = (r: Awaited<ReturnType<OmegaDelTurno['run']>>): OmegaDelTur
 describe('el juez del turno: OMEGA antes de conservar', () => {
   it('APROBADO y factura en agent_runs con el projectId del TERMINAL', async () => {
     const { ctx, runs } = contexto()
-    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', omega: omegaQueDice(conVeredicto({ ...EJES, veredicto_global: 'APROBADO', razon: 'ok' })) }) // prettier-ignore
+    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', agentes: 3, avisar: () => {}, omega: omegaQueDice(conVeredicto({ ...EJES, veredicto_global: 'APROBADO', razon: 'ok' })) }) // prettier-ignore
 
     const v = await juez(CP, PLAN)
 
@@ -47,7 +47,7 @@ describe('el juez del turno: OMEGA antes de conservar', () => {
   it('VETADO trae la razon y una huella de lo que se intento', async () => {
     const { ctx } = contexto()
     const veta = conVeredicto({ ...EJES, resuelve_el_hallazgo: 'NO', veredicto_global: 'VETADO', razon: 'no cubre inline' }) // prettier-ignore
-    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', omega: omegaQueDice(veta) }) // prettier-ignore
+    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', agentes: 3, avisar: () => {}, omega: omegaQueDice(veta) }) // prettier-ignore
 
     const v = await juez(CP, PLAN)
 
@@ -58,7 +58,7 @@ describe('el juez del turno: OMEGA antes de conservar', () => {
   it('sin ficheros tocados NO se juzga, y no se gasta una corrida', async () => {
     const { ctx, runs } = contexto()
     const vacio = { ...CP, diff: () => ({ diffText: '', tocados: [], previo: () => '', actual: () => '' }) } // prettier-ignore
-    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', omega: omegaQueDice(conVeredicto({ ...EJES, veredicto_global: 'APROBADO', razon: 'ok' })) }) // prettier-ignore
+    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', agentes: 3, avisar: () => {}, omega: omegaQueDice(conVeredicto({ ...EJES, veredicto_global: 'APROBADO', razon: 'ok' })) }) // prettier-ignore
 
     expect(await juez(vacio, PLAN)).toEqual({ juzgado: false })
     expect(runs).toHaveLength(0)
@@ -67,7 +67,7 @@ describe('el juez del turno: OMEGA antes de conservar', () => {
   it('si OMEGA no arranca NO se inventa veredicto: decide el gate', async () => {
     const { ctx } = contexto()
     const roto = { ok: false as const, error: 'x', timedOut: false, runMeta: META }
-    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', omega: omegaQueDice(roto) }) // prettier-ignore
+    const juez = juezConOmega({ context: ctx, projectId: 'p1', cwd: '/p', agentes: 3, avisar: () => {}, omega: omegaQueDice(roto) }) // prettier-ignore
 
     expect(await juez(CP, PLAN)).toEqual({ juzgado: false })
   })

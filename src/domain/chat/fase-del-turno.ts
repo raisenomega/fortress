@@ -5,12 +5,11 @@
  * que se HACE. En el ensayo del 18-sep eso significo mirar seis minutos de
  * cronometro mientras un critico navegaba el codigo por $1.93, sin saberlo.
  *
- * Es una union que CRECE: hoy solo el debate; el juicio de OMEGA entra con su
- * propia pieza. Se nombra por lo que el turno esta haciendo, nunca por su color
+ * Se nombra por lo que el turno esta haciendo, nunca por su color
  * —el color lo decide la presentacion, y un dominio que dice «naranja» no puede
  * cambiar de tema sin mentir—.
  */
-export type FaseDelTurno = 'debate'
+export type FaseDelTurno = 'debate' | 'juicio'
 
 /**
  * Lo que se lee en la barra. Un mapa y no un `switch` para que una fase nueva
@@ -21,7 +20,10 @@ export type FaseDelTurno = 'debate'
  * no solo de quien ataca.
  */
 const ETIQUETA: Record<FaseDelTurno, (agentes: number) => string> = {
-  debate: (agentes) => `Debate · ${agentes} agentes`
+  debate: (agentes) => `Debate · ${agentes} agentes`,
+  // El juicio no lleva numero: juzga UNO, y decir «3 agentes» mientras solo
+  // trabaja OMEGA seria contar el turno en vez de contar lo que pasa ahora.
+  juicio: () => 'Consultando a OMEGA'
 }
 
 export function etiquetaDeFase(fase: FaseDelTurno, agentes: number): string {

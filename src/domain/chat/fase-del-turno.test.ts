@@ -17,9 +17,16 @@ describe('la etiqueta del debate', () => {
     expect(etiquetaDeFase('debate', 3)).toContain('3')
   })
 
+  it('el juicio NO lleva numero: juzga uno', () => {
+    // Decir «3 agentes» mientras solo trabaja OMEGA seria contar el turno en
+    // vez de contar lo que pasa ahora.
+    expect(etiquetaDeFase('juicio', 3)).toBe('Consultando a OMEGA')
+  })
+
   it('no dice el color: eso lo decide la presentacion', () => {
     // Un dominio que dijera «naranja» no podria cambiar de tema sin mentir.
-    const texto = etiquetaDeFase('debate', 3)
-    expect(texto).not.toMatch(/naranja|orange|text-|#|hsl/i)
+    for (const fase of ['debate', 'juicio'] as const) {
+      expect(etiquetaDeFase(fase, 3)).not.toMatch(/naranja|azul|orange|blue|text-|#|hsl/i)
+    }
   })
 })

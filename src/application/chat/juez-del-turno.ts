@@ -6,6 +6,7 @@ import { juzgar, type DepsDelJuicio } from '../repair/juicio-de-omega'
 import { recordMotorRun } from '../repair/record-motor-run'
 import { asentarNotasDelProyecto } from '../system/asentar-notas'
 import type { AppContext } from '../context'
+import type { StepProgress } from '../workflow/step-progress'
 
 export interface JuezDelTurno {
   /** `objeciones`: lo que el tribunal encontro, para que OMEGA juzgue INFORMADO
@@ -23,6 +24,10 @@ export interface JuezDeps {
   readonly projectId: string
   readonly cwd: string
   readonly omega: DepsDelJuicio['omega']
+  /** Cuantos agentes intervienen en el turno, para el medidor (ADR-097). */
+  readonly agentes: number
+  /** El canal de la barra: OMEGA tarda y el operador tiene que saber que corre. */
+  readonly avisar: (progreso: StepProgress) => void
 }
 
 /**
@@ -44,6 +49,9 @@ export function juezConOmega(deps: JuezDeps): JuezDelTurno {
   return async (cp, plan) => {
     const trabajo = cp.diff?.() ?? null
     if (trabajo === null || trabajo.tocados.length === 0) return SIN_JUZGAR
+
+    // El ultimo de los tres: el debate ya paso, ahora juzga.
+    deps.avisar({ index: deps.agentes - 1, total: deps.agentes, tokens: 0, costUsd: 0, fase: 'juicio' }) // prettier-ignore
 
     const lee = {
       changedFiles: () => Promise.resolve(trabajo.tocados),

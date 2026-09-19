@@ -45,13 +45,13 @@ export async function turnoDelTerminal(deps: TurnoDeps): Promise<Convergencia> {
     return { turno, convergio: true, razon: null, intentos: 1 }
   }
 
-  const comun = { context, projectId: project.id, cwd: project.path }
-  const juez = juezConOmega({ ...comun, omega: deps.omega })
   // Sin critico inyectado no hay tribunal, y `arbitrar` se salta el debate: la
   // Fase A entera sigue funcionando igual que antes de existir esta pieza.
   const critico = deps.critico ?? SIN_CRITICO
   // Aqui `conJuicio` es cierto por construccion: la guarda de arriba ya salio.
   const agentes = agentesDelTurno(true, critico !== SIN_CRITICO)
-  const tribunal = tribunalConCritico({ ...comun, critico, agentes, avisar: deps.avisar })
+  const comun = { context, projectId: project.id, cwd: project.path, agentes, avisar: deps.avisar }
+  const juez = juezConOmega({ ...comun, omega: deps.omega })
+  const tribunal = tribunalConCritico({ ...comun, critico })
   return hastaConverger({ red, cwd: project.path, foco, pedido: input.prompt, juez, tribunal, producir }) // prettier-ignore
 }
