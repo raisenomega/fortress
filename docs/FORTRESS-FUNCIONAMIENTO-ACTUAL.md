@@ -1,6 +1,18 @@
-# FORTRESS — funcionamiento real a `main@0cc862b`
+# FORTRESS — funcionamiento real a `main@f2cc7f8`
 
-**Fecha del recorrido:** 2026-09-07 · **Commit de referencia:** `0cc862b` (2026-09-06 22:55 AST)
+**Fecha del recorrido:** 2026-09-07, **ampliado el 2026-09-19** · **Commit de
+referencia:** `f2cc7f8` (2026-09-19)
+
+> ### ⚠ ACTUALIZACIÓN — 2026-09-19: lo que el cuerpo de abajo NO conoce
+>
+> **Las secciones 1 a 9 se escribieron sobre `main@0cc862b` (2026-09-06).** Entre
+> aquel commit y este hay **239 commits, 115 en `src/`, 843 ficheros y 19 ADRs
+> nuevos**. Lo que aquellas secciones describen del Terminal **ya no es todo lo
+> que hace**: entre el 17 y el 19 de septiembre aprendió a juzgarse solo.
+>
+> **La §10 es nueva y manda sobre el resto en lo que toca al Terminal.** Nada de
+> lo viejo se borra —describe capas que siguen en pie—, pero donde las dos se
+> contradigan sobre el Terminal, vale la §10.
 **Método:** lectura del código de `src/` por capas (`domain` → `application` → `infrastructure` → `presentation`) y de los 78 ADRs de `docs/DECISIONS/`. Cada afirmación lleva `fichero:línea`. Lo que no se pudo respaldar con código no está escrito.
 
 > **Aviso sobre las plantillas de la raíz.** El `CLAUDE.md` que vive un nivel por encima del repositorio (`../CLAUDE.md`) se describe a sí mismo como *"Configuración Universal para Claude Code · Aplicable a cualquier proyecto"*: es un **molde que FORTRESS distribuye a los proyectos que audita**, igual que la carpeta `templates/**`, que `electron-builder.yml` excluye del binario con el comentario *"Kit universal: se distribuye a proyectos, no viaja en el binario"*. **No describen la maquinaria de FORTRESS.** Lo que la describe es `src/` y `docs/DECISIONS/`, y este documento se apoya solo en eso.
@@ -18,7 +30,8 @@
 7. [OMEGA / Sentinel](#7-omega--sentinel)
 8. [La auto-mejora](#8-la-auto-mejora)
 9. [Alcance y límites actuales](#9-alcance-y-límites-actuales)
-10. [Glosario](#10-glosario)
+10. [El Terminal autónomo: el juicio antes del código](#10-el-terminal-autónomo-el-juicio-antes-del-código) — **2026-09-19**
+11. [Glosario](#11-glosario)
 
 ---
 
@@ -411,7 +424,110 @@ Registradas y abiertas a fecha de este documento, solo las de código: `git-push
 
 ---
 
-## 10. Glosario
+## 10. El Terminal autónomo: el juicio antes del código
+
+**Escrita el 2026-09-19 sobre `f2cc7f8`.** Cubre ADR-089 a ADR-097 — lo que el
+Terminal aprendió entre el 17 y el 19 de septiembre. Manda sobre las §1-9 en
+todo lo que toque al Terminal.
+
+### 10.1 El recibo: qué herramientas corrió el turno
+
+Cada turno deja constancia de las herramientas que usó
+(`domain/chat/recibo-de-herramientas.ts`), y se **tacha antes de cortar**, nunca
+al revés. Se persiste en la última puerta —`persistence/agent-run-insert.ts`,
+por donde pasa todo INSERT— y vive en la columna `recibo` de `agent_runs`.
+
+Un turno que gastó y no dice qué hizo no es un turno auditado: es un cargo.
+
+### 10.2 El diff que se juzga incluye lo creado
+
+`git diff` no ve un fichero nuevo, así que OMEGA juzgaba fixes a los que les
+faltaba justo el fichero que resolvía el hallazgo.
+`infrastructure/git/trabajo-del-turno.ts` los busca con
+`git ls-files --others --exclude-standard` y `diff-de-creados.ts` compone su
+diff a mano — **nunca `git add -N`**, que mutaría el índice del cliente.
+
+### 10.3 El crítico, y el debate
+
+`domain/agent/critico.ts` define un agente cuyo trabajo es **buscar el fallo**,
+no confirmarlo; su modelo se deriva de la escalera, nunca de un literal. Corre
+por `infrastructure/repair/graph-critico.ts`, con el ciclo de proceso propio.
+
+El tribunal se llama solo cuando hay diff que atacar
+(`application/chat/tribunal-con-critico.ts`) y factura como `critico` en
+`agent_runs`. El debate corrió por primera vez en vivo el 2026-09-19: **396 s y
+$1,93**.
+
+### 10.4 El juicio del PLAN: OMEGA en la silla del aprobador
+
+En autónomo no hay humano esperando, así que **OMEGA juzga la dirección antes de
+que nadie toque código** (ADR-097):
+
+1. El productor propone un plan para los **N hallazgos del lote**.
+2. `application/chat/juez-del-plan.ts` los **relee de la base** por sus ids —del
+   mensaje solo se aceptan ids— y se los pasa a OMEGA con la prosa del productor
+   (`domain/chat/plan-prompt.ts:28`). El vocabulario es propio:
+   **`ADELANTE` / `REPLANTEA`**, distinto del `APROBADO`/`VETADO` del fix **a
+   propósito**, para que nadie confunda un cedazo blando con la revisión dura.
+3. `application/chat/ciclo-del-plan.ts` repropone **mientras la propuesta
+   avance** (huella del texto, no un cupo). A la primera huella repetida le deja
+   una vuelta más; a la segunda **para**.
+4. `infrastructure/chat/ciclo-del-plan-del-turno.ts` aprueba el lote llamando a
+   `aprobarLote` **desde el proceso principal**.
+
+### 10.5 La puerta: en autónomo es IMPOSIBLE ejecutar sin aprobación
+
+`infrastructure/plan-guard.ts:36` rechaza cualquier turno que ejecute un
+hallazgo del lote si `hallazgoAprobado` dice que no. Tres propiedades que la
+hacen una garantía y no un consejo:
+
+- **Vive en el main**, junto a `guardRun`, y **antes** que él: negar después de
+  reservar el carril lo dejaría tomado para siempre.
+- **Lee el modo de la BASE** (`esAutonomoDeVerdad`), nunca `input.mode`: el turno
+  de plan manda `supervisado` a propósito, y fiarse del mensaje sería preguntarle
+  al que quiere pasar si tiene permiso.
+- **La aprobación la escribe solo el main** (`aprobacion-del-plan.ts:22`), en
+  memoria y por hallazgos. El renderer no puede firmar su propio permiso.
+
+### 10.6 Los desenlaces, dichos en voz clara
+
+- **ADELANTE** → el lote se ejecuta solo, sin un clic.
+- **REPLANTEA dos veces** → *«Decisión abierta — necesita un humano»*
+  (`domain/chat/decision-abierta.ts`), escrito en el hilo. Dice qué pasó, que
+  **no se ejecutó nada**, y que se espera al operador. No dice «no convergió»:
+  eso es cómo se llama el fallo por dentro, no qué necesita quien lo lee.
+- **OMEGA ilegible** → no se aprueba **y no se anota decisión abierta**: una
+  avería no es un límite alcanzado.
+
+### 10.7 Lo que el operador VE mientras corre
+
+`domain/chat/fase-del-turno.ts` nombra la fase (`debate` · `juicio` · `plan`) y
+`RunMeter.tsx` le da tono con tokens del tema. Antes el medidor contaba tiempo y
+dinero pero nunca lo que se hacía: seis minutos de crítico trabajando por $1,93
+se leían como «no hizo nada».
+
+### 10.8 El modo ya no frena por palabra — en ningún sitio
+
+ADR-089 retiró del código la lista `auth`/`payments`/`RLS`/`seguridad`. El
+2026-09-19 se retiró también **del prompt**, donde había sobrevivido pidiéndole
+al modelo que la aplicara a mano (`domain/settings/instruccion-de-modo.ts`).
+
+### 10.9 Lo que NO está cerrado
+
+**Cinco defectos medidos en el ensayo del 2026-09-19 y el resto de deudas viven
+en [DEUDAS.md](DEUDAS.md)**, con evidencia y orden de arreglo. Los dos que más
+cambian lo de arriba:
+
+- **La aprobación de OMEGA no caduca**: `olvidarAprobacion` no tiene llamadores.
+- **El turno de plan del lote se cree en supervisado**, y eso además le bloquea
+  el grafo (`permission-mode.ts:26` da `'plan'`, que mata el MCP).
+
+Y sigue pendiente **ADR-092, el sandbox**: sin él, Bash libre (ADR-093, pieza 3)
+está bloqueado, y con él la verificación de stacks que no son Node.
+
+---
+
+## 11. Glosario
 
 Términos propios de este código, con su significado **real** y dónde está definido.
 
