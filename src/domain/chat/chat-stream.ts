@@ -1,3 +1,4 @@
+import type { FaseDelTurno } from './fase-del-turno'
 /** Fragmento de una respuesta que aun se esta generando. */
 export interface ChatChunk {
   readonly projectId: string
@@ -11,4 +12,6 @@ export interface ChatProgress {
   readonly total: number
   readonly tokens: number
   readonly costUsd: number
+  /** Que esta haciendo el turno (ADR-097). Copia del gemelo de aplicacion. */
+  readonly fase?: FaseDelTurno
 }
