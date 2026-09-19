@@ -3,7 +3,8 @@ import { findAgent } from '@domain/agent/agent-catalog'
 import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { Project } from '@domain/project/project'
 import { buildDocsFirst } from '@domain/settings/docs-first-compose'
-import { MODE_INSTRUCTION, type OperationMode } from '@domain/settings/operation-mode'
+import { MODE_INSTRUCTION } from '@domain/settings/instruccion-de-modo'
+import type { OperationMode } from '@domain/settings/operation-mode'
 
 function describeAgents(enabled: readonly AgentId[]): string {
   const lines = enabled

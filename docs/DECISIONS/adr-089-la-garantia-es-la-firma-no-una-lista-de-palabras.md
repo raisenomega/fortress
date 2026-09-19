@@ -5,6 +5,13 @@
 - **Área:** Terminal · Modo efectivo · Seguridad
 - **Retira:** la degradación por área protegida (`modo-efectivo.ts:49`)
 
+> ### ⚠ ENMIENDA 1 — 2026-09-19: el freno sobrevivió un mes EN EL PROMPT
+>
+> **Este ADR retiró el freno del CÓDIGO y dejó la misma orden escrita en el
+> prompt**, en `operation-mode.ts`, el propio fichero que estaba limpiando. El
+> mecanismo murió; la instrucción al modelo no. **Lo completa la §8**, escrita al
+> cerrar el punto 5 de la Fase B (ADR-097).
+
 > **El freno que este ADR retira nunca tuvo ADR propio.** Se buscó: ninguna
 > decisión de `docs/DECISIONS/` documenta `PROTECTED_WORDS` ni la degradación
 > por palabra. Nació como decisión de código, sin quedar escrita ni razonada en
@@ -270,3 +277,80 @@ trivial. Se descarta por el coste de oportunidad, con el hueco declarado arriba.
   riesgo), Enmienda 3 (OMEGA = Opus 5, independencia estructural).
 - `modo-efectivo.ts`, `protected-areas.ts`, `modo-del-turno.ts` — el freno.
 - `omega-prompt.ts`, `run-omega-inputs.ts` — lo que OMEGA necesita para juzgar.
+
+---
+
+## §8 — ENMIENDA 1 (2026-09-19): la mitad que faltaba — el freno vivía en el prompt
+
+### 8.1 Lo medido
+
+Este ADR se firmó el 17-sep. El 19-sep, midiendo el punto 5 de la Fase B («el
+autónomo deja de comportarse como supervisado»), se encontró esto en
+`operation-mode.ts`, **el mismo fichero cuyo freno este ADR retiró**:
+
+```ts
+autonomo:
+  'MODO AUTONOMO: aplica los cambios y reporta resultados. Corre los tests antes '
+  'y despues. Si algo falla, revierte. NUNCA toques auth, payments, RLS ni '
+  'seguridad sin volver a supervisado.'
+```
+
+**Es la lista de palabras de la §48 de este ADR** — `auth`, `payments`, `RLS`,
+`seguridad` — **viva y operando**. No la ejecutaba `effectiveMode`: la ejecutaba
+**el modelo**, porque se lo pedíamos en cada turno.
+
+Se verificó que el código estaba limpio de verdad: cero coincidencias de lista de
+palabras en `domain/settings/` y `domain/chat/`, y `operation-mode.test.ts:28-33`
+ya decía *«estos tests probaban lo contrario y ahora prueban que no»*.
+
+**El mecanismo se borró. La orden se quedó.** Y llegaba al agente por **tres**
+puertas, en **todos** los turnos: `chat-prompt.ts:33`, `system-prompt.ts:58`,
+`step-prompt.ts:57`.
+
+### 8.2 Por qué es grave, y por qué es el punto 5
+
+1. **«sin volver a supervisado» le pide al agente rebotar la decisión a un humano
+   que en autónomo NO ESTÁ.** Es, con esas palabras, el autónomo comportándose
+   como supervisado — escrito en el prompt.
+2. **El guardián no estaba pintado: estaba SUBCONTRATADO.** Retirar el mecanismo
+   y dejar la instrucción es la forma más difícil de cazar un freno, porque no
+   aparece en ninguna lectura del código de control.
+3. **«NUNCA toques seguridad» a una herramienta cuyos hallazgos SON de
+   seguridad** es exactamente el argumento con el que la §252-254 de este ADR
+   rechazó *«afinar la lista en vez de retirarla»*. Y es un freno disfrazado, que
+   ADR-090 §0 prohíbe.
+
+### 8.3 La decisión
+
+**Se retiran las dos frases.** Queda: *«MODO AUTONOMO: aplica los cambios y
+reporta resultados. Corre los tests antes y despues.»* — dice qué hacer, no
+prohíbe por palabra.
+
+Y se retira también **«Si algo falla, revierte»**: la reversión es
+`conRedDeReversion` (ADR-079), un checkpoint por intento, abajo, donde no se
+puede esquivar. Pedírsela al agente duplica una garantía existente, y un agente
+que revierte a mano puede deshacer justo lo que la red iba a conservar.
+
+`MODE_INSTRUCTION` sale a `instruccion-de-modo.ts` —el fichero pasaba de 75— con
+las dos razones escritas en su docblock, y `instruccion-de-modo.test.ts` prueba
+la **ausencia**, con el mismo molde que usó `operation-mode.test.ts` cuando este
+ADR retiró el mecanismo.
+
+### 8.4 La lección, que es la que vale para el próximo
+
+> **Retirar un freno del código no lo retira del producto si el prompt sigue
+> pidiéndolo.** Un ADR que elimina un mecanismo tiene que buscar la misma regla
+> escrita en prosa — en los prompts, en las cartas de los agentes, en los
+> docblocks que el modelo no lee pero el humano sí. Aquí sobrevivió un mes, a
+> tres puertas de distancia, dentro del fichero que el ADR estaba limpiando.
+
+### 8.5 Deuda medida al cerrar el punto 5 (NO se resuelve aquí)
+
+`esAutonomoDeVerdad` lee la BASE, así que el juicio del plan (ADR-097 §3) corre y
+**aprueba el lote** aunque el turno vaya a degradar después por una de las tres
+razones estructurales (`modo-efectivo.ts:57-62`: repo propio, sin confianza, sin
+red git). Los turnos del lote descubren la degradación **después**, y no editan.
+
+**No es un fallo de seguridad** —la degradación es deliberada y el aviso la
+explica—: es **gasto antes de que la degradación sea descubrible**, una corrida
+de OMEGA que se sabía de antemano que no iba a servir. Queda anotada.

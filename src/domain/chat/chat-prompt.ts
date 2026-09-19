@@ -2,7 +2,8 @@ import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { hallazgosDelTurno, type HallazgosDelTurno } from './hallazgos-del-prompt'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import { GRAPH_FIRST } from '../settings/graph-first'
-import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
+import { MODE_INSTRUCTION } from '../settings/instruccion-de-modo'
+import type { OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
 
 export interface ChatContext extends HallazgosDelTurno {

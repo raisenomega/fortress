@@ -4,7 +4,8 @@ import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { categoryForAgent } from '../settings/docs-first'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import { graphFirstFor } from '../settings/graph-first'
-import { MODE_INSTRUCTION, type OperationMode } from '../settings/operation-mode'
+import { MODE_INSTRUCTION } from '../settings/instruccion-de-modo'
+import type { OperationMode } from '../settings/operation-mode'
 import { SELF_VERIFY } from '../settings/self-verify'
 import type { WorkflowStep } from './workflow'
 
@@ -25,7 +26,6 @@ export interface StepContext {
  */
 function describePrevious(previous: readonly string[]): string {
   if (previous.length === 0) return 'Eres el primer agente de esta revision.'
-
   return [
     'Lo que ya han reportado los agentes anteriores en esta misma revision:',
     ...previous.map((line) => `- ${line}`),
@@ -35,7 +35,6 @@ function describePrevious(previous: readonly string[]): string {
 
 function describeKnown(known: readonly string[]): string {
   if (known.length === 0) return 'FORTRESS no tiene ningun escaneo previo de este proyecto.'
-
   return [
     'FORTRESS ya tiene registrados estos hallazgos de un escaneo anterior:',
     ...known.map((line) => `- ${line}`),
