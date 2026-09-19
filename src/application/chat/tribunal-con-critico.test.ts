@@ -24,6 +24,8 @@ const deps = (context: AppContext, corrida: CorridaDelCritico): Parameters<typeo
   context,
   projectId: 'p1',
   cwd: '/p',
+  agentes: 3,
+  avisar: () => {},
   critico: { run: () => Promise.resolve(corrida) }
 })
 

@@ -2,6 +2,7 @@ import { buildCriticoPrompt } from '@domain/chat/critico-prompt'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import type { AppContext } from '../context'
 import { recordMotorRun } from '../repair/record-motor-run'
+import type { StepProgress } from '../workflow/step-progress'
 import type { Tribunal } from './tribunal-del-turno'
 
 /** Una corrida del critico, vista desde la aplicacion. */
@@ -14,6 +15,11 @@ export interface TribunalDeps {
   readonly projectId: string
   readonly cwd: string
   readonly critico: { run(arbol: string, prompt: string): Promise<CorridaDelCritico> }
+  /** Cuantos agentes intervienen, para la etiqueta del debate (ADR-097). */
+  readonly agentes: number
+  /** El canal de la barra. Sin el, el debate corre mudo — que es justo lo que
+   *  el ensayo del 18-sep destapo: $1.93 y seis minutos sin decir nada. */
+  readonly avisar: (progreso: StepProgress) => void
 }
 
 /**
@@ -36,6 +42,9 @@ export function tribunalConCritico(deps: TribunalDeps): Tribunal {
     const trabajo = cp.diff?.() ?? null
     if (trabajo === null || trabajo.tocados.length === 0) return []
 
+    // ANTES de arrancar: el critico tarda minutos y la barra tiene que decirlo
+    // mientras pasa, no cuando acabe.
+    deps.avisar({ index: 1, total: deps.agentes, tokens: 0, costUsd: 0, fase: 'debate' })
     const corrida = await deps.critico.run(deps.cwd, buildCriticoPrompt(plan, trabajo.diffText))
 
     const { context, projectId } = deps

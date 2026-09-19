@@ -62,7 +62,7 @@ export async function sendMessage(
     agentes: agentesDelTurno(activa && foco.value !== null && redGit, critico !== SIN_CRITICO),
     onChunk: enVivo
   })
-  const ciclo = await turnoDelTerminal({ context, project, red, activa, foco: foco.value, input, producir, omega, critico }) // prettier-ignore
+  const ciclo = await turnoDelTerminal({ context, project, red, activa, foco: foco.value, input, producir, omega, critico, avisar: onStep }) // prettier-ignore
   const stored = finishTurn({ context, project, meta, outcome: ciclo.turno.outcome, aviso: aviso + ciclo.turno.aviso, startedAt, prompt: input.prompt }) // prettier-ignore
   if (!stored.ok) return err(stored.error)
   // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).

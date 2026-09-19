@@ -4,6 +4,8 @@ import type { Project } from '@domain/project/project'
 import type { AppContext } from '../context'
 import { hastaConverger, type Convergencia, type Reintento } from './ciclo-de-convergencia'
 import { conRedDeReversion } from './con-red-de-reversion'
+import { agentesDelTurno } from '@domain/chat/agentes-del-turno'
+import type { StepProgress } from '../workflow/step-progress'
 import { SIN_CRITICO, type CriticoDelTurno } from './critico-del-turno'
 import { juezConOmega } from './juez-del-turno'
 import type { OmegaDelTurno } from './omega-del-turno'
@@ -21,6 +23,8 @@ export interface TurnoDeps {
   readonly omega: OmegaDelTurno
   /** El tribunal de la Fase B. Ausente = solo OMEGA, como en la Fase A. */
   readonly critico?: CriticoDelTurno
+  /** El canal de la barra, para que el debate se vea mientras corre (ADR-097). */
+  readonly avisar: (progreso: StepProgress) => void
   readonly producir: (reintento: Reintento | null) => Promise<ReplyOutcome>
 }
 
@@ -46,6 +50,8 @@ export async function turnoDelTerminal(deps: TurnoDeps): Promise<Convergencia> {
   // Sin critico inyectado no hay tribunal, y `arbitrar` se salta el debate: la
   // Fase A entera sigue funcionando igual que antes de existir esta pieza.
   const critico = deps.critico ?? SIN_CRITICO
-  const tribunal = tribunalConCritico({ ...comun, critico })
+  // Aqui `conJuicio` es cierto por construccion: la guarda de arriba ya salio.
+  const agentes = agentesDelTurno(true, critico !== SIN_CRITICO)
+  const tribunal = tribunalConCritico({ ...comun, critico, agentes, avisar: deps.avisar })
   return hastaConverger({ red, cwd: project.path, foco, pedido: input.prompt, juez, tribunal, producir }) // prettier-ignore
 }
