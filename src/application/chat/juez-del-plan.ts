@@ -38,7 +38,13 @@ export interface JuezDelPlanDeps {
  * ningun hallazgo vivo cae ahi mismo, antes de gastar una corrida: si no queda
  * nada que juzgar tampoco hay nada que aprobar, y la puerta sigue cerrada.
  */
-export function juezDelPlan(deps: JuezDelPlanDeps) {
+/** Juzga la direccion de un plan sobre los N hallazgos del lote. */
+export type JuezDelPlan = (
+  ids: readonly string[],
+  propuesta: string
+) => Promise<JuicioDelPlan | null>
+
+export function juezDelPlan(deps: JuezDelPlanDeps): JuezDelPlan {
   return async (ids: readonly string[], propuesta: string): Promise<JuicioDelPlan | null> => {
     const hallazgos = lineasDelLote(deps.context, deps.projectId, ids)
     if (hallazgos.length === 0) return null

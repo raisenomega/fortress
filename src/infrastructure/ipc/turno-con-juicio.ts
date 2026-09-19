@@ -38,25 +38,36 @@ export async function turnoConJuicio(
   // momentos del turno, una sola forma de lanzar a quien mira.
   const critico = criticoDelTerminal(input.projectId)
 
-  const hecho = await sendMessage(
-    context,
-    assistant,
-    codeAgent,
-    conFocoSaneado(input),
-    chunkSender(event, input.projectId),
-    progreso,
-    () => isCancelled(input.projectId),
-    isFortressRepo,
-    RED_DE_REVERSION,
-    omegaDelTerminal(input.projectId),
-    critico
-  )
+  /** Un turno del productor. Se LLAMA a `sendMessage`, no se toca: el replanteo
+   *  del plan es otro turno igual, con otro prompt, y por eso se ve en el hilo. */
+  const correrTurno = (peticion: SendMessageInput): Promise<Result<SendMessageOutput>> =>
+    sendMessage(
+      context,
+      assistant,
+      codeAgent,
+      conFocoSaneado(peticion),
+      chunkSender(event, input.projectId),
+      progreso,
+      () => isCancelled(input.projectId),
+      isFortressRepo,
+      RED_DE_REVERSION,
+      omegaDelTerminal(input.projectId),
+      critico
+    )
+
+  const hecho = await correrTurno(input)
   if (!hecho.ok) return hecho
 
   // La OTRA MITAD de la puerta de arriba: el unico camino que la abre. Aqui y no
   // en `sendMessage` porque necesita la prosa que el turno acaba de producir —
   // antes de terminar, ese plan no existe (ADR-097 §3).
   const propuesta = hecho.value.assistant.content
-  const plan = await juzgarElPlanDelLote({ context, input, propuesta, avisar: progreso, omega: critico }) // prettier-ignore
+  // Un turno caido no aporta plan: cadena vacia, y el ciclo lo lee como «no se
+  // pudo juzgar» en vez de mandarle a OMEGA una propuesta que no existe.
+  const reproponer = async (pedido: string): Promise<string> => {
+    const otro = await correrTurno({ ...input, prompt: pedido })
+    return otro.ok ? otro.value.assistant.content : ''
+  }
+  const plan = await juzgarElPlanDelLote({ context, input, propuesta, avisar: progreso, omega: critico, reproponer }) // prettier-ignore
   return ok({ ...hecho.value, plan })
 }

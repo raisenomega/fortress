@@ -17,13 +17,29 @@ const REPLANTEA: JuicioDelPlan = { ...ADELANTE, veredicto: 'REPLANTEA', razon: '
  * preguntas —como avanza y como termina— y juntas pasaban de 75 lineas.
  */
 describe('la huella caza al que da vueltas', () => {
-  it('el mismo plan dos veces: se cierra sin aprobar, con la razon', async () => {
+  it('el mismo plan repetido DOS veces: se cierra sin aprobar, con la razon', async () => {
+    // Antes cortaba a la PRIMERA repeticion. Ahora le deja una vuelta mas
+    // (ADR-097 §5): la respuesta de un modelo no es la misma dos veces, asi que
+    // repetir puede dar otra cosa — es la doctrina de `retry-eligibility`, no un
+    // cupo de dos disfrazado. A la segunda repetida ya no es mala suerte.
     const r = await hastaAprobarElPlan({
       proponer: () => Promise.resolve('el MISMO texto siempre'),
       juzgar: () => Promise.resolve(REPLANTEA)
     })
 
-    expect(r).toMatchObject({ aprobado: false, razon: 'toca el auth', intentos: 2 })
+    expect(r).toMatchObject({ aprobado: false, razon: 'toca el auth', intentos: 3 })
+  })
+
+  it('la segunda oportunidad es UNA: no se renueva en cada repeticion', async () => {
+    // Si `yaRepitio` se reseteara, un productor terco daria vueltas para
+    // siempre — que es exactamente lo que la huella existe para cortar.
+    let vueltas = 0
+    await hastaAprobarElPlan({
+      proponer: () => (vueltas += 1, Promise.resolve('el MISMO texto siempre')), // prettier-ignore
+      juzgar: () => Promise.resolve(REPLANTEA)
+    })
+
+    expect(vueltas).toBe(3)
   })
 
   it('converger no es un contador: mientras el texto CAMBIE, sigue', async () => {

@@ -37,10 +37,24 @@ export interface PlanAprobado {
  * Si OMEGA no llega a juzgar, NO se inventa una aprobacion: sale sin aprobar y
  * decide quien llama, igual que el gate decide cuando el juez del fix no
  * arranca.
+ *
+ * DOS OPORTUNIDADES, MEDIDAS POR PROGRESO Y NO POR CUPO. A la primera huella
+ * repetida no se corta: se le deja UNA vuelta mas. No es un cupo disfrazado de
+ * dos — es la doctrina que `retry-eligibility` ya escribio para el analisis
+ * ilegible: *«la respuesta de un modelo no es la misma dos veces, asi que
+ * repetir SI puede dar otra cosa»*. A la SEGUNDA repetida ya no es mala suerte:
+ * es que el productor no tiene otra direccion que ofrecer, y ahi para.
+ *
+ * NO hay «sesion fresca» que pedir, y no es un olvido: el turno de plan no lleva
+ * foco, y `produce-reply` solo reanuda sesion cuando lo hay. Cada replanteo YA
+ * nace sin `--resume`, sin memoria del texto anterior — que es justo lo que se
+ * queria de una sesion fresca. Por eso la objecion viaja entera en el prompt
+ * (`replanteoComoPedido`) y no apoyada en un hilo que no existe.
  */
 export async function hastaAprobarElPlan(deps: CicloDelPlanDeps): Promise<PlanAprobado> {
   const vistos = new Set<string>()
   let replanteo: string | null = null
+  let yaRepitio = false
 
   for (let intentos = 1; ; intentos += 1) {
     const propuesta = await deps.proponer(replanteo)
@@ -51,7 +65,10 @@ export async function hastaAprobarElPlan(deps: CicloDelPlanDeps): Promise<PlanAp
     }
 
     const huella = createHash('sha1').update(propuesta).digest('hex')
-    if (vistos.has(huella)) return { propuesta, aprobado: false, razon: juicio.razon, intentos }
+    if (vistos.has(huella)) {
+      if (yaRepitio) return { propuesta, aprobado: false, razon: juicio.razon, intentos }
+      yaRepitio = true
+    }
     vistos.add(huella)
     replanteo = replanteoComoPedido(juicio.razon)
   }

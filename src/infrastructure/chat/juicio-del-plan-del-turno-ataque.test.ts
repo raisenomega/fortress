@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { hallazgoAprobado, olvidarAprobacion } from '../aprobacion-del-plan'
-import { deps, DICE, LOTE, TURNO_DE_PLAN } from './juicio-del-plan-del-turno-fixture'
+import { banco, DICE, LOTE, TURNO_DE_PLAN } from './juicio-del-plan-del-turno-fixture'
 import { juzgarElPlanDelLote } from './juicio-del-plan-del-turno'
 
 beforeEach(() => olvidarAprobacion('p1'))
@@ -8,16 +8,16 @@ beforeEach(() => olvidarAprobacion('p1'))
 const aprobados = (): readonly boolean[] => LOTE.map((id) => hallazgoAprobado('p1', id))
 
 /** El juicio con las corridas contadas: aprobar cuesta, y no aprobar no debe. */
-function conCorridasContadas(modo: string): ReturnType<typeof deps> & { corridas: () => number } {
+function conCorridasContadas(modo: string): ReturnType<typeof banco> & { corridas: () => number } {
   let corridas = 0
-  const base = deps(modo, DICE.ADELANTE)
+  const base = banco(modo, [DICE.ADELANTE])
   const d = {
     ...base.d,
     omega: {
       run: () => (corridas += 1, Promise.resolve({ ok: true as const, texto: DICE.ADELANTE, runMeta: { durationMs: 1, startedAt: 0, endedAt: 1 } })) // prettier-ignore
     }
   }
-  return { d, fases: base.fases, corridas: () => corridas }
+  return { ...base, d, corridas: () => corridas }
 }
 
 /**
@@ -29,7 +29,7 @@ describe('el modo sale de la BASE, nunca del mensaje', () => {
     // `planDelLote` manda SIEMPRE `mode: 'supervisado'` —el turno de plan no
     // edita—, incluso con el proyecto en autonomo. Si esto leyera `input.mode`,
     // el lote en autonomo no se juzgaria NUNCA y quedaria muerto tras la puerta.
-    const { d } = deps('autonomo', DICE.ADELANTE)
+    const { d } = banco('autonomo', [DICE.ADELANTE])
 
     expect(d.input.mode).toBe('supervisado')
     expect(await juzgarElPlanDelLote(d)).toBe('ADELANTE')
