@@ -765,6 +765,83 @@ nadie verificó — la mentira de la CSP repetida en una pantalla nueva. La pág
 da tres números y distingue las tres clases, y su clasificador cae siempre del
 lado que no afirma.
 
+## Acto 9 — El Terminal aprende a juzgarse, y FORTRESS se audita entera (2026-09-17 a 2026-09-19)
+
+### El freno que impedía al producto hacer su trabajo
+
+El 2026-09-17 un turno del lote sobre un proyecto de confianza pidió correr en
+autónomo y corrió en supervisado. El hallazgo se llamaba *«falta la cabecera
+Content-Security-Policy»*, y el freno del Terminal degradaba por palabra: el
+título contenía `security`. **ADR-089** retiró la lista. En una herramienta cuyos
+hallazgos son de seguridad por definición, la lista degradaba la mayoría de lo
+que encuentra.
+
+Quedó una mitad sin cerrar, y tardó dos días en verse: la misma orden seguía
+escrita en el prompt, pidiéndole al modelo que la aplicara a mano. Se retiró el
+2026-09-19 (ADR-089, ENMIENDA 1). **Retirar un mecanismo del código no lo retira
+del producto si el prompt sigue pidiéndolo.**
+
+### El Terminal se juzga a sí mismo (ADR-090, ADR-091, ADR-093)
+
+El Terminal pasó a tener las capas que el Motor ya tenía: OMEGA juzga el diff
+con evidencia, el gate dice lo que corrió en vez de fingir verde, y cada turno
+deja **recibo** de las herramientas que usó, redactado en la última puerta antes
+de la base. El diff que se juzga incluye ahora los ficheros **creados**, que
+antes eran invisibles para `git diff`.
+
+### La Fase B: dos voces enfrentadas (ADR-096, ADR-097)
+
+Nació el **crítico**: un agente cuyo trabajo es buscar el fallo en el fix del
+productor, no confirmarlo. OMEGA arbitra entre las dos voces. El debate corrió
+por primera vez en vivo el 2026-09-19 — **396 segundos y $1.93**— y no se vio:
+el medidor contaba tiempo y dinero, nunca lo que se hacía. **ADR-097** lo hizo
+visible y cerró el flujo del autónomo: OMEGA juzga la dirección del plan antes
+de tocar código, aprueba el lote desde el proceso principal, y si el productor
+da dos veces la misma respuesta el turno para con un texto de persona —
+*«Decisión abierta — necesita un humano»*— en vez de dar vueltas a costa del
+operador.
+
+### El ensayo en vivo
+
+El 2026-09-19 el autónomo resolvió un lote de tres hallazgos sin una sola
+pulsación: **3 de 3 procesados, 2 cerrados a Historia**. El ensayo también
+destapó cinco defectos, medidos contra la base y registrados en
+[DEUDAS](DEUDAS.md) con su causa raíz y su orden de arreglo.
+
+### La primera auditoría de FORTRESS sobre sí misma
+
+El 2026-09-18, por primera vez, FORTRESS se escaneó entera con paradas y
+cobertura declarada. Las cifras salen de la base, no de la pantalla:
+
+| | |
+|---|---|
+| paradas | **5 / 5** |
+| ficheros | **2081 / 2081** |
+| duración · coste | **39,1 min · $22,62** (282 turnos) |
+| módulos aplicables | **6** (M1, M4, M5, M6, M9, M10) |
+| módulos descartados **con evidencia** | **4** (M2, M3, M7, M8) |
+| hallazgos | **23** — 6 HIGH, 7 MEDIUM, 10 LOW |
+
+**El logro es la cobertura total con descarte justificado, no el número de
+hallazgos.** El escáner no dijo «no aplica» y siguió: nombró el fichero que
+buscó y no estaba (M2, M7) o citó el código que probaba lo contrario (M3
+apoyado en `README.md:104-113`; M8, en `billing-mode.ts`).
+
+**Los 6 HIGH están todos en `templates/`**, el kit universal que FORTRESS
+distribuye a los proyectos que audita — no su maquinaria. En `src/` salieron
+**2 MEDIUM** (`build-env.ts:38`, `project-mcp.ts`) y **8 LOW**, casi todos de
+accesibilidad. Que el código propio saliera casi limpio tras nueve meses es
+fortaleza medida, no falta de profundidad.
+
+> **Una lección de método, y costó estar a punto de escribir una cifra falsa
+> aquí.** La pantalla del tablero acumula hallazgos vivos de TODOS los escaneos;
+> la fila del escaneo dice cuántos vio ESE. Leer la pantalla y atribuirle el
+> número a un escaneo concreto mezcla semanas de trabajo en una sola fecha. La
+> base es la verdad; la pantalla es una vista. Y el propio escaneo dejó una
+> deuda al descubierto: su contador dice 27 donde hay 23 filas.
+
+---
+
 ## Presente
 
 El motor repara, el operador firma, el motor vuelve a mirar y cierra lo que ya
