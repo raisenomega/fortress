@@ -1,36 +1,12 @@
-import type { StepProgress } from '../workflow/step-progress'
-import type { AgentId } from '@domain/agent/agent'
 import type { Assistant } from '@domain/chat/assistant'
-import type { ChatEngine, CodeAgent } from '@domain/chat/code-agent'
-import { formatearHallazgo, type HallazgoAResolver } from '@domain/chat/hallazgo-a-resolver'
-import type { Project } from '@domain/project/project'
-import type { OperationMode } from '@domain/settings/operation-mode'
-import type { AppContext } from '../context'
+import type { ReplyOptions } from './opciones-de-respuesta'
+import { formatearHallazgo } from '@domain/chat/hallazgo-a-resolver'
 import { listaDelTurno } from './lista-del-turno'
 import type { ReplyOutcome } from './reply-outcome'
 import { replyFromApi } from './reply-from-api'
 import { replyFromChat } from './reply-from-chat'
 import { replyFromWorkflow } from './reply-from-workflow'
-import type { SendMessageInput } from './send-message-types'
 
-export interface ReplyOptions {
-  readonly context: AppContext
-  readonly assistant: Assistant | null
-  readonly codeAgent: CodeAgent
-  readonly project: Project
-  readonly input: SendMessageInput
-  readonly mode: OperationMode
-  readonly engine: ChatEngine
-  /** Agente que se hace cargo, ya enrutado. */
-  /** Agentes excluidos por el operador desde el sidebar. */
-  readonly excludedAgents: readonly AgentId[]
-  /** El hallazgo que resuelve este turno, ya releido de la base (ADR-088). */
-  readonly enFoco?: HallazgoAResolver | null
-  /** Progreso del workflow, paso a paso. */
-  readonly onStep: (progress: StepProgress) => void
-  readonly isCancelled: () => boolean
-  readonly onChunk: (delta: string) => void
-}
 
 /** Produce el texto con el motor elegido: CLI real o API de solo texto. */
 export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
@@ -47,6 +23,7 @@ export function produceReply(options: ReplyOptions): Promise<ReplyOutcome> {
       excludedAgents: options.excludedAgents,
       onStep: options.onStep,
       isCancelled: options.isCancelled,
+      agentes: options.agentes,
       known: listaDelTurno(options.context, project, input, foco),
       // `known` son los hallazgos del lote (plan o hermanos), no el historial.
       deLote: (options.input.lote ?? []).length > 0,

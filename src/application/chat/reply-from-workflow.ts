@@ -1,9 +1,4 @@
-import type { StepProgress } from '../workflow/step-progress'
-import type { CodeAgent } from '@domain/chat/code-agent'
-import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
-import type { Project } from '@domain/project/project'
-import type { OperationMode } from '@domain/settings/operation-mode'
-import type { AgentId } from '@domain/agent/agent'
+import type { WorkflowReplyOptions } from './opciones-de-respuesta'
 import { planWorkflow } from '@domain/workflow/plan-workflow'
 import { routeWorkflow } from '@domain/workflow/route-workflow'
 import { buildWorkflowReport } from '@domain/workflow/workflow-report'
@@ -13,19 +8,6 @@ import { replyFromChat } from './reply-from-chat'
 import { sumUsage } from './sum-usage'
 import type { ReplyOutcome } from './reply-outcome'
 
-export interface WorkflowReplyOptions {
-  readonly codeAgent: CodeAgent
-  readonly project: Project
-  /** Lo que el proyecto documenta, resuelto por el puerto del corpus. */
-  readonly corpus: CorpusDescriptor
-  readonly prompt: string
-  readonly mode: OperationMode
-  readonly excludedAgents: readonly AgentId[]
-  readonly onStep: (progress: StepProgress) => void
-  readonly onChunk: (delta: string) => void
-  readonly known: readonly string[]
-  readonly isCancelled: () => boolean
-}
 
 /**
  * Un mensaje se enruta a un workflow y sus pasos se ejecutan en orden: lo que
@@ -73,3 +55,4 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
     findings: consolidate(outcome.results)
   }
 }
+export type { WorkflowReplyOptions } from './opciones-de-respuesta'

@@ -8,7 +8,7 @@ import { permissionModeFor } from '@domain/settings/permission-mode'
 import { totalTokens } from '@domain/telemetry/token-usage'
 import { correrConMemoria } from './correr-con-memoria'
 import type { ReplyOutcome } from './reply-outcome'
-import type { WorkflowReplyOptions } from './reply-from-workflow'
+import type { WorkflowReplyOptions } from './opciones-de-respuesta'
 import { denialsNote, singleAgentOutcome } from './single-agent-outcome'
 
 /** Las opciones de siempre y, si el turno resuelve UN hallazgo, su bloque ya
@@ -56,7 +56,8 @@ function peticion(options: ChatReplyOptions, agentId: AgentId): CodeAgentRequest
 export async function replyFromChat(options: ChatReplyOptions): Promise<ReplyOutcome> {
   const agentId = quienContesta(options)
 
-  options.onStep({ index: 0, total: 1, tokens: 0, costUsd: 0 })
+  const total = options.agentes ?? 1
+  options.onStep({ index: 0, total, tokens: 0, costUsd: 0 })
 
   const startedAt = Date.now()
   // prettier-ignore
@@ -65,7 +66,7 @@ export async function replyFromChat(options: ChatReplyOptions): Promise<ReplyOut
 
   // El consumo se conoce al terminar (lo reporta el evento final del CLI): sin
   // esto el medidor de un solo agente se quedaba en 0 todo el run.
-  options.onStep({ index: 0, total: 1, tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd }) // prettier-ignore
+  options.onStep({ index: 0, total, tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd }) // prettier-ignore
 
   // La nota de denials da la transparencia del modo supervisado (lo bloqueado).
   const outcome = singleAgentOutcome(agentId, reply, denialsNote(options.mode, reply.denials), startedAt) // prettier-ignore
