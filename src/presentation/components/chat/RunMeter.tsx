@@ -11,8 +11,14 @@ import { useTelemetryStore } from '../../stores/telemetry-store'
  * tiempo llevan, y cuantos tokens y dinero han costado. En una frase, para
  * poder comparar de un vistazo agentes contra tiempo y gasto.
  */
-/** El tono de cada fase. Nunca un color a mano: token del tema (CLAUDE.md). */
-const TONO: Record<FaseDelTurno, string> = { debate: 'text-high' }
+/**
+ * El tono de cada fase. Nunca un color a mano: token del tema (CLAUDE.md).
+ *
+ * `Record` y no un ternario: una fase nueva no compila hasta que alguien decide
+ * como se ve. Es lo que obligo a elegir el azul del juicio en vez de dejarlo
+ * heredando el color de al lado sin que nadie lo notara.
+ */
+const TONO: Record<FaseDelTurno, string> = { debate: 'text-high', juicio: 'text-proceso' }
 
 export function RunMeter(): React.JSX.Element | null {
   const startedAt = useRunMeterStore((state) => state.startedAt)
