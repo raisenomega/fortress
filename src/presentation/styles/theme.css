@@ -28,6 +28,7 @@
   --color-medium: hsl(var(--medium));
   --color-low: hsl(var(--low));
   --color-success: hsl(var(--success));
+  --color-proceso: hsl(var(--proceso));
 
   --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;

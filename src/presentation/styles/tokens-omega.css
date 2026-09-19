@@ -32,5 +32,10 @@
   --low: 225 8% 55%;
   --success: 145 60% 45%;
 
+  /* PROCESO — no es una severidad: es «esto esta ocurriendo ahora». Vive fuera
+     de la escala a proposito, porque un estado transitorio no es un nivel de
+     riesgo. El oro sigue siendo la identidad; esto solo dice que algo corre. */
+  --proceso: 205 85% 58%;
+
   --radius: 0.625rem;
 }

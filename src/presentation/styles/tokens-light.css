@@ -19,4 +19,6 @@
   --sidebar-background: 40 16% 95%;
   --sidebar-border: 40 10% 85%;
   --low: 225 8% 42%;
+  /* Como `--low`: sobre fondo claro necesita bajar para leerse. */
+  --proceso: 205 80% 42%;
 }
