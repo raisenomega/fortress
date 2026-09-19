@@ -6,6 +6,7 @@ import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
 import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun, isCancelled } from '../run-control'
+import { guardPlanAprobado } from '../plan-guard'
 import { guardRun } from '../run-guard'
 import { isFortressRepo } from '../system/self-project'
 import { criticoDelTerminal } from '../chat/critico-del-terminal'
@@ -28,6 +29,13 @@ export function registerChatSendHandler(): void {
   ipcMain.handle(IPC.chatSend, async (event, input: SendMessageInput): Promise<Result<unknown>> => {
     const context = getAppContext()
     // Tope diario y concurrencia, comprobados ANTES de gastar.
+    // ADR-097 §4: en autonomo, un hallazgo del lote no corre sin el ADELANTE de
+    // OMEGA. Aqui y no en el renderer: quien ejecuta es este proceso. Y ANTES de
+    // `guardRun`, que RESERVA el carril: negar despues de reservar lo dejaria
+    // tomado para siempre (`carril-se-suelta`).
+    const sinAprobar = guardPlanAprobado(context, input)
+    if (sinAprobar !== null) return err(sinAprobar)
+
     const denegado = guardRun(context, input.projectId)
     if (denegado !== null) return err(denegado)
 
