@@ -8,6 +8,7 @@ import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
 import { isFortressRepo } from '../system/self-project'
+import { criticoDelTerminal } from '../chat/critico-del-terminal'
 import { omegaDelTerminal } from '../chat/omega-del-terminal'
 import { RED_DE_REVERSION } from '../chat/red-de-reversion'
 import { buildChatEngines } from './chat-engines'
@@ -44,7 +45,8 @@ export function registerChatSendHandler(): void {
         () => isCancelled(input.projectId),
         isFortressRepo,
         RED_DE_REVERSION,
-        omegaDelTerminal(input.projectId)
+        omegaDelTerminal(input.projectId),
+        criticoDelTerminal(input.projectId)
       )
     } catch (error) {
       return err(describeAssistantError(error))

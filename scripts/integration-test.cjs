@@ -34,7 +34,8 @@ const SUITES = [
   ['Reintento explicito (I4.2)', require('./checks/repair-retry-checks.cjs')],
   ['Retirada de propuesta (W2)', require('./checks/repair-withdraw-checks.cjs')],
   ['Libro de la Vida (OMEGA)', require('./checks/omega-checks.cjs')],
-  ['Puntuacion y veto (OMEGA)', require('./checks/omega-score-checks.cjs')],
+  ['Puntuacion y salud (OMEGA)', require('./checks/omega-score-checks.cjs')],
+  ['Veto de push (OMEGA)', require('./checks/omega-push-checks.cjs')],
   ['Crear proyecto desde cero', require('./checks/newproject-checks.cjs')]
 ]
 

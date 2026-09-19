@@ -8,7 +8,14 @@ import { asentarNotasDelProyecto } from '../system/asentar-notas'
 import type { AppContext } from '../context'
 
 export interface JuezDelTurno {
-  (cp: CheckpointDelTurno, plan: HallazgoJuzgado): Promise<VeredictoDelTurno>
+  /** `objeciones`: lo que el tribunal encontro, para que OMEGA juzgue INFORMADO
+   *  (ADR-096, Decision 1). Opcional: sin Fase B no hay tribunal y el juez se
+   *  comporta como siempre. Alimenta los cinco ejes; no anade ninguno. */
+  (
+    cp: CheckpointDelTurno,
+    plan: HallazgoJuzgado,
+    objeciones?: readonly string[]
+  ): Promise<VeredictoDelTurno>
 }
 
 export interface JuezDeps {
