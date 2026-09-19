@@ -5,6 +5,7 @@ import { SIN_RED, type RedDeReversion } from '@domain/chat/red-de-reversion'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
+import { SIN_CRITICO, type CriticoDelTurno } from './critico-del-turno'
 import { SIN_OMEGA, type OmegaDelTurno } from './omega-del-turno'
 import { seConservoSinCompilar } from './turno-protegido'
 import { turnoDelTerminal } from './turno-del-terminal'
@@ -28,10 +29,10 @@ export async function sendMessage(
   isCancelled: () => boolean,
   /** Lo inyecta la infra (leer package.json del disco es su terreno). */
   isSelfRepo: (path: string) => boolean = () => false,
-  /** De la infra las dos: la red del ADR-079 (git) y el revisor del ADR-090.
-   *  Sin red no se edita; sin revisor decide el gate, como antes de existir. */
+  /** Las tres de la infra. Cada `SIN_*` explica a que degrada la suya. */
   red: RedDeReversion = SIN_RED,
-  omega: OmegaDelTurno = SIN_OMEGA
+  omega: OmegaDelTurno = SIN_OMEGA,
+  critico: CriticoDelTurno = SIN_CRITICO
 ): Promise<Result<SendMessageOutput>> {
   const project = context.projects.findById(input.projectId)
   if (!project) return err('El proyecto ya no existe')
@@ -60,7 +61,7 @@ export async function sendMessage(
     foco: foco.value,
     onChunk: enVivo
   })
-  const ciclo = await turnoDelTerminal({ context, project, red, activa, foco: foco.value, input, producir, omega }) // prettier-ignore
+  const ciclo = await turnoDelTerminal({ context, project, red, activa, foco: foco.value, input, producir, omega, critico }) // prettier-ignore
   const stored = finishTurn({ context, project, meta, outcome: ciclo.turno.outcome, aviso: aviso + ciclo.turno.aviso, startedAt, prompt: input.prompt }) // prettier-ignore
   if (!stored.ok) return err(stored.error)
   // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).

@@ -4,6 +4,7 @@ import { vetoComoPedido } from '@domain/chat/veto-como-pedido'
 import type { RedDeReversion } from '@domain/chat/red-de-reversion'
 import { conRedDeReversion, type TurnoProtegido } from './con-red-de-reversion'
 import type { JuezDelTurno } from './juez-del-turno'
+import type { Tribunal } from './tribunal-del-turno'
 import type { ReplyOutcome } from './reply-outcome'
 
 /** Un reintento: el veto de OMEGA como mensaje siguiente, sobre la MISMA sesion
@@ -20,6 +21,8 @@ export interface CicloDeps {
   readonly foco: HallazgoAResolver
   readonly pedido: string
   readonly juez: JuezDelTurno
+  /** El tribunal de la Fase B. Ausente = solo OMEGA (Fase A). */
+  readonly tribunal?: Tribunal
   readonly producir: (reintento: Reintento | null) => Promise<ReplyOutcome>
 }
 
@@ -53,7 +56,7 @@ export async function hastaConverger(deps: CicloDeps): Promise<Convergencia> {
   let reintento: Reintento | null = null
 
   for (let intentos = 1; ; intentos += 1) {
-    const turno = await conRedDeReversion(deps.red, deps.cwd, true, () => deps.producir(reintento), { juez: deps.juez, plan }) // prettier-ignore
+    const turno = await conRedDeReversion(deps.red, deps.cwd, true, () => deps.producir(reintento), { juez: deps.juez, plan, tribunal: deps.tribunal }) // prettier-ignore
     const v = turno.veredicto
     if (!v.juzgado || v.aprobado) return { turno, convergio: true, razon: null, intentos }
 

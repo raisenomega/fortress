@@ -4,10 +4,12 @@ import type { Project } from '@domain/project/project'
 import type { AppContext } from '../context'
 import { hastaConverger, type Convergencia, type Reintento } from './ciclo-de-convergencia'
 import { conRedDeReversion } from './con-red-de-reversion'
+import { SIN_CRITICO, type CriticoDelTurno } from './critico-del-turno'
 import { juezConOmega } from './juez-del-turno'
 import type { OmegaDelTurno } from './omega-del-turno'
 import type { ReplyOutcome } from './reply-outcome'
 import type { SendMessageInput } from './send-message-types'
+import { tribunalConCritico } from './tribunal-con-critico'
 
 export interface TurnoDeps {
   readonly context: AppContext
@@ -17,6 +19,8 @@ export interface TurnoDeps {
   readonly foco: HallazgoAResolver | null
   readonly input: SendMessageInput
   readonly omega: OmegaDelTurno
+  /** El tribunal de la Fase B. Ausente = solo OMEGA, como en la Fase A. */
+  readonly critico?: CriticoDelTurno
   readonly producir: (reintento: Reintento | null) => Promise<ReplyOutcome>
 }
 
@@ -37,11 +41,11 @@ export async function turnoDelTerminal(deps: TurnoDeps): Promise<Convergencia> {
     return { turno, convergio: true, razon: null, intentos: 1 }
   }
 
-  const juez = juezConOmega({
-    context,
-    projectId: project.id,
-    cwd: project.path,
-    omega: deps.omega
-  })
-  return hastaConverger({ red, cwd: project.path, foco, pedido: input.prompt, juez, producir })
+  const comun = { context, projectId: project.id, cwd: project.path }
+  const juez = juezConOmega({ ...comun, omega: deps.omega })
+  // Sin critico inyectado no hay tribunal, y `arbitrar` se salta el debate: la
+  // Fase A entera sigue funcionando igual que antes de existir esta pieza.
+  const critico = deps.critico ?? SIN_CRITICO
+  const tribunal = tribunalConCritico({ ...comun, critico })
+  return hastaConverger({ red, cwd: project.path, foco, pedido: input.prompt, juez, tribunal, producir }) // prettier-ignore
 }
