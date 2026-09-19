@@ -20,7 +20,7 @@ export function escucharElTurno(projectId: string, draft: ChatMessage): () => vo
   })
   const sinMedidor = api().chat.onProgress((p) => {
     if (p.projectId === projectId) {
-      useRunMeterStore.getState().progress(p.index, p.total, p.tokens, p.costUsd)
+      useRunMeterStore.getState().progress(p)
     }
   })
 
