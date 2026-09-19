@@ -23,6 +23,8 @@ export interface ProductorDeps {
   readonly onStep: (progress: StepProgress) => void
   readonly isCancelled: () => boolean
   readonly onChunk: (delta: string) => void
+  /** Cuantos agentes intervienen (ADR-097): baja hasta la barra del operador. */
+  readonly agentes: number
 }
 
 /** El reintento reanuda la sesion del intento anterior; el primero usa la que ya
@@ -56,6 +58,7 @@ export function productorDelTurno(
       input: r === null ? input : { ...input, prompt: r.pedido },
       excludedAgents: input.excludedAgents,
       enFoco: enFocoDelIntento(deps.foco, r),
+      agentes: deps.agentes,
       onChunk: deps.onChunk
     })
 }

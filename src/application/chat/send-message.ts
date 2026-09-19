@@ -5,6 +5,7 @@ import { SIN_RED, type RedDeReversion } from '@domain/chat/red-de-reversion'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { chooseEngine } from './choose-engine'
+import { agentesDelTurno } from '@domain/chat/agentes-del-turno'
 import { SIN_CRITICO, type CriticoDelTurno } from './critico-del-turno'
 import { SIN_OMEGA, type OmegaDelTurno } from './omega-del-turno'
 import { seConservoSinCompilar } from './turno-protegido'
@@ -29,7 +30,6 @@ export async function sendMessage(
   isCancelled: () => boolean,
   /** Lo inyecta la infra (leer package.json del disco es su terreno). */
   isSelfRepo: (path: string) => boolean = () => false,
-  /** Las tres de la infra. Cada `SIN_*` explica a que degrada la suya. */
   red: RedDeReversion = SIN_RED,
   omega: OmegaDelTurno = SIN_OMEGA,
   critico: CriticoDelTurno = SIN_CRITICO
@@ -59,6 +59,7 @@ export async function sendMessage(
   const producir = productorDelTurno({
     ...{ context, assistant, codeAgent, project, input, mode, engine, onStep, isCancelled },
     foco: foco.value,
+    agentes: agentesDelTurno(activa && foco.value !== null && redGit, critico !== SIN_CRITICO),
     onChunk: enVivo
   })
   const ciclo = await turnoDelTerminal({ context, project, red, activa, foco: foco.value, input, producir, omega, critico }) // prettier-ignore
