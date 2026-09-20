@@ -1,4 +1,5 @@
 import { textoDeLaTanda } from '@domain/chat/lote-del-terminal'
+import { etiquetaDelLote } from '@domain/chat/pie-del-lote'
 import type { LoteDelTablero } from '../../hooks/useLoteDelTablero'
 import { Icon } from '../common/Icon'
 
@@ -12,7 +13,9 @@ interface BarraDelLoteProps {
 const BOTON = 'tap rounded-md px-2.5 py-1 text-[11px] font-semibold disabled:opacity-50'
 
 function texto(l: LoteDelTablero): string {
-  if (l.enCurso !== null) return `Lote: ${l.enCurso.hechos} de ${l.enCurso.total}`
+  // El MISMO contador que el Terminal: es el mismo `enCurso` del mismo store,
+  // visto desde otra pantalla. Contar distinto aqui seria mentir en una de las dos.
+  if (l.enCurso !== null) return etiquetaDelLote(l.enCurso.hechos, l.enCurso.total)
   if (l.planeado) return 'Lee el plan en el Terminal'
   if (l.pendiente) return 'Mensaje listo en el Terminal: dale Enter'
   return textoDeLaTanda(l.elegidos)
