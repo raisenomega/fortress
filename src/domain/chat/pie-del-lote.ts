@@ -1,11 +1,11 @@
 /**
- * Que se pinta al pie del plan del lote. Cuatro estados y ninguno solapa.
+ * Que se pinta al pie del plan del lote. Cinco estados y ninguno solapa.
  *
  * Vive en el dominio y no dentro del componente para que la regla que importa
  * —EN AUTONOMO NUNCA SALE EL BOTON— se pueda probar sin montar React. Un `if`
  * escondido en el JSX se prueba pintando; una funcion se prueba preguntando.
  */
-export type PieDelLote = 'ejecutando' | 'boton' | 'sin-aprobar' | 'nada'
+export type PieDelLote = 'ejecutando' | 'lote-en-curso' | 'boton' | 'sin-aprobar' | 'nada'
 
 export interface EstadoDelPie {
   /** La cola ya arranco: el plan dejo de estar en el punto de parada. */
@@ -33,7 +33,21 @@ export interface EstadoDelPie {
  * se intercambian sin que el compilador diga nada.
  */
 export function pieDelLote(e: EstadoDelPie): PieDelLote {
-  if (e.enCurso) return 'ejecutando'
+  if (e.enCurso) return e.autonomo ? 'lote-en-curso' : 'ejecutando'
   if (!e.planeado) return 'nada'
   return e.autonomo ? 'sin-aprobar' : 'boton'
+}
+
+/**
+ * «Lote 2 de 3»: el que corre AHORA, no los terminados. `hechos` cuenta los
+ * cerrados, asi que el vivo es el siguiente; al acabar el ultimo se queda en el
+ * total en vez de anunciar un cuarto que no existe.
+ *
+ * Es el ANCLA del pie en autonomo: mientras el lote corra esto siempre tiene
+ * algo que decir. La fase se le pega como sufijo y desaparece en el hueco entre
+ * turnos —el medidor se apaga en el `finally` de CADA envio—, y sin este ancla
+ * el pie se quedaria en blanco justo entre hallazgo y hallazgo.
+ */
+export function etiquetaDelLote(hechos: number, total: number): string {
+  return `Lote ${Math.min(hechos + 1, total)} de ${total}`
 }

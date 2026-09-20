@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { pieDelLote } from './pie-del-lote'
+import { etiquetaDelLote, pieDelLote } from './pie-del-lote'
 
 const pie = (over: Partial<Parameters<typeof pieDelLote>[0]> = {}): string =>
   pieDelLote({ enCurso: false, planeado: false, autonomo: false, ...over })
@@ -36,9 +36,35 @@ describe('supervisado sigue igual: el Enter del operador aprueba', () => {
   })
 })
 
-describe('la cola en curso manda sobre todo lo demas', () => {
-  it('en los dos modos: lo que importa es que YA corre', () => {
+describe('la cola en curso manda, pero cada modo la cuenta a su manera', () => {
+  it('SUPERVISADO INTACTO: la pildora, que es el boton ya pulsado y apagado', () => {
     expect(pie({ enCurso: true, planeado: true })).toBe('ejecutando')
-    expect(pie({ enCurso: true, planeado: true, autonomo: true })).toBe('ejecutando')
+  })
+
+  it('AUTONOMO: texto del lote, NUNCA la pildora verde (BUG 3)', () => {
+    // Alli nunca hubo boton que apagar: un verde de «adelante» sobre algo que
+    // nadie pulso, fijo el lote entero y sin decir que estaba pasando.
+    expect(pie({ enCurso: true, planeado: true, autonomo: true })).toBe('lote-en-curso')
+    expect(pie({ enCurso: true, planeado: false, autonomo: true })).toBe('lote-en-curso')
+  })
+
+  it('en NINGUN estado sale «ejecutando» con autonomo puesto', () => {
+    for (const planeado of [true, false])
+      expect(pie({ enCurso: true, planeado, autonomo: true })).not.toBe('ejecutando')
+  })
+})
+
+describe('el ancla del lote siempre tiene algo que decir', () => {
+  it('cuenta el que corre AHORA, no los terminados', () => {
+    expect(etiquetaDelLote(0, 3)).toBe('Lote 1 de 3')
+    expect(etiquetaDelLote(1, 3)).toBe('Lote 2 de 3')
+  })
+
+  it('al cerrar el ultimo NO anuncia uno que no existe', () => {
+    expect(etiquetaDelLote(3, 3)).toBe('Lote 3 de 3')
+  })
+
+  it('nunca sale vacio: es lo que sostiene el pie entre turno y turno', () => {
+    for (const hechos of [0, 1, 2, 3, 9]) expect(etiquetaDelLote(hechos, 3)).not.toBe('')
   })
 })

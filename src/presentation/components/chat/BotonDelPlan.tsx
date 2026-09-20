@@ -2,6 +2,7 @@ import { pieDelLote } from '@domain/chat/pie-del-lote'
 import { resolverLotePendiente } from '../../services/resolver-lote-en-terminal'
 import { useColaDelLoteStore } from '../../stores/cola-del-lote-store'
 import { useSettingsStore } from '../../stores/settings-store'
+import { LoteEnCurso } from './LoteEnCurso'
 import { PlanSinAprobar } from './PlanSinAprobar'
 
 interface BotonDelPlanProps {
@@ -50,6 +51,10 @@ export function BotonDelPlan({ projectId }: BotonDelPlanProps): React.JSX.Elemen
   const autonomo = useSettingsStore((s) => s.mode === 'autonomo')
   const pie = pieDelLote({ enCurso: enCurso !== null, planeado: pendiente?.planeado === true, autonomo }) // prettier-ignore
 
+  // En autonomo, texto plano con el lote y su fase; la pildora verde es de
+  // supervisado, donde SI hubo un boton que se pulso y se apago (BUG 3).
+  if (pie === 'lote-en-curso' && enCurso !== null)
+    return <LoteEnCurso hechos={enCurso.hechos} total={enCurso.total} />
   if (pie === 'ejecutando') return <span className={PLANO}>Plan ejecutandose…</span>
   if (pie === 'nada' || pendiente === null) return null
   if (pie === 'sin-aprobar') return <PlanSinAprobar veredicto={pendiente.veredicto} />
