@@ -47,8 +47,10 @@ describe('el turno de plan ve el grafo', () => {
     expect(tools.some((t) => t.includes('codebase-memory'))).toBe(true)
   })
 
-  it('un turno con FOCO no cambia: deriva de su modo, como siempre', async () => {
-    expect((await pedido({ deLote: true, enFoco: 'bloque' })).permissionMode).toBe('plan')
+  it('un turno con FOCO no cambia: deriva de su modo, sin la excepcion', async () => {
+    // Supervisado deriva a 'auditoria' desde la pieza 3; lo que fija este test
+    // es que NO recibe el 'lectura' del turno de plan.
+    expect((await pedido({ deLote: true, enFoco: 'bloque' })).permissionMode).toBe('auditoria')
   })
 })
 

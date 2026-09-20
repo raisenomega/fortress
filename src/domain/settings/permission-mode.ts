@@ -29,9 +29,21 @@ export function claudeModeArg(mode: ClaudePermissionMode): string {
  *
  * Nunca devuelve bypassPermissions: aunque el operador pida autonomia, las
  * operaciones peligrosas siguen necesitando permiso y quedan registradas.
+ *
+ * SUPERVISADO VA A 'auditoria' Y NO A 'plan', y la garantia no cambia: lo que
+ * impide escribir no era el modo `plan`, es que `Write` y `Edit` piden permiso y
+ * en headless no hay quien lo conceda —medido, con su fila en
+ * `permission_denials`—. Lo que `plan` si hacia era BLOQUEAR TODO EL MCP, asi
+ * que el chat supervisado no veia el grafo: «FORTRESS le nego `index_status` al
+ * agente en modo supervisado», anotado por el propio agente.
+ *
+ * Y de paso muere el choque que plan mode provocaba: alli el turno tenia que
+ * cerrar con `ExitPlanMode`, herramienta que el agente no tiene, contra el
+ * contrato de FORTRESS que exige cerrar con el bloque JSON. Cinco observaciones
+ * del backlog eran eso, y sin plan mode no existen.
  */
 export function permissionModeFor(mode: OperationMode): ClaudePermissionMode {
-  return mode === 'autonomo' ? 'acceptEdits' : 'plan'
+  return mode === 'autonomo' ? 'acceptEdits' : 'auditoria'
 }
 
 /** Lo que se le explica al operador sobre lo que el agente puede hacer. */

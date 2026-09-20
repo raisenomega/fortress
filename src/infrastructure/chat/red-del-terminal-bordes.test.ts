@@ -10,8 +10,13 @@ const guarda = (dir: string): string => {
 }
 afterEach(() => limpiar(dirs))
 
+/**
+ * Supervisado paso de 'plan' a 'auditoria' (2026-09-20): `plan` mataba el MCP y
+ * el chat no veia el grafo. Lo que estos bordes garantizan —cero checkpoints,
+ * cero commits, nada escrito— no cambia: eso nunca lo sostuvo el modo.
+ */
 describe('los bordes de la red del Terminal', () => {
-  it('d) supervisado: el agente corre en plan y no se abre ningun checkpoint', async () => {
+  it('d) supervisado: corre en auditoria y no se abre ningun checkpoint', async () => {
     const dir = guarda(crearRepo())
     const { context } = contexto(proyectoEn(dir))
     const cli = cliQue(false)
@@ -19,7 +24,7 @@ describe('los bordes de la red del Terminal', () => {
 
     await enviar(context, cli, { mode: 'supervisado' }, red)
 
-    expect(cli.peticiones[0].permissionMode).toBe('plan')
+    expect(cli.peticiones[0].permissionMode).toBe('auditoria')
     expect(red.abiertos()).toBe(0)
     expect(asuntos(dir)).toEqual(['base'])
   })
@@ -33,9 +38,9 @@ describe('los bordes de la red del Terminal', () => {
     const r = await enviar(context, cli, {}, red)
 
     expect(r.ok).toBe(true)
-    // Degradado ANTES de abrir nada: el agente corre en plan, no hay checkpoint
-    // que abrir, y el operador lee por que no tuvo el autonomo que pidio.
-    expect(cli.peticiones[0].permissionMode).toBe('plan')
+    // Degradado ANTES de abrir nada: el agente corre sin poder editar, no hay
+    // checkpoint que abrir, y el operador lee por que no tuvo el autonomo.
+    expect(cli.peticiones[0].permissionMode).toBe('auditoria')
     expect(red.abiertos()).toBe(0)
     expect(existe(dir, 'b.txt')).toBe(false)
     // El aviso nombra las DOS causas: sin repo, o sin identidad de git.
