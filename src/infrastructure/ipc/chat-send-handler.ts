@@ -6,6 +6,7 @@ import { getAppContext } from '../persistence/app-context'
 import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun } from '../run-control'
 import { gastarAprobacion } from '../aprobacion-del-plan'
+import { guardBarrera } from '../barrera-guard'
 import { guardPlanAprobado } from '../plan-guard'
 import { guardRun } from '../run-guard'
 import { IPC } from './channels'
@@ -23,6 +24,11 @@ async function atenderEnvio(
   input: SendMessageInput
 ): Promise<Result<unknown>> {
   const context = getAppContext()
+  // PRE-VUELO. La PRIMERA de las tres: asienta la observacion pase lo que pase
+  // despues, y en autonomo niega el lote si la barrera del proyecto esta muerta.
+  const rota = guardBarrera(context, input)
+  if (rota !== null) return err(rota)
+
   // Tope diario y concurrencia, comprobados ANTES de gastar.
   // ADR-097 §4: en autonomo, un hallazgo del lote no corre sin el ADELANTE de
   // OMEGA. Aqui y no en el renderer: quien ejecuta es este proceso. Y ANTES de

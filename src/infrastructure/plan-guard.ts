@@ -11,7 +11,7 @@ export const SIN_APROBACION =
 /** Un turno que EJECUTA un hallazgo del lote: lleva el foco y la lista. El
  *  turno de PLAN trae la lista sin foco, y no edita nada — ese no pasa por
  *  aqui. Un turno suelto no trae lista. */
-const ejecutaUnLote = (input: SendMessageInput): boolean =>
+export const ejecutaUnLote = (input: SendMessageInput): boolean =>
   (input.lote ?? []).length > 0 && input.findingId !== undefined
 
 /**

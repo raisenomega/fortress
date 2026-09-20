@@ -64,6 +64,11 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // El TACHADO de lo que sale en vivo al chat: `tool-detail` ya estaba, pero
   // este es quien lo APLICA, y sin el la funcion existe y nadie la llama.
   'src/application/chat/en-vivo-tachado.ts',
+  // El FAIL-CLOSED DEL PRE-VUELO, otras dos mitades de una garantia: la puerta
+  // que niega el lote autonomo, y quien le dice si la barrera del proyecto esta
+  // muerta. Proteger solo la puerta dejaria que un fix devolviera lista vacia.
+  'src/infrastructure/barrera-guard.ts',
+  'src/infrastructure/project/barreras-del-proyecto.ts',
   // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
   'src/domain/repair/innegociables-defensa.ts',
   'src/domain/repair/innegociables-del-automerge.ts'

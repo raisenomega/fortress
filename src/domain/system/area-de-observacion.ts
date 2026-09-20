@@ -1,4 +1,5 @@
 import { AREAS_DE_FALLO } from './areas-de-fallo'
+import { AREAS_DEL_TERMINAL } from './areas-del-terminal'
 
 /**
  * De QUE parte de FORTRESS habla una observacion. Vocabulario CERRADO, derivado
@@ -25,10 +26,9 @@ import { AREAS_DE_FALLO } from './areas-de-fallo'
  * | otro                    |   4 |  4               |
  *
  * Las 26 formas de escribir «permisos» —`permisos MCP`, `permisos-mcp`,
- * `permisos/mcp`, `permisos de Bash`, `sandbox de Bash`...— son UNA clase, y
- * ninguna sumaba a las otras veinticinco. Sin cerrar esto no hay deduplicacion
- * posible, y por tanto tampoco la senal que el backlog existe para dar: cuantos
- * PROYECTOS distintos se toparon con lo mismo.
+ * `permisos de Bash`, `sandbox de Bash`...— son UNA clase, y ninguna sumaba a
+ * las otras veinticinco. Sin cerrar esto no hay deduplicacion posible, y por
+ * tanto tampoco la senal del backlog: cuantos PROYECTOS vieron lo mismo.
  *
  * `motor-de-reparacion` y `cognicion` se conservan con una y dos: su escasez
  * dice que los agentes aun no trabajan ahi, no que la clase no exista. Plegarlas
@@ -51,10 +51,10 @@ export const AREAS_DEL_CORPUS = [
   'cognicion'
 ] as const
 
-/** Las once del corpus, las de FALLO —que crecen aparte y por otra regla
- *  (ADR-086)— y `otro` cerrando la lista ENTERA: el cajon recoge lo que no
- *  encaje, venga de un agente o de una rotura. */
-export const AREAS_DE_OBSERVACION = [...AREAS_DEL_CORPUS, ...AREAS_DE_FALLO, 'otro'] as const
+/** Las once del corpus, las de FALLO (ADR-086), las del TERMINAL —tres familias
+ *  que crecen cada una por su regla— y `otro` cerrando la lista ENTERA: el cajon
+ *  recoge lo que no encaje, venga de un agente, de una rotura o del pre-vuelo. */
+export const AREAS_DE_OBSERVACION = [...AREAS_DEL_CORPUS, ...AREAS_DE_FALLO, ...AREAS_DEL_TERMINAL, 'otro'] as const // prettier-ignore
 
 export type AreaDeObservacion = (typeof AREAS_DE_OBSERVACION)[number]
 

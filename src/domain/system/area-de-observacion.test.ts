@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { AREAS_DEL_CORPUS, AREAS_DE_OBSERVACION, aArea } from './area-de-observacion'
 import { AREAS_DE_FALLO } from './areas-de-fallo'
+import { AREAS_DEL_TERMINAL } from './areas-del-terminal'
 
 describe('el vocabulario de areas, derivado del corpus', () => {
   it('son DOCE clases, y las dos escasas siguen dentro', () => {
@@ -11,13 +12,24 @@ describe('el vocabulario de areas, derivado del corpus', () => {
     expect(AREAS_DE_OBSERVACION).toContain('cognicion')
   })
 
-  it('y las de FALLO se SUMAN sin tocarlas: son otra cosa y otra regla', () => {
+  it('las otras familias se SUMAN sin tocarlas: son otra cosa y otra regla', () => {
     // Las doce salieron de 350 observaciones ya escritas y estan cerradas; las
     // de fallo son provisionales y se cierran del corpus que el embudo genere
-    // (ADR-086). Mezclarlas en una sola lista escondería esa diferencia.
-    expect(AREAS_DE_OBSERVACION).toHaveLength(AREAS_DEL_CORPUS.length + AREAS_DE_FALLO.length + 1)
-    for (const clase of AREAS_DEL_CORPUS) expect(AREAS_DE_OBSERVACION).toContain(clase)
-    for (const clase of AREAS_DE_FALLO) expect(AREAS_DE_OBSERVACION).toContain(clase)
+    // (ADR-086); las del TERMINAL nacen de un emisor nuevo, el pre-vuelo, que
+    // mira el PROYECTO y no a FORTRESS. Mezclarlas escondería esa diferencia.
+    const familias = [AREAS_DEL_CORPUS, AREAS_DE_FALLO, AREAS_DEL_TERMINAL]
+
+    expect(AREAS_DE_OBSERVACION).toHaveLength(familias.flat().length + 1)
+    for (const clase of familias.flat()) expect(AREAS_DE_OBSERVACION).toContain(clase)
+  })
+
+  it('el vocabulario CRECE por clase nueva, nunca por texto libre', () => {
+    // Lo que ADR-085 cerro fueron los 190 valores que escribia un modelo, no la
+    // posibilidad de una clase con emisor determinista. `aArea` sigue hundiendo
+    // cualquier cosa que no este declarada, que es la garantia de verdad.
+    expect(aArea('barrera-del-proyecto')).toBe('barrera-del-proyecto')
+    expect(aArea('barrera del proyecto')).toBe('otro')
+    expect(aArea('barreras-de-proyectos')).toBe('otro')
   })
 
   it('las tres clases que cubren la mitad del corpus estan', () => {
