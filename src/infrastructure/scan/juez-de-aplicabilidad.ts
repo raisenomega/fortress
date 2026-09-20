@@ -21,9 +21,15 @@ export const SIN_JUEZ: Juez = () => Promise.resolve([])
  * El clasificador de ADR-083, Fase 4: un agente decide si M8 y M3 le tocan a
  * este proyecto, y lo respalda con una cita de codigo.
  *
- * En modo PLAN, como el escaner y por lo mismo: clasificar es mirar. Y
- * `trusted: false` siempre —no se autoverifica nada— porque esto corre antes
- * de auditar, sobre codigo del que aun no se sabe nada.
+ * En LECTURA y no en `plan`: aquel BLOQUEA todas las llamadas MCP, asi que el
+ * grafo nunca respondia y este juez clasificaba el alcance sin ver el mapa —«no
+ * se pudo ni comprobar si el proyecto estaba indexado», anotado por el propio
+ * agente en CUATRO proyectos distintos—. `lectura` corre en `default` con solo
+ * tools de lectura: el grafo contesta y no se edita.
+ *
+ * Y APRIETA en vez de aflojar: el prompt ya pedia «no edites ni ejecutes nada»
+ * (`juicio-prompt.ts:30`), pero en `plan` eso era una PETICION con Bash a mano;
+ * aqui no esta en el allowlist. `trusted: false` sigue igual.
  *
  * Un fallo del proceso NO revienta el escaneo: devuelve lista vacia y la
  * cascada deja esos modulos en «no consta», que es la verdad. Perder el juicio
@@ -49,7 +55,7 @@ export function crearJuez(
         projectPath,
         projectId,
         prompt: buildJuicioPrompt(modulos, carpetas),
-        permissionMode: 'plan',
+        permissionMode: 'lectura',
         agentId: 'scope-classifier',
         trusted: false
       },
