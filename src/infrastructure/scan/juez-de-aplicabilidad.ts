@@ -27,9 +27,10 @@ export const SIN_JUEZ: Juez = () => Promise.resolve([])
  * agente en CUATRO proyectos distintos—. `lectura` corre en `default` con solo
  * tools de lectura: el grafo contesta y no se edita.
  *
- * Y APRIETA en vez de aflojar: el prompt ya pedia «no edites ni ejecutes nada»
- * (`juicio-prompt.ts:30`), pero en `plan` eso era una PETICION con Bash a mano;
- * aqui no esta en el allowlist. `trusted: false` sigue igual.
+ * Y APRIETA por `--disallowedTools Bash`, NO por el allowlist —eso lo afirme al
+ * traer este modo y era falso: aquel solo pre-aprueba y Bash corria igual—.
+ * Hacia falta: el prompt pide «no edites ni ejecutes nada» desde el 10-sep y sus
+ * CUATRO corridas siguientes usaron Bash 30-63 veces. `trusted: false` igual.
  *
  * Un fallo del proceso NO revienta el escaneo: devuelve lista vacia y la
  * cascada deja esos modulos en «no consta», que es la verdad. Perder el juicio

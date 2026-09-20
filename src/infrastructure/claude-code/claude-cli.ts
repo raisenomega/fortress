@@ -5,7 +5,7 @@ import { withGraph } from '@domain/connectors/graph-mcp'
 import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
 import { claudeModeArg, type ClaudePermissionMode } from '@domain/settings/permission-mode'
-import { buildAllowedTools } from './build-allowed-tools'
+import { buildAllowedTools, buildDisallowedTools } from './build-allowed-tools'
 
 export const CLAUDE_BIN = 'claude'
 
@@ -36,6 +36,11 @@ export function buildArgs(
   // Allowlist segun el modo: en 'lectura' el grafo EJECUTA (plan lo bloqueaba);
   // en plan/acceptEdits, la regla del grafo + autoverificacion cuando aplica.
   args.push('--allowedTools', ...buildAllowedTools(permissionMode, trusted, scripts))
+
+  // Y lo que se QUITA. `--allowedTools` solo pre-aprueba, asi que impedir una
+  // herramienta pide esta otra lista: aqui no se ofrece, no es que se deniegue.
+  const fuera = buildDisallowedTools(permissionMode)
+  if (fuera.length > 0) args.push('--disallowedTools', ...fuera)
 
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
   if (agentId) args.push('--agent', agentId)

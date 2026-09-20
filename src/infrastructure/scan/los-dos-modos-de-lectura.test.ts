@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { claudeModeArg } from '@domain/settings/permission-mode'
-import { buildAllowedTools } from '../claude-code/build-allowed-tools'
+import { buildAllowedTools, buildDisallowedTools } from '../claude-code/build-allowed-tools'
 
 const SCRIPTS = ['typecheck', 'lint', 'test']
 
@@ -9,10 +9,23 @@ const SCRIPTS = ['typecheck', 'lint', 'test']
  * son dos y no uno. Fundirlos deshace una de las dos piezas.
  */
 describe('los dos modos de lectura NO se fundieron', () => {
-  it('la aplicabilidad sigue SIN Bash: alli ejecutar esta prohibido', () => {
-    // `lectura` es del clasificador de alcance, cuyo prompt dice «no edites ni
-    // ejecutes nada». Darle Bash desharia la pieza 1.
-    expect(buildAllowedTools('lectura', true, SCRIPTS)).not.toContain('Bash')
+  it('a lectura se le QUITA Bash, que es lo unico que de verdad lo impide', () => {
+    // El nombre viejo de este test decia «sigue SIN Bash» y solo miraba el
+    // allowlist — donde Bash nunca estuvo y aun asi corria. Lo que lo impide es
+    // `--disallowedTools`, medido el 2026-09-20: «NO_PUDE_BASH».
+    expect(buildDisallowedTools('lectura')).toContain('Bash')
+  })
+
+  it('y auditoria NO lo lleva: el escaner vive de ejecutar', () => {
+    expect(buildDisallowedTools('auditoria')).toEqual([])
+  })
+
+  it('no estar en el allowlist NO basta: los dos lo omiten y solo uno lo impide', () => {
+    // La premisa falsa que arrastraba el repo, fijada como test para que no
+    // vuelva: omitir una herramienta de `--allowedTools` no la bloquea.
+    for (const modo of ['lectura', 'auditoria'] as const) {
+      expect(buildAllowedTools(modo, true, SCRIPTS).includes('Bash')).toBe(modo === 'auditoria')
+    }
   })
 
   it('pero los dos ven el grafo: es lo que compartian y lo que les faltaba', () => {
