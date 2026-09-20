@@ -7,11 +7,19 @@ import type { OperationMode } from './operation-mode'
  * el grafo nunca respondia. 'lectura' corre en 'default' con solo las tools de
  * lectura permitidas — el grafo contesta, y escribir sigue denegado (sin allowlist).
  */
-export type ClaudePermissionMode = 'plan' | 'acceptEdits' | 'lectura'
+export type ClaudePermissionMode = 'plan' | 'acceptEdits' | 'lectura' | 'auditoria'
 
-/** El valor real de `--permission-mode`: 'lectura' -> 'default' (plan mata el MCP). */
+/**
+ * El valor real de `--permission-mode`. Los DOS modos de lectura corren en
+ * `default` por lo mismo: `plan` mata el MCP y ahi el grafo no responde.
+ *
+ * Se separan porque piden cosas opuestas de Bash, y fundirlos seria el error:
+ * `lectura` NO lo lleva —el clasificador de alcance tiene prohibido ejecutar—,
+ * y `auditoria` SI —el escaner vive de ejecutar: 241 de sus 353 llamadas del
+ * 18-sep fueron Bash—.
+ */
 export function claudeModeArg(mode: ClaudePermissionMode): string {
-  return mode === 'lectura' ? 'default' : mode
+  return mode === 'lectura' || mode === 'auditoria' ? 'default' : mode
 }
 
 /**
@@ -29,6 +37,7 @@ export function permissionModeFor(mode: OperationMode): ClaudePermissionMode {
 /** Lo que se le explica al operador sobre lo que el agente puede hacer. */
 export const PERMISSION_SUMMARY: Record<ClaudePermissionMode, string> = {
   plan: 'Lee y analiza el proyecto, pero no modifica archivos',
+  auditoria: 'Lee, consulta el grafo y ejecuta comandos, pero no modifica archivos',
   lectura: 'Lee y consulta el grafo, pero no modifica archivos',
   acceptEdits: 'Puede editar archivos del proyecto'
 }

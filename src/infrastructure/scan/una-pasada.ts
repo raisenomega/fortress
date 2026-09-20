@@ -22,7 +22,9 @@ export async function escanear(
       projectPath: request.projectPath,
       projectId: request.projectId,
       prompt: promptDeParada(request),
-      permissionMode: 'plan',
+      // 'auditoria' y no 'plan': aquel BLOQUEA todo el MCP y el escaner auditaba
+      // a ciegas (6 llamadas al grafo rechazadas el 18-sep). Ver el modo.
+      permissionMode: 'auditoria',
       // La FASE 1 es cosa del Security Reviewer, siempre el mismo agente.
       agentId: 'security-reviewer',
       // Auditar es mirar: el escaner nunca se autoverifica, sea cual sea la
