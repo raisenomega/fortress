@@ -196,7 +196,38 @@ modelo del grafo — su propio arco, no este bug.
 
 ---
 
-## 4. Deudas estructurales
+## 4. La premisa falsa de `--allowedTools` — ¿qué más se apoya en ella?
+
+Medido el 2026-09-20, dos corridas, $0.60:
+
+|                                              |                                                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `--allowedTools Read` + prompt que pide Bash | **Bash se ejecutó**, `permission_denials` **vacío**                                        |
+| el mismo, con `--disallowedTools Bash`       | **«NO_PUDE_BASH»**, y `permission_denials` **también vacío** — la herramienta no se ofrece |
+| `Write` sin listar                           | **denegado**, con fila en `permission_denials`, y el fichero no existe en disco            |
+
+**`--allowedTools` PRE-APRUEBA. No deniega.** El docblock de
+`build-allowed-tools.ts:11-12` afirmaba _«escribir/Bash quedan denegados por no
+estar en la lista»_ — **falso en la mitad de Bash**, y lo creyó todo el que lo
+leyó. Ya está corregido allí.
+
+**La deuda que queda es la pregunta grande:** ese docblock era la fuente de
+verdad sobre qué bloquea el allowlist. **¿Qué otras garantías del repo se apoyan
+en esa premisa?** Un sitio que omita una herramienta de `--allowedTools` creyendo
+que la bloquea, no la bloquea.
+
+**Sin revisar todavía.** El barrido es `grep` de `allowedTools` y de cada
+docblock que diga «denegado», «bloqueado» o «no puede» sobre una herramienta.
+
+> **La lección, y vale más que el arreglo:** el gate estaba verde, el test estaba
+> verde, y la garantía era falsa. Solo la corrida lo distingue. Un docblock que
+> afirma una garantía de seguridad **sin que nadie la haya falsado** es una
+> premisa heredada, y se hereda hacia abajo: lo repitió el código, lo repitió un
+> test, y lo repitió quien escribió la pieza de encima.
+
+---
+
+## 5. Deudas estructurales
 
 | deuda                                 | evidencia                                                                   | qué la desbloquea                                                                                                                                    |
 | ------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -207,7 +238,7 @@ modelo del grafo — su propio arco, no este bug.
 
 ---
 
-## 5. Dónde viven las deudas de FORTRESS sobre su propio código
+## 6. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del
 proyecto `fortress-command-center`** dentro de la propia app: es la herramienta
