@@ -322,6 +322,11 @@ pasaron con el NUL dentro, porque **el código funcionaba**.
 > garantía **ilegible**. `git diff --stat` antes de commitear no es un trámite:
 > es lo único que caza un fichero que funciona y es opaco.
 
+> ⚠ **DEUDA ABIERTA, y es la única de las cinco sin pared** → **§6.1**. Las otras
+> cuatro quedaron defendidas por un test; esta, por ahora, depende de recordar
+> mirar. La defensa derivada no se construyó aquí a propósito: va después del
+> ensayo.
+
 #### El patrón que une a los cinco
 
 | # | fallo                          | patrón                          |
@@ -396,6 +401,34 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 | **Verificación de stacks no-Node**    | el gate corre `npm`; un repo Python o Go no se verifica                     | ADR-092 + Bash libre. **No** un gate por lenguaje: sería mantener N gates                                                                            |
 | **`sendMessage` saturado**            | 11 parámetros posicionales (`send-message.ts:23-36`)                        | rozada tres veces sin tocarla; se parte por costura cuando un arco la despierte de verdad                                                            |
 | **`build-prompt.ts:6`**               | `'- NUNCA toques auth, pagos, RLS ni seguridad sin dejarlo escrito antes.'` | **medir primero**: dice «sin dejarlo escrito antes», no «vuelve a supervisado». Puede ser transparencia legítima o el freno de ADR-089 con otra ropa |
+| **Ningún paso del gate mira la FORMA del fuente** | el NUL de §5.1-5: `interprete-existe.test.ts` pasó typecheck, lint y 3804 tests, y Git lo marcó `Bin 0 -> 2445 bytes` | una defensa derivada (~15 líneas en `src/domain/repair/`) que rechace todo `.ts` de `src/` con bytes de control |
+
+### 6.1 La defensa que falta: ficheros fuente opacos
+
+**Medido el 2026-09-20.** Un fuente con un byte de control —un NUL— **pasa los
+cinco pasos del gate** y llega a `main` como binario, **sin diff legible**. El
+gate verifica que el código funciona; **no verifica cómo se ve en el repo**.
+
+Lo cazó `git diff --stat`, no el gate.
+
+> **LECCIÓN: `git diff --stat` antes de commitear es parte de la disciplina**, no
+> un trámite. Es lo único que caza un fichero que funciona y es opaco.
+
+**Por qué es deuda y no está cerrada:** las otras cuatro lecciones de §5.1 tienen
+**pared** —tests de inyección, el break que delató la redundancia, el cruce del
+milisegundo, el test de las dos mitades—. **Esta depende de que alguien se acuerde
+de mirar**, que es exactamente lo que `innegociables-derivados` existe para no
+tolerar: *«un fichero nuevo… falla aquí, sin que nadie se acuerde de mirar»*.
+
+**Forma que tendría** (no construida — va después del ensayo):
+
+```ts
+const opacos = ficheros('src').filter((f) => /[ --]/.test(fuente(f)))
+expect(opacos).toEqual([])
+```
+
+Vive junto a sus hermanas en `src/domain/repair/`, reusando el barrido de
+`innegociables-derivados`. Coste: ~15 líneas y un rerun del gate.
 
 ---
 
