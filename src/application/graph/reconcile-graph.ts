@@ -13,6 +13,8 @@ export interface ReconcileDeps {
   readonly enqueue: (job: () => Promise<void>) => Promise<void>
   /** Push al renderer: el estado de indexado de ese proyecto cambio. */
   readonly notify: (projectId: string) => void
+  /** Si hay un turno vivo en ese proyecto: su checkpoint se deshara (BUG 4). */
+  readonly turnoVivo: (projectId: string) => boolean
   readonly now: () => number
 }
 
@@ -43,6 +45,7 @@ export async function reconcileGraph(
     status: state.status,
     runningSince: state.startedAt ?? undefined,
     onBoot,
+    turnoVivo: deps.turnoVivo(projectId),
     now: deps.now()
   })
   console.info('[graph-reindex]', project.name, decision.action, '—', decision.reason)

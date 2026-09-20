@@ -17,6 +17,8 @@ interface Opciones {
   readonly runnerResult?: RunnerResult
   readonly now?: number
   readonly contaminado?: boolean
+  /** Hay un turno corriendo en ese proyecto: su checkpoint se deshara (BUG 4). */
+  readonly turnoVivo?: boolean
 }
 
 /** Contexto y deps falsos: registran marcas y capturan el trabajo encolado. */
@@ -48,6 +50,8 @@ export function bench(opts: Opciones = {}): Bench {
       return Promise.resolve()
     },
     notify: (projectId) => void notified.push(projectId),
+    // Sin turno vivo salvo que el test lo pida: es el caso normal.
+    turnoVivo: () => opts.turnoVivo === true,
     now: () => opts.now ?? 1_000_000
   }
 

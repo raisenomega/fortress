@@ -56,6 +56,12 @@ export async function resolverLotePendiente(projectId: string): Promise<void> {
 
   const hecho = await correrLote(projectId, pendiente.ids, puertos(projectId))
   if (hecho === null) return
+  // El grafo, AL CERRAR el lote y no por turno (BUG 4): el turno no deja commit
+  // —el checkpoint es transitorio— asi que por turno no habria nada nuevo que
+  // indexar, y durante el turno la guarda del main lo rechaza igualmente. Aqui
+  // el arbol ya esta quieto. Es idempotente y sin tokens: si nada se movio, el
+  // main decide SKIP solo.
+  void api().graph.reindex(projectId)
   useColaDelLoteStore.getState().descartar()
   useLoteStore.getState().limpiar(projectId)
 }

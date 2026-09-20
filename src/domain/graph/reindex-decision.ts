@@ -18,6 +18,17 @@ export interface ReindexInput {
    * es probablemente una corrida de ESTA instancia— y ahi manda STALE_MS.
    */
   readonly onBoot?: boolean
+  /**
+   * Hay un turno VIVO en ese proyecto. Mientras lo haya puede haber un
+   * `checkpoint transitorio` abierto, y ese commit se DESHACE al cerrar
+   * (`reset --soft`). Indexar encima deja el indice apuntando a un sha que
+   * dejara de existir — y entonces `currentSha !== indexedSha` para siempre,
+   * porque lo indexado no es que se quedara atras: es que se borro.
+   *
+   * Paso de verdad el 2026-09-19: `raisen-nucleo` quedo indexado en `1752916`,
+   * un commit «checkpoint transitorio», mientras HEAD seguia en el del operador.
+   */
+  readonly turnoVivo?: boolean
   readonly now: number
 }
 
@@ -39,6 +50,12 @@ export interface ReindexDecision {
  * edad que valga: nada de lo que la escribio sobrevivio al proceso.
  */
 export function decideReindex(input: ReindexInput): ReindexDecision {
+  // PRIMERO de todo: con un turno vivo, lo que se indexaria puede ser efimero.
+  // Esperar no cuesta nada —el cierre del lote vuelve a preguntar— y adelantarse
+  // cuesta un indice roto que ningun SKIP posterior sabe reparar.
+  if (input.turnoVivo === true) {
+    return { action: 'SKIP', reason: 'turno vivo: su checkpoint se deshara' }
+  }
   if (input.status === 'RUNNING') {
     if (input.onBoot === true) {
       return { action: 'RECLAIM_STALE', reason: 'arranque: la corrida previa murio con su proceso' }

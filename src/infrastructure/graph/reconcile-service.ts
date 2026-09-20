@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron'
 import { reconcileGraph, type ReconcileOutcome } from '@application/graph/reconcile-graph'
 import { getAppContext } from '../persistence/app-context'
+import { isRunning } from '../run-control'
 import { IPC } from '../ipc/channels'
 import { reindexQueue } from './reindex-queue'
 import { createReindexRunner } from './reindex-runner'
@@ -17,7 +18,7 @@ export function reconcileProject(projectId: string, onBoot = false): Promise<Rec
   return reconcileGraph(
     getAppContext(),
     projectId,
-    { runner: createReindexRunner(), enqueue: (job) => reindexQueue.enqueue(job), notify, now: Date.now }, // prettier-ignore
+    { runner: createReindexRunner(), enqueue: (job) => reindexQueue.enqueue(job), notify, turnoVivo: isRunning, now: Date.now }, // prettier-ignore
     onBoot
   )
 }
