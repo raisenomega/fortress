@@ -5,20 +5,17 @@ import { PRODUCTOR } from '@domain/agent/productor'
 import { buildChatPrompt } from '@domain/chat/chat-prompt'
 import type { CodeAgentRequest } from '@domain/chat/code-agent'
 import { permissionModeFor } from '@domain/settings/permission-mode'
+import { esTurnoDePlanDelLote, type SenasDelTurno } from '@domain/chat/turno-de-plan'
 import { totalTokens } from '@domain/telemetry/token-usage'
 import { correrConMemoria } from './correr-con-memoria'
 import type { ReplyOutcome } from './reply-outcome'
 import type { WorkflowReplyOptions } from './opciones-de-respuesta'
 import { denialsNote, singleAgentOutcome } from './single-agent-outcome'
 
-/** Las opciones de siempre y, si el turno resuelve UN hallazgo, su bloque ya
- *  saneado (ADR-088, pieza 2) y la sesion del productor para reanudarlo
- *  (Enmienda 2). `deLote`: `known` son los hallazgos del lote (arco 1). */
-export type ChatReplyOptions = WorkflowReplyOptions & {
-  readonly enFoco?: string
-  readonly sesion?: string | null
-  readonly deLote?: boolean
-}
+/** Las de siempre, las señas del turno (`SenasDelTurno`) y la sesion del
+ *  productor para reanudarlo (ADR-088, Enmienda 2). */
+export type ChatReplyOptions = WorkflowReplyOptions &
+  SenasDelTurno & { readonly sesion?: string | null }
 
 /**
  * Quien contesta. Con foco, SIEMPRE el productor: resolver un hallazgo no se
@@ -28,13 +25,12 @@ export type ChatReplyOptions = WorkflowReplyOptions & {
  */
 function quienContesta(options: ChatReplyOptions): AgentId {
   if (options.enFoco !== undefined || options.deLote === true) return PRODUCTOR.id
-  const enabled = AGENT_CATALOG.map((agent) => agent.id).filter(
-    (id) => !options.excludedAgents.includes(id)
-  )
+  const fuera = options.excludedAgents
+  const enabled = AGENT_CATALOG.map((agent) => agent.id).filter((id) => !fuera.includes(id))
   return routeToAgent(options.prompt, enabled)
 }
 
-/** La peticion al CLI. La sesion, solo si hay que reanudar: sin llave, nueva. */
+/** La peticion al CLI. La sesion solo si hay que reanudar: sin llave, nueva. */
 function peticion(options: ChatReplyOptions, agentId: AgentId): CodeAgentRequest {
   const { project, mode } = options
   return {
@@ -43,7 +39,9 @@ function peticion(options: ChatReplyOptions, agentId: AgentId): CodeAgentRequest
     projectId: options.project.id,
     // prettier-ignore
     prompt: buildChatPrompt(options.prompt, { projectName: project.name, corpus: options.corpus, known: options.known, mode, enFoco: options.enFoco, deLote: options.deLote }),
-    permissionMode: permissionModeFor(mode),
+    // 'lectura' y no el 'plan' que derivaria de supervisado: aquel BLOQUEA todo
+    // el MCP (permission-mode.ts:4-8). Ve el grafo y sigue sin poder editar.
+    permissionMode: esTurnoDePlanDelLote(options) ? 'lectura' : permissionModeFor(mode),
     agentId,
     trusted: project.trusted,
     ...(options.sesion ? { reanudarSesion: options.sesion } : {})
@@ -69,7 +67,8 @@ export async function replyFromChat(options: ChatReplyOptions): Promise<ReplyOut
   options.onStep({ index: 0, total, tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd }) // prettier-ignore
 
   // La nota de denials da la transparencia del modo supervisado (lo bloqueado).
-  const outcome = singleAgentOutcome(agentId, reply, denialsNote(options.mode, reply.denials), startedAt) // prettier-ignore
+  const nota = denialsNote(options.mode, reply.denials, esTurnoDePlanDelLote(options)) // prettier-ignore
+  const outcome = singleAgentOutcome(agentId, reply, nota, startedAt)
   const { sesion, sesionRota } = corrida
   return { ...outcome, ...(sesion === undefined ? {} : { sesion }), sesionRota }
 }

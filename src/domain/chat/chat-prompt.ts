@@ -2,8 +2,9 @@ import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { hallazgosDelTurno, type HallazgosDelTurno } from './hallazgos-del-prompt'
 import { buildDocsFirst } from '../settings/docs-first-compose'
 import { GRAPH_FIRST } from '../settings/graph-first'
-import { MODE_INSTRUCTION } from '../settings/instruccion-de-modo'
+import { INSTRUCCION_DEL_PLAN, MODE_INSTRUCTION } from '../settings/instruccion-de-modo'
 import type { OperationMode } from '../settings/operation-mode'
+import { esTurnoDePlanDelLote } from './turno-de-plan'
 import { SELF_VERIFY } from '../settings/self-verify'
 
 export interface ChatContext extends HallazgosDelTurno {
@@ -27,11 +28,16 @@ function docsFirst(ctx: ChatContext): readonly string[] {
   return bloque === '' ? [] : [bloque, '']
 }
 
+/** El turno de plan NO recibe la instruccion de su `mode`: ese dice «no edita»,
+ *  y traducirlo a «espera aprobacion» fue el BUG 2. */
+const instruccion = (ctx: ChatContext): string =>
+  esTurnoDePlanDelLote(ctx) ? INSTRUCCION_DEL_PLAN : MODE_INSTRUCTION[ctx.mode]
+
 export function buildChatPrompt(question: string, ctx: ChatContext): string {
   return [
     `Proyecto "${ctx.projectName}", que es tu directorio de trabajo actual.`,
     '',
-    MODE_INSTRUCTION[ctx.mode],
+    instruccion(ctx),
     '',
     GRAPH_FIRST,
     '',

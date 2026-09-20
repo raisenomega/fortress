@@ -29,6 +29,29 @@ import type { OperationMode } from './operation-mode'
  * un limite aqui, el limite no va en el prompt: va en el codigo, donde no
  * depende de la buena voluntad de quien lo lee.
  */
+/**
+ * El turno de PLAN del lote, que NO es ninguno de los dos modos (BUG 2).
+ *
+ * Recibia la instruccion de SUPERVISADO —«propon y espera aprobacion»— porque
+ * `lote-por-enter` manda `mode: 'supervisado'` para que el turno no edite. El
+ * agente la leyo y obedecio: pidio cuatro decisiones a un operador que en
+ * autonomo no esta mirando. **El mode sigue diciendo la verdad —este turno no
+ * edita— y lo que estaba mal era traducir eso a «espera a un humano».**
+ *
+ * Aqui no se espera a nadie: el aprobador es OMEGA, y juzga la direccion en
+ * cuanto el plan este escrito (ADR-097 §3). Decirle al agente que pregunte seria
+ * mandarle a una puerta que no existe.
+ *
+ * Y se le dice que consulte el grafo EXPRESAMENTE: el turno anterior corrio en
+ * `permission-mode plan`, que bloquea el MCP, y el agente acabo leyendo ficheros
+ * a mano. Ahora corre en `lectura`, donde el grafo si responde.
+ */
+export const INSTRUCCION_DEL_PLAN =
+  'TURNO DE PLAN: propon en que ORDEN y con que enfoque atacar los hallazgos de ' +
+  'la lista. NO edites ningun fichero — este turno solo lee. NO esperes ' +
+  'aprobacion de nadie ni preguntes que hacer: en cuanto termines, OMEGA revisa ' +
+  'la direccion y te dira si hay que replantearla. Consulta el grafo cuanto necesites.'
+
 export const MODE_INSTRUCTION: Record<OperationMode, string> = {
   supervisado:
     'MODO SUPERVISADO: propon los cambios y espera aprobacion. No apliques nada ' +
