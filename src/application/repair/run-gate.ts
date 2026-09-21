@@ -1,3 +1,4 @@
+import type { Result } from '@domain/shared/result'
 import type { GateOutcome } from '@domain/repair/gate-result'
 import { canTransition } from '@domain/repair/proposal'
 import type { AppContext } from '../context'
@@ -17,6 +18,9 @@ export interface GateDeps {
   readonly worktreeExists: (path: string) => boolean
   readonly isClean: (path: string) => Promise<boolean>
   readonly runner: { run(worktreePath: string, baseSha: string): Promise<GateOutcome> }
+  /** Si la caja se puede levantar en esta maquina (ADR-092). Inyectada: es
+   *  `bwrap` de verdad, y eso es infraestructura. */
+  readonly hayCaja: () => Result<void>
   /** D16 — cola serial de UN gate a la vez a nivel de proceso. */
   readonly enqueue: (job: () => Promise<RunGateResult>) => Promise<RunGateResult>
   readonly now: () => number

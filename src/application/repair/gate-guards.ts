@@ -36,5 +36,31 @@ export async function gateBlocked(
   if (!ejecutaConConfianza(project)) {
     return rejectGate(ctx, cursor, proposal, 'proyecto_sin_confianza', 'proyecto_sin_confianza', {}, deps.now()) // prettier-ignore
   }
-  return null
+  return guardSandbox(ctx, proposal, cursor, deps)
+}
+
+/**
+ * Sin caja no hay gate (ADR-092, casilla 4), y se dice ANTES de correr nada:
+ * si `npm ci` saliera 127 desde dentro, el libro lo apuntaria como
+ * `npm_ci_failed` —culpa del fix— cuando la culpa es de la maquina. Va DESPUES
+ * de la confianza: un proyecto sin confianza se rechaza por eso, con o sin caja.
+ * `guard…`: `innegociables-derivados` la protege del auto-merge por el nombre.
+ */
+export async function guardSandbox(
+  ctx: AppContext,
+  proposal: Proposal,
+  cursor: BookCursor,
+  deps: GateDeps
+): Promise<RunGateResult | null> {
+  const caja = deps.hayCaja()
+  if (caja.ok) return null
+  return rejectGate(
+    ctx,
+    cursor,
+    proposal,
+    'sin_caja',
+    'sin_caja',
+    { motivo: caja.error },
+    deps.now()
+  )
 }

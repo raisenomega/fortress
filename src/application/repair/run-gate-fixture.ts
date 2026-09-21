@@ -56,6 +56,9 @@ export function bench(opts: Opciones = {}): Bench {
     worktreeExists: () => opts.worktreeExists ?? true,
     isClean: () => Promise.resolve(opts.clean ?? true),
     runner: { run: () => Promise.resolve(opts.outcome ?? VERDE) },
+    // La caja se da por disponible: lo que estos bancos juzgan es el gate, no
+    // la maquina. `gate-sin-caja.test.ts` es quien la quita.
+    hayCaja: () => ({ ok: true, value: undefined }),
     enqueue: (job) => job(),
     now: () => 42
   }
