@@ -96,6 +96,92 @@ puesta a punto de un entorno de desarrollo (`docs/CONTRIBUTING.md`,
 `docs/TROUBLESHOOTING.md`, `docs/RELEASE.md`, `docs/DEV-SETUP.md`)— están por
 completar en la fase de documentación operativa.
 
+## Camino a grado bancario en toda la aplicación
+
+*Tramo añadido el 2026-09-21. No sustituye a los anteriores: los ordena por lo
+que hoy más pesa.* **Doctrina del tramo: lo que ya existe no se rehace; se le
+sube el grado y la profundidad.**
+
+El estándar está fijado (ADR-098 §9): cada parte de la aplicación —Terminal,
+motor, LOOP, datos, despliegue— debe ser tan profunda, precisa y robusta como la
+página de Escaneo cuando corre dentro de la misma disciplina. Este tramo es la
+distancia que falta, y **su orden no es una opinión**: sale de cuatro fuentes que
+coinciden.
+
+| Fuente | Qué aporta |
+|---|---|
+| El **backlog de auto-mejora** | lo que FORTRESS anota que le falta mientras trabaja: 381 observaciones y 711 avistamientos en 7 proyectos |
+| [DEUDAS](DEUDAS.md) §6 | las deudas estructurales, con su evidencia |
+| **ADR-098** | lo que la ley firmada deja pendiente de otra pieza |
+| [INVESTIGACION-FRONTERA-2026](INVESTIGACION-FRONTERA-2026.md) | lo que la frontera externa ya probó, fuente por fuente |
+
+### 1. El sandbox (ADR-092)
+
+**El primero por las cuatro fuentes a la vez.** El backlog: lo que más se repite
+es que los agentes **no pueden ejecutar para verificar** —Bash negado o troceado,
+el revisor que juzga tests que no puede correr, ninguna forma de validar SQL ni
+de instalar dependencias— (5 proyectos, 36 avistamientos solo en su área). DEUDAS
+§6 lo lleva como deuda estructural número uno. ADR-098 no puede ejercer sin él ni
+la casilla 1(a) ni el agente de datos y despliegue. Y la investigación aporta el
+motivo: los incidentes reales de 2025-2026 y dos issues del propio Claude Code,
+**cerradas sin plan de arreglo**, que documentan lo que aquí se midió en vivo —
+una escritura por Bash esquiva un hook de `Write|Edit`— (§2 de la investigación).
+
+Desbloquea: verificar de verdad, los stacks que no son Node, Bash libre (ADR-093
+Pieza 3) y producción bajo firma. **Va antes que cualquier capacidad de salir a
+la red**: FORTRESS no cierra hoy la trifecta letal solo porque le falta la
+tercera pata, y ADR-098 ya firmó ponérsela (§3 de la investigación).
+
+### 2. Que el prompt le diga la verdad al agente
+
+La segunda señal del backlog, y barata. El prompt afirma *«NO tienes Bash»* y el
+agente lo tiene; nombra una herramienta del grafo que el servidor instalado no
+expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
+`SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
+del agente: se audita cada prompt contra lo que de verdad se lanza.
+
+### 3. El contrato del hallazgo
+
+Los 27 tipos son todos de seguridad: accesibilidad y privacidad caen en `otro` y
+pierden identidad entre escaneos. No se puede expresar una cadena de explotación,
+ni un defecto declarado a propósito, ni la diferencia entre dónde se declara un
+defecto y dónde se arregla. Y agrupar «hermanos» por clase empareja defectos que
+no son el mismo.
+
+### 4. El grafo, más allá de JavaScript
+
+La búsqueda devuelve cero en repositorios pequeños, y el índice no cubre `.py`,
+configuración, SQL ni carpetas ignoradas. *Grafo primero* falla justo donde viven
+las barreras de un proyecto.
+
+### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
+
+Medido por sitios de llamada: Escaneo y Terminal autónomo corren la disciplina
+completa. **LOOP, Construir y Cognition no escriben una sola observación**;
+Construir no tiene crítico ni juez; cuatro flujos siguen en el modo que bloquea el
+grafo; y un turno suelto en autónomo edita sin pasar por la guarda de barrera. Se
+conecta órgano por órgano.
+
+### 6. Mergear lo ya hecho
+
+Parte de lo que falta está escrito y sin integrar: trece hallazgos del
+auto-escaneo se cierran solos al mergear la rama de limpieza. Es una decisión del
+operador, no un trabajo.
+
+### Lo que la investigación añade como profundidad — no son arcos nuevos
+
+- **Recibos verificables criptográficamente**, sobre el recibo que ya existe
+  (ADR-093 Pieza 1): los modelos dicen lo que de verdad hicieron entre un 25 % y
+  un 39 % de las veces, así que se juzga lo hecho, no lo dicho.
+- **Memoria por agente** (el campo `memory` del CLI). Existe, y tiene un fallo
+  reportado, cerrado sin arreglo, justo con la combinación de opciones que
+  FORTRESS usa. **Se mide en vivo antes de apoyarse en ella.**
+- **El grafo de código al servicio del crítico**, que es donde la evidencia dice
+  que más rinde. Se apoya en el punto 4.
+- **Cerrar el bucle del sistema nervioso**: FORTRESS observa y funde; le falta
+  re-correr una batería fija antes de dar una observación por atendida, con un
+  check determinista decidiendo — nunca un modelo juzgando a otro en ese banco.
+
 ## Cómo se firma cada dirección
 
 Ninguna de estas áreas se ejecuta por figurar aquí. Cada una se firma
@@ -110,3 +196,6 @@ toma. Este roadmap señala el rumbo; las decisiones lo fijan.
 - [CHANGELOG](CHANGELOG.md) — qué ha cambiado hasta ahora.
 - [DECISIONS/](DECISIONS/README.md) — las decisiones que sostienen cada
   dirección.
+- [INVESTIGACION-FRONTERA-2026](INVESTIGACION-FRONTERA-2026.md) — la referencia
+  externa del último tramo, verificada fuente por fuente.
+- [DEUDAS](DEUDAS.md) — las deudas medidas que ese tramo ordena.
