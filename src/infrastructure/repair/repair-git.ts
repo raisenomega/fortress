@@ -1,15 +1,26 @@
 import { spawn } from 'child_process'
 import { gitEnv } from '../git/git-env'
+import { enCaja } from '../sandbox/en-caja'
 
 export interface GitOut {
   readonly code: number
   readonly out: string
 }
 
-/** git con args en array, jamas shell strings. stdout+stderr juntos para autopsia. */
+// Los hooks del repo auditado NO corren: son codigo del cliente y este git es
+// nuestro (ADR-092, git opcion B). `core.hooksPath=/dev/null` apaga tambien
+// post-checkout y post-merge, que `--no-verify` no toca.
+const SIN_HOOKS = ['-c', 'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=']
+
+/** git con args en array, jamas shell strings. stdout+stderr juntos para autopsia.
+ *  DENTRO DE LA CAJA (ADR-092, clase B): el worktree es lo que se ve, mas el
+ *  `.git` comun que `enCaja` le anade. Sin caja: 127 y el porque. */
 export function git(cwd: string, args: readonly string[]): Promise<GitOut> {
+  const env = gitEnv()
+  const caja = enCaja('git', [...SIN_HOOKS, ...args], cwd, cwd, env.PATH)
+  if (!caja.ok) return Promise.resolve({ code: 127, out: caja.error })
   return new Promise((resolve) => {
-    const child = spawn('git', args as string[], { cwd, env: gitEnv() })
+    const child = spawn(caja.value.bin, [...caja.value.args], { cwd, env })
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.stderr.on('data', (d: Buffer) => (out += d.toString()))

@@ -1,29 +1,23 @@
-import { spawn, type ChildProcess } from 'child_process'
+import { spawn } from 'child_process'
 import { redactSecrets } from '@domain/chat/tool-detail'
 import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
 import { tail } from '@domain/repair/tail'
 import { buildGateEnv } from './gate-env'
 import { trackChild } from '../claude-code/child-registry'
-import { senalAl } from '../claude-code/kill-signal'
-
-/** Mata el GRUPO entero (npm run spawnea hijos: tsc, eslint, vitest). Matar
- *  solo al padre deja nietos vivos sosteniendo los pipes y `close` no llega. */
-/** SIGTERM al grupo; a los 3s, SIGKILL — la leccion del boton Detener. */
-function armTimeout(child: ChildProcess, timeoutMs: number, onFire: () => void): NodeJS.Timeout {
-  return setTimeout(() => {
-    onFire()
-    senalAl(child, 'SIGTERM', 'grupo')
-    const escalation = setTimeout(() => senalAl(child, 'SIGKILL', 'grupo'), 3000)
-    escalation.unref()
-    child.once('close', () => clearTimeout(escalation))
-  }, timeoutMs)
-}
+import { enCaja } from '../sandbox/en-caja'
+import { armTimeout, sinCaja } from './spawn-command-vida'
 
 /**
  * Corre UN comando del gate: spawn con args array (jamas shell strings),
  * grupo de proceso propio (detached) para poder matar el arbol completo, y
  * buffers rotativos — solo los ultimos TAIL_CHARS viajan a la autopsia.
+ *
+ * DENTRO DE LA CAJA (ADR-092, clase B): aqui corren `npm ci` y los scripts del
+ * repo auditado, con sus `preinstall` y `postinstall`. El worktree es el
+ * proyecto que se monta; nada mas del disco se ve. Si la caja no se puede
+ * levantar, el comando NO corre: sale con 127 y el motivo, y el gate lo lee
+ * como fallo, no como exito (fail-closed, casilla 4).
  */
 export function spawnCommand(
   bin: string,
@@ -34,14 +28,16 @@ export function spawnCommand(
   owner: string | null = null
 ): Promise<CommandOutcome> {
   const startedAt = Date.now()
+  // Lista blanca, no herencia: aqui corren los scripts del repo AUDITADO.
+  // `CI` va dentro porque sin ella un proyecto que llama `vitest` a secas
+  // vigila ficheros y cuelga el gate hasta el timeout. Se compone AQUI y no al
+  // cargar el modulo: `augmentPath()` completa el PATH en el arranque mutando
+  // `process.env`, y el gate tiene que correr con el de ahora.
+  const env = buildGateEnv(process.env)
+  const caja = enCaja(bin, args, cwd, cwd, env.PATH)
+  if (!caja.ok) return Promise.resolve(sinCaja(key, startedAt, caja.error))
   return new Promise((resolve) => {
-    // Lista blanca, no herencia: aqui corren los scripts del repo AUDITADO.
-    // `CI` va dentro porque sin ella un proyecto que llama `vitest` a secas
-    // vigila ficheros y cuelga el gate hasta el timeout. Se compone AQUI y no al
-    // cargar el modulo: `augmentPath()` completa el PATH en el arranque mutando
-    // `process.env`, y el gate tiene que correr con el de ahora.
-    const env = buildGateEnv(process.env)
-    const child = spawn(bin, args as string[], { cwd, detached: true, env })
+    const child = spawn(caja.value.bin, [...caja.value.args], { cwd, detached: true, env })
     trackChild(child, owner, 'grupo')
     let out = ''
     let errOut = ''

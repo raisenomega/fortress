@@ -1,6 +1,7 @@
 import { homedir } from 'node:os'
 import { err, ok, type Result } from '@domain/shared/result'
 import { flagsDeBwrap } from '@domain/sandbox/flags-de-bwrap'
+import { dentroDe } from '@domain/sandbox/ruta-de-la-caja'
 import { directorioDeNode, gitComunDe, raicesDelSistema } from './lo-que-ve-la-caja'
 import { BWRAP, sondaDeBwrap } from './sonda-de-bwrap'
 
@@ -35,12 +36,17 @@ export function enCaja(
 
   const node = directorioDeNode(path)
   if (node === null) return err('sin-caja:falta-node')
+  // El binario que se lanza tiene que estar DENTRO de lo que la caja ve. Uno
+  // por ruta absoluta fuera de /usr, de node y del proyecto —un `npm` de otra
+  // instalacion, o el binario de un test— entra el solo, en solo lectura.
+  const propio =
+    bin.startsWith('/') && ![node, proyecto, '/usr'].some((r) => dentroDe(r, bin)) ? [bin] : []
   const flags = flagsDeBwrap({
     proyecto,
     cwd,
     home: homedir(),
     sistema: raicesDelSistema(),
-    soloLectura: [node].filter((r) => !r.startsWith(proyecto)),
+    soloLectura: [node, ...propio].filter((r) => !dentroDe(proyecto, r)),
     escritura: gitComunDe(cwd).filter((r) => r !== proyecto),
     socketDelProxy: null
   })

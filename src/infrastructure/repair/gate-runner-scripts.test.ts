@@ -1,3 +1,4 @@
+import { join } from 'node:path'
 import { readFileSync } from 'fs'
 import { describe, expect, it } from 'vitest'
 import type { GateCommand } from '@domain/repair/gate-config'
@@ -13,14 +14,13 @@ const CMDS: readonly GateCommand[] = [
 describe('createGateRunner: los scripts REALES del proyecto', () => {
   it('un repo que llama type-check a lo mismo se verifica igual', async () => {
     const { bin, llamadas } = fakeNpm()
-    const outcome = await createGateRunner('p1', bin, CMDS, 5000).run(
-      repo('type-check', 'lint', 'test'),
-      'base-sha'
-    )
+    const worktree = repo('type-check', 'lint', 'test')
+    const outcome = await createGateRunner('p1', bin, CMDS, 5000).run(worktree, 'base-sha')
     expect(outcome.ok).toBe(true)
     expect(outcome.skipped).toEqual([])
-    // Se lanza el nombre del repo; la intencion sigue siendo la del gate.
-    const lanzados = readFileSync(llamadas, 'utf8')
+    // Se lanza el nombre del repo; la intencion sigue siendo la del gate. El
+    // registro vive en el worktree: es lo unico que la caja deja escribir.
+    const lanzados = readFileSync(join(worktree, llamadas), 'utf8')
     expect(lanzados).toContain('run type-check')
     expect(lanzados).toContain('run test')
     expect(outcome.commands.map((c) => c.command)).toEqual(['npm ci', 'typecheck', 'lint', 'test:unit']) // prettier-ignore
