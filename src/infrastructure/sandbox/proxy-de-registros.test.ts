@@ -28,7 +28,9 @@ describe('el proxy abre solo hacia la lista, y solo por el puerto TLS', () => {
   })
 
   it('un host de la lista por otro puerto: 403', async () => {
-    expect(await pide(`CONNECT 127.0.0.1:${registro.puerto + 1} HTTP/1.1`)).toMatch(/^HTTP\/1\.1 403/)
+    expect(await pide(`CONNECT 127.0.0.1:${registro.puerto + 1} HTTP/1.1`)).toMatch(
+      /^HTTP\/1\.1 403/
+    )
   })
 
   it('basura que no es CONNECT: 403', async () => {
