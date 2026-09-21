@@ -7,6 +7,11 @@ import { matchesGlob } from '../shared/path-glob'
  */
 const SONDAS: readonly string[] = ['zzz-sonda', 'a/b/zzz-sonda.ts']
 
+/** Lo que ninguna ruta de verdad lleva: control (saltos de linea, tabuladores),
+ *  angulos y acento grave. Con `\p{Cc}` y no con un rango `\x00-\x1f`: el fuente
+ *  se queda en ASCII legible y el lint no lo toma por un byte de control suelto. */
+const REDACTA = /[\p{Cc}<>`]/u
+
 /**
  * Si un glob del `.fortress/config` puede ensanchar la correa de alcance.
  *
@@ -14,7 +19,7 @@ const SONDAS: readonly string[] = ['zzz-sonda', 'a/b/zzz-sonda.ts']
  * `permitido()`, que decide si un fichero tocado por el generador es violacion.
  * Solo se comprobaba que fuera un array de cadenas.
  *
- * Se rechazan tres formas, y conviene saber que hace hoy cada una:
+ * Se rechazan cuatro formas, y conviene saber que hace hoy cada una:
  *
  * UNIVERSAL —dos asteriscos, solos o seguidos de barra y otro— es la unica que
  * hacia dano de verdad: abre el
@@ -28,12 +33,17 @@ const SONDAS: readonly string[] = ['zzz-sonda', 'a/b/zzz-sonda.ts']
  * quien escribio `/**` creyo estar abriendo algo y no abrio nada, y prefiere
  * enterarse a que su grupo no haga lo que cree.
  *
+ * QUE REDACTA —saltos de linea, angulos, acento grave— no abre ficheros: abre
+ * el PROMPT. El glob llega literal al bloque de permitidos del generador, el
+ * agente que escribe, y con un salto de linea cerraba ese bloque y seguia con
+ * reglas propias. Ninguna ruta de verdad lleva esos caracteres.
+ *
  * No se rechaza lo ancho-pero-acotado —`src/` con dos asteriscos, o los `.ts`
  * de todo el arbol—: nombra un terreno de verdad, aunque sea grande, y esa es
  * una decision del proyecto.
  */
 export function globDeAlcanceValido(patron: string): boolean {
-  if (patron === '' || patron.startsWith('/')) return false
+  if (patron === '' || patron.startsWith('/') || REDACTA.test(patron)) return false
   if (patron.split('/').includes('..')) return false
   return !SONDAS.every((sonda) => matchesGlob(sonda, patron))
 }
