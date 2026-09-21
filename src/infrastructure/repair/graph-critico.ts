@@ -3,19 +3,14 @@ import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { buildEnv } from '../claude-code/build-env'
 import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
-import { TOOLS_LECTURA } from './motor-tools'
+import { argsDeLectura } from './generator-args'
 import { processOmegaOut } from './omega-out'
 import { relojDeCorrida } from './reloj-de-corrida'
 
-const GRAPH = JSON.stringify({
-  mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
-})
 const TIMEOUT_MS = 900_000
 
 /** Lo que deja una corrida del critico. Sin `ok` no hubo objecion que leer. */
-export type CriticoRunResult =
-  | { ok: true; texto: string; runMeta: AnalystRunMeta }
-  | { ok: false; error: string; timedOut: boolean; runMeta: AnalystRunMeta }
+export type CriticoRunResult = { ok: true; texto: string; runMeta: AnalystRunMeta } | { ok: false; error: string; timedOut: boolean; runMeta: AnalystRunMeta } // prettier-ignore
 
 export interface GraphCritico {
   run(arbol: string, prompt: string): Promise<CriticoRunResult>
@@ -33,14 +28,19 @@ export interface GraphCritico {
  * criticar— y el reloj de corrida, que ya aprendio que un cero de tokens no es
  * lo mismo que no haber podido medir.
  */
-export function createGraphCritico(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS): GraphCritico { // prettier-ignore
+export function createGraphCritico(
+  claudeBin: string,
+  projectId: string,
+  timeoutMs = TIMEOUT_MS
+): GraphCritico {
+  // prettier-ignore
   return {
     run: (arbol, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
-      const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
-        '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
+      const args = argsDeLectura(prompt, arbol) // sin caja no arranca: como un binario que no existe
+      if (!args.ok) return Promise.resolve({ ok: false, error: args.error, timedOut: false, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
-        const child = spawn(claudeBin, args, { cwd: arbol, detached: true, env: buildEnv(null) })
+        const child = spawn(claudeBin, [...args.value], { cwd: arbol, detached: true, env: buildEnv(null) })
         // Detached y por GRUPO: si no, Detener mata al lider y el MCP sigue vivo.
         trackChild(child, projectId, 'grupo')
         let out = ''

@@ -32,13 +32,16 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
   return {
     generate: (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
+      const args = argsDelGenerador(prompt, worktreePath)
+      // Sin caja no arranca: el mismo camino que un binario que no existe.
+      if (!args.ok) return Promise.resolve({ ok: false, noArranco: true, error: args.error, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
         // El mismo recorte que los demas lanzamientos del CLI: este es el que
         // EDITA, con prompt del repo AJENO y un MCP nieto que hereda esto, asi
         // que la sesion viva del operador no baja. `null` = sin key propia: se
         // sigue facturando por donde ya se facturaba (login OAuth bajo HOME).
         const env = buildEnv(null)
-        const child = spawn(claudeBin, [...argsDelGenerador(prompt)], { cwd: worktreePath, env })
+        const child = spawn(claudeBin, [...args.value], { cwd: worktreePath, env })
         trackChild(child, projectId)
         let out = ''
         // SIGKILL sin gracia (OMEGA da tres segundos; este EDITA, y esos tres

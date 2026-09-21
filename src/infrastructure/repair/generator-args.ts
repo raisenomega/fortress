@@ -1,4 +1,6 @@
-import { TOOLS_EDICION } from './motor-tools'
+import type { Result } from '@domain/shared/result'
+import { conSandbox } from '../sandbox/con-sandbox'
+import { TOOLS_EDICION, TOOLS_LECTURA } from './motor-tools'
 const GRAPH = JSON.stringify({
   mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
 })
@@ -25,9 +27,19 @@ const GRAPH = JSON.stringify({
  */
 export const MAX_TURNS = 30
 
-/** Con que se lanza C3: solo lee y edita, dentro del worktree, y con techo. */
-export function argsDelGenerador(prompt: string): readonly string[] {
-  return ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
+/** Con que se lanza C3: solo lee y edita, dentro del worktree, y con techo.
+ *  Y dentro de la caja del CLI (ADR-092, clase A): sin caja, no hay args. */
+export function argsDelGenerador(prompt: string, worktreePath: string): Result<readonly string[]> {
+  const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
     '--strict-mcp-config', '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION,
     '--max-turns', String(MAX_TURNS)] // prettier-ignore
+  return conSandbox(args, worktreePath)
+}
+
+/** Con que se lanzan los que SOLO LEEN —analista, critico, OMEGA—: el mismo
+ *  array que antes vivia copiado tres veces, y la caja del CLI encima. */
+export function argsDeLectura(prompt: string, cwd: string): Result<readonly string[]> {
+  const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
+    '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
+  return conSandbox(args, cwd)
 }

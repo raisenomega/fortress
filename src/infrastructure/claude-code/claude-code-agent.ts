@@ -3,15 +3,12 @@ import type { CodeAgent } from '@domain/chat/code-agent'
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { ApiKeyStore } from '@domain/settings/api-key-store'
 import type { Budget } from '@domain/settings/run-budget'
-import { mergeMcpConfig } from '@domain/connectors/mcp-config'
-import { agentsForProject } from './agents-for-project'
 import { trackChild } from './child-registry'
 import { buildEnv } from './build-env'
-import { buildArgs, CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
-import { readProjectMcpServers } from './project-mcp'
-import { readProjectScripts } from './project-scripts'
+import { argsDelTurno } from './args-del-turno'
+import { CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { precheckProjectPath } from './precheck-project-path'
-import { collectRun, TECHO_POR_DEFECTO } from './run-claude-process'
+import { collectRun, TECHO_POR_DEFECTO, sinLanzar } from './run-claude-process'
 
 /**
  * Ejecuta Claude Code dentro de la carpeta del proyecto. A diferencia del chat
@@ -44,23 +41,12 @@ export function createClaudeCodeAgent(
     precheck: precheckProjectPath,
 
     run: (request, onChunk) => {
-      const agents = agentsForProject(request.projectPath, customAgents)
-      // El grafo real (codebase-memory con su graph.db) y demas MCP viven en el
-      // .mcp.json del proyecto; solo se pasan si es de confianza (ejecutan comandos).
-      const projectMcp = request.trusted ? readProjectMcpServers(request.projectPath) : null
-      const args = buildArgs(
-        request.prompt,
-        request.permissionMode,
-        agents,
-        request.agentId,
-        budget.perRun,
-        mergeMcpConfig(mcpConfig, projectMcp),
-        request.trusted,
-        readProjectScripts(request.projectPath)
-      )
-      if (request.reanudarSesion) args.push('--resume', request.reanudarSesion, '--fork-session')
+      // La caja del CLI (ADR-092, clase A). Sin caja NO hay turno: se contesta
+      // como un CLI que no arranca, con el motivo, y nada se lanza.
+      const args = argsDelTurno(request, customAgents, mcpConfig, budget.perRun)
+      if (!args.ok) return Promise.resolve(sinLanzar(args.error, onChunk))
 
-      const child = spawn(CLAUDE_BIN, args, {
+      const child = spawn(CLAUDE_BIN, [...args.value], {
         cwd: request.projectPath,
         // Solo se pasa la key si el operador eligio facturar a la key. Sin
         // ella, `claude` usa su propia sesion y consume del plan.

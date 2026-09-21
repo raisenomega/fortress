@@ -1,4 +1,4 @@
-import { TOOLS_LECTURA } from './motor-tools'
+import { argsDeLectura } from './generator-args'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
@@ -12,20 +12,17 @@ import { parseUsage } from '../claude-code/parse-usage'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { trackChild } from '../claude-code/child-registry'
 
-const GRAPH = JSON.stringify({
-  mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
-})
-
 /** `buildEnv(null)` como sus dos hermanos del motor: recorta las llaves de la
  *  SESION VIVA del operador. Era el unico spawn de `claude` que no lo hacia, asi
  *  que su hijo —y los MCP nietos— veian el agente ssh y el keyring. */
 function run(bin: string, cwd: string, prompt: string, owner: string): Promise<RunOut> {
   // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config
   // aisla el grafo (sin los MCP de claude.ai). Solo tools de lectura: read-only.
-  const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
-    '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
+  // Sin caja no arranca: el mismo camino que un binario que no existe.
+  const args = argsDeLectura(prompt, cwd)
+  if (!args.ok) return Promise.resolve({ result: args.error, noArranco: true })
   return new Promise((resolve) => {
-    const child = spawn(bin, args, { cwd, env: buildEnv(null) })
+    const child = spawn(bin, [...args.value], { cwd, env: buildEnv(null) })
     trackChild(child, owner)
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))

@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import { GRAPH_INDEX_TOOL, withGraph } from '@domain/connectors/graph-mcp'
 import { buildEnv } from '../claude-code/build-env'
+import { conSandbox } from '../sandbox/con-sandbox'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
 const PROMPT =
@@ -27,8 +28,15 @@ export function indexGraph(
     '--mcp-config',
     withGraph(null)
   ]
+  // La caja del CLI (ADR-092, clase A). Sin caja no se indexa: se resuelve sin
+  // lanzar nada, y el registro lo cuenta como no hecho.
+  const conCaja = conSandbox(args, projectPath)
+  if (!conCaja.ok) {
+    onLog(conCaja.error)
+    return Promise.resolve()
+  }
   return new Promise((resolve) => {
-    const child = spawn(CLAUDE_BIN, args, { cwd: projectPath, env: buildEnv(apiKey) })
+    const child = spawn(CLAUDE_BIN, [...conCaja.value], { cwd: projectPath, env: buildEnv(apiKey) })
     const timer = setTimeout(() => {
       child.kill()
       resolve()
