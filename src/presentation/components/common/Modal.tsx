@@ -1,5 +1,8 @@
+import { useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useCerrarConEscape } from '../../hooks/useCerrarConEscape'
+import { useFocoDelDialogo } from '../../hooks/useFocoDelDialogo'
 
 interface ModalProps {
   readonly title: string
@@ -16,6 +19,10 @@ interface ModalProps {
  * incomodo que venga despues. Mismo motivo que `BreakdownPopover`.
  */
 export function Modal({ title, onClose, children }: ModalProps): React.JSX.Element {
+  const caja = useRef<HTMLDivElement | null>(null)
+  useCerrarConEscape(onClose)
+  useFocoDelDialogo(caja)
+
   return createPortal(
     <div
       role="presentation"
@@ -23,6 +30,8 @@ export function Modal({ title, onClose, children }: ModalProps): React.JSX.Eleme
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-6 backdrop-blur-sm"
     >
       <div
+        ref={caja}
+        tabIndex={-1}
         role="dialog"
         aria-modal
         aria-label={title}
