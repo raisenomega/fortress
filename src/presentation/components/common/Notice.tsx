@@ -19,15 +19,18 @@ const TONE: Record<NoticeTone, { className: string; iconName: IconName }> = {
 interface NoticeProps {
   readonly tone: NoticeTone
   readonly children: React.ReactNode
+  /** Sin `role="status"` propio: para cuando ya vive DENTRO de una region viva
+   *  (el Toaster). Una region viva dentro de otra se anuncia dos veces. */
+  readonly callado?: boolean
 }
 
 /** Mensaje breve que no interrumpe: informa y deja seguir trabajando. */
-export function Notice({ tone, children }: NoticeProps): React.JSX.Element {
+export function Notice({ tone, children, callado }: NoticeProps): React.JSX.Element {
   const { className, iconName } = TONE[tone]
 
   return (
     <div
-      role="status"
+      role={callado ? undefined : 'status'}
       className={`flex items-start gap-2 rounded-md border px-3 py-2 ${className}`}
     >
       <Icon name={iconName} size={13} className="mt-0.5 shrink-0" />
