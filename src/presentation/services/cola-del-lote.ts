@@ -1,8 +1,9 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { AgentId } from '@domain/agent/agent'
-import { resumenDelLote, type DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
+import type { DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
 import type { DesenlaceDelEnvio } from '@domain/chat/desenlace-del-envio'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
+import { resumenDelLote } from '@domain/chat/parte-del-lote'
 import type { Finding } from '@domain/project/finding'
 import { turnoDelLote } from './turno-del-lote'
 
