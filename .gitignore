@@ -57,3 +57,6 @@ FORTRESS-GUIA-DOCUMENTACION-*.md
 .ui-preview*.png
 .toggle-zoom.png
 *.tsbuildinfo
+
+# Claude Code: la config local es de cada maquina (rutas absolutas del operador)
+.claude/settings.local.json
