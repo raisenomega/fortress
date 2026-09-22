@@ -43,7 +43,9 @@ describe('reclasificar: lo que el agente dijo, comprobado antes de escribir nada
       )
     ).toThrow(/gemela/)
   })
+})
 
+describe('reclasificar: sin gemela, o sin respuesta que valga', () => {
   it('sin gemela: identidad nueva de su propia linea con el tipo elegido; nada se funde', () => {
     const [r] = reclasificar(
       [zombi()],
