@@ -13,7 +13,7 @@ import { cubierto, fuente, todos } from './innegociables-fixture'
  * esas y no entre en la lista falla aqui, sin que nadie se acuerde de mirar.
  */
 const CONTROLES =
-  /export (?:async )?function (build\w*Env|gitEnv\w*|redactSecrets|sanear\w+|guard\w+|conCarril\w+)\b/
+  /export (?:async )?function (build\w*Env|gitEnv\w*|redactSecrets|sanear\w+|guard\w+|conCarril\w+|capacidadesDe|bloqueDeCapacidades|cabeceraSinPropia)\b|export const (HERRAMIENTAS_DEL_SERVIDOR|GRAPH_READ_TOOLS)\b/
 
 /**
  * La otra clase que se escapo, y por la misma razon: `main-window` decidia el
@@ -55,5 +55,6 @@ describe('toda defensa esta en la lista que el auto-merge no puede tocar', () =>
     // Sin esto, una propuesta podria integrar sola el borrado de la proteccion.
     expect(cubierto('src/domain/repair/auto-merge-blacklist.ts')).toBe(true)
     expect(cubierto('src/domain/repair/innegociables-defensa.ts')).toBe(true)
+    expect(cubierto('src/domain/repair/innegociables-prompt.ts')).toBe(true)
   })
 })

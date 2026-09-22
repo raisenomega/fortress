@@ -1,4 +1,9 @@
-import type { CorpusCategory } from '../project/corpus-descriptor'
+import {
+  CANONICAL_DOCS,
+  categoryOf,
+  CORPUS_DIRS,
+  type CorpusCategory
+} from '../project/corpus-descriptor'
 
 /** Cuando el proyecto SI tiene documentos de la clase que toca. */
 export const CABECERA: Readonly<Record<CorpusCategory, string>> = {
@@ -13,24 +18,34 @@ export const CABECERA: Readonly<Record<CorpusCategory, string>> = {
     'decidir sobre disciplina o convencion:'
 }
 
+const CLASE: Readonly<Record<CorpusCategory, string>> = {
+  security: 'de seguridad',
+  structural: 'de arquitectura',
+  general: ''
+}
+
 /**
- * Cuando NO los tiene y se cae a los generales. Caer esta bien —la doctrina
+ * Cuando NO se encontro y se cae a los generales. Caer esta bien —la doctrina
  * general le sirve al revisor— pero anunciarlos bajo la promesa de la clase que
  * falta es una afirmacion falsa, y de las caras: catorce veces el analista
  * abrio un README que era la plantilla intacta de Lovable porque el prompt le
- * dijo que ahi estaba escrito "lo que el proyecto protege". Se le decia dos
- * cosas mentira de una vez: que existe esa doctrina, y que es ese fichero.
+ * dijo que ahi estaba escrito "lo que el proyecto protege".
  *
- * Decirlo cambia lo que el agente hace con lo que lee: mira la doctrina general
- * sabiendo que no le van a contar el modelo de amenazas, en vez de buscarlo
- * dentro y concluir que el proyecto no protege nada.
+ * Y decia «NO tiene doctrina», que es afirmar una ausencia que nadie midio: el
+ * descubridor busca NOMBRES EXACTOS en la raiz, en las carpetas de corpus y en
+ * la declaracion del proyecto. Un proyecto con su doctrina en otro fichero —una
+ * tabla de gaps, medido el 20-sep— la tenia y se le negaba. Lo honesto es lo
+ * que se hizo: no se encontro, y aqui es donde se miro. Las rutas se DERIVAN de
+ * la tabla del corpus, que es la que busca el descubridor: una sola fuente.
  */
-export const CABECERA_SIN_PROPIA: Readonly<Record<CorpusCategory, string>> = {
-  security:
-    'DOCS FIRST: este proyecto NO tiene doctrina de seguridad escrita. Lo que ' +
-    'sigue es su doctrina general, que no dice que protege ni de quien:',
-  structural:
-    'DOCS FIRST: este proyecto NO tiene doctrina de arquitectura escrita. Lo que ' +
-    'sigue es su doctrina general:',
-  general: CABECERA.general
+export function cabeceraSinPropia(category: CorpusCategory): string {
+  if (category === 'general') return CABECERA.general
+  const nombres = CANONICAL_DOCS.filter((n) => categoryOf(n) === category).join(', ')
+  return (
+    `DOCS FIRST: no encontre doctrina ${CLASE[category]} escrita en las rutas conocidas ` +
+    `(${nombres} en la raiz, ni en ${CORPUS_DIRS.join('/, ')}/, ni declarada en la ` +
+    'configuracion del proyecto). Lo que sigue es su doctrina general' +
+    (category === 'security' ? ', que no dice que protege ni de quien' : '') +
+    '; si vive en otro sitio, dilo en "notes":'
+  )
 }

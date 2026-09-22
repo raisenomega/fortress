@@ -1,11 +1,12 @@
 import { DEFENSAS_INNEGOCIABLES } from './innegociables-defensa'
+import { DEFENSAS_DEL_PROMPT } from './innegociables-prompt'
 import { DEFENSAS_DE_SECRETOS } from './innegociables-secretos'
 
-/** Ver `criterio-innegociable.ts`: que entra y por que. Las familias que ya no
- *  cabian viven aparte: `innegociables-defensa`, `-disco` y `-secretos`. */
+/** Ver `criterio-innegociable.ts`. Familias aparte: `-defensa`, `-disco`, `-secretos`, `-prompt`. */
 export const AUTONOMY_RULES_FILES: readonly string[] = [
   ...DEFENSAS_INNEGOCIABLES,
   ...DEFENSAS_DE_SECRETOS,
+  ...DEFENSAS_DEL_PROMPT,
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
   'src/domain/settings/safe-commands.ts',

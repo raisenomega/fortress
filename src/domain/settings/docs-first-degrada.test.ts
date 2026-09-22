@@ -12,20 +12,34 @@ const GENERALES = corpus([
   { path: 'README.md', category: 'general' }
 ])
 
-describe('cuando el proyecto no tiene doctrina de su clase', () => {
+describe('cuando no se encontro doctrina de su clase', () => {
   it('sin documentos de su clase cae a la general, y DICE que se cayo', () => {
     // Este test afirmaba lo contrario —que la cabecera seguia prometiendo
     // seguridad— y con ello fijaba la mentira: el analista abria un README de
     // plantilla creyendo que ahi estaba escrito lo que el proyecto protege.
     const texto = buildDocsFirst('security', GENERALES)
 
-    expect(texto).toContain('NO tiene doctrina de seguridad escrita')
+    expect(texto).toContain('no encontre doctrina de seguridad escrita')
     expect(texto).not.toContain('DOCS FIRST (seguridad)')
     expect(texto).toContain('CLAUDE.md, README.md')
   })
 
+  it('NUNCA afirma ausencia: reporta que no la hallo, y DONDE la busco', () => {
+    // Un proyecto con su doctrina en otro fichero —una tabla de gaps, medido el
+    // 20-sep— recibia «NO tiene doctrina». No la tenia donde se miro; nada mas.
+    for (const c of ['security', 'structural'] as const) {
+      const texto = buildDocsFirst(c, GENERALES)
+      expect(texto).not.toMatch(/NO tiene doctrina/)
+      expect(texto).toContain('en las rutas conocidas')
+      expect(texto).toContain('si vive en otro sitio, dilo')
+    }
+    // Las rutas se DERIVAN de la tabla del corpus: las mismas que busca el descubridor.
+    expect(buildDocsFirst('security', GENERALES)).toContain('SECURITY.md')
+    expect(buildDocsFirst('structural', GENERALES)).toContain('ARCHITECTURE.md')
+  })
+
   it('lo estructural degrada igual, con su propio aviso', () => {
-    expect(buildDocsFirst('structural', GENERALES)).toContain('NO tiene doctrina de arquitectura') // prettier-ignore
+    expect(buildDocsFirst('structural', GENERALES)).toContain('no encontre doctrina de arquitectura') // prettier-ignore
   })
 
   it('la doctrina general no degrada: ya es la suya', () => {

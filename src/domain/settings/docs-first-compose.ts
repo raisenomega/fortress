@@ -4,7 +4,7 @@ import {
   type CorpusDescriptor,
   type CorpusDoc
 } from '../project/corpus-descriptor'
-import { CABECERA, CABECERA_SIN_PROPIA } from './docs-first-cabeceras'
+import { CABECERA, cabeceraSinPropia } from './docs-first-cabeceras'
 
 /**
  * Se decia `file_pattern '*.md'` y ese valor devuelve CERO. El parametro no
@@ -61,6 +61,6 @@ export function buildDocsFirst(category: CorpusCategory, corpus: CorpusDescripto
   if (citados.length === 0) return ''
 
   const grafo = corpus.directories.length > 0 ? ` ${GRAFO}` : ''
-  const cabecera = propia ? CABECERA[category] : CABECERA_SIN_PROPIA[category]
+  const cabecera = propia ? CABECERA[category] : cabeceraSinPropia(category)
   return `${cabecera} ${citados.join(', ')}.${grafo}`
 }
