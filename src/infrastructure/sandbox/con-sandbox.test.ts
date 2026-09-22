@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { conSandbox, olvidarSondaDelCli } from './con-sandbox'
+import { conSandbox } from './con-sandbox'
+import { olvidarSonda } from './sonda-de-bwrap'
 
 const proyecto = (...manifiestos: string[]): string => {
   const dir = mkdtempSync(join(homedir(), '.fortress-cli-test-'))
@@ -13,7 +14,7 @@ const ARGS = ['-p', 'hola', '--output-format', 'json']
 const settingsDe = (args: readonly string[]): { sandbox: Record<string, unknown> } =>
   JSON.parse(args[args.indexOf('--settings') + 1] ?? '{}') as { sandbox: Record<string, unknown> }
 
-afterEach(olvidarSondaDelCli)
+afterEach(olvidarSonda)
 
 describe('los args de un claude -p con la caja puesta', () => {
   it('anade --settings al final y no toca los args que ya habia', () => {

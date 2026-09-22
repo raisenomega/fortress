@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { sondaDeBwrap } from './sonda-de-bwrap'
+import { cajaDisponible, olvidarSonda, sondaDeBwrap } from './sonda-de-bwrap'
 
 /** Un PATH de mentira con los binarios que se le digan. `bwrap` de mentira
  *  contesta lo que se le pase, para simular una maquina donde esta y no corre. */
@@ -52,5 +52,13 @@ describe('la sonda: «instalado» no es «funciona», y falta uno = falta todo',
 
   it('en esta maquina, con el bwrap REAL: disponible (si no, este test dice por que)', () => {
     expect(sondaDeBwrap()).toEqual({ ok: true, value: undefined })
+  })
+
+  it('la memoria es POR PATH: un PATH sin bwrap no envenena al bueno, ni al reves', () => {
+    olvidarSonda()
+    expect(cajaDisponible('/nonexistent')).toEqual({ ok: false, error: 'falta-bwrap' })
+    expect(cajaDisponible()).toEqual({ ok: true, value: undefined })
+    expect(cajaDisponible('/nonexistent')).toEqual({ ok: false, error: 'falta-bwrap' })
+    olvidarSonda()
   })
 })

@@ -3,14 +3,12 @@ import { err, ok, type Result } from '@domain/shared/result'
 import { flagsDeBwrap } from '@domain/sandbox/flags-de-bwrap'
 import { dentroDe } from '@domain/sandbox/ruta-de-la-caja'
 import { directorioDeNode, gitComunDe, raicesDelSistema } from './lo-que-ve-la-caja'
-import { BWRAP, sondaDeBwrap } from './sonda-de-bwrap'
+import { BWRAP, cajaDisponible } from './sonda-de-bwrap'
 
 export interface Lanzamiento {
   readonly bin: string
   readonly args: readonly string[]
 }
-
-let disponible: Result<void> | null = null
 
 /**
  * Un comando de la CLASE B, envuelto: FORTRESS lanza `bwrap` y dentro va el
@@ -18,7 +16,7 @@ let disponible: Result<void> | null = null
  * pasa por el registro, y eso llega en su propio arco con el proxy—.
  *
  * FAIL-CLOSED (casilla 4): si la caja no se puede levantar, NO hay comando. La
- * sonda corre UNA vez por proceso y se guarda: es un `bwrap` real, no un PATH.
+ * sonda es un `bwrap` real, no un PATH, y se recuerda por PATH (`cajaDisponible`).
  * Y sin `node` en el PATH tampoco: dentro no habria con que correr `npm`.
  *
  * `--` antes del comando: lo que venga despues son argumentos del comando y
@@ -37,7 +35,7 @@ export function enCaja(
   path = process.env.PATH ?? '',
   escritura: readonly string[] = []
 ): Result<Lanzamiento> {
-  disponible ??= sondaDeBwrap(path)
+  const disponible = cajaDisponible(path)
   if (!disponible.ok) return err(`sin-caja:${disponible.error}`)
 
   const node = directorioDeNode(path)
@@ -59,9 +57,4 @@ export function enCaja(
   return flags.ok
     ? ok({ bin: BWRAP, args: [...flags.value, '--', bin, ...args] })
     : err(`sin-caja:${flags.error}`)
-}
-
-/** Solo para tests: olvida el resultado de la sonda. */
-export const olvidarSonda = (): void => {
-  disponible = null
 }

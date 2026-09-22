@@ -3,9 +3,7 @@ import { err, ok, type Result } from '@domain/shared/result'
 import { argsDelSandbox } from '@domain/sandbox/config-del-cli'
 import { ecosistemasDe, registrosDe } from '@domain/sandbox/registros-de-paquetes'
 import { directorioDeNode } from './lo-que-ve-la-caja'
-import { sondaDeBwrap } from './sonda-de-bwrap'
-
-let disponible: Result<void> | null = null
+import { cajaDisponible } from './sonda-de-bwrap'
 
 /**
  * Los args de un `claude -p` con el sandbox del CLI puesto (ADR-092, clase A).
@@ -25,7 +23,7 @@ export function conSandbox(
   projectPath: string,
   path = process.env.PATH ?? ''
 ): Result<readonly string[]> {
-  disponible ??= sondaDeBwrap(path)
+  const disponible = cajaDisponible(path)
   if (!disponible.ok) return err(`sin-caja:${disponible.error}`)
 
   const node = directorioDeNode(path)
@@ -46,9 +44,4 @@ function manifiestosDe(projectPath: string): readonly string[] {
   } catch {
     return []
   }
-}
-
-/** Solo para tests: olvida el resultado de la sonda. */
-export const olvidarSondaDelCli = (): void => {
-  disponible = null
 }

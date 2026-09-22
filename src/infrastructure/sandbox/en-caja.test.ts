@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { enCaja, olvidarSonda } from './en-caja'
+import { enCaja } from './en-caja'
+import { olvidarSonda } from './sonda-de-bwrap'
 import { corre, escenario } from './fuga-fixture'
 
 /** LA BATERIA DE FUGAS de ADR-092 §6, contra el bwrap REAL de esta maquina. No

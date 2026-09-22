@@ -3,7 +3,7 @@ import { mkdtempSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { argsDelTurno } from '../claude-code/args-del-turno'
-import { olvidarSondaDelCli } from '../sandbox/con-sandbox'
+import { olvidarSonda } from '../sandbox/sonda-de-bwrap'
 import { argsDeLectura, argsDelGenerador } from './generator-args'
 import { createGraphOmega } from './graph-omega'
 
@@ -13,7 +13,7 @@ const abre = <T>(r: { ok: true; value: T } | { ok: false; error: string }): T =>
   if (!r.ok) throw new Error(r.error)
   return r.value
 }
-afterEach(olvidarSondaDelCli)
+afterEach(olvidarSonda)
 
 describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clase A)', () => {
   it('los que solo leen: analista, critico y OMEGA llevan --settings con el sandbox', () => {
@@ -42,7 +42,7 @@ describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clas
   it('FAIL-CLOSED en OMEGA: sin caja no arranca, y lo dice como un binario que no existe', async () => {
     const path = process.env.PATH
     process.env.PATH = '/nonexistent'
-    olvidarSondaDelCli()
+    olvidarSonda()
     try {
       const result = await createGraphOmega('/bin/true', 'p1').run(worktree(), 'p')
       expect(result.ok).toBe(false)

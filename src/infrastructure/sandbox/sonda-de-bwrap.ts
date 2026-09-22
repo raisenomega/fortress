@@ -40,6 +40,25 @@ export function sondaDeBwrap(path = process.env.PATH ?? '', timeoutMs = TIMEOUT_
   return corrio && salida.stdout.trim() === CANARIO ? ok(undefined) : err('bwrap-no-arranca')
 }
 
+const memo = new Map<string, Result<void>>()
+
+/**
+ * La sonda, recordada POR PATH y por proceso: un `bwrap` real cuesta un fork y
+ * la respuesta no cambia mientras el PATH sea el mismo. Por PATH y no una sola
+ * casilla: un PATH sin bwrap no envenena al bueno, ni al reves. Las dos clases
+ * (A y B) preguntan AQUI: una memoria, no dos que se desincronicen.
+ */
+export function cajaDisponible(path = process.env.PATH ?? ''): Result<void> {
+  const previa = memo.get(path)
+  if (previa !== undefined) return previa
+  const ahora = sondaDeBwrap(path)
+  memo.set(path, ahora)
+  return ahora
+}
+
+/** Solo para tests: olvida lo que la sonda contesto. */
+export const olvidarSonda = (): void => memo.clear()
+
 /** La ruta del binario EN ESE PATH, resuelta aqui y lanzada por ruta: asi la
  *  respuesta no depende de como resuelva nombres el `spawnSync` de cada Node
  *  (medido en 24.18: si respeta `env.PATH`; no se apuesta a que todos lo hagan). */
