@@ -21,6 +21,17 @@ describe('el recibo dice POR QUE no se pudo verificar, no un motivo generico', (
     )
   })
 
+  it('vfat por statfs: la herramienta «falta» porque el disco no enlaza; la causa es el disco', () => {
+    const sinTsc = { code: 127, out: 'sh: 1: tsc: not found' }
+    expect(porQueNoSePudo(sinTsc, true)).toBe('sin-enlaces')
+    expect(porQueNoSePudo(sinTsc, false)).toBe('sin-herramienta')
+    // Sin script sigue siendo sin script, y un rojo sigue siendo rojo: el disco no lo cambia.
+    expect(porQueNoSePudo({ code: 1, out: 'npm ERR! missing script: typecheck' }, true)).toBe(
+      'sin-script'
+    )
+    expect(porQueNoSePudo({ code: 1, out: 'error TS2304' }, true)).toBeNull()
+  })
+
   it('la herramienta que falta sigue diciendo eso', () => {
     expect(porQueNoSePudo({ code: 127, out: 'sh: 1: tsc: not found' })).toBe('sin-herramienta')
     expect(porQueNoSePudo({ code: 1, out: 'npm ERR! missing script: typecheck' })).toBe(

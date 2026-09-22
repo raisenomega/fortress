@@ -1,6 +1,7 @@
 import { medida, type MedidaDelArbol } from '@domain/chat/medida-del-arbol'
 import { porQueNoSePudo } from '@domain/chat/no-se-pudo-verificar'
 import { runCommand } from '../probe/run-command'
+import { admiteEnlaces } from './enlaces-del-disco'
 
 /** El typecheck de un proyecto ajeno no deberia tardar mas que esto. */
 const TIMEOUT_MS = 180_000
@@ -28,6 +29,6 @@ export async function verificarArbol(cwd: string): Promise<MedidaDelArbol> {
   const salida = await runCommand('npm', ['run', 'typecheck'], cwd, TIMEOUT_MS)
   if (salida.code === 0) return medida('verde')
   // `runCommand` junta stdout y stderr, asi que la senal se busca en los dos.
-  const motivo = porQueNoSePudo(salida)
+  const motivo = porQueNoSePudo(salida, !admiteEnlaces(cwd))
   return medida(motivo === null ? 'rojo' : 'desconocida', motivo)
 }

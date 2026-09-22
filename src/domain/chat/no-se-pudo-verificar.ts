@@ -41,11 +41,21 @@ export type MotivoSinVerificar = 'sin-script' | 'sin-herramienta' | 'sin-caja' |
 // fix: es del disco donde vive el proyecto. Un EPERM sobre otra cosa NO entra.
 const SIN_ENLACES = /EPERM[^\n]*symlink/i
 
-export function porQueNoSePudo(salida: SalidaDelGate): MotivoSinVerificar | null {
+/**
+ * `sinEnlaces`: lo que el disco del proyecto contesto (statfs), no la salida.
+ * Sobre vfat la herramienta «falta» porque `npm` no pudo enlazarla en
+ * `node_modules/.bin` —medido el 21-sep en un USB—: la causa es el disco, y
+ * decir «falta la herramienta» culparia a lo que no era.
+ */
+export function porQueNoSePudo(
+  salida: SalidaDelGate,
+  sinEnlaces = false
+): MotivoSinVerificar | null {
+  // prettier-ignore
   if (/^sin-caja:/.test(salida.out)) return 'sin-caja'
   if (/missing script/i.test(salida.out)) return 'sin-script'
   if (SIN_ENLACES.test(salida.out)) return 'sin-enlaces'
   if (salida.code === NO_EXISTE_EL_COMANDO || /\bnot found\b/i.test(salida.out))
-    return 'sin-herramienta'
+    return sinEnlaces ? 'sin-enlaces' : 'sin-herramienta'
   return null
 }
