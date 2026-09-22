@@ -145,7 +145,23 @@ Pieza 3) y producción bajo firma. **Va antes que cualquier capacidad de salir a
 la red**: FORTRESS no cierra hoy la trifecta letal solo porque le falta la
 tercera pata, y ADR-098 ya firmó ponérsela (§3 de la investigación).
 
-### 2. Que el prompt le diga la verdad al agente
+### 2. ~~Que el prompt le diga la verdad al agente~~ — **HECHO** `00656fa` (2026-09-22)
+
+**Construido y en `main`**: merge `00656fa`, 3 commits, gate 6/6 antes y después.
+Doctrina del arco: el prompt no *afirma* capacidades, las *refleja* de la fuente
+real, y un test derivado por fuente caza la desincronización. Lo que corrigió,
+**medido**: el analista decía «NO tienes Bash» y los cuatro agentes del motor lo
+tienen (medido en vivo con sus args exactos); ahora el bloque se lee de
+`--disallowedTools` de las mismas flags que se lanzan, y dice que corre
+contenido por la caja (ADR-092). El vocabulario del grafo concedía once
+herramientas y el servidor fijado expone ocho: las cuatro fantasma salieron del
+allowlist y de los prompts, la lista se fija por versión y un test vivo la cruza
+con el binario instalado. El brief decía «NO tiene doctrina de seguridad» donde
+solo había buscado nombres exactos: ahora dice «no encontré ... en las rutas
+conocidas» y las nombra. Cierra en la raíz la señal de 130 observaciones y 243
+avistamientos de la herramienta fantasma (6 proyectos).
+
+*Lo que sigue era el diagnóstico, y se conserva:*
 
 La segunda señal del backlog, y barata. El prompt afirma *«NO tienes Bash»* y el
 agente lo tiene; nombra una herramienta del grafo que el servidor instalado no
