@@ -1,9 +1,12 @@
-import { describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 import { execFileSync } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { createGitPusher } from './git-push'
 import { gitSnapshot } from './git-snapshot'
+import { limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { conRemoto, repoConHook } from './repo-con-hook-fixture'
+
+afterAll(limpiarCarpetasDePrueba)
 
 /**
  * ADR-092, git opcion B: los hooks del cliente NUNCA corren en el git propio de

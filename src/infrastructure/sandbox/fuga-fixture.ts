@@ -1,7 +1,7 @@
 import { execFile } from 'node:child_process'
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { carpetaDePrueba } from '../carpeta-de-prueba-fixture'
 import { enCaja } from './en-caja'
 
 export interface Escenario {
@@ -14,7 +14,7 @@ export interface Escenario {
  *  de la caja y un primer montaje ahi dio un falso «escribe fuera» (medido)—,
  *  y dentro del proyecto un script hostil que intenta salir por cuatro sitios. */
 export function escenario(): Escenario {
-  const raiz = mkdtempSync(join(homedir(), '.fortress-caja-test-'))
+  const raiz = carpetaDePrueba('.fortress-caja-test-')
   const proyecto = join(raiz, 'proyecto')
   const vecino = join(raiz, 'otro-cliente')
   mkdirSync(proyecto)

@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest'
-import { mkdtempSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { afterAll, describe, expect, it } from 'vitest'
+import { carpetaDePrueba, limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { argsDelGenerador, MAX_TURNS } from './generator-args'
+
+afterAll(limpiarCarpetasDePrueba)
 
 describe('el techo de turnos', () => {
   it('esta calibrado con los datos: sobre las que completaban, bajo las que divagaban', () => {
@@ -14,7 +14,7 @@ describe('el techo de turnos', () => {
   /** Los args del generador para un worktree de prueba: con la caja del CLI
    *  puesta (ADR-092), asi que fallan cerrado si no hay bwrap en la maquina. */
   const args = (): readonly string[] => {
-    const r = argsDelGenerador('arregla esto', mkdtempSync(join(homedir(), '.fortress-gen-test-')))
+    const r = argsDelGenerador('arregla esto', carpetaDePrueba('.fortress-gen-test-'))
     if (!r.ok) throw new Error(r.error)
     return r.value
   }

@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { corre, escenario } from './fuga-fixture'
 import { abrirProxyDeRegistros, type ProxyDeRegistros } from './proxy-de-registros'
 import { registroLocal, type RegistroLocal } from './proxy-fixture'
@@ -29,6 +30,7 @@ afterAll(async () => {
   await proxy.cerrar()
   retirarSocket(socket)
   registro.cerrar()
+  limpiarCarpetasDePrueba()
 })
 
 describe('la clase B sale por el proxy de registros, y solo por el', () => {

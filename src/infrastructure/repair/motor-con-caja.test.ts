@@ -1,19 +1,18 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { mkdtempSync } from 'node:fs'
-import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { afterAll, afterEach, describe, expect, it } from 'vitest'
+import { carpetaDePrueba, limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { argsDelTurno } from '../claude-code/args-del-turno'
 import { olvidarSonda } from '../sandbox/sonda-de-bwrap'
 import { argsDeLectura, argsDelGenerador } from './generator-args'
 import { createGraphOmega } from './graph-omega'
 
 /** Un worktree bajo el HOME, como los del motor (no /tmp: es un tmpfs en la caja). */
-const worktree = (): string => mkdtempSync(join(homedir(), '.fortress-motor-test-'))
+const worktree = (): string => carpetaDePrueba('.fortress-motor-test-')
 const abre = <T>(r: { ok: true; value: T } | { ok: false; error: string }): T => {
   if (!r.ok) throw new Error(r.error)
   return r.value
 }
 afterEach(olvidarSonda)
+afterAll(limpiarCarpetasDePrueba)
 
 describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clase A)', () => {
   it('los que solo leen: analista, critico y OMEGA llevan --settings con el sandbox', () => {

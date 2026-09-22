@@ -1,10 +1,13 @@
-import { describe, expect, it } from 'vitest'
+import { afterAll, describe, expect, it } from 'vitest'
 import { execFileSync } from 'node:child_process'
 import { existsSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { git } from './repair-git'
 import { git as gitDelMerge } from './git-del-merge'
+import { limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { repoConHook } from '../git/repo-con-hook-fixture'
+
+afterAll(limpiarCarpetasDePrueba)
 
 describe('el git de FORTRESS no ejecuta los hooks del repo auditado (ADR-092, git opcion B)', () => {
   it('post-checkout del cliente: `git checkout` de repair-git NO lo dispara', async () => {

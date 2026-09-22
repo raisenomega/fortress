@@ -1,12 +1,13 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import { mkdtempSync, writeFileSync } from 'node:fs'
+import { afterAll, afterEach, describe, expect, it } from 'vitest'
+import { writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
+import { carpetaDePrueba, limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { conSandbox } from './con-sandbox'
 import { olvidarSonda } from './sonda-de-bwrap'
 
 const proyecto = (...manifiestos: string[]): string => {
-  const dir = mkdtempSync(join(homedir(), '.fortress-cli-test-'))
+  const dir = carpetaDePrueba('.fortress-cli-test-')
   for (const m of manifiestos) writeFileSync(join(dir, m), '{}')
   return dir
 }
@@ -15,6 +16,7 @@ const settingsDe = (args: readonly string[]): { sandbox: Record<string, unknown>
   JSON.parse(args[args.indexOf('--settings') + 1] ?? '{}') as { sandbox: Record<string, unknown> }
 
 afterEach(olvidarSonda)
+afterAll(limpiarCarpetasDePrueba)
 
 describe('los args de un claude -p con la caja puesta', () => {
   it('anade --settings al final y no toca los args que ya habia', () => {

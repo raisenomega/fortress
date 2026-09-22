@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { createServer } from 'node:net'
 import { join } from 'node:path'
+import { limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { enCaja } from './en-caja'
 import { olvidarSonda } from './sonda-de-bwrap'
 import { corre, escenario } from './fuga-fixture'
@@ -12,6 +13,7 @@ import { corre, escenario } from './fuga-fixture'
  *  disco de fuera. */
 const e = escenario()
 afterEach(olvidarSonda)
+afterAll(limpiarCarpetasDePrueba)
 
 describe('la caja de la clase B, contra bwrap de verdad', () => {
   it('no lee al otro cliente, no escribe fuera, si escribe dentro', async () => {
