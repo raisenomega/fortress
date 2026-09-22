@@ -36,7 +36,7 @@ export function estudiar(
   const abiertos = ctx.findings
     .listMemory(project.id)
     .filter((f) => f.status === 'open' && f.lifecycle === 'ACTIVE')
-    .map((f) => ({ id: f.id, file: f.file, line: f.line, title: f.title, tipo: tipoDeLaIdentidad(f.identity) })) // prettier-ignore
+    .map((f) => ({ id: f.id, file: f.file, line: f.line, title: f.title, tipo: tipoDeLaIdentidad(f.identity), simbolo: f.simbolo, firstSeen: f.firstSeen })) // prettier-ignore
   const target = {
     ...selection.target,
     intentos: intentosPrevios(suyas),
