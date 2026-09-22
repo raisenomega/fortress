@@ -169,7 +169,38 @@ expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
 `SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
 del agente: se audita cada prompt contra lo que de verdad se lanza.
 
-### 3. El contrato del hallazgo
+### 3. El contrato del hallazgo — **EN MARCHA** (2 sub-piezas hechas, 2026-09-22)
+
+**Hecho y en `main`**, cada pieza con gate 6/6 antes y después:
+
+- **Sub-pieza 1, el backfill de las zombis** — merge `b4eed4a`. Las 98 filas de
+  mailbd con la identidad de antes de ADR-067 (`severidad|fichero|titulo`) están
+  resueltas **en la base viva**: 62 re-identificadas y fundidas con su gemela
+  (paso A) y 36 juzgadas por lote dentro de la caja (paso B: 36 REAL con tipo e
+  identidad de hoy, 2 fusiones ADR-071, nada muere sin que `estaProbado` lo
+  confirme). **Cero identidades viejas vivas en toda la base**; las 29 que
+  quedan están EXTINCT. La herramienta corre por proyecto y con `--base`, ensaya
+  sobre copia, y la red de invariantes vive en `src` con test; la fusión entera
+  es innegociable.
+- **Sub-pieza 2, los hermanos, corte 1** — merge `da5238e`, **ADR-099 firmado**.
+  Los hermanos son contexto para el juicio, no una decisión: se citan primero
+  por SEDE (mismo fichero y símbolo, o a 3 líneas; candidatos a ser el mismo
+  defecto) y después por CLASE dicha como tal, y `otro` no agrupa. Medido antes:
+  `send-invoice` tenía seis filas vivas para un defecto y no se veían entre sí;
+  el 97 % de las citas por clase caían en otro fichero; `otro` agrupaba 34 en
+  un proyecto.
+
+**Queda del #3**:
+
+- **Sub-pieza 3, los tipos fuera de seguridad** — **SIGUIENTE**. Accesibilidad y
+  privacidad caen en `otro` (el 20 % de lo vivo) y pierden identidad entre
+  escaneos.
+- Futuras, cada una con su medición: los cortes 2 y 3 de los hermanos (persistir
+  el juicio «mismo defecto» cuando exista consumidor; la deriva del tipo en el
+  sync, que toca ADR-084 y pide ADR propio), el ancla frente al sitio del
+  arreglo, el defecto declarado a propósito, y las cadenas de explotación.
+
+*Lo que sigue era el diagnóstico, y se conserva:*
 
 Los 27 tipos son todos de seguridad: accesibilidad y privacidad caen en `otro` y
 pierden identidad entre escaneos. No se puede expresar una cadena de explotación,
