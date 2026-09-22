@@ -31,6 +31,7 @@
     "fase-b:ejecutar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-ejecutar.ts",
     "fase-b:plan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fusion-plan.ts",
     "fase-b:juzgar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-juzgar.ts",
+    "fase-b:replan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-replan.ts",
     "fase-b:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-aplicar.ts"
   },
   "overrides": {
