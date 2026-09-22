@@ -4,13 +4,13 @@ import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
 import { tail } from '@domain/repair/tail'
 import { trackChild } from '../claude-code/child-registry'
+import { buildGateEnv } from './gate-env'
 import type { Lanzamiento } from '../sandbox/en-caja'
 import { armTimeout } from './spawn-command-vida'
 
 export interface Corrida {
   readonly key: string
   readonly cwd: string
-  readonly env: Record<string, string>
   readonly timeoutMs: number
   readonly owner: string | null
   readonly startedAt: number
@@ -20,10 +20,15 @@ export interface Corrida {
  * Corre lo que `enCaja` devolvio: spawn con args array (jamas shell strings),
  * grupo de proceso propio (detached) para poder matar el arbol completo, y
  * buffers rotativos — solo los ultimos TAIL_CHARS viajan a la autopsia.
+ *
+ * El entorno lo acota ESTE fichero, no quien lo llama: lista blanca sobre
+ * `process.env` en el momento de lanzar, que es lo que el barrido
+ * `spawn-entorno-acotado` exige ver en cada lanzador, sin fiarse de un parametro.
  */
 export function correrEnCaja(l: Lanzamiento, c: Corrida): Promise<CommandOutcome> {
+  const env = buildGateEnv(process.env)
   return new Promise((resolve) => {
-    const child = spawn(l.bin, [...l.args], { cwd: c.cwd, detached: true, env: c.env })
+    const child = spawn(l.bin, [...l.args], { cwd: c.cwd, detached: true, env })
     trackChild(child, c.owner, 'grupo')
     let out = ''
     let errOut = ''

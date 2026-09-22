@@ -20,8 +20,8 @@ import { sinCaja } from './spawn-command-vida'
  * Sin cache compartida entre clientes —el HOME de la caja es un tmpfs—: cada
  * `npm ci` descarga de nuevo a traves del proxy. Mas lento, y aislado.
  *
- * El entorno es lista blanca, no herencia, y se compone AQUI y no al cargar el
- * modulo: `augmentPath()` completa el PATH en el arranque mutando `process.env`.
+ * El entorno es lista blanca, no herencia, y se compone al lanzar y no al cargar
+ * el modulo: `augmentPath()` completa el PATH en el arranque mutando `process.env`.
  */
 export async function spawnCommand(
   bin: string,
@@ -38,7 +38,7 @@ export async function spawnCommand(
   try {
     const caja = enCaja(bin, args, cwd, cwd, env.PATH, [], proxy.socket)
     if (!caja.ok) return sinCaja(key, startedAt, caja.error)
-    return await correrEnCaja(caja.value, { key, cwd, env, timeoutMs, owner, startedAt })
+    return await correrEnCaja(caja.value, { key, cwd, timeoutMs, owner, startedAt })
   } finally {
     await proxy.cerrar()
     retirarSocket(socket)
