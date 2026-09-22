@@ -12,5 +12,8 @@ export const DESEMPATES: readonly string[] = [
   'El dato manda (precio, estado, identidad) -> confianza-en-datos-del-cliente. Se valida en un camino y no en el otro -> validacion-asimetrica. Se interpola en HTML, SQL, shell o correo -> salida-sin-escapar.', // prettier-ignore
   'Detalle interno (mensaje de error, identificador, traza) -> fuga-de-informacion-en-error. Un secreto de verdad -> secreto-sin-redactar. Un secreto en el repositorio -> secreto-versionado.', // prettier-ignore
   'Nadie comprueba quien llama -> autorizacion-ausente. No se exige project.trusted, que solo existe en FORTRESS -> missing-trust-check.', // prettier-ignore
-  'IPv4 mapeada en IPv6 -> ssrf-ipv6-mapped. Decimal, hexadecimal u octal -> ssrf-ipv4-formatos.'
+  'IPv4 mapeada en IPv6 -> ssrf-ipv6-mapped. Decimal, hexadecimal u octal -> ssrf-ipv4-formatos.',
+  // Los dos de ADR-100: donde lo que los modulos encuentran roza un tipo de seguridad.
+  'Dato personal de un titular -> privacidad. Un secreto del sistema (clave, token, credencial) -> secreto-sin-redactar.', // prettier-ignore
+  'El dato lo manda el cliente y decide dinero, estado o identidad -> confianza-en-datos-del-cliente. El sistema se contradice a si mismo (un camino no revierte o no valida lo suyo) -> integridad-de-negocio.' // prettier-ignore
 ]
