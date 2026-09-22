@@ -12,10 +12,12 @@ export const DEFENSAS_DE_LA_FUSION: readonly string[] = [
   'src/domain/project/gemela-de-la-zombi.ts',
   'src/domain/project/reclasificacion-de-zombis.ts',
   'src/domain/project/veredictos-del-lote.ts',
+  'src/domain/project/fusiones-del-paso-b.ts',
   'src/domain/repair/evidencia-obsolescencia.ts',
   'src/infrastructure/persistence/filas-con-identidad-vieja.ts',
   'src/infrastructure/persistence/zombis-sin-gemela.ts',
   'src/infrastructure/persistence/finding-fusion-sql.ts',
+  'src/infrastructure/persistence/fundir-en-caliente.ts',
   'src/infrastructure/persistence/red-de-la-fusion.ts',
   'src/infrastructure/persistence/red-de-la-fusion-marcas.ts',
   // Auto-cobertura.

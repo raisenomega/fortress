@@ -20,6 +20,8 @@ export interface FilaDeHoy {
   readonly title: string
   readonly tipo: string
   readonly identity: string
+  /** Su antiguedad: si una juzgada choca con ella, decide quien sobrevive (ADR-071). */
+  readonly first_seen: string
 }
 
 /**
@@ -38,7 +40,7 @@ const VIVA = `project_id = ? AND lifecycle != 'EXTINCT'`
 const ZOMBIS = `SELECT id, file, line, title, severity, identity, tipo, first_seen FROM findings
   WHERE ${VIVA} AND ${IDENTIDAD_VIEJA} ORDER BY file, line, first_seen`
 
-const DE_HOY = `SELECT id, file, line, title, tipo, identity FROM findings
+const DE_HOY = `SELECT id, file, line, title, tipo, identity, first_seen FROM findings
   WHERE ${VIVA} AND NOT (${IDENTIDAD_VIEJA})`
 
 /** Las vivas que siguen con la identidad vieja, y SOLO esas. */
