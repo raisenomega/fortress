@@ -1,6 +1,6 @@
 # ADR-100 — Seis tipos de auditoría para lo que FORTRESS ya encuentra: accesibilidad, privacidad, integridad de negocio, continuidad, dependencias y criptografía dejan de caer en «otro»
 
-- **Estado**: Propuesta — pendiente de la firma del operador (al firmarse pasa a Aceptada)
+- **Estado**: Aceptada (firmada por el operador el 2026-09-22)
 - **Fecha**: 2026-09-22
 - **Alcance**: el vocabulario cerrado de tipos de defecto (`src/domain/scan/`) y el
   re-tipado, por juicio, de las filas vivas que hoy están en `otro`. **No toca** los
@@ -192,19 +192,24 @@ ADR-065, ADR-067, ADR-071, ADR-080, ADR-081, ADR-083, ADR-084, ADR-099 · ROADMA
 
 ## 9. Casillas de firma
 
-Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta.
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-22 por orden del operador, con su línea literal:
+
+> *«yo jojo dueño del proyecto fortress firmo ADR-100: seis tipos [nombres ok],
+> desempates ok, severidad-por-familia y opción-2 aparte, re-tipado con parada en
+> el plan, leído — Jojo, 22 septiembre 2026»*
 
 1. **Los seis tipos** (`accesibilidad`, `privacidad`, `integridad-de-negocio`,
    `continuidad-y-backups`, `dependencia-vulnerable`, `criptografia-debil`), en una
-   tercera lista `defectos-de-auditoria.ts`: [ ] sí · [ ] otra: ________
+   tercera lista `defectos-de-auditoria.ts`: [x] sí, con los nombres tal cual · [ ] otra: ________
 2. **Los desempates** de §2 (dato personal -> privacidad / secreto del sistema ->
    secreto-sin-redactar; el cliente manda -> confianza-en-datos-del-cliente / el
-   sistema se contradice -> integridad-de-negocio): [ ] sí · [ ] otra: ________
+   sistema se contradice -> integridad-de-negocio): [x] sí · [ ] otra: ________
 3. **Lo que queda aparte**: la severidad por familia y la opción 2 son decisiones
-   posteriores, no de este ADR: [ ] leído
+   posteriores, no de este ADR: [x] leído
 4. **El re-tipado seguro** de las 108 filas `otro`, por juicio y en la misma
    entrega, con backup, ensayo en copia, plan impreso y **parada antes de la viva**:
-   [ ] sí · [ ] otra: ________
-5. **He leído §1.3 y §3.** [ ]
+   [x] sí · [ ] otra: ________
+5. **He leído §1.3 y §3.** [x]
 
-**Firma del operador:** ________ · **Fecha:** ________
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 22 septiembre 2026

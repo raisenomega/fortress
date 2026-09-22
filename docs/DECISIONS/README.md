@@ -130,7 +130,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-089](adr-089-la-garantia-es-la-firma-no-una-lista-de-palabras.md) | La garantía es la firma humana, no una lista de palabras — muere el freno por palabra del Terminal | 2026-09-17 | Aceptada | Terminal |
 | [ADR-090](adr-090-el-terminal-autonomo-juzga-debate-y-reintenta-sin-parar.md) | El Terminal autónomo juzga, debate y reintenta sin parar — grado bancario sin frenos disfrazados | 2026-09-17 | Aceptada | Terminal |
 | [ADR-099](adr-099-los-hermanos-del-hallazgo-son-contexto-no-decision.md) | Los hermanos del hallazgo son contexto, no decisión: sede antes que clase, y «otro» no agrupa | 2026-09-22 | Aceptada | Motor |
-| [ADR-100](adr-100-seis-tipos-de-auditoria-para-lo-que-fortress-ya-encuentra.md) | Seis tipos de auditoría para lo que FORTRESS ya encuentra: accesibilidad, privacidad, integridad de negocio, continuidad, dependencias y criptografía | 2026-09-22 | Propuesta (sin firmar) | Escaneo |
+| [ADR-100](adr-100-seis-tipos-de-auditoria-para-lo-que-fortress-ya-encuentra.md) | Seis tipos de auditoría para lo que FORTRESS ya encuentra: accesibilidad, privacidad, integridad de negocio, continuidad, dependencias y criptografía | 2026-09-22 | Aceptada | Escaneo |
 
 ## Referencias
 
