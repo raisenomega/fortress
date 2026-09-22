@@ -1,8 +1,7 @@
-import { readdirSync } from 'node:fs'
 import { err, ok, type Result } from '@domain/shared/result'
 import { argsDelSandbox } from '@domain/sandbox/config-del-cli'
-import { ecosistemasDe, registrosDe } from '@domain/sandbox/registros-de-paquetes'
 import { directorioDeNode } from './lo-que-ve-la-caja'
+import { registrosDelProyecto } from './registros-del-proyecto'
 import { cajaDisponible } from './sonda-de-bwrap'
 
 /**
@@ -32,16 +31,7 @@ export function conSandbox(
   const sandbox = argsDelSandbox({
     proyecto: projectPath,
     soloLectura: [node],
-    registros: registrosDe(ecosistemasDe(manifiestosDe(projectPath)))
+    registros: registrosDelProyecto(projectPath)
   })
   return sandbox.ok ? ok([...args, ...sandbox.value]) : err(`sin-caja:${sandbox.error}`)
-}
-
-/** Los ficheros de la raiz del proyecto, o ninguno si no se puede leer. */
-function manifiestosDe(projectPath: string): readonly string[] {
-  try {
-    return readdirSync(projectPath)
-  } catch {
-    return []
-  }
 }

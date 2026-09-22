@@ -1,11 +1,12 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { existsSync, statSync } from 'node:fs'
 import { abrirProxyDeRegistros, type ProxyDeRegistros } from './proxy-de-registros'
-import { registroLocal, socketDePrueba, tunel, type RegistroLocal } from './proxy-fixture'
+import { registroLocal, tunel, type RegistroLocal } from './proxy-fixture'
+import { socketNuevo } from './socket-del-proxy'
 
 let registro: RegistroLocal
 let proxy: ProxyDeRegistros
-const socket = socketDePrueba()
+const socket = socketNuevo()
 const pide = (linea: string): Promise<string> => tunel(socket, linea)
 
 beforeAll(async () => {
@@ -49,7 +50,7 @@ describe('el proxy abre solo hacia la lista, y solo por el puerto TLS', () => {
   })
 
   it('cerrar retira el socket', async () => {
-    const otro = socketDePrueba()
+    const otro = socketNuevo()
     const p = await abrirProxyDeRegistros(otro, [])
     expect(existsSync(otro)).toBe(true)
     await p.cerrar()

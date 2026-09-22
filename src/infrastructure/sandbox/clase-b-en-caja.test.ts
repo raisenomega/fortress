@@ -19,6 +19,14 @@ const CLASE_B = [
 const codigo = (t: string): string =>
   t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
+describe('el gate sale a la red SOLO por el proxy de registros (casilla 2)', () => {
+  it('spawn-command abre el proxy y le pasa SU socket a enCaja: ni red abierta ni muerta', () => {
+    const fuente = codigo(readFileSync('src/infrastructure/repair/spawn-command.ts', 'utf8'))
+    expect(/\babrirProxyDeRegistros\(/.test(fuente)).toBe(true)
+    expect(/enCaja\([^)]*proxy\.socket\)/.test(fuente)).toBe(true)
+  })
+})
+
 describe('la clase B corre dentro de la caja', () => {
   it.each(CLASE_B)('%s lanza por enCaja, no a pelo', (ruta) => {
     const fuente = codigo(readFileSync(ruta, 'utf8'))

@@ -14,18 +14,18 @@ const e = escenario()
 afterEach(olvidarSonda)
 
 describe('la caja de la clase B, contra bwrap de verdad', () => {
-  it('no lee al otro cliente, no escribe fuera, si escribe dentro', () => {
-    const salida = corre(e, ['fuga.js'])
+  it('no lee al otro cliente, no escribe fuera, si escribe dentro', async () => {
+    const salida = await corre(e, ['fuga.js'])
     expect(salida['vecino']).toBe('NO:ENOENT')
     expect(salida['dentro']).toBe('OK:escrito')
     expect(existsSync(join(e.raiz, 'escrito.txt'))).toBe(false)
     expect(existsSync(join(e.proyecto, 'dentro.txt'))).toBe(true)
   })
 
-  it('el HOME es un tmpfs vacio: solo asoma el camino hasta node, la excepcion firmada', () => {
+  it('el HOME es un tmpfs vacio: solo asoma el camino hasta node, la excepcion firmada', async () => {
     // Si node vive en el HOME (nvm), su camino se ve; nada mas: ni .ssh, ni
     // .config, ni .npm. Es la excepcion medida y firmada («salvo la ruta de node»).
-    const asoma = (corre(e, ['fuga.js'])['home'] ?? '').replace(/^OK:/, '')
+    const asoma = ((await corre(e, ['fuga.js']))['home'] ?? '').replace(/^OK:/, '')
     const nombres = asoma.split(',').filter((x) => x !== '')
     expect(nombres.every((x) => x === '.nvm' || x === '.fnm')).toBe(true)
   })
@@ -38,7 +38,7 @@ describe('la caja de la clase B, contra bwrap de verdad', () => {
     const puerto = (servidor.address() as { port: number }).port
     const js = `require('net').connect(${puerto},'127.0.0.1').on('connect',()=>console.log('red=OK')).on('error',(x)=>console.log('red=NO:'+x.code))` // prettier-ignore
     try {
-      expect(corre(e, ['-e', js])['red']).toMatch(/^NO:/)
+      expect((await corre(e, ['-e', js]))['red']).toMatch(/^NO:/)
     } finally {
       servidor.close()
     }

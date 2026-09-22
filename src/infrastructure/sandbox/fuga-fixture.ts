@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process'
+import { execFile } from 'node:child_process'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -33,15 +33,26 @@ t('dentro',()=>{fs.writeFileSync('${proyecto}/dentro.txt','x');return 'escrito'}
   return { raiz, proyecto, vecino }
 }
 
-/** Lanza `node args` tal como lo devuelve `enCaja`, sin shell, y lee `clave=valor`. */
-export function corre(e: Escenario, args: readonly string[]): Record<string, string> {
-  const l = enCaja('node', args, e.proyecto, e.proyecto)
-  if (!l.ok) throw new Error(l.error)
-  const r = spawnSync(l.value.bin, [...l.value.args], { encoding: 'utf8', timeout: 20_000 })
-  if (r.status !== 0) throw new Error(`rc=${r.status} ${r.stderr}`)
-  const pares = r.stdout
-    .trim()
-    .split('\n')
-    .map((x) => x.split('=') as [string, string])
-  return Object.fromEntries(pares)
+/** Lanza `node args` tal como lo devuelve `enCaja`, sin shell, y lee `clave=valor`.
+ *  ASINCRONO a proposito: el proxy de registros vive en ESTE proceso, y un
+ *  `spawnSync` lo dejaria sin event loop mientras la caja le habla (medido). */
+export function corre(
+  e: Escenario,
+  args: readonly string[],
+  socket: string | null = null
+): Promise<Record<string, string>> {
+  // prettier-ignore
+  const l = enCaja('node', args, e.proyecto, e.proyecto, undefined, [], socket)
+  if (!l.ok) return Promise.reject(new Error(l.error))
+  return new Promise((resolve, reject) => {
+    const opciones = { encoding: 'utf8' as const, timeout: 20_000 }
+    execFile(l.value.bin, [...l.value.args], opciones, (error, stdout, stderr) => {
+      if (error !== null) return reject(new Error(`rc=${error.code} ${stderr}`))
+      const pares = stdout
+        .trim()
+        .split('\n')
+        .map((x) => x.split('=') as [string, string])
+      resolve(Object.fromEntries(pares))
+    })
+  })
 }

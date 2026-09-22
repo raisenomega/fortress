@@ -1,7 +1,4 @@
 import { createServer, connect } from 'node:net'
-import { mkdtempSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { join } from 'node:path'
 
 export interface RegistroLocal {
   readonly puerto: number
@@ -19,9 +16,6 @@ export async function registroLocal(): Promise<RegistroLocal> {
   await new Promise<void>((r) => impostor.listen(puerto, '127.0.0.2', r))
   return { puerto, cerrar: () => (registro.close(), impostor.close()) }
 }
-
-export const socketDePrueba = (): string =>
-  join(mkdtempSync(join(tmpdir(), 'fortress-proxy-')), 'p.sock')
 
 /** Manda una linea por el socket y devuelve lo que vuelve (cabecera + datos). */
 export function tunel(socket: string, linea: string): Promise<string> {

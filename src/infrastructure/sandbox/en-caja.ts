@@ -3,6 +3,7 @@ import { err, ok, type Result } from '@domain/shared/result'
 import { flagsDeBwrap } from '@domain/sandbox/flags-de-bwrap'
 import { dentroDe } from '@domain/sandbox/ruta-de-la-caja'
 import { directorioDeNode, gitComunDe, raicesDelSistema } from './lo-que-ve-la-caja'
+import { conPuente } from './puente-del-proxy'
 import { BWRAP, cajaDisponible } from './sonda-de-bwrap'
 
 export interface Lanzamiento {
@@ -12,8 +13,8 @@ export interface Lanzamiento {
 
 /**
  * Un comando de la CLASE B, envuelto: FORTRESS lanza `bwrap` y dentro va el
- * comando (ADR-092, casilla 3). Sin red: la clase B no la necesita hoy —`npm ci`
- * pasa por el registro, y eso llega en su propio arco con el proxy—.
+ * comando (ADR-092, casilla 3). Sin red, salvo que venga `socketDelProxy`: entonces
+ * la unica salida es el puente hacia ese socket, y la lista la decide el proxy.
  *
  * FAIL-CLOSED (casilla 4): si la caja no se puede levantar, NO hay comando. La
  * sonda es un `bwrap` real, no un PATH, y se recuerda por PATH (`cajaDisponible`).
@@ -33,7 +34,8 @@ export function enCaja(
   proyecto: string,
   cwd: string,
   path = process.env.PATH ?? '',
-  escritura: readonly string[] = []
+  escritura: readonly string[] = [],
+  socketDelProxy: string | null = null
 ): Result<Lanzamiento> {
   const disponible = cajaDisponible(path)
   if (!disponible.ok) return err(`sin-caja:${disponible.error}`)
@@ -52,9 +54,10 @@ export function enCaja(
     sistema: raicesDelSistema(),
     soloLectura: [node, ...propio].filter((r) => !dentroDe(proyecto, r)),
     escritura: [...gitComunDe(cwd), ...escritura].filter((r) => r !== proyecto),
-    socketDelProxy: null
+    socketDelProxy
   })
+  const comando = socketDelProxy === null ? [bin, ...args] : conPuente(bin, args)
   return flags.ok
-    ? ok({ bin: BWRAP, args: [...flags.value, '--', bin, ...args] })
+    ? ok({ bin: BWRAP, args: [...flags.value, '--', ...comando] })
     : err(`sin-caja:${flags.error}`)
 }
