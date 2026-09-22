@@ -9,8 +9,8 @@
  * Pedir que CITE EL COMMIT que lo arreglo no vale: los dos casos dudosos citaron
  * uno real y exacto —titulo, fichero y numero de lineas— que solo habia anadido
  * un comentario mientras el agujero seguia en su sitio. Una cita puede ser
- * verdadera y no probar nada; y el analista corre sin `Bash`, asi que de donde
- * saca el sha no le consta a nadie. Lo que SI se comprueba es una cadena literal
+ * verdadera y no probar nada; y de donde saca el sha no le consta a nadie. Lo
+ * que SI se comprueba es una cadena literal
  * contra el fichero de hoy: ahi no hay prosa que interpretar, o esta o no esta.
  */
 

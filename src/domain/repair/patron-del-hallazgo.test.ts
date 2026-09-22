@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { EMPTY_CORPUS } from '../project/corpus-descriptor'
 import type { CognitionPattern } from '../cognition/cognition-log'
+import { CON_BASH } from '../agent/capacidades-fixture'
 import { buildAnalysisPrompt } from './analysis-prompt'
 import { patternId } from '../cognition/pattern-id'
 import { patronDelHallazgo } from './patron-del-hallazgo'
@@ -43,11 +44,13 @@ describe('el analista recibe lo que el COGNITION-LOG ya sabia del hallazgo', () 
   })
 
   it('y llega al prompt, que es el unico sitio donde sirve de algo', () => {
-    const p = buildAnalysisPrompt(HALLAZGO, EMPTY_CORPUS, [], 'g', [patron({})])
+    const p = buildAnalysisPrompt(HALLAZGO, EMPTY_CORPUS, [], 'g', CON_BASH, [patron({})])
 
     expect(p).toContain('En el COGNITION-LOG del proyecto este hallazgo es PTN-')
     // Sin patrones el prompt no cambia: no se afirma historia que no consta.
-    expect(buildAnalysisPrompt(HALLAZGO, EMPTY_CORPUS, [], 'g')).not.toContain('COGNITION-LOG')
+    expect(buildAnalysisPrompt(HALLAZGO, EMPTY_CORPUS, [], 'g', CON_BASH)).not.toContain(
+      'COGNITION-LOG'
+    )
   })
 
   it('los campos que el log no trae no dejan huecos raros en la frase', () => {

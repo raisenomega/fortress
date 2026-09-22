@@ -1,3 +1,4 @@
+import { bloqueDeCapacidades, type Capacidades } from '../agent/capacidades-del-agente'
 import type { CognitionPattern } from '../cognition/cognition-log'
 import { seccionAtendido } from './analysis-prompt-atendido'
 import { patronDelHallazgo } from './patron-del-hallazgo'
@@ -17,7 +18,7 @@ import type { Candidate } from './select-target'
  * u OBSOLETO (como paso con posture), y un JSON inerte con el entendimiento.
  */
 // prettier-ignore
-export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, atendidas: readonly string[], enElGrafo: string, patrones: readonly CognitionPattern[] = []): string {
+export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, atendidas: readonly string[], enElGrafo: string, capacidades: Capacidades, patrones: readonly CognitionPattern[] = []): string {
   // El analista juzga si un hallazgo de seguridad sigue vivo: lo que el proyecto
   // haya escrito sobre lo que protege es parte de esa respuesta.
   const docs = buildDocsFirst('security', corpus)
@@ -28,8 +29,8 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     // La antiguedad es contexto para el veredicto: un hallazgo de hace semanas
     // ha tenido tiempo de arreglarse por otra via, y uno de hoy no. No decide
     // nada por si sola —la prueba sigue siendo el fichero—, pero orienta donde
-    // mirar. El sha del arbol NO se le da: no tiene Bash, no podria diffear, y
-    // un dato que no puede usar solo ocupa prompt.
+    // mirar. El sha del arbol NO se le da: la prueba es el fichero de hoy, no
+    // un diff, y un dato que no va a usar solo ocupa prompt.
     'La fecha NO es prueba: lo que decide es el fichero. Orienta, nada mas.',
     ...senasDelHallazgo(t),
     ...patronDelHallazgo(t, patrones),
@@ -41,6 +42,8 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     'cuadra, list_projects te da el nombre real). Usalo como project en cada consulta.',
     '',
     ...EL_GRAFO,
+    // Lo que PUEDE, leido de los args con que se lanza: nunca texto fijo.
+    ...bloqueDeCapacidades(capacidades),
     ...CALLEJONES,
     'Pasos: (1) localiza en el grafo el simbolo del hallazgo, quien lo llama y que toca;',
     '(2) si el fix seria agregar un control ya usado en el repo (el titulo suele',

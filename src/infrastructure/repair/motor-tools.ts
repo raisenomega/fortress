@@ -26,6 +26,7 @@ const FICHEROS = ['Read', 'Grep', 'Glob']
  */
 export const TOOLS_LECTURA = [...GRAPH_READ_TOOLS, ...FICHEROS].join(',')
 
-/** El generador ADEMAS edita. Sin Bash: no corre git ni tests — el commit y el
- *  gate son del motor, no suyos. */
+/** El generador ADEMAS edita. Bash no va en la lista, y no por eso le falta:
+ *  la lista solo pre-aprueba y lo tiene igual (medido). El commit y el gate
+ *  siguen siendo del motor, no suyos. */
 export const TOOLS_EDICION = [...GRAPH_READ_TOOLS, ...FICHEROS, 'Edit', 'Write'].join(',')

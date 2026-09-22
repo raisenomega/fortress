@@ -27,7 +27,7 @@ describe('los tres agentes del motor alcanzan TODO el grafo de lectura', () => {
     expect(TOOLS_LECTURA.split(',')).not.toContain('Write')
   })
 
-  it('el generador edita, pero sigue SIN Bash: el gate no es suyo', () => {
+  it('el generador edita; Bash no esta en la lista (la lista no lo quita: lo tiene igual)', () => {
     expect(TOOLS_EDICION.split(',')).toContain('Edit')
     expect(TOOLS_EDICION.split(',')).toContain('Write')
     expect(TOOLS_EDICION.split(',')).not.toContain('Bash')

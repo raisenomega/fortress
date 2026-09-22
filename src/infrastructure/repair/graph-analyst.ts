@@ -1,6 +1,7 @@
-import { argsDeLectura } from './generator-args'
+import { argsDeLectura, type Prompt } from './generator-args'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
+import type { Capacidades } from '@domain/agent/capacidades-del-agente'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import { graphSlug } from '@domain/graph/graph-slug'
 import { discoverCorpus } from '../project/discover-corpus'
@@ -15,7 +16,7 @@ import { trackChild } from '../claude-code/child-registry'
 /** `buildEnv(null)` como sus dos hermanos del motor: recorta las llaves de la
  *  SESION VIVA del operador. Era el unico spawn de `claude` que no lo hacia, asi
  *  que su hijo —y los MCP nietos— veian el agente ssh y el keyring. */
-function run(bin: string, cwd: string, prompt: string, owner: string): Promise<RunOut> {
+function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<RunOut> {
   // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config
   // aisla el grafo (sin los MCP de claude.ai). Solo tools de lectura: read-only.
   // Sin caja no arranca: el mismo camino que un binario que no existe.
@@ -54,7 +55,9 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       // El corpus y el COGNITION-LOG se leen en cada estudio, no al crear el
       // analista: entre dos propuestas el proyecto puede haber ganado un ADR, y
       // el log se reescribe entero en cada escaneo.
-      const prompt = buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, graphSlug(projectPath), readCognitionLog(projectPath).patterns)
+      // Recibe lo que el lanzamiento PUEDE (Bash, edicion) leido de sus flags:
+      // el prompt refleja las capacidades reales, no las que alguien creyo.
+      const prompt = (c: Capacidades): string => buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, graphSlug(projectPath), c, readCognitionLog(projectPath).patterns) // prettier-ignore
       const out = await run(claudeBin, projectPath, prompt, projectId)
       const analysis = toAnalysis(target, out)
       return {

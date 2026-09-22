@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { EMPTY_CORPUS } from '../project/corpus-descriptor'
+import { CON_BASH } from '../agent/capacidades-fixture'
 import { buildAnalysisPrompt } from './analysis-prompt'
 
 // prettier-ignore
 const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }
-const prompt = (): string => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'home-jojo-repo')
+const prompt = (): string =>
+  buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'home-jojo-repo', CON_BASH)
 
 describe('el analista sabe DESDE CUANDO se ve el hallazgo', () => {
   it('la fecha de deteccion viaja en la cabecera, en formato corto', () => {

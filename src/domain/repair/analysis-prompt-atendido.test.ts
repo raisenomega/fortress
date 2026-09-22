@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { EMPTY_CORPUS } from '../project/corpus-descriptor'
+import { CON_BASH } from '../agent/capacidades-fixture'
 import { buildAnalysisPrompt } from './analysis-prompt'
 import { seccionAtendido } from './analysis-prompt-atendido'
 
 // prettier-ignore
 const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }
 const prompt = (atendidas: readonly string[]): string =>
-  buildAnalysisPrompt(TARGET, EMPTY_CORPUS, atendidas, 'home-jojo-repo')
+  buildAnalysisPrompt(TARGET, EMPTY_CORPUS, atendidas, 'home-jojo-repo', CON_BASH)
 
 describe('el analista lee lo ya atendido antes de observar', () => {
   it('con cerradas, el prompt las lleva y le dice que no las repita', () => {
