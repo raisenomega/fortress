@@ -8,7 +8,8 @@ import { relojDeCorrida } from './reloj-de-corrida'
 
 export type { OmegaRunResult }
 
-// LECTURA ESTRICTA: grafo + Read/Grep/Glob. Sin Edit, sin Write, sin Bash.
+// LECTURA de ficheros: grafo + Read/Grep/Glob, sin Edit ni Write. Bash no se
+// niega (el allowlist no quita; medido en vivo): lo tiene, contenido en la caja.
 const TIMEOUT_MS = 900_000
 
 export interface GraphOmega {

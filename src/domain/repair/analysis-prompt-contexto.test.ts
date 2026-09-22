@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { EMPTY_CORPUS } from '../project/corpus-descriptor'
+import { CON_BASH } from '../agent/capacidades-fixture'
 import { buildAnalysisPrompt } from './analysis-prompt'
 
 // prettier-ignore
 const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'handleverify' }
-const prompt = (): string => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'home-jojo-repo')
+const prompt = (): string =>
+  buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'home-jojo-repo', CON_BASH)
 
 describe('el analista sabe DESDE CUANDO se ve el hallazgo', () => {
   it('la fecha de deteccion viaja en la cabecera, en formato corto', () => {
@@ -29,15 +31,18 @@ describe('el analista sabe como se llama el proyecto en el grafo', () => {
     expect(p.indexOf('home-jojo-repo')).toBeLessThan(p.indexOf('GRAFO PRIMERO'))
   })
 
-  it('va como PISTA, con la salida si no cuadra', () => {
+  it('va como PISTA, con la salida si no cuadra: la respuesta de search_graph lista los nombres', () => {
     // El esquema lo decide el servidor. Acertar ahorra turnos; fallar no rompe.
-    expect(prompt()).toContain('list_projects te da el nombre real')
+    // `list_projects` no existe en el servidor fijado: era una fantasma.
+    expect(prompt()).toContain('search_graph responde con los nombres reales')
+    expect(prompt()).not.toContain('list_projects')
   })
 })
 
 describe('que hacer cuando el grafo no tiene el proyecto', () => {
-  it('le dice que index_status se lo resuelve en una llamada', () => {
-    expect(prompt()).toContain('index_status te lo dice en una llamada')
+  it('le dice que la primera consulta se lo dice, sin herramienta aparte', () => {
+    expect(prompt()).toContain('la primera consulta te lo dice')
+    expect(prompt()).not.toContain('index_status')
   })
 
   it('le prohibe indexar: es accion del operador, con gate', () => {
@@ -51,8 +56,9 @@ describe('que hacer cuando el grafo no tiene el proyecto', () => {
     expect(prompt()).toContain('lo demas que te falte, si')
   })
 
-  it('le da las dos herramientas de frescura por su nombre', () => {
-    expect(prompt()).toContain('check_index_coverage')
-    expect(prompt()).toContain('detect_changes')
+  it('la frescura se comprueba contra el disco: no hay herramienta de frescura en el servidor', () => {
+    expect(prompt()).toContain('el disco dice QUE hay hoy')
+    expect(prompt()).not.toContain('check_index_coverage')
+    expect(prompt()).not.toContain('detect_changes')
   })
 })
