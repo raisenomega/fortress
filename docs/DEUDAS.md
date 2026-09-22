@@ -1,6 +1,6 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-20 · **Commit de referencia:** `6af70b0`
+**Fecha:** 2026-09-21 · **Commit de referencia:** `cd6a510`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
@@ -304,7 +304,7 @@ test que exige las **dos mitades** en la lista innegociable.
 > solo la visible.**
 
 **5. Un byte NUL real dentro de un `.ts`, que pasó el gate entero.** El escape
-` ` de un test se escribió como **byte**, no como texto. Git marcó el
+`\0` de un test se escribió como **byte**, no como texto. Git marcó el
 fichero como binario (`Bin 0 -> 2445 bytes`): habría entrado a `main` **sin diff
 legible**. Y el fichero era justo `interprete-existe.test.ts` — el que prueba que
 el `command -v` no abre una shell. Arreglado con `String.fromCharCode(0)`, que
@@ -397,7 +397,7 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 
 | deuda                                 | evidencia                                                                   | qué la desbloquea                                                                                                                                    |
 | ------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **ADR-092 (el sandbox) sin escribir** | `adr-093:546-548,561` lo nombra como bloqueador                             | es el siguiente ADR; bloquea Bash libre (ADR-093 pieza 3)                                                                                            |
+| ~~**ADR-092 (el sandbox) sin escribir**~~ — **CERRADO** `cd6a510` | firmado `3af7007`, construido en 24 commits y en `main` el 2026-09-21: `npm ci` por el proxy medido en vivo | lo que deja abierto, en §6.2 |
 | **Verificación de stacks no-Node**    | el gate corre `npm`; un repo Python o Go no se verifica                     | ADR-092 + Bash libre. **No** un gate por lenguaje: sería mantener N gates                                                                            |
 | **`sendMessage` saturado**            | 11 parámetros posicionales (`send-message.ts:23-36`)                        | rozada tres veces sin tocarla; se parte por costura cuando un arco la despierte de verdad                                                            |
 | **`build-prompt.ts:6`**               | `'- NUNCA toques auth, pagos, RLS ni seguridad sin dejarlo escrito antes.'` | **medir primero**: dice «sin dejarlo escrito antes», no «vuelve a supervisado». Puede ser transparencia legítima o el freno de ADR-089 con otra ropa |
@@ -423,12 +423,22 @@ tolerar: *«un fichero nuevo… falla aquí, sin que nadie se acuerde de mirar»
 **Forma que tendría** (no construida — va después del ensayo):
 
 ```ts
-const opacos = ficheros('src').filter((f) => /[ --]/.test(fuente(f)))
+const opacos = ficheros('src').filter((f) => /[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(fuente(f)))
 expect(opacos).toEqual([])
 ```
 
 Vive junto a sus hermanas en `src/domain/repair/`, reusando el barrido de
 `innegociables-derivados`. Coste: ~15 líneas y un rerun del gate.
+
+### 6.2 Lo que el sandbox deja abierto (2026-09-21)
+
+Tres deudas menores, **medidas al cerrar el arco** (`cd6a510`), ninguna bloquea:
+
+| deuda | evidencia | qué la cierra |
+| --- | --- | --- |
+| **`runCommand` corre en la caja SIN red** | `probe/run-command.ts` y `build-verify.ts` van por `enCaja` sin socket: hoy ninguna sonda instala nada | el día que una sonda necesite el registro, darle el proxy como al gate (`spawn-command.ts`) |
+| **La sonda de bwrap se recuerda por proceso** | `cajaDisponible` (`sonda-de-bwrap.ts`) memoriza por PATH y no caduca: instalar bwrap con la app abierta no se ve hasta reiniciar | caducar la memoria, o invalidarla desde la pantalla de diagnóstico |
+| **Sin caché por proyecto** | cada `npm ci` descarga por el proxy (medido: 1-3 s en un proyecto pequeño); la caché compartida está firmada como NO (canal lateral) | si un proyecto grande lo hace lento, una caché dentro de SU propia caja, nunca compartida; medirlo antes |
 
 ---
 

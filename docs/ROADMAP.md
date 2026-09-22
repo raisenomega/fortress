@@ -115,7 +115,20 @@ coinciden.
 | **ADR-098** | lo que la ley firmada deja pendiente de otra pieza |
 | [INVESTIGACION-FRONTERA-2026](INVESTIGACION-FRONTERA-2026.md) | lo que la frontera externa ya probó, fuente por fuente |
 
-### 1. El sandbox (ADR-092)
+### 1. ~~El sandbox (ADR-092)~~ — **HECHO** `cd6a510` (2026-09-21)
+
+**Construido y en `main`**: merge `cd6a510`, 24 commits, gate 6/6 antes y después
+de integrar. Lo que desbloqueó, **medido**: *verificar de verdad* —el gate instala
+dentro de la caja: `npm ci` por el proxy de registros, rc 0 en vivo—; *stacks que
+no son Node* —la tabla cerrada de registros cubre Python, Rust, Go, Java, Ruby y
+PHP, aunque solo npm se midió de punta a punta—; *contención cliente contra
+cliente* —dentro de la caja no se ve al vecino ni el HOME salvo la ruta de node,
+no se escribe fuera, y la red solo sale a la tabla—; *los hooks del cliente
+apagados* en los ocho `git` de FORTRESS; y *fail-closed*: sin bwrap o socat no
+corre nada del proyecto. Bash libre (ADR-093 Pieza 3) sigue siendo un arco
+aparte. Las tres deudas menores que deja están en [DEUDAS §6.2](DEUDAS.md).
+
+*Lo que sigue era el diagnóstico que lo puso primero, y se conserva:*
 
 **El primero por las cuatro fuentes a la vez.** El backlog: lo que más se repite
 es que los agentes **no pueden ejecutar para verificar** —Bash negado o troceado,
