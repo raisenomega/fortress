@@ -1,6 +1,6 @@
 # ADR-099 — Los hermanos del hallazgo son contexto para el juicio, no una decisión: se citan por SEDE antes que por CLASE, y «otro» no agrupa
 
-- **Estado**: Propuesta — pendiente de la firma del operador (al firmarse pasa a Aceptada)
+- **Estado**: Aceptada (firmada por el operador el 2026-09-22)
 - **Fecha**: 2026-09-22
 - **Alcance**: la línea de «hermanos» del prompt del analista (motor, paso
   «entender», camino normal y reintento). **No toca** el escáner, el sync, la
@@ -140,6 +140,9 @@ regex nueva.
 - **El hueco «mismo defecto en filas distintas»** sigue abierto hasta los
   cortes 2 y 3. Mientras, la única mitigación es la sede bien citada más las
   `notes` del analista.
+- **El índice de ADRs** (`docs/DECISIONS/README.md`) no tiene fila para 091 a
+  098, y el 094 no existe. Queda **ANOTADO como deuda de documentación** en
+  `docs/DEUDAS.md`, no arreglado en este arco (firmado).
 
 ## 4. Alternativas consideradas
 
@@ -169,3 +172,23 @@ regex nueva.
 ADR-012, ADR-065, ADR-067, ADR-071, ADR-081, ADR-084, ADR-088 · ROADMAP §3 «El
 contrato del hallazgo» · medición del 2026-09-22 (memoria del operador,
 `fortress-backfill-98-zombis-medido` y la de esta sub-pieza) · commit `a947302`.
+
+## 7. Casillas de firma
+
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-22 por orden del operador, con su línea literal:
+
+> *«YO JOJO dueño de proyecto FORTRESS firmo = firmo ADR-099: sede a 3 líneas,
+> función fuera de innegociables, índice de ADRs anotado como deuda, leído —
+> Jojo, 22 septiembre 2026»*
+
+1. **La sede sin símbolo:** [x] mismo fichero a 3 líneas o menos · [ ] solo
+   mismo fichero · [ ] otra: ________
+2. **`hermanosDelHallazgo` en la lista innegociable:** [ ] sí · [x] no: es
+   contexto, no una defensa
+3. **El índice de ADRs (sin fila para 091-098; el 094 no existe):** [x] anotado
+   como deuda de documentación en `docs/DEUDAS.md`, no se arregla en este arco ·
+   [ ] se arregla aquí
+4. **He leído §1.1 y §2.** [x]
+
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 22 septiembre 2026

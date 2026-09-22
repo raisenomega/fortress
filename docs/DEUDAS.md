@@ -402,6 +402,7 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 | **`sendMessage` saturado**            | 11 parámetros posicionales (`send-message.ts:23-36`)                        | rozada tres veces sin tocarla; se parte por costura cuando un arco la despierte de verdad                                                            |
 | **`build-prompt.ts:6`**               | `'- NUNCA toques auth, pagos, RLS ni seguridad sin dejarlo escrito antes.'` | **medir primero**: dice «sin dejarlo escrito antes», no «vuelve a supervisado». Puede ser transparencia legítima o el freno de ADR-089 con otra ropa |
 | **Ningún paso del gate mira la FORMA del fuente** | el NUL de §5.1-5: `interprete-existe.test.ts` pasó typecheck, lint y 3804 tests, y Git lo marcó `Bin 0 -> 2445 bytes` | una defensa derivada (~15 líneas en `src/domain/repair/`) que rechace todo `.ts` de `src/` con bytes de control |
+| **El índice de ADRs va por detrás** | `docs/DECISIONS/README.md` no tiene fila para ADR-091 a 098, y el 094 no existe (visto el 2026-09-22 al añadir ADR-099) | añadir las ocho filas. Deuda de documentación, no de este arco (ADR-099 §3, firmado) |
 
 ### 6.1 La defensa que falta: ficheros fuente opacos
 
