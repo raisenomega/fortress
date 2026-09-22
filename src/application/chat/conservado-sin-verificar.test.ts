@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { RedDeReversion } from '@domain/chat/red-de-reversion'
-import { CONSERVADO_SIN_VERIFICAR } from '@domain/chat/no-se-pudo-verificar'
+import { CONSERVADO_SIN_VERIFICAR } from '@domain/chat/aviso-sin-verificar'
+import { medida } from '@domain/chat/medida-del-arbol'
 import type { VerificacionDelArbol } from '@domain/chat/verificacion-del-arbol'
 import { conRedDeReversion } from './con-red-de-reversion'
 import { textOnly, type ReplyOutcome } from './reply-outcome'
@@ -13,7 +14,7 @@ const red = (arbol: VerificacionDelArbol): RedDeReversion & { pasos: string[] } 
   return {
     pasos,
     disponible: () => true,
-    verificar: () => Promise.resolve(arbol),
+    verificar: () => Promise.resolve(medida(arbol)),
     abrir: () => ({
       conservar: () => (pasos.push('conservar'), true),
       revertir: () => (pasos.push('revertir'), true)

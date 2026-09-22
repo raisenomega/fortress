@@ -1,5 +1,6 @@
 import type { NewChatMessage } from '@domain/chat/chat-message'
 import type { CodeAgent, CodeAgentReply, CodeAgentRequest } from '@domain/chat/code-agent'
+import { medida } from '@domain/chat/medida-del-arbol'
 import type { RedDeReversion } from '@domain/chat/red-de-reversion'
 import type { Project } from '@domain/project/project'
 import type { Result } from '@domain/shared/result'
@@ -33,7 +34,7 @@ export interface Memoria {
 const RED: RedDeReversion = {
   disponible: () => true,
   abrir: () => ({ conservar: () => true, revertir: () => true }),
-  verificar: () => Promise.resolve('verde')
+  verificar: () => Promise.resolve(medida('verde'))
 }
 
 const HECHO: CodeAgentReply = { text: 'hecho', failed: false, denials: [], usage: EMPTY_USAGE, tools: [], edits: [] } // prettier-ignore

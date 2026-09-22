@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { medida } from '@domain/chat/medida-del-arbol'
 import { SIN_RED_NO_SE_EDITA, type RedDeReversion } from '@domain/chat/red-de-reversion'
 import { conRedDeReversion } from './con-red-de-reversion'
 import { textOnly } from './reply-outcome'
@@ -8,7 +9,7 @@ import { textOnly } from './reply-outcome'
 const REVIENTA: RedDeReversion = {
   disponible: () => true,
   abrir: () => null,
-  verificar: () => Promise.resolve('verde')
+  verificar: () => Promise.resolve(medida('verde'))
 }
 
 describe('si debia haber red y no la hay, NO se edita', () => {

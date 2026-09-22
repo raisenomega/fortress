@@ -30,21 +30,22 @@ const NO_EXISTE_EL_COMANDO = 127
  * ni absuelve como el verde ni castiga como el rojo.
  */
 export function noSePudoVerificar(salida: SalidaDelGate): boolean {
-  if (/missing script/i.test(salida.out)) return true
-  return salida.code === NO_EXISTE_EL_COMANDO || /\bnot found\b/i.test(salida.out)
+  return porQueNoSePudo(salida) !== null
 }
 
-/**
- * Lo que el operador lee cuando el turno se conservo SIN haberse compilado
- * (ADR-091 §4). No es un aviso de cortesia: es lo unico que separa «lo revise y
- * esta bien» de «nadie pudo revisarlo», y sin el, las dos se leen igual.
- *
- * Se dice en el turno y no solo en el parte final porque el operador puede
- * cerrar la app antes de que el lote acabe: lo que se conserva sin verificar
- * tiene que constar en el momento en que se conserva.
- */
-export const CONSERVADO_SIN_VERIFICAR =
-  '\n\n---\nAVISO: esto se quedo escrito SIN comprobar que el proyecto compila. ' +
-  'El revisor miro el cambio, pero aqui no habia con que construirlo —falta la ' +
-  'herramienta o el script de verificacion—, asi que nadie lo compilo. ' +
-  'Compruebalo tu antes de darlo por bueno.'
+/** Por que el gate no llego a medir: la CAUSA, para que el recibo la diga. */
+export type MotivoSinVerificar = 'sin-script' | 'sin-herramienta' | 'sin-caja' | 'sin-enlaces'
+
+// `EPERM … symlink`: el sistema de ficheros no admite enlaces —vfat, medido el
+// 21-sep en un disco USB— y `npm` no puede crear `node_modules/.bin`. No es del
+// fix: es del disco donde vive el proyecto. Un EPERM sobre otra cosa NO entra.
+const SIN_ENLACES = /EPERM[^\n]*symlink/i
+
+export function porQueNoSePudo(salida: SalidaDelGate): MotivoSinVerificar | null {
+  if (/^sin-caja:/.test(salida.out)) return 'sin-caja'
+  if (/missing script/i.test(salida.out)) return 'sin-script'
+  if (SIN_ENLACES.test(salida.out)) return 'sin-enlaces'
+  if (salida.code === NO_EXISTE_EL_COMANDO || /\bnot found\b/i.test(salida.out))
+    return 'sin-herramienta'
+  return null
+}

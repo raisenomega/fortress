@@ -1,4 +1,5 @@
 import type { CodeAgent, CodeAgentReply, CodeAgentRequest } from '@domain/chat/code-agent'
+import { medida } from '@domain/chat/medida-del-arbol'
 import type { RedDeReversion } from '@domain/chat/red-de-reversion'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import { escribir } from '../git/checkpoint-fixture'
@@ -35,7 +36,7 @@ export function redReal(verde = true): RedDeReversion & { abiertos: () => number
       n += 1
       return abrirCheckpoint(cwd)
     },
-    verificar: () => Promise.resolve(verde ? 'verde' : 'rojo'),
+    verificar: () => Promise.resolve(medida(verde ? 'verde' : 'rojo')),
     abiertos: () => n
   }
 }

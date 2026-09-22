@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { medida } from '@domain/chat/medida-del-arbol'
 import type { RedDeReversion } from '@domain/chat/red-de-reversion'
 import { conRedDeReversion } from './con-red-de-reversion'
 import { textOnly, type ReplyOutcome } from './reply-outcome'
@@ -7,7 +8,7 @@ import { textOnly, type ReplyOutcome } from './reply-outcome'
 const red = (verde = true, retirado = true): RedDeReversion => ({
   disponible: () => true,
   abrir: () => ({ conservar: () => retirado, revertir: () => retirado }),
-  verificar: () => Promise.resolve(verde ? 'verde' : 'rojo')
+  verificar: () => Promise.resolve(medida(verde ? 'verde' : 'rojo'))
 })
 
 const con =

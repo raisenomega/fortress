@@ -30,7 +30,7 @@ export async function runBuild(
       // El Ejecutor revierte con `false` (build-feature.ts:57). Su booleano
       // siempre quiso decir «no esta roto», y eso es exactamente `!cortaElTurno`:
       // una fase que no se pudo medir no revierte una construccion (ADR-091).
-      verify: async () => !cortaElTurno(await verificarArbol(project.path))
+      verify: async () => !cortaElTurno((await verificarArbol(project.path)).arbol)
     },
     () => {}
   )
