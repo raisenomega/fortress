@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
+import { createServer } from 'node:net'
 import { join } from 'node:path'
 import { enCaja } from './en-caja'
 import { olvidarSonda } from './sonda-de-bwrap'
@@ -29,12 +30,22 @@ describe('la caja de la clase B, contra bwrap de verdad', () => {
     expect(nombres.every((x) => x === '.nvm' || x === '.fnm')).toBe(true)
   })
 
-  it('no hay red: ni resolver un nombre', () => {
-    const js =
-      "require('dns').lookup('registry.npmjs.org',(e)=>console.log('red='+(e?'NO:'+e.code:'OK')))"
-    expect(corre(e, ['-e', js])['red']).toMatch(/^NO:/)
+  it('no hay red: un servidor en el loopback de FUERA no se alcanza desde dentro', async () => {
+    // Que un nombre no resuelva no prueba nada: dentro no hay resolv.conf y
+    // fallaria igual con la red abierta (el mutante `--share-net` sobrevivia).
+    const servidor = createServer((s) => s.end('FUERA'))
+    await new Promise<void>((r) => servidor.listen(0, '127.0.0.1', r))
+    const puerto = (servidor.address() as { port: number }).port
+    const js = `require('net').connect(${puerto},'127.0.0.1').on('connect',()=>console.log('red=OK')).on('error',(x)=>console.log('red=NO:'+x.code))` // prettier-ignore
+    try {
+      expect(corre(e, ['-e', js])['red']).toMatch(/^NO:/)
+    } finally {
+      servidor.close()
+    }
   })
+})
 
+describe('la caja falla cerrada, y sus flags no se negocian', () => {
   it('FAIL-CLOSED: sin bwrap en el PATH no hay comando, y dice por que', () => {
     const l = enCaja('node', ['x'], e.proyecto, e.proyecto, '/nonexistent')
     expect(l).toEqual({ ok: false, error: 'sin-caja:falta-bwrap' })
