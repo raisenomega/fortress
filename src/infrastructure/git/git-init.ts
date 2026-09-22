@@ -1,5 +1,6 @@
 import { execFile } from 'child_process'
 import { gitEnv } from './git-env'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 import { err, ok, type Result } from '@domain/shared/result'
 
 const TIMEOUT_MS = 30 * 1000
@@ -11,9 +12,14 @@ const ENV = gitEnv()
  */
 export function gitInit(cwd: string): Promise<Result<string>> {
   return new Promise((resolve) => {
-    execFile('git', ['init'], { cwd, env: ENV, timeout: TIMEOUT_MS }, (error, stdout, stderr) => {
-      const output = `${stdout}${stderr}`.trim()
-      resolve(error ? err(output || error.message) : ok(output || 'Repositorio git iniciado'))
-    })
+    execFile(
+      'git',
+      [...SIN_HOOKS, 'init'],
+      { cwd, env: ENV, timeout: TIMEOUT_MS },
+      (error, stdout, stderr) => {
+        const output = `${stdout}${stderr}`.trim()
+        resolve(error ? err(output || error.message) : ok(output || 'Repositorio git iniciado'))
+      }
+    )
   })
 }

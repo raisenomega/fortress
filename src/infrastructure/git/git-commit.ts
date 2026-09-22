@@ -1,5 +1,6 @@
 import { execFile } from 'child_process'
 import { gitEnv } from './git-env'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 import { err, ok, type Result } from '@domain/shared/result'
 
 const ENV = gitEnv()
@@ -14,8 +15,7 @@ const TIMEOUT_MS = 30 * 1000
 // fsmonitor vacio es apagado en cualquier version de git. Se pierde el escaner
 // de secretos que el operador tuviera en el pre-commit: la misma eleccion que
 // C3 y el checkpoint (ADR-079). Los clean filters de .gitattributes no tienen
-// interruptor global y siguen corriendo.
-const SIN_CODIGO_DEL_REPO = ['-c', 'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=']
+// interruptor global y siguen corriendo. La lista es `SIN_HOOKS`, la de todos.
 
 // Identidad inline y firma desactivada: un repo recien creado no tiene
 // user.name/email (git commit falla sin ellos) y un `commit.gpgsign` global
@@ -34,7 +34,7 @@ const COMMIT_ARGS = [
 ]
 
 function run(cwd: string, args: readonly string[]): Promise<Result<string>> {
-  const argv = [...SIN_CODIGO_DEL_REPO, ...args]
+  const argv = [...SIN_HOOKS, ...args]
   return new Promise((resolve) => {
     execFile('git', argv, { cwd, env: ENV, timeout: TIMEOUT_MS }, (error, stdout, stderr) => {
       const output = `${stdout}${stderr}`.trim()

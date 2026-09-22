@@ -15,4 +15,8 @@ export const cubierto = (f: string): boolean =>
   AUTONOMY_RULES_FILES.some((p) => p === f || (p.endsWith('/**') && f.startsWith(p.slice(0, -2))))
 
 export const fuente = (f: string): string => readFileSync(f, 'utf8')
+
+/** Se juzga codigo, no comentarios: un docblock que nombre la guarda no cuenta. */
+export const codigo = (t: string): string =>
+  t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 export const todos = ficheros('src')

@@ -1,8 +1,11 @@
 import { execFileSync } from 'child_process'
 import { resolve } from 'path'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
+/** El git del Terminal, sin los hooks del cliente (ADR-092, git opcion B): el
+ *  checkpoint comitea en el arbol vivo, y `--no-verify` no apaga `post-commit`. */
 export function git(cwd: string, args: readonly string[]): string {
-  return execFileSync('git', args as string[], {
+  return execFileSync('git', [...SIN_HOOKS, ...args], {
     cwd,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore']
