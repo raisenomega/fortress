@@ -27,6 +27,9 @@ describe('createWorktreeManager (git real)', () => {
 
     const created = await manager.create(baseSha, repo, wt, 'repair/test-ciclo')
     expect(created).toEqual({ ok: true })
+    // En el disco de FUERA: git corre en la caja y sin montar el destino el
+    // checkout se quedaba en su tmpfs (medido tras ADR-092).
+    expect(existsSync(join(wt, 'a.ts'))).toBe(true)
     expect(await manager.isClean(wt)).toBe(true)
     expect(await manager.hasChanges(wt)).toBe(false)
 

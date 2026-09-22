@@ -1,6 +1,7 @@
 import { execFile } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
 import { enCaja } from '../sandbox/en-caja'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
 const TIMEOUT_MS = 2 * 60 * 1000
 
@@ -25,10 +26,6 @@ export interface Corrida {
   readonly fallo: boolean
   readonly salida: string
 }
-
-// Sin los hooks del repo auditado (ADR-092, git opcion B): `git merge` ejecuta
-// `post-merge` del cliente, y ese es codigo ajeno corriendo con el operador.
-const SIN_HOOKS = ['-c', 'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=']
 
 /** execFile con argumentos separados: no hay shell, no hay inyeccion posible.
  *  DENTRO DE LA CAJA (ADR-092, clase B): el arbol vivo del cliente, y nada mas.

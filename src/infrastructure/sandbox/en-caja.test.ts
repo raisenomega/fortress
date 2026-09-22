@@ -43,6 +43,13 @@ describe('la caja de la clase B, contra bwrap de verdad', () => {
     expect(enCaja('node', ['x'], homedir(), homedir()).ok).toBe(false)
   })
 
+  it('una ruta de escritura declarada fuera del proyecto se monta rw: ahi cae el worktree', () => {
+    const l = enCaja('git', ['worktree', 'add', e.vecino], e.proyecto, e.proyecto, undefined, [e.vecino]) // prettier-ignore
+    if (!l.ok) throw new Error(l.error)
+    const i = l.value.args.indexOf('--bind')
+    expect(l.value.args.slice(i, i + 3)).toEqual(['--bind', e.vecino, e.vecino])
+  })
+
   it('el comando va tras `--`: sus argumentos nunca son flags de bwrap', () => {
     const l = enCaja('node', ['--version'], e.proyecto, e.proyecto)
     if (!l.ok) throw new Error(l.error)

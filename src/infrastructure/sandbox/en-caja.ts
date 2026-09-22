@@ -23,13 +23,19 @@ let disponible: Result<void> | null = null
  *
  * `--` antes del comando: lo que venga despues son argumentos del comando y
  * nunca flags de bwrap, aunque empiecen por `--`.
+ *
+ * `escritura`: rutas FUERA del proyecto que el comando tiene que dejar en el
+ * disco de verdad —el destino de un `git worktree add`—. Sin declararlas, lo
+ * que se escribe ahi cae en el tmpfs de la caja y se evapora al salir (medido:
+ * el worktree del motor quedaba registrado en `.git` y sin directorio).
  */
 export function enCaja(
   bin: string,
   args: readonly string[],
   proyecto: string,
   cwd: string,
-  path = process.env.PATH ?? ''
+  path = process.env.PATH ?? '',
+  escritura: readonly string[] = []
 ): Result<Lanzamiento> {
   disponible ??= sondaDeBwrap(path)
   if (!disponible.ok) return err(`sin-caja:${disponible.error}`)
@@ -47,7 +53,7 @@ export function enCaja(
     home: homedir(),
     sistema: raicesDelSistema(),
     soloLectura: [node, ...propio].filter((r) => !dentroDe(proyecto, r)),
-    escritura: gitComunDe(cwd).filter((r) => r !== proyecto),
+    escritura: [...gitComunDe(cwd), ...escritura].filter((r) => r !== proyecto),
     socketDelProxy: null
   })
   return flags.ok
