@@ -42,9 +42,11 @@ const DE_HOY = `SELECT id, file, line, title, tipo, identity FROM findings
   WHERE ${VIVA} AND NOT (${IDENTIDAD_VIEJA})`
 
 /** Las vivas que siguen con la identidad vieja, y SOLO esas. */
-export const leerZombis = (db: Db, proyecto: string): readonly FilaZombi[] =>
-  db.prepare(ZOMBIS).all(proyecto) as FilaZombi[]
+export function leerZombis(db: Db, proyecto: string): readonly FilaZombi[] {
+  return db.prepare(ZOMBIS).all(proyecto) as FilaZombi[]
+}
 
 /** Las vivas con la clave de hoy, incluidas las que el escaner dejo en `otro`. */
-export const leerVivasDeHoy = (db: Db, proyecto: string): readonly FilaDeHoy[] =>
-  db.prepare(DE_HOY).all(proyecto) as FilaDeHoy[]
+export function leerVivasDeHoy(db: Db, proyecto: string): readonly FilaDeHoy[] {
+  return db.prepare(DE_HOY).all(proyecto) as FilaDeHoy[]
+}

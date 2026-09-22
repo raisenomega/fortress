@@ -1,5 +1,6 @@
 import { DEFENSAS_INNEGOCIABLES } from './innegociables-defensa'
 import { DEFENSAS_DEL_PROMPT } from './innegociables-prompt'
+import { DEFENSAS_DE_LA_FUSION } from './innegociables-fusion'
 import { DEFENSAS_DE_SECRETOS } from './innegociables-secretos'
 
 /** Ver `criterio-innegociable.ts`. Familias aparte: `-defensa`, `-disco`, `-secretos`, `-prompt`. */
@@ -7,6 +8,7 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   ...DEFENSAS_INNEGOCIABLES,
   ...DEFENSAS_DE_SECRETOS,
   ...DEFENSAS_DEL_PROMPT,
+  ...DEFENSAS_DE_LA_FUSION,
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
   'src/domain/settings/safe-commands.ts',
@@ -17,8 +19,7 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/repair/confianza.ts',
   'src/application/repair/gate-guards.ts',
   'src/infrastructure/repair/gate-env.ts',
-  // La otra mitad: `gate-env` arma el entorno del gate y `claude-cli` el de TODO
-  // agente, con sus tools y su MCP.
+  // La otra mitad: `gate-env` arma el entorno del gate; `claude-cli` el de todo agente.
   'src/infrastructure/claude-code/claude-cli.ts',
   'src/infrastructure/system/self-project.ts',
   // El perimetro del generador: hasta donde llega un fix.
@@ -54,7 +55,6 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/repair/auto-merge-config.ts',
   'src/domain/repair/auto-merge-blacklist.ts',
   'src/domain/shared/path-glob.ts',
-  // Auto-cobertura: el archivo que declara la blacklist se cubre a si mismo.
   '.fortress/config'
 ]
 

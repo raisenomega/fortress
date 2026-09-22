@@ -2,12 +2,8 @@ import { spawnSync } from 'child_process'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
 
 export interface Respuesta {
-  readonly clasificados: readonly {
-    id: string
-    tipo?: unknown
-    simbolo?: unknown
-    gemela?: unknown
-  }[]
+  /** El ultimo bloque JSON tal cual: quien llama sabe que clave espera. */
+  readonly crudo: Record<string, unknown>
   readonly coste: number
 }
 
@@ -26,6 +22,5 @@ export function preguntarAlAgente(prompt: string, proyectoPath: string): Respues
   const bloques = [...(res.result ?? '').matchAll(/```json\s*([\s\S]*?)```/g)]
   const ultimo = bloques.at(-1)
   if (ultimo === undefined) throw new Error('el clasificador no devolvio bloque json')
-  const crudo = JSON.parse(ultimo[1]) as { clasificados?: Respuesta['clasificados'] }
-  return { clasificados: crudo.clasificados ?? [], coste: res.total_cost_usd ?? 0 }
+  return { crudo: JSON.parse(ultimo[1]) as Record<string, unknown>, coste: res.total_cost_usd ?? 0 }
 }

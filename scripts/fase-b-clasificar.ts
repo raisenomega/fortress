@@ -36,7 +36,10 @@ console.log(
   `Preguntando al agente por ${items.length} hallazgos, dentro de la caja, sobre ${p.path} ...`
 )
 const respuesta = preguntarAlAgente(promptDeReclasificacion(items), p.path)
-const decididas = reclasificar(enAlcance, respuesta.clasificados)
+const decididas = reclasificar(
+  enAlcance,
+  (respuesta.crudo.clasificados ?? []) as Parameters<typeof reclasificar>[1]
+)
 
 const filas = decididas.map((d) => {
   const z = enAlcance.find((x) => x.id === d.id)

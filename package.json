@@ -29,7 +29,9 @@
     "backfill:proposal-events": "node scripts/backfill-events-i1.5.ts",
     "fase-b:clasificar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-clasificar.ts",
     "fase-b:ejecutar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-ejecutar.ts",
-    "fase-b:plan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fusion-plan.ts"
+    "fase-b:plan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fusion-plan.ts",
+    "fase-b:juzgar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-juzgar.ts",
+    "fase-b:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-aplicar.ts"
   },
   "overrides": {
     "nanoid": "^3.3.17"

@@ -13,12 +13,15 @@ export interface Fila {
   readonly lifecycle?: string
   readonly extinctReason?: string | null
   readonly resolvedAt?: string | null
+  /** Donde vive: por defecto todas en el mismo sitio, que es lo que los criterios miran. */
+  readonly file?: string
+  readonly line?: number | null
 }
 
 const INSERT = `INSERT INTO findings
   (id, project_id, severity, title, file, line, created_at, identity, tipo, simbolo,
    lifecycle, first_seen, last_seen, extinct_reason, resolved_at)
-  VALUES (@id, @proyecto, 'MEDIUM', 't', 'f.ts', 1, @at, @identity, @tipo, 's',
+  VALUES (@id, @proyecto, 'MEDIUM', 't', @file, @line, @at, @identity, @tipo, 's',
    @lifecycle, @at, @at, @extinctReason, @resolvedAt)`
 
 /**
@@ -42,7 +45,9 @@ export function baseCon(filas: readonly Fila[]): Db {
       tipo: f.tipo ?? 'path-traversal',
       lifecycle: f.lifecycle ?? 'ACTIVE',
       extinctReason: f.extinctReason ?? null,
-      resolvedAt: f.resolvedAt ?? null
+      resolvedAt: f.resolvedAt ?? null,
+      file: f.file ?? 'f.ts',
+      line: f.line === undefined ? 1 : f.line
     })
   }
   return db
