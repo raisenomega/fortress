@@ -39,7 +39,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     '',
     ...(docs === '' ? [] : [docs, '']),
     `En el grafo este proyecto se llama "${enElGrafo}" (deducido de su ruta; si no`,
-    'cuadra, list_projects te da el nombre real). Usalo como project en cada consulta.',
+    'cuadra, search_graph responde con los nombres reales). Usalo como project en cada consulta.',
     '',
     ...EL_GRAFO,
     // Lo que PUEDE, leido de los args con que se lanza: nunca texto fijo.

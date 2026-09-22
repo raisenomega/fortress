@@ -31,15 +31,18 @@ describe('el analista sabe como se llama el proyecto en el grafo', () => {
     expect(p.indexOf('home-jojo-repo')).toBeLessThan(p.indexOf('GRAFO PRIMERO'))
   })
 
-  it('va como PISTA, con la salida si no cuadra', () => {
+  it('va como PISTA, con la salida si no cuadra: la respuesta de search_graph lista los nombres', () => {
     // El esquema lo decide el servidor. Acertar ahorra turnos; fallar no rompe.
-    expect(prompt()).toContain('list_projects te da el nombre real')
+    // `list_projects` no existe en el servidor fijado: era una fantasma.
+    expect(prompt()).toContain('search_graph responde con los nombres reales')
+    expect(prompt()).not.toContain('list_projects')
   })
 })
 
 describe('que hacer cuando el grafo no tiene el proyecto', () => {
-  it('le dice que index_status se lo resuelve en una llamada', () => {
-    expect(prompt()).toContain('index_status te lo dice en una llamada')
+  it('le dice que la primera consulta se lo dice, sin herramienta aparte', () => {
+    expect(prompt()).toContain('la primera consulta te lo dice')
+    expect(prompt()).not.toContain('index_status')
   })
 
   it('le prohibe indexar: es accion del operador, con gate', () => {
@@ -53,8 +56,9 @@ describe('que hacer cuando el grafo no tiene el proyecto', () => {
     expect(prompt()).toContain('lo demas que te falte, si')
   })
 
-  it('le da las dos herramientas de frescura por su nombre', () => {
-    expect(prompt()).toContain('check_index_coverage')
-    expect(prompt()).toContain('detect_changes')
+  it('la frescura se comprueba contra el disco: no hay herramienta de frescura en el servidor', () => {
+    expect(prompt()).toContain('el disco dice QUE hay hoy')
+    expect(prompt()).not.toContain('check_index_coverage')
+    expect(prompt()).not.toContain('detect_changes')
   })
 })

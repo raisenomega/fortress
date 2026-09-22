@@ -10,11 +10,11 @@ describe('los tres agentes del motor alcanzan TODO el grafo de lectura', () => {
     for (const tool of GRAPH_READ_TOOLS) expect(lista.split(',')).toContain(tool)
   })
 
-  it('las cuatro que faltaban estan: list_projects era la que mas dolia', () => {
+  it('las que faltaban y EXISTEN estan: query_graph y get_graph_schema', () => {
     // 79 observaciones de auto-mejora por la misma causa. En headless una tool
-    // fuera de la lista se auto-deniega: el analista sacaba el nombre del
-    // proyecto del mensaje de ERROR de search_graph, de rebote.
-    for (const t of ['list_projects', 'index_status', 'query_graph', 'get_graph_schema']) {
+    // fuera de la lista se auto-deniega. (`list_projects` e `index_status` NO
+    // existen en el servidor fijado: concederlas era una fantasma mas.)
+    for (const t of ['query_graph', 'get_graph_schema']) {
       expect(TOOLS_LECTURA).toContain(`mcp__codebase-memory__${t}`)
     }
   })
@@ -35,12 +35,12 @@ describe('los tres agentes del motor alcanzan TODO el grafo de lectura', () => {
 })
 
 describe('el VOCABULARIO en si, no solo que se derive de el', () => {
-  it('lleva las dos de frescura, que decidian REAL vs OBSOLETO a ciegas', () => {
-    // Recorrer GRAPH_READ_TOOLS prueba que las tres listas derivan de el, pero
-    // no que el vocabulario este completo: quitar una herramienta la quita de
-    // los dos lados y el test de arriba sigue verde. Estas van por su nombre.
-    expect(GRAPH_READ_TOOLS).toContain('mcp__codebase-memory__check_index_coverage')
-    expect(GRAPH_READ_TOOLS).toContain('mcp__codebase-memory__detect_changes')
+  it('NO lleva las fantasma: el servidor fijado no las expone (medido por tools/list)', () => {
+    // Aqui se exigian `check_index_coverage` y `detect_changes` por su nombre,
+    // y el analista las pidio 243 veces a un servidor que no las tiene.
+    for (const f of ['check_index_coverage', 'detect_changes', 'list_projects', 'index_status']) {
+      expect(GRAPH_READ_TOOLS).not.toContain(`mcp__codebase-memory__${f}`)
+    }
   })
 
   it('sigue sin conceder ninguna de ESCRITURA', () => {
