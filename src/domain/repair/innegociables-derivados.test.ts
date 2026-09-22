@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { join } from 'node:path'
-import { AUTONOMY_RULES_FILES } from './auto-merge-blacklist'
+import { cubierto, fuente, todos } from './innegociables-fixture'
 
 /**
  * La lista innegociable se ha quedado corta CUATRO veces, y siempre igual: una
@@ -17,17 +15,6 @@ import { AUTONOMY_RULES_FILES } from './auto-merge-blacklist'
 const CONTROLES =
   /export (?:async )?function (build\w*Env|gitEnv\w*|redactSecrets|sanear\w+|guard\w+|conCarril\w+)\b/
 
-const ficheros = (dir: string): readonly string[] =>
-  readdirSync(dir).flatMap((e) => {
-    const ruta = join(dir, e)
-    if (statSync(ruta).isDirectory()) return ficheros(ruta)
-    return ruta.endsWith('.ts') && !/\.test\.ts$|fixture|fake/.test(ruta) ? [ruta] : []
-  })
-
-/** Un fichero esta cubierto por su ruta exacta o por un glob de carpeta. */
-const cubierto = (f: string): boolean =>
-  AUTONOMY_RULES_FILES.some((p) => p === f || (p.endsWith('/**') && f.startsWith(p.slice(0, -2))))
-
 /**
  * La otra clase que se escapo, y por la misma razon: `main-window` decidia el
  * aislamiento del renderer y la lista lo cubria con `electron/**`, un patron que
@@ -41,8 +28,6 @@ const AISLAMIENTO = /\b(nodeIntegration|contextIsolation|exposeInMainWorld)\b/
  *  comentario de `context`, y marcarlo seria pedir proteger el mapa de puertos. */
 const SECRETOS = /\bencryptedApiKey\b|\bisPublicSettingKey\b|\bsafeStorage\.|\bPUBLIC_KEYS\b/
 
-const fuente = (f: string): string => readFileSync(f, 'utf8')
-const todos = ficheros('src')
 const defensas = todos.filter((f) => CONTROLES.test(fuente(f)))
 const ventanas = todos.filter((f) => AISLAMIENTO.test(fuente(f)))
 const secretos = todos.filter((f) => SECRETOS.test(fuente(f)))
