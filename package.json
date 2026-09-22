@@ -1,7 +1,7 @@
 {
   "name": "fortress-command-center",
   "version": "1.0.0",
-  "description": "FORTRESS Command Center \u2014 interfaz \u00fanica para gestionar m\u00faltiples proyectos con agentes de IA",
+  "description": "FORTRESS Command Center — interfaz única para gestionar múltiples proyectos con agentes de IA",
   "main": "./out/main/index.js",
   "author": "raisenomega",
   "homepage": "https://github.com/raisenomega/fortress",
@@ -26,7 +26,13 @@
     "install:desktop": "./install.sh",
     "icons": "electron --no-sandbox scripts/make-icons.cjs",
     "verify:scan": "npm run build && electron --no-sandbox scripts/scan-verification.cjs",
-    "backfill:proposal-events": "node scripts/backfill-events-i1.5.ts"
+    "backfill:proposal-events": "node scripts/backfill-events-i1.5.ts",
+    "fase-b:clasificar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-clasificar.ts",
+    "fase-b:ejecutar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-ejecutar.ts",
+    "fase-b:plan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fusion-plan.ts",
+    "fase-b:juzgar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-juzgar.ts",
+    "fase-b:replan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-replan.ts",
+    "fase-b:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-aplicar.ts"
   },
   "overrides": {
     "nanoid": "^3.3.17"

@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { homedir } from 'os'
 import { join } from 'path'
-import { senasDeIdentidad } from '../src/domain/project/finding-identity.ts'
+import { tipoDeLaIdentidad } from '../src/domain/project/finding-identity.ts'
 import { planDeFusion } from '../src/domain/project/fusion-de-duplicados.ts'
 import { informeDeFusion, type FilaDelInforme } from '../src/domain/project/informe-de-fusion.ts'
 import { isSeverity, masUrgente } from '../src/domain/shared/severity.ts'
@@ -57,7 +57,7 @@ const filas: FilaDelInforme[] = (db.prepare(VIVAS).all(fila.id) as Row[]).map((r
   title: r.title
 }))
 
-const sinClasificar = filas.filter((f) => senasDeIdentidad(f.identidad).tipo === null).length
+const sinClasificar = filas.filter((f) => tipoDeLaIdentidad(f.identidad) === null).length
 const grupos = informeDeFusion(filas, planDeFusion(filas), masUrgente)
 
 for (const linea of salidaDelPlan(proyecto, filas.length, sinClasificar, grupos)) {

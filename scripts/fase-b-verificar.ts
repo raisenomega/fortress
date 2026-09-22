@@ -21,9 +21,10 @@ import { sinSupervivientesDegradadas } from './fase-b-criterio-6.ts'
 export function verificarEnCaliente(
   db: Database,
   proyecto: string,
-  exentas: readonly string[]
+  exentas: readonly string[],
+  fueraDeAlcance: readonly string[] = []
 ): void {
-  const violaciones = redDeLaFusion(db, proyecto, exentas)
+  const violaciones = redDeLaFusion(db, proyecto, exentas, fueraDeAlcance)
   if (violaciones.length > 0) {
     const partes = violaciones.map((v) => `  criterio ${v.criterio}: ${v.quien} — ${v.detalle}`)
     throw new Error(`la migracion no cuadra:\n${partes.join('\n')}`)

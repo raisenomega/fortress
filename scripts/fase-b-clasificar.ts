@@ -1,61 +1,55 @@
 import Database from 'better-sqlite3'
-import { spawnSync } from 'child_process'
 import { writeFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
-import { findingIdentity } from '../src/domain/project/finding-identity.ts'
-import { aTipoDeDefecto } from '../src/domain/scan/tipo-de-defecto.ts'
-import { PREDICCION, promptDeClasificacion, type ItemAClasificar } from './fase-b-prompt.ts'
-import { agrupar, leerVivas, type Clasificado, type Fila } from './fase-b-lectura.ts'
+import { gemelaDe } from '../src/domain/project/gemela-de-la-zombi.ts'
+import { reclasificar } from '../src/domain/project/reclasificacion-de-zombis.ts'
+import { promptDeReclasificacion } from '../src/domain/scan/prompt-de-reclasificacion.ts'
+import { leerVivasDeHoy, leerZombis } from '../src/infrastructure/persistence/filas-con-identidad-vieja.ts' // prettier-ignore
+import { preguntarAlAgente } from './fase-b-agente.ts'
+import { leerArgumentos } from './fase-b-argumentos.ts'
+import { planImpreso } from './fase-b-plan.ts'
 
-// Pieza 2a: clasifica las filas VIVAS con identidad vieja y deja el resultado en
-// un JSON para que el operador lo revise. NO escribe en la base: la abre en modo
-// solo lectura, y quien reclasifica de verdad es la 2b, en su transaccion unica.
-const RAIZ = process.cwd()
-const SALIDA = join(RAIZ, 'internal', 'fase-b-clasificacion.json')
+// Pieza 2a: clasifica las zombis CON GEMELA (paso A) y deja el resultado y el
+// plan en internal/, por proyecto, para que la operadora los revise. NO escribe
+// en la base: la abre en solo lectura. Quien reclasifica de verdad es la 2b.
+// Uso: npm run fase-b:clasificar -- <proyecto> [--base <ruta>]
+const { proyecto, base } = leerArgumentos(process.argv.slice(2))
+const RUTA = base ?? join(homedir(), '.config/fortress-command-center/fortress.db')
+const db = new Database(RUTA, { readonly: true })
+const p = db.prepare('SELECT id, path FROM projects WHERE name = ?').get(proyecto) as { id: string; path: string } | undefined // prettier-ignore
+if (p === undefined) throw new Error(`No hay ningun proyecto llamado "${proyecto}" en ${RUTA}`)
 
-const db = new Database(join(homedir(), '.config/fortress-command-center/fortress.db'), { readonly: true }) // prettier-ignore
-const filas = leerVivas(db, 'fortress-command-center')
-console.log(`LA PREDICCION, antes de mirar nada:\n${PREDICCION.map((p) => '  ' + p).join('\n')}\n`)
-console.log(`${filas.length} filas vivas con identidad vieja. Llamando al clasificador...`)
+const zombis = leerZombis(db, p.id)
+const vivas = leerVivasDeHoy(db, p.id)
+const conCandidata = zombis.map((z) => ({ ...z, candidata: gemelaDe(z, vivas) }))
+const enAlcance = conCandidata.filter((z) => z.candidata !== null)
+const fueraDeAlcance = conCandidata.filter((z) => z.candidata === null).map((z) => z.id)
+console.log(`${zombis.length} zombis en ${proyecto}: ${enAlcance.length} con gemela (paso A), ${fueraDeAlcance.length} sin gemela (paso B, no se tocan). Base: ${RUTA}`) // prettier-ignore
+db.close()
 
-const items: ItemAClasificar[] = filas.map(({ id, file, line, title, severity }) => ({ id, file, line, title, severity })) // prettier-ignore
-const args = ['-p', promptDeClasificacion(RAIZ, items), '--output-format', 'stream-json', '--verbose', '--permission-mode', 'plan'] // prettier-ignore
-// prettier-ignore
-const salida = spawnSync('claude', args, { cwd: RAIZ, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
-if (salida.status !== 0) throw new Error(`el clasificador salio con ${salida.status}`)
+const items = enAlcance.map((z) => ({
+  id: z.id, file: z.file, line: z.line, title: z.title, severity: z.severity,
+  candidata: z.candidata === null ? null : { id: z.candidata.id, line: z.candidata.line, tipo: z.candidata.tipo, title: vivas.find((v) => v.id === z.candidata?.id)?.title ?? '' }
+})) // prettier-ignore
+console.log(
+  `Preguntando al agente por ${items.length} hallazgos, dentro de la caja, sobre ${p.path} ...`
+)
+const respuesta = preguntarAlAgente(promptDeReclasificacion(items), p.path)
+const decididas = reclasificar(
+  enAlcance,
+  (respuesta.crudo.clasificados ?? []) as Parameters<typeof reclasificar>[1]
+)
 
-let texto = ''
-let coste = 0
-for (const linea of salida.stdout.split('\n')) {
-  if (linea.trim() === '') continue
-  const evento = JSON.parse(linea) as { type?: string; result?: string; total_cost_usd?: number }
-  if (evento.type !== 'result') continue
-  texto = evento.result ?? ''
-  coste = evento.total_cost_usd ?? 0
-}
-
-const bloque = /```json\s*([\s\S]*?)```/g
-const bloques = [...texto.matchAll(bloque)]
-if (bloques.length === 0) throw new Error('el clasificador no devolvio bloque json')
-const crudo = JSON.parse(bloques[bloques.length - 1][1]) as { clasificados?: Clasificado[] }
-const porId = new Map((crudo.clasificados ?? []).map((c) => [c.id, c]))
-
-const clasificadas = filas.map((fila: Fila) => {
-  const c = porId.get(fila.id)
-  const tipo = aTipoDeDefecto(c?.tipo)
-  const simbolo = typeof c?.simbolo === 'string' ? c.simbolo.trim() : ''
-  return {
-    id: fila.id, file: fila.file, title_viejo: fila.title, severity: fila.severity,
-    tipo, simbolo, identidad_vieja: fila.identity, first_seen: fila.first_seen,
-    identidad_nueva: findingIdentity({ ...fila, tipo, simbolo })
-  } // prettier-ignore
+const filas = decididas.map((d) => {
+  const z = enAlcance.find((x) => x.id === d.id)
+  if (z === undefined) throw new Error(`reclasificada sin zombi: ${d.id}`)
+  return { ...d, file: z.file, line: z.line, title_viejo: z.title, severity: z.severity, identidad_vieja: z.identity, first_seen: z.first_seen } // prettier-ignore
 })
-
-const grupos = agrupar(clasificadas)
-writeFileSync(SALIDA, JSON.stringify({ prediccion: PREDICCION, coste, clasificadas, grupos }, null, 2)) // prettier-ignore
-console.log(`\ncoste real: $${coste.toFixed(4)}`)
-console.log(`sin clasificar (cayeron a 'otro'): ${clasificadas.filter((c) => c.tipo === 'otro').length}`) // prettier-ignore
-console.log(`\nGRUPOS QUE FUSIONARIAN (identidad nueva repetida):`)
-for (const g of grupos) console.log(`  ${g.ids.length}->1  ${g.identidad}`)
-console.log(`\nJSON: ${SALIDA}`)
+const SALIDA = join(process.cwd(), 'internal', `fase-b-clasificacion-${proyecto}.json`)
+const PLAN = join(process.cwd(), 'internal', `fase-b-plan-${proyecto}.txt`)
+writeFileSync(SALIDA, JSON.stringify({ proyecto, base: RUTA, coste: respuesta.coste, clasificadas: filas, fueraDeAlcance }, null, 2)) // prettier-ignore
+const plan = planImpreso(proyecto, filas, fueraDeAlcance.length)
+writeFileSync(PLAN, `${plan.join('\n')}\n`)
+console.log(plan.join('\n'))
+console.log(`\ncoste real: $${respuesta.coste.toFixed(4)}\nJSON: ${SALIDA}\nPLAN: ${PLAN}`)

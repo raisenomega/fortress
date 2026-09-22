@@ -13,13 +13,19 @@ export interface Fila {
   readonly lifecycle?: string
   readonly extinctReason?: string | null
   readonly resolvedAt?: string | null
+  /** Donde vive: por defecto todas en el mismo sitio, que es lo que los criterios miran. */
+  readonly file?: string
+  readonly line?: number | null
+  /** Lo que la fusion decide y escribe: quien es mas antigua, y que gravedad queda. */
+  readonly firstSeen?: string
+  readonly severity?: string
 }
 
 const INSERT = `INSERT INTO findings
   (id, project_id, severity, title, file, line, created_at, identity, tipo, simbolo,
    lifecycle, first_seen, last_seen, extinct_reason, resolved_at)
-  VALUES (@id, @proyecto, 'MEDIUM', 't', 'f.ts', 1, @at, @identity, @tipo, 's',
-   @lifecycle, @at, @at, @extinctReason, @resolvedAt)`
+  VALUES (@id, @proyecto, @severity, 't', @file, @line, @at, @identity, @tipo, 's',
+   @lifecycle, @firstSeen, @at, @extinctReason, @resolvedAt)`
 
 /**
  * Base REAL en memoria: mismo esquema y mismas migraciones que la del operador.
@@ -42,7 +48,11 @@ export function baseCon(filas: readonly Fila[]): Db {
       tipo: f.tipo ?? 'path-traversal',
       lifecycle: f.lifecycle ?? 'ACTIVE',
       extinctReason: f.extinctReason ?? null,
-      resolvedAt: f.resolvedAt ?? null
+      resolvedAt: f.resolvedAt ?? null,
+      file: f.file ?? 'f.ts',
+      line: f.line === undefined ? 1 : f.line,
+      firstSeen: f.firstSeen ?? '2026-08-01T00:00:00Z',
+      severity: f.severity ?? 'MEDIUM'
     })
   }
   return db

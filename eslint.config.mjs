@@ -36,9 +36,9 @@ export default defineConfig(
     }
   },
   {
-    // Scripts que Electron ejecuta directamente: son CommonJS de Node, no
-    // TypeScript. Las reglas de modulos ES y de tipado no aplican aqui.
-    files: ['scripts/**/*.cjs'],
+    // Scripts que Electron ejecuta directamente (CommonJS) y los cargadores de
+    // node en scripts/lib (ESM): no son TypeScript, y el tipado no aplica aqui.
+    files: ['scripts/**/*.cjs', 'scripts/lib/*.mjs'],
     rules: {
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
