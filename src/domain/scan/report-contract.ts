@@ -17,6 +17,11 @@ const lista = (valores: readonly string[]): string => valores.join(', ')
  * anterior era un defecto interno de FORTRESS emparejado con un tipo que
  * definia otra cosa: ensenaba a forzar justo donde hace falta lo contrario.
  */
+/** La regla del simbolo, en una sola fuente: la lee el escaner y la Fase B. */
+export const REGLA_DEL_SIMBOLO = `- simbolo: el nombre de la funcion o bloque que contiene el defecto (por
+  ejemplo "createCheckout" o "resolvePrice"), sin parentesis. Cadena vacia si
+  el hallazgo no esta dentro de codigo con nombre.`
+
 export const REPORT_CONTRACT = `Termina SIEMPRE tu respuesta con este bloque, y nada despues:
 
 \`\`\`json
@@ -34,9 +39,7 @@ Formato del bloque:
   por su nombre, y elige el mismo que elegirias manana para el mismo defecto:
   es lo que permite reconocerlo entre escaneos.
 ${BLOQUE_DE_TIPOS}
-- simbolo: el nombre de la funcion o bloque que contiene el defecto (por
-  ejemplo "createCheckout" o "resolvePrice"), sin parentesis. Cadena vacia si
-  el hallazgo no esta dentro de codigo con nombre.
+${REGLA_DEL_SIMBOLO}
 - alcance: quien llega hasta el defecto. ELIGE uno: ${lista(ALCANCES)}.
 - efecto: que se lleva o rompe quien lo explota. ELIGE uno: ${lista(EFECTOS)}.
   Los datos de personas son datos-de-terceros, no informacion; informacion es
