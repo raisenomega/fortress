@@ -169,7 +169,7 @@ expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
 `SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
 del agente: se audita cada prompt contra lo que de verdad se lanza.
 
-### 3. El contrato del hallazgo — **EN MARCHA** (2 sub-piezas hechas, 2026-09-22)
+### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas hechas, 2026-09-22)
 
 **Hecho y en `main`**, cada pieza con gate 6/6 antes y después:
 
@@ -189,16 +189,27 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
   `send-invoice` tenía seis filas vivas para un defecto y no se veían entre sí;
   el 97 % de las citas por clase caían en otro fichero; `otro` agrupaba 34 en
   un proyecto.
+- **Sub-pieza 3, los tipos de auditoría** — merge `bd51aee`, **ADR-100 firmado**.
+  Seis tipos nuevos en una tercera lista —`accesibilidad`, `privacidad`,
+  `integridad-de-negocio`, `continuidad-y-backups`, `dependencia-vulnerable`,
+  `criptografia-debil`—, cada uno pedido por filas reales, con dos desempates,
+  y el bloque del prompt emitido solo. Y el re-tipado **en la misma entrega**
+  (ADR-100 §5): las 108 vivas en `otro` juzgadas por lote en la caja de cada
+  proyecto, 103 re-tipadas (87 a los seis nuevos, 16 a tipos de seguridad que
+  ya existían), 2 fusiones y 5 que siguen `otro` con razón honesta. **`otro`
+  pasa del 20 % al 1 % de lo vivo** (108 → 5), aplicado en la base viva y
+  verificado fila a fila contra su backup. Medido antes: los temas de `otro`
+  eran los módulos M9, M3, M8, M2 y M4 de ADR-083 sin sitio en el contrato, y
+  «calidad de código» eran dos títulos.
 
 **Queda del #3**:
 
-- **Sub-pieza 3, los tipos fuera de seguridad** — **SIGUIENTE**. Accesibilidad y
-  privacidad caen en `otro` (el 20 % de lo vivo) y pierden identidad entre
-  escaneos.
-- Futuras, cada una con su medición: los cortes 2 y 3 de los hermanos (persistir
-  el juicio «mismo defecto» cuando exista consumidor; la deriva del tipo en el
+- Cada una con su medición: los cortes 2 y 3 de los hermanos (persistir el
+  juicio «mismo defecto» cuando exista consumidor; la deriva del tipo en el
   sync, que toca ADR-084 y pide ADR propio), el ancla frente al sitio del
-  arreglo, el defecto declarado a propósito, y las cadenas de explotación.
+  arreglo, el defecto declarado a propósito, las cadenas de explotación, y la
+  **severidad por familia** (ADR-100 §4: los ejes son de seguridad y
+  accesibilidad o privacidad quedan `sinEjes`, con la palabra del modelo).
 
 *Lo que sigue era el diagnóstico, y se conserva:*
 
