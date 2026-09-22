@@ -5,6 +5,7 @@ import type { GateDeps } from '@application/repair/run-gate'
 import type { OmegaDeps } from '@application/repair/run-omega'
 import type { GenerateDeps } from '@application/repair/generate-types'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
+import { sondaDeBwrap } from '../sandbox/sonda-de-bwrap'
 import { readScopeGroups } from '../project/fortress-config'
 import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
@@ -41,6 +42,7 @@ export function buildGateDeps(projectId: string): GateDeps {
     worktreeExists: (path) => existsSync(path),
     isClean: (path) => manager.isClean(path),
     runner: createGateRunner(projectId),
+    hayCaja: () => sondaDeBwrap(),
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }

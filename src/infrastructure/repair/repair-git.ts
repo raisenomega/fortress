@@ -1,15 +1,28 @@
 import { spawn } from 'child_process'
 import { gitEnv } from '../git/git-env'
+import { enCaja } from '../sandbox/en-caja'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
 export interface GitOut {
   readonly code: number
   readonly out: string
 }
 
-/** git con args en array, jamas shell strings. stdout+stderr juntos para autopsia. */
-export function git(cwd: string, args: readonly string[]): Promise<GitOut> {
+/** git con args en array, jamas shell strings. stdout+stderr juntos para autopsia.
+ *  DENTRO DE LA CAJA (ADR-092, clase B): el worktree es lo que se ve, mas el
+ *  `.git` comun que `enCaja` le anade, mas lo que se declare en `escritura`
+ *  (el destino de un `worktree add`, que vive fuera). Sin caja: 127 y el porque. */
+export function git(
+  cwd: string,
+  args: readonly string[],
+  escritura: readonly string[] = []
+): Promise<GitOut> {
+  // prettier-ignore
+  const env = gitEnv()
+  const caja = enCaja('git', [...SIN_HOOKS, ...args], cwd, cwd, env.PATH, escritura)
+  if (!caja.ok) return Promise.resolve({ code: 127, out: caja.error })
   return new Promise((resolve) => {
-    const child = spawn('git', args as string[], { cwd, env: gitEnv() })
+    const child = spawn(caja.value.bin, [...caja.value.args], { cwd, env })
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.stderr.on('data', (d: Buffer) => (out += d.toString()))

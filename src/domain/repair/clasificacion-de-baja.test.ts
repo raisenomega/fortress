@@ -18,6 +18,7 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
   npm_ci_failed: 'porEntornoDelProyecto',
   gate_sin_verificacion: 'porEntornoDelProyecto',
   proyecto_sin_confianza: 'porEntornoDelProyecto',
+  sin_caja: 'porEntornoDelProyecto',
   worktree_missing: 'porEntornoDelProyecto',
   worktree_contaminated: 'porEntornoDelProyecto',
   invalid_state: 'porDefectoInterno',

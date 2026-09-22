@@ -25,7 +25,9 @@ const BY_DEPENDENCY: ReadonlyArray<readonly [string, string]> = [
   ['prisma', 'Prisma']
 ]
 
-const BY_FILE: ReadonlyArray<readonly [string, string]> = [
+/** Exportada: de aqui sale tambien que ecosistemas tienen registro de paquetes
+ *  (`domain/sandbox`), para que las dos listas no puedan separarse. */
+export const BY_FILE: ReadonlyArray<readonly [string, string]> = [
   ['go.mod', 'Go'],
   ['cargo.toml', 'Rust'],
   ['composer.json', 'PHP'],

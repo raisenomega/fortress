@@ -1,4 +1,4 @@
-import { TOOLS_LECTURA } from './motor-tools'
+import { argsDeLectura } from './generator-args'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
 import { trackChild } from '../claude-code/child-registry'
@@ -8,9 +8,6 @@ import { relojDeCorrida } from './reloj-de-corrida'
 
 export type { OmegaRunResult }
 
-const GRAPH = JSON.stringify({
-  mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
-})
 // LECTURA ESTRICTA: grafo + Read/Grep/Glob. Sin Edit, sin Write, sin Bash.
 const TIMEOUT_MS = 900_000
 
@@ -25,14 +22,15 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
   return {
     run: (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
-      const args = ['-p', prompt, '--output-format', 'json', '--mcp-config', GRAPH,
-        '--strict-mcp-config', '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
+      const args = argsDeLectura(prompt, worktreePath)
+      // Sin caja no arranca: el mismo camino que un binario que no existe.
+      if (!args.ok) return Promise.resolve({ ok: false, error: args.error, timedOut: false, noArranco: true, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
         // Recorte del CLI, no herencia cruda: ni el revisor ni sus nietos —el MCP
         // del grafo que el mismo levanta— ven las llaves de la sesion viva. Sin key
         // porque hoy se autentica con lo que hereda: quien paga no cambia aqui.
         const env = buildEnv(null)
-        const child = spawn(claudeBin, args, { cwd: worktreePath, detached: true, env })
+        const child = spawn(claudeBin, [...args.value], { cwd: worktreePath, detached: true, env })
         // Detached: el registro tiene que matarlo por GRUPO o solo cae el lider.
         trackChild(child, projectId, 'grupo')
         let out = ''

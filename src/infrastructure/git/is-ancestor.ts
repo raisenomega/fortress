@@ -1,4 +1,5 @@
 import { execFileSync } from 'child_process'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
 /**
  * true si `commit` ya esta contenido en HEAD del repo en `dir`.
@@ -12,7 +13,7 @@ import { execFileSync } from 'child_process'
  */
 export function isAncestor(dir: string, commit: string): boolean {
   try {
-    execFileSync('git', ['merge-base', '--is-ancestor', commit, 'HEAD'], {
+    execFileSync('git', [...SIN_HOOKS, 'merge-base', '--is-ancestor', commit, 'HEAD'], {
       cwd: dir,
       stdio: ['ignore', 'ignore', 'ignore']
     })

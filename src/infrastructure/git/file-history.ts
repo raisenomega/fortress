@@ -1,4 +1,5 @@
 import { execFile } from 'child_process'
+import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 import { gitEnv } from './git-env'
 import type { FileHistory } from '@domain/project/file-history'
 
@@ -21,9 +22,14 @@ const TIMEOUT_MS = 15 * 1000
 function lastTouch(cwd: string, file: string): Promise<string> {
   return new Promise((resolve) => {
     const args = ['log', '-1', '--format=%cI', '--', file]
-    execFile('git', args, { cwd, env: ENV, timeout: TIMEOUT_MS }, (error, out) => {
-      resolve(error ? '' : out.trim())
-    })
+    execFile(
+      'git',
+      [...SIN_HOOKS, ...args],
+      { cwd, env: ENV, timeout: TIMEOUT_MS },
+      (error, out) => {
+        resolve(error ? '' : out.trim())
+      }
+    )
   })
 }
 

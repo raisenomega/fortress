@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { medida } from '@domain/chat/medida-del-arbol'
 import { CHECKPOINT_HUERFANO, REVERTIDO_POR_RED, type RedDeReversion } from '@domain/chat/red-de-reversion' // prettier-ignore
 import { conRedDeReversion } from './con-red-de-reversion'
 import { textOnly, type ReplyOutcome } from './reply-outcome'
@@ -16,10 +17,7 @@ function redFalsa(verde = true, retirado = true): { red: RedDeReversion; pasos: 
       pasos.push('abrir')
       return { conservar: () => paso('conservar'), revertir: () => paso('revertir') }
     },
-    verificar: () => {
-      pasos.push('verificar')
-      return Promise.resolve(verde ? 'verde' : 'rojo')
-    }
+    verificar: () => (pasos.push('verificar'), Promise.resolve(medida(verde ? 'verde' : 'rojo')))
   }
   return { red, pasos }
 }

@@ -1,3 +1,5 @@
+import { medida } from '@domain/chat/medida-del-arbol'
+import type { MotivoSinVerificar } from '@domain/chat/no-se-pudo-verificar'
 import type { CheckpointDelTurno, RedDeReversion } from '@domain/chat/red-de-reversion'
 import { SIN_JUZGAR, vetado, type VeredictoDelTurno } from '@domain/chat/veredicto-del-turno'
 import { cortaElTurno, type VerificacionDelArbol } from '@domain/chat/verificacion-del-arbol'
@@ -19,8 +21,9 @@ export interface Arbitraje {
   /** El arbol no vale: el agente fallo, lo detuvieron, o no compila. */
   readonly rojo: boolean
   readonly veredicto: VeredictoDelTurno
-  /** Que dijo el gate. Viaja para que un `desconocida` no se conserve mudo. */
+  /** Que dijo el gate, y POR QUE si fue `desconocida`: no se conserva mudo ni en generico. */
   readonly arbol: VerificacionDelArbol
+  readonly motivo: MotivoSinVerificar | null
   /** Lo que el tribunal encontro. Vacio = no corrio, o no encontro nada: las
    *  dos se conservan igual, y la diferencia la cuenta el parte. */
   readonly objeciones: readonly string[]
@@ -54,16 +57,16 @@ export async function arbitrar(
   const edito = outcome.edits.length > 0
   // `failed` corta SIN mirar el arbol: gastar un typecheck en un turno que ya
   // se sabe perdido es tiempo tirado, y el `||` de antes lo cortocircuitaba.
-  const arbol = !outcome.failed && edito ? await red.verificar(cwd) : 'verde'
+  const { arbol, motivo } = !outcome.failed && edito ? await red.verificar(cwd) : medida('verde')
   const rojo = outcome.failed || cortaElTurno(arbol)
-  const sinJuicio = { rojo, arbol, veredicto: SIN_JUZGAR, objeciones: [] }
+  const sinJuicio = { rojo, arbol, motivo, veredicto: SIN_JUZGAR, objeciones: [] }
   if (rojo || !edito || juez === null) return sinJuicio
 
   // El tribunal va AQUI, detras de la guarda: lo que no se juzga tampoco se
   // critica, y esa garantia no hay que reescribirla — se hereda del `return` de
   // arriba. Un espia la fija en `supervisado-sin-juez.test.ts`.
   const objeciones = juez.tribunal && corresponde(arbol) ? await juez.tribunal(cp, juez.plan) : []
-  return { rojo, arbol, objeciones, veredicto: await juez.juez(cp, juez.plan, objeciones) }
+  return { rojo, arbol, motivo, objeciones, veredicto: await juez.juez(cp, juez.plan, objeciones) }
 }
 
 /** Se descarta el turno si el gate lo tumbo o si OMEGA lo veto. */

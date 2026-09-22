@@ -15,5 +15,10 @@
 export const DEFENSAS_DEL_DISCO: readonly string[] = [
   'src/infrastructure/fs/ruta-contenida.ts',
   'src/infrastructure/newproject/docs-reader.ts',
+  // La CAJA (ADR-092): la contencion de lo que CORRE —bwrap, la config del CLI,
+  // la tabla de registros, el proxy y la sonda—. Entera, como `posture/**`:
+  // un host mas en la tabla es una linea, y la deriva `innegociables-caja.test`.
+  'src/domain/sandbox/**',
+  'src/infrastructure/sandbox/**',
   'src/domain/repair/innegociables-disco.ts'
 ]

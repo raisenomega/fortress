@@ -45,10 +45,8 @@ export const REJECTION_REASONS = [
    * `invalid_state`. Se conserva para que las filas ya escritas se lean.
    */
   'generator_error',
-  /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */
-  'turnos_agotados',
-  /** El analista corrio pero su salida no se dejo leer. No es obsolescencia. */
-  'analisis_ilegible',
+  /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */ 'turnos_agotados',
+  /** El analista corrio pero su salida no se dejo leer. No es obsolescencia. */ 'analisis_ilegible',
   'no_diff_produced',
   /** Solo toco pruebas: el gate lo daria VERDE. Ver `solo-toca-pruebas`. */ 'solo_pruebas',
   'worktree_contaminated',
@@ -65,7 +63,9 @@ export const REJECTION_REASONS = [
   'omega_error',
   'omega_response_invalid',
   /** El proyecto no es de confianza: el gate no ejecuta su codigo. */
-  'proyecto_sin_confianza'
+  'proyecto_sin_confianza',
+  /** Sin caja en esta maquina (ADR-092) no se ejecuta codigo del proyecto. */
+  'sin_caja'
 ] as const
 
 export type RejectionReason = (typeof REJECTION_REASONS)[number]

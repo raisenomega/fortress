@@ -43,10 +43,10 @@ const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   solo_pruebas: 'porCorrea',
   // Nuestro techo de turnos. No dice NADA del fix: no hubo juicio.
   turnos_agotados: 'porLimitePropio',
-  // Ni el fix ni nosotros: el repositorio o su worktree.
-  npm_ci_failed: 'porEntornoDelProyecto',
+  npm_ci_failed: 'porEntornoDelProyecto', // ni el fix ni nosotros: el repositorio o su worktree
   gate_sin_verificacion: 'porEntornoDelProyecto',
   proyecto_sin_confianza: 'porEntornoDelProyecto',
+  sin_caja: 'porEntornoDelProyecto', // ADR-092: la maquina no puede levantar la caja
   worktree_missing: 'porEntornoDelProyecto',
   worktree_contaminated: 'porEntornoDelProyecto',
   // Un bug NUESTRO, no un veredicto sobre la propuesta.

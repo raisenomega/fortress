@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { medida } from '@domain/chat/medida-del-arbol'
 import type { CheckpointDelTurno, RedDeReversion } from '@domain/chat/red-de-reversion'
 import type { VerificacionDelArbol } from '@domain/chat/verificacion-del-arbol'
 import { arbitrar } from './desenlace-del-turno'
@@ -10,7 +11,7 @@ const OBJECION = 'Rompe a quien lo llama: api.ts:17 esperaba null'
 
 /** Una red que contesta lo que se le diga del arbol. */
 const redCon = (arbol: VerificacionDelArbol): RedDeReversion =>
-  ({ disponible: () => true, abrir: () => CP, verificar: () => Promise.resolve(arbol) }) as RedDeReversion // prettier-ignore
+  ({ disponible: () => true, abrir: () => CP, verificar: () => Promise.resolve(medida(arbol)) }) as RedDeReversion // prettier-ignore
 
 /** Juez espia: apunta con que objeciones lo llamaron. */
 function juezQueApunta(): { juez: never; vistas: () => readonly string[] } {

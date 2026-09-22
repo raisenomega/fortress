@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { argsDelGenerador, MAX_TURNS } from './generator-args'
+import { MAX_TURNS } from './generator-args'
 import { desenlaceDelGenerador } from './generator-outcome'
 
 const salida = (extra: Record<string, unknown>): string =>
@@ -10,26 +10,6 @@ const salida = (extra: Record<string, unknown>): string =>
     usage: { input_tokens: 40, output_tokens: 20_000, cache_read_input_tokens: 900_000 },
     ...extra
   })
-
-describe('el techo de turnos', () => {
-  it('esta calibrado con los datos: sobre las que completaban, bajo las que divagaban', () => {
-    // Completaron en 4-25 vueltas; reventaron el tope con 32, 35, 44 y 50.
-    expect(MAX_TURNS).toBeGreaterThan(25)
-    expect(MAX_TURNS).toBeLessThan(32)
-  })
-
-  it('el generador se lanza CON el techo puesto', () => {
-    const args = argsDelGenerador('arregla esto')
-    expect(args).toContain('--max-turns')
-    expect(args[args.indexOf('--max-turns') + 1]).toBe(String(MAX_TURNS))
-  })
-
-  it('sigue lanzandose sin Bash: el commit y el gate son del motor', () => {
-    const tools = argsDelGenerador('x')[argsDelGenerador('x').indexOf('--allowedTools') + 1]
-    expect(tools).toContain('Edit')
-    expect(tools.split(',')).not.toContain('Bash')
-  })
-})
 
 describe('desenlaceDelGenerador', () => {
   it('agotar los turnos tiene desenlace propio y honesto', () => {

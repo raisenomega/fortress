@@ -1,9 +1,8 @@
-import { execFileSync } from 'child_process'
-import { resolve } from 'path'
 import { ipcMain } from 'electron'
 import { pushProject } from '@application/push/push-project'
 import { err, type Result } from '@domain/shared/result'
 import { createGitPusher } from '../git/git-push'
+import { isRepoRoot } from '../git/git-snapshot'
 import { getAppContext } from '../persistence/app-context'
 import { endMerge } from '../run-control'
 import { guardMerge } from '../run-guard'
@@ -17,25 +16,10 @@ const NO_ES_RAIZ =
  * un repo padre, `git push` sube por el arbol y publica el padre entero —su
  * rama activa, su remoto— cuando el operador creyo autorizar otra cosa.
  *
- * Se le pregunta a git y no al `gitRemote` guardado: ese campo es una foto en
- * SQLite que entro por el canal sin verificar. `--show-toplevel` no exige un
- * `.git` de directorio (worktrees y submodulos son su propia raiz), y todo
- * fallo cuenta como "no es raiz": sin respuesta de git, no hay push.
+ * Se le pregunta a git (`isRepoRoot`, el mismo que usa el checkpoint) y no al
+ * `gitRemote` guardado: ese campo es una foto en SQLite que entro por el canal
+ * sin verificar. Todo fallo cuenta como "no es raiz": sin respuesta, no hay push.
  */
-function esRaizDeSuRepo(projectPath: string): boolean {
-  try {
-    const raiz = execFileSync('git', ['rev-parse', '--show-toplevel'], {
-      cwd: projectPath,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-      timeout: 10 * 1000
-    })
-    return resolve(raiz.trim()) === resolve(projectPath)
-  } catch {
-    return false
-  }
-}
-
 /**
  * El push pide el turno del MERGE, no el del motor. El recurso compartido aqui
  * no es el motor —publicar no spawnea nada ni gasta un token— sino la RAMA
@@ -62,7 +46,7 @@ export function registerPushHandlers(): void {
     try {
       // Detras del turno: el proceso git extra no se paga en los rechazos.
       const project = context.projects.findById(projectId)
-      if (project && !esRaizDeSuRepo(project.path)) return err(NO_ES_RAIZ)
+      if (project && !isRepoRoot(project.path)) return err(NO_ES_RAIZ)
 
       return await pushProject(context, createGitPusher(), projectId)
     } finally {

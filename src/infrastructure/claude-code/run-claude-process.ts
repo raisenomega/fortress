@@ -39,6 +39,14 @@ function armarTecho(child: ChildProcessWithoutNullStreams, techoMs: number): () 
 }
 
 /** Consume la salida NDJSON del CLI y resuelve al cerrarse el proceso. */
+/** La respuesta de un turno que NO se lanzo: el mismo camino que un CLI que
+ *  no arranca, con el motivo en stderr. Sin caja (ADR-092) se responde asi. */
+export function sinLanzar(motivo: string, onChunk: (delta: string) => void): CodeAgentReply {
+  const accumulator = createRunAccumulator(onChunk)
+  accumulator.addStderr(`No se pudo ejecutar Claude Code: ${motivo}`)
+  return accumulator.toReply(null)
+}
+
 export function collectRun(
   child: ChildProcessWithoutNullStreams,
   onChunk: (delta: string) => void,

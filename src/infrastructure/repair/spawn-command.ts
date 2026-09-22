@@ -1,31 +1,29 @@
-import { spawn, type ChildProcess } from 'child_process'
-import { redactSecrets } from '@domain/chat/tool-detail'
-import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
-import { tail } from '@domain/repair/tail'
 import { buildGateEnv } from './gate-env'
-import { trackChild } from '../claude-code/child-registry'
-import { senalAl } from '../claude-code/kill-signal'
-
-/** Mata el GRUPO entero (npm run spawnea hijos: tsc, eslint, vitest). Matar
- *  solo al padre deja nietos vivos sosteniendo los pipes y `close` no llega. */
-/** SIGTERM al grupo; a los 3s, SIGKILL — la leccion del boton Detener. */
-function armTimeout(child: ChildProcess, timeoutMs: number, onFire: () => void): NodeJS.Timeout {
-  return setTimeout(() => {
-    onFire()
-    senalAl(child, 'SIGTERM', 'grupo')
-    const escalation = setTimeout(() => senalAl(child, 'SIGKILL', 'grupo'), 3000)
-    escalation.unref()
-    child.once('close', () => clearTimeout(escalation))
-  }, timeoutMs)
-}
+import { enCaja } from '../sandbox/en-caja'
+import { abrirProxyDeRegistros } from '../sandbox/proxy-de-registros'
+import { registrosDelProyecto } from '../sandbox/registros-del-proyecto'
+import { retirarSocket, socketNuevo } from '../sandbox/socket-del-proxy'
+import { correrEnCaja } from './spawn-command-hijo'
+import { sinCaja } from './spawn-command-vida'
 
 /**
- * Corre UN comando del gate: spawn con args array (jamas shell strings),
- * grupo de proceso propio (detached) para poder matar el arbol completo, y
- * buffers rotativos — solo los ultimos TAIL_CHARS viajan a la autopsia.
+ * Corre UN comando del gate, DENTRO DE LA CAJA (ADR-092, clase B): aqui corren
+ * `npm ci` y los scripts del repo auditado, con sus `preinstall` y `postinstall`.
+ * El worktree es el proyecto que se monta; nada mas del disco se ve. Si la caja
+ * no se puede levantar, el comando NO corre: sale con 127 y el motivo, y el
+ * gate lo lee como fallo, no como exito (fail-closed, casilla 4).
+ *
+ * Y CON RED SOLO A LOS REGISTROS (casilla 2): cada comando levanta SU proxy,
+ * fuera, con la lista de los ecosistemas que el proyecto declara; dentro, el
+ * puente de `socat` es la unica salida. Ni red abierta ni red muerta: la tabla.
+ * Sin cache compartida entre clientes —el HOME de la caja es un tmpfs—: cada
+ * `npm ci` descarga de nuevo a traves del proxy. Mas lento, y aislado.
+ *
+ * El entorno es lista blanca, no herencia, y se compone al lanzar y no al cargar
+ * el modulo: `augmentPath()` completa el PATH en el arranque mutando `process.env`.
  */
-export function spawnCommand(
+export async function spawnCommand(
   bin: string,
   key: string,
   args: readonly string[],
@@ -34,41 +32,15 @@ export function spawnCommand(
   owner: string | null = null
 ): Promise<CommandOutcome> {
   const startedAt = Date.now()
-  return new Promise((resolve) => {
-    // Lista blanca, no herencia: aqui corren los scripts del repo AUDITADO.
-    // `CI` va dentro porque sin ella un proyecto que llama `vitest` a secas
-    // vigila ficheros y cuelga el gate hasta el timeout. Se compone AQUI y no al
-    // cargar el modulo: `augmentPath()` completa el PATH en el arranque mutando
-    // `process.env`, y el gate tiene que correr con el de ahora.
-    const env = buildGateEnv(process.env)
-    const child = spawn(bin, args as string[], { cwd, detached: true, env })
-    trackChild(child, owner, 'grupo')
-    let out = ''
-    let errOut = ''
-    let timedOut = false
-    const timer = armTimeout(child, timeoutMs, () => (timedOut = true))
-
-    // La autopsia se PERSISTE entera en `evidence_json`, que es append-only, y
-    // aqui imprime codigo ajeno: se redacta ANTES de recortar, porque `tail`
-    // corta por el medio y un secreto partido ya no lo reconoce ninguna regex.
-    const outcome = (exitCode: number, extraErr = ''): CommandOutcome => ({
-      command: key,
-      exitCode,
-      durationMs: Date.now() - startedAt,
-      stdoutTail: tail(redactSecrets(out), TAIL_CHARS),
-      stderrTail: tail(redactSecrets(errOut + extraErr), TAIL_CHARS),
-      timedOut
-    })
-
-    child.stdout?.on('data', (d: Buffer) => (out = (out + d.toString()).slice(-TAIL_CHARS * 2)))
-    child.stderr?.on('data', (d: Buffer) => (errOut = (errOut + d.toString()).slice(-TAIL_CHARS * 2))) // prettier-ignore
-    child.on('close', (code) => {
-      clearTimeout(timer)
-      resolve(outcome(code ?? 1))
-    })
-    child.on('error', (error) => {
-      clearTimeout(timer)
-      resolve(outcome(127, error.message))
-    })
-  })
+  const env = buildGateEnv(process.env)
+  const socket = socketNuevo()
+  const proxy = await abrirProxyDeRegistros(socket, registrosDelProyecto(cwd))
+  try {
+    const caja = enCaja(bin, args, cwd, cwd, env.PATH, [], proxy.socket)
+    if (!caja.ok) return sinCaja(key, startedAt, caja.error)
+    return await correrEnCaja(caja.value, { key, cwd, timeoutMs, owner, startedAt })
+  } finally {
+    await proxy.cerrar()
+    retirarSocket(socket)
+  }
 }

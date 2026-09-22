@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
 import { buildGateEnv } from '../repair/gate-env'
+import { enCaja } from '../sandbox/en-caja'
 
 export interface CmdResult {
   readonly code: number
@@ -22,13 +23,20 @@ const MAX_OUT = 32_000_000
  * secretos de sesion —el agente ssh, el llavero, X11— por la misma via. Se reusa
  * `buildGateEnv` en vez de copiar la lista: dos listas blancas divergen, y la que
  * se quede atras es un agujero que nadie mira.
+ *
+ * Y DENTRO DE LA CAJA (ADR-092, clase B): el proyecto vivo del cliente es lo
+ * unico que se ve. Sin caja no hay comando: vuelve como `missing`, que es lo
+ * que las sondas ya leen como «no se pudo medir» (fail-closed, casilla 4).
  */
 // prettier-ignore
 export function runCommand(cmd: string, args: readonly string[], cwd: string, timeoutMs = TIMEOUT_MS): Promise<CmdResult> {
+  const env = buildGateEnv(process.env)
+  const caja = enCaja(cmd, args, cwd, cwd, env.PATH)
+  if (!caja.ok) return Promise.resolve({ code: 127, out: caja.error, missing: true })
   return new Promise((resolve) => {
     // CI=true (dentro de la lista): vitest/jest corren UNA vez y no entran en
     // modo watch, que colgaria el probe hasta el timeout.
-    const child = spawn(cmd, [...args], { cwd, env: buildGateEnv(process.env) })
+    const child = spawn(caja.value.bin, [...caja.value.args], { cwd, env })
     let out = ''
     const capture = (chunk: Buffer): void => {
       out += chunk.toString('utf8')

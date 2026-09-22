@@ -3,6 +3,7 @@ import { GRAPH_READ_TOOLS, withGraph } from '@domain/connectors/graph-mcp'
 import type { GraphVerify } from '@domain/graph/graph-actions'
 import { parseInitEvent } from '@domain/graph/parse-init'
 import { buildEnv } from '../claude-code/build-env'
+import { conSandbox } from '../sandbox/con-sandbox'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
 const FAILED: GraphVerify = { connected: false, tools: [] }
@@ -29,8 +30,12 @@ function verifyArgs(): string[] {
  * corta. Barato: no espera a que el modelo razone, solo al handshake MCP.
  */
 export function verifyGraph(projectPath: string, apiKey: string | null): Promise<GraphVerify> {
+  // La caja del CLI (ADR-092, clase A). Sin caja, el grafo cuenta como no
+  // verificado: FAILED, que es lo que la UI ya sabe ensenar.
+  const args = conSandbox(verifyArgs(), projectPath)
+  if (!args.ok) return Promise.resolve(FAILED)
   return new Promise((resolve) => {
-    const child = spawn(CLAUDE_BIN, verifyArgs(), { cwd: projectPath, env: buildEnv(apiKey) })
+    const child = spawn(CLAUDE_BIN, [...args.value], { cwd: projectPath, env: buildEnv(apiKey) })
     let buffer = ''
     let done = false
     const finish = (result: GraphVerify): void => {

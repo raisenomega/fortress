@@ -1,3 +1,5 @@
+import { existsSync, mkdirSync } from 'node:fs'
+import { rmdirSiVacio } from './directorio-vacio'
 import { git, lastLine, porcelainFiles, shortstat } from './repair-git'
 
 export interface WorktreeDiff {
@@ -26,11 +28,19 @@ export function createWorktreeManager(): WorktreeManager {
 
   return {
     create: async (baseSha, projectRepoPath, worktreePath, branchName) => {
-      const result = await git(projectRepoPath, ['worktree', 'add', '-b', branchName, worktreePath, baseSha]) // prettier-ignore
+      // El destino vive FUERA del repo: se crea aqui, vacio, y se monta en
+      // escritura dentro de la caja; si no, el checkout cae en su tmpfs (ADR-092).
+      mkdirSync(worktreePath, { recursive: true })
+      const result = await git(projectRepoPath, ['worktree', 'add', '-b', branchName, worktreePath, baseSha], [worktreePath]) // prettier-ignore
+      if (result.code !== 0) rmdirSiVacio(worktreePath)
       return result.code === 0 ? { ok: true } : { ok: false, error: lastLine(result.out) }
     },
     remove: async (worktreePath, branchName, projectRepoPath) => {
-      await git(projectRepoPath, ['worktree', 'remove', '--force', worktreePath])
+      // Dentro de la caja el destino es un punto de montaje: git vacia su
+      // contenido pero no puede quitar el directorio; eso se hace aqui, fuera.
+      const montar = existsSync(worktreePath) ? [worktreePath] : []
+      await git(projectRepoPath, ['worktree', 'remove', '--force', worktreePath], montar)
+      rmdirSiVacio(worktreePath)
       if (branchName !== '') await git(projectRepoPath, ['branch', '-D', branchName])
     },
     isClean: async (worktreePath) => {

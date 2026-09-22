@@ -1,4 +1,5 @@
 import type { HallazgoAResolver } from '@domain/chat/hallazgo-a-resolver'
+import { medida } from '@domain/chat/medida-del-arbol'
 import type { RedDeReversion, TrabajoDelTurno } from '@domain/chat/red-de-reversion'
 import type { VeredictoDelTurno } from '@domain/chat/veredicto-del-turno'
 import type { JuezDelTurno } from './juez-del-turno'
@@ -31,7 +32,7 @@ export function redDeMentira(verde = true): RedDeReversion & { pasos: string[] }
   return {
     pasos,
     disponible: () => true,
-    verificar: () => Promise.resolve(verde ? 'verde' : 'rojo'),
+    verificar: () => Promise.resolve(medida(verde ? 'verde' : 'rojo')),
     abrir: () => ({
       conservar: () => (pasos.push('conservar'), true),
       revertir: () => (pasos.push('revertir'), true),

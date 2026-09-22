@@ -9,11 +9,14 @@ import { join } from 'path'
  */
 export function fakeNpm(script = ':'): { bin: string; llamadas: string } {
   const dir = mkdtempSync(join(tmpdir(), 'fcc-gate-'))
-  const llamadas = join(dir, 'llamadas.txt')
   const bin = join(dir, 'fake-npm')
-  writeFileSync(bin, `#!/bin/sh\necho "$@" >> ${llamadas}\n${script}\nexit 0\n`)
+  // El registro de llamadas se escribe en el CWD (el worktree), no aqui: el gate
+  // corre dentro de la caja (ADR-092) y desde ahi este directorio no existe. Lo
+  // unico que un comando del gate puede escribir es su proyecto — y eso es lo
+  // que se mira.
+  writeFileSync(bin, `#!/bin/sh\necho "$@" >> ./llamadas.txt\n${script}\nexit 0\n`)
   chmodSync(bin, 0o755)
-  return { bin, llamadas }
+  return { bin, llamadas: 'llamadas.txt' }
 }
 
 /** Un worktree de prueba que declara exactamente los scripts que se le pidan. */
