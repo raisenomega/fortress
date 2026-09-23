@@ -1,3 +1,4 @@
+import type { Arreglo } from '@domain/repair/leer-arreglo'
 import type { ScopeGroup } from '@domain/repair/scope-groups'
 import type { Proposal } from '@domain/repair/proposal'
 import { buildAgentRunEvent, buildTransitionEvent, type ProposalEvent } from '@domain/repair/proposal-event' // prettier-ignore
@@ -25,6 +26,12 @@ export interface Opciones {
   readonly sinPrimary?: boolean
   /** El ancla del hallazgo, para probar archivos sin extension. */
   readonly ancla?: string
+  /** Donde el analisis dice que va el fix (ADR-102). Por defecto, el ancla. */
+  readonly arreglo?: Arreglo
+  /** Un analisis anterior al ADR-102, o un analista que no contesto. */
+  readonly sinArreglo?: boolean
+  /** La huella de `.fortress/config` del worktree. */
+  readonly huella?: string
 }
 
 export interface Bench {
@@ -57,7 +64,8 @@ export function cadenaDe(opts: Opciones): ProposalEvent[] {
   ]
   if (opts.conAnalisis !== false) {
     const file = opts.sinPrimary === true ? '' : (opts.ancla ?? ANALYSIS.target.file)
-    const analysis = { ...ANALYSIS, target: { ...ANALYSIS.target, file } }
+    const arreglo = opts.sinArreglo === true ? {} : { arreglo: opts.arreglo ?? { file, line: 1 } }
+    const analysis = { ...ANALYSIS, target: { ...ANALYSIS.target, file }, ...arreglo }
     chain.push(buildTransitionEvent({ proposalId: 'prop-1', seq: 2, phase: 'ANALYZE', toState: 'ANALIZADO', evidenceJson: JSON.stringify(analysis), ts: 2 })) // prettier-ignore
   }
   return chain

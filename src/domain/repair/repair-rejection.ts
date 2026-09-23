@@ -38,16 +38,16 @@ export const REJECTION_REASONS = [
    */
   'cli_no_arranco',
   /**
-   * HISTORICO: ya no lo emite nadie. Cubrio a la vez el timeout, el spawn
-   * fallido y la transicion invalida —tres naturalezas bajo un nombre que
-   * acusaba al generador de las tres—. Los dos primeros se separaron; la
-   * tercera resulto no ser suya, sino de la maquina de estados, y se llama
+   * HISTORICO: ya no lo emite nadie. Cubrio timeout, spawn fallido y transicion
+   * invalida; se separaron en `generator_timeout`, `cli_no_arranco` e
    * `invalid_state`. Se conserva para que las filas ya escritas se lean.
    */
   'generator_error',
   /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */ 'turnos_agotados',
   /** El analista corrio pero su salida no se dejo leer. No es obsolescencia. */ 'analisis_ilegible',
   'no_diff_produced',
+  /** ADR-102: el arreglo declarado no cabe en la correa; no se reintenta, la pausa la levanta el terreno. */
+  'arreglo_fuera_de_correa',
   /** Solo toco pruebas: el gate lo daria VERDE. Ver `solo-toca-pruebas`. */ 'solo_pruebas',
   'worktree_contaminated',
   'orphan_before_generate',

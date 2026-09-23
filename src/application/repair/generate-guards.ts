@@ -14,29 +14,29 @@ export interface Admitted {
   readonly cursor: BookCursor
   readonly spent: number
 }
-/** Rechaza con patch + eslabon en el libro, en un solo gesto. */
+/** Rechaza con patch + eslabon en el libro. `detalle`: el motivo con sufijo, si lo hay. */
 export async function rejectWith(
   ctx: AppContext,
   cursor: BookCursor,
   proposal: Proposal,
   reason: RejectionReason,
   evidence: object,
-  now: number
+  now: number,
+  detalle?: string
 ): Promise<void> {
   ctx.repairProposals.update(proposal.id, {
     state: 'RECHAZADO',
     analysisVerdict: proposal.analysisVerdict ?? 'REAL',
-    analysisReason: reason,
+    analysisReason: detalle ?? reason,
     updatedAt: now
   })
-  await emitOutcome(ctx.eventLog, cursor, proposal.id, 'RECHAZADO', reason, evidence, now)
+  const motivo = detalle ?? reason
+  await emitOutcome(ctx.eventLog, cursor, proposal.id, 'RECHAZADO', motivo, evidence, now)
 }
 
-/**
- * Guardas de admision (a-c del flujo): estado valido, supersede (R1) y
- * presupuesto previo (R2). Devuelve el contexto admitido o el rechazo ya
- * persistido. Sin analisis en el libro no se genera (cadenas sinteticas).
- */
+/** Guardas de admision (a-c del flujo): estado valido, supersede (R1) y
+ *  presupuesto previo (R2). Devuelve el contexto admitido o el rechazo ya
+ *  persistido. Sin analisis en el libro no se genera (cadenas sinteticas). */
 export async function admitProposal(
   ctx: AppContext,
   proposalId: string,

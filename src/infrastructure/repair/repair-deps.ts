@@ -6,7 +6,7 @@ import type { OmegaDeps } from '@application/repair/run-omega'
 import type { GenerateDeps } from '@application/repair/generate-types'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 import { sondaDeBwrap } from '../sandbox/sonda-de-bwrap'
-import { readScopeGroups } from '../project/fortress-config'
+import { huellaDeConfig, readScopeGroups } from '../project/fortress-config'
 import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
 import { createGraphGenerator } from './graph-generator'
@@ -28,6 +28,7 @@ export function buildGenerateDeps(projectId: string): GenerateDeps {
     worktrees: createWorktreeManager(),
     generator: createGraphGenerator(CLAUDE_BIN, projectId),
     scopeGroups: readScopeGroups,
+    huellaDeConfig,
     sandbox: (worktreePath, proposalId, liveRepoPath) =>
       assertRepairSandbox(worktreePath, proposalId, root, liveRepoPath),
     now: Date.now

@@ -36,6 +36,8 @@ export interface GenerateDeps {
   readonly sandbox: (worktreePath: string, proposalId: string, liveRepoPath: string) => { ok: true } | { ok: false; error: string } // prettier-ignore
   /** Los grupos que el proyecto declara, leidos del worktree (su ancla). */
   readonly scopeGroups: (worktreePath: string) => readonly ScopeGroup[]
+  /** La huella de `.fortress/config` en ese arbol (ADR-102 §4). */
+  readonly huellaDeConfig: (worktreePath: string) => string
   readonly now: () => number
 }
 

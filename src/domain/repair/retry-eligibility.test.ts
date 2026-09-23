@@ -52,3 +52,9 @@ describe('isRetryable (D24)', () => {
     expect(isRetryable('RECHAZADO', 'scope_violation_extra')).toBe(false)
   })
 })
+
+describe('el arreglo fuera de la correa no se reintenta (ADR-102)', () => {
+  it('repetir no cambia la correa: la pausa la levanta el terreno, no otra corrida', () => {
+    expect(isRetryable('RECHAZADO', 'arreglo_fuera_de_correa: src/x.ts cfg=abcd1234')).toBe(false)
+  })
+})
