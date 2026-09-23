@@ -6,6 +6,7 @@ import { toHistoria, type HistoriaRow } from './finding-historia-row'
 import { toMemory, type MemoryRow } from './finding-memory-row'
 import { toFinding, toInsert, type FindingRow } from './finding-row'
 import * as SQL from './finding-sql'
+import { createFusionPorJuicio } from './finding-fusion-por-juicio'
 import { createFindingWrites } from './finding-writes'
 import { createMemoriaDelTerminal } from './memoria-del-terminal'
 
@@ -56,6 +57,8 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
     devolverALaCola: (findingId, note) => writes.devolverALaCola(findingId, note),
     markMitigated: (id, note, at) => writes.markMitigated(id, note, at),
     markActive: (id) => writes.markActive(id),
+
+    fundirPorJuicio: (projectId, fusion) => createFusionPorJuicio(db).fundir(projectId, fusion),
 
     dismiss: (findingId) => writes.changeStatus(findingId, true),
     reopen: (findingId) => writes.changeStatus(findingId, false),
