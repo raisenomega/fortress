@@ -1,6 +1,6 @@
 # ADR-102 — El arreglo fuera de la correa: el analista dice dónde va el fix y el Motor no paga por generar lo que no cabe
 
-- **Estado**: Propuesta (sin firmar)
+- **Estado**: Aceptada (firmada por el operador el 2026-09-23)
 - **Fecha**: 2026-09-23
 - **Alcance**: dos piezas dentro del Motor, y solo del Motor. (1) El análisis (C2)
   lleva una clave estructurada `arreglo` con el fichero y la línea donde VA el
@@ -225,20 +225,27 @@ ADR-012, ADR-028, ADR-067, ADR-084, ADR-090, ADR-101 ·
 
 ## 9. Casillas de firma
 
-Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta.
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-23 por orden del operador, con su línea literal:
+
+> *«YO Jojo dueño del proyecto FORTRESS firmo ADR-102: casilla 1 genera si falta,
+> casilla 2 la pausa sobrevive al HEAD por hash de config, casilla 3
+> porEntornoDelProyecto, casilla 4 el arreglo no ensancha la correa (ADR-012
+> intacto), casilla 5 leído §1.5, casilla 6 el patrón A es pieza aparte — Jojo,
+> 23 septiembre 2026»*
 
 1. **La clave `arreglo`** es obligatoria en el formato con `status` REAL; si
-   falta, se genera como hoy y se cuenta: [ ] sí · [ ] fail-closed: sin
+   falta, se genera como hoy y se cuenta: [x] sí · [ ] fail-closed: sin
    `arreglo` no se genera · [ ] otra: ________
 2. **La pausa sobrevive al HEAD**: `arreglo_fuera_de_correa` pausa el hallazgo
-   mientras `.fortress/config` no cambie: [ ] sí · [ ] solo el mismo HEAD, como
+   mientras `.fortress/config` no cambie: [x] sí · [ ] solo el mismo HEAD, como
    el resto de causas · [ ] otra: ________
-3. **Casilla del parte**: `porEntornoDelProyecto`: [ ] sí · [ ] `porCorrea` ·
+3. **Casilla del parte**: `porEntornoDelProyecto`: [x] sí · [ ] `porCorrea` ·
    [ ] casilla nueva: ________
-4. **El arreglo NO ensancha la correa**; ADR-012 queda intacto: [ ] sí
+4. **El arreglo NO ensancha la correa**; ADR-012 queda intacto: [x] sí
 5. **He leído §1.5**: la columna y la vista «declara / arregla» quedan anotadas,
-   la extinción no se toca: [ ]
+   la extinción no se toca: [x]
 6. **El patrón A** («línea que ya no es») es pieza de identidad aparte, no de
-   este ADR: [ ]
+   este ADR: [x]
 
-**Firma del operador:** ________ · **Fecha:** ________
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 23 septiembre 2026
