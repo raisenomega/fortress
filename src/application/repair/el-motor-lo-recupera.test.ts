@@ -20,7 +20,8 @@ const banco = (findings: readonly FindingMemory[]): AppContext =>
       findLiveFindingIds: () => [],
       listByProject: () => []
     },
-    fortressConfig: () => ({})
+    fortressConfig: () => ({}),
+    huellaDeConfig: () => 'none'
   }) as unknown as AppContext
 
 const enLaCola = (findings: readonly FindingMemory[]): readonly string[] =>

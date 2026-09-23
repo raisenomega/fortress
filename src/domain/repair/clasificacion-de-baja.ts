@@ -8,11 +8,9 @@ import type { RejectionReason } from './repair-rejection'
  */
 export type MotivoDeBaja = Exclude<RejectionReason, MotivoDeAveria> | 'invalid_state'
 
-/**
- * Las casillas se agrupan por la ACCION que el parte le pide al operador, no por
- * la fase que las produjo: leer el diff, mirar su proyecto o abrir un issue
- * nuestro son respuestas distintas, y juntarlas no le dice a nadie que hacer.
- */
+/** Las casillas se agrupan por la ACCION que el parte le pide al operador, no por
+ *  la fase que las produjo: leer el diff, mirar su proyecto o abrir un issue
+ *  nuestro son respuestas distintas, y juntarlas no le dice a nadie que hacer. */
 export type CasillaDeBaja =
   | 'vetadas'
   | 'porPresupuesto'
@@ -49,6 +47,8 @@ const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   sin_caja: 'porEntornoDelProyecto', // ADR-092: la maquina no puede levantar la caja
   worktree_missing: 'porEntornoDelProyecto',
   worktree_contaminated: 'porEntornoDelProyecto',
+  // ADR-102: declarar terreno en `.fortress/config` o llevarlo al Terminal. No hay diff.
+  arreglo_fuera_de_correa: 'porEntornoDelProyecto',
   // Un bug NUESTRO, no un veredicto sobre la propuesta.
   invalid_state: 'porDefectoInterno',
   omega_response_invalid: 'porDefectoInterno',

@@ -21,6 +21,7 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
   sin_caja: 'porEntornoDelProyecto',
   worktree_missing: 'porEntornoDelProyecto',
   worktree_contaminated: 'porEntornoDelProyecto',
+  arreglo_fuera_de_correa: 'porEntornoDelProyecto',
   invalid_state: 'porDefectoInterno',
   omega_response_invalid: 'porDefectoInterno',
   analisis_ilegible: 'porDefectoInterno',
@@ -30,7 +31,7 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
 }
 
 describe('cada motivo tiene su casilla, y ninguno cae en un cajon', () => {
-  it('los 21 que llegan al recuento estan mapeados uno a uno', () => {
+  it('los 22 que llegan al recuento estan mapeados uno a uno', () => {
     for (const [motivo, casilla] of Object.entries(ESPERADO)) {
       expect(casillaDeBaja(motivo), motivo).toBe(casilla)
     }

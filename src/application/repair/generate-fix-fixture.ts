@@ -23,6 +23,7 @@ function depsDe(opts: Opciones, calls: string[], prompts: string[]): GenerateDep
     generator: generadorFake(opts, calls, prompts),
     // Proyecto sin `.fortress/config`: manda la correa universal.
     scopeGroups: () => opts.scopeGroups ?? [],
+    huellaDeConfig: () => opts.huella ?? 'none',
     sandbox: () =>
       opts.sandboxError === undefined ? { ok: true } : { ok: false, error: opts.sandboxError },
     now: () => 99

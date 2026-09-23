@@ -6,7 +6,8 @@ import { rejectWith, type Admitted } from './generate-guards'
 export type FailFn = (
   reason: RejectionReason,
   evidence: object,
-  keep: boolean
+  keep: boolean,
+  detalle?: string
 ) => Promise<GenerateResult>
 
 /**
@@ -21,9 +22,9 @@ export function makeFail(
   worktreePath: string,
   branch: string
 ): FailFn {
-  return async (reason, evidence, keep) => {
+  return async (reason, evidence, keep, detalle) => {
     if (!keep) await deps.worktrees.remove(worktreePath, branch, admitted.project.path)
-    await rejectWith(ctx, admitted.cursor, admitted.proposal, reason, evidence, deps.now())
+    await rejectWith(ctx, admitted.cursor, admitted.proposal, reason, evidence, deps.now(), detalle)
     return { ok: false, reason, detail: JSON.stringify(evidence) }
   }
 }

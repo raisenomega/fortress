@@ -5,6 +5,7 @@ import type { AppContext } from '../context'
 import type { GenerateDeps, GenerateResult } from './generate-types'
 import type { Admitted } from './generate-guards'
 import { makeFail, type FailFn } from './generate-fail'
+import { guardDelArreglo } from './guard-del-arreglo'
 import { emitDecision } from './record-generate-events'
 
 export interface Prepared {
@@ -54,6 +55,10 @@ export async function prepareWorktree(
   // Sin correa Y sin grupo no hay terreno que darle al generador. Se limpia: no
   // hay nada que autopsiar, porque nunca llego a correr.
   if (allowed.length === 0 && allows.length === 0) return { failed: await fail('scope_violation', { where: a.analysis.where }, false) } // prettier-ignore
+  // ADR-102 §3: con la correa y el terreno ya calculados, y ANTES de pagar el
+  // generador, el arreglo que el analisis declaro tiene que caber en ellos.
+  const parado = await guardDelArreglo(ctx, a, deps, { worktreePath, allowed, allows }, fail)
+  if (parado !== null) return { failed: parado }
 
   return { worktreePath, branch, allowed, allows, fail }
 }

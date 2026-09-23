@@ -14,7 +14,8 @@ export const vivo = (f: FindingMemory): boolean => f.lifecycle === 'ACTIVE' && f
  *  que ya tienen propuesta VIVA: la seleccion es determinista y sin eso el mismo
  *  hallazgo saldria elegido en cada ronda mientras su propuesta espera la firma
  *  (ADR-059). Los que fracasaron por una causa que repetir no arregla con el
- *  arbol quieto: sin ese tercero, el motor compra el mismo fix hasta el tope. Y
+ *  arbol quieto —o, si el arreglo no cabia en la correa, con el terreno quieto
+ *  (ADR-102)—: sin ese tercero, el motor compra el mismo fix hasta el tope. Y
  *  los que quedan fuera del alcance de ESTA vuelta: si puede integrar sola, solo
  *  lo que el cerco admitiria; si para antes del merge, todo menos las defensas.
  *  Exportada para que el panel diga cuantos QUEDAN sin recalcularlo por su
@@ -31,10 +32,11 @@ export function candidates(
   for (const id of context.repairProposals.findLiveFindingIds(projectId)) excluded.add(id)
   const previas = context.repairProposals.listByProject(projectId)
   const config = context.fortressConfig(projectPath)
+  const huella = context.huellaDeConfig(projectPath)
   return context.findings
     .listMemory(projectId)
     .filter((f) => vivo(f) && !excluded.has(f.id))
-    .filter((f) => !hasBlockingRejection(f.id, headSha, previas))
+    .filter((f) => !hasBlockingRejection(f.id, headSha, previas, huella))
     .filter((f) => dentroDelAlcance(modo, f.severity, f.file, config))
     .map(aCandidato)
 }

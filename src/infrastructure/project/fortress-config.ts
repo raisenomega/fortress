@@ -1,3 +1,4 @@
+import { createHash } from 'crypto'
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { parseAutoMergeConfig, type ConfigState } from '@domain/repair/auto-merge-config'
@@ -43,5 +44,21 @@ export function readScopeGroups(projectPath: string): readonly ScopeGroup[] {
     return parseScopeGroups(JSON.parse(readFileSync(path, 'utf8')))
   } catch {
     return []
+  }
+}
+
+/**
+ * La huella del terreno declarado (ADR-102 §4): ocho hex del contenido de
+ * `.fortress/config`, o `none` si no existe o no se deja leer. Es lo que levanta
+ * la pausa de un arreglo fuera de la correa: cambia el fichero, cambia la huella.
+ * Se lee del arbol que se le pase: el worktree al rechazar, el vivo al elegir.
+ */
+export function huellaDeConfig(projectPath: string): string {
+  const path = join(projectPath, FORTRESS_CONFIG)
+  if (!existsSync(path)) return 'none'
+  try {
+    return createHash('sha256').update(readFileSync(path)).digest('hex').slice(0, 8)
+  } catch {
+    return 'none'
   }
 }

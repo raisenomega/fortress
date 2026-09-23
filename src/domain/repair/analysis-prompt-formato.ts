@@ -33,6 +33,10 @@ export const FORMATO = [
   'ficheros que de verdad hay que tocar, aunque no sea el del ancla, y explica en',
   '"whatToChange" por que ahi.',
   '',
+  '"arreglo" (OBLIGATORIA con status REAL): {"file":"ruta relativa al repo","line":numero o null},',
+  'el fichero donde VA el cambio principal; si es el del ancla, repite el ancla. FORTRESS',
+  'contrasta ese fichero con la correa ANTES de generar y, si no cabe, no gasta: lo dice.',
+  '',
   '"mismoDefectoQue" (opcional): los ids entre corchetes de los hermanos de tu MISMA SEDE',
   'que sean el MISMO defecto que este, no una sede parecida. Solo ids de esa lista:',
   'cualquier otro se ignora. FORTRESS los fundira y conservara el mas antiguo.',
@@ -62,6 +66,6 @@ export const FORMATO = [
   'madure. Si no hubo nada, omite la clave.',
   '',
   '"notes" va DENTRO del objeto, como una clave mas. NUNCA en un bloque aparte:',
-  '{"status":"REAL","whatToChange":"...","where":"...","patternToCopy":"...",',
-  ` "doNotTouch":"...","risk":"...","notes":[${NOTA}]}`
+  '{"status":"REAL","whatToChange":"...","where":"...","arreglo":{"file":"...","line":12},',
+  ` "patternToCopy":"...","doNotTouch":"...","risk":"...","notes":[${NOTA}]}`
 ]

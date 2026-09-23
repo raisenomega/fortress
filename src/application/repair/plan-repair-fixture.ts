@@ -65,7 +65,8 @@ export function bench(opts: Opciones): Bench {
       study: (t: unknown, atendidas: readonly string[]) => (memoria.push(atendidas), analyst.study(t as never, atendidas)) // prettier-ignore
     }),
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha),
-    fortressConfig: () => opts.cerco ?? { kind: 'not-present' }
+    fortressConfig: () => opts.cerco ?? { kind: 'not-present' },
+    huellaDeConfig: () => 'none'
   } as unknown as AppContext
   // prettier-ignore
   return { context, inserted, patches, events, observadas, memoria, anclaDelDescuento, extinguidos, mitigados, anotados, devueltos }
