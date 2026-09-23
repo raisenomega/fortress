@@ -1,6 +1,6 @@
 # ADR-101 — La memoria del escáner y el alias de clave: el mismo defecto deja de nacer dos veces, sin tocar la identidad
 
-- **Estado**: Propuesta — pendiente de la firma del operador (al firmarse pasa a Aceptada)
+- **Estado**: Aceptada (firmada por el operador el 2026-09-22)
 - **Fecha**: 2026-09-22
 - **Alcance**: dos palancas, en este orden. (1) El prompt de cada parada del escaneo
   recibe las filas ya registradas de su carpeta con su tipo. (2) Una tabla de alias
@@ -209,20 +209,29 @@ ADR-012, ADR-065, ADR-071, ADR-077, ADR-081, ADR-084, ADR-088, ADR-099, ADR-100 
 
 ## 10. Casillas de firma
 
-Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta.
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-22 por orden del operador, con su línea literal:
+
+> *«YO Jojo dueño del proyecto FORTRESS firmo ADR-101: palanca 1 sí, palanca 2 sí
+> (alias por juicio, nunca por sede), corte 2 como fusión+alias sí, el orden sí,
+> el lote con parada sí, el alias no caduca, leído §1.4 — Jojo, 22 septiembre
+> 2026»*
 
 1. **Palanca 1, la memoria del escáner**: las vivas de la carpeta, una línea
    `fichero:línea tipo`, con la instrucción de conservar tipo y línea:
-   [ ] sí · [ ] otra: ________
+   [x] sí · [ ] otra: ________
 2. **Palanca 2, el alias de clave**: tabla `finding_aliases`, consultada por el
    sync solo al fallar la clave exacta, alimentada por fusión y juicio, **nunca
-   por sede**: [ ] sí · [ ] otra: ________
+   por sede**: [x] sí · [ ] otra: ________
 3. **El corte 2 se cierra así**: el juicio del analista con ids se persiste como
-   fusión más alias, sin tabla de relaciones: [ ] sí · [ ] otra: ________
+   fusión más alias, sin tabla de relaciones: [x] sí · [ ] otra: ________
 4. **El orden**: palanca 1, medir la deriva, y solo después la palanca 2:
-   [ ] sí · [ ] otra: ________
+   [x] sí · [ ] otra: ________
 5. **El lote sobre los pares existentes**, por juicio y con parada en el plan
-   antes de la viva: [ ] sí · [ ] otra: ________
-6. **He leído §1.4**: la sede no es identidad. [ ]
+   antes de la viva: [x] sí · [ ] otra: ________
+6. **He leído §1.4**: la sede no es identidad. [x]
+7. **El alias no caduca**: una clave con alias que reaparece tras extinguir a la
+   superviviente la resucita, como cualquier clave reencontrada (§3, punto 2; el
+   texto no cambia): [x] sí · [ ] muere con su superviviente
 
-**Firma del operador:** ________ · **Fecha:** ________
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 22 septiembre 2026
