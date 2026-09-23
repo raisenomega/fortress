@@ -45,15 +45,21 @@ export function registradasDeLaParada(
     .map(linea)
 }
 
-/** El bloque del prompt, o cadena vacia si no hay nada registrado. NO pide
- *  omitir nada: ADR-065 sigue mandando y la ausencia no mata. */
+/** El bloque del prompt, o cadena vacia si no hay nada registrado. No pide
+ *  callar ningun defecto (ADR-065: la ausencia no mata); pide no repetirlo: una
+ *  fila por defecto, y los duplicados historicos de la lista, una sola vez. */
 export function bloqueDeMemoria(registradas: readonly string[]): string {
   if (registradas.length === 0) return ''
   return [
     `Lo que FORTRESS ya tiene registrado en este alcance (${registradas.length}, como fichero:linea tipo, y el simbolo si consta):`, // prettier-ignore
     ...registradas.map((r) => `- ${r}`),
     'Si vuelves a encontrar un defecto ya registrado, conserva su tipo y su linea salvo que el',
-    'codigo haya cambiado; NO lo reescribas con un tipo vecino. Lo nuevo, reportalo como',
-    'siempre: esta lista no te pide omitir nada.'
+    'codigo haya cambiado; NO lo reescribas con un tipo vecino. Un defecto ya registrado se',
+    'reporta UNA vez, con su tipo: NUNCA una segunda fila del mismo sitio (mismo fichero y linea)',
+    'con un tipo vecino, porque seria una faceta del mismo defecto. Si esta lista trae varias',
+    'filas del mismo sitio, son duplicados historicos: reporta ese defecto una sola vez, con el',
+    'tipo que mejor encaje segun los desempates. Dos defectos DISTINTOS en la misma linea si se',
+    'reportan, cada uno con su tipo, cuando de verdad son otro defecto y no una faceta. Lo nuevo,',
+    'reportalo como siempre: esta lista no te pide callar ningun defecto, solo no repetirlo.'
   ].join('\n')
 }

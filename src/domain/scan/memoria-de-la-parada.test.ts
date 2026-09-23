@@ -37,16 +37,26 @@ describe('registradasDeLaParada: lo que FORTRESS ya tiene en las carpetas que re
 })
 
 describe('bloqueDeMemoria: la instruccion que acompana a la lista', () => {
-  it('dice lo que es, pide conservar tipo y linea, y no pide omitir nada', () => {
+  it('dice lo que es, pide conservar tipo y linea, y no pide callar ningun defecto', () => {
     const bloque = bloqueDeMemoria(['src/a.ts:1 rate-limit-ausente'])
     expect(bloque).toContain('ya tiene registrado')
     expect(bloque).toContain('src/a.ts:1 rate-limit-ausente')
     expect(bloque).toContain('conserva su tipo y su linea')
     expect(bloque).toContain('NO lo reescribas con un tipo vecino')
-    expect(bloque).toContain('no te pide omitir nada')
+    expect(bloque).toContain('no te pide callar ningun defecto, solo no repetirlo')
   })
 
   it('sin filas registradas, no hay bloque', () => {
     expect(bloqueDeMemoria([])).toBe('')
+  })
+
+  it('pide UNA fila por defecto registrado, y NO prohibe dos defectos distintos en la misma linea', () => {
+    const bloque = bloqueDeMemoria(['src/a.ts:1 rate-limit-ausente'])
+    expect(bloque).toContain('reporta UNA vez, con su tipo')
+    expect(bloque).toContain('NUNCA una segunda fila del mismo sitio')
+    expect(bloque).toContain('duplicados historicos')
+    expect(bloque).toContain('Dos defectos DISTINTOS en la misma linea')
+    expect(bloque).toContain('cuando de verdad son otro defecto y no una faceta')
+    expect(bloque).not.toContain('no te pide omitir nada')
   })
 })

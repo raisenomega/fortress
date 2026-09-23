@@ -12,6 +12,7 @@ import { buildScanPrompt } from '../src/domain/scan/scan-prompt.ts'
 import { termometroDeOtro } from '../src/domain/scan/termometro-de-otro.ts'
 import { discoverCorpus } from '../src/infrastructure/project/discover-corpus.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
+import { cruzar, reencontradas } from './medir-deriva-cruce.ts'
 
 // Mide la deriva del tipo de UNA parada de carpeta, con o sin la memoria de
 // ADR-101 (palanca 1): lanza el prompt de la parada en la caja, parsea el informe
@@ -43,25 +44,12 @@ const parsed = parseScanOutput(res.result ?? '')
 if (!parsed.ok) throw new Error(`informe ilegible: ${parsed.error}`)
 
 const enCarpeta = vivas.filter((v) => v.file === carpeta || v.file.startsWith(`${carpeta}/`))
-const porSitio = new Map(enCarpeta.map((v) => [`${v.file.toLowerCase()}:${v.line ?? '-'}`, v.tipo]))
-const cruce = parsed.value.map((f) => {
-  const registrado = porSitio.get(`${f.file.toLowerCase()}:${f.line ?? '-'}`)
-  const veredicto =
-    registrado === undefined ? 'nuevo' : registrado === f.tipo ? 'conservado' : 'DERIVA'
-  return {
-    file: f.file,
-    line: f.line,
-    tipo: f.tipo,
-    registrado: registrado ?? null,
-    veredicto,
-    title: f.title
-  }
-})
+const cruce = cruzar(enCarpeta, parsed.value.map((f) => ({ file: f.file, line: f.line, tipo: f.tipo, title: f.title }))) // prettier-ignore
 const n = (v: string): number => cruce.filter((c) => c.veredicto === v).length
 const termometro = termometroDeOtro(parsed.value)
-const resumen = { proyecto, carpeta, memoria: !sinMemoria, registradas: registradas.length, emitidos: cruce.length, conservados: n('conservado'), deriva: n('DERIVA'), nuevos: n('nuevo'), otro: termometro === null ? 0 : termometro.otros, coste: res.total_cost_usd ?? 0 } // prettier-ignore
+const resumen = { proyecto, carpeta, memoria: !sinMemoria, registradas: registradas.length, enCarpeta: enCarpeta.length, emitidos: cruce.length, conservados: n('conservado'), sustituciones: n('sustitucion'), facetasExtra: n('faceta-extra'), nuevos: n('nuevo'), reencontradas: reencontradas(enCarpeta, cruce), otro: termometro === null ? 0 : termometro.otros, coste: res.total_cost_usd ?? 0 } // prettier-ignore
 const SALIDA = join(process.cwd(), 'internal', `deriva-${proyecto}-${carpeta.replace(/\//g, '_')}-${sinMemoria ? 'sin' : 'con'}-memoria.json`) // prettier-ignore
 writeFileSync(SALIDA, JSON.stringify({ ...resumen, cruce }, null, 2))
 console.log(JSON.stringify(resumen))
-for (const c of cruce.filter((x) => x.veredicto === 'DERIVA')) console.log(`  DERIVA ${c.file}:${c.line} registrado=${c.registrado} emitido=${c.tipo} | ${c.title.slice(0, 70)}`) // prettier-ignore
+for (const c of cruce.filter((x) => x.veredicto !== 'conservado' && x.veredicto !== 'nuevo')) console.log(`  ${c.veredicto.toUpperCase()} ${c.file}:${c.line} registrados=[${c.registrados.join(',')}] emitido=${c.tipo} | ${c.title.slice(0, 70)}`) // prettier-ignore
 console.log(`JSON: ${SALIDA}`)
