@@ -7,6 +7,7 @@ import { OMEGA_SCHEMA } from './schema-omega'
 import { QUALITY_SCHEMA } from './schema-quality'
 import { PROPOSAL_EVENTS_SCHEMA } from './schema-proposal-events'
 import { REPAIR_SCHEMA } from './schema-repair'
+import { ALIASES_SCHEMA } from './schema-aliases'
 import { SIGHTINGS_SCHEMA } from './schema-sightings'
 import { SYSTEM_SCHEMA } from './schema-system'
 import { TELEMETRY_SCHEMA } from './schema-telemetry'
@@ -31,6 +32,7 @@ export function createMemoryDb(): Db {
     OMEGA_SCHEMA,
     SYSTEM_SCHEMA,
     SIGHTINGS_SCHEMA,
+    ALIASES_SCHEMA,
     QUALITY_SCHEMA,
     REPAIR_SCHEMA,
     PROPOSAL_EVENTS_SCHEMA

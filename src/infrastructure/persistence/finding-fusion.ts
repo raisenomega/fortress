@@ -2,6 +2,7 @@ import { identidadFusionada, planDeFusion } from '@domain/project/fusion-de-dupl
 import { severidadDeLaSuperviviente, type FilaConSeveridad } from '@domain/project/severidad-al-fundir' // prettier-ignore
 import { masUrgente } from '@domain/shared/severity'
 import type { Db } from './database'
+import { createAliasWrites } from './finding-alias-writes'
 import { MARCAR_FUSIONADA, RECLASIFICAR_FINDING } from './finding-fusion-sql'
 import { ELEVAR_SEVERIDAD } from './reparar-gravedad'
 
@@ -32,6 +33,7 @@ export function createFindingFusion(db: Db): FindingFusion {
   const reclasificarUna = db.prepare(RECLASIFICAR_FINDING)
   const marcar = db.prepare(MARCAR_FUSIONADA)
   const elevar = db.prepare(ELEVAR_SEVERIDAD)
+  const aliases = createAliasWrites(db)
 
   // A mano y no reenviando el objeto entero (como `toTouch`): asi no se cuela
   // por descuido un campo que tiene que quedarse quieto.
@@ -48,6 +50,7 @@ export function createFindingFusion(db: Db): FindingFusion {
     let absorbidas = 0
     for (const fusion of planDeFusion(filas)) {
       for (const id of fusion.absorbidas) {
+        aliases.retirarClave(id, fusion.ganadora, 'fusion', new Date().toISOString())
         marcar.run({
           id,
           motivo: `fusionada-con-${fusion.ganadora}`,
