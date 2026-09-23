@@ -46,20 +46,23 @@ export function registradasDeLaParada(
 }
 
 /** El bloque del prompt, o cadena vacia si no hay nada registrado. No pide
- *  callar ningun defecto (ADR-065: la ausencia no mata); pide no repetirlo: una
- *  fila por defecto, y los duplicados historicos de la lista, una sola vez. */
+ *  callar ningun defecto (ADR-065): una fila por SITIO EXACTO, y nada mas. Juntar
+ *  lineas distintas es del lote y del alias (ADR-101), no del escaner: medido el
+ *  2026-09-23, la version que no lo decia suprimia 8 de 27 sitios. */
 export function bloqueDeMemoria(registradas: readonly string[]): string {
   if (registradas.length === 0) return ''
   return [
     `Lo que FORTRESS ya tiene registrado en este alcance (${registradas.length}, como fichero:linea tipo, y el simbolo si consta):`, // prettier-ignore
     ...registradas.map((r) => `- ${r}`),
     'Si vuelves a encontrar un defecto ya registrado, conserva su tipo y su linea salvo que el',
-    'codigo haya cambiado; NO lo reescribas con un tipo vecino. Un defecto ya registrado se',
-    'reporta UNA vez, con su tipo: NUNCA una segunda fila del mismo sitio (mismo fichero y linea)',
-    'con un tipo vecino, porque seria una faceta del mismo defecto. Si esta lista trae varias',
-    'filas del mismo sitio, son duplicados historicos: reporta ese defecto una sola vez, con el',
-    'tipo que mejor encaje segun los desempates. Dos defectos DISTINTOS en la misma linea si se',
-    'reportan, cada uno con su tipo, cuando de verdad son otro defecto y no una faceta. Lo nuevo,',
-    'reportalo como siempre: esta lista no te pide callar ningun defecto, solo no repetirlo.'
+    'codigo haya cambiado; NO lo reescribas con un tipo vecino. En el MISMO sitio exacto (mismo',
+    'fichero Y misma linea), un defecto registrado se reporta UNA vez, con su tipo: nunca una',
+    'segunda fila de ese sitio con un tipo vecino, que seria una faceta; y si esta lista trae',
+    'varias filas del mismo sitio exacto, son duplicados historicos: una sola, con el tipo del',
+    'desempate. En lineas DISTINTAS, reporta CADA sitio registrado aunque parezcan el mismo defecto:',
+    'juntarlos es decision de FORTRESS, no tuya. Reporta lo que ves; no decidas que dos lineas son',
+    'el mismo defecto. Dos defectos DISTINTOS en la misma linea si se reportan, cada uno con su',
+    'tipo, cuando de verdad son otro defecto y no una faceta. Lo nuevo, reportalo como siempre:',
+    'esta lista no te pide callar ningun defecto, solo no repetir un sitio exacto.'
   ].join('\n')
 }

@@ -43,20 +43,31 @@ describe('bloqueDeMemoria: la instruccion que acompana a la lista', () => {
     expect(bloque).toContain('src/a.ts:1 rate-limit-ausente')
     expect(bloque).toContain('conserva su tipo y su linea')
     expect(bloque).toContain('NO lo reescribas con un tipo vecino')
-    expect(bloque).toContain('no te pide callar ningun defecto, solo no repetirlo')
+    expect(bloque).toContain('no te pide callar ningun defecto, solo no repetir un sitio exacto')
   })
 
   it('sin filas registradas, no hay bloque', () => {
     expect(bloqueDeMemoria([])).toBe('')
   })
 
-  it('pide UNA fila por defecto registrado, y NO prohibe dos defectos distintos en la misma linea', () => {
+  it('colapsa el duplicado SOLO en el mismo sitio exacto, y respeta dos defectos distintos en la misma linea', () => {
     const bloque = bloqueDeMemoria(['src/a.ts:1 rate-limit-ausente'])
-    expect(bloque).toContain('reporta UNA vez, con su tipo')
-    expect(bloque).toContain('NUNCA una segunda fila del mismo sitio')
+    expect(bloque).toContain('MISMO sitio exacto (mismo')
+    expect(bloque).toContain('un defecto registrado se reporta UNA vez, con su tipo')
     expect(bloque).toContain('duplicados historicos')
-    expect(bloque).toContain('Dos defectos DISTINTOS en la misma linea')
-    expect(bloque).toContain('cuando de verdad son otro defecto y no una faceta')
+    expect(bloque).toContain('Dos defectos DISTINTOS en la misma linea si se reportan')
     expect(bloque).not.toContain('no te pide omitir nada')
+  })
+
+  it('NO suprime sitios de lineas distintas: pide reportar CADA sitio registrado, juntarlos es de FORTRESS', () => {
+    const bloque = bloqueDeMemoria([
+      'src/a.ts:258 rate-limit-ausente',
+      'src/a.ts:268 rate-limit-ausente'
+    ])
+    expect(bloque).toContain(
+      'En lineas DISTINTAS, reporta CADA sitio registrado aunque parezcan el mismo defecto'
+    )
+    expect(bloque).toContain('es decision de FORTRESS, no tuya')
+    expect(bloque).toContain('Reporta lo que ves; no decidas que dos lineas son')
   })
 })
