@@ -51,7 +51,7 @@ export async function recorrerParadas(
       return ok(cerrar('abortado', acumulado))
     }
 
-    const salida = await escanearParada(scanner, project, parada, salidas.progreso, temas)
+    const salida = await escanearParada(scanner, project, parada, salidas.progreso, temas, context.findings.listMemory(project.id)) // prettier-ignore
     // Un fallo del escaner cierra el recorrido con lo que SI se audito, en vez
     // de dejar la fila ABIERTA para siempre. `fallo` y no `abortado`: el
     // operador no paro nada, la maquina se rompio, y juntarlos haria invisible

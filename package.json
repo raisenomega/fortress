@@ -34,7 +34,10 @@
     "fase-b:replan": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-replan.ts",
     "fase-b:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-paso-b-aplicar.ts",
     "retipar:juzgar": "node --import ./scripts/lib/cargar-ts.mjs scripts/retipar-juzgar.ts",
-    "retipar:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/retipar-aplicar.ts"
+    "retipar:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/retipar-aplicar.ts",
+    "medir:deriva": "node --import ./scripts/lib/cargar-ts.mjs scripts/medir-deriva.ts",
+    "lote:juzgar": "node --import ./scripts/lib/cargar-ts.mjs scripts/lote-alias-juzgar.ts",
+    "lote:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/lote-alias-aplicar.ts"
   },
   "overrides": {
     "nanoid": "^3.3.17"

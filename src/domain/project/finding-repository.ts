@@ -1,4 +1,5 @@
 import type { FindingLifecyclePort } from './finding-lifecycle-port'
+import type { FusionPorJuicioPort } from './fusion-por-juicio-port'
 import type { MemoriaDelTerminalPort } from './memoria-del-terminal-port'
 import type { DetectedFinding } from '../scan/detected-finding'
 import type { FindingHistoria } from './finding-historia'
@@ -7,7 +8,8 @@ import type { Finding } from './project'
 import type { SeverityCounts } from './severity-counts'
 
 /** Puerto de persistencia de hallazgos. La infraestructura lo implementa. */
-export interface FindingRepository extends FindingLifecyclePort, MemoriaDelTerminalPort {
+export interface FindingRepository
+  extends FindingLifecyclePort, MemoriaDelTerminalPort, FusionPorJuicioPort {
   listByProject(projectId: string): readonly Finding[]
 
   /** Los mismos hallazgos con su expediente: clave, ciclo de vida y fechas. */

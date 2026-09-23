@@ -3,6 +3,7 @@ import { buildDocsFirst } from '../settings/docs-first-compose'
 import { GRAPH_FIRST_SECURITY } from '../settings/graph-first'
 import { bloqueDePlantillas, type PlantillasDeParada } from './bloque-de-plantillas'
 import { alcance, COMPLETO } from './cabecera-de-alcance'
+import { bloqueDeMemoria } from './memoria-de-la-parada'
 import { REPORT_CONTRACT } from './report-contract'
 import { SCAN_RULES, SECURITY_CHECKLIST } from './scan-checklist'
 
@@ -12,12 +13,15 @@ import { SCAN_RULES, SECURITY_CHECKLIST } from './scan-checklist'
  * `temas` ausente = el prompt de siempre, como `rutas`: un parametro opcional
  * cuya ausencia deja el prompt donde estaba, para que un proyecto sin modulos
  * aplicables —o sin plantillas sembradas— componga exactamente lo de ayer.
+ * `registradas` igual (ADR-101): las vivas que FORTRESS ya tiene en este
+ * alcance, para que el tipo no se elija desde cero cada corrida.
  */
 export function buildScanPrompt(
   projectName: string,
   corpus: CorpusDescriptor,
   rutas?: readonly string[],
-  temas?: PlantillasDeParada
+  temas?: PlantillasDeParada,
+  registradas: readonly string[] = []
 ): string {
   const docs = buildDocsFirst('security', corpus)
   const cabecera =
@@ -25,6 +29,7 @@ export function buildScanPrompt(
   // Entre la checklist y las reglas: la de siempre manda y va primero (el ADR
   // fija que las plantillas refuerzan), y las reglas cierran sobre las dos.
   const bloque = temas === undefined ? '' : bloqueDePlantillas(temas, projectName)
+  const memoria = bloqueDeMemoria(registradas)
 
   return [
     ...cabecera,
@@ -36,6 +41,7 @@ export function buildScanPrompt(
     SECURITY_CHECKLIST,
     '',
     ...(bloque === '' ? [] : [bloque, '']),
+    ...(memoria === '' ? [] : [memoria, '']),
     'Reglas:',
     SCAN_RULES,
     '',

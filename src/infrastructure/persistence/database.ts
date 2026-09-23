@@ -8,6 +8,7 @@ import { OMEGA_SCHEMA } from './schema-omega'
 import { QUALITY_SCHEMA } from './schema-quality'
 import { PROPOSAL_EVENTS_SCHEMA } from './schema-proposal-events'
 import { REPAIR_SCHEMA } from './schema-repair'
+import { ALIASES_SCHEMA } from './schema-aliases'
 import { SIGHTINGS_SCHEMA } from './schema-sightings'
 import { SYSTEM_SCHEMA } from './schema-system'
 import { TELEMETRY_SCHEMA } from './schema-telemetry'
@@ -40,6 +41,7 @@ export function getDatabase(): Db {
   db.exec(OMEGA_SCHEMA)
   db.exec(SYSTEM_SCHEMA)
   db.exec(SIGHTINGS_SCHEMA)
+  db.exec(ALIASES_SCHEMA)
   db.exec(QUALITY_SCHEMA)
   db.exec(REPAIR_SCHEMA)
   db.exec(PROPOSAL_EVENTS_SCHEMA)

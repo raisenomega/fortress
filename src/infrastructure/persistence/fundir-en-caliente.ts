@@ -2,6 +2,7 @@ import { identidadFusionada, planDeFusion, type Fusion } from '@domain/project/f
 import { severidadDeLaSuperviviente } from '@domain/project/severidad-al-fundir'
 import { masUrgente, type Severity } from '@domain/shared/severity'
 import type { Db } from './database'
+import { createAliasWrites } from './finding-alias-writes'
 import { MARCAR_FUSIONADA } from './finding-fusion-sql'
 import { ELEVAR_SEVERIDAD } from './reparar-gravedad'
 
@@ -43,8 +44,10 @@ export function fundirEnCaliente(
     throw new Error(`fail-closed: la base pide estas fusiones:\n${pide.join('\n')}\ny el plan aprobado trae:\n${trae.join('\n')}\nno se escribe nada`) // prettier-ignore
   const marcar = db.prepare(MARCAR_FUSIONADA),
     elevar = db.prepare(ELEVAR_SEVERIDAD)
+  const aliases = createAliasWrites(db)
   const porId = new Map(vivas.map((v) => [v.id, v.severity]))
   for (const f of plan) {
+    for (const id of f.absorbidas) aliases.retirarClave(id, f.ganadora, 'fusion', new Date().toISOString()) // prettier-ignore
     for (const id of f.absorbidas) marcar.run({ id, motivo: `fusionada-con-${f.ganadora}`, identity: identidadFusionada(f.ganadora, f.identidad) }) // prettier-ignore
     const maxima = severidadDeLaSuperviviente(f, porId, masUrgente)
     if (maxima !== porId.get(f.ganadora)) elevar.run({ id: f.ganadora, severity: maxima })

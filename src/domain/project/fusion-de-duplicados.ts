@@ -37,7 +37,7 @@ export function identidadFusionada(ganadora: string, identidadVieja: string): st
 /** La que se queda es la que lleva mas tiempo: su `first_seen` es la historia
  *  real del defecto. A igualdad de fecha manda el id, para que dos corridas
  *  sobre los mismos datos decidan lo mismo. */
-function mayor(a: FilaAFusionar, b: FilaAFusionar): FilaAFusionar {
+export function mayor(a: FilaAFusionar, b: FilaAFusionar): FilaAFusionar {
   if (a.firstSeen !== b.firstSeen) return a.firstSeen < b.firstSeen ? a : b
   return a.id < b.id ? a : b
 }

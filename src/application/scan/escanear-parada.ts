@@ -1,4 +1,5 @@
 import type { Project } from '@domain/project/project'
+import { registradasDeLaParada, type FilaRegistrada } from '@domain/scan/memoria-de-la-parada'
 import type { ModuloAuditoria } from '@domain/scan/modulo-auditoria'
 import { esDeTema, type Parada } from '@domain/scan/parada'
 import type { ScanRequest, Scanner } from '@domain/scan/scanner'
@@ -29,21 +30,25 @@ function alcanceDe(
 /**
  * Una parada, escaneada entera. El `projectPath` sigue siendo la RAIZ sea cual
  * sea la clase, que es de donde cuelgan el grafo, el corpus y la identidad de
- * los hallazgos (ADR-082, Enmienda 1).
+ * los hallazgos (ADR-082, Enmienda 1). `vivas` es la memoria del proyecto: de
+ * ella salen las registradas del alcance de esta parada (ADR-101, palanca 1).
  */
 export function escanearParada(
   scanner: Scanner,
   project: Project,
   parada: Parada,
   progreso: ProgresoDelRecorrido,
-  deCarpeta: readonly ModuloAuditoria[] = []
+  deCarpeta: readonly ModuloAuditoria[] = [],
+  vivas: readonly FilaRegistrada[] = []
 ): ReturnType<Scanner['scan']> {
+  const alcance = alcanceDe(parada, deCarpeta)
   return scanner.scan(
     {
       projectPath: project.path,
       projectName: project.name,
       projectId: project.id,
-      ...alcanceDe(parada, deCarpeta)
+      ...alcance,
+      registradas: registradasDeLaParada(vivas, alcance.rutas)
     },
     progreso.texto
   )
