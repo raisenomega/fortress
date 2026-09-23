@@ -29,6 +29,7 @@ export interface Analysis {
    * ayudado. No es del proyecto auditado; es material para que FORTRESS madure.
    */
   readonly notes?: readonly SelfNoteDraft[]
+  readonly mismoDefectoQue?: readonly string[] // citados que juzga el MISMO defecto (ADR-101 §3): se funden
 }
 
 /** REAL y accionable (no obsoleto): C3 solo debe proponer sobre esto. */

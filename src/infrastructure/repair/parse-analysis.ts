@@ -1,6 +1,7 @@
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
 import { sinProceso } from '@domain/repair/cli-no-arranco'
 import { leerEvidencia } from '@domain/repair/leer-evidencia'
+import { leerMismoDefecto } from '@domain/repair/leer-mismo-defecto'
 import { tail } from '@domain/repair/tail'
 import { trabajoReal } from '@domain/repair/budget'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
@@ -56,6 +57,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   // no puede extinguir. Un `status` ausente o torcido cae en OBSOLETO como
   // siempre, pero ya no mata nada, porque tampoco trae con que probarlo.
   const evidencia = leerEvidencia(j.evidencia)
+  const mismo = leerMismoDefecto(j.mismoDefectoQue)
   return {
     target,
     status: leido === null ? 'DESCONOCIDO' : text('status') || 'DESCONOCIDO',
@@ -66,6 +68,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
     doNotTouch: text('doNotTouch'),
     risk: leido === null ? `${ILEGIBLE}${ilegible}` : text('risk'),
     tokensUsed: out.usage === undefined ? 0 : trabajoReal(out.usage),
-    ...(notes.length > 0 ? { notes } : {})
+    ...(notes.length > 0 ? { notes } : {}),
+    ...(mismo.length > 0 ? { mismoDefectoQue: mismo } : {})
   }
 }

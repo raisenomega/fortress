@@ -2,6 +2,7 @@ import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { canTransition, type Proposal } from '@domain/repair/proposal'
 import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
 import { extinguirSiObsoleto } from './extinguir-con-juicio'
+import { fundirPorJuicio } from './fundir-por-juicio'
 import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { estudiar } from './estudiar-con-memoria'
@@ -65,6 +66,8 @@ export async function planRepair(
   // El juicio del agente es lo unico que cierra un hallazgo, y solo si trae
   // prueba comprobable: sin ella el hallazgo se mitiga, no muere.
   extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso())
+  // El juicio «mismo defecto» se persiste como fusion mas alias (ADR-101, corte 2).
+  const fundido = fundirPorJuicio(context, project, { ...proposal, ...patch }, result.analysis)
   await recordAnalyzed(context.eventLog, proposal, result, veredicto)
-  return { ...proposal, ...patch }
+  return { ...proposal, ...patch, ...(fundido ?? {}) }
 }

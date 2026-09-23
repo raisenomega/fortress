@@ -22,6 +22,7 @@ export interface Candidate {
   readonly intentos?: string | null
   /** Las OTRAS sedes abiertas del mismo defecto. Lo pone quien tiene la base. */
   readonly hermanos?: string | null
+  readonly hermanosCitados?: readonly string[] // a quien se cito: lo unico que puede nombrar "mismoDefectoQue"
 }
 
 export interface Selection {
