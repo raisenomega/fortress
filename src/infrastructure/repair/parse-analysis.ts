@@ -1,6 +1,7 @@
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
 import { sinProceso } from '@domain/repair/cli-no-arranco'
 import { leerEvidencia } from '@domain/repair/leer-evidencia'
+import { leerArreglo } from '@domain/repair/leer-arreglo'
 import { leerMismoDefecto } from '@domain/repair/leer-mismo-defecto'
 import { tail } from '@domain/repair/tail'
 import { trabajoReal } from '@domain/repair/budget'
@@ -42,12 +43,10 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   const j = leido ?? {}
   const text = (k: string): string => (typeof j[k] === 'string' ? j[k] : '').trim()
   // `risk` es el canal: plan-repair lo persiste como analysisReason y el libro
-  // lo asienta como razon de la transicion. La muestra viaja por ahi sola.
-  // La COLA, no la cabeza: el fallo tipico es "contenido extra despues del
-  // JSON", asi que lo que sobra esta al final y el principio se parece siempre
-  // al de una respuesta buena. Guardar el prefijo dejo sin diagnosticar el
-  // primer caso real (18-ago); es el mismo `tail` que el gate usa para su
-  // autopsia, que ademas corta en salto de linea para no empezar a medias.
+  // lo asienta como razon de la transicion. La muestra viaja por ahi sola, y es
+  // la COLA: el fallo tipico es "contenido extra despues del JSON", asi que lo
+  // que sobra esta al final (guardar el prefijo dejo sin diagnosticar el primer
+  // caso real, 18-ago); mismo `tail` que la autopsia del gate, cortado en linea.
   const ilegible = tail(out.result.trim(), MUESTRA)
   // El CLI que no arranco no produjo una respuesta mala: no produjo ninguna.
   // Su marca gana a la de ilegible, que supondria que hubo algo que leer.
@@ -58,6 +57,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   // siempre, pero ya no mata nada, porque tampoco trae con que probarlo.
   const evidencia = leerEvidencia(j.evidencia)
   const mismo = leerMismoDefecto(j.mismoDefectoQue)
+  const arreglo = leerArreglo(j.arreglo)
   return {
     target,
     status: leido === null ? 'DESCONOCIDO' : text('status') || 'DESCONOCIDO',
@@ -69,6 +69,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
     risk: leido === null ? `${ILEGIBLE}${ilegible}` : text('risk'),
     tokensUsed: out.usage === undefined ? 0 : trabajoReal(out.usage),
     ...(notes.length > 0 ? { notes } : {}),
-    ...(mismo.length > 0 ? { mismoDefectoQue: mismo } : {})
+    ...(mismo.length > 0 ? { mismoDefectoQue: mismo } : {}),
+    ...(arreglo === undefined ? {} : { arreglo })
   }
 }

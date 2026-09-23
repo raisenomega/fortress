@@ -1,6 +1,7 @@
 import type { SelfNoteDraft } from '../system/self-observation'
 import type { TokenUsage } from '../telemetry/token-usage'
 import type { Evidencia } from './evidencia-obsolescencia'
+import type { Arreglo } from './leer-arreglo'
 import type { Candidate } from './select-target'
 
 /**
@@ -23,12 +24,10 @@ export interface Analysis {
   readonly risk: string
   /** Tokens que costo el analisis (grafo-primero deberia ser barato). */
   readonly tokensUsed: number
-  /**
-   * Lo que el analista noto de FORTRESS MISMA mientras estudiaba el hallazgo:
-   * una herramienta que le falto, un permiso que le corto, algo que le habria
-   * ayudado. No es del proyecto auditado; es material para que FORTRESS madure.
-   */
+  /** Lo que el analista noto de FORTRESS MISMA (una herramienta que le falto, un
+   *  permiso que le corto): no es del proyecto auditado, es para que FORTRESS madure. */
   readonly notes?: readonly SelfNoteDraft[]
+  readonly arreglo?: Arreglo // donde VA el cambio (ADR-102 §2): el guard lo contrasta con la correa antes de generar
   readonly mismoDefectoQue?: readonly string[] // citados que juzga el MISMO defecto (ADR-101 §3): se funden
 }
 
