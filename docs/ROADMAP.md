@@ -169,7 +169,7 @@ expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
 `SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
 del agente: se audita cada prompt contra lo que de verdad se lanza.
 
-### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas hechas, 2026-09-22)
+### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas y el corte 3 hechos, 2026-09-23)
 
 **Hecho y en `main`**, cada pieza con gate 6/6 antes y después:
 
@@ -201,15 +201,34 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
   verificado fila a fila contra su backup. Medido antes: los temas de `otro`
   eran los módulos M9, M3, M8, M2 y M4 de ADR-083 sin sitio en el contrato, y
   «calidad de código» eran dos títulos.
+- **Cortes 2 y 3 de los hermanos: la memoria del escáner y el alias de clave** —
+  merge `aeb6b88`, **ADR-101 firmado**. Dos palancas, sin tocar la identidad de
+  ADR-084. **Palanca 1, la memoria de la parada**: cada pasada recibe las vivas
+  ya registradas de su alcance como `fichero:linea tipo` y conserva tipo y línea;
+  una fila por defecto solo en el mismo sitio exacto, y en líneas distintas se
+  reporta cada sitio (juntarlos no es del escáner). Solo prompt, ni clave ni
+  sync. Medido en ocho corridas: **deriva 0** (0 sustituciones de tipo, 0
+  facetas), recall 25/27. **Palanca 2, el alias de clave**: la tabla
+  `finding_aliases`; el sync la consulta solo al fallar la clave exacta y toca a
+  la superviviente, nunca a una absorbida; toda fusión registra la clave que
+  retira como alias de la ganadora, y el alias no caduca. El **corte 2 queda
+  cerrado dentro**: el analista dice `mismoDefectoQue` solo con los ids que se le
+  citaron, y FORTRESS lo persiste como fusión más alias; si el objetivo se
+  absorbe, la propuesta caduca diciendo con quién. Y el lote (ADR-101 §5) **en
+  la misma entrega**: los 96 pares de misma sede o misma línea juzgados por lote
+  en la caja de cada proyecto, 33 MISMO / 63 DISTINTOS / 0 sin decidir, **22
+  fusiones** con 26 absorbidas y 26 alias, vivas 526 → 500, aplicado en la base
+  viva y verificado fila a fila contra su backup. Medido antes: la sede como
+  identidad se rechazó con datos (7 de 32 pares de misma línea eran defectos
+  distintos), la deriva era estructural (el escáner no tenía memoria) y una
+  fusión entre claves distintas la deshacía el sync sin alias.
 
 **Queda del #3**:
 
-- Cada una con su medición: los cortes 2 y 3 de los hermanos (persistir el
-  juicio «mismo defecto» cuando exista consumidor; la deriva del tipo en el
-  sync, que toca ADR-084 y pide ADR propio), el ancla frente al sitio del
-  arreglo, el defecto declarado a propósito, las cadenas de explotación, y la
-  **severidad por familia** (ADR-100 §4: los ejes son de seguridad y
-  accesibilidad o privacidad quedan `sinEjes`, con la palabra del modelo).
+- Cada una con su medición: el ancla frente al sitio del arreglo, el defecto
+  declarado a propósito, las cadenas de explotación, y la **severidad por
+  familia** (ADR-100 §4: los ejes son de seguridad y accesibilidad o privacidad
+  quedan `sinEjes`, con la palabra del modelo).
 
 *Lo que sigue era el diagnóstico, y se conserva:*
 
