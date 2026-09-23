@@ -169,7 +169,7 @@ expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
 `SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
 del agente: se audita cada prompt contra lo que de verdad se lanza.
 
-### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas y el corte 3 hechos, 2026-09-23)
+### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas, el corte 3 y el guard del arreglo hechos, 2026-09-23)
 
 **Hecho y en `main`**, cada pieza con gate 6/6 antes y después:
 
@@ -222,13 +222,38 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
   identidad se rechazó con datos (7 de 32 pares de misma línea eran defectos
   distintos), la deriva era estructural (el escáner no tenía memoria) y una
   fusión entre claves distintas la deshacía el sync sin alias.
+- **Ancla frente a arreglo: el guard del arreglo fuera de la correa** — merge
+  `5f76a44`, **ADR-102 firmado**. El ancla sigue siendo un solo lugar y la
+  identidad no cambia. Lo que cambia es que el análisis dice, en una clave
+  estructurada `arreglo` (fichero y línea), dónde VA el cambio; y el Motor,
+  con la correa y el terreno ya calculados y ANTES de pagar el generador, la
+  contrasta con la misma regla que juzga el diff después. Si no cabe, rechaza
+  con motivo propio (`arreglo_fuera_de_correa`), **no reintentable**, que lleva
+  la huella de `.fortress/config`: el hallazgo no vuelve a la baraja hasta que
+  el terreno declarado cambie, aunque el HEAD cambie a diario; el camino
+  dirigido se la salta, como siempre. La correa **no se ensancha** (ADR-012
+  intacto). Si el analista no declara el arreglo, se genera como hoy y el Libro
+  lo cuenta. Los frenos de gasto son la cuarta familia innegociable. Medido
+  antes: 61,87 $ hundidos en tres anclas donde el fix no cabía, 49,71 $ en
+  `run-genesis.ts:32` (16 propuestas en ocho sesiones, ninguna un reintento);
+  con el guard y la pausa habrían costado un análisis, alrededor de 1,50 $.
+  **Queda anotado, sin construir**: la columna «dónde se arregla» en el
+  hallazgo y la vista «declara / arregla», infraestructura sin consumidor
+  medido (el Terminal arregla donde encuentra y la extinción acertó en el único
+  caso); y el **patrón A, «línea que ya no es»** (11 observaciones: el ancla
+  cae en un comentario o una llave porque el fichero creció por encima), que es
+  deriva de línea, pieza de identidad y reanclaje aparte, no de ancla frente a
+  arreglo.
 
 **Queda del #3**:
 
-- Cada una con su medición: el ancla frente al sitio del arreglo, el defecto
-  declarado a propósito, las cadenas de explotación, y la **severidad por
-  familia** (ADR-100 §4: los ejes son de seguridad y accesibilidad o privacidad
-  quedan `sinEjes`, con la palabra del modelo).
+- Cada una con su medición: el defecto declarado a propósito, las cadenas de
+  explotación, la **severidad por familia** (ADR-100 §4: los ejes son de
+  seguridad y accesibilidad o privacidad quedan `sinEjes`, con la palabra del
+  modelo), y el **patrón A** de la línea que ya no es (reanclar por símbolo o
+  «última definición gana», ADR-067 y ADR-084).
+- Infraestructura anotada hasta que aparezca quien la lea: la columna «dónde se
+  arregla» y la vista «declara / arregla» (ADR-102 §1.5).
 
 *Lo que sigue era el diagnóstico, y se conserva:*
 
