@@ -1,4 +1,5 @@
 import type { Proposal } from './proposal'
+import { huellaDelMotivo } from './motivo-del-arreglo'
 import { isRetryable } from './retry-eligibility'
 
 /**
@@ -32,17 +33,25 @@ function repetidos(suyas: readonly Proposal[], ultima: Proposal): number {
  * 2. La causa SI era reintentable, pero ya se reintento y murio igual. El
  *    reintento existe para el fallo de una vez; sostenerlo contra un fix que
  *    no cabe en la correa es pagar dos veces por el mismo no.
+ * 3. El arreglo no cabia en la correa (ADR-102 §4): a esta la levanta el
+ *    TERRENO, no el HEAD. El arbol de FORTRESS cambia a diario y la correa no;
+ *    mientras `.fortress/config` tenga la misma huella, volver a elegirlo es
+ *    pagar otro analisis por el mismo no (24 $ de 49 en un solo ancla).
  */
 export function hasBlockingRejection(
   findingId: string,
   headSha: string,
-  proposals: readonly Proposal[]
+  proposals: readonly Proposal[],
+  huella: string
 ): boolean {
   const suyas = proposals.filter((p) => p.findingId === findingId)
   if (suyas.length === 0) return false
 
   const ultima = suyas.reduce((vieja, otra) => (otra.createdAt > vieja.createdAt ? otra : vieja))
-  if (ultima.state !== 'RECHAZADO' || ultima.baseSha !== headSha) return false
+  if (ultima.state !== 'RECHAZADO') return false
+  const cfg = huellaDelMotivo(ultima.analysisReason)
+  if (cfg !== null) return cfg === huella
+  if (ultima.baseSha !== headSha) return false
   if (!isRetryable(ultima.state, ultima.analysisReason ?? null)) return true
   return repetidos(suyas, ultima) >= INTENTOS_POR_CAUSA
 }

@@ -10,7 +10,7 @@ import { createGitFileHistory } from '../git/file-history'
 import { headSha } from '../git/head-sha'
 import { createFsProbe } from '../omega/fs-probe'
 import { discoverCorpus } from '../project/discover-corpus'
-import { readFortressConfig } from '../project/fortress-config'
+import { huellaDeConfig, readFortressConfig } from '../project/fortress-config'
 import { puertosDeAutoMejora } from './app-context-automejora'
 import { createGraphAnalyst } from '../repair/graph-analyst'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
@@ -44,6 +44,7 @@ export function getAppContext(): AppContext {
     projects: createSqliteProjectRepository(db),
     corpus: { of: discoverCorpus },
     fortressConfig: readFortressConfig,
+    huellaDeConfig,
     findings: createSqliteFindingRepository(db),
     fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),

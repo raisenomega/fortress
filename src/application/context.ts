@@ -36,9 +36,10 @@ export interface AppContext extends EscritoresDeFichero, Telemetria {
   readonly projects: ProjectRepository
   /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
   readonly corpus: CorpusReader
-  /** Que cerco de integracion automatica declara un proyecto en su disco. Tres
-   *  estados: no lo declara, lo declara bien, o lo declara y no se entiende. */
+  /** El cerco de integracion automatica que declara el proyecto: ausente, bien, o ilegible. */
   readonly fortressConfig: (projectPath: string) => ConfigState
+  /** La huella de `.fortress/config`: levanta la pausa del arreglo fuera de la correa (ADR-102 §4). */
+  readonly huellaDeConfig: (projectPath: string) => string
   readonly findings: FindingRepository
   /** git: si el archivo de un hallazgo cambio desde que se detecto. */
   readonly fileHistory: FileHistory
