@@ -13,7 +13,7 @@ import { cubierto, fuente, todos } from './innegociables-fixture'
  * esas y no entre en la lista falla aqui, sin que nadie se acuerde de mirar.
  */
 const CONTROLES =
-  /export (?:async )?function (build\w*Env|gitEnv\w*|redactSecrets|sanear\w+|guard\w+|conCarril\w+|capacidadesDe|bloqueDeCapacidades|cabeceraSinPropia|leerZombis|zombisSinGemela|reclasificar|veredictosDelLote|redDeLaFusion|planDeFusion|fusionesDelPasoB|fundirEnCaliente|leerOtros|retipar|fusionesDelRetipado|fusionPorJuicio|idsAdmitidos|createAliasWrites|createFusionPorJuicio|fundirPorJuicio|leerMismoDefecto)\b|export const (HERRAMIENTAS_DEL_SERVIDOR|GRAPH_READ_TOOLS|RECLASIFICAR_FINDING|MARCAR_FUSIONADA)\b/
+  /export (?:async )?function (build\w*Env|gitEnv\w*|redactSecrets|sanear\w+|guard\w+|conCarril\w+|capacidadesDe|bloqueDeCapacidades|cabeceraSinPropia|leerZombis|zombisSinGemela|reclasificar|veredictosDelLote|redDeLaFusion|planDeFusion|fusionesDelPasoB|fundirEnCaliente|leerOtros|retipar|fusionesDelRetipado|fusionPorJuicio|idsAdmitidos|createAliasWrites|createFusionPorJuicio|fundirPorJuicio|leerMismoDefecto|paresCandidatos|veredictosDePares|fusionesDelLote)\b|export const (HERRAMIENTAS_DEL_SERVIDOR|GRAPH_READ_TOOLS|RECLASIFICAR_FINDING|MARCAR_FUSIONADA)\b/
 
 /**
  * La otra clase que se escapo, y por la misma razon: `main-window` decidia el

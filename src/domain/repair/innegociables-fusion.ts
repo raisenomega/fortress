@@ -16,6 +16,8 @@ export const DEFENSAS_DE_LA_FUSION: readonly string[] = [
   'src/domain/project/retipado-de-otros.ts',
   'src/domain/project/fusiones-del-retipado.ts',
   'src/domain/project/fusion-por-juicio.ts',
+  'src/domain/project/pares-candidatos.ts',
+  'src/domain/project/veredictos-de-pares.ts',
   'src/domain/repair/leer-mismo-defecto.ts',
   'src/application/repair/fundir-por-juicio.ts',
   'src/domain/repair/evidencia-obsolescencia.ts',
