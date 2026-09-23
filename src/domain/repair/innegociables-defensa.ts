@@ -2,6 +2,7 @@ import { INNEGOCIABLES_DEL_AUTOMERGE } from './innegociables-del-automerge'
 
 import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
 import { DEFENSAS_DE_LA_RED } from './innegociables-red'
+import { FRENOS_DE_GASTO } from './innegociables-gasto'
 /**
  * La TERCERA familia del criterio innegociable: ficheros que IMPLEMENTAN una
  * defensa, sin gobernar la autonomia ni validar una entrada. Ver
@@ -12,14 +13,13 @@ import { DEFENSAS_DE_LA_RED } from './innegociables-red'
  * nueva encuentra aqui a sus hermanas.
  *
  * La lista se queda corta por lo mismo una y otra vez —"al partir un modulo, la
- * mitad que decidia se quedaba fuera"—: `buildEnv` salio de `claude-cli`,
- * `sanearParaPrompt` de `knownFindings`, el turno del arbol de
- * `apply-auto-merge`. Cada extraccion dejo la defensa fuera sin que nadie lo
- * notara, porque la lista sigue al fichero y la defensa se mudo.
+ * mitad que decidia se quedaba fuera"—: `buildEnv`, `sanearParaPrompt` y el turno
+ * del arbol se mudaron y la lista, que sigue al fichero, se quedo mirando atras.
  */
 export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   ...DEFENSAS_DEL_DISCO,
   ...DEFENSAS_DE_LA_RED,
+  ...FRENOS_DE_GASTO,
   // El ENTORNO de todo hijo: `build-env` recorta la sesion viva del operador
   // —agente ssh, keyring, GPG— y `git-env` hace lo propio para los cinco `git`
   // que corren en el repo auditado y ejecutan sus hooks.
