@@ -38,8 +38,8 @@ const alcanceDe = (rutas?: readonly string[]): AlcanceDePasada =>
 export function promptDeParada(request: ScanRequest): string {
   const corpus = discoverCorpus(request.projectPath)
   const modulos = request.modulos ?? []
-  if (modulos.length === 0) return buildScanPrompt(request.projectName, corpus, request.rutas)
+  if (modulos.length === 0) return buildScanPrompt(request.projectName, corpus, request.rutas, undefined, request.registradas) // prettier-ignore
 
   const temas = { ...alcanceDe(request.rutas), modulos, plantillas: sembradas(modulos) }
-  return buildScanPrompt(request.projectName, corpus, request.rutas, temas)
+  return buildScanPrompt(request.projectName, corpus, request.rutas, temas, request.registradas)
 }

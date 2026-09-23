@@ -27,6 +27,12 @@ export interface ScanRequest {
    * `rutas` y por la misma razon: solo lo consume el prompt.
    */
   readonly modulos?: readonly ModuloAuditoria[]
+  /**
+   * Las vivas ya registradas en el alcance de esta parada, una linea cada una
+   * (ADR-101, palanca 1). Mismo carril que `rutas` y `modulos`: solo lo consume
+   * el prompt; ni la clave ni el sync lo miran.
+   */
+  readonly registradas?: readonly string[]
 }
 
 export interface ScanOutcome {
