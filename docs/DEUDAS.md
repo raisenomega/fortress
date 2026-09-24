@@ -405,6 +405,7 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 | **El índice de ADRs va por detrás** | `docs/DECISIONS/README.md` no tiene fila para ADR-091 a 098, y el 094 no existe (visto el 2026-09-22 al añadir ADR-099) | añadir las ocho filas. Deuda de documentación, no de este arco (ADR-099 §3, firmado) |
 | **El score del escaneo cuenta los descartados** | `expediente-del-cierre.ts:29-31` puntúa `datos.reportados` (sin `status`) más los ACTIVE ausentes (`ausencia.ts:24`, sin mirar `status`); el quality audit sí filtra (`run-quality-audit.ts:24`, `isOpen`) y el push también (`record-push-decision.ts:28`). Medido el 2026-09-23, §6.3 | filtrar los descartados en `calcularExpediente` con el mismo `isOpen`, y un test que descarte un CRITICAL reportado y compruebe que el score del cierre no baja |
 | **Patrón repetido en N ficheros sin modelar** | la observación de Trade99PRO del 2026-09-12 (`contrato-del-hallazgo`, pendiente): «ni un hallazgo de patrón repetido en N archivos; hubo que partirlo en entradas sueltas y dejar funciones de menor impacto en prosa». El contrato exige fichero y línea concretos por hallazgo, así que un defecto idéntico en N funciones son N filas o prosa. Medido el 2026-09-23 al medir las cadenas, §6.4 | pieza propia: un hallazgo «de patrón» con sus N sitios, cuando una segunda observación lo pida |
+| **Patrón A: la línea que ya no es (deriva de línea)** | 6 de 40 vivas de FORTRESS con el ancla en un comentario de un fichero que cambió tras `first_seen`; 0 en clientes (repos estáticos); 0 duplicados por línea tras el lote del alias. Medido el 2026-09-23, §6.5 | medir la deriva de línea en el próximo escaneo de FORTRESS con `medir:deriva`; si la palanca 1 no la mata, el lote del alias automático tras cada escaneo |
 
 ### 6.1 La defensa que falta: ficheros fuente opacos
 
@@ -540,6 +541,51 @@ tendría consumidor. Hasta entonces, no.
 
 **Aparte, con su origen:** la misma observación pide un **hallazgo de patrón
 repetido en N ficheros**. Es otra pieza sin modelar y va en la tabla de §6.
+
+### 6.5 Patrón A, la línea que ya no es: medido, anotado con condición, no construido (2026-09-23)
+
+**Decisión de Jojo y el CTO sobre la medición del 2026-09-23** (main `c971730`,
+base viva en solo lectura y repos en disco): **no se construye**. Es la última
+pieza del arco #3, y con ella el arco queda cerrado.
+
+**Lo medido:**
+
+- **Las 12 observaciones** (23-ago a 4-sep) son todas de FORTRESS y del analista
+  del Motor: el ancla caía en una llave de cierre, un `return new Promise`, un
+  import o un comentario porque el fichero creció por encima. Todas dicen que
+  el desfase **no invalidó el análisis**: el analista releyó el fichero.
+- **Ancla hoy en disco, 492 vivas**: 441 en código, 26 en comentario, 2 vacías,
+  1 import, 3 sin línea, 19 de Trade99PRO sin fichero en disco. Ficheros
+  cambiados tras `first_seen`: 19, **todos de FORTRESS**. Los repos de clientes
+  son instantáneas estáticas: 0 cambios, deriva imposible ahí. En FORTRESS, **6
+  de 40 vivas (15 %)** tienen el ancla en un comentario de un fichero que
+  cambió: `scope-groups.ts:24`, `git-merge-applier.ts:13`, `repair-git.ts:11`,
+  `spawn-entorno-acotado.test.ts:12`, `write-cognition-log.ts:21`,
+  `unmap-ipv4.ts:12`. Los 20 comentarios de clientes son anclas legítimas
+  (documentación que contradice código, CSS), no deriva.
+- **Duplicados por línea movida: 0** hoy; el lote del alias los acaba de juzgar.
+- **La mecánica**: identidad `fichero|línea|tipo`; el sync casa clave exacta o
+  alias y `TOUCH` no mueve la línea; en un fichero cambiado el modelo re-emite en
+  la línea nueva, nace fila nueva y la vieja sigue ACTIVE hasta un juicio (lote
+  manual, o el analista del Motor, solo FORTRESS). La **palanca 1 de ADR-101 ya
+  cubre el fichero quieto** (deriva 0 medida); **falta medir el fichero
+  cambiado**: la palanca 1 entró el 23 y el último escaneo de FORTRESS es del
+  18, así que la memoria no ha corrido aún sobre un FORTRESS crecido.
+- **Daño**: solo tiempo del analista al relocalizar; **0 reparaciones en línea
+  equivocada** (el analista relee, ADR-102 declara el arreglo, la correa es por
+  fichero); la extinción busca el marcador en el fichero entero, no en la
+  línea; **el operador no va a la línea**: la UI no abre ficheros.
+- **Reanclar por símbolo, rechazado con dato**: de los 5 grupos vivos con mismo
+  fichero, tipo y símbolo en líneas distintas, el lote juzgó DISTINTOS al menos
+  uno (`rate-limit.ts` 28 y 20 son dos defectos), y 7 de los 96 pares del lote
+  eran mismo tipo y defectos distintos. Una regla automática se equivoca 1 de 5.
+  «Última definición gana» es el problema de las migraciones append-only de
+  nucleo, otra pieza.
+
+**Condición de reactivación:** medir la deriva de línea en el próximo escaneo
+de FORTRESS con `medir:deriva`, que ya existe. Si la palanca 1 no la mata y
+aparecen duplicados por línea, la pieza barata es **correr el lote del alias
+automáticamente tras cada escaneo**: un juicio, no una regla. Hasta entonces, no.
 
 ---
 

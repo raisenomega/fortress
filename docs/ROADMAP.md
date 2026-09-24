@@ -169,7 +169,7 @@ expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
 `SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
 del agente: se audita cada prompt contra lo que de verdad se lanza.
 
-### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas, el corte 3, el guard del arreglo y la severidad por familia hechos, 2026-09-23)
+### 3. ~~El contrato del hallazgo~~ — **HECHO** `fd9c2c9` (2026-09-23)
 
 **Hecho y en `main`**, cada pieza con gate 6/6 antes y después:
 
@@ -262,10 +262,26 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
   aplicado en la base viva y verificado fila a fila contra su backup. Los ejes
   por familia quedan anotados: solo dos de las seis tienen escala medible.
 
-**Queda del #3**:
+**Cerrado el 2026-09-23.** Seis piezas construidas con ADR firmado, cada una
+medida antes y gateada después: la identidad y el backfill de las zombis
+(ADR-084, sub-pieza 1), los hermanos (ADR-099), los tipos de auditoría
+(ADR-100), la memoria del escáner y el alias de clave (ADR-101), el ancla frente
+al arreglo (ADR-102) y la severidad por familia (ADR-103). Cinco piezas medidas
+y anotadas con dato, sin construir: el corte 2 absorbido en ADR-101, la columna
+«dónde se arregla», el defecto a propósito, las cadenas de explotación y el
+patrón A. Cada hueco del diagnóstico quedó resuelto o descartado con medición.
+**Siguiente arco: #4, el grafo más allá de JavaScript.**
 
-- Con su medición: el **patrón A** de la línea que ya no es (reanclar por
-  símbolo o «última definición gana», ADR-067 y ADR-084). Es lo último del #3.
+**Anotado con dato, no construido**:
+
+- **El patrón A, «la línea que ya no es»** (DEUDAS §6.5, 2026-09-23): 6 de 40
+  vivas de FORTRESS con el ancla en un comentario de un fichero que cambió; 0 en
+  clientes, que son instantáneas estáticas; 0 duplicados por línea tras el lote
+  del alias; daño solo en tiempo del analista, que relee. Reanclar por símbolo
+  queda rechazado con dato (1 de 5 pares de misma sede eran defectos distintos).
+  **Con condición**: medir la deriva de línea en el próximo escaneo de FORTRESS
+  con `medir:deriva`; si la palanca 1 no la mata, el lote del alias automático
+  tras cada escaneo.
 - **Medido y anotado, no construido**: las **cadenas de explotación** (DEUDAS
   §6.4, 2026-09-23). Las «3 observaciones» eran coincidencias de la palabra
   «cadena»; la real es una (Trade99PRO) y la única instancia en la base tiene
