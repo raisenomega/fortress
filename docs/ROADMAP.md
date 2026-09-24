@@ -310,7 +310,7 @@ ni un defecto declarado a propósito, ni la diferencia entre dónde se declara u
 defecto y dónde se arregla. Y agrupar «hermanos» por clase empareja defectos que
 no son el mismo.
 
-### 4. El grafo, más allá de JavaScript — **pieza A HECHA** `a152a32` (2026-09-24)
+### 4. ~~El grafo, más allá de JavaScript~~ — **HECHO** `686b212` (2026-09-24)
 
 **Medido primero, y la premisa era falsa** (2026-09-24, sobre la caché del grafo
 y los repos en disco): el binario fijado trae 156 gramáticas y ya indexa `.py`,
@@ -335,10 +335,41 @@ no hay nada declarado. Los handlers inline quedan en DEUDAS §6 con su dato, no
 en el prompt. La 0.11.0 queda como **arco futuro por frescura**, no por
 cobertura.
 
-**Queda del #4: pieza B, higiene del índice**: `has_graph` real (hoy 0 en 7 de
-8 proyectos con `graph_indexed_at_sha` puesto), reindexar tras cada merge
-externo (FORTRESS iba 51 ficheros de `src` por detrás), e indexar mailbd
-(`has_graph=1` sin `.db`, 45 vivas).
+**Pieza B, higiene del índice, construida y en `main`** (sin ADR, merge
+`686b212`, gate 6/6 antes y después, 9 mutantes muertos), con las tres causas
+medidas antes de tocar nada. `has_graph` tenía dos escritores y ningún lector:
+lo ponía solo el botón de instalar y el reconcilio por sha nunca lo tocaba, así
+que estaba en 0 en seis proyectos con índice y en 1 en el único sin él; ahora
+el reconcilio mira el `.db` antes de decidir, alinea la bandera con el disco, y
+un índice ausente se reindexa aunque el sha coincida (mailbd llevaba desde el
+29 de agosto «alineado con HEAD» sin índice, porque la caché entera renació ese
+día sin que conste quién la borró). El reindex ya era determinista por sha en
+arranque, foco, chip y cierre de lote; los huecos (un pull o merge de fuera con
+el proyecto ya enfocado, y la integración del Motor) los cubre el **reindex al
+volver a la ventana**, sin daemon. mailbd quedó indexado en la máquina con el
+binario fijado (1232 nodos, 148 ficheros; huella de la caché idéntica salvo su
+`.db`). Y un intruso cazado: el servidor 0.9.0 pone un vigilante sobre su cwd al
+arrancar por stdio y reindexa el proyecto si ya está en la caché, y el test del
+vocabulario lo arrancaba con el HOME real y cwd en el repo, así que **cada gate
+reindexaba FORTRESS en la caché real del operador**; ahora arranca con HOME
+propio y cwd vacío, y la suite unitaria ya no toca la caché (huella idéntica en
+tres corridas). Al confirmar la huella sobre `main` apareció un **segundo
+intruso, anterior (desde el 26 de agosto)**: el check «Loop blindado» de la
+suite de integración enciende un loop real sobre el repo propio, el motor lanza
+el juez del alcance (`claude -p`) antes de que llegue la parada, y la app sale
+sin matar a sus hijos: el juez queda huérfano hasta dos minutos con el servidor
+del grafo vigilando el repo, y reindexa cuando ve cambios (medido: 14:11:20Z
+del 24-sep). Arreglado en `fix/huerfanos-del-loop` (pendiente de merge): la
+parada se honra antes de reservar el carril y al nacer el hijo, y `will-quit`
+mata a todos los hijos. Trade99PRO sí está en disco pero no es repositorio git
+ni de confianza: anotado en DEUDAS §6.
+
+**Cerrado el 2026-09-24.** A: el agente sabe qué no ve el grafo y qué barreras
+declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
+índice se realinea solo. Queda del camino a grado bancario: **#5** (toda la
+aplicación dentro del tribunal y del sistema nervioso) y **#6** (mergear lo ya
+hecho: la decisión D del operador sobre B y limpieza). La 0.11.0 sigue como
+arco futuro por frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
