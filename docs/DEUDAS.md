@@ -404,6 +404,7 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 | **Ningún paso del gate mira la FORMA del fuente** | el NUL de §5.1-5: `interprete-existe.test.ts` pasó typecheck, lint y 3804 tests, y Git lo marcó `Bin 0 -> 2445 bytes` | una defensa derivada (~15 líneas en `src/domain/repair/`) que rechace todo `.ts` de `src/` con bytes de control |
 | **El índice de ADRs va por detrás** | `docs/DECISIONS/README.md` no tiene fila para ADR-091 a 098, y el 094 no existe (visto el 2026-09-22 al añadir ADR-099) | añadir las ocho filas. Deuda de documentación, no de este arco (ADR-099 §3, firmado) |
 | **El score del escaneo cuenta los descartados** | `expediente-del-cierre.ts:29-31` puntúa `datos.reportados` (sin `status`) más los ACTIVE ausentes (`ausencia.ts:24`, sin mirar `status`); el quality audit sí filtra (`run-quality-audit.ts:24`, `isOpen`) y el push también (`record-push-decision.ts:28`). Medido el 2026-09-23, §6.3 | filtrar los descartados en `calcularExpediente` con el mismo `isOpen`, y un test que descarte un CRITICAL reportado y compruebe que el score del cierre no baja |
+| **Patrón repetido en N ficheros sin modelar** | la observación de Trade99PRO del 2026-09-12 (`contrato-del-hallazgo`, pendiente): «ni un hallazgo de patrón repetido en N archivos; hubo que partirlo en entradas sueltas y dejar funciones de menor impacto en prosa». El contrato exige fichero y línea concretos por hallazgo, así que un defecto idéntico en N funciones son N filas o prosa. Medido el 2026-09-23 al medir las cadenas, §6.4 | pieza propia: un hallazgo «de patrón» con sus N sitios, cuando una segunda observación lo pida |
 
 ### 6.1 La defensa que falta: ficheros fuente opacos
 
@@ -497,6 +498,48 @@ que este escaneo no nombró (`ausencia.ts:24`, que filtra `lifecycle` y no
 push con `status === 'open'` (`record-push-decision.ts:28`). Un descartado que el
 escáner vuelve a nombrar **cuenta en el score del cierre y no en el audit**. No
 es de defecto a propósito: es un bug de consistencia del score, con su fila.
+
+### 6.4 Cadenas de explotación: medido, anotado, no construido (2026-09-23)
+
+**Decisión de Jojo y el CTO sobre la medición del 2026-09-23** (main `d69fac7`,
+base viva en solo lectura): **no se construye**. Es la pieza más cara del
+contrato y la de menos señal.
+
+**Lo medido:**
+
+- **Las «3 observaciones» del backlog eran coincidencias de la palabra
+  «cadena»**: cadenas de texto, de llamadas, de hashes. Sobre cadenas de
+  explotación hay **una**: Trade99PRO, 2026-09-12, área `contrato-del-hallazgo`,
+  pendiente: «el contrato no permite expresar cadenas de explotación
+  (portfolio-cron entrega UUIDs que alimentan agent-loop)». Sus 3 avistamientos
+  son 3 quejas distintas fundidas; la señal real es 1.
+- **Instancias en la base: una.** `portfolio-cron/index.ts:40` («sin
+  autenticación devuelve el UUID de todos los usuarios») y
+  `agent-loop/index.ts:28` («ejecuta ciclos de trading para cualquier userId sin
+  verificar»). **Los dos eslabones ya son CRITICAL**, Trade99PRO tiene 13
+  CRITICAL y score 0: la cadena no cambiaría el score, el push ni el orden.
+  De 497 títulos vivos, 23 dicen «permite» y describen un solo defecto; de 171
+  análisis, 36 dicen «cadena» y son cadenas de llamadas o de texto.
+- **Nada de lo que existe expresa «estos suman»**: hermanos (misma sede o
+  misma clase), `mismoDefectoQue` (fusión más alias) y la fusión por identidad
+  dicen «el mismo defecto». El contrato empuja a partir: fichero y línea
+  concretos, símbolos distintos, «partirlo es del escáner».
+- **Consumidor: ninguno.** El score suma y pone techo en 64 con cualquier
+  CRITICAL; la UI agrupa por estado y severidad; el Motor repara un hallazgo
+  con un fix (ADR-012) y solo corre sobre FORTRESS; el Terminal resuelve un foco.
+- **Coste: el más alto del contrato.** Una tabla de relaciones (rechazada en
+  ADR-101 §6 porque se pudre cuando una fila muere o cambia de clave), un juicio
+  «estos encadenan» con candidatos fuera de la sede (todas las vivas del
+  proyecto, hasta 156 en el prompt), persistencia, y tres consumidores nuevos:
+  score de cadena, agrupación en la UI, elección del eslabón en el Motor. Más
+  caro que el corte 2 y con menos señal: 1 instancia frente a 90 pares.
+
+**Condición de reactivación:** que aparezcan cadenas cuyos eslabones **no** sean
+ya CRITICAL por sí solos (tres LOW que juntos son críticos). Entonces el score
+tendría consumidor. Hasta entonces, no.
+
+**Aparte, con su origen:** la misma observación pide un **hallazgo de patrón
+repetido en N ficheros**. Es otra pieza sin modelar y va en la tabla de §6.
 
 ---
 

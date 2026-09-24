@@ -264,9 +264,15 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
 
 **Queda del #3**:
 
-- Cada una con su medición: las cadenas de explotación, y el **patrón A** de la
-  línea que ya no es (reanclar por símbolo o «última definición gana», ADR-067 y
-  ADR-084).
+- Con su medición: el **patrón A** de la línea que ya no es (reanclar por
+  símbolo o «última definición gana», ADR-067 y ADR-084). Es lo último del #3.
+- **Medido y anotado, no construido**: las **cadenas de explotación** (DEUDAS
+  §6.4, 2026-09-23). Las «3 observaciones» eran coincidencias de la palabra
+  «cadena»; la real es una (Trade99PRO) y la única instancia en la base tiene
+  sus dos eslabones ya CRITICAL, así que no cambia score, push ni orden. Sin
+  consumidor y con el coste más alto del contrato. Se reactiva si aparece una
+  cadena cuyos eslabones no sean ya CRITICAL por sí solos. Aparte queda el
+  patrón repetido en N ficheros (DEUDAS §6).
 - Anotado hasta que aporte: los **ejes por familia** (ADR-103 §1.5), cuando un
   proyecto suba del suelo o un CRITICAL de familia bloquee un push por sí solo.
 - **Medido y anotado, no construido**: el **defecto declarado a propósito**
