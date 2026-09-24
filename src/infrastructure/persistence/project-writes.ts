@@ -7,6 +7,8 @@ import type { Db } from './database'
 
 const GRAPH_SQL = `UPDATE projects SET has_graph = 1, graph_nodes = ?, graph_edges = ?,
   graph_indexed_at = ? WHERE id = ?`
+const CLEAR_GRAPH_SQL = `UPDATE projects SET has_graph = 0, graph_nodes = NULL, graph_edges = NULL,
+  graph_indexed_at = NULL WHERE id = ?`
 const QUALITY_SQL = `UPDATE projects SET general_quality = ?, quality_partial = ?, dim_seguridad = ?,
   dim_correctitud = ?, dim_tests = ?, dim_mantenibilidad = ?, dim_dependencias = ?,
   dim_operacion = ? WHERE id = ?`
@@ -21,6 +23,7 @@ const CLEAN_SQL = `UPDATE projects SET contaminated_at = NULL, contamination_det
 
 export interface ExtraWrites {
   setGraph: (id: string, nodes: number, edges: number, indexedAt: string) => void
+  clearGraph: (id: string) => void
   setQuality: (id: string, global: number, dims: DimensionScores, partial: boolean) => void
   markContaminated: (id: string, detail: string) => void
   markClean: (id: string) => void
@@ -30,12 +33,14 @@ export interface ExtraWrites {
 /** Los writers grandes de projects (grafo + score integral), fuera del repo por tamano. */
 export function makeExtraWrites(db: Db): ExtraWrites {
   const graph = db.prepare(GRAPH_SQL)
+  const clearGraph = db.prepare(CLEAR_GRAPH_SQL)
   const quality = db.prepare(QUALITY_SQL)
   const contaminate = db.prepare(CONTAMINATE_SQL)
   const clean = db.prepare(CLEAN_SQL)
   const modulos = db.prepare(MODULOS_SQL)
   return {
     setGraph: (id, nodes, edges, indexedAt) => graph.run(nodes, edges, indexedAt, id),
+    clearGraph: (id) => clearGraph.run(id),
     markContaminated: (id, detail) => contaminate.run(nowIso(), detail, id),
     markClean: (id) => clean.run(id),
     // Se sanea al ESCRIBIR: lo que entra en la columna ya esta en vocabulario.

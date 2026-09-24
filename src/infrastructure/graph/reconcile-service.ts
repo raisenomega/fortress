@@ -5,6 +5,8 @@ import { isRunning } from '../run-control'
 import { IPC } from '../ipc/channels'
 import { reindexQueue } from './reindex-queue'
 import { createReindexRunner } from './reindex-runner'
+import { readGraphIndex } from './read-graph-index'
+import { crearFocoDeVentana } from '@application/graph/foco-de-ventana'
 
 /** Push al renderer: el estado de indexado de ese proyecto cambio. */
 function notify(projectId: string): void {
@@ -18,7 +20,7 @@ export function reconcileProject(projectId: string, onBoot = false): Promise<Rec
   return reconcileGraph(
     getAppContext(),
     projectId,
-    { runner: createReindexRunner(), enqueue: (job) => reindexQueue.enqueue(job), notify, turnoVivo: isRunning, now: Date.now }, // prettier-ignore
+    { runner: createReindexRunner(), enqueue: (job) => reindexQueue.enqueue(job), notify, turnoVivo: isRunning, indice: readGraphIndex, now: Date.now }, // prettier-ignore
     onBoot
   )
 }
@@ -33,3 +35,6 @@ export function reconcileProject(projectId: string, onBoot = false): Promise<Rec
 export function reconcileAllOnBoot(): void {
   for (const project of getAppContext().projects.list()) void reconcileProject(project.id, true)
 }
+
+/** El foco de proyecto y el de ventana pasan por aqui: la decision sigue siendo del dominio. */
+export const focoDeVentana = crearFocoDeVentana((projectId) => void reconcileProject(projectId))
