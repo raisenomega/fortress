@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { SIN_BARRERAS } from '@domain/project/barreras-declaradas'
 import type { Project } from '@domain/project/project'
 import type { Candidate, Selection } from '@domain/repair/select-target'
 import type { SelfObservation } from '@domain/system/self-observation'
@@ -28,6 +29,7 @@ function banco(cerradas: readonly SelfObservation[]): {
     // desde esta, las otras sedes abiertas del mismo defecto.
     repairProposals: { listByProject: () => [] },
     findings: { listMemory: () => [] },
+    barrerasDeclaradas: () => SIN_BARRERAS,
     analystFor: () => ({
       study: (_t: Candidate, atendidas: readonly string[]) => {
         recibido = atendidas

@@ -17,12 +17,12 @@ export interface Candidate {
   readonly tipo: string | null
   /** La funcion o bloque donde vive, normalizado en minusculas. */
   readonly simbolo: string | null
-  /** Lo que YA se intento con el, si algo. `null` mientras solo se ELIGE: lo
-   *  pone quien va a estudiarlo, que es quien tiene el expediente delante. */
+  /** Lo que YA se intento con el. `null` mientras solo se ELIGE: lo pone quien lo estudia. */
   readonly intentos?: string | null
   /** Las OTRAS sedes abiertas del mismo defecto. Lo pone quien tiene la base. */
   readonly hermanos?: string | null
   readonly hermanosCitados?: readonly string[] // a quien se cito: lo unico que puede nombrar "mismoDefectoQue"
+  readonly barreras?: readonly string[] // lo que el proyecto declara en .claude/ y .fortress/ (ADR-104); lo pone quien tiene el disco
 }
 
 export interface Selection {

@@ -1,3 +1,4 @@
+import { SIN_BARRERAS } from '@domain/project/barreras-declaradas'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import type { ProposalPatch } from '@domain/repair/proposal-repository'
@@ -66,7 +67,8 @@ export function bench(opts: Opciones): Bench {
     }),
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha),
     fortressConfig: () => opts.cerco ?? { kind: 'not-present' },
-    huellaDeConfig: () => 'none'
+    huellaDeConfig: () => 'none',
+    barrerasDeclaradas: () => SIN_BARRERAS
   } as unknown as AppContext
   // prettier-ignore
   return { context, inserted, patches, events, observadas, memoria, anclaDelDescuento, extinguidos, mitigados, anotados, devueltos }

@@ -2,6 +2,7 @@ import type { Project } from '@domain/project/project'
 import type { AnalystResult } from '@domain/repair/analysis'
 import type { Selection } from '@domain/repair/select-target'
 import type { AppContext } from '../context'
+import { bloqueDeBarreras } from '@domain/project/barreras-declaradas'
 import { hermanosCitados, hermanosDelHallazgo } from '@domain/repair/hermanos-del-hallazgo'
 import { intentosPrevios } from '@domain/repair/intentos-previos'
 import { tipoDeLaIdentidad } from '@domain/project/finding-identity'
@@ -41,7 +42,10 @@ export function estudiar(
     ...selection.target,
     intentos: intentosPrevios(suyas),
     hermanos: hermanosDelHallazgo(selection.target, abiertos),
-    hermanosCitados: hermanosCitados(selection.target, abiertos)
+    hermanosCitados: hermanosCitados(selection.target, abiertos),
+    // Lo que el proyecto declara se lee AQUI por lo mismo: el analista no
+    // alcanza el disco del proyecto por su cuenta, y hay dos caminos (ADR-104).
+    barreras: bloqueDeBarreras(ctx.barrerasDeclaradas(project.path))
   }
   return analyzeTarget(ctx.analystFor(project.path, project.id), { ...selection, target }, loYaAtendido(ctx)) // prettier-ignore
 }
