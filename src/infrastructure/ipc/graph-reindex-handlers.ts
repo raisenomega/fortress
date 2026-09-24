@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { reconcileProject } from '../graph/reconcile-service'
+import { focoDeVentana, reconcileProject } from '../graph/reconcile-service'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -21,8 +21,9 @@ export function registerGraphReindexHandlers(): void {
   })
 
   // Foco de proyecto en el renderer: reconciliar en background, sin bloquear.
+  // Queda recordado: al volver a la ventana se vuelve a mirar ese mismo proyecto.
   ipcMain.handle(IPC.projectsFocus, (_event, projectId: string) => {
-    void reconcileProject(String(projectId))
+    focoDeVentana.enfocar(String(projectId))
     return null
   })
 }

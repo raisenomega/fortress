@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
-import { reconcileAllOnBoot } from '@infrastructure/graph/reconcile-service'
+import { focoDeVentana, reconcileAllOnBoot } from '@infrastructure/graph/reconcile-service'
 import { reclaimRepairWorktrees } from '@infrastructure/repair/reclaim-service'
 import { restoreKeepAwake } from '@infrastructure/system/restore-keep-awake'
 import { resumeLoops } from '@infrastructure/loop/loop-controller'
@@ -49,6 +49,8 @@ app
     resumeLoops()
     // Alinea el grafo de cada proyecto con su HEAD, en background y de a uno.
     reconcileAllOnBoot()
+    // Y al VOLVER a la ventana: un pull o merge de fuera mueve HEAD sin avisar.
+    app.on('browser-window-focus', () => focoDeVentana.ventanaActiva())
     // Worktrees huerfanos de reparaciones interrumpidas: se reconcilian aqui.
     reclaimRepairWorktrees()
     // El candado que el operador dejo pedido vuelve solo: si lo encendio para un
