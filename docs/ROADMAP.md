@@ -310,11 +310,35 @@ ni un defecto declarado a propósito, ni la diferencia entre dónde se declara u
 defecto y dónde se arregla. Y agrupar «hermanos» por clase empareja defectos que
 no son el mismo.
 
-### 4. El grafo, más allá de JavaScript
+### 4. El grafo, más allá de JavaScript — **pieza A HECHA** `a152a32` (2026-09-24)
 
-La búsqueda devuelve cero en repositorios pequeños, y el índice no cubre `.py`,
-configuración, SQL ni carpetas ignoradas. *Grafo primero* falla justo donde viven
-las barreras de un proyecto.
+**Medido primero, y la premisa era falsa** (2026-09-24, sobre la caché del grafo
+y los repos en disco): el binario fijado trae 156 gramáticas y ya indexa `.py`,
+`.sql`, `.prisma`, `.tf` y la configuración de la raíz; la cobertura por
+ficheros va del 94 al 99 % salvo Omega (45 %). Lo que de verdad no ve, y donde
+anclan **134 de las 492 vivas (27 %)**: los directorios ocultos (`.claude/`,
+`.fortress/`, `.husky/`: la superficie de las barreras), las carpetas que
+`.gitignore` excluye aunque estén versionadas (`legacy/` de Omega, el 79 % de
+sus líneas), las políticas SQL, `GRANT` y buckets (la gramática las conoce, el
+extractor no las emite), los handlers inline que funde en una función, y los
+proyectos sin índice. La 0.11.0 se midió aislada: tampoco ve ocultos ni
+políticas; trae 17 herramientas, nodos `Table` y un daemon por cuenta.
+
+**Pieza A, construida y en `main`** (ADR-104 firmado, merge `a152a32`, gate 6/6
+antes y después, 10 mutantes muertos), solo prompt: el aviso «lo que el grafo NO
+indexa» con las tres superficies medidas y el camino (Read y Grep) en los **tres
+bloques grafo primero** (chat, escáner y analista, heredado de una sola base); y
+el **bloque de barreras declaradas** al escáner y al analista, leído de lo que
+el pre-vuelo ya parsea (hooks `PreToolUse` con matcher, guion, intérprete y si
+arranca; `.fortress/config` presente o ausente), saneado, y sin una línea cuando
+no hay nada declarado. Los handlers inline quedan en DEUDAS §6 con su dato, no
+en el prompt. La 0.11.0 queda como **arco futuro por frescura**, no por
+cobertura.
+
+**Queda del #4: pieza B, higiene del índice**: `has_graph` real (hoy 0 en 7 de
+8 proyectos con `graph_indexed_at_sha` puesto), reindexar tras cada merge
+externo (FORTRESS iba 51 ficheros de `src` por detrás), e indexar mailbd
+(`has_graph=1` sin `.db`, 45 vivas).
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
