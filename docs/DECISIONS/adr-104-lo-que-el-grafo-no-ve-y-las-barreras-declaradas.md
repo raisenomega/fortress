@@ -1,6 +1,6 @@
 # ADR-104 — Lo que el grafo no ve y las barreras declaradas: el agente sabe dónde el grafo no llega, y lee ahí
 
-- **Estado**: Propuesta (sin firmar)
+- **Estado**: Aceptada (firmada por el operador el 2026-09-24)
 - **Fecha**: 2026-09-24
 - **Alcance**: solo prompt, en dos piezas. (1) Los bloques «grafo primero» del
   escáner, del analista y del chat dicen las tres superficies que el grafo **no**
@@ -145,19 +145,27 @@ ADR-097, ADR-101 · `src/domain/repair/analysis-prompt-grafo.ts`,
 
 ## 8. Casillas de firma
 
-Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta.
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-24 por orden del operador, con su línea literal:
+
+> *«YO Jojo dueño del proyecto FORTRESS firmo ADR-104: casilla 1 sí (la
+> advertencia de los tres huecos en los tres bloques grafo-primero, con Read y
+> Grep ahí), casilla 2 sí (el bloque de barreras al escáner y al analista),
+> casilla 3 sí (la 0.11.0 como arco futuro por frescura, no por este ADR),
+> casilla 4 leído §1.2 y §1.5, casilla 5 sí (los handlers inline a DEUDAS, no al
+> prompt) — Jojo, 24 septiembre 2026»*
 
 1. **La advertencia de los tres huecos** —ocultos, gitignorados aunque
    versionados, políticas SQL— en los tres bloques «grafo primero», con Read y
-   Grep como camino ahí: [ ] sí · [ ] otra: ________
+   Grep como camino ahí: [x] sí · [ ] otra: ________
 2. **El bloque de barreras declaradas** al escáner y al analista, leído en la
-   aplicación de lo que el pre-vuelo ya parsea, solo lo que consta: [ ] sí ·
+   aplicación de lo que el pre-vuelo ya parsea, solo lo que consta: [x] sí ·
    [ ] solo al analista · [ ] otra: ________
 3. **La 0.11.0 queda anotada como arco futuro** por frescura, nodos Table y
-   `.husky/`, no por este ADR: [ ] sí
+   `.husky/`, no por este ADR: [x] sí
 4. **He leído §1.2 y §1.5**: ninguna versión cubre ocultos ni políticas; el
-   prompt hace falta con cualquiera: [ ]
+   prompt hace falta con cualquiera: [x]
 5. **Los handlers inline van a DEUDAS** con su dato y no al prompt, hasta medir
-   cuánto pesan: [ ] sí · [ ] al prompt también
+   cuánto pesan: [x] sí · [ ] al prompt también
 
-**Firma del operador:** ________ · **Fecha:** ________
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 24 septiembre 2026

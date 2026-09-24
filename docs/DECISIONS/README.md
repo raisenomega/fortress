@@ -134,7 +134,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-101](adr-101-la-memoria-del-escaner-y-el-alias-de-clave.md) | La memoria del escáner y el alias de clave: el mismo defecto deja de nacer dos veces, sin tocar la identidad | 2026-09-22 | Aceptada | Escaneo |
 | [ADR-102](adr-102-el-arreglo-fuera-de-la-correa.md) | El arreglo fuera de la correa: el analista dice dónde va el fix y el Motor no paga por generar lo que no cabe | 2026-09-23 | Aceptada | Motor |
 | [ADR-103](adr-103-la-severidad-de-las-familias-de-auditoria.md) | La severidad de las familias de auditoría: los ejes de seguridad no juzgan lo que no es de seguridad | 2026-09-23 | Aceptada | Escaneo |
-| [ADR-104](adr-104-lo-que-el-grafo-no-ve-y-las-barreras-declaradas.md) | Lo que el grafo no ve y las barreras declaradas: el agente sabe dónde el grafo no llega, y lee ahí | 2026-09-24 | Propuesta | Grafo |
+| [ADR-104](adr-104-lo-que-el-grafo-no-ve-y-las-barreras-declaradas.md) | Lo que el grafo no ve y las barreras declaradas: el agente sabe dónde el grafo no llega, y lee ahí | 2026-09-24 | Aceptada | Grafo |
 
 ## Referencias
 
