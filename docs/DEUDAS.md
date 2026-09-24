@@ -403,6 +403,7 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 | **`build-prompt.ts:6`**               | `'- NUNCA toques auth, pagos, RLS ni seguridad sin dejarlo escrito antes.'` | **medir primero**: dice «sin dejarlo escrito antes», no «vuelve a supervisado». Puede ser transparencia legítima o el freno de ADR-089 con otra ropa |
 | **Ningún paso del gate mira la FORMA del fuente** | el NUL de §5.1-5: `interprete-existe.test.ts` pasó typecheck, lint y 3804 tests, y Git lo marcó `Bin 0 -> 2445 bytes` | una defensa derivada (~15 líneas en `src/domain/repair/`) que rechace todo `.ts` de `src/` con bytes de control |
 | **El índice de ADRs va por detrás** | `docs/DECISIONS/README.md` no tiene fila para ADR-091 a 098, y el 094 no existe (visto el 2026-09-22 al añadir ADR-099) | añadir las ocho filas. Deuda de documentación, no de este arco (ADR-099 §3, firmado) |
+| **El score del escaneo cuenta los descartados** | `expediente-del-cierre.ts:29-31` puntúa `datos.reportados` (sin `status`) más los ACTIVE ausentes (`ausencia.ts:24`, sin mirar `status`); el quality audit sí filtra (`run-quality-audit.ts:24`, `isOpen`) y el push también (`record-push-decision.ts:28`). Medido el 2026-09-23, §6.3 | filtrar los descartados en `calcularExpediente` con el mismo `isOpen`, y un test que descarte un CRITICAL reportado y compruebe que el score del cierre no baja |
 
 ### 6.1 La defensa que falta: ficheros fuente opacos
 
@@ -440,6 +441,62 @@ Tres deudas menores, **medidas al cerrar el arco** (`cd6a510`), ninguna bloquea:
 | **`runCommand` corre en la caja SIN red** | `probe/run-command.ts` y `build-verify.ts` van por `enCaja` sin socket: hoy ninguna sonda instala nada | el día que una sonda necesite el registro, darle el proxy como al gate (`spawn-command.ts`) |
 | **La sonda de bwrap se recuerda por proceso** | `cajaDisponible` (`sonda-de-bwrap.ts`) memoriza por PATH y no caduca: instalar bwrap con la app abierta no se ve hasta reiniciar | caducar la memoria, o invalidarla desde la pantalla de diagnóstico |
 | **Sin caché por proyecto** | cada `npm ci` descarga por el proxy (medido: 1-3 s en un proyecto pequeño); la caché compartida está firmada como NO (canal lateral) | si un proyecto grande lo hace lento, una caché dentro de SU propia caja, nunca compartida; medirlo antes |
+
+### 6.3 Defecto a propósito: medido, anotado, no construido (2026-09-23)
+
+**Decisión de Jojo y el CTO sobre la medición del 2026-09-23** (main `9a599b7`,
+base viva en solo lectura): **no se construye**. Es infraestructura por adelantado,
+como la relación «mismo defecto» del corte 2 y la columna «dónde se arregla» de
+ADR-102 §1.5.
+
+**Lo medido:**
+
+- **No hay estado «intencional».** `status` es `open` o `false_positive`
+  (`finding-status.ts`), una decisión del operador guardada en `dismissals` por
+  fingerprint y sin motivo; `lifecycle` es ACTIVE, MITIGATED o EXTINCT. Hoy
+  «no es defecto» y «es defecto a propósito» caen en la misma casilla.
+- **El backlog decía 7 observaciones; son 5**, todas de agosto y en 2 proyectos, y
+  **ninguna es un defecto plantado**: son **riesgos aceptados por escrito** (el
+  CSP con `unsafe-inline` documentado en FORTRESS, 4 filas nacidas entre el 9 y
+  el 23 de agosto y hoy todas EXTINCT, 2 por `juicio_obsoleto`; y en mailbd «lo
+  aceptado a propósito vive en `SECURITY-FIXES.md` y en las cabeceras de las
+  migraciones, no en el README plantilla»).
+- **En clientes, cero daño.** Las 17 vivas en carpetas de tests o docs (Health
+  Flow 14, Omega 2, FORTRESS 1) son defectos **reales**: contraseñas en docs y en
+  tests e2e, políticas RLS abiertas en SQL de docs, documentación que contradice
+  el código. Ningún título vivo dice «a propósito» ni «intencional».
+- **El único proyecto plantado es `ensayo-fail-closed`**, el rig desechable del
+  operador: 14 vivas, 7 CRITICAL, un escaneo (2026-09-21), 0 propuestas, 0
+  descartes. Su README dice «los defectos de `src/servidor.js` son a propósito»,
+  el escáner **lo lee** (sin `SECURITY.md` cae a los docs generales, README
+  incluido) y reporta igual: el contrato no tiene dónde ponerlo.
+- **`false_positive` ya saca de todo lo que importa**: del quality audit
+  (`isOpen`), del bloqueo del push por CRITICAL, de la cola del Motor (`vivo`) y
+  del Terminal (`seResuelveEnTerminal`). **Descartes en toda la historia: 4**,
+  todos de FORTRESS del 5 y 6 de septiembre, sin repetición.
+- **Mecanismo por ruta: ninguno.** `.fortress/config` entiende `autoMerge`
+  (obligatorio) y `scope.groups`; el escáner lista con `git ls-files` y pide en
+  el checklist «ignora node_modules, dist, build, .git y terceros», frontera
+  blanda. No excluye tests, fixtures ni docs.
+
+**Las dos opciones, medidas y aparcadas:** un estado nuevo «intencional» (8 a 10
+ficheros: vocabulario, descartes con motivo, derivación de la fila, tabla
+exhaustiva del tablero, toggle de la UI) o la **exclusión por ruta** en
+`.fortress/config` (unos 6 ficheros: bloque nuevo, línea del checklist y filtro
+duro al asentar, porque la frontera del prompt es blanda). Ninguna tiene
+consumidor hoy. **Si algún día un cliente trae fixtures deliberadamente
+vulnerables, la exclusión por ruta es la pieza barata.** Hasta entonces, no se
+construye. `ensayo-fail-closed` se puede borrar de la app cuando el ensayo
+termine: limpia 14 filas.
+
+**La deuda real, separada, está en la tabla de §6**: el score del escaneo cuenta
+los descartados. `calcularExpediente` (`expediente-del-cierre.ts:29-31`) puntúa
+`datos.reportados`, que son hallazgos detectados **sin `status`**, más los ACTIVE
+que este escaneo no nombró (`ausencia.ts:24`, que filtra `lifecycle` y no
+`status`). El quality audit filtra con `isOpen` (`run-quality-audit.ts:24`) y el
+push con `status === 'open'` (`record-push-decision.ts:28`). Un descartado que el
+escáner vuelve a nombrar **cuenta en el score del cierre y no en el audit**. No
+es de defecto a propósito: es un bug de consistencia del score, con su fila.
 
 ---
 

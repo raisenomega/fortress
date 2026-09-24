@@ -247,11 +247,18 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
 
 **Queda del #3**:
 
-- Cada una con su medición: el defecto declarado a propósito, las cadenas de
-  explotación, la **severidad por familia** (ADR-100 §4: los ejes son de
-  seguridad y accesibilidad o privacidad quedan `sinEjes`, con la palabra del
-  modelo), y el **patrón A** de la línea que ya no es (reanclar por símbolo o
-  «última definición gana», ADR-067 y ADR-084).
+- Cada una con su medición: las cadenas de explotación, la **severidad por
+  familia** (ADR-100 §4: los ejes son de seguridad y accesibilidad o privacidad
+  quedan `sinEjes`, con la palabra del modelo), y el **patrón A** de la línea que
+  ya no es (reanclar por símbolo o «última definición gana», ADR-067 y ADR-084).
+- **Medido y anotado, no construido**: el **defecto declarado a propósito**
+  (DEUDAS §6.3, 2026-09-23). Los 5 casos del backlog eran riesgos aceptados por
+  escrito, ya EXTINCT; en clientes cero daño; el único plantado es el rig
+  `ensayo-fail-closed`; `false_positive` ya saca del audit, del push, del Motor y
+  del Terminal; 4 descartes en toda la historia. Sin consumidor. Si un cliente
+  trae fixtures vulnerables a propósito, la exclusión por ruta en
+  `.fortress/config` es la pieza barata. De paso salió una deuda real aparte: el
+  score del escaneo cuenta los descartados (DEUDAS §6).
 - Infraestructura anotada hasta que aparezca quien la lea: la columna «dónde se
   arregla» y la vista «declara / arregla» (ADR-102 §1.5).
 
