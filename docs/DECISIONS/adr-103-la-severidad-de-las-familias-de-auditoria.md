@@ -1,6 +1,6 @@
 # ADR-103 — La severidad de las familias de auditoría: los ejes de seguridad no juzgan lo que no es de seguridad
 
-- **Estado**: Propuesta (sin firmar)
+- **Estado**: Aceptada (firmada por el operador el 2026-09-23)
 - **Fecha**: 2026-09-23
 - **Alcance**: dos piezas. (1) La derivación de severidad por ejes (ADR-080) **no
   se aplica** a los seis tipos de auditoría de ADR-100: para ellos manda la banda
@@ -187,20 +187,28 @@ medición del 2026-09-23 (memoria del operador, `fortress-severidad-por-familia-
 
 ## 8. Casillas de firma
 
-Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta.
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-23 por orden del operador, con su línea literal:
+
+> *«YO Jojo dueño del proyecto FORTRESS firmo ADR-103: casilla 1 sí (la derivación
+> no aplica a los seis tipos, ejesNoAplican aparte de sinEjes), casilla 2 sí (la
+> guía WCAG y clase-de-dato como orientación, no derivación), casilla 3 sí (el
+> lote restaura en las dos direcciones, con parada), casilla 4 sí (las 37 sin
+> discrepancia y las EXTINCT no se tocan), casilla 5 leído §1.5, casilla 6 leído
+> §1.2 — Jojo, 23 septiembre 2026»*
 
 1. **La derivación no se aplica a los seis tipos de auditoría**; manda la palabra
-   del modelo y la fila se marca `ejesNoAplican`, aparte de `sinEjes`: [ ] sí ·
+   del modelo y la fila se marca `ejesNoAplican`, aparte de `sinEjes`: [x] sí ·
    [ ] otra: ________
 2. **Guía de una línea en el contrato** para las dos familias con escala
    (accesibilidad: nivel WCAG y tarea bloqueada; privacidad: clase de dato y a
-   quién se expone), como orientación y no como derivación: [ ] sí · [ ] solo la
+   quién se expone), como orientación y no como derivación: [x] sí · [ ] solo la
    excepción, sin guía
 3. **El lote restaura la palabra del modelo en las 48 filas**, en las dos
    direcciones, con el cuadre fail-closed de §3 y parada antes de la viva:
-   [ ] sí · [ ] solo las que bajan · [ ] otra: ________
-4. **Las 37 sin discrepancia y las EXTINCT no se tocan**: [ ] sí
-5. **He leído §1.5**: los ejes por familia quedan anotados: [ ]
-6. **He leído §1.2**: la premisa de ADR-100 §4(a) queda corregida por este ADR: [ ]
+   [x] sí · [ ] solo las que bajan · [ ] otra: ________
+4. **Las 37 sin discrepancia y las EXTINCT no se tocan**: [x] sí
+5. **He leído §1.5**: los ejes por familia quedan anotados: [x]
+6. **He leído §1.2**: la premisa de ADR-100 §4(a) queda corregida por este ADR: [x]
 
-**Firma del operador:** ________ · **Fecha:** ________
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 23 septiembre 2026
