@@ -169,7 +169,7 @@ expone; dice que un proyecto no tiene doctrina de seguridad cuando tiene un
 `SECURITY.md`. Es la premisa heredada —la lección de `--allowedTools`— del lado
 del agente: se audita cada prompt contra lo que de verdad se lanza.
 
-### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas, el corte 3 y el guard del arreglo hechos, 2026-09-23)
+### 3. El contrato del hallazgo — **EN MARCHA** (3 sub-piezas, el corte 3, el guard del arreglo y la severidad por familia hechos, 2026-09-23)
 
 **Hecho y en `main`**, cada pieza con gate 6/6 antes y después:
 
@@ -244,13 +244,31 @@ del agente: se audita cada prompt contra lo que de verdad se lanza.
   cae en un comentario o una llave porque el fichero creció por encima), que es
   deriva de línea, pieza de identidad y reanclaje aparte, no de ancla frente a
   arreglo.
+- **Severidad por familia: los ejes de seguridad no juzgan lo que no es de
+  seguridad** — merge `fd9c2c9`, **ADR-103 firmado**. La premisa de ADR-100
+  §4 («accesibilidad queda `sinEjes` y manda la palabra del modelo») era falsa:
+  medido, cero hallazgos sin ejes en 12 escaneos, porque el contrato obligaba a
+  elegir ejes para todo y el modelo los inventaba para un contraste (el mismo
+  4,08:1 salió HIGH en un proyecto y LOW en otro). Ahora los **seis tipos de
+  auditoría no pasan por la tabla de ADR-080**: manda la palabra del modelo, los
+  ejes que vengan de más se ignoran, la fila se marca `ejesNoAplican` aparte de
+  `sinEjes` (que sigue midiendo la calibración de seguridad), el contrato pide
+  no poner ejes y da una **guía de orientación**, no de derivación, a las dos
+  familias con escala (accesibilidad: nivel WCAG y tarea bloqueada; privacidad:
+  clase de dato y a quién se expone). Y el **lote** (`severidad:plan` y
+  `severidad:aplicar`, patrón seguro) restauró el juicio del modelo en las **48
+  filas vivas** cuya banda la había puesto la tabla, leído de las notas del
+  Libro: 36 bajan y 12 suben, el único CRITICAL de familia vuelve a MEDIUM,
+  aplicado en la base viva y verificado fila a fila contra su backup. Los ejes
+  por familia quedan anotados: solo dos de las seis tienen escala medible.
 
 **Queda del #3**:
 
-- Cada una con su medición: las cadenas de explotación, la **severidad por
-  familia** (ADR-100 §4: los ejes son de seguridad y accesibilidad o privacidad
-  quedan `sinEjes`, con la palabra del modelo), y el **patrón A** de la línea que
-  ya no es (reanclar por símbolo o «última definición gana», ADR-067 y ADR-084).
+- Cada una con su medición: las cadenas de explotación, y el **patrón A** de la
+  línea que ya no es (reanclar por símbolo o «última definición gana», ADR-067 y
+  ADR-084).
+- Anotado hasta que aporte: los **ejes por familia** (ADR-103 §1.5), cuando un
+  proyecto suba del suelo o un CRITICAL de familia bloquee un push por sí solo.
 - **Medido y anotado, no construido**: el **defecto declarado a propósito**
   (DEUDAS §6.3, 2026-09-23). Los 5 casos del backlog eran riesgos aceptados por
   escrito, ya EXTINCT; en clientes cero daño; el único plantado es el rig
