@@ -49,6 +49,13 @@ ${REGLA_DEL_SIMBOLO}
   concreta o acceso a la red interna. defensa-en-profundidad = falta una capa
   sin que haya hoy un camino de explotacion (cabeceras, rate limiting, un
   error.message crudo).
+- Para los tipos de auditoria —accesibilidad, privacidad, integridad-de-negocio,
+  continuidad-y-backups, dependencia-vulnerable, criptografia-debil— NO pongas ejes:
+  son de seguridad y no describen esos defectos. Ahi manda tu severity, juzgada
+  por lo que el defecto es. Orientacion, no tabla: en accesibilidad, el nivel WCAG
+  (A, AA, AAA) que incumple y si la tarea queda bloqueada o solo degradada; en
+  privacidad, la clase de dato (PII, PHI, metadato) y a quien se expone (terceros,
+  logs, repositorio).
 - Si no encuentras nada en tu especialidad, el bloque es {"findings":[]}.
 
 ${NOTAS_COMO_CLAVE}
