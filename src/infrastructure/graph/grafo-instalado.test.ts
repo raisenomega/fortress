@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { spawnSync } from 'node:child_process'
-import { mkdtempSync } from 'node:fs'
+import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import {
@@ -33,7 +33,9 @@ function herramientasReales(): readonly string[] {
     linea({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'fortress-test', version: '0' } } }) + // prettier-ignore
     linea({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} }) +
     linea({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} })
-  const r = spawnSync(GRAPH_BIN, [], { input: entrada, encoding: 'utf8', timeout: 30_000, ...aislado() }) // prettier-ignore
+  const caja = aislado()
+  const r = spawnSync(GRAPH_BIN, [], { input: entrada, encoding: 'utf8', timeout: 30_000, ...caja }) // prettier-ignore
+  rmSync(caja.cwd, { recursive: true, force: true })
   for (const l of r.stdout.split('\n')) {
     try {
       const m = JSON.parse(l) as { id?: number; result?: { tools?: { name: string }[] } }
