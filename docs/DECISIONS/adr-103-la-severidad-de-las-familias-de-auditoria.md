@@ -118,10 +118,12 @@ de las notas «Severidad por ejes» del Libro, como `fichero:línea MODELO→BAN
 - **Alcance medido**: 48 filas, todas `open/ACTIVE`, en cuatro proyectos (Health
   Flow 14, Omega 16, nucleo 10, FORTRESS 8); por tipo, accesibilidad 29,
   privacidad 8, integridad de negocio 3, continuidad 3, dependencia 3,
-  criptografía 2. **No es solo bajar**: 35 bajan (HIGH → MEDIUM 13, HIGH → LOW 9,
-  MEDIUM → LOW 13) y 13 suben (LOW → MEDIUM 7, MEDIUM → HIGH 4, LOW → HIGH 1),
-  más el CRITICAL de privacidad que vuelve a MEDIUM. Se restaura el juicio del
-  modelo, no una dirección.
+  criptografía 2. **No es solo bajar**: 36 bajan (HIGH → MEDIUM 13, HIGH → LOW 9,
+  MEDIUM → LOW 13, y el CRITICAL de privacidad que vuelve a MEDIUM) y 12 suben
+  (LOW → MEDIUM 7, MEDIUM → HIGH 4, LOW → HIGH 1). Se restaura el juicio del
+  modelo, no una dirección. *(Errata corregida el 2026-09-23 tras el ensayo: el
+  texto firmado decía «35 bajan y 13 suben, más el CRITICAL»; la suma medida es
+  36 y 12, y la decisión de la casilla 3 no cambia.)*
 - **Cuadre, fail-closed**: por proyecto se usa la nota **más reciente**; una fila
   entra solo si su tipo es de auditoría, no está EXTINCT, su `fichero:línea`
   tiene entrada en la nota y **la banda de la entrada es igual a la severidad
