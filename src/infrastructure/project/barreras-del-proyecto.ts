@@ -18,7 +18,7 @@ import { interpreteExiste } from './interprete-existe'
  * ajeno por iniciativa propia.
  */
 export function barrerasDelProyecto(projectPath: string): readonly BarreraRota[] {
-  const settings = leerSettings(projectPath)
+  const settings = leerSettingsDelProyecto(projectPath)
 
   // SIN `if (settings === null)`: lo tuve puesto y al romperlo no cayo nadie,
   // porque `hooksDeclarados` ya devuelve lista vacia ante null, basura o un
@@ -37,8 +37,11 @@ export function barrerasDelProyecto(projectPath: string): readonly BarreraRota[]
  * no se dejo leer seria inventar un hallazgo, y encima uno que en autonomo
  * bloquearia el lote. El fail-closed cuelga de una barrera ENCONTRADA, nunca de
  * la duda.
+ *
+ * Exportado porque el bloque de barreras del prompt (ADR-104) lee el MISMO
+ * fichero: dos lectores serian dos verdades.
  */
-function leerSettings(projectPath: string): unknown {
+export function leerSettingsDelProyecto(projectPath: string): unknown {
   try {
     return JSON.parse(readFileSync(join(projectPath, '.claude', 'settings.json'), 'utf8'))
   } catch {

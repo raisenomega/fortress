@@ -8,6 +8,7 @@ import type { CapabilityNoteRepository } from '@domain/system/capability-note-re
 import type { AgentDraftRepository } from '@domain/system/agent-draft-repository'
 import type { CapabilityEpisodeRepository } from '@domain/system/capability-episode-repository'
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
+import type { BarrerasDeclaradas } from '@domain/project/barreras-declaradas'
 import type { FileHistory } from '@domain/project/file-history'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { CorpusReader } from '@domain/project/corpus-reader'
@@ -36,10 +37,10 @@ export interface AppContext extends EscritoresDeFichero, Telemetria {
   readonly projects: ProjectRepository
   /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
   readonly corpus: CorpusReader
-  /** El cerco de integracion automatica que declara el proyecto: ausente, bien, o ilegible. */
+  /** El cerco `.fortress/config` que declara el proyecto (ausente, bien o ilegible) y su huella (ADR-102 §4). */
   readonly fortressConfig: (projectPath: string) => ConfigState
-  /** La huella de `.fortress/config`: levanta la pausa del arreglo fuera de la correa (ADR-102 §4). */
   readonly huellaDeConfig: (projectPath: string) => string
+  readonly barrerasDeclaradas: (projectPath: string) => BarrerasDeclaradas // hooks y cerco, para el prompt (ADR-104)
   readonly findings: FindingRepository
   /** git: si el archivo de un hallazgo cambio desde que se detecto. */
   readonly fileHistory: FileHistory
@@ -49,8 +50,7 @@ export interface AppContext extends EscritoresDeFichero, Telemetria {
   readonly repairProposals: RepairProposalRepository
   /** Libro de vida: un evento por eslabon de cada propuesta. Telemetria, no gate. */
   readonly eventLog: ProposalEventLog
-  /** Analista C2 (grafo-primero, solo lectura) anclado a la carpeta del proyecto.
-   *  El id acompana a la ruta: es a nombre de quien se registra su proceso. */
+  /** Analista C2 (grafo-primero, solo lectura) anclado al proyecto; el id, a nombre de quien corre. */
   readonly analystFor: (projectPath: string, projectId: string) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */
   readonly headSha: (projectPath: string) => string | null

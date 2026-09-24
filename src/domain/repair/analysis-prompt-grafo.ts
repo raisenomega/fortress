@@ -1,3 +1,5 @@
+import { LO_QUE_EL_GRAFO_NO_VE } from '../settings/lo-que-el-grafo-no-ve'
+
 /**
  * Como se usa el grafo y como se sabe si va al dia. Solo nombra herramientas que
  * el servidor fijado EXPONE (`herramientas-del-grafo.test.ts` lo deriva): aqui
@@ -24,5 +26,7 @@ export const EL_GRAFO: readonly string[] = [
   'El grafo puede ir retrasado respecto al disco, y no hay herramienta que lo',
   'diga: compara con el fichero real. El grafo dice DONDE mirar;',
   'el disco dice QUE hay hoy, y es lo que decide.',
+  '',
+  LO_QUE_EL_GRAFO_NO_VE,
   ''
 ]

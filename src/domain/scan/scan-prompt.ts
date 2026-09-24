@@ -14,14 +14,17 @@ import { SCAN_RULES, SECURITY_CHECKLIST } from './scan-checklist'
  * cuya ausencia deja el prompt donde estaba, para que un proyecto sin modulos
  * aplicables —o sin plantillas sembradas— componga exactamente lo de ayer.
  * `registradas` igual (ADR-101): las vivas que FORTRESS ya tiene en este
- * alcance, para que el tipo no se elija desde cero cada corrida.
+ * alcance, para que el tipo no se elija desde cero cada corrida. `barreras`
+ * igual (ADR-104): lo que el proyecto declara en `.claude/` y `.fortress/`,
+ * que el grafo no ve; vacio = ni una linea.
  */
 export function buildScanPrompt(
   projectName: string,
   corpus: CorpusDescriptor,
   rutas?: readonly string[],
   temas?: PlantillasDeParada,
-  registradas: readonly string[] = []
+  registradas: readonly string[] = [],
+  barreras: readonly string[] = []
 ): string {
   const docs = buildDocsFirst('security', corpus)
   const cabecera =
@@ -42,6 +45,7 @@ export function buildScanPrompt(
     '',
     ...(bloque === '' ? [] : [bloque, '']),
     ...(memoria === '' ? [] : [memoria, '']),
+    ...(barreras.length === 0 ? [] : [...barreras, '']),
     'Reglas:',
     SCAN_RULES,
     '',

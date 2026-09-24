@@ -11,6 +11,9 @@ export const DEFENSAS_DEL_PROMPT: readonly string[] = [
   'src/domain/agent/capacidades-del-agente.ts',
   'src/domain/connectors/herramientas-del-grafo.ts',
   'src/domain/settings/docs-first-cabeceras.ts',
+  // Lo que el grafo NO ve y lo que el proyecto declara: derivadas de una medida (ADR-104).
+  'src/domain/settings/lo-que-el-grafo-no-ve.ts',
+  'src/domain/project/barreras-declaradas.ts',
   // Los tests derivados que cazan la desincronizacion, para que un fix no los afloje.
   'src/infrastructure/repair/prompt-refleja-los-args.test.ts',
   'src/domain/connectors/herramientas-del-grafo.test.ts',

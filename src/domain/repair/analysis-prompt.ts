@@ -36,6 +36,7 @@ export function buildAnalysisPrompt(t: Candidate, corpus: CorpusDescriptor, aten
     ...patronDelHallazgo(t, patrones),
     ...(t.intentos == null ? [] : ['', t.intentos]),
     ...(t.hermanos == null ? [] : ['', t.hermanos]),
+    ...(t.barreras === undefined || t.barreras.length === 0 ? [] : ['', ...t.barreras]),
     '',
     ...(docs === '' ? [] : [docs, '']),
     `En el grafo este proyecto se llama "${enElGrafo}" (deducido de su ruta; si no`,

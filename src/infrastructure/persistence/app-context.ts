@@ -10,6 +10,7 @@ import { createGitFileHistory } from '../git/file-history'
 import { headSha } from '../git/head-sha'
 import { createFsProbe } from '../omega/fs-probe'
 import { discoverCorpus } from '../project/discover-corpus'
+import { barrerasDeclaradasDelProyecto } from '../project/barreras-declaradas-del-proyecto'
 import { huellaDeConfig, readFortressConfig } from '../project/fortress-config'
 import { puertosDeAutoMejora } from './app-context-automejora'
 import { createGraphAnalyst } from '../repair/graph-analyst'
@@ -35,16 +36,15 @@ let context: AppContext | null = null
 /** Ensambla los adaptadores concretos detras de los puertos del dominio. */
 export function getAppContext(): AppContext {
   if (context) return context
-
   const db = getDatabase()
   const settings = createSqliteSettingsRepository(db)
   const propuestas = createSqliteRepairProposalRepository(db)
-
   context = {
     projects: createSqliteProjectRepository(db),
     corpus: { of: discoverCorpus },
     fortressConfig: readFortressConfig,
     huellaDeConfig,
+    barrerasDeclaradas: barrerasDeclaradasDelProyecto,
     findings: createSqliteFindingRepository(db),
     fileHistory: createGitFileHistory(),
     scans: createSqliteScanHistoryRepository(db),
