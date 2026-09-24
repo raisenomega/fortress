@@ -1,4 +1,5 @@
 import type { AgentId } from '../agent/agent'
+import { LO_QUE_EL_GRAFO_NO_VE } from './lo-que-el-grafo-no-ve'
 
 /**
  * Se inyecta en TODO prompt de agente. Usar el grafo (MCP codebase-memory) antes
@@ -13,12 +14,16 @@ import type { AgentId } from '../agent/agent'
  * genesis obedecia sobre la carpeta TEMPORAL en la que estaba, y el grafo acabo
  * con decenas de copias efimeras y sin el repo que importa. La indexacion tiene
  * su propia accion con gate (`index-graph`), que es donde debia estar sola.
+ *
+ * La BASE lleva lo que el grafo NO ve (ADR-104): las tres variantes lo heredan,
+ * y un rol que lo olvidara seria una cuarta variante sin medir.
  */
 const BASE =
   'GRAFO PRIMERO (no negociable): antes de leer archivos a mano, consulta el ' +
   'grafo del proyecto por el MCP codebase-memory. Si el proyecto no esta indexado, ' +
   'dilo y sigue leyendo a mano: NO lo indexes tu. Abre un archivo entero SOLO si ' +
-  'el grafo no responde.'
+  'el grafo no responde. ' +
+  LO_QUE_EL_GRAFO_NO_VE
 
 /** Chat general y agentes sin rol claro: la guia base con las tres herramientas. */
 export const GRAPH_FIRST =
