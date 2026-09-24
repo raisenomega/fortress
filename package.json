@@ -37,7 +37,9 @@
     "retipar:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/retipar-aplicar.ts",
     "medir:deriva": "node --import ./scripts/lib/cargar-ts.mjs scripts/medir-deriva.ts",
     "lote:juzgar": "node --import ./scripts/lib/cargar-ts.mjs scripts/lote-alias-juzgar.ts",
-    "lote:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/lote-alias-aplicar.ts"
+    "lote:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/lote-alias-aplicar.ts",
+    "severidad:plan": "node --import ./scripts/lib/cargar-ts.mjs scripts/severidad-plan.ts",
+    "severidad:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/severidad-aplicar.ts"
   },
   "overrides": {
     "nanoid": "^3.3.17"

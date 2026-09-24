@@ -1,3 +1,4 @@
+import { esTipoDeAuditoria } from './defectos-de-auditoria'
 import type { DetectedFinding } from './detected-finding'
 import { leerEjes, type EjesCrudos } from './ejes-de-severidad'
 import { bandaDe } from './severidad-derivada'
@@ -19,4 +20,19 @@ export function conSeveridadDerivada(crudos: EjesCrudos, base: DetectedFinding):
   const ejes = leerEjes(crudos)
   if (ejes === null) return { ...base, sinEjes: true }
   return { ...base, ...ejes, severity: bandaDe(ejes), severidadDelModelo: base.severity }
+}
+
+/**
+ * ADR-103 §2 — la tabla de ADR-080 es de seguridad y no juzga lo que no es de
+ * seguridad. Medido: el contrato obligaba a elegir ejes para todo, el modelo los
+ * inventaba para un contraste (`anonimo·disponibilidad·explotable-hoy`) y la
+ * tabla lo subia a HIGH; el mismo 4,08:1 salio HIGH y LOW segun los ejes de esa
+ * vez. Para los seis tipos de auditoria manda la palabra del modelo y los ejes
+ * que vengan de mas se ignoran: la excepcion es de FORTRESS, no del modelo. Se
+ * marca `ejesNoAplican`, nunca `sinEjes`, que sigue midiendo la calibracion.
+ */
+export function conSeveridadSegunTipo(crudos: EjesCrudos, base: DetectedFinding): DetectedFinding {
+  if (base.tipo !== undefined && esTipoDeAuditoria(base.tipo))
+    return { ...base, ejesNoAplican: true }
+  return conSeveridadDerivada(crudos, base)
 }

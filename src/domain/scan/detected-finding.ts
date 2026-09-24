@@ -39,4 +39,7 @@ export interface DetectedFinding {
   /** El bloque vino sin ejes, o con uno fuera del vocabulario: la severidad es
    *  la palabra del modelo, sin derivar. */
   readonly sinEjes?: true
+  /** Tipo de auditoria (ADR-103): los ejes de seguridad no le aplican y manda
+   *  la palabra del modelo. Aparte de `sinEjes`, que mide la calibracion. */
+  readonly ejesNoAplican?: true
 }

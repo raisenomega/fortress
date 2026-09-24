@@ -1,7 +1,7 @@
 import { err, ok, type Result } from '../shared/result'
 import { isSeverity } from '../shared/severity'
 import type { DetectedFinding } from './detected-finding'
-import { conSeveridadDerivada } from './hallazgo-con-ejes'
+import { conSeveridadSegunTipo } from './hallazgo-con-ejes'
 import { aTipoDeDefecto } from './tipo-de-defecto'
 
 const JSON_FENCE = /```json\s*([\s\S]*?)```/g
@@ -35,8 +35,9 @@ function toFinding(entry: unknown): DetectedFinding | null {
 
   // Un tipo fuera del vocabulario cae a `otro` y un simbolo ausente queda
   // vacio: no se inventa ninguno de los dos, y el escaneo no se tira por eso.
-  // Los ejes siguen la misma regla: sin ellos, la palabra del modelo manda.
-  return conSeveridadDerivada(raw, {
+  // Los ejes siguen la misma regla: sin ellos, la palabra del modelo manda. Y
+  // para los tipos de auditoria ni se miran (ADR-103): el tipo ya esta resuelto.
+  return conSeveridadSegunTipo(raw, {
     severity: raw.severity,
     title: raw.title.trim(),
     file: typeof raw.file === 'string' ? raw.file : '',

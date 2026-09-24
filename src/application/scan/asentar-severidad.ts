@@ -34,6 +34,9 @@ export function asentarSeveridadDerivada(
   const conEjes = findings.filter((f) => f.severidadDelModelo !== undefined)
   const distintas = conEjes.filter((f) => f.severidadDelModelo !== f.severity)
   const sinEjes = findings.filter((f) => f.sinEjes === true).length
+  // ADR-103: las familias de auditoria van con su palabra y NO son "sin ejes";
+  // se cuentan aparte para que el sin-ejes siga midiendo lo que media.
+  const conSuPalabra = findings.filter((f) => f.ejesNoAplican === true).length
   if (distintas.length === 0 && sinEjes === 0) return
 
   try {
@@ -42,7 +45,7 @@ export function asentarSeveridadDerivada(
       agentId: ESCANER,
       kind: 'nota',
       verdict: 'info',
-      summary: `Severidad por ejes: ${distintas.length} de ${conEjes.length} con ejes difieren de lo que dijo el modelo; ${sinEjes} sin ejes.`, // prettier-ignore
+      summary: `Severidad por ejes: ${distintas.length} de ${conEjes.length} con ejes difieren de lo que dijo el modelo; ${sinEjes} sin ejes; ${conSuPalabra} de auditoria con su palabra.`, // prettier-ignore
       evidence: distintas
         .map(
           (f) =>

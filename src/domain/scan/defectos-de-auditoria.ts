@@ -30,3 +30,13 @@ export const DEFECTOS_DE_AUDITORIA = {
   /** 4 filas. */
   'criptografia-debil': 'cifrado o hash que no protege: sin autenticacion, sal fija, algoritmo roto, o dato sensible en claro donde deberia ir cifrado.' // prettier-ignore
 } as const
+
+/**
+ * Si un tipo es de auditoria (ADR-103 §2): para estos seis la tabla de
+ * severidad de ADR-080 NO se aplica, porque sus ejes son de seguridad y no
+ * describen un contraste, un label o un dato personal sin consentimiento. Se
+ * pregunta por clave propia, no con `in`: `toString` no es una familia.
+ */
+export function esTipoDeAuditoria(tipo: string): boolean {
+  return Object.hasOwn(DEFECTOS_DE_AUDITORIA, tipo)
+}
