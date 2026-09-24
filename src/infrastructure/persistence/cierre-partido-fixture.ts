@@ -1,5 +1,6 @@
 import { createSqliteParadaRunRepository } from './sqlite-parada-run-repository'
 import type { AppContext } from '@application/context'
+import { SIN_BARRERAS } from '@domain/project/barreras-declaradas'
 import type { Project } from '@domain/project/project'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
 import type { ScanOutcome } from '@domain/scan/scanner'
@@ -15,17 +16,19 @@ import { createSqliteScanHistoryRepository } from './sqlite-scan-history-reposit
 export const PROYECTO = 'p1'
 export const PROJECT = { id: PROYECTO, path: '/tmp/p1', name: 'p1' } as Project
 
-export const SIN_FACTURA = {
-  inputTokens: 0,
-  outputTokens: 0,
-  cacheReadTokens: 0,
-  cacheCreationTokens: 0,
-  costUsd: 0,
-  numTurns: 0
-}
+// prettier-ignore
+export const SIN_FACTURA = { inputTokens: 0, outputTokens: 0, cacheReadTokens: 0, cacheCreationTokens: 0, costUsd: 0, numTurns: 0 }
 
 export function corrida(findings: readonly DetectedFinding[]): ScanOutcome {
-  return { findings, durationMs: 1234, usage: SIN_FACTURA, tools: [], edits: [], texto: '', notas: [] }
+  return {
+    findings,
+    durationMs: 1234,
+    usage: SIN_FACTURA,
+    tools: [],
+    edits: [],
+    texto: '',
+    notas: []
+  }
 }
 
 export interface Bench extends Consultas {
@@ -60,6 +63,7 @@ export function crearBench(): Bench {
     informeWriter: { write: (): void => undefined },
     // El banco no tiene repo git: null es la verdad, y el informe la dice.
     headSha: () => null,
+    barrerasDeclaradas: () => SIN_BARRERAS,
     transaction: (work: () => void) => db.transaction(work)()
   } as unknown as AppContext
 

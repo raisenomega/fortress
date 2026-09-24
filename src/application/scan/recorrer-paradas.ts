@@ -1,3 +1,4 @@
+import { bloqueDeBarreras } from '@domain/project/barreras-declaradas'
 import type { Project } from '@domain/project/project'
 import type { Manifiesto } from '@domain/scan/manifiesto'
 import { campanaDe } from '@domain/scan/campana-declarada'
@@ -32,8 +33,7 @@ export async function recorrerParadas(
   deps: RecorridoDeps
 ): Promise<Result<ScanSummary>> {
   const paradas = ordenDelRecorrido(manifiesto.paradas)
-  // Los de CARPETA bajan a TODAS las paradas de carpeta; el de un tema lo lleva
-  // la parada de tema, que es una por modulo y va al final del recorrido.
+  // Los de CARPETA bajan a TODAS las de carpeta; el de un tema, a la suya, al final.
   const temas = modulosDeParada(manifiesto.modulosAplicables)
   const { scanId, at, cerrar } = abrirRecorrido(context, project, salidas, {
     paradasTotal: paradas.length,
@@ -44,6 +44,7 @@ export async function recorrerParadas(
   let acumulado = NADA_RECORRIDO
   let indice = 0
   const notas = notasDelRecorrido(context, project)
+  const barreras = bloqueDeBarreras(context.barrerasDeclaradas(project.path)) // por proyecto: una vez, a todas
 
   for (const parada of paradas) {
     if (deps.cancelado()) {
@@ -51,12 +52,11 @@ export async function recorrerParadas(
       return ok(cerrar('abortado', acumulado))
     }
 
-    const salida = await escanearParada(scanner, project, parada, salidas.progreso, temas, context.findings.listMemory(project.id)) // prettier-ignore
-    // Un fallo del escaner cierra el recorrido con lo que SI se audito, en vez
-    // de dejar la fila ABIERTA para siempre. `fallo` y no `abortado`: el
-    // operador no paro nada, la maquina se rompio, y juntarlos haria invisible
-    // cuantas veces revienta el escaner. La factura del intento ya quedo
-    // asentada aparte (asentarIntentoFallido).
+    const salida = await escanearParada(scanner, project, parada, salidas.progreso, temas, context.findings.listMemory(project.id), barreras) // prettier-ignore
+    // Un fallo del escaner cierra el recorrido con lo que SI se audito, en vez de
+    // dejar la fila ABIERTA para siempre. `fallo` y no `abortado`: el operador no
+    // paro nada, la maquina se rompio, y juntarlos haria invisible cuantas veces
+    // revienta el escaner. La factura ya quedo asentada (asentarIntentoFallido).
     if (!salida.ok) {
       notas.volcar()
       cerrar('fallo', acumulado, salida.error)

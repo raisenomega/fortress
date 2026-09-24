@@ -32,6 +32,8 @@ function alcanceDe(
  * sea la clase, que es de donde cuelgan el grafo, el corpus y la identidad de
  * los hallazgos (ADR-082, Enmienda 1). `vivas` es la memoria del proyecto: de
  * ella salen las registradas del alcance de esta parada (ADR-101, palanca 1).
+ * `barreras` es el bloque ya formateado de lo que el proyecto declara
+ * (ADR-104): el mismo en todas las paradas, porque se declara por proyecto.
  */
 export function escanearParada(
   scanner: Scanner,
@@ -39,7 +41,8 @@ export function escanearParada(
   parada: Parada,
   progreso: ProgresoDelRecorrido,
   deCarpeta: readonly ModuloAuditoria[] = [],
-  vivas: readonly FilaRegistrada[] = []
+  vivas: readonly FilaRegistrada[] = [],
+  barreras: readonly string[] = []
 ): ReturnType<Scanner['scan']> {
   const alcance = alcanceDe(parada, deCarpeta)
   return scanner.scan(
@@ -48,7 +51,8 @@ export function escanearParada(
       projectName: project.name,
       projectId: project.id,
       ...alcance,
-      registradas: registradasDeLaParada(vivas, alcance.rutas)
+      registradas: registradasDeLaParada(vivas, alcance.rutas),
+      barreras
     },
     progreso.texto
   )

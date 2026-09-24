@@ -33,6 +33,8 @@ export interface ScanRequest {
    * el prompt; ni la clave ni el sync lo miran.
    */
   readonly registradas?: readonly string[]
+  /** Las barreras que el proyecto declara, ya formateadas (ADR-104). Mismo carril: solo el prompt. */
+  readonly barreras?: readonly string[]
 }
 
 export interface ScanOutcome {
