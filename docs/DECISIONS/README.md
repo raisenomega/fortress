@@ -133,6 +133,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-100](adr-100-seis-tipos-de-auditoria-para-lo-que-fortress-ya-encuentra.md) | Seis tipos de auditoría para lo que FORTRESS ya encuentra: accesibilidad, privacidad, integridad de negocio, continuidad, dependencias y criptografía | 2026-09-22 | Aceptada | Escaneo |
 | [ADR-101](adr-101-la-memoria-del-escaner-y-el-alias-de-clave.md) | La memoria del escáner y el alias de clave: el mismo defecto deja de nacer dos veces, sin tocar la identidad | 2026-09-22 | Aceptada | Escaneo |
 | [ADR-102](adr-102-el-arreglo-fuera-de-la-correa.md) | El arreglo fuera de la correa: el analista dice dónde va el fix y el Motor no paga por generar lo que no cabe | 2026-09-23 | Aceptada | Motor |
+| [ADR-103](adr-103-la-severidad-de-las-familias-de-auditoria.md) | La severidad de las familias de auditoría: los ejes de seguridad no juzgan lo que no es de seguridad | 2026-09-23 | Propuesta | Escaneo |
 
 ## Referencias
 
