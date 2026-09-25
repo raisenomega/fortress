@@ -393,6 +393,38 @@ vacío, no existe ningún `.bak` en la máquina y los `deny` siguen cubriendo so
 
 ---
 
+### 5.5 Sangrado medido: jueces huérfanos de la suite de integración (2026-08-26 → 2026-09-24)
+
+Destapado el 2026-09-24 al confirmar la huella de la caché del grafo tras
+mergear la pieza B del arco #4. El check «Loop blindado» de la suite de
+integración enciende un loop real sobre el repo propio (`projects.self()`) y
+revoca la confianza unas líneas después. Entre medias el motor ya iba hacia el
+escaneo: el juez del alcance (`claude -p "Clasificas el ALCANCE…"`) nacía sobre
+el repo, y la parada se perdía por una carrera —`tryBeginRun` borra la marca de
+cancelado, o el hijo nace después de que `killChildrenOf` matara a los vivos—.
+La app salía sin matar hijos: el juez quedaba huérfano (reparentado a systemd),
+70 ms o hasta dos minutos según la carrera, con un `codebase-memory-mcp` colgado
+de él vigilando el repo y reindexándolo al ver cambios (14:11:20Z del 24-sep).
+
+**Medido, no estimado**: los logs MCP del CLI con cwd en el repo
+(`~/.cache/claude-cli-nodejs/…/mcp-logs-codebase-memory/`) suman **275
+conexiones desde el 26 de agosto**; 170 viven entre 60 y 180 s, la forma del
+juez (88 a 124 s medidos), en 171 sesiones distintas; 89 viven más de 180 s
+(turnos legítimos) y 16 menos de un minuto. Ocho el 24-sep solo. Cada una es un
+`claude -p` real sobre el repo, en el plan del operador, sin que nadie lo
+pidiera. Las sondas `claude --version` y `claude auth status` quedan
+descartadas: no abren MCP (probado desde cwd vacío y desde el repo).
+
+**Cerrado en `main`** (merge `f836f14`, 3 commits, 3 mutantes muertos, gate 6/6
+con las tres pruebas): `loopScan` honra la parada ANTES de reservar el carril
+(`loopParado`, que pregunta solo «lo pararon»); el agente mata al hijo al
+registrarlo si su proyecto ya está cancelado; y `will-quit` pasa por `alSalir`,
+que mata a todos los hijos antes de cerrar la base. Lección, la de §4 y §5.4:
+un test que enciende algo real tiene que apagarlo, y la app no puede fiarse de
+que sus hijos mueran con ella.
+
+---
+
 ## 6. Deudas estructurales
 
 | deuda                                 | evidencia                                                                   | qué la desbloquea                                                                                                                                    |

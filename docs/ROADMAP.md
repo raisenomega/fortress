@@ -359,10 +359,15 @@ suite de integración enciende un loop real sobre el repo propio, el motor lanza
 el juez del alcance (`claude -p`) antes de que llegue la parada, y la app sale
 sin matar a sus hijos: el juez queda huérfano hasta dos minutos con el servidor
 del grafo vigilando el repo, y reindexa cuando ve cambios (medido: 14:11:20Z
-del 24-sep). Arreglado en `fix/huerfanos-del-loop` (pendiente de merge): la
-parada se honra antes de reservar el carril y al nacer el hijo, y `will-quit`
-mata a todos los hijos. Trade99PRO sí está en disco pero no es repositorio git
-ni de confianza: anotado en DEUDAS §6.
+del 24-sep). **Arreglado y en `main`** (merge `f836f14`, gate 6/6 sobre `main`
+con las tres pruebas: 0 huérfanos tras el gate, 0 conexiones MCP nuevas desde
+el repo, huella de los ocho `.db` idéntica): la parada se honra antes de
+reservar el carril, un hijo que nace tras la parada muere al nacer, y
+`will-quit` mata a todos los hijos. El sangrado, medido en DEUDAS §5.5: 275
+conexiones del grafo desde el repo entre el 26 de agosto y el 24 de septiembre,
+170 de ellas con la vida del juez (60 a 180 s), jueces `claude -p` gastando el
+plan sin que nadie los pidiera. Trade99PRO sí está en disco pero no es
+repositorio git ni de confianza: anotado en DEUDAS §6.
 
 **Cerrado el 2026-09-24.** A: el agente sabe qué no ve el grafo y qué barreras
 declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
