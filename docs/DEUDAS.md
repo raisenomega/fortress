@@ -663,3 +663,99 @@ accesibilidad.
 **Lo que este documento recoge es lo que el escáner NO puede ver**: decisiones
 pendientes, contratos a medias y defectos de comportamiento que solo aparecen
 corriendo el producto.
+
+---
+
+## 8. Cazado al poner la documentación al día (2026-09-24), por prioridad
+
+Siete hallazgos al recorrer el código de `main@052638b` para actualizar
+FUNCIONAMIENTO-ACTUAL, GLOSSARY y este documento. Autorizados por Jojo el
+2026-09-24, con la lectura del CTO: **el primero no es una errata de
+documentación, es un agujero del aislamiento con ADR ya aceptado.** Ninguno se
+inventó: cada uno lleva lo que se midió y dónde.
+
+### 8.1 ALTO — Gap de seguridad: la clase A corre con el HOME real, y su grafo ve a todos los clientes (ADR-095 pieza B aceptada, NO construida)
+
+**Qué es.** El sandbox de ADR-092 encerró la clase B en `bwrap` con el HOME
+tapado por un tmpfs (`src/domain/sandbox/flags-de-bwrap.ts:63`). La clase A
+—el turno del CLI, `claude -p`— no: el proceso se lanza con
+`env: buildEnv(...)`, que copia `process.env` entero, HOME incluido
+(`src/infrastructure/claude-code/claude-code-agent.ts:54`,
+`src/infrastructure/claude-code/build-env.ts:38`). El `--settings` del sandbox
+del CLI niega la lectura del HOME **a los comandos que el agente ejecuta**
+(`src/domain/sandbox/config-del-cli.ts:14,44`), pero el propio CLI y sus
+servidores MCP corren fuera de esa correa: el `codebase-memory-mcp` del turno
+resuelve su caché en `$HOME/.cache/codebase-memory-mcp`
+(`src/infrastructure/graph/read-graph-index.ts:8`) y ve los `.db` de **todos**
+los clientes. Y no solo ve: el 0.9.0 pone un vigilante sobre su cwd al arrancar
+y reindexa el proyecto del turno cuando cambia (reproducido aislado el
+2026-09-24 con HOME propio: `watcher.changed → watcher.reindex` con el servidor
+vivo unos segundos tras un cambio), sin que `graph_indexed_at_sha` se entere: el
+escenario de «turno vivo» que `decideReindex` evita, hecho por el servidor por su
+cuenta.
+
+**Evidencia.** 134 carpetas de logs MCP bajo
+`~/.cache/claude-cli-nodejs/*repair-worktrees-*/mcp-logs-codebase-memory/`:
+turnos del motor conectando el grafo desde worktrees, con el HOME real. La
+garantía de producto «el código de un cliente no ve al de otro» tiene esta
+excepción en clase A. **No medido en un turno real** (que un agente consulte de
+hecho el `.db` de otro cliente, o que el vigilante reescriba a mitad de un
+checkpoint transitorio): la mecánica está probada, el daño en vivo no.
+
+**Qué lo cierra.** ADR-095 pieza B, «LA PARED: un `HOME` por turno con un solo
+grafo dentro»
+(`docs/DECISIONS/adr-095-el-grafo-solo-responde-del-proyecto-del-turno-y-los-guardianes-dejan-de-mentir.md:148`),
+**aceptada el 2026-09-18 y sin construir**. Es una pieza pendiente del
+aislamiento, para retomar con el sandbox o con el arco #5; no una nota.
+
+### 8.2 ALTO — Errata: SECURITY-MODEL.md no conoce el sandbox
+
+`docs/SECURITY-MODEL.md` tiene **cero** menciones de caja, `bwrap`, sandbox o
+ADR-092 (medido con grep el 2026-09-24); su «Alcance» (línea 12) y su «Lo que NO
+cubre este modelo» (línea 231) están escritos como antes del arco #1. Un lector
+del modelo de seguridad no vería la contención que existe desde `cd6a510`.
+**Debe actualizarse con el sandbox, no solo anotarse**: gesto pendiente, del
+mismo corte que los tres documentos del 2026-09-24.
+
+### 8.3 MEDIA — Errata: TAXONOMIA-DE-DEFECTOS.md sin las seis familias de auditoría
+
+`docs/TAXONOMIA-DE-DEFECTOS.md` se presenta como «el vocabulario cerrado de
+tipos» (línea 3) y el glosario la señala como la lista completa
+(`docs/GLOSSARY.md:434`), pero no contiene `accesibilidad`, `privacidad`,
+`integridad-de-negocio`, `continuidad-y-backups`, `dependencia-vulnerable` ni
+`criptografia-debil` (cero menciones), que ADR-100 sumó al vocabulario
+(`src/domain/scan/defectos-de-auditoria.ts:19-31`).
+
+### 8.4 MEDIA — Errata: DATA-MODEL.md sin `finding_aliases`, y `has_graph` con el significado viejo
+
+`docs/DATA-MODEL.md` no menciona la tabla `finding_aliases` (cero menciones),
+creada en `src/infrastructure/persistence/schema-aliases.ts:16` (ADR-101), y
+describe `has_graph` solo como columna con default 0 (línea 115): desde
+`686b212` significa «hay índice en disco» y la alinea el reconcilio (§5.6).
+
+### 8.5 BAJO — Gap: el pre-vuelo lee solo `.claude/settings.json`
+
+`leerSettingsDelProyecto` lee únicamente
+`join(projectPath, '.claude', 'settings.json')`
+(`src/infrastructure/project/barreras-del-proyecto.ts:46`). Un hook `PreToolUse`
+declarado en `.claude/settings.local.json` es invisible para el pre-vuelo y para
+el bloque de barreras declaradas (ADR-104). Medido: hoy ningún proyecto
+registrado tiene hooks en `settings.local.json` (este repo solo tiene ese fichero,
+sin hooks; el settings global del operador tampoco los tiene). Real, bajo.
+
+### 8.6 BAJO — Gap de diseño: «Loop blindado» arranca un agente real en cada integración
+
+`scripts/checks/loop-guard-checks.cjs:42-49` registra el repo propio
+(`projects.self()`) y lo enciende con `setLoopEnabled(true)`, que es `startLoop`
+→ `runEngine` (`src/infrastructure/loop/loop-controller.ts:44-53`): un ciclo real
+con un `claude -p` sobre el repo. Con `f836f14` ya no fuga —el juez nace y muere
+al nacer, y en el gate sobre `main` no abrió ninguna conexión MCP (275 → 275)—,
+pero el diseño del test sigue lanzando un agente real por corrida. Cuestionable,
+no fuga.
+
+### 8.7 BAJO — Errata con matiz: ARCHITECTURE.md y OVERVIEW.md sin la caja ni el pre-vuelo
+
+Cero menciones de sandbox, `bwrap`, caja, pre-vuelo o barreras en
+`docs/ARCHITECTURE.md` y `docs/OVERVIEW.md` (medido con grep). Son documentos de
+vista general y **quizás no deban** entrar en ese detalle: queda como pregunta,
+no como obligación. **Decisión pendiente de Jojo.**
