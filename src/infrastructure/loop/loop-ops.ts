@@ -4,6 +4,7 @@ import { runScan } from '@application/scan/run-scan'
 import { err, ok, type Result } from '@domain/shared/result'
 import { endRun, isCancelled } from '../run-control'
 import { guardRun } from '../run-guard'
+import { loopParado } from './loop-registry'
 import { armarEscaneo } from '../scan/armar-escaneo'
 import { scanLogWriter } from '../scan/write-scan-log'
 
@@ -13,6 +14,10 @@ export async function loopScan(
   projectId: string,
   onProgress: (delta: string) => void
 ): Promise<Result<number>> {
+  // ANTES de reservar: `tryBeginRun` borra la marca de cancelado, y una parada
+  // que llegara aqui se perdia. Paso el 2026-09-24: el juez del alcance se lanzo
+  // sobre el repo propio con el loop ya parado, y quedo huerfano al salir la app.
+  if (loopParado(projectId)) return err('el loop se detuvo antes de escanear')
   const busy = guardRun(context, projectId)
   if (busy !== null) return err(busy)
 

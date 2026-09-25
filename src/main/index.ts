@@ -8,7 +8,7 @@ import { resumeLoops } from '@infrastructure/loop/loop-controller'
 import { bindLoopWindow } from '@infrastructure/loop/loop-registry'
 import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
 import { registerIpcHandlers } from '@infrastructure/ipc/register-handlers'
-import { closeDatabase } from '@infrastructure/persistence/database'
+import { alSalir } from '@infrastructure/system/al-salir'
 import { augmentPath } from '@infrastructure/system/augment-path'
 import { capturarFallo, instalarEmbudoDeArranque } from '@infrastructure/system/embudo-de-arranque'
 import { sumideroDeFallos } from '@infrastructure/system/sumidero-de-fallos'
@@ -71,5 +71,5 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-// Cerrar la base explicitamente asegura que WAL haga checkpoint al salir.
-app.on('will-quit', closeDatabase)
+// Sin hijos vivos (ninguno sobrevive a la app) y con la base cerrada (WAL checkpoint).
+app.on('will-quit', alSalir)

@@ -38,6 +38,11 @@ export function cancelLoop(projectId: string): void {
   if (handle) handle.cancelled = true
 }
 
+/** Solo si el humano lo PARO. Distinto de `isLoopCancelled`, que tambien dice si ya no corre. */
+export function loopParado(projectId: string): boolean {
+  return loops.get(projectId)?.cancelled === true
+}
+
 /** Cancelado si el humano lo paro o si ya no corre (fuera del mapa). */
 export function isLoopCancelled(projectId: string): boolean {
   const handle = loops.get(projectId)
