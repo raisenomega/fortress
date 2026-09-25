@@ -425,6 +425,30 @@ que sus hijos mueran con ella.
 
 ---
 
+### 5.6 `has_graph`, la contabilidad del grafo que mentía: medido y cerrado (2026-09-24)
+
+Medido sobre la base viva en solo lectura: `has_graph` estaba en **0 en siete
+de ocho proyectos**, seis de ellos con índice en disco y `graph_indexed_at_sha`
+puesto, y en **1 en el único sin índice** (mailbd, cuyo `.db` desapareció cuando
+la caché entera renació el 2026-08-29 sin que conste quién la borró). La causa no
+era el slug ni el store mixto: **dos escritores para una verdad y ningún
+lector**. El 1 lo ponía solo `installGraph` (el botón de instalar) por
+`setGraph`; el reconcilio por sha, que es como se indexaron los seis, escribía
+`graph_indexed_at_sha` por `markSuccess` y nunca tocaba la bandera; y la decisión
+comparaba shas sin mirar si el `.db` existía, así que mailbd salió «alineado con
+HEAD» en cada arranque durante un mes.
+
+**Cerrado en `main`** (merge `686b212`, 9 mutantes muertos): `decideReindex`
+recibe `indiceEnDisco` y un índice ausente se reindexa aunque el sha coincida;
+`clearGraph` es el inverso de `setGraph`; el reconcilio alinea la bandera con el
+disco antes de decidir y el éxito del runner exige el `.db`. Verificado con el
+código real sobre una copia de la viva: seis proyectos 0→1 con sus nodos, mailbd
+1→1 (indexado en la máquina con el binario fijado: 1232 nodos), Trade99PRO 0→0
+(sin repo git, §6). En la viva cambia al primer arranque con el binario
+reconstruido.
+
+---
+
 ## 6. Deudas estructurales
 
 | deuda                                 | evidencia                                                                   | qué la desbloquea                                                                                                                                    |
@@ -441,6 +465,7 @@ que sus hijos mueran con ella.
 | **El store del grafo lleva 4 tablas de la 0.11.0** | la sesión de Claude Code del operador arrancaba el grafo con `npx -y codebase-memory-mcp` sin versión (`~/.claude.json`) y un daemon 0.11.0 escribió en la caché real `index_coverage`, `index_coverage_meta`, `lsp_surface` y `store_meta` (medido el 2026-09-24); la 0.9.0 fijada las ignora, mismas columnas en `nodes`, `edges`, `file_hashes` y `projects`. El 2026-09-24 la sesión quedó fijada al binario del PATH (0.9.0), el daemon parado y las cachés de npx borradas; huella de los 7 SQLite y del binario idéntica antes y después | inofensivas; si algún día se sube a 0.11.0 (arco futuro), ya están. No borrarlas a mano |
 | **Handlers inline sin descomponer en el grafo** | `serve(async (req) => …)` de Deno y `http.createServer((req, res) => …)` dan UN solo nodo: el cuerpo del handler no tiene símbolos (ensayo-fail-closed: 62 nodos y 1 Function; mailbd: 6 observaciones sobre las edge functions). Hueco de GRANULARIDAD, no de cobertura; igual en 0.9.0 y 0.11.0. Medido el 2026-09-24, ADR-104 §4 | medir cuánto pesa (hallazgos vivos en handlers inline y cuántas lecturas cuesta) antes de tocarlo; firmado en ADR-104 casilla 5: no va al prompt |
 | Trade99PRO sin índice del grafo | Está en disco (`~/Escritorio/Trade99PRO`, 27 275 ficheros) pero NO es un repositorio git y no es de confianza: el reconcilio salta con «sin repo git» y el botón de instalar exige confianza, así que sus 19 vivas quedan invisibles al grafo (medido 2026-09-24, pieza B del arco #4). | Un `git init` del operador en ese proyecto, o un runner que indexe sin exigir sha (el binario no necesita git). |
+| **La columna «dónde se arregla» (ADR-102 §1.5)** | el analista ya declara `arreglo` (fichero y línea) y el guard lo contrasta con la correa; no se persiste como columna propia ni se pinta en la fila: hoy solo vive dentro del JSON del análisis de la propuesta (medido 2026-09-23). | Un consumidor que la lea —la fila del hallazgo o el selector—; hasta entonces es infraestructura por adelantado, como el corte 2 y el defecto a propósito (§6.3). |
 
 ### 6.1 La defensa que falta: ficheros fuente opacos
 

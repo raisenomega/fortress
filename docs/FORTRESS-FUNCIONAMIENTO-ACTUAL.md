@@ -1,7 +1,17 @@
-# FORTRESS — funcionamiento real a `main@f2cc7f8`
+# FORTRESS — funcionamiento real a `main@052638b`
 
-**Fecha del recorrido:** 2026-09-07, **ampliado el 2026-09-19** · **Commit de
-referencia:** `f2cc7f8` (2026-09-19)
+**Fecha del recorrido:** 2026-09-07, **ampliado el 2026-09-19 y el 2026-09-24** ·
+**Commit de referencia:** `052638b` (2026-09-24)
+
+> ### ⚠ ACTUALIZACIÓN — 2026-09-24: cinco arcos que el cuerpo de abajo NO conoce
+>
+> **Las secciones 1 a 11 se escribieron sobre `main@f2cc7f8` (2026-09-19).** Entre
+> aquel commit y `052638b` van cinco arcos del camino a grado bancario: el sandbox
+> (ADR-092), el prompt que refleja la verdad, el contrato del hallazgo (ADR-084,
+> 099, 100, 101, 102 y 103), el grafo (ADR-104 y la higiene del índice) y el cierre
+> de los agentes huérfanos del loop. **La §12 es nueva y manda sobre el resto**
+> donde se contradigan. Las erratas que esos arcos dejaron en §3, §9, §10 y §11
+> están corregidas en el sitio, tachadas y con su sha.
 
 > ### ⚠ ACTUALIZACIÓN — 2026-09-19: lo que el cuerpo de abajo NO conoce
 >
@@ -32,6 +42,7 @@ referencia:** `f2cc7f8` (2026-09-19)
 9. [Alcance y límites actuales](#9-alcance-y-límites-actuales)
 10. [El Terminal autónomo: el juicio antes del código](#10-el-terminal-autónomo-el-juicio-antes-del-código) — **2026-09-19**
 11. [Glosario](#11-glosario)
+12. [Lo que main hace desde el 21 de septiembre](#12-lo-que-main-hace-desde-el-21-de-septiembre-a-052638b)
 
 ---
 
@@ -142,7 +153,7 @@ Un hallazgo tiene **dos ejes ortogonales** y el dominio insiste en no mezclarlos
 
 ### Nacer
 
-Un escaneo produce filas con identidad estable `fichero│tipo│símbolo` (`src/domain/project/finding-identity.ts:29-31`; ADR-067). Si esa identidad ya existe en el proyecto —viva o extinta— **no se inserta una segunda**: se refresca (`finding-writes.ts:29-33`; `SELECT_BY_IDENTITY` no filtra por ciclo de vida, `finding-sql.ts:39`). El refresco por defecto **revive**: `lifecycle = 'ACTIVE', resolved_at = NULL` (`finding-sql.ts:53-55`). Consecuencia medida y documentada: un proyecto que nace bajo ADR-067 no acumula duplicados de identidad (ADR-071, adenda del 2026-09-06).
+Un escaneo produce filas con identidad estable ~~`fichero│tipo│símbolo` (ADR-067)~~ **`fichero│línea│tipo`** (`src/domain/project/finding-identity.ts`, `findingIdentity`; ADR-084, en `main` desde `b4eed4a`: la ruta y la línea salen del disco, el tipo de una lista cerrada, y el símbolo se guarda como dato; §12.3). Si esa identidad ya existe en el proyecto —viva o extinta— **no se inserta una segunda**: se refresca (`finding-writes.ts:29-33`; `SELECT_BY_IDENTITY` no filtra por ciclo de vida, `finding-sql.ts:39`). El refresco por defecto **revive**: `lifecycle = 'ACTIVE', resolved_at = NULL` (`finding-sql.ts:53-55`). Consecuencia medida y documentada: un proyecto que nace bajo ADR-067 no acumula duplicados de identidad (ADR-071, adenda del 2026-09-06).
 
 ### `ACTIVE` — y por qué sigue en el tablero aunque el escaneo no lo nombre
 
@@ -384,7 +395,7 @@ Es el bucle por el que FORTRESS observa sus propios defectos trabajando en otros
 
 ### 9.2 Qué NO hace
 
-- **No encierra al código ajeno.** El gate y el CLI *acotan el entorno* —quitan las llaves de la sesión viva— pero el código del repo auditado *"sigue corriendo con el usuario y ve el disco entero"*; contener de verdad *"exige un sandbox, y eso es otra pieza"* (`gate-env.ts:32-36`; `build-env.ts:12-19`).
+- ~~**No encierra al código ajeno.**~~ **Desde ADR-092 (`cd6a510`, 2026-09-21) lo encierra en dos clases** (§12.1): el turno del CLI corre con la correa del sandbox del propio CLI (lectura negada al HOME y a los otros discos, red solo a los registros de paquetes, fail-closed) y el gate corre dentro de una caja `bwrap` con el HOME vacío y sin red salvo el proxy de registros. Lo que la caja deja abierto está medido en DEUDAS §6.2.
 - **No mide el árbol después de integrar.** Mide antes (ADR-069); lo que rompe tras el merge no lo detecta nadie (deuda registrada como arco).
 - **No hace push por sí misma**, en ningún modo (§2.5).
 - **No integra en el repo propio por ninguna vía automática** (§5.3).
@@ -518,12 +529,13 @@ al modelo que la aplicara a mano (`domain/settings/instruccion-de-modo.ts`).
 en [DEUDAS.md](DEUDAS.md)**, con evidencia y orden de arreglo. Los dos que más
 cambian lo de arriba:
 
-- **La aprobación de OMEGA no caduca**: `olvidarAprobacion` no tiene llamadores.
-- **El turno de plan del lote se cree en supervisado**, y eso además le bloquea
-  el grafo (`permission-mode.ts:26` da `'plan'`, que mata el MCP).
+- ~~**La aprobación de OMEGA no caduca**: `olvidarAprobacion` no tiene llamadores.~~ **Cerrado** `1256620` (DEUDAS §1).
+- ~~**El turno de plan del lote se cree en supervisado**, y eso además le bloquea
+  el grafo (`permission-mode.ts:26` da `'plan'`, que mata el MCP).~~ **Cerrado** `3ff4186` (DEUDAS §1).
 
-Y sigue pendiente **ADR-092, el sandbox**: sin él, Bash libre (ADR-093, pieza 3)
-está bloqueado, y con él la verificación de stacks que no son Node.
+~~Y sigue pendiente **ADR-092, el sandbox**.~~ **ADR-092 está en `main` desde el
+2026-09-21** (`cd6a510`; §12.1). Bash libre (ADR-093, pieza 3) sigue siendo otro
+arco, y la verificación de stacks que no son Node sigue en DEUDAS §6.
 
 ---
 
@@ -541,14 +553,14 @@ Términos propios de este código, con su significado **real** y dónde está de
 - **Confianza (`trusted`)** — Permiso para **ejecutar** código del repo auditado; leer no la exige (`confianza.ts`; ADR-044).
 - **Contaminado** — Circuit breaker: el audit de calidad no dejó el proyecto byte-idéntico; bloqueado hasta revisión humana (`contamination.ts:8-10`; `run-guard.ts:47-51`).
 - **Corpus / docs-first** — Los documentos canónicos que el proyecto auditado **realmente tiene**, con su categoría, para que el prompt cite lo firmado y calle si no hay nada (`corpus-descriptor.ts:10-15`; ADR-064).
-- **Correa (allowedFiles)** — Los únicos ficheros que un fix puede tocar: el del hallazgo, sus tests hermanos y vecinos del mismo directorio que la prosa nombre (`allowed-files.ts:33-74`; ADR-012).
+- **Correa (allowedFiles)** — Los únicos ficheros que un fix puede tocar: el del hallazgo, sus tests hermanos y vecinos del mismo directorio que la prosa nombre (`allowed-files.ts:33-74`; ADR-012). Desde ADR-102 también se contrasta con el sitio del arreglo que el analista declara: si cae fuera, la propuesta se rechaza antes de generar (§12.3).
 - **Debut / estreno** — Severidades que el motor puede trabajar hoy: LOW y MEDIUM (`debut.ts:16`; ADR-007).
 - **Drenaje** — Recorrer los elegibles dejándolos juzgados y esperando firma, sin escanear ni integrar (`drenar-hasta-omega.ts`).
 - **Expediente** — Lo reportado por el escaneo más los ACTIVE que no nombró; sobre eso puntúa el score (`persist-scan.ts:28-35`).
 - **Firma** — El acto humano que integra una propuesta aprobada al árbol vivo con `git merge --no-ff`; la única vía sobre el repo propio y la vía por defecto sobre cualquier proyecto sin `.fortress/config` (`firmar-integracion.ts`).
-- **Fingerprint** vs **identidad** — La identidad (`fichero│tipo│símbolo`) es la clave estable entre escaneos; el fingerprint lleva la línea y gobierna los descartes del operador (`finding-identity.ts:25-27`).
+- **Fingerprint** vs **identidad** — La identidad (~~`fichero│tipo│símbolo`~~ **`fichero│línea│tipo`** desde ADR-084; el símbolo es dato, no clave) es la clave estable entre escaneos; el fingerprint lleva la línea y gobierna los descartes del operador (`finding-identity.ts:25-27`).
 - **GATE** — Dos cosas: el **runner** mecánico (typecheck/lint/test del proyecto dentro del worktree, ADR-015) y el **estado** "gate pasado, esperando revisor" (ADR-018).
-- **Grafo** — El MCP `codebase-memory`, memoria del código que evita releerlo; viaja en todo spawn y solo con herramientas de lectura pre-autorizadas (`graph-mcp.ts`).
+- **Grafo** — El MCP `codebase-memory`, memoria del código que evita releerlo; viaja en todo spawn y solo con herramientas de lectura pre-autorizadas (`graph-mcp.ts`). Lo que **no** indexa —directorios ocultos, carpetas que `.gitignore` excluye, políticas SQL— se le dice al agente en el prompt (ADR-104; §12.4).
 - **guardRun / guardMerge** — Las dos guardias del main: contaminación + tope diario + turno del motor, y contaminación + turno del merge (`run-guard.ts:21-29,65-70`).
 - **hasta-gate / hasta-omega / completo** — Los tres cortes de una vuelta del motor (`modo-vuelta.ts:19`).
 - **Heredado (rojo)** — Un comando del gate que ya fallaba en la base antes del fix; no corta la cadena (`gate-sequence.ts:35-43`).
@@ -565,3 +577,155 @@ Términos propios de este código, con su significado **real** y dónde está de
 - **Tope diario / por corrida** — `--max-budget-usd` por spawn (default $3) y suma del día (default $10) leída de `agent_runs`, que sobrevive al reinicio (`run-budget.ts:12-13`; `run-guard.ts:36-39`).
 - **Vía de integración** — `automatica | firmada`; viaja como dato hasta el asunto del commit y el Libro (`via-de-integracion.ts:17`).
 - **Worktree** — Árbol git aislado sobre `base_sha` en los datos de la app, donde el motor genera, compila y juzga sin tocar el repo vivo (`worktree-manager.ts`; ADR-009).
+
+---
+
+## 12. Lo que `main` hace desde el 21 de septiembre (a `052638b`)
+
+Cinco arcos del camino a grado bancario (ROADMAP, #1 a #4, más el sangrado que
+se destapó al cerrar el #4), leídos del código de `052638b` el 2026-09-24. Manda
+sobre §1-§11 donde se contradigan.
+
+### 12.1 El sandbox: la caja es el proyecto (ADR-092, `cd6a510`)
+
+Dos clases de ejecución, dos contenciones, y ninguna se salta
+(`src/domain/sandbox/`, `src/infrastructure/sandbox/`):
+
+- **Clase A, el turno del CLI** (`claude -p`). `argsDelTurno` termina en
+  `conSandbox`, que añade `--settings` con el sandbox del propio CLI
+  (`config-del-cli.ts`, `configDelSandbox`): lectura negada al HOME, `/media`,
+  `/mnt` y `/run/media`; lectura permitida solo al proyecto y al directorio de
+  `node`; red solo a los **registros de paquetes** de una tabla cerrada por
+  ecosistema (`registros-de-paquetes.ts`: npm, PyPI, crates.io, Go, Maven,
+  RubyGems, Packagist); `failIfUnavailable`, `allowUnsandboxedCommands: false` y
+  `autoAllowBashIfSandboxed: false` (la caja se pone y la correa sigue). Un
+  `Result` fallido es «no se lanza», nunca «se lanza sin caja». El proceso del
+  CLI en sí corre con el HOME real: su servidor del grafo ve la caché entera.
+- **Clase B, el gate y las sondas** (`npm ci`, typecheck, lint, tests del
+  cliente). `enCaja` lanza `bwrap` (`flags-de-bwrap.ts`): `--unshare-all`;
+  `/tmp`, `/run` y el HOME tapados con un tmpfs vacío; el proyecto montado en
+  escritura; `node` en solo lectura; y como única salida el socket del **proxy
+  de registros** (`proxy-de-registros.ts`: solo `CONNECT`, a hosts de la tabla y
+  por el puerto TLS). Sin `bwrap`, sin `socat` o sin `node` en el PATH no hay
+  comando (`sonda-de-bwrap.ts`): **fail-closed**.
+- **Los hooks del cliente no corren**: los dos `git` del motor llevan
+  `core.hooksPath=/dev/null` y `core.fsmonitor=` (`git-sin-hooks.ts`, `SIN_HOOKS`).
+- Lo que la caja deja abierto está medido en DEUDAS §6.2: `runCommand` sin red,
+  la sonda de `bwrap` memorizada por proceso, sin caché por proyecto.
+
+### 12.2 El prompt refleja lo que el agente puede (arco #2, `00656fa`)
+
+El prompt no afirma capacidades: las lee de su fuente, y un test derivado por
+fuente caza la desincronización (`src/domain/repair/innegociables-prompt.ts`,
+`DEFENSAS_DEL_PROMPT`).
+
+- **Bash.** `capacidadesDe(args)` (`src/domain/agent/capacidades-del-agente.ts`)
+  lee `--disallowedTools` y `--permission-mode` de los mismos argumentos con que
+  se lanza el proceso; el bloque dice «Tienes Bash… corre CONTENIDO en la caja» o
+  «NO tienes Bash», nunca un texto fijo.
+- **El grafo.** `HERRAMIENTAS_DEL_SERVIDOR`
+  (`src/domain/connectors/herramientas-del-grafo.ts`) fija las ocho herramientas
+  que la 0.9.0 expone (`get_architecture`, `get_code_snippet`,
+  `get_graph_schema`, `index_repository`, `query_graph`, `search_code`,
+  `search_graph`, `trace_path`), `GRAPH_MCP_VERSION = '0.9.0'`, y
+  `grafo-instalado.test.ts` cruza la lista con el `tools/list` del binario
+  instalado. Las herramientas fantasma (`index_status`, `detect_changes`,
+  `check_index_coverage`) salieron de los prompts y de la allowlist.
+- **La doctrina del proyecto.** `buildDocsFirst` dice «no encontré doctrina de
+  seguridad escrita en las rutas conocidas» y las nombra
+  (`docs-first-cabeceras.ts`), en vez de «NO tiene doctrina».
+
+### 12.3 El contrato del hallazgo, reconstruido (arco #3, `fd9c2c9`)
+
+- **Identidad `fichero│línea│tipo`** (ADR-084; `findingIdentity` en
+  `finding-identity.ts`): la ruta y la línea salen del disco, el tipo de una
+  lista cerrada; el símbolo se guarda como dato y ya no es clave. Las 98 filas de
+  mailbd con la clave anterior a ADR-067 se re-identificaron o se fundieron en la
+  base viva: cero identidades viejas vivas.
+- **Hermanos por sede** (ADR-099; `hermanosDelHallazgo` en
+  `hermanos-del-hallazgo.ts`): las otras sedes abiertas del mismo defecto se
+  citan primero por bloque (`esMismaSede`) y después por clase; `otro` no agrupa.
+- **Seis tipos de auditoría** (ADR-100; `DEFECTOS_DE_AUDITORIA` en
+  `defectos-de-auditoria.ts`): `accesibilidad`, `privacidad`,
+  `integridad-de-negocio`, `continuidad-y-backups`, `dependencia-vulnerable` y
+  `criptografia-debil`, sumados al vocabulario de seguridad; las 108 filas «otro»
+  de la base viva se re-tiparon (quedan 5).
+- **Memoria de la parada y alias de clave** (ADR-101). El escáner recibe las
+  vivas ya registradas en su alcance (`registradasDeLaParada`, `bloqueDeMemoria`
+  en `memoria-de-la-parada.ts`) para conservar tipo y línea salvo que el código
+  cambie. Cuando el analista cita «mismo defecto que» con ids, `fusionPorJuicio`
+  (`fusion-por-juicio.ts`) funde y deja un alias en `finding_aliases`
+  (`finding-alias-sql.ts`) que el sync resuelve antes de insertar: la deriva de
+  tipo o de línea ya no duplica filas.
+- **El arreglo fuera de la correa** (ADR-102; `arregloFueraDeCorrea` en
+  `arreglo-fuera-de-correa.ts`, `guardDelArreglo` en `guard-del-arreglo.ts`). El
+  analista declara dónde se arregla (`analysis.arreglo`); si cae fuera de
+  `allowedFiles`, la propuesta se rechaza con `arreglo_fuera_de_correa` **antes
+  de generar** y queda pausada mientras `.fortress/config` conserve su huella
+  (`huellaDeConfig`). Medido antes de construirlo: $61,87 en propuestas condenadas.
+- **Severidad por familia** (ADR-103; `conSeveridadSegunTipo` en
+  `hallazgo-con-ejes.ts`): los seis tipos de auditoría no pasan por la tabla de
+  ejes de seguridad de ADR-080; se marcan `ejesNoAplican` (distinto de `sinEjes`,
+  que sigue midiendo la calibración) y conservan la palabra del modelo. 48 filas
+  vivas restauradas por lote.
+- Lo medido y **no construido**, con dato, vive en DEUDAS §6: el defecto a
+  propósito (§6.3), las cadenas de explotación (§6.4), el patrón A (§6.5), la
+  columna «dónde se arregla» y el score que cuenta descartados.
+
+### 12.4 El grafo: lo que ve, lo que no, y su higiene (arco #4, `a152a32` y `686b212`)
+
+- **Qué indexa.** El binario fijado (`codebase-memory-mcp` 0.9.0, Go, MIT) trae
+  156 gramáticas y ya indexa `.py`, `.sql`, `.prisma`, `.tf` y la configuración
+  de la raíz (medido el 2026-09-24 sobre la caché). **Qué no:** los directorios
+  ocultos (`.claude/`, `.fortress/`, `.husky/`), las carpetas que `.gitignore`
+  excluye aunque estén versionadas, las políticas SQL, `GRANT` y buckets (la
+  gramática las conoce, el extractor no las emite) y los handlers inline
+  (DEUDAS §6).
+- **El agente lo sabe** (ADR-104). `LO_QUE_EL_GRAFO_NO_VE`
+  (`src/domain/settings/lo-que-el-grafo-no-ve.ts`) va en la base de
+  `GRAPH_FIRST` (chat y escáner) y en `EL_GRAFO` (analista): ahí una búsqueda
+  vacía no es ausencia, y se lee con Read y Grep.
+- **Barreras declaradas.** El escáner y el analista reciben lo que el pre-vuelo
+  ya parsea —hooks `PreToolUse` con matcher, guion, intérprete y si arranca, y
+  `.fortress/config` presente o ausente— como bloque saneado
+  (`barrerasDeclaradas`, `bloqueDeBarreras` en
+  `src/domain/project/barreras-declaradas.ts`; `barrerasDeclaradasDelProyecto`
+  en infraestructura). Sin barreras no se escribe una línea.
+- **`has_graph` dice la verdad.** El reconcilio (`reconcileGraph` en
+  `src/application/graph/`) mira el `.db` antes de decidir, alinea la bandera con
+  el disco (`alinearBandera`) y trata un índice ausente como nunca indexado
+  aunque el sha coincida (`indiceEnDisco` en `reindex-decision.ts`); el éxito del
+  runner exige el índice en disco (`trabajo-de-reindex.ts`). Antes la bandera la
+  escribía solo el botón de instalar y nadie la leía: 0 en seis proyectos con
+  índice y 1 en el único sin él.
+- **Cuándo reindexa.** Al arrancar (todos los proyectos), al enfocar un proyecto,
+  al pulsar el chip, al cerrar un lote del Terminal y, desde `686b212`, **al
+  volver a la ventana** (`crearFocoDeVentana`, `app.on('browser-window-focus')`):
+  un pull o un merge hechos fuera se detectan al volver, comparando shas. Sin
+  daemon.
+- **mailbd** está indexado (1232 nodos, 148 ficheros); **Trade99PRO** no lo
+  estará mientras no sea repositorio git (DEUDAS §6).
+- **El test del vocabulario ya no toca la caché real**: arranca el servidor con
+  HOME propio y cwd vacío (`grafo-instalado.test.ts`), porque el 0.9.0 vigila su
+  cwd y reindexa lo que ya esté en caché.
+
+### 12.5 Los agentes huérfanos del loop (`f836f14`)
+
+Destapado al verificar la huella de la caché tras el arco #4 (DEUDAS §5.5): el
+check «Loop blindado» encendía un loop real sobre el repo propio y el juez del
+alcance nacía después de la parada, huérfano al salir la app, desde el 26 de
+agosto. Tres cierres: `loopScan` honra la parada **antes** de reservar el carril
+(`loopParado` en `loop-registry.ts`); el agente mata al hijo al registrarlo si su
+proyecto ya está cancelado (`claude-code-agent.ts`); y `will-quit` pasa por
+`alSalir` (`src/infrastructure/system/al-salir.ts`), que mata a todos los hijos
+antes de cerrar la base. Probado sobre `main`: 0 huérfanos tras el gate, 0
+conexiones MCP nuevas desde el repo, huella de la caché idéntica.
+
+### 12.6 Lo que sigue igual, y el aviso de siempre
+
+- El motor sigue estrenándose en LOW y MEDIUM (§9.2), no hace push por sí mismo y
+  no integra en el repo propio sin firma.
+- Todo lo de arriba vive en `main`, no en el binario instalado, hasta el rebuild
+  y la instalación en frío (README): el AppImage no protege hasta entonces.
+- Del camino a grado bancario quedan #5 (toda la aplicación dentro del tribunal
+  y del sistema nervioso) y #6 (mergear lo ya hecho). Ver ROADMAP.

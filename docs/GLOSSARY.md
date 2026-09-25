@@ -6,7 +6,7 @@ Ningún término es aspiracional: todos existen en el código o en la
 documentación escrita.
 
 Índice: [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) ·
-[G](#g) · [H](#h) · [I](#i) · [L](#l) · [M](#m) · [O](#o) · [P](#p) ·
+[G](#g) · [H](#h) · [I](#i) · [J](#j) · [L](#l) · [M](#m) · [O](#o) · [P](#p) ·
 [R](#r) · [S](#s) · [T](#t) · [V](#v) · [W](#w)
 
 ## A
@@ -20,6 +20,12 @@ dentro de un proyecto. Cada corrida de agente del motor queda asentada en el
 Lista mínima de comandos que un agente puede ejecutar sin pedir permiso:
 `npm run typecheck`, `npm run lint`, `npm run test:unit`. Es un techo, no una
 sugerencia; nada fuera de la lista se auto-ejecuta.
+
+### Alias de clave
+Fila de `finding_aliases` que apunta una identidad vieja a la fila viva que la
+absorbió (ADR-101). El sync la consulta antes de insertar: si el escáner vuelve
+con la clave vieja, toca la viva en vez de crear un duplicado. Nace de la
+fusión por juicio (`fusionPorJuicio`) o de un lote del operador.
 
 ### analysis
 Estructura que devuelve [C2](#c2-analyzetarget): objetivo, veredicto
@@ -68,6 +74,12 @@ SHA del HEAD del repo anclado en el momento en que nace una propuesta del
 motor. Es la base exacta del [worktree](#worktree): reproducibilidad
 estricta.
 
+### Barreras declaradas
+Lo que un proyecto declara como defensa y el grafo no ve: sus hooks `PreToolUse`
+(matcher, guion, intérprete y si arranca) y si tiene `.fortress/config`. Se lee
+de lo que el pre-vuelo ya parsea y baja al escáner y al analista como bloque
+saneado (`bloqueDeBarreras`, ADR-104); sin barreras no se escribe una línea.
+
 ## C
 
 ### C1 (selectTarget)
@@ -84,6 +96,20 @@ verifica el hallazgo contra el código real y dictamina REAL u OBSOLETO
 Tercer eslabón: GENERAR. Produce el fix en un [worktree](#worktree) aislado,
 bajo [correa](#correa-allowedfiles) de alcance y
 [presupuesto](#presupuesto-por-propuesta). Jamás toca el árbol vivo.
+
+### Caja (sandbox por proyecto)
+La contención de ADR-092: un proceso ve su proyecto y poco más. En
+[clase A](#clase-a--clase-b) es el sandbox del propio CLI por `--settings`
+(`configDelSandbox`); en clase B es `bwrap` con `/tmp`, `/run` y el HOME tapados
+por un tmpfs, el proyecto en escritura, `node` en solo lectura y sin red salvo el
+socket del proxy de registros. Sin caja no se lanza nada: fail-closed.
+
+### Clase A / clase B
+Las dos clases de ejecución de código ajeno (ADR-092 §3). **A**: el turno del
+CLI (`claude -p`), contenido por el sandbox del CLI. **B**: lo que FORTRESS lanza
+por sí misma dentro del proyecto —`npm ci`, typecheck, lint, tests, sondas—,
+contenido por `bwrap` (`enCaja`). La B es la más peligrosa: ahí corre el
+`postinstall` del cliente.
 
 ### CADUCADO
 Estado terminal: la propuesta dejó de tener sentido (por ejemplo, C2
@@ -141,8 +167,19 @@ El terreno que el motor tiene permitido reparar: hallazgos LOW y MEDIUM.
 HIGH y CRITICAL quedan fuera hasta acumular confianza demostrada.
 
 ### decideReindex
-Decisión pura (dominio) de cuándo realinear el Knowledge Graph ante un
-cambio de HEAD del repo: on-boot, on-focus o manual, con cola serial.
+Decisión pura (dominio) de cuándo realinear el Knowledge Graph: al arrancar, al
+enfocar un proyecto, al volver a la ventana, al cerrar un lote del Terminal o a
+mano, con cola serial. Compara HEAD con el sha indexado y, desde `686b212`,
+pregunta también si el `.db` existe en disco (`indiceEnDisco`): un índice
+ausente se reindexa aunque el sha coincida.
+
+### Deriva (de tipo, de línea)
+Que el mismo defecto vuelva del escáner con otro tipo o en otra línea y, sin
+más, sea una fila nueva. La corta la memoria de la parada (el escáner recibe las
+vivas registradas en su alcance y conserva tipo y línea salvo que el código
+cambie) y, cuando aun así se duplica, el [alias de clave](#alias-de-clave). La
+deriva de línea que queda —el ancla en un comentario de un fichero que cambió—
+está medida en DEUDAS §6.5.
 
 ## E
 
@@ -150,9 +187,18 @@ cambio de HEAD del repo: on-boot, on-focus o manual, con cola serial.
 Estado inicial de una propuesta: C1 la eligió y quedó anclada a su
 [base_sha](#base_sha).
 
+### ejesNoAplican / sinEjes
+Dos marcas de un hallazgo con ejes de severidad (ADR-080, ADR-103). `sinEjes`:
+el modelo no puso ejes donde debía, y mide la calibración de seguridad.
+`ejesNoAplican`: el tipo es de una [familia de auditoría](#familias-de-auditoria)
+y los ejes de seguridad no le corresponden; la severidad es la palabra del
+modelo y no pasa por la tabla.
+
 ### Extincion honesta
-Un [finding](#finding) solo se declara extinto con evidencia: ausente del
-escaneo vigente Y con su archivo modificado. Nunca por fe ni por antigüedad.
+Un [finding](#finding) solo se declara extinto con juicio: el analista dictamina
+`OBSOLETO` y el marcador que cita se comprueba en el fichero, o dos filas se
+funden, o el operador lo marca con fecha y motivo. Nunca por fe, por antigüedad
+ni por [ausencia](#ausentes) del escaneo (ADR-065).
 
 ## F
 
@@ -164,6 +210,13 @@ leyenda (la idea que la sostiene) y a su freno (la regla que la hace segura).
 Hallazgo de un escaneo, persistido con severidad, archivo, línea, identidad
 estable y ciclo de vida (activo, extinto). Alias en español:
 [hallazgo](#hallazgo).
+
+### Familias de auditoria
+Los seis tipos que ADR-100 sumó al vocabulario de seguridad
+(`DEFECTOS_DE_AUDITORIA`): `accesibilidad`, `privacidad`,
+`integridad-de-negocio`, `continuidad-y-backups`, `dependencia-vulnerable` y
+`criptografia-debil`. Comparten identidad, sync y tablero con los de seguridad;
+no comparten la tabla de ejes (ADR-103).
 
 ### FORTRESS-NOTES
 Bloques que un agente deja sobre FORTRESS mismo mientras trabaja en OTRO
@@ -179,23 +232,40 @@ de OMEGA.
 ### Gate hermetico
 Juicio mecánico del fix DENTRO del worktree: `npm ci` estricto + typecheck +
 lint + test:unit, con timeouts por comando. Verde avanza; rojo rechaza con
-autopsia (el worktree se conserva).
+autopsia (el worktree se conserva). Desde ADR-092 corre en la
+[caja](#caja-sandbox-por-proyecto) de clase B: `bwrap`, HOME vacío, red solo al
+proxy de registros, y el `git` del motor sin los hooks del cliente.
 
 ### Genesis
 Bucle que entrena capacidades auto-propuestas por su cuenta, con topes de
 coste obligatorios. El humano firma los agentes nuevos; OMEGA puede vetar.
+
+### Guard del arreglo fuera de correa
+Puerta del motor (ADR-102): el analista declara dónde se arregla
+(`analysis.arreglo`) y, si ese sitio cae fuera de la
+[correa](#allowlist) de `allowedFiles`, la propuesta se rechaza con
+`arreglo_fuera_de_correa` antes de generar nada. Queda pausada mientras
+`.fortress/config` conserve su huella; cambiar el cerco la libera.
 
 ## H
 
 ### hallazgo
 Ver [finding](#finding).
 
+### has_graph
+Columna de `projects` que dice si el proyecto tiene índice del grafo **en
+disco**. Desde `686b212` la alinea el reconcilio cada vez que mira (`alinearBandera`);
+antes la escribía solo el botón de instalar y nadie la leía, y estaba en 0 en
+seis proyectos con índice y en 1 en el único sin él.
+
 ## I
 
 ### identidad de un hallazgo
 
-`fichero │ tipo │ símbolo`. La clave que decide si un hallazgo reportado es una
-fila nueva o una que ya existía. **No** es la del `PTN-` de COGNITION ni la de
+`fichero │ línea │ tipo` (ADR-084; antes `fichero │ tipo │ símbolo`, ADR-067). La
+clave que decide si un hallazgo reportado es una fila nueva o una que ya existía:
+la ruta y la línea salen del disco, el tipo de un vocabulario cerrado. Un
+[alias de clave](#alias-de-clave) resuelve la deriva antes de insertar. **No** es la del `PTN-` de COGNITION ni la de
 los descartes: tres claves distintas para tres preguntas distintas, tabuladas en
 [DATA-MODEL](DATA-MODEL.md).
 
@@ -210,6 +280,16 @@ proyecto nuevo, y solo para ese flujo.
 Guard anti-[SSRF](#ssrf): rechaza loopback, rangos privados, link-local y
 las formas equivalentes del mismo host (IPv4-mapped, hexadecimal, decimal).
 
+## J
+
+### Juez huerfano del loop
+El bug cerrado en `f836f14`: el juez del alcance (`claude -p` que clasifica qué
+módulos de auditoría aplican) nacía después de que el loop se parara, sobrevivía
+a la app y seguía gastando hasta dos minutos, con un servidor del grafo
+vigilando el repo. Ahora la parada se honra antes de reservar el carril, un hijo
+que nace tras la parada muere al nacer, y `will-quit` mata a todos los hijos
+(`alSalir`). Sangrado medido en DEUDAS §5.5.
+
 ## L
 
 ### Libro de vida
@@ -221,6 +301,13 @@ Telemetría paralela a la máquina de estados: registra, no valida.
 Guard de dominio que impide el loop autónomo sobre el propio repo de
 FORTRESS. Doctrina permanente, aplicada por capas independientes y
 verificada en el binario.
+
+### LO_QUE_EL_GRAFO_NO_VE
+La constante (ADR-104) que va en los tres bloques «grafo primero»: el grafo no
+indexa los directorios ocultos (`.claude/`, `.fortress/`, `.husky/`), las
+carpetas que `.gitignore` excluye aunque estén versionadas, ni las políticas
+SQL, `GRANT` y buckets. Ahí una búsqueda vacía no es ausencia: se lee con Read y
+Grep. Nombra solo las tres superficies medidas.
 
 ## M
 
@@ -293,8 +380,10 @@ Carpeta en los datos de la aplicación donde viven los
 
 La función o bloque que contiene el defecto (`handleVerify`, `buildEnv`). Es lo
 único de la ubicación que sobrevive a que el código de arriba crezca — la línea
-del mismo agujero viajó de la 43 a la 59 en tres escaneos. Separa dos defectos
-del mismo tipo en el mismo fichero.
+del mismo agujero viajó de la 43 a la 59 en tres escaneos. Desde ADR-084 **no
+forma parte de la clave** —la línea ocupa su sitio, porque en `allowed-files.ts`
+había dos defectos distintos en la misma línea y con el mismo símbolo— y se
+guarda como dato para orientar al analista.
 
 ### sin reconfirmar
 
@@ -306,8 +395,10 @@ Cifrado del sistema operativo (keychain) para la API key. Solo el proceso
 main la descifra; el renderer únicamente puede preguntar si existe.
 
 ### Sandbox
-Ejecución acotada para corridas de génesis y auto-creación: directorio
-controlado, modo de solo-plan y guardas de corrida por proyecto.
+Dos cosas. La antigua: ejecución acotada de génesis y auto-creación (directorio
+controlado, solo-plan, guardas de corrida). La de ADR-092 (`cd6a510`): la
+[caja por proyecto](#caja-sandbox-por-proyecto) que encierra cada ejecución de
+código ajeno, en sus dos [clases](#clase-a--clase-b).
 
 ### Sentinel OMEGA
 El agente número 11: meta-auditor que verifica los veredictos del resto
