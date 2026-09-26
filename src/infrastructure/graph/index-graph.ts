@@ -13,21 +13,17 @@ const PROMPT =
  * plan bloquea el MCP). Es la unica corrida donde el grafo ESCRIBE, y solo se
  * dispara desde la accion de instalar, con un prompt acotado.
  */
+/** Sin directorio de turno a proposito: este es el que ESCRIBE el indice de verdad, en la cache real. */
+export function argsDeIndexar(): string[] {
+  return ['-p', PROMPT, '--permission-mode', 'default', '--allowedTools', GRAPH_INDEX_TOOL, '--mcp-config', withGraph(null)] // prettier-ignore
+}
+
 export function indexGraph(
   projectPath: string,
   apiKey: string | null,
   onLog: (line: string) => void
 ): Promise<void> {
-  const args = [
-    '-p',
-    PROMPT,
-    '--permission-mode',
-    'default',
-    '--allowedTools',
-    GRAPH_INDEX_TOOL,
-    '--mcp-config',
-    withGraph(null)
-  ]
+  const args = argsDeIndexar()
   // La caja del CLI (ADR-092, clase A). Sin caja no se indexa: se resuelve sin
   // lanzar nada, y el registro lo cuenta como no hecho.
   const conCaja = conSandbox(args, projectPath)
