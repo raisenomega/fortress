@@ -16,17 +16,20 @@ import { describe, expect, it } from 'vitest'
 const OBSERVAN: ReadonlyArray<readonly [string, string]> = [
   ['src/domain/scan/report-contract.ts', 'NOTAS_COMO_CLAVE'],
   ['src/domain/scan/juicio-prompt.ts', 'NOTAS_COMO_BLOQUE'],
-  ['src/domain/repair/omega-prompt.ts', 'NOTAS_COMO_CLAVE']
+  ['src/domain/repair/omega-prompt.ts', 'NOTAS_COMO_CLAVE'],
+  // Construir (sub-pieza 3 del #5): sus tres prompts responden prosa y ninguno
+  // emite en vivo (onChunk vacio), asi que el bloque cabe y se quita del texto.
+  ['src/domain/build/build-prompt.ts', 'NOTAS_COMO_BLOQUE']
 ]
 
 const fuente = (ruta: string): string => readFileSync(join(process.cwd(), ruta), 'utf8')
 
-describe('los tres NO-interactivos piden sus notas', () => {
+describe('los NO-interactivos piden sus notas', () => {
   it.each(OBSERVAN)('%s pide notas con %s', (ruta, marca) => {
     expect(fuente(ruta)).toContain(marca)
   })
 
-  it('y los tres usan el MISMO texto: cuatro redacciones pedirian cuatro cosas', () => {
+  it('y todos usan el MISMO texto: varias redacciones pedirian cosas distintas', () => {
     const compartido = fuente('src/domain/system/peticion-de-notas.ts')
 
     expect(compartido).toContain('la herramienta que te ejecuta, NO el proyecto')

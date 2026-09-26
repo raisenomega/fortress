@@ -25,6 +25,15 @@ export function notasDeObjeto(parsed: unknown): readonly SelfNoteDraft[] {
   return toSelfNotes((parsed as { notes?: unknown }).notes)
 }
 
+/**
+ * El mismo texto sin el bloque: lo que ve el operador y lo que se guarda en el
+ * disco del CLIENTE (el plan en `docs/`). Una nota sobre FORTRESS no es del
+ * proyecto, y el cerco que la redacta vive en `add`, no en ese fichero.
+ */
+export function sinBloqueDeNotas(texto: string): string {
+  return texto.replace(BLOQUE, '').trim()
+}
+
 export function notasDeBloque(texto: string): readonly SelfNoteDraft[] {
   const match = BLOQUE.exec(texto)
   if (match === null) return []

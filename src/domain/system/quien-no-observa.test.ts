@@ -10,20 +10,21 @@ import { describe, expect, it } from 'vitest'
 const CHAT_OBSERVA_DE_DENIALS = 'src/application/chat/finish-turn.ts'
 
 /**
- * Los CUATRO que siguen fuera, y no por olvido.
+ * El UNICO que sigue fuera, y no por olvido: la entrevista de configuracion es
+ * un turno del chat, emite en vivo por `onChunk`, y un bloque `NOTAS:` se
+ * teclearia delante del operador (`en-vivo-tachado` es innegociable).
  *
- * El EJECUTOR si tiene que decir —corre en `acceptEdits`, que es la mayor
- * superficie de denegaciones— pero NO pasa por `finishTurn`, y engancharlo
- * parcheando su sitio repetiria la leccion de los seis agentes sin orquestador.
- * Necesita su punto comun: deuda `ejecutor-observa-de-denials`.
- *
- * Los otros tres corren en `plan` o `lectura`. Un agente de solo lectura casi
- * no topa permisos, asi que lo que reportaria seria relleno — mismo criterio que
- * dejo fuera al episodio y al borrador por vivir en un sandbox.
+ * Los tres de CONSTRUIR (plan, investigacion, ejecutor) observan desde la
+ * sub-pieza 3 del #5, por BLOQUE: ninguno emite en vivo (los tres pasan un
+ * `onChunk` vacio), asi que el bloque cabe y `sinBloqueDeNotas` lo quita del
+ * texto que ve el operador y del `docs/` del cliente. Lo que NO cubre el bloque
+ * son los DENIALS del ejecutor —dato duro, `acceptEdits` es la mayor superficie
+ * de denegaciones— y sigue siendo deuda `ejecutor-observa-de-denials`.
  */
-const NO_OBSERVAN: readonly string[] = [
+const NO_OBSERVAN: readonly string[] = ['src/application/chat/reply-from-configuration.ts']
+
+const CONSTRUIR_OBSERVA: readonly string[] = [
   'src/application/build/build-feature.ts',
-  'src/application/chat/reply-from-configuration.ts',
   'src/infrastructure/build/run-build-plan.ts',
   'src/infrastructure/build/run-investigate.ts'
 ]
@@ -53,14 +54,22 @@ describe('el chat observa de sus DENIALS, no de un bloque', () => {
   })
 })
 
-describe('los CUATRO que siguen fuera, cada uno con su razon', () => {
+describe('el que sigue fuera, con su razon', () => {
   it.each(NO_OBSERVAN)('%s no observa', (ruta) => {
     expect(fuente(ruta)).not.toContain('NOTAS_COMO')
     expect(fuente(ruta)).not.toContain('asentarNotas')
     expect(fuente(ruta)).not.toContain('observacionesDeDenials')
   })
 
-  it('siguen siendo CUATRO: ni un agente nuevo enganchado sin decidir', () => {
-    expect(NO_OBSERVAN).toHaveLength(4)
+  it('sigue siendo UNO: ni un agente nuevo enganchado ni desenganchado sin decidir', () => {
+    expect(NO_OBSERVAN).toHaveLength(1)
+  })
+})
+
+describe('los tres de Construir asientan por el cuello unico (sub-pieza 3 del #5)', () => {
+  it.each(CONSTRUIR_OBSERVA)('%s asienta con asentarNotas y quita el bloque', (ruta) => {
+    expect(fuente(ruta)).toContain('asentarNotas(')
+    expect(fuente(ruta)).toContain('notasDeBloque(')
+    expect(fuente(ruta)).toContain('sinBloqueDeNotas(')
   })
 })

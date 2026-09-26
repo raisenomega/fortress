@@ -1,4 +1,6 @@
 import type { AppContext } from '@application/context'
+import { asentarNotas } from '@application/system/asentar-notas'
+import { notasDeBloque, sinBloqueDeNotas } from '@domain/system/extraer-notas'
 import { buildPlanPrompt } from '@domain/build/build-prompt'
 import { err, ok, type Result } from '@domain/shared/result'
 import { agentFor, resolveTarget } from './build-target'
@@ -28,13 +30,11 @@ export async function runBuildPlan(
     },
     () => {}
   )
-  if (reply.failed) return err(reply.text)
-  const saved = savePlanDoc(
-    target.value.path,
-    target.value.name,
-    intent,
-    reply.text,
-    new Date().toISOString()
-  )
-  return ok(saved ? `${reply.text}\n\n— Plan guardado en ${saved}` : reply.text)
+  // Construir observa (sub-pieza 3 del #5): la nota entra pase lo que pase con
+  // el plan, y el bloque no llega ni al operador ni al `docs/` del cliente.
+  asentarNotas(context, target.value, notasDeBloque(reply.text))
+  const texto = sinBloqueDeNotas(reply.text)
+  if (reply.failed) return err(texto)
+  const saved = savePlanDoc(target.value.path, target.value.name, intent, texto, new Date().toISOString()) // prettier-ignore
+  return ok(saved ? `${texto}\n\n— Plan guardado en ${saved}` : texto)
 }

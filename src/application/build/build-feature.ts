@@ -1,5 +1,7 @@
 import type { CodeAgent } from '@domain/chat/code-agent'
 import { buildFeaturePrompt } from '@domain/build/build-prompt'
+import { notasDeBloque, sinBloqueDeNotas } from '@domain/system/extraer-notas'
+import { asentarNotas } from '../system/asentar-notas'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 
@@ -50,13 +52,16 @@ export async function buildFeature(
     },
     onChunk
   )
+  // Construir observa (sub-pieza 3 del #5): la nota entra pase lo que pase.
+  asentarNotas(context, project, notasDeBloque(reply.text))
+  const texto = sinBloqueDeNotas(reply.text)
   if (reply.failed) {
     deps.revert(ref)
-    return err(reply.text)
+    return err(texto)
   }
   if (!(await deps.verify())) {
     deps.revert(ref)
     return err('La verificacion quedo en rojo: se revirtio el cambio')
   }
-  return ok({ text: reply.text, edits: reply.edits })
+  return ok({ text: texto, edits: reply.edits })
 }
