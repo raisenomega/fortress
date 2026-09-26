@@ -385,10 +385,10 @@ declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
 (DEUDAS §8.1, `fd4b5c2`): el sandbox del arco #1 queda completo, clase A y B.
 **Y el 2026-09-26 se cerró el #5** (abajo): cuatro sub-piezas construidas, cuatro
 anotadas con dato y condición, más la higiene del COGNITION-LOG cazada por el
-camino. Queda del camino a grado bancario **solo #6** (mergear lo ya hecho: la
-decisión D del operador sobre B y limpieza, con remedición previa de la rama de
-limpieza, que se midió sobre un `main` muy anterior). La 0.11.0 sigue como arco
-futuro por frescura.
+camino. Queda del camino a grado bancario **solo #6**, re-medido el 2026-09-26: no se
+mergea lo viejo, se rehace sobre main por partes (parte 1 hecha; quedan B sobre
+ADR-105, el saneado de hermanos y los cierres en la base). La 0.11.0 sigue como
+arco futuro por frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
@@ -466,6 +466,28 @@ cada reintento y puede llevar rutas del cliente.
 Parte de lo que falta está escrito y sin integrar: trece hallazgos del
 auto-escaneo se cierran solos al mergear la rama de limpieza. Es una decisión del
 operador, no un trabajo.
+
+**Re-medido el 2026-09-26 contra `f874c0b`** (DEUDAS y memoria del día): las dos
+ramas nacen del 20 de septiembre y main lleva 157 commits por delante; B está
+apilada sobre limpieza; ninguna mergea en seco (21 y 25 bloques de conflicto);
+tres ideas de limpieza ya estaban en main por otra vía; el miedo de «reabrir
+pausados» murió por dato (los merges del día ya levantaron los 17 bloqueos y
+nada corre sobre FCC). Decisión del operador: **rehacer sobre main, por partes**,
+no mergear.
+
+**Parte 1 HECHA el 2026-09-26** (merge `4dbf512`): diez cherry-picks de la rama
+de limpieza, cada uno con rojo previo, verde y gate. El HIGH del enlace colgante
+cerrado en código (path-traversal: `rutaContenida` guarda siete escritores del
+proceso principal, fuera de la caja del CLI, y `existsSync` seguía el enlace),
+las cuatro reglas de forma de secretos que main no tenía (AWS, Slack, JWT de
+tres segmentos, PEM acotado), los tres innegociables que protegen a quien aplica
+la lista, y las siete de accesibilidad con test de fuente. **Los ocho hallazgos
+más el HIGH siguen ABIERTOS en la base:** el cierre es la parte 3, con el kit.
+
+**Queda del #6:** parte 2, B (el recibo del bloqueo del chat y del lote) rehecha
+sobre ADR-105 más el saneado de hermanos sobre ADR-099; parte 3, cerrar en la
+base con el kit los hallazgos ya arreglados en código; y los seis docs pequeños
+de la rama vieja, a mano. Las ramas viejas se conservan como referencia.
 
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 
