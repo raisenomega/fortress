@@ -600,7 +600,10 @@ Dos clases de ejecución, dos contenciones, y ninguna se salta
   RubyGems, Packagist); `failIfUnavailable`, `allowUnsandboxedCommands: false` y
   `autoAllowBashIfSandboxed: false` (la caja se pone y la correa sigue). Un
   `Result` fallido es «no se lanza», nunca «se lanza sin caja». El proceso del
-  CLI en sí corre con el HOME real: su servidor del grafo ve la caché entera.
+  CLI en sí corre con el HOME real ~~y su servidor del grafo ve la caché
+  entera~~ (hasta `d8b0de6`; desde `fd4b5c2` el servidor del grafo del turno
+  recibe `CBM_CACHE_DIR` a un directorio con solo una copia del `.db` del
+  proyecto, en este camino y en el del motor: enmienda a ADR-095 pieza B).
 - **Clase B, el gate y las sondas** (`npm ci`, typecheck, lint, tests del
   cliente). `enCaja` lanza `bwrap` (`flags-de-bwrap.ts`): `--unshare-all`;
   `/tmp`, `/run` y el HOME tapados con un tmpfs vacío; el proyecto montado en

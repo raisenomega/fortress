@@ -145,6 +145,16 @@ Pieza 3) y producción bajo firma. **Va antes que cualquier capacidad de salir a
 la red**: FORTRESS no cierra hoy la trifecta letal solo porque le falta la
 tercera pata, y ADR-098 ya firmó ponérsela (§3 de la investigación).
 
+**Sandbox completo el 2026-09-25** (`fd4b5c2`): el arco cerró la clase B en
+`bwrap`, pero la clase A —el CLI del agente— seguía con el HOME real y su
+servidor del grafo veía los índices de todos los clientes (DEUDAS §8.1, 134
+instancias medidas). Cerrado con la enmienda firmada a ADR-095 pieza B: el
+servidor del grafo de cada turno recibe `CBM_CACHE_DIR` a un directorio con una
+copia real del `.db` del proyecto, en los dos caminos (`withGraph` y el `GRAPH`
+del motor), con rechazo legible de lo que no está y sin que el `.mcp.json` del
+proyecto pueda saltárselo. La promesa «el código de un cliente no ve al de otro»
+queda sin excepción, probada en vivo con huella idéntica de la caché real.
+
 ### 2. ~~Que el prompt le diga la verdad al agente~~ — **HECHO** `00656fa` (2026-09-22)
 
 **Construido y en `main`**: merge `00656fa`, 3 commits, gate 6/6 antes y después.
@@ -371,10 +381,13 @@ repositorio git ni de confianza: anotado en DEUDAS §6.
 
 **Cerrado el 2026-09-24.** A: el agente sabe qué no ve el grafo y qué barreras
 declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
-índice se realinea solo. Queda del camino a grado bancario: **#5** (toda la
-aplicación dentro del tribunal y del sistema nervioso) y **#6** (mergear lo ya
-hecho: la decisión D del operador sobre B y limpieza). La 0.11.0 sigue como
-arco futuro por frescura.
+índice se realinea solo. Y el 2026-09-25, el aislamiento del grafo por turno
+(DEUDAS §8.1, `fd4b5c2`): el sandbox del arco #1 queda completo, clase A y B.
+Queda del camino a grado bancario: **#5** (toda la aplicación dentro del
+tribunal y del sistema nervioso) y **#6** (mergear lo ya hecho: la decisión D
+del operador sobre B y limpieza, con remedición previa de la rama de limpieza,
+que se midió sobre un `main` muy anterior). La 0.11.0 sigue como arco futuro
+por frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 

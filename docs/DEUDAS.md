@@ -674,7 +674,7 @@ FUNCIONAMIENTO-ACTUAL, GLOSSARY y este documento. Autorizados por Jojo el
 documentación, es un agujero del aislamiento con ADR ya aceptado.** Ninguno se
 inventó: cada uno lleva lo que se midió y dónde.
 
-### 8.1 ALTO — Gap de seguridad: la clase A corre con el HOME real, y su grafo ve a todos los clientes (ADR-095 pieza B aceptada, NO construida)
+### 8.1 ~~ALTO — Gap de seguridad: la clase A corre con el HOME real, y su grafo ve a todos los clientes~~ — **CERRADO** `fd4b5c2` (2026-09-25)
 
 **Qué es.** El sandbox de ADR-092 encerró la clase B en `bwrap` con el HOME
 tapado por un tmpfs (`src/domain/sandbox/flags-de-bwrap.ts:63`). La clase A
@@ -707,6 +707,26 @@ grafo dentro»
 (`docs/DECISIONS/adr-095-el-grafo-solo-responde-del-proyecto-del-turno-y-los-guardianes-dejan-de-mentir.md:148`),
 **aceptada el 2026-09-18 y sin construir**. Es una pieza pendiente del
 aislamiento, para retomar con el sandbox o con el arco #5; no una nota.
+
+**Cerrado el 2026-09-25** (merge `fd4b5c2`, 9 commits, gate 6/6 sobre `main`,
+9 mutantes muertos). La medición encontró una palanca mejor que la del ADR: la
+0.9.0 honra `CBM_CACHE_DIR` (y no `XDG_CACHE_HOME`), así que la **enmienda a
+ADR-095 pieza B, firmada por Jojo**, sustituye el `HOME` por turno por un
+**directorio por turno con una copia real del `.db` del proyecto**, puesto en el
+`env` de la entrada del servidor: el `HOME` del CLI no se toca y no hay
+`~/.claude` que enlazar. La palanca entra en los **dos caminos** —`withGraph`
+(Terminal, escáner, génesis, episodios, borradores, build) y el `GRAPH` propio
+del motor (generador, analista, crítico, OMEGA)—; `index-graph`, `verify-graph`,
+el runner de reindex y `readGraphIndex` siguen en la caché real. El servidor
+sobre la copia **rechaza** con error legible lo que no está (`project not found
+or not indexed`, `available_projects` con solo la copia; fijado con test sobre
+el binario real) y el grafo aislado gana al que traiga el `.mcp.json` del
+proyecto: el muro no es opcional. Prueba dura, dos veces: un turno real de
+clase A sobre ensayo-fail-closed vio 62 nodos desde la copia, recibió el error
+literal al pedir FORTRESS, y dejó la huella de los ocho `.db` de la caché real
+**idéntica**. Las cuatro piezas de la pared están en los innegociables
+(`DEFENSAS_DEL_GRAFO_POR_TURNO`). El binario instalado no lo lleva hasta el
+rebuild.
 
 ### 8.2 ALTO — Errata: SECURITY-MODEL.md no conoce el sandbox
 

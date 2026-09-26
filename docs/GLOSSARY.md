@@ -109,7 +109,9 @@ Las dos clases de ejecución de código ajeno (ADR-092 §3). **A**: el turno del
 CLI (`claude -p`), contenido por el sandbox del CLI. **B**: lo que FORTRESS lanza
 por sí misma dentro del proyecto —`npm ci`, typecheck, lint, tests, sondas—,
 contenido por `bwrap` (`enCaja`). La B es la más peligrosa: ahí corre el
-`postinstall` del cliente.
+`postinstall` del cliente. Desde `fd4b5c2` la A también tiene su pared en el
+grafo: el servidor del turno solo alcanza una copia del `.db` del proyecto
+(`CBM_CACHE_DIR`, enmienda a ADR-095).
 
 ### CADUCADO
 Estado terminal: la propuesta dejó de tener sentido (por ejemplo, C2
