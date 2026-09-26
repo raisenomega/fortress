@@ -655,6 +655,37 @@ automáticamente tras cada escaneo**: un juicio, no una regla. Hasta entonces, n
 
 ---
 
+### 6.6 Cognition al COGNITION-LOG: medido, anotado con condición de reactivación, no construido (2026-09-26)
+
+**Decisión de Jojo y el CTO sobre la medición del 2026-09-26** (main `22a5fdd`,
+base viva en solo lectura): **no se construye** (camino C). Es la sub-pieza 5 del
+arco #5 del ROADMAP.
+
+**Lo medido:**
+
+- **«Cognition escribe el log» contradice ADR-047** (2026-08-05, Aceptada): «el
+  MOTOR, no el LLM, reescribe de forma determinista el COGNITION-LOG». Que solo
+  el cierre del escaneo escriba el fichero (`cerrar-escaneo.ts` →
+  `escribir-memoria.ts` → `rebuildLog`) es a propósito, no un hueco.
+- **Cero uso desde agosto.** 3 corridas del agente en toda la base: 2 útiles el
+  2026-08-04 (31 y 21 turnos, unos 2,60 $, 0 ediciones) y 1 fallida el 08-12.
+  Ninguna después.
+- **Lo que produciría, nadie lo lee.** El agente devuelve prosa (patrones,
+  defensas) al historial del chat o al texto final del workflow, que cierra
+  siempre con él (`CLOSING_STEP`). El consumidor real del log, el analista
+  (`graph-analyst.ts:58` → `patron-del-hallazgo.ts`), usa del patrón emparejado
+  solo id, estado, recurrencias y fecha; las reflexiones las pinta el panel y
+  nada más las consume. AGENTS.md promete «patrones con causa raíz y prevención
+  hacia el COGNITION-LOG»: no ocurre.
+- **La reflexión del motor ya cubre lo que se lee:** una línea por corrida con
+  conteos y score, más los patrones regenerados del expediente.
+
+**Condición de reactivación.** Si Cognition vuelve a usarse (corridas nuevas) y
+sus reflexiones ganan un consumidor, la pieza es el cuello de notas que ya usa
+OMEGA (`peticion-de-notas.ts` → `asentarNotas`): Cognition escribe
+**observaciones al sistema nervioso, no el log**, respetando ADR-047 sin
+enmendarlo.
+
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del

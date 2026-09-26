@@ -93,7 +93,7 @@ La vista etiquetada **"Terminal"** en la barra lateral es `view='chat'`; la etiq
 2. Calcula el **modo efectivo** (`:39-40`): pedido `autonomo` degrada a `supervisado` si el objetivo es el propio repo de FORTRESS, si la petición menciona un área protegida (auth, pagos, RLS, secretos… `src/domain/settings/protected-areas.ts:9-25`) o si el proyecto no es de confianza (`src/domain/settings/modo-efectivo.ts:36-41`).
 3. Elige motor: CLI si está instalado, si no la API de solo texto (`choose-engine.ts:22-27`).
 4. **Enruta** (`produce-reply.ts:35-48` → `reply-from-workflow.ts:35-38`): si el mensaje es una **orden** —contiene un verbo imperativo de la lista `revisa, escanea, audita, corre, ejecuta, busca, limpia, arregla, analiza…` (`src/domain/workflow/workflow-intent.ts:7-23`)— y casa con un workflow del catálogo (`seguridad`, `limpieza`, `bugs`, `tests`, `produccion`; `workflow-catalog.ts:24-56`), corre ese workflow paso a paso; si no, **conversa** (`route-workflow.ts:52-66`, `id === 'libre'` → `replyFromChat`).
-5. Cada paso lanza el CLI con `permissionMode = permissionModeFor(mode)` (`src/application/workflow/run-workflow.ts:45`): **`plan` en supervisado, `acceptEdits` en autónomo** (`src/domain/settings/permission-mode.ts:25-27`). Un paso con `gate: true` (el de seguridad) que vea un CRITICAL detiene los siguientes (`run-workflow.ts:65-66`).
+5. Cada paso lanza el CLI con `permissionMode = permissionModeFor(mode)` (`src/application/workflow/run-workflow.ts:45`): **`auditoria` en supervisado, `acceptEdits` en autónomo** (`src/domain/settings/permission-mode.ts:45-47`). Un paso con `gate: true` (el de seguridad) que vea un CRITICAL detiene los siguientes (`run-workflow.ts:65-66`).
 
 **Entonces, ¿analiza o arregla?** Depende del modo efectivo:
 
