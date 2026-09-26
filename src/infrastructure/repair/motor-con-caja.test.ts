@@ -16,7 +16,7 @@ afterAll(limpiarCarpetasDePrueba)
 
 describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clase A)', () => {
   it('los que solo leen: analista, critico y OMEGA llevan --settings con el sandbox', () => {
-    const args = abre(argsDeLectura('juzga', worktree()))
+    const args = abre(argsDeLectura('juzga', worktree(), '/grafo/turno'))
     expect(args[0]).toBe('-p')
     const i = args.indexOf('--settings')
     expect(i).toBeGreaterThan(0)
@@ -26,14 +26,14 @@ describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clas
   })
 
   it('el generador tambien, y ademas conserva su techo de turnos', () => {
-    const args = abre(argsDelGenerador('arregla', worktree()))
+    const args = abre(argsDelGenerador('arregla', worktree(), '/grafo/turno'))
     expect(args).toContain('--settings')
     expect(args).toContain('--max-turns')
   })
 
   it('el turno del Terminal: --settings al final, tras lo que buildArgs armo', () => {
     const request = { projectPath: worktree(), prompt: 'hola', permissionMode: 'auditoria', agentId: null, trusted: true } as const // prettier-ignore
-    const args = abre(argsDelTurno(request, {}, null, 0))
+    const args = abre(argsDelTurno(request, {}, null, 0, '/grafo/turno'))
     expect(args[0]).toBe('-p')
     expect(args.at(-2)).toBe('--settings')
   })

@@ -1,10 +1,11 @@
 import { capacidadesDe, type Capacidades } from '@domain/agent/capacidades-del-agente'
+import { entradaDelGrafo, GRAPH_SERVER } from '@domain/connectors/graph-mcp'
 import type { Result } from '@domain/shared/result'
 import { conSandbox } from '../sandbox/con-sandbox'
 import { TOOLS_EDICION, TOOLS_LECTURA } from './motor-tools'
-const GRAPH = JSON.stringify({
-  mcpServers: { 'codebase-memory': { command: 'codebase-memory-mcp', args: [] } }
-})
+// El mismo servidor que `withGraph`, con la misma palanca: el GRAPH del motor era
+// el segundo camino al grafo, y sin esto el aislamiento quedaba medio hecho.
+const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GRAPH_SERVER]: entradaDelGrafo(dir) } }) // prettier-ignore
 
 // Lectura (grafo + Read/Grep/Glob) MAS edicion (Edit/Write). Bash NO va en la
 // lista y NO por eso falta: el allowlist solo pre-aprueba, y los cuatro agentes
@@ -38,9 +39,9 @@ export const MAX_TURNS = 30
  */
 export type Prompt = string | ((c: Capacidades) => string)
 
-const FLAGS_EDICION = ['--output-format', 'json', '--mcp-config', GRAPH, '--strict-mcp-config',
+const flagsEdicion = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
   '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION, '--max-turns', String(MAX_TURNS)] // prettier-ignore
-const FLAGS_LECTURA = ['--output-format', 'json', '--mcp-config', GRAPH, '--strict-mcp-config',
+const flagsLectura = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
   '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
 
 const conFlags = (prompt: Prompt, flags: readonly string[]): readonly string[] => [
@@ -51,12 +52,20 @@ const conFlags = (prompt: Prompt, flags: readonly string[]): readonly string[] =
 
 /** Con que se lanza C3: lee y edita, dentro del worktree, y con techo.
  *  Y dentro de la caja del CLI (ADR-092, clase A): sin caja, no hay args. */
-export function argsDelGenerador(prompt: Prompt, worktreePath: string): Result<readonly string[]> {
-  return conSandbox(conFlags(prompt, FLAGS_EDICION), worktreePath)
+export function argsDelGenerador(
+  prompt: Prompt,
+  worktreePath: string,
+  grafoDir: string | null
+): Result<readonly string[]> {
+  return conSandbox(conFlags(prompt, flagsEdicion(grafoDir)), worktreePath)
 }
 
 /** Con que se lanzan los que SOLO LEEN ficheros —analista, critico, OMEGA—: el
  *  mismo array que antes vivia copiado tres veces, y la caja del CLI encima. */
-export function argsDeLectura(prompt: Prompt, cwd: string): Result<readonly string[]> {
-  return conSandbox(conFlags(prompt, FLAGS_LECTURA), cwd)
+export function argsDeLectura(
+  prompt: Prompt,
+  cwd: string,
+  grafoDir: string | null
+): Result<readonly string[]> {
+  return conSandbox(conFlags(prompt, flagsLectura(grafoDir)), cwd)
 }

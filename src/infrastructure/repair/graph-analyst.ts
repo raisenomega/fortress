@@ -12,22 +12,22 @@ import { toAnalysis, type RunOut } from './parse-analysis'
 import { parseUsage } from '../claude-code/parse-usage'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { trackChild } from '../claude-code/child-registry'
+import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
 
-/** `buildEnv(null)` como sus dos hermanos del motor: recorta las llaves de la
- *  SESION VIVA del operador. Era el unico spawn de `claude` que no lo hacia, asi
- *  que su hijo —y los MCP nietos— veian el agente ssh y el keyring. */
-function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<RunOut> {
-  // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config
-  // aisla el grafo (sin los MCP de claude.ai). Solo tools de lectura: read-only.
-  // Sin caja no arranca: el mismo camino que un binario que no existe.
-  const args = argsDeLectura(prompt, cwd)
-  if (!args.ok) return Promise.resolve({ result: args.error, noArranco: true })
+/** `buildEnv(null)` como sus hermanos: recorta la SESION VIVA del operador (era el unico spawn que no lo hacia). */
+async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<RunOut> {
+  // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config aisla el
+  // grafo (sin los MCP de claude.ai). Solo lectura. Sin caja no arranca, como un binario ausente.
+  const grafo = await prepararGrafoDelTurno(cwd) // el store del turno (ADR-095, enmienda)
+  const args = argsDeLectura(prompt, cwd, grafo.dir)
+  if (!args.ok) return (grafo.liberar(), { result: args.error, noArranco: true })
   return new Promise((resolve) => {
     const child = spawn(bin, [...args.value], { cwd, env: buildEnv(null) })
     trackChild(child, owner)
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.on('close', () => {
+      grafo.liberar()
       try {
         const j = JSON.parse(out) as Record<string, unknown>
         const texto = typeof j.result === 'string' ? j.result : ''
@@ -39,7 +39,10 @@ function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<R
     })
     // Antes resolvia con una cadena vacia, indistinguible de un CLI que corrio
     // y no dijo nada: el expediente acababa juzgando una respuesta inexistente.
-    child.on('error', (error) => resolve({ result: error.message, noArranco: true }))
+    child.on(
+      'error',
+      (error) => (grafo.liberar(), resolve({ result: error.message, noArranco: true }))
+    )
   })
 }
 

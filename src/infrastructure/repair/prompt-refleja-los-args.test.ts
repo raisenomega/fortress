@@ -20,7 +20,7 @@ const textoDe = (args: readonly string[]): string => args[args.indexOf('-p') + 1
  */
 describe('el prompt refleja las capacidades reales del lanzamiento', () => {
   it('el analista se lanza con las flags que le dan Bash, y su prompt lo dice', () => {
-    const args = abre(argsDeLectura((c) => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g', c), '/p')) // prettier-ignore
+    const args = abre(argsDeLectura((c) => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g', c), '/p', '/grafo/turno')) // prettier-ignore
     const prompt = textoDe(args)
     expect(capacidadesDe(args).bash).toBe(true)
     expect(prompt).toContain('Tienes Bash')
@@ -29,7 +29,7 @@ describe('el prompt refleja las capacidades reales del lanzamiento', () => {
 
   it('las capacidades que recibe el constructor son las de los args que se lanzan', () => {
     for (const lanzar of [argsDeLectura, argsDelGenerador]) {
-      const args = abre(lanzar((c) => JSON.stringify(c), '/p'))
+      const args = abre(lanzar((c) => JSON.stringify(c), '/p', '/grafo/turno'))
       expect(JSON.parse(textoDe(args))).toEqual(capacidadesDe(args))
     }
   })

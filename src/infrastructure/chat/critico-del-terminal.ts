@@ -1,5 +1,7 @@
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 import { createGraphCritico } from '../repair/graph-critico'
+import { grafoDelTurnoDe } from '../graph/grafo-del-turno'
+import { getAppContext } from '../persistence/app-context'
 import type { TribunalDeps } from '@application/chat/tribunal-con-critico'
 
 /**
@@ -8,5 +10,5 @@ import type { TribunalDeps } from '@application/chat/tribunal-con-critico'
  * razon — el adaptador solo decide DONDE corre, nunca QUE hace.
  */
 export function criticoDelTerminal(projectId: string): TribunalDeps['critico'] {
-  return createGraphCritico(CLAUDE_BIN, projectId)
+  return createGraphCritico(CLAUDE_BIN, projectId, undefined, grafoDelTurnoDe(getAppContext().projects.findById(projectId)?.path ?? null)) // prettier-ignore
 }

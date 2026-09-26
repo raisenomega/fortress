@@ -14,7 +14,11 @@ describe('el techo de turnos', () => {
   /** Los args del generador para un worktree de prueba: con la caja del CLI
    *  puesta (ADR-092), asi que fallan cerrado si no hay bwrap en la maquina. */
   const args = (): readonly string[] => {
-    const r = argsDelGenerador('arregla esto', carpetaDePrueba('.fortress-gen-test-'))
+    const r = argsDelGenerador(
+      'arregla esto',
+      carpetaDePrueba('.fortress-gen-test-'),
+      '/grafo/turno'
+    )
     if (!r.ok) throw new Error(r.error)
     return r.value
   }
