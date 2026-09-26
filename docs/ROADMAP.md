@@ -402,10 +402,23 @@ barrera cubre los tres flujos que editan. En el chat —turno suelto, lote y
 workflow, sin distinguirlos— cuando el proyecto corre en autónomo y el turno va
 por el CLI; en el Ejecutor de Construir siempre, negado sea cual sea el modo y
 con el recibo en el historial. La observación se asienta en los tres, bloquee o
-no. Quedan: 2 los cuatro flujos en `plan` → `lectura`; 3 Construir observa; 4
-LOOP observa sus paradas; 5 Cognition escribe COGNITION-LOG; 6 OMEGA y crítico
-en el Ejecutor (ADR corto); 7 el `stderr` del Terminal y 8 las notas del chat
-(anotadas, sin consumidor medido).
+no. Quedan: 3 Construir observa; 4 LOOP observa sus paradas; 5 Cognition al
+COGNITION-LOG (medir primero contra ADR-047, que reserva el log al motor); 6
+OMEGA y crítico en el Ejecutor (ADR corto); 7 el `stderr` del Terminal y 8 las
+notas del chat (anotadas, sin consumidor medido).
+
+**Sub-pieza 2 HECHA el 2026-09-26** (merge `22a5fdd`, sin ADR: es el bug 2
+repetido): los cuatro flujos que corrían en `plan` —el Plan de Construir, la
+entrevista de configuración, el episodio de aprendizaje y el borrador del
+agente— pasan a `lectura`. Ven el grafo, y «solo lectura», que sus docblocks ya
+declaraban, se hace verdad. **Dato del mapa corregido:** el mapa decía que ni
+`plan` ni `lectura` quitan Bash y que el único cambio era que el grafo
+responde. Falso: `plan` regalaba Bash sin constar en ninguna lista y `lectura`
+lo quita por `--disallowedTools` (`build-allowed-tools.ts:64-66`, medido el
+2026-09-20). El cambio hace dos cosas: el grafo responde y Bash queda fuera.
+Decisión del operador, con dato: el planner nunca planeó con Bash (su única
+corrida falló, 0 planes), `auditoria` habría permitido escribir en el proyecto
+por redirección (12-sep) y el sandbox no lo impide.
 
 ### 6. Mergear lo ya hecho
 
