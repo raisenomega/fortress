@@ -1,11 +1,13 @@
 import { appendMessage } from '@application/chat/chat-history'
-import { buildFeature } from '@application/build/build-feature'
+import { buildFeature, type BuildResult } from '@application/build/build-feature'
 import type { AppContext } from '@application/context'
+import type { Project } from '@domain/project/project'
 import { err, ok, type Result } from '@domain/shared/result'
 import { gitRevert, gitSnapshot } from '../git/git-snapshot'
 import { cortaElTurno } from '@domain/chat/verificacion-del-arbol'
 import { verificarArbol } from './build-verify'
 import { agentFor, resolveEditTarget } from './build-target'
+import { guardBarrera } from '../barrera-guard'
 
 /** Fase 2: construye el plan aprobado con red git+verify y persiste el resultado. */
 export async function runBuild(
@@ -18,7 +20,33 @@ export async function runBuild(
   const target = resolveEditTarget(context, projectId)
   if (!target.ok) return target
   const project = target.value
-  const result = await buildFeature(
+  // ADR-105: el Ejecutor edita SIEMPRE (`true`, sea cual sea el modo guardado);
+  // con la barrera del cliente muerta no arranca, y el recibo queda en el
+  // historial como cualquier otro «no aplicada».
+  const rota = guardBarrera(context, projectId, true)
+  const result = rota === null ? await construir(context, projectId, intent, plan, project) : err<BuildResult>(rota) // prettier-ignore
+  const text = result.ok
+    ? `Construccion completada:\n\n${result.value.text}`
+    : `Construccion no aplicada: ${result.error}`
+  appendMessage(context, {
+    projectId,
+    role: 'assistant',
+    content: text,
+    agentId: null,
+    mode: 'autonomo',
+    engine: 'claude-code'
+  })
+  return result.ok ? ok(undefined) : err(result.error)
+}
+
+function construir(
+  context: AppContext,
+  projectId: string,
+  intent: string,
+  plan: string,
+  project: Project
+): Promise<Result<BuildResult>> {
+  return buildFeature(
     context,
     projectId,
     intent,
@@ -34,16 +62,4 @@ export async function runBuild(
     },
     () => {}
   )
-  const text = result.ok
-    ? `Construccion completada:\n\n${result.value.text}`
-    : `Construccion no aplicada: ${result.error}`
-  appendMessage(context, {
-    projectId,
-    role: 'assistant',
-    content: text,
-    agentId: null,
-    mode: 'autonomo',
-    engine: 'claude-code'
-  })
-  return result.ok ? ok(undefined) : err(result.error)
 }
