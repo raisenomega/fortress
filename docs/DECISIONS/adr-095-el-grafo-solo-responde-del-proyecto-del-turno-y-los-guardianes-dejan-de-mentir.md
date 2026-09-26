@@ -2,8 +2,8 @@
 
 - **Estado**: Aceptada
 - **Fecha**: 2026-09-18
-- **Enmienda**: 2026-09-25, la Pieza B se construye con `CBM_CACHE_DIR` y no con un
-  `HOME` por turno — **SIN FIRMAR**, al final del documento
+- **Enmienda**: firmada el 2026-09-25 — la Pieza B se construye con `CBM_CACHE_DIR`
+  y no con un `HOME` por turno (sección Enmienda, al final del documento)
 - **Alcance**: aislamiento entre proyectos — el cruce que está abierto HOY, sin
   sandbox y con la correa puesta
 - **Relación**: contención rápida **previa** a ADR-092 (el sandbox), que sigue
@@ -412,7 +412,7 @@ reales donde se indica.
 
 ---
 
-## Enmienda (2026-09-25): la palanca es `CBM_CACHE_DIR`, no `HOME` — SIN FIRMAR
+## Enmienda (2026-09-25): la palanca es `CBM_CACHE_DIR`, no `HOME` — FIRMADA
 
 ### E.1 La premisa que era incompleta
 
@@ -527,19 +527,26 @@ disco, 402 GB libres. Un turno tarda minutos: la copia no se nota.
   la huella sha256 de los `.db` de la caché real **idéntica**.
 - Las guardas nuevas entran en los innegociables: son defensa del sandbox.
 
-### E.6 Casillas de la enmienda — SIN FIRMAR
+### E.6 Casillas de la enmienda — FIRMADAS el 2026-09-25
 
-- [ ] **Casilla 1.** La palanca es `CBM_CACHE_DIR` en el `env` de la entrada del
+- [x] **Casilla 1.** La palanca es `CBM_CACHE_DIR` en el `env` de la entrada del
       servidor; el `HOME` del CLI no se toca.
-- [ ] **Casilla 2.** Un directorio por turno con una **copia real** del `.db`
+- [x] **Casilla 2.** Un directorio por turno con una **copia real** del `.db`
       del proyecto (no enlace duro), borrado al cerrar y barrido al arrancar.
-- [ ] **Casilla 3.** Las excepciones de FORTRESS siguen en la caché real:
+- [x] **Casilla 3.** Las excepciones de FORTRESS siguen en la caché real:
       `index-graph`, `verify-graph`, el runner de reindex y `readGraphIndex`.
-- [ ] **Casilla 4.** Rechazo, no filtrado silencioso: el proyecto que no está en
+- [x] **Casilla 4.** Rechazo, no filtrado silencioso: el proyecto que no está en
       la copia produce un error legible, medido y fijado con test.
-- [ ] **Casilla 5.** Leído el riesgo original de §3.1 y §3.2: esta enmienda lo
+- [x] **Casilla 5.** Leído el riesgo original de §3.1 y §3.2: esta enmienda lo
       evita en vez de validarlo, porque no hay `HOME` nuevo ni `~/.claude`
       enlazado.
 
-**Firma**: pendiente de Jojo. Con la firma, la Pieza B se construye tal cual la
-describe esta enmienda, con el método de siempre: test rojo → mutante → gate.
+**Firma** (línea literal de Jojo, de su mano, el 2026-09-25, tras leer E.1-E.6 y
+§3.1/§3.2):
+
+> yo Jojo dueño del proyecto fortress Firmo la enmienda a ADR-095 con las cinco
+> casillas sí y los dos caminos, como el CTO propuso — Jojo, 25 septiembre 2026
+
+Las cinco casillas sí, y los **dos caminos** (`withGraph` y el `GRAPH` del
+motor). Con la firma, la Pieza B se construye tal cual la describe esta enmienda,
+con el método de siempre: test rojo → mutante → gate.
