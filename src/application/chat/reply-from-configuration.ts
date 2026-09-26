@@ -12,9 +12,10 @@ export interface ConfigReplyOptions {
 }
 
 /**
- * Un turno de la entrevista: el agente corre en 'plan' (SOLO LECTURA) con el
- * prompt rector + la conversacion. Nunca escribe; la app captura los borradores
- * del texto de la respuesta con parseDocBlocks.
+ * Un turno de la entrevista: el agente corre en 'lectura' (solo lectura, sin
+ * Bash, y con el grafo respondiendo: en 'plan' el MCP entero quedaba bloqueado)
+ * con el prompt rector + la conversacion. Nunca escribe; la app captura los
+ * borradores del texto de la respuesta con parseDocBlocks.
  */
 export async function replyFromConfiguration(options: ConfigReplyOptions): Promise<ReplyOutcome> {
   if (!options.codeAgent.isAvailable()) {
@@ -30,7 +31,7 @@ export async function replyFromConfiguration(options: ConfigReplyOptions): Promi
       projectPath: options.project.path,
       projectId: options.project.id,
       prompt: buildConfigurationPrompt(options.history, options.project.name),
-      permissionMode: 'plan',
+      permissionMode: 'lectura',
       agentId: null,
       trusted: false
     },

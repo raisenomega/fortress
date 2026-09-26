@@ -4,7 +4,12 @@ import { err, ok, type Result } from '@domain/shared/result'
 import { agentFor, resolveTarget } from './build-target'
 import { savePlanDoc } from './save-plan-doc'
 
-/** Fase 1: el planner disena el plan (solo lectura) y FORTRESS lo guarda en .md. */
+/**
+ * Fase 1: el planner disena el plan (solo lectura) y FORTRESS lo guarda en .md.
+ * Corre en 'lectura', no en 'plan': `plan` bloquea todo el MCP y el planner no
+ * veia el grafo (bug 2 repetido, ROADMAP #5 sub-pieza 2). 'lectura' ademas le
+ * QUITA Bash, que `plan` regalaba sin constar en ninguna lista.
+ */
 export async function runBuildPlan(
   context: AppContext,
   projectId: string,
@@ -17,7 +22,7 @@ export async function runBuildPlan(
       projectPath: target.value.path,
       projectId: target.value.id,
       prompt: buildPlanPrompt(target.value.name, intent),
-      permissionMode: 'plan',
+      permissionMode: 'lectura',
       agentId: 'planner',
       trusted: target.value.trusted
     },
