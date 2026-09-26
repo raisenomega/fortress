@@ -27,8 +27,12 @@ describe('el Ejecutor de Construir edita SIEMPRE: con la barrera muerta no arran
       const { ctx, historial } = contexto(ROTO, modo)
       const r = await runBuild(ctx, 'p1', 'una feature', 'el plan')
 
-      expect(r).toEqual({ ok: false, error: BARRERA_ROTA })
-      expect(historial).toEqual([`Construccion no aplicada: ${BARRERA_ROTA}`])
+      // Mejora sobre la rama B: el Ejecutor tambien recibe QUE barrera esta rota.
+      expect(r.ok).toBe(false)
+      if (!r.ok) expect(r.error).toBe(`${BARRERA_ROTA} Rota: PreToolUse (Write|Edit|MultiEdit) llama a «python» protect-invariants.py, que no existe; existe «python3».`) // prettier-ignore
+      expect(historial).toHaveLength(1)
+      expect(historial[0]).toContain('Construccion no aplicada: ' + BARRERA_ROTA)
+      expect(historial[0]).toContain('existe «python3»')
     }
   )
 

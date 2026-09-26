@@ -14,8 +14,12 @@ beforeAll(pathSinPython)
 afterAll(restaurarPath)
 
 describe('FAIL-CLOSED (ADR-105): un turno que EDITA no corre con la barrera muerta', () => {
-  it('lo NIEGA, y dice por que', () => {
-    expect(guardBarrera(conBarrera(ROTO, 'autonomo'), 'p1', true)).toBe(BARRERA_ROTA)
+  it('lo NIEGA, y dice por que — con el interprete que falta y el que si existe', () => {
+    // El motivo se PERSISTE (parte del lote, recibo del Ejecutor): lo escrito
+    // tiene que bastar solo, sin ir a buscar que interprete era.
+    expect(guardBarrera(conBarrera(ROTO, 'autonomo'), 'p1', true)).toBe(
+      `${BARRERA_ROTA} Rota: PreToolUse (Write|Edit|MultiEdit) llama a «python» protect-invariants.py, que no existe; existe «python3».`
+    )
   })
 
   it('con la barrera SANA, edita', () => {

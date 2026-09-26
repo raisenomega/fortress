@@ -1,6 +1,7 @@
 import type { AppContext } from '@application/context'
 import { esAutonomoDeVerdad } from '@application/settings/modo-guardado'
 import { asentarNotas } from '@application/system/asentar-notas'
+import { cualesBarreras } from '@domain/project/cuales-barreras'
 import { observacionesDeBarreras } from '@domain/project/observacion-de-barrera'
 import { isClaudeInstalled } from './claude-code/claude-cli'
 import { barrerasDelProyecto } from './project/barreras-del-proyecto'
@@ -49,7 +50,9 @@ export function guardBarrera(
 
   asentarNotas(context, project, observacionesDeBarreras(rotas))
 
-  return edita ? BARRERA_ROTA : null
+  // Con el dato duro detras (rama B, rehecha sobre ADR-105): el motivo se PERSISTE
+  // —parte del lote, recibo del Ejecutor— y lo escrito tiene que bastar solo.
+  return edita ? `${BARRERA_ROTA} ${cualesBarreras(rotas)}` : null
 }
 
 /** El chat edita si el proyecto corre en autonomo (base) y el turno ira por el CLI. */
