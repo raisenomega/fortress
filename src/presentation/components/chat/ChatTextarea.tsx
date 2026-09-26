@@ -25,6 +25,7 @@ export function ChatTextarea({
       rows={1}
       value={value}
       disabled={disabled}
+      aria-label="Mensaje para el agente"
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
       onKeyDown={(event) => {

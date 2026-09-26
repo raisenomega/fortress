@@ -37,6 +37,7 @@ export function ConstruirInput({ projectId }: ConstruirInputProps): React.JSX.El
               submitConstruir(projectId)
             }
           }}
+          aria-label="Describe lo que quieres construir o investigar"
           placeholder="Describe lo que quieres construir o investigar..."
           className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent text-sm text-foreground outline-none"
         />
