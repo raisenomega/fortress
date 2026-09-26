@@ -1,4 +1,5 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
+import type { Negativa } from '@domain/chat/envio-negado'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
 import type { PuertosDeLaCola } from './cola-del-lote'
@@ -17,6 +18,8 @@ export interface Opciones {
   readonly sinCierre?: (id: string) => SinCierre | null
   /** Ese turno se conservo sin que nadie pudiera compilar (ADR-091). */
   readonly sinVerificar?: (id: string) => boolean
+  /** Una puerta del main nego ESE envio: el turno no llego a existir. */
+  readonly niega?: (id: string) => Negativa | null
 }
 
 export interface Banco {
@@ -50,7 +53,7 @@ export function banco(o: Opciones = {}): Banco {
       if (terminados === o.detenerTras) cortado = true
       // `plan: null` — los turnos de la COLA llevan foco, y esos no se juzgan
       // como plan: los juzga el fix, con el diff delante (ADR-097 §2).
-      return { sinCierre: o.sinCierre?.(id) ?? null, sinVerificar: o.sinVerificar?.(id) ?? false, plan: null } // prettier-ignore
+      return { sinCierre: o.sinCierre?.(id) ?? null, sinVerificar: o.sinVerificar?.(id) ?? false, plan: null, negado: o.niega?.(id) ?? null } // prettier-ignore
     },
     recargar: async () => void log.push('recargar'),
     contar: async (resumen) => void resumenes.push(resumen),

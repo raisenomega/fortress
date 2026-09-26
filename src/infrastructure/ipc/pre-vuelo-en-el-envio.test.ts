@@ -15,7 +15,9 @@ describe('el pre-vuelo es la PRIMERA de las tres puertas de chat:send', () => {
     expect(FUENTE).toMatch(
       /const rota = guardBarrera\(context, input\.projectId, editaElChat\(context\)\)/
     )
-    expect(FUENTE).toMatch(/if \(rota !== null\) return err\(rota\)/)
+    // `negado` y no `err`: una puerta que para el envio no es un turno que fallo,
+    // y la cola del lote tiene que poder distinguirlos para cortar y decir por que.
+    expect(FUENTE).toMatch(/if \(rota !== null\) return negado\('barrera', rota\)/)
   })
 
   it('sin distinguir suelto de lote: el input NO entra en la decision (ADR-105)', () => {

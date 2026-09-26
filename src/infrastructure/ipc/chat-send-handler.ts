@@ -1,5 +1,6 @@
 import { ipcMain, type IpcMainInvokeEvent } from 'electron'
 import type { SendMessageInput } from '@application/chat/send-message-types'
+import { negado } from '@domain/chat/envio-negado'
 import { err, type Result } from '@domain/shared/result'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
@@ -28,7 +29,7 @@ async function atenderEnvio(
   // despues, y niega TODO turno que edita —suelto, lote o workflow, sin
   // distinguirlos— si la barrera del proyecto esta muerta (ADR-105).
   const rota = guardBarrera(context, input.projectId, editaElChat(context))
-  if (rota !== null) return err(rota)
+  if (rota !== null) return negado('barrera', rota)
 
   // Tope diario y concurrencia, comprobados ANTES de gastar.
   // ADR-097 §4: en autonomo, un hallazgo del lote no corre sin el ADELANTE de
@@ -36,10 +37,10 @@ async function atenderEnvio(
   // `guardRun`, que RESERVA el carril: negar despues de reservar lo dejaria
   // tomado para siempre (`carril-se-suelta`).
   const sinAprobar = guardPlanAprobado(context, input)
-  if (sinAprobar !== null) return err(sinAprobar)
+  if (sinAprobar !== null) return negado('plan-sin-aprobar', sinAprobar)
 
   const denegado = guardRun(context, input.projectId)
-  if (denegado !== null) return err(denegado)
+  if (denegado !== null) return negado('carril', denegado)
 
   // (b) El permiso se GASTA aqui, con las dos puertas ya pasadas: el mismo
   // hallazgo no corre dos veces con una sola aprobacion. DESPUES de `guardRun`

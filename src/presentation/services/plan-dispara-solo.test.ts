@@ -8,7 +8,7 @@ const { estado } = vi.hoisted(() => ({
 
 vi.mock('./chat-service', () => ({
   sendMessage: (): Promise<DesenlaceDelEnvio> =>
-    Promise.resolve({ sinCierre: null, sinVerificar: false, plan: estado.plan })
+    Promise.resolve({ sinCierre: null, sinVerificar: false, plan: estado.plan, negado: null })
 }))
 
 vi.mock('./resolver-lote-en-terminal', () => ({

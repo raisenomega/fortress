@@ -2,9 +2,13 @@ import type { Finding } from '../project/finding'
 import { pendienteDeVerificar } from './cierre-del-ciclo'
 import type { SinCierre } from './motivo-sin-cierre'
 
-/** Como quedo UN hallazgo del lote. `omitido`: cuando le toco, ya no pedia trabajo. */
+/**
+ * Como quedo UN hallazgo del lote. `omitido`: cuando le toco, ya no pedia
+ * trabajo. `negado`: una puerta del main paro su envio antes de que el turno
+ * existiera — no dice nada del hallazgo, y por eso corta la cola (`parte-del-lote`).
+ */
 export type DesenlaceEnLote =
-  'extinguido' | 'sigue_vivo' | 'sin_prueba' | 'pendiente' | 'no_cerro' | 'omitido'
+  'extinguido' | 'sigue_vivo' | 'sin_prueba' | 'pendiente' | 'no_cerro' | 'omitido' | 'negado'
 
 /** El comienzo fijo de la nota de «pendiente», sacado de quien la escribe (pieza
  *  3): si el texto cambia alli, esto lo sigue sin copiarlo. */
