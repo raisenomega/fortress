@@ -22,7 +22,7 @@ export function agentFor(context: AppContext): CodeAgent {
 
 /**
  * Resuelve el proyecto objetivo. Lo usan los modos de SOLO LECTURA (Plan e
- * Investigacion, que corren al agente en permissionMode 'plan' y NO editan): es
+ * Investigacion, que corren al agente en permissionMode 'lectura' y NO editan): es
  * seguro conversar/investigar sobre CUALQUIER proyecto, incluido el propio repo.
  */
 export function resolveTarget(context: AppContext, projectId: string): Result<Project> {
