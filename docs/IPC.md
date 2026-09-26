@@ -88,7 +88,7 @@ Chat por proyecto que actúa de verdad, con streaming.
 | `chat:history` | R/R | projectId → ChatMessage[] | — |
 | `chat:append` | R/R | NewChatMessage → Result<ChatMessage> | — |
 | `chat:clear` | R/R | projectId → void | — |
-| `chat:send` | R/R | SendMessageInput → Result<SendMessageOutput> | guardRun; modo autónomo exige proyecto confiable; bloqueo hasta CONFIGURADO |
+| `chat:send` | R/R | SendMessageInput → Result<SendMessageOutput> | guardBarrera (ADR-105: observa siempre; niega todo turno que edita —suelto, lote o workflow— si la barrera del proyecto está muerta); guardRun; modo autónomo exige proyecto confiable; bloqueo hasta CONFIGURADO |
 | `chat:stop` | R/R | projectId → number (procesos matados, kill de grupo) | — |
 | `chat:chunk` | PUSH | ChatChunk (streaming del agente) | — |
 | `chat:progress` | PUSH | ChatProgress { index, total, tokens, costUsd } — medidor | — |
@@ -229,7 +229,7 @@ El panel del meta-auditor y el Libro de la Vida.
 |---|---|---|---|
 | `build:plan` | R/R | (projectId, intent) → Result<string> | guardRun |
 | `build:investigate` | R/R | (projectId, intent) → Result<string> | guardRun |
-| `build:feature` | R/R | (projectId, intent, plan) → Result<void> | guardRun; proyecto confiable |
+| `build:feature` | R/R | (projectId, intent, plan) → Result<void> | guardRun; guardBarrera (ADR-105: el Ejecutor edita siempre, se niega sea cual sea el modo, recibo en el historial); proyecto confiable |
 | `build:stop` | R/R | projectId → number | — |
 | `build:pick-file` | R/R | () → string \| null (diálogo nativo) | — |
 
