@@ -383,13 +383,22 @@ repositorio git ni de confianza: anotado en DEUDAS §6.
 declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
 índice se realinea solo. Y el 2026-09-25, el aislamiento del grafo por turno
 (DEUDAS §8.1, `fd4b5c2`): el sandbox del arco #1 queda completo, clase A y B.
-Queda del camino a grado bancario: **#5** (toda la aplicación dentro del
-tribunal y del sistema nervioso) y **#6** (mergear lo ya hecho: la decisión D
-del operador sobre B y limpieza, con remedición previa de la rama de limpieza,
-que se midió sobre un `main` muy anterior). La 0.11.0 sigue como arco futuro
-por frescura.
+**Y el 2026-09-26 se cerró el #5** (abajo): cuatro sub-piezas construidas, cuatro
+anotadas con dato y condición, más la higiene del COGNITION-LOG cazada por el
+camino. Queda del camino a grado bancario **solo #6** (mergear lo ya hecho: la
+decisión D del operador sobre B y limpieza, con remedición previa de la rama de
+limpieza, que se midió sobre un `main` muy anterior). La 0.11.0 sigue como arco
+futuro por frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
+
+**ARCO CERRADO el 2026-09-26.** Construidas: #1 la guarda de barrera para todo
+turno que edita (ADR-105), #2 los cuatro flujos de `plan` a `lectura`, #3
+Construir observa, #4 LOOP observa sus paradas y standbys, más la higiene del
+COGNITION-LOG. Anotadas con dato y condición de reactivación: #5 Cognition
+(DEUDAS §6.6), #6 el tribunal en el Ejecutor de Construir (§6.8), #7 el `stderr`
+del Terminal como fuente (§6.9) y #8 las notas al chat y al workflow (§6.10).
+Cada sub-pieza resuelta o anotada con dato; ninguna infra sin consumidor.
 
 Medido por sitios de llamada: Escaneo y Terminal autónomo corren la disciplina
 completa. **Cognition no escribe una sola observación** (Construir sí, desde la
@@ -403,10 +412,9 @@ barrera cubre los tres flujos que editan. En el chat —turno suelto, lote y
 workflow, sin distinguirlos— cuando el proyecto corre en autónomo y el turno va
 por el CLI; en el Ejecutor de Construir siempre, negado sea cual sea el modo y
 con el recibo en el historial. La observación se asienta en los tres, bloquee o
-no. Quedan: 5 Cognition al
-COGNITION-LOG (medir primero contra ADR-047, que reserva el log al motor); 6
-OMEGA y crítico en el Ejecutor (ADR corto); 7 el `stderr` del Terminal y 8 las
-notas del chat (anotadas, sin consumidor medido).
+no. ~~Quedan: 5 Cognition al COGNITION-LOG; 6 OMEGA y crítico en el Ejecutor; 7
+el `stderr` del Terminal y 8 las notas del chat~~ (las cuatro anotadas el
+2026-09-26: DEUDAS §6.6, §6.8, §6.9 y §6.10).
 
 **Sub-pieza 2 HECHA el 2026-09-26** (merge `22a5fdd`, sin ADR: es el bug 2
 repetido): los cuatro flujos que corrían en `plan` —el Plan de Construir, la

@@ -703,6 +703,59 @@ con su test y su mutante. Sin consumidor medido hoy: el ejecutor **no tiene ni
 una corrida en la base viva** (0 mensajes «Construccion …» en el historial, 0
 corridas de sistema sin agente), por eso se anota y no se construye.
 
+### 6.8 El tribunal en el Ejecutor de Construir: medido, anotado con condición, no construido (2026-09-26)
+
+**Decisión de Jojo y el CTO sobre la medición del 2026-09-26** (main `c0ef39f`,
+base viva en solo lectura): **no se construye**. Es la sub-pieza 6 del arco #5.
+
+**Lo medido:**
+
+- **El Ejecutor tiene CERO corridas en la base.** El planner, 2 (una del chat el
+  2026-08-04 y una de Construir **fallida** el 09-19, 0 turnos, sin plan). Cero
+  mensajes de Construir en el historial y cero planes guardados en el `docs/` de
+  los ocho proyectos.
+- **El Ejecutor NO tiene modo autónomo.** Solo lo dispara el operador desde el
+  renderer (`build:feature`, `preload/build-impl.ts:10`) con un plan que él mismo
+  aprobó, sobre proyecto de confianza. Ni el loop ni un workflow lo llaman.
+- **Hoy ya tiene tres capas de red:** la guarda de barrera (ADR-105: barrera
+  muerta → negado sea cual sea el modo), el checkpoint git con reversión (el
+  agente falla → revierte) y el verify (árbol en rojo → revierte)
+  (`build-feature.ts:39-41`, `run-build.ts`).
+- **Lo que le falta es el TRIBUNAL**, que juzga algo distinto: si el cambio hace
+  lo que el plan decía. Las otras tres no lo juzgan: el gate pasa aunque el
+  cambio no cumpla la intención. Coste: un adaptador (OMEGA y el crítico juzgan
+  hoy contra un `HallazgoJuzgado`, título/fichero/línea/qué cambiar; Construir
+  solo tiene intención y plan) más un ADR corto.
+
+**Condición de reactivación.** El adaptador al tribunal se diseña con el
+**primer plan real de Construir delante** (que enseña qué juzga OMEGA sin
+hallazgo) y se construye **antes de la segunda corrida**: así Construir no se
+vuelve de uso habitual sin crítico ni OMEGA, y no se construye a ciegas hoy.
+
+**Nota:** es una deuda distinta de los denials del Ejecutor (§6.7). El tribunal
+juzga la intención; los denials registran los bloqueos.
+
+### 6.9 El `stderr` del Terminal como fuente: anotado, no construido (2026-09-26)
+
+Sub-pieza 7 del arco #5, del mapa del 2026-09-25. «No puedo instalar» y
+similares mueren en `stderr`: `run-accumulator.ts` lo acumula y solo lo saca
+como detalle del fallo cuando el proceso termina mal (`:65`); cuando el turno
+tiene éxito se tira. Es capacidad sin el diseño de cómo hacerlo bien sin ruido:
+no todo `stderr` es señal, y §5.2 exige antes decidir «cómo no romperse en
+silencio» con un dato estructurado del que salir. **Condición:** cuando §5.2
+tenga el diseño de qué `stderr` vale como observación, se deriva de ahí, como la
+barrera rota salió de `.claude/settings.json`.
+
+### 6.10 Chat y workflow piden notas en el prompt: anotado, no construido (2026-09-26)
+
+Sub-pieza 8 del arco #5, del mapa del 2026-09-25. El Terminal ya deriva del
+dato duro —denials (`finish-turn.ts`), barreras (`barrera-guard.ts`), notas de
+OMEGA en el juicio del turno—, y pedirle notas al modelo en vivo duplicaría lo
+que el dato duro ya da, además de teclear un bloque `NOTAS:` delante del
+operador (`en-vivo-tachado` es innegociable; `quien-no-observa.test.ts`). Es
+infra que duplica. **Condición:** si aparece una señal que el dato duro NO cubre
+y solo el modelo vería, entonces pedir notas al chat, por el mismo cuello.
+
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del
