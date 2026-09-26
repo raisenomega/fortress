@@ -38,10 +38,12 @@ const peticion: CodeAgentRequest = {
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
+const alSiguienteTick = (): Promise<void> => new Promise((r) => process.nextTick(r))
 
 describe('el reloj lo decide quien crea el agente, y el agente lo cumple', () => {
-  it('Build, Genesis, borradores y episodios no piden nada: SIGTERM a los 15 minutos', () => {
+  it('Build, Genesis, borradores y episodios no piden nada: SIGTERM a los 15 minutos', async () => {
     void createClaudeCodeAgent(CLAVES, DEFAULT_BUDGET, false).run(peticion, () => undefined)
+    await alSiguienteTick() // el agente prepara el grafo del turno antes de lanzar
     const hijo = lanzados.at(-1)
 
     vi.advanceTimersByTime(TECHO_POR_DEFECTO + 1)
@@ -50,9 +52,10 @@ describe('el reloj lo decide quien crea el agente, y el agente lo cumple', () =>
     hijo?.cerrar()
   })
 
-  it('escaneo y Terminal piden SIN_TECHO: pasada una HORA no les llega nada', () => {
+  it('escaneo y Terminal piden SIN_TECHO: pasada una HORA no les llega nada', async () => {
     const agente = createClaudeCodeAgent(CLAVES, DEFAULT_BUDGET, false, null, {}, SIN_TECHO)
     void agente.run(peticion, () => undefined)
+    await alSiguienteTick()
     const hijo = lanzados.at(-1)
 
     vi.advanceTimersByTime(UNA_HORA)

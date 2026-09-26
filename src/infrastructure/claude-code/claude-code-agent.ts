@@ -10,6 +10,7 @@ import { argsDelTurno } from './args-del-turno'
 import { CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { precheckProjectPath } from './precheck-project-path'
 import { collectRun, TECHO_POR_DEFECTO, sinLanzar } from './run-claude-process'
+import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
 
 /**
  * Ejecuta Claude Code dentro de la carpeta del proyecto. A diferencia del chat
@@ -41,11 +42,14 @@ export function createClaudeCodeAgent(
     isAvailable: isClaudeInstalled,
     precheck: precheckProjectPath,
 
-    run: (request, onChunk) => {
+    run: async (request, onChunk) => {
+      // El grafo de ESTE turno (ADR-095, enmienda): una copia del .db del proyecto
+      // en su directorio; el servidor no alcanza la cache real ni a otro cliente.
+      const grafo = await prepararGrafoDelTurno(request.projectPath)
       // La caja del CLI (ADR-092, clase A). Sin caja NO hay turno: se contesta
       // como un CLI que no arranca, con el motivo, y nada se lanza.
-      const args = argsDelTurno(request, customAgents, mcpConfig, budget.perRun)
-      if (!args.ok) return Promise.resolve(sinLanzar(args.error, onChunk))
+      const args = argsDelTurno(request, customAgents, mcpConfig, budget.perRun, grafo.dir)
+      if (!args.ok) return (grafo.liberar(), sinLanzar(args.error, onChunk))
 
       const child = spawn(CLAUDE_BIN, [...args.value], {
         cwd: request.projectPath,
@@ -58,7 +62,8 @@ export function createClaudeCodeAgent(
       // a los vivos y no vio a este. Un hijo que nace parado, muere al nacer.
       if (request.projectId !== undefined && isCancelled(request.projectId)) killChildrenOf(request.projectId) // prettier-ignore
 
-      return collectRun(child, onChunk, techoMs)
+      // La copia muere con el proceso: se libera al cerrar, pase lo que pase.
+      return collectRun(child, onChunk, techoMs).finally(() => grafo.liberar())
     }
   }
 }

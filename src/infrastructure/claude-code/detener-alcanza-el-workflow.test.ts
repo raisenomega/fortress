@@ -48,8 +48,9 @@ const deps = (): WorkflowDeps => ({
 })
 
 describe('Detener alcanza al paso de workflow en curso', () => {
-  it('el proceso del paso se registra con su proyecto, y killChildrenOf lo mata', () => {
+  it('el proceso del paso se registra con su proyecto, y killChildrenOf lo mata', async () => {
     void runStep(deps(), 'code-reviewer', 'revisa el codigo', 'plan', () => ok([]))
+    await new Promise((r) => process.nextTick(r)) // el agente prepara el grafo del turno antes de lanzar
     const hijo = lanzados.at(-1)
 
     try {

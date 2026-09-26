@@ -23,7 +23,9 @@ export function buildArgs(
   mcpConfig: string | null = null,
   // trusted -> pasa allowlist; scripts (del package.json) -> de que se arma.
   trusted = false,
-  scripts: readonly string[] = []
+  scripts: readonly string[] = [],
+  /** El store del grafo de ESTE turno (ADR-095, enmienda); null = la cache real, solo FORTRESS. */
+  grafoDir: string | null = null
 ): string[] {
   // stream-json solo emite el flujo completo de eventos con --verbose.
   // prettier-ignore
@@ -47,7 +49,7 @@ export function buildArgs(
 
   // El grafo viaja en TODO spawn. Si no arranca, Claude Code sigue sin el. Y
   // el flag estricto cierra el conjunto: el hijo monta esto y nada del entorno.
-  args.push(MCP_CONFIG_FLAG, withGraph(mcpConfig), '--strict-mcp-config')
+  args.push(MCP_CONFIG_FLAG, withGraph(mcpConfig, grafoDir), '--strict-mcp-config')
 
   return args
 }

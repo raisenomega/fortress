@@ -34,7 +34,7 @@ const peticion = (projectId: string): CodeAgentRequest => ({
 })
 
 describe('un hijo que nace DESPUES de la parada nace ya condenado', () => {
-  it('con el proyecto cancelado, el proceso recien lanzado recibe SIGTERM al instante', () => {
+  it('con el proyecto cancelado, el proceso recien lanzado recibe SIGTERM al instante', async () => {
     // El caso medido el 2026-09-24: `cancelRun` mato a los hijos vivos (ninguno)
     // y el juez del alcance nacio un instante despues, huerfano hasta 2 minutos.
     const agente = createClaudeCodeAgent({ read: () => null } as never, DEFAULT_BUDGET, false)
@@ -42,6 +42,7 @@ describe('un hijo que nace DESPUES de la parada nace ya condenado', () => {
     cancelRun('p-cancel')
     try {
       void agente.run(peticion('p-cancel'), () => {})
+      await new Promise((r) => process.nextTick(r)) // el agente prepara el grafo del turno antes de lanzar
       expect(lanzados.at(-1)?.killed).toEqual(['SIGTERM'])
     } finally {
       lanzados.at(-1)?.cerrar()
@@ -49,11 +50,12 @@ describe('un hijo que nace DESPUES de la parada nace ya condenado', () => {
     }
   })
 
-  it('sin parada, el proceso recien lanzado sigue vivo', () => {
+  it('sin parada, el proceso recien lanzado sigue vivo', async () => {
     const agente = createClaudeCodeAgent({ read: () => null } as never, DEFAULT_BUDGET, false)
     tryBeginRun('p-vivo')
     try {
       void agente.run(peticion('p-vivo'), () => {})
+      await new Promise((r) => process.nextTick(r))
       expect(lanzados.at(-1)?.killed).toEqual([])
     } finally {
       lanzados.at(-1)?.cerrar()
