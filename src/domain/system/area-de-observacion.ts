@@ -1,5 +1,6 @@
 import { AREAS_DE_FALLO } from './areas-de-fallo'
 import { AREAS_DEL_TERMINAL } from './areas-del-terminal'
+import { AREAS_DEL_LOOP } from './areas-del-loop'
 
 /**
  * De QUE parte de FORTRESS habla una observacion. Vocabulario CERRADO, derivado
@@ -51,10 +52,9 @@ export const AREAS_DEL_CORPUS = [
   'cognicion'
 ] as const
 
-/** Las once del corpus, las de FALLO (ADR-086), las del TERMINAL —tres familias
- *  que crecen cada una por su regla— y `otro` cerrando la lista ENTERA: el cajon
- *  recoge lo que no encaje, venga de un agente, de una rotura o del pre-vuelo. */
-export const AREAS_DE_OBSERVACION = [...AREAS_DEL_CORPUS, ...AREAS_DE_FALLO, ...AREAS_DEL_TERMINAL, 'otro'] as const // prettier-ignore
+/** Corpus, FALLO (ADR-086), TERMINAL y LOOP —cuatro familias, cada una con su
+ *  regla— y `otro` cerrando la lista ENTERA: el cajon de lo que no encaje. */
+export const AREAS_DE_OBSERVACION = [...AREAS_DEL_CORPUS, ...AREAS_DE_FALLO, ...AREAS_DEL_TERMINAL, ...AREAS_DEL_LOOP, 'otro'] as const // prettier-ignore
 
 export type AreaDeObservacion = (typeof AREAS_DE_OBSERVACION)[number]
 
