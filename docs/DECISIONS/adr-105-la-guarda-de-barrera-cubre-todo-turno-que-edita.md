@@ -1,6 +1,6 @@
 # ADR-105 — La guarda de barrera cubre TODO turno que edita: barrera sana edita, barrera muerta bloquea con recibo
 
-- **Estado**: Propuesta — **SIN FIRMAR**
+- **Estado**: Aceptada (firmada por el operador el 2026-09-26)
 - **Fecha**: 2026-09-26
 - **Alcance**: la guarda de barrera del pre-vuelo (`barrera-guard.ts`) deja de
   negar solo el lote del chat y niega **cualquier turno que edite** un proyecto
@@ -121,16 +121,25 @@ negar **antes** de `guardRun`, o dentro del `try` que lo suelta.
 - Lo que se pierde: la posibilidad de construir en autónomo sobre un proyecto
   cuyo hook no arranca. Es lo que se quiere perder.
 
-## 6. Casillas de firma — SIN FIRMAR
+## 6. Casillas de firma
+
+Firmar este ADR es decidir esto. Ninguna casilla la **decide** quien redacta: las
+marcó el 2026-09-26 por orden del operador, con su línea literal:
+
+> *«yo Jojo dueño del proyecto FORTRESS firmo ADR-105 con las cinco casillas sí,
+> como el CTO recomienda: (1) ampliar a los tres flujos, (2) fail-closed solo
+> ante barrera muerta, (3) el Ejecutor negado sea cual sea el modo, (4) la
+> observación en los tres, (5) leído §5.3 y el docblock — Jojo, 26 septiembre
+> 2026»*
 
 1. **Ampliar la guarda a los tres**: lote del chat, turno suelto con su workflow,
-   Ejecutor de Construir: [ ] sí · [ ] solo al chat · [ ] otra: ________
+   Ejecutor de Construir: [x] sí · [ ] solo al chat · [ ] otra: ________
 2. **Fail-closed solo ante barrera muerta**: barrera sana o ninguna → edita;
-   muerta → no corre, con recibo: [ ] sí · [ ] otra: ________
+   muerta → no corre, con recibo: [x] sí · [ ] otra: ________
 3. **El Ejecutor se niega sea cual sea el modo guardado** (siempre edita sin
-   nadie delante): [ ] sí · [ ] solo si el modo guardado es autónomo
-4. **La observación se asienta en los tres**, bloquee o no: [ ] sí
+   nadie delante): [x] sí · [ ] solo si el modo guardado es autónomo
+4. **La observación se asienta en los tres**, bloquee o no: [x] sí
 5. **He leído DEUDAS §5.3 y el docblock de `barrera-guard.ts`**: la limitación al
-   lote fue a propósito y esta es la decisión de ampliarla: [ ]
+   lote fue a propósito y esta es la decisión de ampliarla: [x]
 
-**Firma del operador:** pendiente · **Fecha:** ________
+**Firma del operador:** Jojo, dueño del proyecto FORTRESS · **Fecha:** 26 septiembre 2026
