@@ -6,6 +6,7 @@ import type { DatosDelCierre } from './datos-del-cierre'
 import { calcularExpediente } from './expediente-del-cierre'
 import { escribirFilasDelCierre } from './filas-del-cierre'
 import { emitirInforme } from './emitir-informe'
+import { escribirMemoria } from './escribir-memoria'
 import type { ScanSummary } from './scan-types'
 
 /**
@@ -34,21 +35,7 @@ export function cerrarEscaneo(
 
   emitirInforme(context, project, datos, calculado)
 
-  // Cognition registra lo aprendido en la memoria del proyecto. Fuera de la
-  // transaccion: es un archivo, y perderlo no debe invalidar el escaneo.
-  context.cognitionWriter.writeScan({
-    projectPath: project.path,
-    projectName: project.name,
-    // El expediente entero: un ausente que nadie ha arreglado sigue listado. Si
-    // solo se escribiera lo reportado, dejaria de mentir llamandolo extinto
-    // para mentir callandolo.
-    findings: calculado.expediente,
-    // Un escaneo ya no resuelve nada por su cuenta: cerrar exige juicio.
-    resolved: [],
-    score: calculado.score,
-    counts: calculado.counts,
-    at: datos.at
-  })
+  escribirMemoria(context, project, datos, calculado)
 
   return {
     projectId: project.id,
