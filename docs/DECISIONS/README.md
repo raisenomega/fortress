@@ -135,6 +135,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-102](adr-102-el-arreglo-fuera-de-la-correa.md) | El arreglo fuera de la correa: el analista dice dónde va el fix y el Motor no paga por generar lo que no cabe | 2026-09-23 | Aceptada | Motor |
 | [ADR-103](adr-103-la-severidad-de-las-familias-de-auditoria.md) | La severidad de las familias de auditoría: los ejes de seguridad no juzgan lo que no es de seguridad | 2026-09-23 | Aceptada | Escaneo |
 | [ADR-104](adr-104-lo-que-el-grafo-no-ve-y-las-barreras-declaradas.md) | Lo que el grafo no ve y las barreras declaradas: el agente sabe dónde el grafo no llega, y lee ahí | 2026-09-24 | Aceptada | Grafo |
+| [ADR-105](adr-105-la-guarda-de-barrera-cubre-todo-turno-que-edita.md) | La guarda de barrera cubre todo turno que edita: barrera sana edita, barrera muerta bloquea con recibo | 2026-09-26 | Propuesta (sin firmar) | Seguridad |
 
 ## Referencias
 
