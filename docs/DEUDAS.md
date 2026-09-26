@@ -686,6 +686,22 @@ OMEGA (`peticion-de-notas.ts` → `asentarNotas`): Cognition escribe
 **observaciones al sistema nervioso, no el log**, respetando ADR-047 sin
 enmendarlo.
 
+### 6.7 Los denials del ejecutor de Construir: dato duro sin asentar (2026-09-26)
+
+**Medido al construir la sub-pieza 3 del #5** (main `2266922`): el ejecutor de
+Construir corre en `acceptEdits`, la mayor superficie de denegaciones, y su
+respuesta trae `denials` (dato duro del CLI, como los del chat que `finishTurn`
+asienta con `observacionesDeDenials`). Hoy el ejecutor asienta sus **notas**
+(prosa que pide el prompt) pero **no sus denials**: la deuda vivía solo en el
+docblock de `quien-no-observa.test.ts` (`ejecutor-observa-de-denials`) y no
+aquí. Son fuentes distintas: la nota es lo que el agente dice; el denial es lo
+que FORTRESS le negó.
+
+**Arreglo cuando se decida:** una línea en `build-feature.ts`, tras la corrida,
+`asentarNotas(context, project, observacionesDeDenials(reply.denials, 'autonomo'))`,
+con su test y su mutante. Sin consumidor medido hoy (0 corridas del ejecutor
+con denials en la base viva), por eso se anota y no se construye.
+
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del

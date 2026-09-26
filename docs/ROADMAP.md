@@ -392,17 +392,18 @@ por frescura.
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
 Medido por sitios de llamada: Escaneo y Terminal autónomo corren la disciplina
-completa. **LOOP, Construir y Cognition no escriben una sola observación**;
-Construir no tiene crítico ni juez; cuatro flujos siguen en el modo que bloquea el
-grafo; ~~y un turno suelto en autónomo edita sin pasar por la guarda de
-barrera~~. Se conecta órgano por órgano, en ocho sub-piezas.
+completa. **LOOP y Cognition no escriben una sola observación** (Construir sí,
+desde la sub-pieza 3); Construir no tiene crítico ni juez; ~~cuatro flujos
+siguen en el modo que bloquea el grafo~~; ~~y un turno suelto en autónomo edita
+sin pasar por la guarda de barrera~~. Se conecta órgano por órgano, en ocho
+sub-piezas.
 
 **Sub-pieza 1 HECHA el 2026-09-26** (ADR-105, merge `4dbaa1b`): la guarda de
 barrera cubre los tres flujos que editan. En el chat —turno suelto, lote y
 workflow, sin distinguirlos— cuando el proyecto corre en autónomo y el turno va
 por el CLI; en el Ejecutor de Construir siempre, negado sea cual sea el modo y
 con el recibo en el historial. La observación se asienta en los tres, bloquee o
-no. Quedan: 3 Construir observa; 4 LOOP observa sus paradas; 5 Cognition al
+no. Quedan: 4 LOOP observa sus paradas; 5 Cognition al
 COGNITION-LOG (medir primero contra ADR-047, que reserva el log al motor); 6
 OMEGA y crítico en el Ejecutor (ADR corto); 7 el `stderr` del Terminal y 8 las
 notas del chat (anotadas, sin consumidor medido).
@@ -430,6 +431,16 @@ memoria; un escaneo detenido a mitad con una parada hecha conserva la suya
 conteo de sesiones del log propio no cambia (59 → 59 medido sobre main). Las
 31 sesiones falsas ya escritas son limpieza aparte del fichero del operador,
 con copia previa, pendiente de orden de Jojo.
+
+**Sub-pieza 3 HECHA el 2026-09-26** (merge `2266922`, sin ADR: calco): Construir
+observa. Los tres prompts —investigación, plan y ejecutor— piden notas por
+**bloque** (calco del juez, no del escáner: responden prosa y ninguno emite en
+vivo) y los tres flujos las asientan por el cuello único `asentarNotas` justo
+tras la corrida, **pase lo que pase con el resultado**. El bloque se quita del
+texto antes de guardarlo en el `docs/` del cliente y de mostrarlo
+(`sinBloqueDeNotas`). Solo la entrevista de configuración sigue fuera, por
+emitir en vivo. Queda aparte, distinta de las notas, la deuda de los **denials
+del ejecutor** (DEUDAS §6.7).
 
 ### 6. Mergear lo ya hecho
 
