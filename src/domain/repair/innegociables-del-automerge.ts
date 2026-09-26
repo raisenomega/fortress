@@ -22,5 +22,13 @@ export const INNEGOCIABLES_DEL_AUTOMERGE: readonly string[] = [
   // regla— ya estaba; estos dos son quien la consulta y quien la aplica, que es
   // por donde se escapo la vez anterior.
   'src/application/repair/integrable-sin-firma.ts',
-  'src/application/repair/judge-and-integrate.ts'
+  'src/application/repair/judge-and-integrate.ts',
+  // Quien APLICA esta lista: `firma-limite` la convierte en el limite de la
+  // firma, `firmar-integracion` lo invoca al firmar y `alcance` es la jaula del
+  // motor antes de la cola. Protegida la regla y suelto quien la ejecuta: una
+  // propuesta que dejara `defensasQueToca` en `return []` apagaba el limite
+  // entero sin tocar un solo fichero de los de arriba.
+  'src/domain/repair/firma-limite.ts',
+  'src/application/repair/firmar-integracion.ts',
+  'src/domain/repair/alcance.ts'
 ]
