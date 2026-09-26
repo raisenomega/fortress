@@ -394,8 +394,18 @@ por frescura.
 Medido por sitios de llamada: Escaneo y Terminal autónomo corren la disciplina
 completa. **LOOP, Construir y Cognition no escriben una sola observación**;
 Construir no tiene crítico ni juez; cuatro flujos siguen en el modo que bloquea el
-grafo; y un turno suelto en autónomo edita sin pasar por la guarda de barrera. Se
-conecta órgano por órgano.
+grafo; ~~y un turno suelto en autónomo edita sin pasar por la guarda de
+barrera~~. Se conecta órgano por órgano, en ocho sub-piezas.
+
+**Sub-pieza 1 HECHA el 2026-09-26** (ADR-105, merge `4dbaa1b`): la guarda de
+barrera cubre los tres flujos que editan. En el chat —turno suelto, lote y
+workflow, sin distinguirlos— cuando el proyecto corre en autónomo y el turno va
+por el CLI; en el Ejecutor de Construir siempre, negado sea cual sea el modo y
+con el recibo en el historial. La observación se asienta en los tres, bloquee o
+no. Quedan: 2 los cuatro flujos en `plan` → `lectura`; 3 Construir observa; 4
+LOOP observa sus paradas; 5 Cognition escribe COGNITION-LOG; 6 OMEGA y crítico
+en el Ejecutor (ADR corto); 7 el `stderr` del Terminal y 8 las notas del chat
+(anotadas, sin consumidor medido).
 
 ### 6. Mergear lo ya hecho
 

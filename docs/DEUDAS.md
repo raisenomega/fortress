@@ -371,9 +371,15 @@ propósito**:
 
 ### 5.3 Lo que el pre-vuelo NO cubre (dicho, no escondido)
 
-- Un turno **suelto** en autónomo también edita, y `guardBarrera` lo deja pasar:
-  lo que se decidió bloquear fue el **lote**. Quitar `ejecutaUnLote` es una línea
-  y la costura está puesta; no se amplía sin decidirlo.
+- **OBSOLETO el 2026-09-26** (ADR-105, merge `4dbaa1b`): se decidió y se
+  construyó. ~~Un turno **suelto** en autónomo también edita, y `guardBarrera`
+  lo deja pasar: lo que se decidió bloquear fue el **lote**. Quitar
+  `ejecutaUnLote` es una línea y la costura está puesta; no se amplía sin
+  decidirlo.~~ Hoy la guarda es `guardBarrera(context, projectId, edita)`: el
+  chat pasa `editaElChat` (autónomo en la base y turno por el CLI, sin mirar el
+  input, así que suelto, lote y workflow son iguales) y el Ejecutor de Construir
+  pasa `true` (negado sea cual sea el modo, recibo en el historial).
+  `ejecutaUnLote` ya no participa en la guarda.
 - Solo mira `PreToolUse`. Un `PostToolUse` roto pierde un aviso; un `PreToolUse`
   roto deja pasar la escritura que venía a impedir. Esa es la línea, y es la
   correcta mientras lo que se protege sea lo irreversible.
