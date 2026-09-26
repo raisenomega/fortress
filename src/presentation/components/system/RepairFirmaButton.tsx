@@ -42,7 +42,7 @@ export function RepairFirmaButton({
       disabled={busy}
       onClick={() => void firmar()}
       title={queFirma(proposal.state)}
-      className="border-primary/50 text-primary hover:bg-primary/10 flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] tracking-wide uppercase disabled:opacity-60"
+      className="border-primary/50 text-primary hover:bg-primary/10 flex min-h-6 shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] tracking-wide uppercase disabled:opacity-60"
     >
       <span className={busy ? 'animate-spin' : ''}>
         <Icon name={busy ? 'refresh-cw' : 'eye'} size={10} />

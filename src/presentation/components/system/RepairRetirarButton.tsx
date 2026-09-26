@@ -48,7 +48,7 @@ export function RepairRetirarButton({
         disabled={busy}
         onClick={() => setPreguntando(true)}
         title="Retirar: la caduca y saca de la cola. Su hallazgo vuelve"
-        className="tap border-border text-muted-foreground hover:border-critical/50 hover:text-critical flex shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] tracking-wide uppercase disabled:opacity-60"
+        className="tap border-border text-muted-foreground hover:border-critical/50 hover:text-critical flex min-h-6 shrink-0 items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] tracking-wide uppercase disabled:opacity-60"
       >
         <span className={busy ? 'animate-spin' : ''}>
           <Icon name={busy ? 'refresh-cw' : 'x-circle'} size={10} />
