@@ -392,18 +392,18 @@ por frescura.
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
 Medido por sitios de llamada: Escaneo y Terminal autónomo corren la disciplina
-completa. **LOOP y Cognition no escriben una sola observación** (Construir sí,
-desde la sub-pieza 3); Construir no tiene crítico ni juez; ~~cuatro flujos
-siguen en el modo que bloquea el grafo~~; ~~y un turno suelto en autónomo edita
-sin pasar por la guarda de barrera~~. Se conecta órgano por órgano, en ocho
-sub-piezas.
+completa. **Cognition no escribe una sola observación** (Construir sí, desde la
+sub-pieza 3; LOOP observa lo suyo, sus paradas y standbys, desde la sub-pieza
+4); Construir no tiene crítico ni juez; ~~cuatro flujos siguen en el modo que
+bloquea el grafo~~; ~~y un turno suelto en autónomo edita sin pasar por la
+guarda de barrera~~. Se conecta órgano por órgano, en ocho sub-piezas.
 
 **Sub-pieza 1 HECHA el 2026-09-26** (ADR-105, merge `4dbaa1b`): la guarda de
 barrera cubre los tres flujos que editan. En el chat —turno suelto, lote y
 workflow, sin distinguirlos— cuando el proyecto corre en autónomo y el turno va
 por el CLI; en el Ejecutor de Construir siempre, negado sea cual sea el modo y
 con el recibo en el historial. La observación se asienta en los tres, bloquee o
-no. Quedan: 4 LOOP observa sus paradas; 5 Cognition al
+no. Quedan: 5 Cognition al
 COGNITION-LOG (medir primero contra ADR-047, que reserva el log al motor); 6
 OMEGA y crítico en el Ejecutor (ADR corto); 7 el `stderr` del Terminal y 8 las
 notas del chat (anotadas, sin consumidor medido).
@@ -441,6 +441,17 @@ texto antes de guardarlo en el `docs/` del cliente y de mostrarlo
 (`sinBloqueDeNotas`). Solo la entrevista de configuración sigue fuera, por
 emitir en vivo. Queda aparte, distinta de las notas, la deuda de los **denials
 del ejecutor** (DEUDAS §6.7).
+
+**Sub-pieza 4 HECHA el 2026-09-26** (merge `ff59bcd`, sin ADR: calco de las
+barreras): LOOP observa sus paradas y sus standbys **del dato duro**, no del
+modelo: el motivo cerrado y la cifra que ya se guardan en `loop_sessions`, y la
+causa del standby clasificada. Dos áreas nuevas, `parada-del-loop` y
+`standby-del-loop`, porque la dedup funde por tipo y área y un solo cajón
+enterraría juntos los topes y las caídas del proveedor. La clasificación
+distingue límite real de decisión humana: los topes y la falta de avance son
+limitación, romperse es bug, y parar a mano o terminar resuelto no observan
+nada. El texto crudo del error del proveedor queda fuera de la nota: baila en
+cada reintento y puede llevar rutas del cliente.
 
 ### 6. Mergear lo ya hecho
 
