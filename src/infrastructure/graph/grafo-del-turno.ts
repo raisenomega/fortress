@@ -34,7 +34,21 @@ export async function prepararGrafoDelTurno(
   const dir = mkdtempSync(join(raiz, 'turno-'))
   const origen = projectPath === null ? null : join(cacheReal, `${graphSlug(projectPath)}.db`)
   if (origen !== null && existsSync(origen)) await copiaReal(origen, join(dir, basename(origen)))
-  return { dir, liberar: () => rmSync(dir, { recursive: true, force: true }) }
+  return { dir, liberar: () => liberarDir(dir) }
+}
+
+/**
+ * Borrar el directorio del turno sin reventar el turno. El servidor deja dentro
+ * su `_config.db` y sus `logs/`, y puede seguir escribiendolos unos cientos de
+ * milisegundos despues de que el CLI cierre (medido: ENOTEMPTY en la prueba
+ * dura): se reintenta con espera, y si aun asi queda algo, lo barre el arranque.
+ */
+function liberarDir(dir: string): void {
+  try {
+    rmSync(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 })
+  } catch (error) {
+    console.warn('[grafo-por-turno] no se pudo liberar', dir, error instanceof Error ? error.message : error) // prettier-ignore
+  }
 }
 
 async function copiaReal(origen: string, destino: string): Promise<void> {
