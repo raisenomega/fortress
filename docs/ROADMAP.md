@@ -420,6 +420,17 @@ Decisión del operador, con dato: el planner nunca planeó con Bash (su única
 corrida falló, 0 planes), `auditoria` habría permitido escribir en el proyecto
 por redirección (12-sep) y el sandbox no lo impide.
 
+**Higiene del COGNITION-LOG HECHA el 2026-09-26** (merge `2dfb070`, sin ADR,
+cazada al medir la sub-pieza 5): cada gate escribía una sesión falsa «sin
+hallazgos, score 100» en el COGNITION-LOG del repo propio, porque la suite lo
+registra con su ruta real, el escaneo nace parado y se cerraba con cero
+paradas. La condición es «solo lo visto»: con 0 paradas hechas no se escribe
+memoria; un escaneo detenido a mitad con una parada hecha conserva la suya
+(`escribir-memoria.ts`). El gate lleva desde entonces una **cuarta prueba**: el
+conteo de sesiones del log propio no cambia (59 → 59 medido sobre main). Las
+31 sesiones falsas ya escritas son limpieza aparte del fichero del operador,
+con copia previa, pendiente de orden de Jojo.
+
 ### 6. Mergear lo ya hecho
 
 Parte de lo que falta está escrito y sin integrar: trece hallazgos del
