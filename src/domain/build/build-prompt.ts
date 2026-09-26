@@ -1,3 +1,5 @@
+import { NOTAS_COMO_BLOQUE } from '../system/peticion-de-notas'
+
 const BUILD_RULES = [
   '- Implementa SOLO lo que pide el plan aprobado; nada extra.',
   '- Sigue las convenciones DEL PROYECTO (estilo, estructura, tests que ya existen).',
@@ -20,7 +22,9 @@ export function investigatePrompt(projectName: string, intent: string): string {
     intent,
     '',
     'Investiga el codigo y responde con evidencia (archivo:linea). SOLO LECTURA:',
-    'no modifiques nada. Se claro y directo; usa el grafo antes de abrir archivos.'
+    'no modifiques nada. Se claro y directo; usa el grafo antes de abrir archivos.',
+    '',
+    NOTAS_COMO_BLOQUE
   ].join('\n')
 }
 
@@ -37,7 +41,9 @@ export function buildPlanPrompt(projectName: string, intent: string): string {
     '',
     'Disena un PLAN de implementacion concreto: que archivos crear/tocar, en que',
     'orden, y los criterios de aceptacion. NO implementes nada: solo el plan, breve',
-    'y accionable, respetando las convenciones del proyecto.'
+    'y accionable, respetando las convenciones del proyecto.',
+    '',
+    NOTAS_COMO_BLOQUE
   ].join('\n')
 }
 
@@ -57,6 +63,8 @@ export function buildFeaturePrompt(projectName: string, intent: string, plan: st
     plan,
     '',
     'Tu tarea: CREA el codigo que implementa el plan. Reglas:',
-    BUILD_RULES
+    BUILD_RULES,
+    '',
+    NOTAS_COMO_BLOQUE
   ].join('\n')
 }
