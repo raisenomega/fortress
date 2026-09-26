@@ -699,8 +699,9 @@ que FORTRESS le negó.
 
 **Arreglo cuando se decida:** una línea en `build-feature.ts`, tras la corrida,
 `asentarNotas(context, project, observacionesDeDenials(reply.denials, 'autonomo'))`,
-con su test y su mutante. Sin consumidor medido hoy (0 corridas del ejecutor
-con denials en la base viva), por eso se anota y no se construye.
+con su test y su mutante. Sin consumidor medido hoy: el ejecutor **no tiene ni
+una corrida en la base viva** (0 mensajes «Construccion …» en el historial, 0
+corridas de sistema sin agente), por eso se anota y no se construye.
 
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
