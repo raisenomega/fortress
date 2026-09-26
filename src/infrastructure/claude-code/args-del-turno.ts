@@ -18,7 +18,9 @@ export function argsDelTurno(
   request: CodeAgentRequest,
   customAgents: Readonly<Record<string, AgentDefinition>>,
   mcpConfig: string | null,
-  maxUsd: number
+  maxUsd: number,
+  /** El directorio del grafo de este turno: el servidor solo alcanza ese store. */
+  grafoDir: string | null
 ): Result<readonly string[]> {
   const agents = agentsForProject(request.projectPath, customAgents)
   // El grafo real (codebase-memory con su graph.db) y demas MCP viven en el
@@ -32,7 +34,8 @@ export function argsDelTurno(
     maxUsd,
     mergeMcpConfig(mcpConfig, projectMcp),
     request.trusted,
-    readProjectScripts(request.projectPath)
+    readProjectScripts(request.projectPath),
+    grafoDir
   )
   if (request.reanudarSesion) args.push('--resume', request.reanudarSesion, '--fork-session')
   return conSandbox(args, request.projectPath)

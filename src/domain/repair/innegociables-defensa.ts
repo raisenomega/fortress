@@ -3,6 +3,7 @@ import { INNEGOCIABLES_DEL_AUTOMERGE } from './innegociables-del-automerge'
 import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
 import { DEFENSAS_DE_LA_RED } from './innegociables-red'
 import { FRENOS_DE_GASTO } from './innegociables-gasto'
+import { DEFENSAS_DEL_GRAFO_POR_TURNO } from './innegociables-grafo'
 /**
  * La TERCERA familia del criterio innegociable: ficheros que IMPLEMENTAN una
  * defensa, sin gobernar la autonomia ni validar una entrada. Ver
@@ -20,6 +21,7 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   ...DEFENSAS_DEL_DISCO,
   ...DEFENSAS_DE_LA_RED,
   ...FRENOS_DE_GASTO,
+  ...DEFENSAS_DEL_GRAFO_POR_TURNO,
   // El ENTORNO de todo hijo: `build-env` recorta la sesion viva del operador
   // —agente ssh, keyring, GPG— y `git-env` hace lo propio para los cinco `git`
   // que corren en el repo auditado y ejecutan sus hooks.
@@ -48,8 +50,7 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // auto-merge pudiera tocarlos, el autonomo se abriria a si mismo la puerta.
   'src/infrastructure/plan-guard.ts',
   'src/infrastructure/aprobacion-del-plan.ts',
-  // Las HERRAMIENTAS del motor, derivadas del vocabulario del grafo.
-  'src/infrastructure/repair/motor-tools.ts',
+  'src/infrastructure/repair/motor-tools.ts', // las HERRAMIENTAS del motor, derivadas del vocabulario del grafo
   // Lo que el AUTO-MERGE no puede integrar, aparte por tamano y por asunto.
   ...INNEGOCIABLES_DEL_AUTOMERGE,
   // El AISLAMIENTO DEL RENDERER, dos mitades de una sola garantia: `main-window`
@@ -69,7 +70,6 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   // muerta. Proteger solo la puerta dejaria que un fix devolviera lista vacia.
   'src/infrastructure/barrera-guard.ts',
   'src/infrastructure/project/barreras-del-proyecto.ts',
-  // Auto-cobertura, por lo mismo que la lista principal se cubre a si misma.
-  'src/domain/repair/innegociables-defensa.ts',
+  'src/domain/repair/innegociables-defensa.ts', // auto-cobertura, como la lista principal
   'src/domain/repair/innegociables-del-automerge.ts'
 ]

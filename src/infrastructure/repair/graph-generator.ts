@@ -4,6 +4,7 @@ import { argsDelGenerador } from './generator-args'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
+import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
 import { buildEnv } from '../claude-code/build-env'
 
 /** El plazo, sacado del dato: las corridas que TERMINARON tardaron entre 205 y
@@ -28,13 +29,16 @@ export interface GraphGenerator {
  * tocados NO se le creen al agente: los lee el motor con git, despues.
  */
 // prettier-ignore
-export function createGraphGenerator(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS): GraphGenerator {
+// `grafo` es el store del turno (ADR-095, enmienda), atado al proyecto por quien crea
+// el generador; sin atar, un directorio vacio: nunca la cache real.
+export function createGraphGenerator(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS, grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)): GraphGenerator { // prettier-ignore
   return {
-    generate: (worktreePath, prompt) => {
+    generate: async (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
-      const args = argsDelGenerador(prompt, worktreePath)
+      const store = await grafo.preparar()
+      const args = argsDelGenerador(prompt, worktreePath, store.dir)
       // Sin caja no arranca: el mismo camino que un binario que no existe.
-      if (!args.ok) return Promise.resolve({ ok: false, noArranco: true, error: args.error, runMeta: sinFactura() }) // prettier-ignore
+      if (!args.ok) return (store.liberar(), { ok: false, noArranco: true, error: args.error, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
         // El mismo recorte que los demas lanzamientos del CLI: este es el que
         // EDITA, con prompt del repo AJENO y un MCP nieto que hereda esto, asi
@@ -54,12 +58,14 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         child.stdout.on('data', (d: Buffer) => (out += d.toString()))
         child.on('close', (code) => {
           clearTimeout(timer)
+          store.liberar()
           const fin = desenlaceDelGenerador(out, code)
           if (fin.ok) resolve({ ok: true, runMeta: meta(fin.usage) })
           else resolve({ ...fin, error: fin.error, runMeta: meta(fin.usage) })
         })
         child.on('error', (error) => {
           clearTimeout(timer)
+          store.liberar()
           // El proceso jamas existio: ni facturo nada ni es del proveedor.
           resolve({ ok: false, noArranco: true, error: error.message, runMeta: sinFactura() })
         })

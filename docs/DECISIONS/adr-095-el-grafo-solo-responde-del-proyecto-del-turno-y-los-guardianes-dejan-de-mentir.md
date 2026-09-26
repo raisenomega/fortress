@@ -2,6 +2,8 @@
 
 - **Estado**: Aceptada
 - **Fecha**: 2026-09-18
+- **Enmienda**: firmada el 2026-09-25 — la Pieza B se construye con `CBM_CACHE_DIR`
+  y no con un `HOME` por turno (sección Enmienda, al final del documento)
 - **Alcance**: aislamiento entre proyectos — el cruce que está abierto HOY, sin
   sandbox y con la correa puesta
 - **Relación**: contención rápida **previa** a ADR-092 (el sandbox), que sigue
@@ -128,7 +130,8 @@ Y hoy FORTRESS lo lanza **sin argumentos** (`graph-mcp.ts:57`):
 const GRAPH_MCP = { type: 'stdio', command: GRAPH_BIN, args: [] } as const
 ```
 
-**`HOME` es la única palanca que el servidor respeta.**
+**`HOME` es la única palanca que el servidor respeta.** *(Enmendado el
+2026-09-25: hay otra, `CBM_CACHE_DIR`, que la tabla no probó; ver la Enmienda.)*
 
 ---
 
@@ -145,7 +148,7 @@ Motivo propio, aparte de la pared: enumerar los proyectos del operador **no es
 una capacidad que el agente necesite** para trabajar en el suyo. Quitarla no le
 resta nada de su trabajo — no es un freno, es quitar una puerta que sobra.
 
-### Pieza B — LA PARED: un `HOME` por turno con un solo grafo dentro
+### Pieza B — LA PARED: un `HOME` por turno con un solo grafo dentro *(enmendada el 2026-09-25: mismo muro, otra palanca)*
 
 El grafo resuelve su cache como `$HOME/.cache/codebase-memory-mcp`. Si ese
 directorio **solo contiene el `.db` del proyecto del turno**, entonces:
@@ -391,6 +394,7 @@ reales donde se indica.
 | *(medido en vivo)* `--help` / `config list` | sin bandera ni clave de proyecto |
 | *(medido en vivo)* `XDG_CACHE_HOME` | ignorado |
 | *(medido en vivo)* `HOME` | honrado — «cannot read cache directory» |
+| *(medido en vivo, 2026-09-25)* `CBM_CACHE_DIR` | **honrado** — el índice cae en su directorio y nada en `$HOME/.cache` (HOME aislado como red de seguridad) |
 
 ---
 
@@ -405,3 +409,144 @@ reales donde se indica.
 - **No desbloquea** la Pieza 3 de ADR-093. Esa sigue esperando a ADR-092.
 - **Precede** a ADR-092 sin sustituirlo: cierra un cruce concreto; el
   aislamiento del proceso sigue sin existir.
+
+---
+
+## Enmienda (2026-09-25): la palanca es `CBM_CACHE_DIR`, no `HOME` — FIRMADA
+
+### E.1 La premisa que era incompleta
+
+§2.1 midió que `XDG_CACHE_HOME` se ignora y que `HOME` se honra, y concluyó
+que **«`HOME` es la única palanca»**. Faltaba una. El 2026-09-25, al medir el
+arco 8.1 (DEUDAS §8.1: la clase A sigue con el HOME real y su grafo ve a todos
+los clientes), se probó cada variable **por separado, con un `HOME` aislado
+como red de seguridad** para que ninguna prueba tocara la caché real:
+
+| variable, sola | dónde cayó el índice del repo de prueba |
+|---|---|
+| `XDG_CACHE_HOME` | en `$HOME/.cache/codebase-memory-mcp` — **ignorada**, como decía §2.1 |
+| `CODEBASE_MEMORY_CACHE_DIR` | en `$HOME/.cache/…` — ignorada |
+| **`CBM_CACHE_DIR`** | **en su directorio, y nada en `$HOME/.cache`** — **honrada** |
+
+El binario 0.9.0 la lleva entre sus variables (`strings`) y la nombra en su
+propio error de caché. La lección de método, dicha: la primera prueba de
+`XDG_CACHE_HOME` se hizo sin la red de seguridad, y como no la honra, el índice
+del repo de prueba cayó en la caché real como un `.db` nuevo. Los ocho `.db`
+de los clientes quedaron idénticos (huella comprobada) y el `.db` de prueba se
+borró; desde ahí, toda prueba llevó `HOME` aislado.
+
+Y la segunda medición, la que decide dónde va la palanca: **el `env` de una
+entrada del `--mcp-config` llega al servidor**. Un turno headless mínimo desde
+un directorio vacío, con `CBM_CACHE_DIR` solo en la entrada de
+`codebase-memory`, arrancó el servidor (log MCP: conectado en 748 ms) y este
+creó su `_config.db` **en el directorio aislado**; la caché real quedó idéntica
+y no sobrevivió ningún proceso. El HOME del CLI no se tocó, y no hace falta:
+con un `HOME` aislado el CLI pierde el login (`auth status`: `loggedIn: false`),
+porque `~/.claude` guarda la credencial OAuth, `history.jsonl`, `projects`
+(62 sesiones), `plans`, `paste-cache`, `file-history` y `sessions`.
+
+### E.2 La decisión enmendada: mismo muro, otra palanca
+
+**No hay `HOME` por turno.** El servidor del grafo del turno de clase A recibe
+`CBM_CACHE_DIR` apuntando a un **directorio por turno** que contiene **una
+copia real del `.db` del proyecto** y nada más. El HOME del CLI no se toca:
+login, credenciales y sesiones siguen donde están.
+
+Es el mismo muro que la Pieza B quería —**el proceso solo puede alcanzar un
+grafo**, aislamiento por construcción y no por regla—, sin la ventana que §3.1
+y §3.2 temían: como no hay `HOME` nuevo, no hay `~/.claude` que enlazar y no
+hay historial de otros proyectos que exponer. La validación del «mínimo
+enlazable» de §3.2 deja de tener objeto. Y sin el plan B de §7.2: no hace falta
+un envoltorio propio del binario.
+
+De paso cierra lo que DEUDAS §8.1 midió aparte: el vigilante del 0.9.0 reindexa
+el proyecto del turno cuando cambia (`watcher.changed → watcher.reindex`,
+reproducido aislado). Con la copia, reindexa **la copia**, que muere con el
+turno; la caché real ya no se reescribe a mitad de un checkpoint transitorio.
+
+**Copia real, no enlace duro.** Un enlace duro comparte inodo: lo que el
+servidor escribiera en «su» `.db` llegaría al original.
+
+### E.3 Por dónde entra, y qué se queda fuera (citas contra `main@d8b0de6`)
+
+Tres caminos al servidor del grafo; los dos primeros son del agente (clase A)
+y llevan la palanca, el tercero es de FORTRESS y **sigue en la caché real**:
+
+1. `buildArgs` en `src/infrastructure/claude-code/claude-cli.ts:50` pega
+   `--mcp-config withGraph(mcpConfig) --strict-mcp-config`; `withGraph`
+   (`src/domain/connectors/graph-mcp.ts:39`) envuelve `GRAPH_MCP`
+   (`graph-mcp.ts:28`: `{ type: 'stdio', command, args: [] }`). Es el camino
+   del Terminal, el escáner, génesis, episodios, borradores y el build. Aquí
+   `GRAPH_MCP` gana `env: { CBM_CACHE_DIR: <dir del turno> }` y `withGraph`
+   recibe ese directorio, que conoce `argsDelTurno` (tiene `projectPath`).
+2. `generator-args.ts:5-7` declara su **propio** `GRAPH` (el mismo servidor,
+   literal aparte) para el generador, el analista, el crítico y OMEGA
+   (`FLAGS_EDICION`, `FLAGS_LECTURA`; consumido en `graph-generator.ts:35`,
+   `graph-analyst.ts:23`, `graph-critico.ts:40`, `graph-omega.ts:26`). Lleva la
+   misma palanca; en los turnos sobre worktree el servidor busca el proyecto
+   por **nombre**, no por `cwd` (§1.3), así que la copia guarda el `.db` con su
+   nombre de siempre y el analista lo encuentra.
+3. **Fuera, en la caché real, a propósito**: `index-graph.ts:29` (instalar e
+   indexar escribe el índice de verdad), `verify-graph.ts:23` (comprueba que el
+   servidor conecta), el runner de reindex (`reindex-runner.ts:46`, `cli
+   index_repository`) y `readGraphIndex` (`read-graph-index.ts:8`). Son de
+   FORTRESS, no del agente.
+
+La copia se prepara antes del `spawn` (`claude-code-agent.ts:54`,
+`graph-analyst.ts:26` y sus hermanos), se borra al cerrarse el proceso
+(`run-claude-process.ts:69`) y lo que un cierre abrupto deje se barre al
+arrancar, como los worktrees huérfanos (`reclaim-service.ts`). Ambos `spawn`
+comparten `buildEnv` (`build-env.ts:38`), que copia `process.env`: la palanca va
+en la entrada del servidor, no en ese entorno, para que el CLI no la herede.
+
+### E.4 Lo que cuesta
+
+| índice | tamaño |
+|---|---|
+| fortress-command-center | 45,7 MB |
+| Health Flow V1_FINAL | 41,2 MB |
+| raisen-nucleo | 32,4 MB |
+| Raisen Omega | 10,5 MB |
+| mailbd, APT BY, ensayo-fail-closed | 4,7 / 3,1 / 2,3 MB |
+
+Copiar el mayor: `cp` 0,03 s (idéntica byte a byte, con el WAL vacío); por la
+API de backup de SQLite, consistente aunque haya un escritor, 1,09 s. Mismo
+disco, 402 GB libres. Un turno tarda minutos: la copia no se nota.
+
+### E.5 Lo que la construcción debe probar, no suponer
+
+- **Rechazo, no filtrado silencioso** (§3, la lección de ADR-091): con la copia
+  dentro, qué contesta el servidor cuando el agente pide un proyecto que no
+  está. Debe ser un error legible, no una lista vacía que se lea como «ese
+  proyecto no tiene ese código». Se mide en construcción y se fija con test.
+- **Proyecto sin `.db`**: hoy el turno corre sin grafo y el prompt lo dice
+  («si no está indexado, dilo y sigue a mano», ADR-104); con la copia, el
+  directorio del turno queda vacío y el servidor debe contestar lo mismo. Se
+  mide y se decide con el patrón existente, sin inventar un rechazo nuevo.
+- **La prueba dura**: un turno de clase A real sobre un proyecto indexado deja
+  la huella sha256 de los `.db` de la caché real **idéntica**.
+- Las guardas nuevas entran en los innegociables: son defensa del sandbox.
+
+### E.6 Casillas de la enmienda — FIRMADAS el 2026-09-25
+
+- [x] **Casilla 1.** La palanca es `CBM_CACHE_DIR` en el `env` de la entrada del
+      servidor; el `HOME` del CLI no se toca.
+- [x] **Casilla 2.** Un directorio por turno con una **copia real** del `.db`
+      del proyecto (no enlace duro), borrado al cerrar y barrido al arrancar.
+- [x] **Casilla 3.** Las excepciones de FORTRESS siguen en la caché real:
+      `index-graph`, `verify-graph`, el runner de reindex y `readGraphIndex`.
+- [x] **Casilla 4.** Rechazo, no filtrado silencioso: el proyecto que no está en
+      la copia produce un error legible, medido y fijado con test.
+- [x] **Casilla 5.** Leído el riesgo original de §3.1 y §3.2: esta enmienda lo
+      evita en vez de validarlo, porque no hay `HOME` nuevo ni `~/.claude`
+      enlazado.
+
+**Firma** (línea literal de Jojo, de su mano, el 2026-09-25, tras leer E.1-E.6 y
+§3.1/§3.2):
+
+> yo Jojo dueño del proyecto fortress Firmo la enmienda a ADR-095 con las cinco
+> casillas sí y los dos caminos, como el CTO propuso — Jojo, 25 septiembre 2026
+
+Las cinco casillas sí, y los **dos caminos** (`withGraph` y el `GRAPH` del
+motor). Con la firma, la Pieza B se construye tal cual la describe esta enmienda,
+con el método de siempre: test rojo → mutante → gate.

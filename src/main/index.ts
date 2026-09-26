@@ -1,7 +1,8 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { createMainWindow } from '@infrastructure/electron/main-window'
-import { focoDeVentana, reconcileAllOnBoot } from '@infrastructure/graph/reconcile-service'
+import { focoDeVentana } from '@infrastructure/graph/reconcile-service'
+import { arrancarGrafo } from '@infrastructure/graph/arranque-del-grafo'
 import { reclaimRepairWorktrees } from '@infrastructure/repair/reclaim-service'
 import { restoreKeepAwake } from '@infrastructure/system/restore-keep-awake'
 import { resumeLoops } from '@infrastructure/loop/loop-controller'
@@ -47,8 +48,7 @@ app
     bindGenesisWindow(mainWindow)
     // Reanuda los loops que quedaron vivos: nada se pierde tras un reinicio.
     resumeLoops()
-    // Alinea el grafo de cada proyecto con su HEAD, en background y de a uno.
-    reconcileAllOnBoot()
+    arrancarGrafo(app.getPath('userData')) // raiz de los turnos, barrido de huerfanos, y cada proyecto con su HEAD
     // Y al VOLVER a la ventana: un pull o merge de fuera mueve HEAD sin avisar.
     app.on('browser-window-focus', () => focoDeVentana.ventanaActiva())
     // Worktrees huerfanos de reparaciones interrumpidas: se reconcilian aqui.

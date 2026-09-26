@@ -8,7 +8,8 @@ import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
 const FAILED: GraphVerify = { connected: false, tools: [] }
 
-function verifyArgs(): string[] {
+/** Sin directorio de turno a proposito: verifica que el servidor conecta con la cache real. */
+export function verifyArgs(): string[] {
   return [
     '-p',
     'ok',

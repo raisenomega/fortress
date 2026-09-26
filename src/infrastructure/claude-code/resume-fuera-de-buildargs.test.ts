@@ -28,21 +28,22 @@ const peticion: CodeAgentRequest = {
   trusted: false
 }
 
-const lanzar = (over: Partial<CodeAgentRequest>): string[] => {
+const lanzar = async (over: Partial<CodeAgentRequest>): Promise<string[]> => {
   void createClaudeCodeAgent(CLAVES, DEFAULT_BUDGET, false).run({ ...peticion, ...over }, () => undefined) // prettier-ignore
+  await new Promise((r) => process.nextTick(r)) // el agente prepara el grafo del turno antes de lanzar
   return lanzados.at(-1) ?? []
 }
 
 describe('--resume lo pone claude-code-agent, NUNCA buildArgs (ADR-088, Enmienda 2)', () => {
-  it('con sesion, reanuda en una DERIVADA: --resume <id> --fork-session', () => {
-    const args = lanzar({ reanudarSesion: 'ses-1' })
+  it('con sesion, reanuda en una DERIVADA: --resume <id> --fork-session', async () => {
+    const args = await lanzar({ reanudarSesion: 'ses-1' })
     const i = args.indexOf('--resume')
 
     expect(args.slice(i, i + 3)).toEqual(['--resume', 'ses-1', '--fork-session'])
   })
 
-  it('sin sesion, ni --resume ni --fork-session: sesion nueva', () => {
-    const args = lanzar({})
+  it('sin sesion, ni --resume ni --fork-session: sesion nueva', async () => {
+    const args = await lanzar({})
     expect(args).not.toContain('--resume')
     expect(args).not.toContain('--fork-session')
   })

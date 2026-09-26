@@ -11,9 +11,14 @@ import { createGateRunner } from './gate-runner'
 import { gateQueue } from './gate-queue'
 import { createGraphGenerator } from './graph-generator'
 import { createGraphOmega } from './graph-omega'
+import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
+import { getAppContext } from '../persistence/app-context'
 import { readAtHead, readAtSha, showHead } from './worktree-file-reader'
 import { assertRepairSandbox } from './repair-sandbox'
 import { createWorktreeManager } from './worktree-manager'
+
+/** El grafo del turno va atado a la RUTA del proyecto: el .db se busca por su slug. */
+const grafoDelProyecto = (projectId: string): GrafoDelTurnoPort => grafoDelTurnoDe(getAppContext().projects.findById(projectId)?.path ?? null) // prettier-ignore
 
 /** D7 — los worktrees del motor viven en userData, JAMAS dentro del repo. */
 export function worktreeRoot(): string {
@@ -26,7 +31,7 @@ export function buildGenerateDeps(projectId: string): GenerateDeps {
   return {
     worktreeRoot: root,
     worktrees: createWorktreeManager(),
-    generator: createGraphGenerator(CLAUDE_BIN, projectId),
+    generator: createGraphGenerator(CLAUDE_BIN, projectId, undefined, grafoDelProyecto(projectId)),
     scopeGroups: readScopeGroups,
     huellaDeConfig,
     sandbox: (worktreePath, proposalId, liveRepoPath) =>
@@ -60,7 +65,7 @@ export function buildOmegaDeps(projectId: string): OmegaDeps {
     diffText: (worktreePath) => showHead(worktreePath),
     readPost: (worktreePath, relPath) => readAtHead(worktreePath, relPath),
     readPre: (worktreePath, baseSha, relPath) => readAtSha(worktreePath, baseSha, relPath),
-    omega: createGraphOmega(CLAUDE_BIN, projectId),
+    omega: createGraphOmega(CLAUDE_BIN, projectId, undefined, grafoDelProyecto(projectId)),
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }

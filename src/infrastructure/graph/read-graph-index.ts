@@ -5,7 +5,9 @@ import { join } from 'path'
 import { graphSlug } from '@domain/graph/graph-slug'
 import type { GraphStats } from '@domain/graph/graph-status'
 
-const DIR = join(homedir(), '.cache', 'codebase-memory-mcp')
+/** La cache REAL del grafo, la del operador: aqui leen y escriben las acciones de FORTRESS. */
+export const CACHE_REAL_DEL_GRAFO = join(homedir(), '.cache', 'codebase-memory-mcp')
+const DIR = CACHE_REAL_DEL_GRAFO
 
 interface ProjectRow {
   indexed_at?: string
