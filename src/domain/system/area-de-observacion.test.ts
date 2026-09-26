@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { AREAS_DEL_CORPUS, AREAS_DE_OBSERVACION, aArea } from './area-de-observacion'
 import { AREAS_DE_FALLO } from './areas-de-fallo'
 import { AREAS_DEL_TERMINAL } from './areas-del-terminal'
+import { AREAS_DEL_LOOP } from './areas-del-loop'
 
 describe('el vocabulario de areas, derivado del corpus', () => {
   it('son DOCE clases, y las dos escasas siguen dentro', () => {
@@ -17,7 +18,8 @@ describe('el vocabulario de areas, derivado del corpus', () => {
     // de fallo son provisionales y se cierran del corpus que el embudo genere
     // (ADR-086); las del TERMINAL nacen de un emisor nuevo, el pre-vuelo, que
     // mira el PROYECTO y no a FORTRESS. Mezclarlas escondería esa diferencia.
-    const familias = [AREAS_DEL_CORPUS, AREAS_DE_FALLO, AREAS_DEL_TERMINAL]
+    // Y las del LOOP nacen de otro emisor determinista: el motor del loop al parar.
+    const familias = [AREAS_DEL_CORPUS, AREAS_DE_FALLO, AREAS_DEL_TERMINAL, AREAS_DEL_LOOP]
 
     expect(AREAS_DE_OBSERVACION).toHaveLength(familias.flat().length + 1)
     for (const clase of familias.flat()) expect(AREAS_DE_OBSERVACION).toContain(clase)
