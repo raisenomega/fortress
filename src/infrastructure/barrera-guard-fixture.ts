@@ -1,4 +1,3 @@
-import type { SendMessageInput } from '@application/chat/send-message-types'
 import type { AppContext } from '@application/context'
 import type { OperationMode } from '@domain/settings/operation-mode'
 import { createMemoryDb } from './persistence/memory-db'
@@ -16,10 +15,6 @@ export interface Cliente {
   readonly name: string
   readonly path: string
 }
-
-/** Un turno que EJECUTA un hallazgo del lote: con lista y con foco. */
-export const lote = (over: Partial<SendMessageInput> = {}): SendMessageInput =>
-  ({ projectId: 'p1', prompt: 'arregla', mode: 'autonomo', lote: ['h1', 'h2'], findingId: 'h1', ...over }) as SendMessageInput // prettier-ignore
 
 /** Un solo cliente, que es el caso de casi todos los tests. */
 export const unCliente = (path: string): readonly Cliente[] => [

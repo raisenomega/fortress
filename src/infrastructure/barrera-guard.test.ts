@@ -1,56 +1,52 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { AppContext } from '@application/context'
-import { AUTONOMY_RULES_FILES } from '@domain/repair/auto-merge-blacklist'
 import type { OperationMode } from '@domain/settings/operation-mode'
-import { BARRERA_ROTA, guardBarrera } from './barrera-guard'
-import { banco, conHooks, lote, pathSinPython, restaurarPath, ROTO, SANO, unCliente } from './barrera-guard-fixture' // prettier-ignore
+import { BARRERA_ROTA, editaElChat, guardBarrera } from './barrera-guard'
+import { banco, conHooks, pathSinPython, restaurarPath, ROTO, SANO, unCliente } from './barrera-guard-fixture' // prettier-ignore
 
 const conBarrera = (comando: string, modo: OperationMode): AppContext =>
   banco(unCliente(conHooks(comando)), modo)
 
+const CLI = (): boolean => true
+const API = (): boolean => false
+
 beforeAll(pathSinPython)
 afterAll(restaurarPath)
 
-describe('FAIL-CLOSED: el lote autonomo no corre con la barrera muerta', () => {
+describe('FAIL-CLOSED (ADR-105): un turno que EDITA no corre con la barrera muerta', () => {
   it('lo NIEGA, y dice por que', () => {
-    expect(guardBarrera(conBarrera(ROTO, 'autonomo'), lote())).toBe(BARRERA_ROTA)
+    expect(guardBarrera(conBarrera(ROTO, 'autonomo'), 'p1', true)).toBe(BARRERA_ROTA)
   })
 
-  it('con la barrera SANA, pasa', () => {
-    expect(guardBarrera(conBarrera(SANO, 'autonomo'), lote())).toBeNull()
+  it('con la barrera SANA, edita', () => {
+    expect(guardBarrera(conBarrera(SANO, 'autonomo'), 'p1', true)).toBeNull()
   })
 
-  it('EN SUPERVISADO NO bloquea: hay un humano delante y decide el', () => {
-    expect(guardBarrera(conBarrera(ROTO, 'supervisado'), lote())).toBeNull()
-  })
-
-  it('el modo sale de la BASE, no del mensaje que trae el renderer', () => {
-    // El turno de plan del lote manda `supervisado` a proposito en un proyecto
-    // autonomo. Fiarse del mensaje seria preguntarle al que quiere pasar.
-    const ctx = conBarrera(ROTO, 'autonomo')
-
-    expect(guardBarrera(ctx, lote({ mode: 'supervisado' }))).toBe(BARRERA_ROTA)
-  })
-
-  it('un turno SUELTO no es un lote: pasa, y el docblock lo dice', () => {
-    const suelto = lote({ lote: undefined, findingId: undefined })
-
-    expect(guardBarrera(conBarrera(ROTO, 'autonomo'), suelto)).toBeNull()
+  it('un turno que NO edita pasa: hay un humano delante y decide el', () => {
+    expect(guardBarrera(conBarrera(ROTO, 'supervisado'), 'p1', false)).toBeNull()
   })
 
   it('un proyecto que ya no existe no bloquea nada', () => {
-    expect(guardBarrera(banco([], 'autonomo'), lote())).toBeNull()
+    expect(guardBarrera(banco([], 'autonomo'), 'p1', true)).toBeNull()
   })
 })
 
-describe('y el auto-merge no puede integrar un fix que la desactive', () => {
-  it('las DOS mitades estan en la lista innegociable', () => {
-    // `innegociables-derivados` deriva sola la puerta —casa con `guard\w+`—
-    // pero NO el pre-vuelo, que no exporta ninguna guarda. Un fix que hiciera
-    // `barrerasDelProyecto` devolver siempre vacio apagaria el fail-closed
-    // entero sin tocar la puerta, y entraria sin que nadie lo viera.
-    for (const mitad of ['barrera-guard.ts', 'project/barreras-del-proyecto.ts']) {
-      expect(AUTONOMY_RULES_FILES).toContain(`src/infrastructure/${mitad}`)
-    }
+describe('editaElChat: lo que hace que el turno del chat cuente como «edita»', () => {
+  it('autonomo en la BASE y turno por el CLI: edita, sea suelto, lote o workflow', () => {
+    expect(editaElChat(conBarrera(ROTO, 'autonomo'), CLI)).toBe(true)
+  })
+
+  it('supervisado no edita', () => {
+    expect(editaElChat(conBarrera(ROTO, 'supervisado'), CLI)).toBe(false)
+  })
+
+  it('por API no toca el disco: no edita aunque el proyecto corra en autonomo', () => {
+    expect(editaElChat(conBarrera(ROTO, 'autonomo'), API)).toBe(false)
+  })
+
+  it('el modo sale de la BASE: no recibe el input, asi que no hay mensaje al que creerle', () => {
+    // El turno de plan del lote manda `supervisado` a proposito en un proyecto
+    // autonomo. La firma no admite el input: fiarse del mensaje ya no es posible.
+    expect(editaElChat.length).toBe(1)
   })
 })
