@@ -1,4 +1,5 @@
 import type { VeredictoDelPlan } from './juicio-del-plan'
+import type { Negativa } from './envio-negado'
 import type { SinCierre } from './motivo-sin-cierre'
 
 /**
@@ -24,6 +25,9 @@ export interface DesenlaceDelEnvio {
    * el bucle de replanteo la necesite (4b) la leera en el main, sin cruzarla.
    */
   readonly plan: VeredictoDelPlan | null
+  /** Una puerta del main nego el envio ANTES de que el turno existiera. `null` es
+   *  lo normal. No es un desenlace del hallazgo: es una condicion del LOTE. */
+  readonly negado: Negativa | null
 }
 
-export const ENVIO_SIN_DATO: DesenlaceDelEnvio = { sinCierre: null, sinVerificar: false, plan: null } // prettier-ignore
+export const ENVIO_SIN_DATO: DesenlaceDelEnvio = { sinCierre: null, sinVerificar: false, plan: null, negado: null } // prettier-ignore

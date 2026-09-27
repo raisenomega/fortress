@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { notaDelCierre } from './cierre-del-ciclo'
-import { resumenDelLote } from './desenlace-del-lote'
+import { resumenDelLote } from './parte-del-lote'
 
 /**
  * ADR-091 §4, el recibo. Un turno puede quedarse escrito sin que nadie haya

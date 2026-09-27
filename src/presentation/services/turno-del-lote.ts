@@ -1,4 +1,5 @@
 import { desenlaceEnLote, type DesenlaceEnLote } from '@domain/chat/desenlace-del-lote'
+import type { Negativa } from '@domain/chat/envio-negado'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { Finding } from '@domain/project/finding'
 import { seResuelveEnTerminal } from '@domain/project/se-resuelve-en-terminal'
@@ -11,7 +12,11 @@ export interface TurnoDelLote {
   readonly sinCierre: SinCierre | null
   /** Se conservo, pero nadie pudo compilar el proyecto (ADR-091). */
   readonly sinVerificar: boolean
+  /** Una puerta del main nego el envio: el turno no llego a existir. */
+  readonly negado: Negativa | null
 }
+
+const SIN_TURNO = { sinCierre: null, sinVerificar: false } as const
 
 const pideTrabajo = (f: Finding): boolean =>
   seResuelveEnTerminal({ dismissed: f.status === 'false_positive', mitigado: f.lifecycle === 'MITIGATED' }) // prettier-ignore
@@ -34,11 +39,15 @@ export async function turnoDelLote(
   p: PuertosDeLaCola
 ): Promise<TurnoDelLote> {
   const antes = p.hallazgo(id)
-  if (antes === undefined || !pideTrabajo(antes)) return { desenlace: 'omitido', sinCierre: null, sinVerificar: false }
+  if (antes === undefined || !pideTrabajo(antes))
+    return { ...SIN_TURNO, desenlace: 'omitido', negado: null }
   p.abrirTerminal()
   const prompt = borradorDeResolucion(antes)
   const envio = await p.enviar({ projectId, prompt, mode: 'autonomo', excludedAgents: p.excluidos(), findingId: id, lote: ids }) // prettier-ignore
+  // NEGADO: no hubo turno, asi que no hay nada que recargar ni que inferir de la
+  // base. Sin esto el hallazgo «seguia como estaba» y se contaba como no_cerro.
+  if (envio.negado !== null) return { ...SIN_TURNO, desenlace: 'negado', negado: envio.negado }
   await p.recargar()
   const desenlace = desenlaceEnLote(antes, p.hallazgo(id), envio.sinCierre)
-  return { desenlace, sinCierre: envio.sinCierre, sinVerificar: envio.sinVerificar }
+  return { desenlace, sinCierre: envio.sinCierre, sinVerificar: envio.sinVerificar, negado: null }
 }

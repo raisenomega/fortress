@@ -1,5 +1,6 @@
 import type { SendMessageInput } from '@application/chat/send-message-types'
 import { ENVIO_SIN_DATO, type DesenlaceDelEnvio } from '@domain/chat/desenlace-del-envio'
+import { desenlaceDelResultado } from '@domain/chat/desenlace-del-resultado'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
@@ -35,15 +36,12 @@ export async function sendMessage(input: SendMessageInput): Promise<DesenlaceDel
   let desenlace: DesenlaceDelEnvio = ENVIO_SIN_DATO
   try {
     const result = await api().chat.send(conLoteDelPlan(input))
+    // Corrio, lo NEGO una puerta o revento: los tres caminos, en el dominio.
+    desenlace = desenlaceDelResultado(result)
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
     // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
     // stream (que puede traer lineas de herramienta o venir vacio).
-    else {
-      // `plan` solo viene en el turno de plan de un lote en autonomo; en todo lo
-      // demas el main no lo pone, y ausente significa «nadie lo juzgo».
-      desenlace = { sinCierre: result.value.sinCierre, sinVerificar: result.value.sinVerificar, plan: result.value.plan ?? null } // prettier-ignore
-      captureConfigDrafts(input.projectId, result.value.assistant.content)
-    }
+    else captureConfigDrafts(input.projectId, result.value.assistant.content)
   } catch (error) {
     // Sin catch, un fallo del canal IPC seria un rechazo no manejado y el
     // finally recargaria el historial borrando el mensaje sin ninguna senal.

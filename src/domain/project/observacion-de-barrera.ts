@@ -1,5 +1,6 @@
 import type { SelfNoteDraft } from '../system/self-observation'
 import type { BarreraRota } from './barrera-rota'
+import { sanearParaPrompt } from '../shared/sanear-para-prompt'
 
 /**
  * Lo que FORTRESS aprende cuando un proyecto declara una proteccion que no puede
@@ -21,20 +22,27 @@ import type { BarreraRota } from './barrera-rota'
  * solo aqui.
  *
  * SEGURA POR CONSTRUCCION: matcher, nombre del guion e interprete. Ni la ruta
- * del hook ni su contenido, que son del cliente.
+ * del hook ni su contenido, que son del cliente. Y los tres SANEADOS con el
+ * saneador del prompt (aplanados y acotados): salen crudos del settings.json de
+ * un repo auditado y esta nota acaba en `self_observations` y en el export del
+ * backlog, que otro agente lee (cerco de ADR-085). Sigue siendo determinista.
  */
 export function observacionDeBarrera(barrera: BarreraRota): SelfNoteDraft {
   return { kind: 'bug', area: 'barrera-del-proyecto', note: nota(barrera) }
 }
 
+/** Lo que cabe de un dato del cliente en una nota que se PERSISTE y se exporta. */
+const MAX = 60
+const limpio = (texto: string): string => sanearParaPrompt(texto, MAX)
+
 function nota(b: BarreraRota): string {
   const pista =
     b.alternativa === null
       ? `ningun interprete alternativo en el PATH`
-      : `fix: cambiar el interprete a «${b.alternativa}», que si existe`
+      : `fix: cambiar el interprete a «${limpio(b.alternativa)}», que si existe`
   return (
-    `Barrera declarada y MUERTA: el hook PreToolUse (${b.matcher}) llama a ` +
-    `${b.guion} con el interprete «${b.interprete}», que no existe en el PATH. ` +
+    `Barrera declarada y MUERTA: el hook PreToolUse (${limpio(b.matcher)}) llama a ` +
+    `${limpio(b.guion)} con el interprete «${limpio(b.interprete)}», que no existe en el PATH. ` +
     `El hook no arranca, asi que lo que protege queda sin proteger; ${pista}.`
   )
 }

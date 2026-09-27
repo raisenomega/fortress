@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { Finding } from '../project/finding'
 import { pendienteDeVerificar } from './cierre-del-ciclo'
-import { desenlaceEnLote, resumenDelLote } from './desenlace-del-lote'
+import { desenlaceEnLote } from './desenlace-del-lote'
+import { resumenDelLote } from './parte-del-lote'
 
 // prettier-ignore
 const fila = (over: Partial<Finding>): Finding => ({ id: 'f1', lifecycle: 'ACTIVE', status: 'open', verificacionNote: null, ...over }) as Finding

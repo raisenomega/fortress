@@ -1,4 +1,5 @@
 import type { Candidate } from './select-target'
+import { sanearParaPrompt } from '../shared/sanear-para-prompt'
 
 /**
  * De que CLASE es el defecto y DONDE vive, que son las dos senas con las que
@@ -27,6 +28,8 @@ export function senasDelHallazgo(t: Candidate): readonly string[] {
   const simbolo =
     t.simbolo === null
       ? []
-      : [`Vive en el simbolo "${t.simbolo}", en minusculas: buscalo sin distinguir mayusculas.`]
+      : [
+          `Vive en el simbolo "${sanearParaPrompt(t.simbolo)}", en minusculas: buscalo sin distinguir mayusculas.`
+        ]
   return ['', ...tipo, ...simbolo]
 }

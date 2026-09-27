@@ -1,10 +1,17 @@
 import type { Hermano } from './hermanos-del-hallazgo'
+import { sanearParaPrompt } from '../shared/sanear-para-prompt'
 
-const donde = (h: Hermano): string => (h.line === null ? h.file : `${h.file}:${h.line}`)
+// Ruta y titulo los escribio el ESCANER, otro agente: entran aplanados, igual
+// que los del hallazgo en foco (analysis-prompt). Sanear uno y no sus hermanos
+// dejaba la puerta de al lado abierta.
+const donde = (h: Hermano): string => {
+  const file = sanearParaPrompt(h.file)
+  return h.line === null ? file : `${file}:${h.line}`
+}
 
 /** `[id] fichero:linea — titulo`. El id va delante para que "mismoDefectoQue"
  *  pueda nombrarlo sin ambiguedad (ADR-101, corte 2). */
-export const cita = (h: Hermano): string => `[${h.id}] ${donde(h)} — ${h.title}`
+export const cita = (h: Hermano): string => `[${h.id}] ${donde(h)} — ${sanearParaPrompt(h.title)}`
 
 export const quedan = (
   todos: readonly Hermano[],
