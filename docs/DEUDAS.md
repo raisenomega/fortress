@@ -969,6 +969,34 @@ corrección es pequeña.
   pequeña y sigue siendo real: pierde en silencio todo lo que ese escaneo vio.
   **Arreglo:** `err(UNREADABLE)` si `list.length > 0` y el resultado queda vacío,
   y aceptar la severidad sin distinguir mayúsculas antes de validarla.
+- **RESIDUO del arreglo anterior: un informe PARCIALMENTE ilegible pasa en
+  silencio.** *Medido con el módulo compilado, 2026-09-27.* El arreglo cubre «la
+  lista traía entradas y no sobrevivió ninguna»; NO cubre el descarte masivo
+  PARCIAL. Con una entrada buena y nueve malas, `parse-scan-output.ts` devuelve
+  `ok` con una y las otras nueve se pierden sin que nada las cuente: un escaneo
+  que perdió el 90 % de lo que vio parece un escaneo exitoso con el 10 %. Medido:
+  1 buena de 10 da `ok` con 1; 5 de 10 da `ok` con 5; 0 de 1 sí da error. Nadie
+  mide lo descartado, ni en el parser ni aguas abajo. **Arreglo:** contar los
+  descartados por pasada y decidir con el número delante — error por encima de un
+  umbral, o el dato al termómetro que ya existe para lo inclasificable (ADR-081).
+- **Los hermanos del guard de mayúsculas: CORREGIDA una afirmación propia.**
+  *Medido fichero por fichero, 2026-09-27.* Se reportó «cinco hermanos, dos
+  degradan a MEDIUM en silencio». **Es falso, y se corrige aquí:** los tres que
+  caen a MEDIUM —`veredictos-del-lote.ts:39`, `retipado-de-otros.ts:52`,
+  `reclasificacion-de-zombis.ts:35`— leen `severity: string` de FILAS DE LA BASE
+  (`ZombiAJuzgar`, `FilaOtro`, `Candidata`), no informes de un modelo. Ahí el
+  guard estricto es lo CORRECTO por la asimetría que fija
+  `severidad-del-informe.ts`, y MEDIUM es el respaldo de una fila corrupta. De los
+  tres que sí leen texto escrito por un modelo o por una mano, dos fallan bien y
+  lo dicen: `auto-merge-fields.ts:11-12` devuelve null y `auto-merge-config.ts:52`
+  rechaza la configuración con un error legible; `migrate-extinct.ts:8-11`
+  devuelve la entrada intacta antes que corromperla, y su docblock lo declara.
+  **Queda uno solo y es menor:** `parse-patterns.ts:29` y `:51` dejan el patrón
+  con `severity: null` si el log trae la severidad en minúscula. **Arreglo:**
+  ninguno urgente; si se toca ese fichero, reusar `severidadDelInforme`.
+- **NOTA de mantenimiento: `parse-scan-output.ts` quedó en 75 líneas EXACTAS.**
+  Es el techo de `max-lines`, así que el siguiente cambio en ese fichero obliga a
+  partirlo. No es deuda de seguridad; es la trampa que espera a quien lo abra.
 - **`PGPASSWORD=` no se tacha, y un SHA de git sí.** *Verificado, medido con el
   módulo compilado.* `src/domain/chat/tool-detail.ts:30` exige que no haya una
   letra antes de la palabra clave, así que `PGPASSWORD=hunter2`, `MITOKEN=` y
