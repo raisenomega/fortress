@@ -1,5 +1,6 @@
 import type { IntentoFallido } from '@domain/scan/intento-fallido'
 import type { AppContext } from '../context'
+import { asentarNotasDelProyecto } from '../system/asentar-notas'
 
 /** El escaneo lo hace el Security Reviewer: es la FASE 1 del protocolo. */
 const SCANNER_AGENT = 'security-reviewer' as const
@@ -39,4 +40,9 @@ export function asentarIntentoFallido(context: AppContext, intento: IntentoFalli
   } catch {
     // Silencio deliberado: ver arriba.
   }
+
+  // Y lo que el agente noto de FORTRESS (ADR-085). FUERA de la transaccion de la
+  // factura y con su propio catch dentro: son dos hechos distintos y perder uno
+  // no puede llevarse al otro. Va por el cuello unico, asi que hereda el cerco.
+  asentarNotasDelProyecto(context, intento.projectId, intento.notas)
 }
