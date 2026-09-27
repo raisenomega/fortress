@@ -1,5 +1,7 @@
 import type { Project } from '@domain/project/project'
 import { yaHayFactura } from '@domain/scan/factura-del-cierre'
+import { notaDelCierre } from '@domain/scan/nota-del-cierre'
+import { SCORE_PROVISIONAL } from '@domain/scan/scan-history-repository'
 import type { AppContext } from '../context'
 import { scanActivity } from '../telemetry/scan-activity'
 import type { Calculado, DatosDelCierre } from './datos-del-cierre'
@@ -23,11 +25,12 @@ export function escribirFilasDelCierre(
   calculado: Calculado
 ): void {
   const { score, counts } = calculado
+  const nota = notaDelCierre(score, datos.paradasHechas)
 
   context.transaction(() => {
     const cerrada = context.scans.cerrar(datos.scanId, {
       estado: datos.motivo === 'completo' ? 'CERRADO' : 'ABORTADO',
-      score,
+      score: nota ?? SCORE_PROVISIONAL,
       findingCount: datos.reportados.length,
       dossierCount: calculado.expediente.length,
       criticalCount: counts.CRITICAL,
@@ -49,7 +52,8 @@ export function escribirFilasDelCierre(
     // hablarian de algo que no existe. Se para aqui, sin escribir nada.
     if (!cerrada) return
 
-    context.projects.updateScan(project.id, score, datos.at)
+    // Solo si el escaneo vio algo (ver `notaDelCierre`): el tablero lee ESTA nota.
+    if (nota !== null) context.projects.updateScan(project.id, nota, datos.at)
     // La corrida se asienta UNA vez. Si el intento ya la asento con su factura
     // real (`yaHayFactura`), esta seria una segunda con ceros — y una factura
     // de ceros afirma que la corrida salio gratis, que es justo lo que

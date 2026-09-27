@@ -18,7 +18,8 @@ const asentarLaFactura = (): void =>
     durationMs: QUINCE_MIN,
     usage: SIN_FACTURA,
     tools: [],
-    texto: 'murio a mitad'
+    texto: 'murio a mitad',
+    notas: []
   })
 
 const filaScan = (): Record<string, unknown> =>

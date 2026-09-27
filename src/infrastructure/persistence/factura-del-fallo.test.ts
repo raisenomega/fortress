@@ -18,7 +18,8 @@ const INTENTO: IntentoFallido = {
   durationMs: 900_000,
   usage: FACTURA,
   tools: ['Read'],
-  texto: 'un muro de analisis sin bloque'
+  texto: 'un muro de analisis sin bloque',
+  notas: []
 }
 
 let bench: Bench

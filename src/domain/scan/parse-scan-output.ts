@@ -1,7 +1,7 @@
 import { err, ok, type Result } from '../shared/result'
-import { isSeverity } from '../shared/severity'
 import type { DetectedFinding } from './detected-finding'
 import { conSeveridadSegunTipo } from './hallazgo-con-ejes'
+import { severidadDelInforme } from './severidad-del-informe'
 import { aTipoDeDefecto } from './tipo-de-defecto'
 
 const JSON_FENCE = /```json\s*([\s\S]*?)```/g
@@ -28,7 +28,8 @@ function toFinding(entry: unknown): DetectedFinding | null {
   if (typeof entry !== 'object' || entry === null) return null
   const raw = entry as Record<string, unknown>
 
-  if (!isSeverity(raw.severity)) return null
+  const severity = severidadDelInforme(raw.severity)
+  if (severity === null) return null
   if (typeof raw.title !== 'string' || raw.title.trim() === '') return null
 
   const line = typeof raw.line === 'number' && Number.isFinite(raw.line) ? raw.line : null
@@ -38,7 +39,7 @@ function toFinding(entry: unknown): DetectedFinding | null {
   // Los ejes siguen la misma regla: sin ellos, la palabra del modelo manda. Y
   // para los tipos de auditoria ni se miran (ADR-103): el tipo ya esta resuelto.
   return conSeveridadSegunTipo(raw, {
-    severity: raw.severity,
+    severity,
     title: raw.title.trim(),
     file: typeof raw.file === 'string' ? raw.file : '',
     line: line === null ? null : Math.trunc(line),
@@ -61,5 +62,14 @@ export function parseScanOutput(output: string): Result<readonly DetectedFinding
   const list = (parsed as { findings?: unknown } | null)?.findings
   if (!Array.isArray(list)) return err(UNREADABLE)
 
-  return ok(list.map(toFinding).filter((finding): finding is DetectedFinding => finding !== null))
+  const hallazgos = list.map(toFinding).filter((f): f is DetectedFinding => f !== null)
+
+  // Una lista CON entradas de la que no sobrevive NINGUNA no es un proyecto
+  // limpio: es el informe que no se entendio, y sale por la misma puerta que un
+  // bloque roto. La lista VACIA declarada si es limpio, y en esa diferencia esta
+  // todo: cero entradas es el modelo diciendo «no encontre nada»; entradas que no
+  // se entienden es el modelo sin decir nada.
+  if (list.length > 0 && hallazgos.length === 0) return err(UNREADABLE)
+
+  return ok(hallazgos)
 }

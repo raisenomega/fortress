@@ -1,3 +1,4 @@
+import type { SelfNoteDraft } from '../system/self-observation'
 import type { TokenUsage } from '../telemetry/token-usage'
 
 /** Por que no hubo informe. Los dos gastan; el segundo ademas TERMINO BIEN. */
@@ -28,4 +29,16 @@ export interface IntentoFallido {
   readonly tools: readonly string[]
   /** La salida cruda, para que el fallo tambien deje transcripcion. */
   readonly texto: string
+  /**
+   * Lo que el agente noto de FORTRESS en el intento que NO llego a informe
+   * (ADR-085). Viaja por aqui por la misma razon que la factura: `Result` solo
+   * es generico en su valor, y al convertir el fallo a `err(string)` estas se
+   * perdian con el resto.
+   *
+   * Un informe ilegible no invalida la nota: `notes` es clave HERMANA de
+   * `findings` y la valida `toSelfNotes` por su cuenta, asi que se lee bien
+   * aunque ningun hallazgo lo haga (medido). Tirarla era perder el unico
+   * aprendizaje que dejaba un escaneo ya pagado.
+   */
+  readonly notas: readonly SelfNoteDraft[]
 }

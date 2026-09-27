@@ -44,7 +44,8 @@ describe('un fallo a mitad no deja la serie a medias ni duplica el gasto', () =>
       durationMs: 901_727,
       usage: SIN_FACTURA,
       tools: [],
-      texto: 'murio'
+      texto: 'murio',
+      notas: []
     })
 
     await recorrerParadas(bench.context, rotoEnLaTercera(), PROJECT, CUATRO, SIN_SALIDAS, {
