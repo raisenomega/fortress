@@ -910,3 +910,261 @@ Cero menciones de sandbox, `bwrap`, caja, pre-vuelo o barreras en
 `docs/ARCHITECTURE.md` y `docs/OVERVIEW.md` (medido con grep). Son documentos de
 vista general y **quizás no deban** entrar en ese detalle: queda como pregunta,
 no como obligación. **Decisión pendiente de Jojo.**
+
+## 9. Auditoría end-to-end del 2026-09-27: 118 hallazgos, doc contra código
+
+**Alcance:** `src/domain` entero, 446 ficheros fuente y 18.246 líneas, leído
+fichero a fichero por seis auditores en paralelo, más un barrido mecánico de todo
+el repo. Base: `main@5b91c6a`. **Decisión de Jojo: se anota todo y no se arregla
+en la sesión que lo encontró** — lo de seguridad merece el método completo, con
+test rojo, mutante y gate, y cabeza fresca.
+
+**NOTA DE HONESTIDAD.** De los 118 hallazgos, **14 están verificados por mano**
+(leídos o medidos por el operador de la sesión, marcados abajo como
+*verificado*). Los demás llegan con la cita `fichero:línea` y la línea literal
+del auditor de su tramo, **sin releer cada uno**. Al arreglar cualquiera de
+ellos, el primer paso es re-verificar su evidencia contra el árbol de ese
+momento: esta lista es una guía de dónde mirar, no una prueba cerrada.
+
+### 9.1 P0 — Seguridad que toca código de estos dos días
+
+Lo primero de la próxima sesión, porque son piezas recién mergeadas y la
+corrección es pequeña.
+
+- **El saneador de prompts se rodea con un carácter.** *Verificado, medido con la
+  función real.* `src/domain/shared/sanear-para-prompt.ts:21-25` aplana solo
+  `\r\n\t`, y la segunda sustitución exige dos blancos seguidos. Sobreviven
+  solos `U+2028` LINE SEPARATOR, `U+2029` PARAGRAPH SEPARATOR, `U+000B`, `U+000C`
+  y `U+0085`. Es el control ÚNICO de catorce llamantes, y entre ellos los tres
+  saneados del 2026-09-26: `cuales-barreras.ts`, `observacion-de-barrera.ts` y
+  `hermanos-del-hallazgo-texto.ts`. El docblock declara que su trabajo es que un
+  salto de línea no abra línea nueva dentro del prompt. **Arreglo:**
+  `/[\r\n\t\v\f\u0085\u2028\u2029]+/g` y el caso `U+2028` en el test.
+- **La observación de parada por error mete el mensaje crudo.** Código del arco
+  #5 sub-pieza 4, mergeado en `ff59bcd`.
+  `src/domain/loop/observacion-de-parada.ts:27-32` compone la nota con
+  `error.message`, así que la nota **baila en cada fallo** y siembra un
+  avistamiento por reintento, y no pasa por `toSelfNotes`, así que no tiene el
+  tope de 500. Su propia hermana, doce líneas más abajo, rechaza exactamente eso
+  para el standby. **Arreglo:** clasificar el error por clase cerrada, como
+  `CLASES`, y dejar el mensaje solo en el log local.
+- **`innegociables-red.ts` no se protege a sí misma.** *Verificado: comprobadas
+  las nueve de la familia, ocho nombran su propia ruta y esta no.* Un fix
+  pequeño puede vaciar `DEFENSAS_DE_LA_RED` sin tocar un fichero protegido, y el
+  cerco lo integraría solo; después quedan al alcance `checkpoint-transitorio.ts`
+  y `con-red-de-reversion.ts`, la red de ADR-079. **Arreglo:** añadir su propia
+  ruta y derivar el test de auto-cobertura de las nueve, no enumerarlas.
+
+### 9.2 P0 — Seguridad grave
+
+- **EL MÁS GRAVE. Un informe cuyas entradas se caen todas da «proyecto limpio» y
+  100/100.** *Verificado.* `src/domain/scan/parse-scan-output.ts:64` devuelve
+  `ok([])` cuando la lista traía entradas y todas fallaron el guard, y su propio
+  docblock `:9-13` llama a eso «*la peor mentira que podría contar esta app*».
+  El disparador es barato: `isSeverity` (`shared/severity.ts:12-13`) distingue
+  mayúsculas, así que un informe entero con `"severity":"high"` se convierte en
+  proyecto limpio. Nadie aguas abajo compara la longitud de la lista con el
+  resultado. En un proyecto sin hallazgos previos eso es un 100/100 falso; en uno
+  con hallazgos vivos, la ausencia no extingue, así que la mentira es más
+  pequeña y sigue siendo real: pierde en silencio todo lo que ese escaneo vio.
+  **Arreglo:** `err(UNREADABLE)` si `list.length > 0` y el resultado queda vacío,
+  y aceptar la severidad sin distinguir mayúsculas antes de validarla.
+- **`PGPASSWORD=` no se tacha, y un SHA de git sí.** *Verificado, medido con el
+  módulo compilado.* `src/domain/chat/tool-detail.ts:30` exige que no haya una
+  letra antes de la palabra clave, así que `PGPASSWORD=hunter2`, `MITOKEN=` y
+  `APITOKEN=` pasan enteros; `--password hunter2` con espacio también, porque la
+  regla exige `=` o `:`. Los cuatro casos que el docblock declara medidos llevan
+  todos `_`, así que esta clase nunca se midió. Eso se persiste en el recibo, que
+  `recibo-de-herramientas.ts:41-43` llama el único campo persistido sin
+  redacción. Y al revés: `git show <sha>` sale tachado, así que el recibo pierde
+  la huella forense que un auditor necesita. **Arreglo:** límite de identificador
+  en vez de «no letra antes», y el caso al fixture.
+- **El corpus que declara el repo auditado entra crudo a nueve prompts.**
+  *Verificado, cadena leída línea a línea.* `corpus-config.ts:10` valida solo que
+  sea una lista de cadenas; `discover-corpus.ts:61` la devuelve **sustituyendo**
+  al descubrimiento, sin comprobar que los ficheros existan;
+  `docs-first-compose.ts:65` las une con `, ` en el bloque DOCS FIRST, y lo
+  incluyen nueve constructores de prompt, entre ellos el del generador, el único
+  agente con permiso de escritura, y el de OMEGA, que juzga si un fix es seguro.
+  Ni saneado, ni contención de ruta, ni tope de cuenta. El hermano de su mismo
+  arco hace lo contrario y lo dice: `barreras-declaradas.ts:48-49`. **Arreglo:**
+  `sanearParaPrompt` por ruta, rechazar absolutas y con `..`, y acotar la cuenta.
+- **Tres prompts meten texto ajeno sin aplanar.** *Verificado: cero llamadas al
+  saneador compartido en los tres.* `generator-prompt.ts`, `omega-prompt.ts` y
+  `critico-prompt.ts` tienen cada uno su propio `safe()`, copia byte a byte, que
+  cambia `<`, `>` y el acento grave y **no toca los saltos de línea**. Su hermano
+  `plan-prompt.ts:23-26` documenta que hacen falta los DOS controles. El texto
+  que pasa por ahí lo redacta un modelo que acaba de leer el repo auditado.
+  **Arreglo:** un solo saneador compartido, y los dos tests que faltan.
+- **El analista pide el área en texto libre.** *Verificado.*
+  `analysis-prompt-formato.ts:1` pide `"area":"zona"` en vez del
+  `FORMA_DE_NOTA` compartido, que pide «de la lista» y enumera el vocabulario.
+  `aArea` hunde todo lo que no reconoce a `otro`, y la dedup funde por
+  `(kind, area)`, así que **todas** las observaciones del analista colapsan en
+  cinco filas como máximo. Tampoco está en el guardián `quien-observa.test.ts`.
+  **Arreglo:** usar `NOTAS_COMO_CLAVE` y añadirlo a la lista del guardián.
+
+### 9.3 P0 — Seguridad con efecto SIN MEDIR: medir antes de priorizar
+
+- **La cota de anchura de la caja solo mira el proyecto.** *Mecánica verificada
+  en el código; el efecto dentro de `bwrap` NO se midió.*
+  `src/domain/sandbox/ruta-de-la-caja.ts:29` aplica la cota de «demasiado ancho»
+  únicamente a `r.proyecto`; las listas de escritura y de lectura pasan solo por
+  `rutaLimpia`. `flags-de-bwrap.ts:68` monta la de escritura con `--bind`
+  **después** del `--tmpfs` que tapa el HOME, y ese orden es el contrato que
+  exige su test. Quien rellena esa lista es
+  `infrastructure/sandbox/lo-que-ve-la-caja.ts:38`, que lee el fichero `.git` del
+  `cwd` y devuelve sin validar el texto anterior a `/worktrees/`. En
+  `run-command.ts:34` y `git-del-merge.ts:34` ese `cwd` es carpeta del cliente.
+  Un `.git` que sea un FICHERO con `gitdir: /home/jojo/worktrees/x` produciría
+  `--bind /home/jojo /home/jojo` dentro de la caja. **Lo que falta por medir:**
+  si un `--bind` posterior sobrescribe de verdad el `--tmpfs` anterior sobre la
+  misma ruta, con un `bwrap` real. De eso depende si esto es P0 o una costura.
+  Nota aparte: `lo-que-ve-la-caja.ts` no está en el barrido de innegociables, así
+  que ensancharlo no exige firma.
+
+### 9.4 P1 — Funcionales graves
+
+- **El clasificador de fallos del loop marca terminal como transitorio.**
+  *Verificado, medido con la regex real.* En
+  `src/domain/loop/failure-kind.ts:10-11` la palabra `red` va sin límites de
+  palabra y casa dentro de `required`, `reviewer`, `occurred` y `hundred`:
+  «missing **requi**red argument», «igno**red** by the reviewer» y «hund**red**
+  limit» salen los tres transitorios. El loop entra en standby y reintenta una
+  vez por minuto contra algo que no se recupera, que es justo lo que su docblock
+  dice evitar. Su hermana `CLASES`, mergeada el 26-sep, sí usa `\bred\b`, y su
+  docblock afirma que las clases «calcan los grupos de `classifyFailure`»: no los
+  calcan. **Arreglo:** `\bred\b`.
+- **El informe declara auditados cuatro módulos que ninguna parada audita.**
+  `informe-campana.ts:23-25` imprime «APLICA — auditado con su plantilla» por el
+  simple hecho de que la plantilla esté sembrada. M1, M5, M6 y M10 son aplicables
+  y no están ni en `MODULOS_DE_CARPETA` ni en `MODULOS_DE_TEMA`, así que nunca
+  reciben pasada. Es la decisión 4 de ADR-083 al revés, en el documento que el
+  operador entrega. **Arreglo:** que el cierre lleve los aplicables sin pasada y
+  el informe los imprima como tales.
+- **Las dos acciones del grafo no cierran el conjunto de servidores.**
+  *Verificado.* `index-graph.ts:18` y `verify-graph.ts:23` no llevan
+  `--strict-mcp-config`, que sí llevan el turno y el motor, así que heredan los
+  servidores de `~/.claude.json`; y la de indexar preaprueba
+  `index_repository`, la única herramienta de escritura del grafo, contra el
+  servidor que gane ese nombre. **Mitigado hoy**, comprobado: la entrada global
+  del operador apunta al binario fijado, sin `npx`. **Arreglo:** el flag en los
+  dos, con su aserción.
+- **La tarjeta del plan ofrece un workflow que nunca corre.** Para un mensaje
+  libre en supervisado, la tarjeta se calcula con `FREE_TRIGGERS` y el turno se
+  ejecuta con `TRIGGERS`, que son dos tablas distintas y ya divergen. La tarjeta
+  nombra el agente equivocado y sobreestima el coste en cada mensaje libre, que
+  es lo contrario de la honestidad que su propio docblock invoca. **Arreglo:**
+  derivar los pasos de `routeToAgent`, o no pintar pasos en el workflow libre.
+- **El cerco de privacidad deja pasar cuatro formas.** *Medido por el auditor:*
+  carpeta multi-palabra en minúscula, `clinica dental madrid` deja dos palabras
+  del cliente en el export; `/srv` y `/Volumes` no están anclados; las rutas de
+  Windows no las toca ninguna de las cuatro reglas.
+  `src/domain/system/reglas-del-cerco.ts:43-51`.
+
+**Otros funcionales del mismo nivel, con evidencia del auditor y sin
+re-verificar:** un workflow con todos los pasos excluidos informa 100/100 sin
+hallazgos; `esEnvioNegado` valida la puerta y no el motivo, así que el parte del
+lote puede escribir `undefined`; el `title` del escáner se escribe sin aplanar en
+el COGNITION-LOG del cliente y luego se vuelve a parsear, lo que permite forjar
+una cabecera de patrón; el COGNITION-LOG del repo ajeno entra al prompt del
+analista por `detectedAt` sin sanear; `parseJuicio` se queda con el primer bloque
+donde su hermano se queda con el último por la lección contraria; una llave en la
+prosa de OMEGA invalida el juicio del plan y bloquea el lote en silencio; el
+comodín `*` pasa el guard del alcance y alcanza al `package.json` que el gate
+ejecuta; el chequeo de flags de cookie mira la línea entera, así que el nombre de
+la cookie tapa el flag ausente; la cobertura declarada cuenta nueve extensiones y
+un proyecto Vue o PHP audita «N de N» sin listar su interfaz.
+
+### 9.5 P2 — Erratas de documento, unas 35
+
+Las de más peso, medidas:
+
+- **`FORTRESS-FUNCIONAMIENTO-ACTUAL.md` está anclado a `main@052638b`**, 65
+  commits por detrás, con bloques internos a 198 y 437 commits. De sus 57 citas
+  `fichero:línea`, una apunta a `protected-areas.ts`, borrado el 17-sep, y dos
+  caen fuera del fichero. Además dice `plan` donde hoy es `auditoria`, cuenta 11
+  agentes cuando son 14, y describe el modo efectivo con una causa retirada y sin
+  la causa viva de la red git.
+- **`IPC.md` afirma 105 canales y hay 118.** Su tabla tiene 115 filas: faltan
+  `projects:declarar-modulos`, `scan:stop`, `system:export-observations` y
+  `system:import-attended`, y sobra una fila de `system:resolve-observation`, que
+  no existe en el código. Medido. Nota: `projects:declarar-modulos` tiene handler
+  y no tiene puente en el preload, así que hoy no lo puede llamar nadie.
+- **`SECURITY-MODEL.md` no menciona la caja ni el grafo por turno.** Cero
+  apariciones de `bwrap`, sandbox, caja, clase A, ADR-092, `CBM_CACHE_DIR` y
+  «grafo por turno», medido sobre sus 256 líneas. Ya estaba anotado en §8.2 y
+  sigue abierto; ahora le falta también el grafo por turno y el filtro de host
+  privado aplicado a los conectores.
+- **`TAXONOMIA-DE-DEFECTOS.md` se declara fuente de verdad y lista 16 de los 33
+  tipos.** Falta toda la familia de código ajeno, incluido el tipo que usa el
+  ejemplo del propio contrato del escáner.
+- **`FLOWS/SELF-REPAIR.md` dice que no hay firma en la app**, y existe de punta a
+  punta; promete un guard de `base_sha` que el código no tiene; cuenta tres
+  veredictos cuando son cuatro; y afirma una extinción automática que ADR-087
+  retiró. Su tabla de rechazos se declara completa con 22 de 25.
+- **`FLOWS/RETRY.md`: cuatro de seis filas de reintentables son falsas.**
+- **El índice de ADRs no lista siete**, entre ellos el del sandbox, el del grafo
+  por turno, el de la Fase B y el de la firma. Medido: 104 ficheros, 97 filas.
+- **`DATA-MODEL.md`** da la identidad del hallazgo con la fórmula de ADR-067 en
+  tres sitios, y `loop_sessions` y `self_observations` sin las columnas que sí
+  existen, entre ellas el `status` sobre el que se apoya toda la dedup.
+- **`FLOWS/GRAPH-REINDEX.md`** no conoce dos ramas vivas de la decisión de
+  reindexar y contradice la tercera. **`FLOWS/LOOP-VIEJO.md`** lleva un
+  vocabulario de paradas y fases de otra versión y niega una garantía que el
+  código ya no da. **`FLOWS/CHAT.md`** describe un prompt que solo existe en la
+  ruta de la API. **`PAGES/conectores.md`** llama conector al grafo, que no lo
+  es y no se puede apagar.
+
+### 9.6 P3 — Código sin consumidor, y controles duplicados
+
+**Cuarenta exportaciones ejecutables de `src/domain` sin un solo importador en
+`src/`, tests incluidos.** Medido con barrido por nombre. Cinco importan porque
+prometen algo que no ocurre:
+
+- `PERMISSION_SUMMARY`: «lo que se le explica al operador sobre lo que el agente
+  puede hacer». Nadie la pinta, así que el operador no ve en ninguna pantalla que
+  en supervisado el agente ejecuta comandos.
+- `SELF_REPO_EXIGE_FIRMA`: «se asienta y viaja: no es un silencio». No se asienta
+  en ningún sitio, así que la no-integración en el repo propio es un silencio.
+- `INSTALL_HINT`: propone `npx -y codebase-memory-mcp`, que el propio repo tiene
+  medido como fallo de handshake y que el modelo de seguridad prohíbe por no
+  fijar versión.
+- `analyzeReflection`: la familia `recon` del análisis de superficie no está
+  cableada, así que el nivel `ultra` produce exactamente lo mismo que `alta`.
+- `objecionesComoPedido`: el bucle de objeciones del tribunal, ADR-096 Fase B,
+  escrito, con test, y sin cablear; el productor nunca ve las objeciones.
+
+**Controles de seguridad duplicados en cinco sitios**, que es el patrón que el
+saneador compartido se extrajo para cerrar: `safe()` tres veces, `parseAmount`
+tres veces con el mismo techo y distinto fallback, dos tablas de palabras clave,
+dos listas de timeouts y dos `fuera()` con distinta dureza, donde la que juzga el
+diff es la floja.
+
+### 9.7 Lo que la auditoría comprobó que está BIEN
+
+Para que la lista de arriba no se lea como un panorama: cero violaciones de capa
+en los 446 ficheros de dominio; dos marcadores de tarea pendiente en todo `src`;
+la tabla de severidad, el score y las bandas de OMEGA cuadran línea a línea con
+su documentación; los vocabularios cerrados tienen su guard y su cajón declarado;
+el JSON de `--mcp-config` no es inyectable por la ruta del proyecto y viaja como
+un solo argumento, sin shell en ningún camino; el muro del grafo aislado aguanta
+al `.mcp.json` del proyecto; la tabla de registros del proxy es cerrada de verdad
+y casa hosts enteros; los flags de la caja no abren red; el fail-closed está en
+las dos clases; la contención de la raíz del proyecto rechaza `..` por segmentos
+en las tres puertas; la clave cifrada no cruza el puente en ninguno de los dos
+sentidos; y el ReDoS del PEM que se cerró ayer está probado con carga real.
+
+### 9.8 PENDIENTE: los tramos 2 a 7 de la auditoría
+
+Esta auditoría cubrió **`src/domain` entero más un barrido mecánico del repo**.
+Falta la profundidad por capa, en este orden y por esta razón:
+
+| Tramo | Alcance | Por qué ahí |
+|---|---|---|
+| 2 | Infraestructura del motor y del escáner | es lo que spawnea agentes y toca el disco |
+| 3 | Resto de infraestructura: grafo, caja, persistencia, IPC | la frontera con el sistema |
+| 4 | `src/application`, 195 ficheros | orquesta las reglas ya auditadas |
+| 5 | Puente y presentación, 430 ficheros | cobertura baja: 74 tests para 410 fuente |
+| 6 | `scripts/`, 106 ficheros | cero tests, y corren sobre la base viva |
+| 7 | Barrido documental completo | cerrar las erratas de §9.5 con método |
