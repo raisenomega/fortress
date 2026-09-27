@@ -62,5 +62,14 @@ export function parseScanOutput(output: string): Result<readonly DetectedFinding
   const list = (parsed as { findings?: unknown } | null)?.findings
   if (!Array.isArray(list)) return err(UNREADABLE)
 
-  return ok(list.map(toFinding).filter((finding): finding is DetectedFinding => finding !== null))
+  const hallazgos = list.map(toFinding).filter((f): f is DetectedFinding => f !== null)
+
+  // Una lista CON entradas de la que no sobrevive NINGUNA no es un proyecto
+  // limpio: es el informe que no se entendio, y sale por la misma puerta que un
+  // bloque roto. La lista VACIA declarada si es limpio, y en esa diferencia esta
+  // todo: cero entradas es el modelo diciendo «no encontre nada»; entradas que no
+  // se entienden es el modelo sin decir nada.
+  if (list.length > 0 && hallazgos.length === 0) return err(UNREADABLE)
+
+  return ok(hallazgos)
 }

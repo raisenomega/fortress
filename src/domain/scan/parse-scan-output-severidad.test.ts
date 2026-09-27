@@ -21,7 +21,12 @@ describe('el parser tolera la CAJA de la severidad que escribe el modelo', () =>
   })
 
   it('sigue descartando una severidad que no esta en la escala', () => {
-    const result = parseScanOutput(report('{"findings":[{"severity":"urgente","title":"a"}]}'))
-    expect(result.ok && result.value).toHaveLength(0)
+    // Con una entrada buena al lado, para medir el DESCARTE de la inventada y no
+    // el desenlace del informe entero: una lista sin supervivientes es ilegible.
+    const result = parseScanOutput(
+      report('{"findings":[{"severity":"urgente","title":"a"},{"severity":"LOW","title":"b"}]}')
+    )
+    expect(result.ok && result.value).toHaveLength(1)
+    expect(result.ok && result.value[0].title).toBe('b')
   })
 })
