@@ -5,7 +5,9 @@ proyectos, hallazgos, propuestas de reparación, el libro de vida del motor,
 corridas de agentes, capacidades, escaneos, conectores y el registro eterno
 de OMEGA. Un único archivo. La base nunca sale del disco del usuario.
 
-Este documento es referencia exhaustiva: las 19 tablas, con columnas, tipos,
+Este documento es referencia exhaustiva: las **22** tablas (19 hasta el 2026-09-20,
+cuando se añadieron `observation_sightings` y `scan_parada_runs`; 22 desde el
+2026-09-23 con `finding_aliases`, ADR-101), con columnas, tipos,
 constraints e índices exactos del código. Verificado además por
 introspección readonly de una base viva (con el mismo binding better-sqlite3
 que usa FORTRESS): esquema declarado == esquema vivo.
@@ -36,6 +38,9 @@ funcional, reflejo de la organización DDD del código:
 | reparación | repair_proposals |
 | libro de vida | proposal_events |
 | conectores | connectors |
+| avistamientos (`schema-sightings.ts`) | observation_sightings |
+| paradas del escaneo (`schema-parada-runs.ts`) | scan_parada_runs |
+| alias de clave (`schema-aliases.ts`) | finding_aliases |
 
 Un orquestador de migraciones corre en cada arranque: el esquema base es
 idempotente (`CREATE TABLE IF NOT EXISTS`) y las migraciones ADITIVAS añaden
@@ -149,6 +154,10 @@ columnas `graph_*` del reindex las opera un repositorio auxiliar dedicado
 (sqlite-graph-state-repository) — el estado del grafo tiene ciclo propio
 pero no entidad separada; se proyecta como columnas del padre. Ver
 [FLOWS/GRAPH-REINDEX](FLOWS/GRAPH-REINDEX.md).
+
+`has_graph` refleja desde el 2026-09-24 el **índice del grafo en disco** y se
+reconcilia al arrancar (pieza B del arco #4, `686b212`); antes era una marca que
+dos escritores ponían y nadie leía ([DEUDAS](DEUDAS.md) §8.4).
 
 ### settings
 
@@ -561,6 +570,78 @@ FORTRESS mismo mientras trabaja en otro proyecto.
 | created_at | TEXT | NOT NULL |
 
 **Repositorio principal:** sqlite-self-observation-repository.
+
+### observation_sightings
+
+**Propósito:** los **avistamientos** de una observación de auto-mejora (ADR-085,
+Fase 4): cada vez que un agente se topa con ella, en qué proyecto y con qué
+palabras. Es lo que convierte el backlog en una señal — *"la pregunta que decide
+la prioridad no es «cuántas veces se dijo» sino «cuántos PROYECTOS distintos se
+toparon con lo mismo», y un contador no la responde porque no guarda CUÁLES"*.
+La deduplicación funde por `(kind, area)` y deja la nota aquí.
+
+| Columna | Tipo | Constraints / Default |
+|---|---|---|
+| observation_id | TEXT | NOT NULL, FK self_observations ON DELETE CASCADE |
+| source_project | TEXT | NOT NULL |
+| note | TEXT | NOT NULL |
+| at | TEXT | NOT NULL |
+
+**Sin PRIMARY KEY.** `UNIQUE(observation_id, source_project, note)`: lleva la
+nota además del proyecto para que el mismo proyecto que se topa dos veces con el
+mismo límite **por caminos distintos** conserve las dos descripciones; por eso
+las notas derivadas del dato duro (denials, barreras, paradas del loop) son
+deterministas. **Índice:** `idx_sightings_obs (observation_id)`.
+**Esquema:** `schema-sightings.ts`. **SQL:** `self-observation-sql.ts`.
+
+### scan_parada_runs
+
+**Propósito:** la corrida de **una parada** del recorrido del escaneo (ADR-082).
+Aparte de `agent_runs` a propósito: allí cuatro consultas **cuentan filas** y de
+ellas cuelgan el `compliance` del superdashboard y el score de OMEGA sobre el
+escáner; meter doce filas por escaneo habría dividido `tokensPerRun` entre doce.
+*"`agent_runs` contesta «cuántas corridas hubo y cuánto costaron», y esta contesta
+«cómo se comportó el agente PARADA A PARADA dentro de una»."* El gasto diario
+sigue saliendo solo de `agent_runs`: esta tabla no puede contarlo dos veces.
+
+| Columna | Tipo | Constraints / Default |
+|---|---|---|
+| id | TEXT | PRIMARY KEY |
+| scan_id | TEXT | NOT NULL, FK scans ON DELETE CASCADE |
+| project_id | TEXT | NOT NULL, FK projects ON DELETE CASCADE |
+| parada_indice | INTEGER | NOT NULL |
+| parada_rotulo | TEXT | NOT NULL |
+| duration_ms | INTEGER | NOT NULL DEFAULT 0 |
+| input_tokens | INTEGER | NOT NULL DEFAULT 0 |
+| output_tokens | INTEGER | NOT NULL DEFAULT 0 |
+| cache_read_tokens | INTEGER | NOT NULL DEFAULT 0 |
+| cache_creation_tokens | INTEGER | NOT NULL DEFAULT 0 |
+| cost_usd | REAL | NOT NULL DEFAULT 0 |
+| num_turns | INTEGER | NOT NULL DEFAULT 0 |
+| at | TEXT | NOT NULL |
+
+**Índice:** `idx_parada_runs_scan (scan_id, parada_indice)`.
+**Esquema:** `schema-parada-runs.ts`. **Repositorio principal:**
+`sqlite-parada-run-repository`.
+
+### finding_aliases
+
+**Propósito:** el **alias de clave** de ADR-101: cuando dos hallazgos se funden,
+la clave (`identity`) de la absorbida queda apuntando a la ganadora, de modo que
+si el escáner vuelve a nombrar esa clave el hallazgo no nace dos veces. Cura la
+**reaparición** de una clave conocida, no su primera vez.
+
+| Columna | Tipo | Constraints / Default |
+|---|---|---|
+| project_id | TEXT | NOT NULL, FK projects ON DELETE CASCADE |
+| clave | TEXT | NOT NULL |
+| finding_id | TEXT | NOT NULL |
+| origen | TEXT | NOT NULL |
+| at | TEXT | NOT NULL |
+
+`PRIMARY KEY (project_id, clave)`. **Índice:** `idx_aliases_finding (finding_id)`.
+**Esquema:** `schema-aliases.ts`. **SQL:** `finding-alias-writes.ts`
+(`registrar`, `retirarClave`).
 
 ### connectors
 

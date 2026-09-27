@@ -35,7 +35,7 @@ Las tablas de ambos historiales están en [DATA-MODEL](../DATA-MODEL.md).
       v
  [Post-procesamiento del motor (determinista):]
       |
-      +--- calcular identity (fichero|tipo|simbolo) y fingerprint
+      +--- calcular identity (fichero|linea|tipo, ADR-084) y fingerprint
       +--- nuevos: primera aparicion, ciclo de vida ACTIVE
       +--- re-vistos: se refresca lo que pudo cambiar; first_seen NO se toca
       +--- ausentes: SIGUEN VIVOS. El escaneo no extingue (ver abajo)

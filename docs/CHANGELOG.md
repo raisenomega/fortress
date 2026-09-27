@@ -31,6 +31,138 @@ general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
 [DECISIONS/](DECISIONS/README.md) contiene las ochenta y siete decisiones
 arquitectónicas.
 
+## 2026-09-26
+
+**[Terminal]** **La guarda de barrera cubre TODO turno que edita** (ADR-105,
+`4dbaa1b`): el turno suelto, el lote y el workflow del chat cuando el proyecto
+corre en autónomo por el CLI, y el Ejecutor de Construir siempre, negado sea
+cual sea el modo y con recibo en el historial. **Y el recibo del bloqueo del
+chat y del lote** (`1076666`): las tres puertas del envío niegan con su nombre,
+la cola corta en la primera negativa, el negado no cuenta como procesado y el
+parte persistido dice qué barrera está rota, con el intérprete que falta y el
+que existe. La nota de barrera del sistema nervioso lleva los datos del cliente
+saneados.
+
+**[Seguridad]** **Los cuatro flujos que corrían en `plan` pasan a `lectura`**
+(`22a5fdd`): Plan de Construir, entrevista de configuración, episodio de
+aprendizaje y borrador del agente ven el grafo y pierden el Bash que `plan`
+regalaba sin constar. **Lo limpio de la rama de limpieza, rehecho sobre main**
+(`4dbf512`): el enlace colgante negado con `lstat` en `rutaContenida` (HIGH,
+path-traversal fuera de la caja del CLI), cuatro reglas de forma de secretos
+(AWS, Slack, JWT, PEM), el glob que redactaba el prompt, tres innegociables que
+protegen a quien aplica la lista, siete de accesibilidad, y el saneado de
+hermanos y símbolo en el prompt del analista.
+
+**[Sistema nervioso]** **Construir y LOOP observan** (`2266922`, `ff59bcd`): los
+tres prompts de Construir piden notas por bloque y las asientan pase lo que
+pase; el loop asienta sus paradas y standbys del dato duro con dos áreas nuevas.
+Cognition, el tribunal en el Ejecutor, el `stderr` y las notas al chat quedan
+anotados con condición ([DEUDAS](DEUDAS.md) §6.6-6.10). **Arco #5 cerrado.**
+
+**[Higiene]** **Cada gate escribía una sesión falsa en el COGNITION-LOG del
+repo propio** (`2dfb070`): el cierre del escaneo solo escribe la memoria del
+proyecto con lo VISTO (cero paradas, nada que afirmar). El gate lleva desde
+entonces una cuarta prueba: el conteo de sesiones del log propio no cambia.
+
+**[Base]** **Diez hallazgos de FORTRESS cerrados en la base viva**, nueve por
+marcador verificado y el HIGH del enlace colgante por juicio; 46 vivos a 36,
+otros proyectos intactos, backup validado.
+
+## 2026-09-25
+
+**[Grafo]** **El grafo por turno** (ADR-095 enmendado, `947be07`; `fd4b5c2`):
+cada `claude -p` recibe una copia real del `.db` de su proyecto en un directorio
+propio por `CBM_CACHE_DIR` en el `env` del servidor, en los dos caminos (CLI y
+generador); el servidor rechaza con error legible cualquier otro proyecto, la
+caché real no se toca y FORTRESS sigue indexando ahí. Cierra el gap de
+aislamiento de la clase A ([DEUDAS](DEUDAS.md) §8.1). Binario reconstruido e
+instalado en frío (`997e1e6b`, sobre `d8b0de6`: aún sin esta pieza).
+
+## 2026-09-24
+
+**[Grafo]** **Lo que el grafo no ve** (ADR-104, `a152a32`): el agente sabe qué
+carpetas y ficheros no están indexados y qué barreras declara el proyecto.
+**Higiene del índice** (`686b212`): `has_graph` refleja el índice en disco y se
+realinea solo. **El juez huérfano** (`f836f14`): la suite de integración dejaba
+un `claude -p` huérfano sobre el repo propio en cada corrida desde el 26-ago;
+la parada se honra antes de reservar el carril, el hijo que nace parado muere al
+nacer, y al salir la app mata a sus hijos. Documentación al día y siete
+hallazgos cazados al ponerla ([DEUDAS](DEUDAS.md) §8).
+
+## 2026-09-23
+
+**[Escaneo]** **El contrato del hallazgo, cerrado**: la memoria del escáner y el
+alias de clave (ADR-101, `aeb6b88`; el mismo defecto deja de nacer dos veces),
+el ancla frente al arreglo (ADR-102, `5f76a44`; el guard antes del generador y
+la pausa por huella de `.fortress/config`), la severidad de las familias de
+auditoría (ADR-103, `fd9c2c9`). Anotados con dato: el defecto a propósito, las
+cadenas de explotación y la línea que ya no es ([DEUDAS](DEUDAS.md) §6.3-6.5).
+
+## 2026-09-22
+
+**[Motor]** **El prompt refleja las capacidades reales** (`00656fa`): Bash se
+lee de los argumentos, el vocabulario del grafo queda fijado a lo que el
+servidor expone y el brief dice «no encontré». **Las 98 zombis con identidad
+vieja**, reescritas (`b4eed4a`); **los hermanos por sede antes que por clase**
+(ADR-099, `da5238e`); **seis tipos de auditoría** fuera de seguridad (ADR-100,
+`bd51aee`), con el re-tipado de las 108 «otro» aplicado en la base viva.
+
+## 2026-09-21
+
+**[Seguridad]** **El sandbox** (ADR-092, `cd6a510`): los comandos de la clase B
+corren en `bwrap` sin red salvo el puente al proxy, fail-closed si la caja no se
+puede levantar; `npm ci` por el proxy medido en vivo. **ADR-098 firmado**: la
+producción autónoma va bajo firma. **El pre-vuelo de barreras, ejercitado en
+vivo**: el fail-closed negó la ejecución de un lote sobre una barrera muerta de
+verdad (el plan negado costó 0,96 $).
+
+## 2026-09-20
+
+**[Seguridad]** **`--allowedTools` pre-aprueba; no deniega.** Medido con corridas
+reales: con `--permission-mode default --allowedTools Read`, `Bash` se ejecutó
+igual y `permission_denials` salió vacío. El docblock afirmaba lo contrario, y lo
+repitieron el código, un test y quien escribió la pieza de encima. Quitar una
+herramienta de verdad exige `--disallowedTools`, y desde hoy el modo `lectura` lo
+lleva ([DEUDAS](DEUDAS.md) §4 y §8).
+
+**[Escaneo]** **El escáner audita en `auditoria`, no en `plan`.** En `plan` el CLI
+bloquea todas las llamadas MCP, así que el escáner llevaba el grafo encima y
+auditaba a ciegas. Nace un cuarto modo de permisos: corre en `default`, el grafo
+responde, `Bash` va entero y **escrito** en el allowlist —en `plan` ya corría,
+regalado por el modo y sin constar en ninguna lista— y `Write`/`Edit` siguen
+fuera. El juez de aplicabilidad pasa a `lectura`, y el chat supervisado entero
+sale también de `plan` ([FUNCIONAMIENTO-ACTUAL](FORTRESS-FUNCIONAMIENTO-ACTUAL.md) §2.6).
+
+**[Seguridad]** **El pre-vuelo de barreras.** Antes de un turno, el Terminal lee
+los hooks `PreToolUse` que el proyecto del cliente declara y comprueba que su
+intérprete existe. Si no existe, el hook nunca corre: el proyecto cree tener
+guardia y no la tiene. La observación se asienta siempre; en autónomo y con un
+lote, además, **bloquea** (ampliado a todo turno que edita el 26-sep, ADR-105).
+Sin shell, porque el nombre sale de la configuración de un repo auditado.
+
+**[Documentación]** `FORTRESS-FUNCIONAMIENTO-ACTUAL` puesto al día a `247611f`,
+con sus 355 citas `fichero:línea` comprobadas por máquina —ocho estaban muertas,
+entre ellas la de `protected-areas.ts`, borrado el 17-sep, que seguía sosteniendo
+un freno por palabras que ya no existe—. La limpieza del auto-escaneo de ese día
+quedó en una rama que main superó; su trabajo valioso se rehizo sobre main el
+26-sep (ROADMAP #6).
+
+## 2026-09-19
+
+> Entre el 2026-09-13 y esta fecha el changelog no tiene entradas. Ese tramo
+> —de ADR-088 a ADR-097, el Terminal que aprende a juzgarse— está narrado en
+> [HISTORY](HISTORY.md), Acto 9.
+
+**[Motor]** **Cuatro de los cinco defectos del primer ensayo autónomo, cerrados
+en el orden fijado.** (1) La aprobación de OMEGA **caduca**: un plan nuevo
+invalida el permiso viejo y el permiso se gasta al usarse —autoriza un intento,
+no un resultado—. (2) El turno de plan corre en `lectura` y recibe su propia
+instrucción: mandaba `supervisado`, el agente obedecía *«espera aprobación»* a
+un humano que no estaba, y `plan` le mataba el grafo —el turno más caro del
+lote, 5,02 $, planeó sin él—. (3) En autónomo el pie del hilo es texto plano con
+el lote y su fase. (4) El grafo **no se indexa con un turno vivo**, y el lote
+reconcilia al cerrar. El quinto sigue abierto ([DEUDAS](DEUDAS.md) §1).
+
 ## 2026-09-13
 
 **[Motor]** El fix que **entra al repo marca su hallazgo**. Integrar no tocaba la

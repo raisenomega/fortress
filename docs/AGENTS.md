@@ -335,6 +335,36 @@ Enmienda 2).
 - **Sin toggle:** es fijo en la barra lateral; apagarlo dejaría el turno de
   resolución sin quien produzca.
 
+### El Crítico del Terminal (`critico`) — fuera del reparto
+
+No audita el código del proyecto: **audita el fix** que acaba de proponer el
+Productor ([ADR-096](DECISIONS/adr-096-fase-b-el-debate-con-roles-enfrentados-el-critico-busca-el-fallo-y-omega-juzga-entre-las-voces.md),
+Fase B). Vive aparte de los diez especialistas por su propósito: aquel audita el
+proyecto y su regla «no inventes problemas» es correcta ahí; el encargo de este
+es el contrario.
+
+- **Carta propia:** *"Tu encargo es UNO: encontrar por qué ese fix está MAL. No
+  confirmarlo."* Navega el código todo lo que necesite, y cada objeción lleva
+  archivo:línea y el escenario concreto —qué entrada, qué resultado—: *"una
+  objeción sin escenario no es una objeción: es una opinión, y no cuenta"*
+  (`src/domain/agent/critico.ts:19-31`).
+- **Cuándo corre:** solo cuando hay diff que atacar, dentro del tribunal del
+  turno, y factura como `critico` en `agent_runs`.
+- **Modelo:** el mismo peldaño de la escalera que el Productor
+  (`critico.ts:2,14-17`). La razón está escrita: *"un crítico barato aprueba. El
+  desacuerdo solo vale si quien contradice es tan capaz como quien propuso"*.
+- **Cómo corre:** proceso propio con las herramientas de lectura del motor, el
+  grafo de su turno y `buildEnv(null)` (`src/infrastructure/repair/graph-critico.ts:42`).
+
+### El juez de aplicabilidad (`scope-classifier`) — opcional
+
+*"Decide qué módulos de la campaña de auditoría aplican, con evidencia"*
+(`src/domain/agent/optional-agents.ts:41-46`). Corre **antes** de las pasadas del
+escáner, con modelo `haiku` y en modo `lectura` —ve el grafo y **no tiene
+Bash**— (`src/infrastructure/scan/juez-de-aplicabilidad.ts:59`). Como los demás
+no interactivos, pide sus notas para el sistema nervioso por bloque
+(`juicio-prompt.ts`).
+
 ## Ciclo de vida común de todos los agentes
 
 - Todos los agentes LLM consumen tokens (el gate mecánico no).

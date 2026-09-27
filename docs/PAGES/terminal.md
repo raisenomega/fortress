@@ -46,8 +46,9 @@ Dos zonas apiladas:
 - **Botón de envío:** dispara el turno; deshabilitado si el proyecto está
   pendiente de configuración.
 - **Toggle de modo (supervisado / autónomo):** el modo autónomo exige
-  proyecto confiable; además la petición degrada a supervisado por su
-  contenido si toca un área protegida.
+  proyecto confiable, que no sea el propio repo de FORTRESS y que haya red de
+  reversión (git). **Ya no degrada por el contenido** de la petición: ese freno
+  por palabras se retiró con ADR-089.
 - **Medidor de la corrida:** progreso y coste del turno en vivo.
 
 ## Estados de la vista

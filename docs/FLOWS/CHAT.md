@@ -84,24 +84,24 @@ registrada por mensaje.
 Dos modos de operación: **supervisado** (por defecto — propone y espera
 aprobación) y **autónomo** (aplica y reporta; exige proyecto confiable).
 
-La degradación NO es de sesión: **se evalúa el contenido de CADA
-mensaje.** Si el texto toca un área protegida — por clase: autenticación y
-sesión, pagos, base de datos y permisos, secretos y cifrado — esa petición
-corre SUPERVISADA aunque el modo del proyecto sea autónomo. El siguiente
-mensaje vuelve a ser autónomo si no toca áreas protegidas.
+La degradación se evalúa en **cada mensaje**, y hoy tiene **tres razones, las
+tres estructurales** (`src/domain/settings/modo-efectivo.ts:21-23,58-61`): el
+objetivo es el propio repo de FORTRESS, el proyecto no ejecuta con confianza, o
+**no hay red de reversión** —sin raíz de repo git no hay checkpoint, y sin
+checkpoint el autónomo escribiría sin vuelta (ADR-079)—. Desde ADR-105 se suma
+la guarda de barrera: un turno que edita no corre si el proyecto declara un hook
+`PreToolUse` cuyo intérprete no existe.
 
-La detección cubre español e inglés, con normalización de acentos. La
-historia de origen, publicada como advertencia: **el freno fallaba en
-silencio porque "autenticacion" no contiene "auth"** — sin la cobertura
-bilingüe y la normalización, el sistema tendería a operar en autónomo
-sobre áreas críticas cada vez que el operador escribiera en español. La
-regla existe por evidencia dura, no por prevención abstracta.
-
-Y la doctrina que justifica el diseño conservador, tal cual la guarda el
-código: **"sobre-degradar es seguro; infra-degradar es el peligro."** Como
-mucho, el sistema pide permiso de más. Un mantenedor futuro que
-"simplifique" la detección a una búsqueda simple en un solo idioma
-destruiría el freno silenciosamente — esta doctrina es la vacuna.
+> **Hubo una cuarta, y se retiró (ADR-089).** Hasta el 2026-09-17 una petición
+> degradaba a supervisado si su TEXTO tocaba un área protegida —autenticación,
+> pagos, permisos, secretos—, con detección bilingüe y normalización de acentos.
+> Miraba palabras: en una herramienta cuyos hallazgos son de seguridad por
+> definición, *"degradaba la mayoría de lo que encuentra"*; un hallazgo titulado
+> «falta Content-Security-Policy» no se podía resolver porque contenía
+> «security». `protected-areas.ts` se borró, y el 2026-09-19 la lista salió
+> también del prompt, donde había sobrevivido. Lo que la sustituye es lo que ya
+> había debajo: la firma del operador al elegir autónomo y marcar la confianza,
+> el gate, y git, que revierte.
 
 ## Bloqueo hasta CONFIGURADO: redirigir, no rechazar
 

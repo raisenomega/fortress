@@ -274,9 +274,11 @@ los descartes: tres claves distintas para tres preguntas distintas, tabuladas en
 ### isAbsoluteProjectPath
 Guard de dominio: la raíz de un proyecto debe ser absoluta (POSIX, unidad de
 Windows o UNC). Cierra rutas relativas hostiles al registrar u operar
-proyectos. Comprueba el PREFIJO: no normaliza la cadena ni rechaza segmentos
-`..`; ese rechazo lo añade encima el guard de la carpeta padre en el alta de
-proyecto nuevo, y solo para ese flujo.
+proyectos. Comprueba el PREFIJO y rechaza los segmentos `..`, mirando por
+segmentos y no por subcadena (`src/domain/project/project-path.ts:21`): es
+garantía de dominio, no cobertura de un flujo, y por ella pasan todas las
+puertas de registro. Lo que NO hace es normalizar la cadena ni resolver
+symlinks (ver [SECURITY-MODEL](SECURITY-MODEL.md)).
 
 ### isPrivateHost
 Guard anti-[SSRF](#ssrf): rechaza loopback, rangos privados, link-local y
