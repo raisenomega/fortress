@@ -926,6 +926,13 @@ del auditor de su tramo, **sin releer cada uno**. Al arreglar cualquiera de
 ellos, el primer paso es re-verificar su evidencia contra el árbol de ese
 momento: esta lista es una guía de dónde mirar, no una prueba cerrada.
 
+**AVANCE DE LOS CUATRO URGENTES DE SEGURIDAD (2026-09-27).** Se arreglan de uno
+en uno con el método completo. **1 de 4 hecho:** el 100/100 en minúscula (§9.2),
+el más grave, en `26f4db4`. **Quedan tres:** el saneador de prompts con el hueco
+de `U+2028` y compañía (§9.1), `PGPASSWORD=` sin tachar (§9.2) y la nota de
+parada del LOOP en crudo (§9.1). Los dos residuos medidos del primero quedan
+anotados en §9.2, debajo de su entrada.
+
 ### 9.1 P0 — Seguridad que toca código de estos dos días
 
 Lo primero de la próxima sesión, porque son piezas recién mergeadas y la
@@ -957,8 +964,24 @@ corrección es pequeña.
 
 ### 9.2 P0 — Seguridad grave
 
-- **EL MÁS GRAVE. Un informe cuyas entradas se caen todas da «proyecto limpio» y
-  100/100.** *Verificado.* `src/domain/scan/parse-scan-output.ts:64` devuelve
+- **~~EL MÁS GRAVE. Un informe cuyas entradas se caen todas da «proyecto limpio»
+  y 100/100.~~** — **ARREGLADO Y VERIFICADO EN VIVO** `26f4db4` (2026-09-27).
+  **Eran TRES bugs y no dos**, y el tercero salió al trazar el efecto del arreglo:
+  `filas-del-cierre.ts` escribía el score y llamaba a `projects.updateScan`
+  **sea cual fuera el motivo**, así que arreglar el parser cambiaba la etiqueta a
+  ABORTADO y dejaba el 100 en el tablero igual. Los cuatro commits: la caja de la
+  severidad se normaliza DENTRO del parser (`severidad-del-informe.ts`) y el guard
+  de la base sigue estricto a propósito, con un test que clava la asimetría; las
+  notas de ADR-085 se rescatan por el embudo del fallo antes de que el informe se
+  tire, medido limpio porque `notes` es clave hermana de `findings` y la valida su
+  propio validador; `list.length > 0` con resultado vacío da `err(UNREADABLE)`; y
+  `notaDelCierre` devuelve null con cero paradas, así que ni el proyecto ni la
+  fila puntúan. **Verificado en vivo con el módulo compilado:** minúscula y
+  capitalizado pasan de 0 a 3 hallazgos, el limpio declarado sigue válido con 0,
+  y todas caídas da error en vez de 100/100. **Y con SQLite real:** con cero
+  paradas el tablero se queda en 63 y la fila en el score provisional; con una
+  parada sube a 92. Nueve mutantes muertos, gate 6/6 sobre main y las cuatro
+  pruebas sin cambio. Diagnóstico original, que se conserva: *verificado.* `src/domain/scan/parse-scan-output.ts:64` devuelve
   `ok([])` cuando la lista traía entradas y todas fallaron el guard, y su propio
   docblock `:9-13` llama a eso «*la peor mentira que podría contar esta app*».
   El disparador es barato: `isSeverity` (`shared/severity.ts:12-13`) distingue

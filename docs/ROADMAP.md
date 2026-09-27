@@ -535,6 +535,33 @@ que depende del gitEnv descartado, y los dos del login); y las ramas viejas
 `limpieza/escaneo-2026-09-20` y `fix/lote-negado-deja-constancia` se conservan
 como referencia, borrables cuando el operador lo diga.
 
+### Lo que la auditoría del 27 de septiembre ordena arreglar
+
+Los seis arcos cerraron el camino. La auditoría end-to-end de `src/domain` entero
+mide lo que quedaba debajo: 118 hallazgos, todos anotados en
+[DEUDAS §9](DEUDAS.md). **Cuatro son urgentes de seguridad**, y se arreglan de uno
+en uno con el método completo — medir, test rojo, mutante, gate y verificar el
+efecto en vivo — porque tres de ellos tocan código recién integrado.
+
+- **1. ~~El 100/100 en minúscula~~** — **HECHO** `26f4db4` (2026-09-27). Un
+  informe cuyas entradas se caían todas pasaba por «proyecto limpio». La medición
+  encontró **tres** bugs y no dos: el guard de severidad distinguía mayúsculas, el
+  parser devolvía lista vacía en vez de error, y el cierre escribía el score en el
+  tablero sea cual fuera el motivo. Se arregló entero, más el rescate de las notas
+  del sistema nervioso, que antes morían con el informe.
+- **2. El saneador de prompts.** `sanearParaPrompt` deja pasar `U+2028`, `U+2029`
+  y tres controles más cuando van solos. Es el control único de catorce llamantes,
+  entre ellos los tres saneados de esta misma semana.
+- **3. `PGPASSWORD=` no se tacha, y un SHA de git sí.** El recibo de herramientas
+  es el único campo que se persiste sin redacción, y la regla de la palabra clave
+  nunca se midió con esta clase de nombre.
+- **4. La nota de parada del LOOP viaja en crudo.** Mete `error.message` sin
+  aplanar ni acotar: nota no determinista, un avistamiento por reintento y sin
+  tope de 500.
+
+No son arcos nuevos del camino; son la letra pequeña que el camino dejó abierta, y
+el orden lo fija la gravedad medida, no el orden en que se encontraron.
+
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 
 - **Recibos verificables criptográficamente**, sobre el recibo que ya existe
