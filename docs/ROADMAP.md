@@ -386,9 +386,9 @@ declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
 **Y el 2026-09-26 se cerró el #5** (abajo): cuatro sub-piezas construidas, cuatro
 anotadas con dato y condición, más la higiene del COGNITION-LOG cazada por el
 camino. Queda del camino a grado bancario **solo #6**, re-medido el 2026-09-26: no se
-mergea lo viejo, se rehace sobre main por partes (partes 1 y 2 hechas; queda
-aplicar los cierres en la base, ya medidos). La 0.11.0 sigue como arco futuro
-por frescura.
+mergea lo viejo, se rehace sobre main por partes (partes 1, 2 y 3 hechas;
+quedan los seis docs pequeños a mano). La 0.11.0 sigue como arco futuro por
+frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
@@ -504,9 +504,18 @@ vivos a 36. Quedan 4 de los 13: el script de caducar sin guarda de app cerrada,
 el barrido de spawns ampliado, y los dos del login. El kit rehecho no admite la
 base viva por defecto y solo escribe con `--aplicar` tras backup validado.
 
-**Queda del #6:** aplicar la parte 3 sobre la viva, con la app cerrada y por
-orden del operador; y los seis docs pequeños de la rama vieja, a mano. Las
-ramas viejas se conservan como referencia.
+**Parte 3 HECHA el 2026-09-26** (sobre la base viva, con la app cerrada, por
+orden del operador): diez hallazgos de FORTRESS cerrados en la base, nueve por
+marcador verificado en el momento contra main con el `estaProbado` real y el
+HIGH del enlace colgante por juicio; 567 filas de otros proyectos idénticas,
+21 tablas sin cambio, integridad ok; verificado fila a fila contra el backup
+validado que el kit dejó antes de escribir. FORTRESS pasa de 46 vivos a 36.
+
+**Queda del #6:** solo los seis docs pequeños de la rama vieja, a mano. Y de
+los trece hallazgos que la rama de limpieza tocaba, cuatro esperan a fases
+posteriores: el script de caducar sin guarda de app cerrada, el barrido de
+spawns ampliado (depende del gitEnv descartado) y los dos del login. Las ramas
+viejas se conservan como referencia.
 
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 
