@@ -98,6 +98,16 @@ completar en la fase de documentación operativa.
 
 ## Camino a grado bancario en toda la aplicación
 
+> **CAMINO COMPLETO el 2026-09-26.** Los seis arcos cerrados —el sandbox con la
+> clase A aislada (#1, ADR-092 y ADR-095 enmendado), el prompt que refleja (#2),
+> el contrato del hallazgo (#3, ADR-099 a ADR-103), el grafo más allá de JS (#4,
+> ADR-104 e higiene), el aislamiento de la clase A por turno (8.1, `fd4b5c2`) y
+> toda la aplicación dentro del tribunal y del sistema nervioso (#5, ADR-105)— y
+> la decisión D rehecha sobre el main reconstruido (#6, tres partes y los docs).
+> Lo que queda es deuda menor, anotada en su sitio (DEUDAS §6.11): cuatro de los
+> trece hallazgos de la rama de limpieza, y las ramas viejas conservadas como
+> referencia hasta que el operador ordene borrarlas.
+
 *Tramo añadido el 2026-09-21. No sustituye a los anteriores: los ordena por lo
 que hoy más pesa.* **Doctrina del tramo: lo que ya existe no se rehace; se le
 sube el grado y la profundidad.**
@@ -385,10 +395,9 @@ declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
 (DEUDAS §8.1, `fd4b5c2`): el sandbox del arco #1 queda completo, clase A y B.
 **Y el 2026-09-26 se cerró el #5** (abajo): cuatro sub-piezas construidas, cuatro
 anotadas con dato y condición, más la higiene del COGNITION-LOG cazada por el
-camino. Queda del camino a grado bancario **solo #6**, re-medido el 2026-09-26: no se
-mergea lo viejo, se rehace sobre main por partes (partes 1, 2 y 3 hechas;
-quedan los seis docs pequeños a mano). La 0.11.0 sigue como arco futuro por
-frescura.
+camino. Y el #6, re-medido el 2026-09-26 y rehecho sobre main por partes, se
+cerró ese mismo día con los seis docs a mano: **el camino está completo.** La
+0.11.0 sigue como arco futuro por frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
@@ -511,11 +520,20 @@ HIGH del enlace colgante por juicio; 567 filas de otros proyectos idénticas,
 21 tablas sin cambio, integridad ok; verificado fila a fila contra el backup
 validado que el kit dejó antes de escribir. FORTRESS pasa de 46 vivos a 36.
 
-**Queda del #6:** solo los seis docs pequeños de la rama vieja, a mano. Y de
-los trece hallazgos que la rama de limpieza tocaba, cuatro esperan a fases
-posteriores: el script de caducar sin guarda de app cerrada, el barrido de
-spawns ampliado (depende del gitEnv descartado) y los dos del login. Las ramas
-viejas se conservan como referencia.
+**Los seis docs, rehechos a mano el 2026-09-26** (`34e088a`), midiendo qué
+decía cada uno que main no reflejaba y trayendo solo eso: el glosario decía que
+`isAbsoluteProjectPath` no rechaza `..` y el código lo rechaza; el flujo del
+chat y la página del Terminal seguían describiendo el freno por palabras que
+ADR-089 retiró; el flujo del escaneo daba la identidad vieja; AGENTS no tenía
+al Crítico ni al juez de aplicabilidad; DATA-MODEL decía 19 tablas y son 22; y
+el changelog acababa el 13 de septiembre y va hasta el 26.
+
+**ARCO #6 CERRADO.** Deuda menor, anotada en DEUDAS §6.11: de los trece
+hallazgos que la rama de limpieza tocaba, cuatro esperan a fases posteriores
+(el script de caducar sin guarda de app cerrada, el barrido de spawns ampliado
+que depende del gitEnv descartado, y los dos del login); y las ramas viejas
+`limpieza/escaneo-2026-09-20` y `fix/lote-negado-deja-constancia` se conservan
+como referencia, borrables cuando el operador lo diga.
 
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 

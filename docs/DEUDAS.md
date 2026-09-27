@@ -756,6 +756,30 @@ operador (`en-vivo-tachado` es innegociable; `quien-no-observa.test.ts`). Es
 infra que duplica. **Condición:** si aparece una señal que el dato duro NO cubre
 y solo el modelo vería, entonces pedir notas al chat, por el mismo cuello.
 
+### 6.11 Lo que quedó de la decisión D, rehecha (2026-09-26)
+
+**Deuda menor tras cerrar el arco #6.** La rama de limpieza del 20-sep tocaba
+trece hallazgos vivos de FORTRESS; las partes 1 a 3 arreglaron y cerraron nueve
+más el HIGH del enlace colgante. **Quedan cuatro, abiertos y con dueño claro:**
+
+- `f9f835d9` (MEDIUM): `scripts/caduca-cadena-sintetica.ts` escribe en la base
+  viva sin guarda de app cerrada; main la tiene para fase B (`appCerrada()`) y
+  no para este script. Arreglo: la misma guarda, una línea y su test.
+- `1cd561ed` (LOW): el barrido de spawns (`spawn-entorno-acotado.test.ts`) no ve
+  `execFileSync`; ampliarlo exige antes decidir si los tres `git` del checkpoint
+  llevan `gitEnv()` además de `SIN_HOOKS` (la rama vieja lo traía junto; se
+  descartó por redundante y el barrido ampliado los tumbaría).
+- `6f0683f4` (LOW, MITIGATED) y `990c3d88` (LOW): la salida del login se reenvía
+  al renderer sin tachar y `startLogin` hereda el entorno entero. Trabajo nuevo:
+  un `redactSecrets` en `account-handlers.ts` y un entorno acotado que conserve
+  lo que el navegador necesita.
+
+**Las ramas viejas** `limpieza/escaneo-2026-09-20` (26 commits) y
+`fix/lote-negado-deja-constancia` (30, apilada sobre la anterior) se conservan
+sin push como referencia de lo que se rehízo; se borran cuando el operador lo
+ordene. **El kit de cierres** de la parte 3 vive en
+`~/Escritorio/Raisen_FCC/cierres-parte-3-2026-09-27/`, fuera del repo.
+
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del
