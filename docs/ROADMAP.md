@@ -386,9 +386,9 @@ declara el proyecto (ADR-104). B: la contabilidad del grafo dice la verdad y el
 **Y el 2026-09-26 se cerró el #5** (abajo): cuatro sub-piezas construidas, cuatro
 anotadas con dato y condición, más la higiene del COGNITION-LOG cazada por el
 camino. Queda del camino a grado bancario **solo #6**, re-medido el 2026-09-26: no se
-mergea lo viejo, se rehace sobre main por partes (parte 1 hecha; quedan B sobre
-ADR-105, el saneado de hermanos y los cierres en la base). La 0.11.0 sigue como
-arco futuro por frescura.
+mergea lo viejo, se rehace sobre main por partes (partes 1 y 2 hechas; queda
+aplicar los cierres en la base, ya medidos). La 0.11.0 sigue como arco futuro
+por frescura.
 
 ### 5. Toda la aplicación dentro del tribunal y del sistema nervioso
 
@@ -484,10 +484,29 @@ tres segmentos, PEM acotado), los tres innegociables que protegen a quien aplica
 la lista, y las siete de accesibilidad con test de fuente. **Los ocho hallazgos
 más el HIGH siguen ABIERTOS en la base:** el cierre es la parte 3, con el kit.
 
-**Queda del #6:** parte 2, B (el recibo del bloqueo del chat y del lote) rehecha
-sobre ADR-105 más el saneado de hermanos sobre ADR-099; parte 3, cerrar en la
-base con el kit los hallazgos ya arreglados en código; y los seis docs pequeños
-de la rama vieja, a mano. Las ramas viejas se conservan como referencia.
+**Parte 2 HECHA el 2026-09-26** (merge `1076666`): B rehecha sobre ADR-105, con
+mejora. Las tres puertas del envío niegan con su nombre (barrera, plan sin
+aprobar, carril) y el reventón sigue siendo error; la cola del lote corta en la
+primera negativa, porque la barrera es del proyecto y el tope del día, no del
+hallazgo; el negado no cuenta como procesado; y el parte persistido dice qué
+barrera está rota, con el intérprete que falta y el que existe, en los dos
+recibos, el del chat y el del Ejecutor. Además el saneado de hermanos y símbolo
+sobre la estructura de ADR-099, y el hallazgo lateral cerrado: la nota de
+barrera del sistema nervioso lleva el matcher, el guion y el intérprete del
+cliente saneados y acotados, con la dedup intacta (la nota normal es idéntica).
+
+**Parte 3 MEDIDA, sin tocar la base:** se cierran 10. Nueve por marcador con las
+cuatro pruebas del kit y el `estaProbado` real (los siete de accesibilidad, el
+de secretos con marcador nuevo y el de fase B, que main arregló por otra vía y
+lleva marcador nuevo), y el HIGH del enlace colgante por juicio, porque su
+arreglo vive en otro fichero que el ancla. Ensayo en seco sobre una copia: 46
+vivos a 36. Quedan 4 de los 13: el script de caducar sin guarda de app cerrada,
+el barrido de spawns ampliado, y los dos del login. El kit rehecho no admite la
+base viva por defecto y solo escribe con `--aplicar` tras backup validado.
+
+**Queda del #6:** aplicar la parte 3 sobre la viva, con la app cerrada y por
+orden del operador; y los seis docs pequeños de la rama vieja, a mano. Las
+ramas viejas se conservan como referencia.
 
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 
