@@ -2,11 +2,13 @@ import { DEFENSAS_INNEGOCIABLES } from './innegociables-defensa'
 import { DEFENSAS_DEL_PROMPT } from './innegociables-prompt'
 import { DEFENSAS_DE_LA_FUSION } from './innegociables-fusion'
 import { DEFENSAS_DE_SECRETOS } from './innegociables-secretos'
+import { DEFENSAS_DEL_TACHADO } from './innegociables-tachado'
 
-/** Ver `criterio-innegociable.ts`. Familias aparte: `-defensa`, `-disco`, `-secretos`, `-prompt`. */
+/** Ver `criterio-innegociable.ts`. Familias aparte: `-defensa`, `-disco`, `-secretos`, `-prompt`, `-tachado`. */
 export const AUTONOMY_RULES_FILES: readonly string[] = [
   ...DEFENSAS_INNEGOCIABLES,
   ...DEFENSAS_DE_SECRETOS,
+  ...DEFENSAS_DEL_TACHADO,
   ...DEFENSAS_DEL_PROMPT,
   ...DEFENSAS_DE_LA_FUSION,
   // Que puede hacer el agente, y donde.
@@ -37,9 +39,6 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/connectors/connector-url.ts',
   'src/domain/shared/safe-url.ts',
   'src/infrastructure/newproject/create-folder.ts',
-  // `redactSecrets` tacha el secreto antes de que se PERSISTA, y lo escrito no
-  // se deshace retirando el fix despues. Sus hermanas, en `innegociables-defensa`.
-  'src/domain/chat/tool-detail.ts',
   // POR CARPETA: posture ENTERA es la defensa anti-SSRF. Enumerar sus mitades
   // fallo cuatro veces —la lista solo cubre lo que alguien recuerda escribir— y
   // un glob cubre tambien lo que aun no existe: `ipv4-formas`, nacido el 05 de

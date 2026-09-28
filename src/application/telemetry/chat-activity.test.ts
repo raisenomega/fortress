@@ -38,8 +38,13 @@ describe('chatActivity', () => {
   })
 
   it('tacha antes de recortar: un secreto en el borde no queda a medias', () => {
-    const hex = '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b'
-    const [entry] = chatActivity('p1', null, 'api', `${'x'.repeat(57)} ${hex}`, outcome())
+    // El material era una tira de 40 hexadecimales, que resulto ser el resumen de
+    // «test»: un HASH, no un secreto, y lo tapaba el comodin que se retiro el
+    // 2026-09-28 por borrar la huella forense del recibo. El sujeto de este test
+    // es el ORDEN —tachar antes de recortar— y para eso hace falta un secreto de
+    // verdad, no algo con su forma. Un token de GitHub mide lo mismo.
+    const token = `${'ghp'}_abcdefghijklmnopqrstuvwxyz0123456789`
+    const [entry] = chatActivity('p1', null, 'api', `${'x'.repeat(57)} ${token}`, outcome())
     expect(entry.summary).toBe(`${'x'.repeat(57)} *** (solo texto)`)
   })
 
