@@ -13,6 +13,7 @@
 export type Regla = readonly [RegExp, string]
 
 import { REGLAS_POR_NOMBRE } from './secreto-por-nombre'
+import { REGLAS_POR_CONTEXTO } from './secreto-por-contexto'
 
 /** Una clave PRIVADA en PEM (certificado y clave publica no lo son). ACOTADO y sin
  *  nada perezoso: un `[\s\S]*?` re-escanea hasta el final por cada cabecera sin pie
@@ -35,4 +36,8 @@ const POR_VALOR: readonly Regla[] = [
   [PEM, '***']
 ]
 
-export const REGLAS_DE_SECRETO: readonly Regla[] = [...REGLAS_POR_NOMBRE, ...POR_VALOR]
+export const REGLAS_DE_SECRETO: readonly Regla[] = [
+  ...REGLAS_POR_NOMBRE,
+  ...REGLAS_POR_CONTEXTO,
+  ...POR_VALOR
+]
