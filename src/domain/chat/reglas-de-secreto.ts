@@ -21,14 +21,27 @@ import { REGLAS_POR_CONTEXTO } from './secreto-por-contexto'
 // prettier-ignore
 const PEM = /-----BEGIN [A-Z ]{0,30}PRIVATE KEY-----\s{0,4}(?:[\w-]{1,20}: [^\n]{0,90}\n){0,4}\s{0,4}(?:[A-Za-z0-9+/=]{20,120}\s{0,4}){0,400}(?:(?:[A-Za-z0-9+/=]{1,19}\s{0,4})?-----END [A-Z ]{0,30}PRIVATE KEY-----)?/g
 
-/** Por la FORMA del valor, para los que se reconocen sin ver su nombre: viajan
- *  sueltos en una URL, en un log o en la salida de un agente. */
+/**
+ * Por la FORMA del valor, para los que se reconocen sin ver su nombre: viajan
+ * sueltos en una URL, en un log o en la salida de un agente.
+ *
+ * Cada una nombra a SU emisor. Aqui vivia un comodin —«32 o mas hexadecimales»—
+ * que no nombraba a ninguno, y se retira. Medido el 2026-09-28: nacio para la
+ * linea EN VIVO y su propio commit lo dice, «solo en vivo por onChunk: NO se
+ * persiste»; pero hoy `redactSecrets` tiene 17 llamadas en 15 modulos y la
+ * mayoria SI persisten, asi que acabo borrando del recibo la huella que un
+ * auditor necesita: el identificador de un commit, un resumen de integridad, el
+ * digest de una imagen. Y no protegia nada propio — ningun test nombra un
+ * secreto que solo el tapara—. Lo que si tapaba, por accidente y sin decirlo,
+ * eran tres credenciales por su SITIO, y esas las cubre `secreto-por-contexto`.
+ *
+ * La regla que queda: un control que borra evidencia sin proteger nada se retira.
+ */
 const POR_VALOR: readonly Regla[] = [
   [/sk-ant-[\w-]{6,}/gi, '***'],
   [/\bgh[pousr]_[A-Za-z0-9]{16,}/g, '***'],
   [/\bgithub_pat_[A-Za-z0-9_]{20,}/g, '***'],
   [/Bearer\s+\S+/gi, '***'],
-  [/\b[0-9a-f]{32,}\b/gi, '***'],
   [/\bA[KS]IA[0-9A-Z]{16}\b/g, '***'],
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}/g, '***'],
   // Los TRES segmentos: con uno o dos se comeria cualquier base64 que empiece igual.
