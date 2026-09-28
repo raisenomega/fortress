@@ -51,12 +51,25 @@ const instalada = versionInstalada()
 const esLaFijada = instalada === GRAPH_MCP_VERSION
 
 /**
+ * VEINTE SEGUNDOS y no los 5.000 ms por defecto de vitest: mismo patron y misma
+ * razon que su hermano `grafo-aislado-rechaza` y que las seis veces que ya lo usa
+ * `build-verify-entorno`. Este arranca el BINARIO real por stdio y le habla el
+ * protocolo entero; aislado tarda 0,7 s, pero con las 862 suites en paralelo un
+ * spawn no cabe en cinco segundos.
+ */
+const TECHO = 20_000
+
+/**
  * La lista fijada es la fuente ESTABLE (no depende de que haya binario en la
  * maquina que corre los tests); este test la cruza con el binario REAL cuando
  * esta instalado en la version fijada. Si no lo esta, lo dice y no finge.
  */
 describe(`el vocabulario coincide con el servidor instalado (fijado ${GRAPH_MCP_VERSION}, instalado ${instalada ?? 'ninguno'})`, () => {
-  it.skipIf(!esLaFijada)('tools/list del binario == HERRAMIENTAS_DEL_SERVIDOR', () => {
-    expect(herramientasReales()).toEqual([...HERRAMIENTAS_DEL_SERVIDOR].sort())
-  })
+  it.skipIf(!esLaFijada)(
+    'tools/list del binario == HERRAMIENTAS_DEL_SERVIDOR',
+    () => {
+      expect(herramientasReales()).toEqual([...HERRAMIENTAS_DEL_SERVIDOR].sort())
+    },
+    TECHO
+  )
 })

@@ -10,7 +10,8 @@ import type { Parada } from './loop-stop-record'
  * `loop_sessions` y en un aviso al renderer que nadie guardaba.
  */
 export function observarParada(context: AppContext, project: Project, parada: Parada): void {
-  const nota = observacionDeParada(parada.stoppedReason, parada.stoppedReasonDetail ?? null)
+  // El detalle CRUDO no viaja a la nota: para eso esta la clase (ver `claseDelFallo`).
+  const nota = observacionDeParada(parada.stoppedReason, parada.stoppedReasonDetail ?? null, parada.claseDelFallo ?? null) // prettier-ignore
   if (nota !== null) asentarNotas(context, project, [nota])
 }
 
