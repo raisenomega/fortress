@@ -560,18 +560,26 @@ efecto en vivo — porque tres de ellos tocan código recién integrado.
   porque lo que juzga es la prosa del productor y esa es el objeto del juicio, no
   un campo. De paso se cerraron las cuatro copias del neutralizador de marcas y
   una fuga de la copia del grafo cuando el proceso no llegaba a lanzarse.
-- **3. `PGPASSWORD=` no se tacha, y un SHA de git sí.** El recibo de herramientas
-  es el único campo que se persiste sin redacción, y la regla de la palabra clave
-  nunca se midió con esta clase de nombre.
+- **3. ~~`PGPASSWORD=` no se tacha, y un SHA de git sí~~** — **HECHO** `4fc30c0`
+  (2026-09-28). No eran dos defectos opuestos sino TRES piezas, y la tercera solo
+  la vio la medición. El primero era una familia de trece secretos con el prefijo
+  pegado al nombre. El comodín que tachaba cualquier hexadecimal largo se retiró
+  entero: había nacido para la línea en vivo, con la nota «no se persiste» escrita
+  en su propio commit, y había derivado a diecisiete sitios donde sí persiste,
+  borrando del recibo la huella que un auditor necesita. Y retirarlo abría tres
+  agujeros, porque tapaba por accidente tres credenciales que se reconocen por el
+  sitio donde viven; ahora se cubren por diseño, conservando la línea legible.
 - **4. La nota de parada del LOOP viaja en crudo.** Mete `error.message` sin
   aplanar ni acotar: nota no determinista, un avistamiento por reintento y sin
   tope de 500.
 
 No son arcos nuevos del camino; son la letra pequeña que el camino dejó abierta, y
 el orden lo fija la gravedad medida, no el orden en que se encontraron. Y la
-gravedad se ha reordenado dos veces al medir: el primero eran tres defectos y no
-dos, y el segundo resultó ser el peor de los cuatro. Medir antes de construir no
-solo confirma el hallazgo; a menudo lo corrige.
+gravedad se ha reordenado en los TRES: el primero eran tres defectos y no dos, el
+segundo resultó ser el peor de los cuatro, y el tercero eran tres piezas donde el
+informe veía dos, con la tercera necesaria para que arreglar las otras no abriera
+un agujero nuevo. Medir antes de construir no solo confirma el hallazgo; a menudo
+lo corrige, y dos veces ha cambiado qué se construía.
 
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 

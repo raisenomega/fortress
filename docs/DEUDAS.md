@@ -926,14 +926,18 @@ del auditor de su tramo, **sin releer cada uno**. Al arreglar cualquiera de
 ellos, el primer paso es re-verificar su evidencia contra el árbol de ese
 momento: esta lista es una guía de dónde mirar, no una prueba cerrada.
 
-**AVANCE DE LOS CUATRO URGENTES DE SEGURIDAD (2026-09-27).** Se arreglan de uno
-en uno con el método completo. **2 de 4 hechos:** el 100/100 en minúscula (§9.2)
-en `26f4db4`, y el saneador de prompts (§9.1) en `3810e5c`, que resultó ser el más
-grave de los dos: cerró la inyección de prompt desde el código del cliente hacia
-el agente que edita. **Quedan dos:** `PGPASSWORD=` sin tachar (§9.2) y la nota de
-parada del LOOP en crudo (§9.1). Los dos residuos medidos del primero quedan
-anotados en §9.2, debajo de su entrada; las cuatro correcciones que la medición
-del segundo hizo a esta auditoría, debajo de la suya en §9.1.
+**AVANCE DE LOS CUATRO URGENTES DE SEGURIDAD.** Se arreglan de uno en uno con el
+método completo. **3 de 4 hechos, y la medición reordenó la gravedad cada vez:**
+
+1. El 100/100 en minúscula (§9.2), `26f4db4` el 27-sep. Eran TRES defectos y no dos.
+2. El saneador de prompts (§9.1), `3810e5c` el 27-sep. Resultó ser el más grave de
+   todos: cerró la inyección de prompt desde el código del cliente hacia el agente
+   que edita. El hueco eran 19 caracteres de 22, no los 5 del hallazgo.
+3. El tachado de secretos (§9.2), `4fc30c0` el 28-sep. Eran TRES piezas y no dos
+   defectos opuestos: retirar el comodín del hash abría tres agujeros nuevos.
+
+**Queda uno:** la nota de parada del LOOP en crudo (§9.1). Debajo de cada entrada
+quedan sus residuos y las correcciones que su medición hizo a esta auditoría.
 
 ### 9.1 P0 — Seguridad que toca código de estos dos días
 
@@ -1054,16 +1058,56 @@ corrección es pequeña.
 - **NOTA de mantenimiento: `parse-scan-output.ts` quedó en 75 líneas EXACTAS.**
   Es el techo de `max-lines`, así que el siguiente cambio en ese fichero obliga a
   partirlo. No es deuda de seguridad; es la trampa que espera a quien lo abra.
-- **`PGPASSWORD=` no se tacha, y un SHA de git sí.** *Verificado, medido con el
-  módulo compilado.* `src/domain/chat/tool-detail.ts:30` exige que no haya una
-  letra antes de la palabra clave, así que `PGPASSWORD=hunter2`, `MITOKEN=` y
-  `APITOKEN=` pasan enteros; `--password hunter2` con espacio también, porque la
-  regla exige `=` o `:`. Los cuatro casos que el docblock declara medidos llevan
-  todos `_`, así que esta clase nunca se midió. Eso se persiste en el recibo, que
-  `recibo-de-herramientas.ts:41-43` llama el único campo persistido sin
-  redacción. Y al revés: `git show <sha>` sale tachado, así que el recibo pierde
-  la huella forense que un auditor necesita. **Arreglo:** límite de identificador
-  en vez de «no letra antes», y el caso al fixture.
+- **~~`PGPASSWORD=` no se tacha, y un SHA de git sí.~~** — **ARREGLADO Y
+  VERIFICADO EN VIVO** `4fc30c0` (2026-09-28). **No eran dos defectos opuestos
+  sino TRES piezas**, y la tercera solo la vio la medición.
+  **(1) El primero no era uno, era una FAMILIA de trece.** Todos con el prefijo
+  PEGADO a la palabra: las contraseñas de Postgres, MySQL, Redis y SMTP, y los
+  tokens de GitHub y Slack escritos sin separador. Con guion bajo funcionaba;
+  pegado, no. El arreglo quita la condición de la letra solo a las palabras
+  LARGAS, que no colisionan con nada, y la conserva para `key` y `pwd`, que son
+  sufijo de ocho palabras reales de `monkey` a `whiskey`. Pasó de tachar 24
+  secretos a 33 sin romper ninguno de los 14 textos legítimos.
+  **(2) El comodín del hash se RETIRA, y su historia lo explica.** Nació para la
+  línea EN VIVO y su propio commit lo dice, «solo en vivo por onChunk: NO se
+  persiste»; pero hoy `redactSecrets` tiene **17 llamadas en 15 módulos** y la
+  mayoría SÍ persisten, así que una regla efímera derivó a la persistencia y acabó
+  borrando del recibo el identificador de un commit, un resumen de integridad y el
+  digest de una imagen. Dos mutantes prueban que acotarlo no basta: a 64 sigue
+  borrando el resumen de integridad y a 40 el identificador del commit, porque las
+  longitudes forenses son las mismas que las de un secreto hexadecimal.
+  **(3) Y el comodín tapaba TRES credenciales por accidente.** Al retirarlo
+  quedaban al descubierto la credencial tras `curl -u`, la de dentro de una
+  dirección de Postgres y el encabezado de autorización, en cuanto el valor no
+  fuera hexadecimal — y una contraseña rara vez lo es. Se cubren por diseño, por el
+  SITIO donde viven, conservando el usuario y la arroba para que la línea siga
+  legible: `curl -u api:*** https://x`.
+  **Verificado en vivo:** 22 de 22 escapados ahora tachados, 6 de 6 huellas
+  forenses intactas, 6 de 6 credenciales de contexto tapadas, 20 de 20 comandos
+  reales del agente sin tocar. De las nueve reglas de forma solo cambió una; las
+  otras ocho, idénticas. El coste BAJÓ a 0,2 ms sobre 50.000 caracteres, porque el
+  comodín era la regla más cara. 16 mutantes muertos.
+- **Los costes ACEPTADOS del tachado, y el hueco que se descartó midiendo.**
+  *Medidos el 2026-09-28, fijados en test para que sean deliberados.* Dos falsos
+  positivos: `betoken=` se tacha por acabar en `token`, palabra arcaica inglesa; y
+  una palabra del diccionario escrita ENTERA en mayúsculas seguida de `=`
+  (`MONKEY=banana`) tiene la MISMA forma que `MYKEY=` y no hay manera de
+  separarlas. Se elige ese lado a propósito: tachar de más cuesta legibilidad en
+  una línea que casi nunca existe, no tachar cuesta una credencial en disco.
+  **Y un hueco conocido:** la forma de MySQL, con la clave pegada a la bandera, se
+  DESCARTÓ porque destrozaba **6 de 12** órdenes que el agente auditor corre a
+  diario — `find -print`, `-path`, `-prune`, `-perm`, `rsync --progress` y
+  `npm --prod` —. La diferencia entre un puerto y una clave es solo el espacio.
+  `mysql -pclave` no se tacha, y está escrito en `secreto-por-contexto.ts`.
+- **Un test que guarda seguridad es INTERMITENTE.** *Medido el 2026-09-28 al
+  perseguir un gate rojo.* `src/infrastructure/graph/grafo-aislado-rechaza.test.ts`
+  —el que comprueba que un cliente no ve el grafo de otro— tarda 1,6 s aislado y se
+  pasa del `testTimeout` por defecto de vitest, 5.000 ms, cuando corre con las 862
+  suites en paralelo: lanza el binario real del grafo dos veces e indexa dos
+  repositorios. El repo ya tiene el patrón para esto, `}, 20_000)` seis veces en
+  `build-verify-entorno.test.ts`, y los DOS tests que lanzan ese binario no declaran
+  ninguno. Un test que guarda seguridad y falla por carga se acaba ignorando.
+  **Arreglo:** un tope explícito en los dos, una línea cada uno.
 - **El corpus que declara el repo auditado entra crudo a nueve prompts.**
   *Verificado, cadena leída línea a línea.* `corpus-config.ts:10` valida solo que
   sea una lista de cadenas; `discover-corpus.ts:61` la devuelve **sustituyendo**
