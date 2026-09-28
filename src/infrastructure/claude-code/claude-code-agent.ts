@@ -11,6 +11,8 @@ import { CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { precheckProjectPath } from './precheck-project-path'
 import { collectRun, TECHO_POR_DEFECTO, sinLanzar } from './run-claude-process'
 import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
+import type { CodeAgentReply } from '@domain/chat/code-agent'
+import { turnoConGrafo } from './turno-con-grafo'
 
 /**
  * Ejecuta Claude Code dentro de la carpeta del proyecto. A diferencia del chat
@@ -51,19 +53,20 @@ export function createClaudeCodeAgent(
       const args = argsDelTurno(request, customAgents, mcpConfig, budget.perRun, grafo.dir)
       if (!args.ok) return (grafo.liberar(), sinLanzar(args.error, onChunk))
 
-      const child = spawn(CLAUDE_BIN, [...args.value], {
-        cwd: request.projectPath,
+      const lanzar = (): Promise<CodeAgentReply> => {
         // Solo se pasa la key si el operador eligio facturar a la key. Sin
         // ella, `claude` usa su propia sesion y consume del plan.
-        env: buildEnv(useApiKey ? apiKeys.read() : null)
-      })
-      trackChild(child, request.projectId ?? null)
-      // La parada pudo llegar mientras se armaba el turno: `cancelRun` ya mato
-      // a los vivos y no vio a este. Un hijo que nace parado, muere al nacer.
-      if (request.projectId !== undefined && isCancelled(request.projectId)) killChildrenOf(request.projectId) // prettier-ignore
+        const child = spawn(CLAUDE_BIN, [...args.value], { cwd: request.projectPath, env: buildEnv(useApiKey ? apiKeys.read() : null) }) // prettier-ignore
+        trackChild(child, request.projectId ?? null)
+        // La parada pudo llegar mientras se armaba el turno: `cancelRun` ya mato
+        // a los vivos y no vio a este. Un hijo que nace parado, muere al nacer.
+        if (request.projectId !== undefined && isCancelled(request.projectId)) killChildrenOf(request.projectId) // prettier-ignore
+        return collectRun(child, onChunk, techoMs)
+      }
 
-      // La copia muere con el proceso: se libera al cerrar, pase lo que pase.
-      return collectRun(child, onChunk, techoMs).finally(() => grafo.liberar())
+      // La copia muere con el turno por sus TRES salidas, no solo al cerrar el
+      // proceso: `spawn` puede tirar antes de que el hijo exista.
+      return turnoConGrafo(grafo, lanzar, (motivo) => sinLanzar(motivo, onChunk))
     }
   }
 }

@@ -1,5 +1,4 @@
-/** Los campos del analisis son DATO, no ordenes. Igual que en `omega-prompt`. */
-const safe = (text: string): string => text.replace(/</g, '(').replace(/>/g, ')').replace(/`/g, "'")
+import { neutralizarMarcas } from '../shared/sanear-campo-de-prompt'
 
 /**
  * Lo que se le manda a OMEGA para juzgar un PLAN (ADR-097 §2 y §2.2-bis).
@@ -40,11 +39,11 @@ export function buildPlanPrompt(hallazgos: readonly string[], propuesta: string)
     'bloquea, y el hallazgo se queda sin arreglar por una duda tuya.',
     '',
     `<hallazgos total="${hallazgos.length}">`,
-    ...hallazgos.map(safe),
+    ...hallazgos.map(neutralizarMarcas),
     '</hallazgos>',
     '',
     '=== EL PLAN QUE PROPONE EL PRODUCTOR PARA ESOS HALLAZGOS ===',
-    safe(propuesta),
+    neutralizarMarcas(propuesta),
     '',
     'Juzga la direccion sobre EL CONJUNTO: el orden que propone, el enfoque, y si',
     'abarca lo que hay delante. NO juzgues hallazgo por hallazgo.',

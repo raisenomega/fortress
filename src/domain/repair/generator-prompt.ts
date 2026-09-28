@@ -1,11 +1,7 @@
+import { sanearCampoDePrompt } from '../shared/sanear-campo-de-prompt'
 import type { Analysis } from './analysis'
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
-
-/** El texto del analisis es dato, no ordenes: se neutraliza lo que rompe marcas. */
-function safe(text: string): string {
-  return text.replace(/</g, '(').replace(/>/g, ')').replace(/`/g, "'")
-}
 
 const RULES = [
   '- UN hallazgo, UN fix: el diff minimo que resuelva el problema.',
@@ -34,15 +30,15 @@ export function buildGeneratorPrompt(
     'Modo REPARACION (C3). Trabajas en una COPIA aislada del repo: genera el fix.',
     '',
     '<hallazgo>',
-    `titulo: ${safe(analysis.target.title)}`,
-    `archivo: ${safe(analysis.target.file)}:${analysis.target.line ?? ''}`,
+    `titulo: ${sanearCampoDePrompt(analysis.target.title)}`,
+    `archivo: ${sanearCampoDePrompt(analysis.target.file)}:${analysis.target.line ?? ''}`,
     '</hallazgo>',
     '<analisis>',
-    `QUE_CAMBIAR: ${safe(analysis.whatToChange)}`,
-    `DONDE: ${safe(analysis.where)}`,
-    `PATRON: ${safe(analysis.patternToCopy)}`,
-    `NO_TOCAR: ${safe(analysis.doNotTouch)}`,
-    `RIESGO: ${safe(analysis.risk)}`,
+    `QUE_CAMBIAR: ${sanearCampoDePrompt(analysis.whatToChange)}`,
+    `DONDE: ${sanearCampoDePrompt(analysis.where)}`,
+    `PATRON: ${sanearCampoDePrompt(analysis.patternToCopy)}`,
+    `NO_TOCAR: ${sanearCampoDePrompt(analysis.doNotTouch)}`,
+    `RIESGO: ${sanearCampoDePrompt(analysis.risk)}`,
     '</analisis>',
     '<permitidos>',
     ...allowed.map((file) => `- ${file}`),

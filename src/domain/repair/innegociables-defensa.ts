@@ -4,6 +4,7 @@ import { DEFENSAS_DEL_DISCO } from './innegociables-disco'
 import { DEFENSAS_DE_LA_RED } from './innegociables-red'
 import { FRENOS_DE_GASTO } from './innegociables-gasto'
 import { DEFENSAS_DEL_GRAFO_POR_TURNO } from './innegociables-grafo'
+import { DEFENSAS_DEL_SANEADO } from './innegociables-saneado'
 /**
  * La TERCERA familia del criterio innegociable: ficheros que IMPLEMENTAN una
  * defensa, sin gobernar la autonomia ni validar una entrada. Ver
@@ -22,6 +23,7 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   ...DEFENSAS_DE_LA_RED,
   ...FRENOS_DE_GASTO,
   ...DEFENSAS_DEL_GRAFO_POR_TURNO,
+  ...DEFENSAS_DEL_SANEADO,
   // El ENTORNO de todo hijo: `build-env` recorta la sesion viva del operador
   // —agente ssh, keyring, GPG— y `git-env` hace lo propio para los cinco `git`
   // que corren en el repo auditado y ejecutan sus hooks.
@@ -36,9 +38,6 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   'src/domain/repair/allowed-files.ts',
   'src/domain/repair/path-hints.ts',
   'src/domain/repair/solo-toca-pruebas.ts',
-  // El SANEADO de texto ajeno que entra en el prompt de un agente. `tool-detail`
-  // ya estaba por `redactSecrets`; este es el mismo control para la otra puerta.
-  'src/domain/shared/sanear-para-prompt.ts',
   // Los TURNOS sobre lo que no admite dos a la vez. `run-guard` ya estaba;
   // `carril-del-merge` es quien lo toma para el arbol vivo y `loop-fix` quien lo
   // aplica al bucle autonomo. Sin ellos el guard existe y nadie lo pide.

@@ -1,9 +1,6 @@
+import { sanearCampoDePrompt } from '../shared/sanear-campo-de-prompt'
 import { CRITICO } from '../agent/critico'
 import type { HallazgoJuzgado } from '../repair/hallazgo-juzgado'
-
-/** Los campos del plan son DATO, no ordenes: se neutralizan las marcas, igual
- *  que en `omega-prompt`. El diff va sin escapar: es el objeto del ataque. */
-const safe = (text: string): string => text.replace(/</g, '(').replace(/>/g, ')').replace(/`/g, "'")
 
 /**
  * Lo que se le manda al CRITICO (ADR-096, Fase B).
@@ -26,12 +23,12 @@ export function buildCriticoPrompt(plan: HallazgoJuzgado, diffText: string): str
     CRITICO.charter ?? '',
     '',
     '<hallazgo>',
-    `titulo: ${safe(plan.target.title)}`,
-    `archivo: ${safe(plan.target.file)}:${plan.target.line ?? ''}`,
+    `titulo: ${sanearCampoDePrompt(plan.target.title)}`,
+    `archivo: ${sanearCampoDePrompt(plan.target.file)}:${plan.target.line ?? ''}`,
     '</hallazgo>',
     '<plan>',
-    `QUE_CAMBIAR: ${safe(plan.whatToChange)}`,
-    `NO_TOCAR: ${safe(plan.doNotTouch)}`,
+    `QUE_CAMBIAR: ${sanearCampoDePrompt(plan.whatToChange)}`,
+    `NO_TOCAR: ${sanearCampoDePrompt(plan.doNotTouch)}`,
     '</plan>',
     '',
     '=== EL FIX QUE TIENES QUE ATACAR ===',
