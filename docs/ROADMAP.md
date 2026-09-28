@@ -569,9 +569,25 @@ efecto en vivo — porque tres de ellos tocan código recién integrado.
   borrando del recibo la huella que un auditor necesita. Y retirarlo abría tres
   agujeros, porque tapaba por accidente tres credenciales que se reconocen por el
   sitio donde viven; ahora se cubren por diseño, conservando la línea legible.
-- **4. La nota de parada del LOOP viaja en crudo.** Mete `error.message` sin
-  aplanar ni acotar: nota no determinista, un avistamiento por reintento y sin
-  tope de 500.
+- **4. ~~La nota de parada del LOOP viaja en crudo~~** — **HECHO** `b949c34`
+  (2026-09-28). Era la única rama del sistema nervioso que metía texto libre: su
+  gemela clasifica doce líneas más abajo y las cuatro hermanas derivan todas de
+  dato clasificado. Costaba tres cosas a la vez: la nota bailaba y sembraba diez
+  avistamientos donde debía haber uno, no tenía tope, y llevaba nombres de tabla y
+  correos del cliente que el cerco no alcanza. Ahora sale de tres ejes cerrados, y
+  la privacidad es por construcción: el código solo entra si tiene forma de código
+  de sistema. El mensaje entero se queda donde el operador lo ve y no se exporta.
+
+**LOS CUATRO URGENTES DE LA AUDITORÍA: CERRADOS Y VERIFICADOS EN VIVO.** Y la
+medición corrigió el hallazgo las cuatro veces, así que ninguno se cerró con el
+arreglo que el informe proponía. El hallazgo dice dónde mirar, no qué construir.
+
+**El gate, arreglado por el mismo principio.** Al probar el determinismo con la
+suite entera aparecieron dos tests intermitentes, y medir la clase dio 44 ficheros
+que lanzan procesos reales con una sola causa: el techo por defecto no aguanta
+arrancar un proceso con 862 suites compitiendo. Se arregló la causa con una línea
+y no los casos con 41 parches, porque los parches no cubren el fichero que alguien
+escriba mañana. Cuatro pasadas de la suite completa, las cuatro estables.
 
 No son arcos nuevos del camino; son la letra pequeña que el camino dejó abierta, y
 el orden lo fija la gravedad medida, no el orden en que se encontraron. Y la

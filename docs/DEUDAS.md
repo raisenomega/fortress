@@ -926,8 +926,8 @@ del auditor de su tramo, **sin releer cada uno**. Al arreglar cualquiera de
 ellos, el primer paso es re-verificar su evidencia contra el árbol de ese
 momento: esta lista es una guía de dónde mirar, no una prueba cerrada.
 
-**AVANCE DE LOS CUATRO URGENTES DE SEGURIDAD.** Se arreglan de uno en uno con el
-método completo. **3 de 4 hechos, y la medición reordenó la gravedad cada vez:**
+**LOS CUATRO URGENTES DE SEGURIDAD: CERRADOS Y VERIFICADOS EN VIVO.** Uno a uno
+con el método completo, y **la medición corrigió el hallazgo las cuatro veces:**
 
 1. El 100/100 en minúscula (§9.2), `26f4db4` el 27-sep. Eran TRES defectos y no dos.
 2. El saneador de prompts (§9.1), `3810e5c` el 27-sep. Resultó ser el más grave de
@@ -935,9 +935,18 @@ método completo. **3 de 4 hechos, y la medición reordenó la gravedad cada vez
    que edita. El hueco eran 19 caracteres de 22, no los 5 del hallazgo.
 3. El tachado de secretos (§9.2), `4fc30c0` el 28-sep. Eran TRES piezas y no dos
    defectos opuestos: retirar el comodín del hash abría tres agujeros nuevos.
+4. La nota de parada del LOOP (§9.1), `b949c34` el 28-sep. Las clases que el
+   arreglo previsto reutilizaba dejaban 6 de 8 caídas sin clasificar: hicieron
+   falta tres ejes, no uno.
 
-**Queda uno:** la nota de parada del LOOP en crudo (§9.1). Debajo de cada entrada
-quedan sus residuos y las correcciones que su medición hizo a esta auditoría.
+Ninguno se cerró con el arreglo que el informe proponía, y esa es la lección de
+los cuatro: **el hallazgo dice dónde mirar, no qué construir.** Debajo de cada
+entrada quedan sus residuos, sus costes aceptados y lo que su medición corrigió
+de esta misma auditoría.
+
+**Y el propio gate quedó arreglado por el mismo principio** (§9.1, el último):
+dos tests intermitentes eran la punta; la clase eran 44 ficheros y una sola causa.
+Se arregló la causa, no los casos.
 
 ### 9.1 P0 — Seguridad que toca código de estos dos días
 
@@ -985,14 +994,31 @@ corrección es pequeña.
   habría escrito en el historial. El motivo se compone con `error.code` y nunca con
   el mensaje, y un mutante lo prueba. Ni esta auditoría ni la medición inicial la
   vieron.
-- **La observación de parada por error mete el mensaje crudo.** Código del arco
-  #5 sub-pieza 4, mergeado en `ff59bcd`.
-  `src/domain/loop/observacion-de-parada.ts:27-32` compone la nota con
-  `error.message`, así que la nota **baila en cada fallo** y siembra un
-  avistamiento por reintento, y no pasa por `toSelfNotes`, así que no tiene el
-  tope de 500. Su propia hermana, doce líneas más abajo, rechaza exactamente eso
-  para el standby. **Arreglo:** clasificar el error por clase cerrada, como
-  `CLASES`, y dejar el mensaje solo en el log local.
+- **~~La observación de parada por error mete el mensaje crudo.~~** — **ARREGLADO
+  Y VERIFICADO EN VIVO** `b949c34` (2026-09-28). Era la **única** rama del sistema
+  nervioso que metía texto libre: su gemela del standby clasifica doce líneas más
+  abajo, y las cuatro hermanas —fallo, IPC, render y denial— derivan todas de dato
+  clasificado. Costaba tres cosas a la vez, medidas con SQLite real: **bailaba**
+  (diez reintentos sembraban diez avistamientos donde debía haber uno, porque el
+  UNIQUE de avistamientos incluye la nota), **no tenía tope** (un mensaje de 5.000
+  caracteres se guardaba entero: el tope de 500 solo alcanza a lo que viene de un
+  modelo) y **llevaba datos del cliente**.
+  **Corrección medida a este mismo hallazgo:** el cerco SÍ tacha rutas, citas y
+  tokens; lo que deja pasar son nombres de tabla, correos y fragmentos de SQL, y
+  su propio docblock lo admite como límite honesto.
+  **Y una corrección al arreglo previsto:** reutilizar las clases de la gemela NO
+  bastaba. Están afinadas para fallos del proveedor y dejaban **6 de 8** caídas
+  reales en «sin clasificar», o sea una nota sin valor diagnóstico. La nota sale
+  ahora de TRES ejes cerrados o validados: la clase del error, el código de sistema
+  cuando lo hay y la clase transitoria cuando el mensaje la delata. Once de once
+  casos dan resultado estable. El cerco de privacidad es **por construcción**: el
+  código solo entra si tiene forma de código de sistema, así que un `pacientes.dni`
+  no pasa. El crudo sigue en `stoppedReasonDetail`, que el operador ve y no se
+  exporta.
+  **Verificado en vivo:** 10 avistamientos → 1; ninguno de los seis datos
+  sensibles llega a la nota; la nota pasa de 5.028 caracteres a 53. Las cinco ramas
+  hermanas, sin tocar (la gemela comparada byte a byte). 4 mutantes muertos, dos de
+  ellos vivos en la primera pasada y los dos tenían razón.
 - **`innegociables-red.ts` no se protege a sí misma.** *Verificado: comprobadas
   las nueve de la familia, ocho nombran su propia ruta y esta no.* Un fix
   pequeño puede vaciar `DEFENSAS_DE_LA_RED` sin tocar un fichero protegido, y el
@@ -1099,15 +1125,37 @@ corrección es pequeña.
   diario — `find -print`, `-path`, `-prune`, `-perm`, `rsync --progress` y
   `npm --prod` —. La diferencia entre un puerto y una clave es solo el espacio.
   `mysql -pclave` no se tacha, y está escrito en `secreto-por-contexto.ts`.
-- **Un test que guarda seguridad es INTERMITENTE.** *Medido el 2026-09-28 al
-  perseguir un gate rojo.* `src/infrastructure/graph/grafo-aislado-rechaza.test.ts`
-  —el que comprueba que un cliente no ve el grafo de otro— tarda 1,6 s aislado y se
-  pasa del `testTimeout` por defecto de vitest, 5.000 ms, cuando corre con las 862
-  suites en paralelo: lanza el binario real del grafo dos veces e indexa dos
-  repositorios. El repo ya tiene el patrón para esto, `}, 20_000)` seis veces en
-  `build-verify-entorno.test.ts`, y los DOS tests que lanzan ese binario no declaran
-  ninguno. Un test que guarda seguridad y falla por carga se acaba ignorando.
-  **Arreglo:** un tope explícito en los dos, una línea cada uno.
+- **~~Un test que guarda seguridad es INTERMITENTE.~~** — **RESUELTO POR LA CAUSA,
+  NO POR EL CASO** `b949c34` (2026-09-28). El hallazgo era la punta; medir la clase
+  dio el iceberg.
+  **La clase, medida:** **44 ficheros** de test lanzan procesos REALES —`git`, el
+  binario del grafo, procesos en caja—, de ellos **41 sin techo propio** y unos 170
+  bloques de prueba. El primer barrido se quedó en 22 porque buscaba la llamada
+  DENTRO del test, y los dos intermitentes conocidos lanzan a través de un arnés:
+  hubo que barrer también los siete arneses y sus importadores. Parchear los dos
+  que se veían habría dejado 39 ficheros intermitentes.
+  **La causa no es lentitud, es INANICIÓN DE TURNO.** El segundo intermitente
+  —borrado de rama con worktree, nueve procesos entre `git` síncronos, un
+  `worktree add` y un `git` asíncrono— tarda **118 ms aislado** y se pasó de 5.000
+  bajo carga: 42 veces. Un test de 118 ms no es lento; lo que no consigue es turno
+  para arrancar un proceso con 862 suites en paralelo.
+  **Y el dato que lo cierra:** el test más lento de TODA la suite mide **3.256 ms**,
+  ya al 65 % del techo por defecto. Cinco segundos estaba apretado para la suite
+  entera, no solo para los 44.
+  **El arreglo es una línea en `vitest.config.ts`,** `testTimeout` de 20 s, y no 41
+  parches: cubre los 44 de hoy y el fichero que alguien escriba mañana, que un
+  parche por fichero nunca cubriría. La aritmética del número está en su docblock:
+  el más lento real 3,3 s, la peor degradación observada unos +5 s absolutos, el
+  peor caso realista ~8,3 s, y 20 s deja 2,4 veces eso.
+  **Los dos techos por test se quedan** en `grafo-instalado` y
+  `grafo-aislado-rechaza`: allí documentan la medición donde se lee. Son la
+  explicación; la defensa es la línea global.
+  **COSTE ACEPTADO:** un test que de verdad se cuelgue tardará 20 s en fallar en vez
+  de 5. Con el más lento real en 3,3 s, esto no tapa la lentitud de nadie.
+  **Probado:** cuatro pasadas de la suite completa, las cuatro con 4.650 en verde y
+  cero fallos. Antes de la línea, tres pasadas daban un intermitente en la segunda.
+  **Coste que tuvo antes de arreglarse:** tumbó el gate en dos arcos distintos, unos
+  20 minutos de relanzar cada vez, y una vez llevó a comitear sobre rojo.
 - **El corpus que declara el repo auditado entra crudo a nueve prompts.**
   *Verificado, cadena leída línea a línea.* `corpus-config.ts:10` valida solo que
   sea una lista de cadenas; `discover-corpus.ts:61` la devuelve **sustituyendo**
