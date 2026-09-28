@@ -12,23 +12,7 @@
  */
 export type Regla = readonly [RegExp, string]
 
-/**
- * Por el NOMBRE de lo que se asigna. Llevaba `\b` delante y el `\b` no existe
- * entre dos caracteres de palabra: en `GITHUB_TOKEN` no hay frontera entre el
- * `_` y la `T`, asi que NINGUN token con prefijo se tachaba. Medido:
- * `GITHUB_TOKEN=ghp_...`, `GH_TOKEN=`, `MI_SECRET=` y `npm_config_token=`
- * pasaban enteros. La `ANTHROPIC_API_KEY` se salvaba de casualidad, por el
- * patron `sk-ant-` de abajo y no por su nombre.
- *
- * Basta con que la palabra no venga pegada a otra LETRA, que es lo que
- * distingue `_KEY=` de `monkey=`. Sin eso, la version amplia tachaba `monkey`,
- * `donkey`, `turkey` y `keyboard`: acotar de mas destroza texto legitimo, y un
- * comando tachado entero no se puede leer ni auditar.
- */
-const POR_NOMBRE: Regla = [
-  /(?<![A-Za-z])(?:api[_-]?key|key|token|secret|password|passwd|pwd|credentials?)\s*[=:]\s*\S+/gi,
-  '***'
-]
+import { REGLAS_POR_NOMBRE } from './secreto-por-nombre'
 
 /** Una clave PRIVADA en PEM (certificado y clave publica no lo son). ACOTADO y sin
  *  nada perezoso: un `[\s\S]*?` re-escanea hasta el final por cada cabecera sin pie
@@ -51,4 +35,4 @@ const POR_VALOR: readonly Regla[] = [
   [PEM, '***']
 ]
 
-export const REGLAS_DE_SECRETO: readonly Regla[] = [POR_NOMBRE, ...POR_VALOR]
+export const REGLAS_DE_SECRETO: readonly Regla[] = [...REGLAS_POR_NOMBRE, ...POR_VALOR]
