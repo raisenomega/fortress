@@ -1,3 +1,4 @@
+import { sanearCampoDePrompt } from '../shared/sanear-campo-de-prompt'
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { categoryForAgent } from '../settings/docs-first'
 import { NOTAS_COMO_CLAVE } from '../system/peticion-de-notas'
@@ -16,11 +17,6 @@ export interface OmegaPromptInput {
   readonly diffText: string
   readonly filesPost: readonly OmegaFile[]
   readonly filesPre: readonly OmegaFile[]
-}
-
-/** Los campos del analisis son dato, no ordenes: se neutralizan las marcas. */
-function safe(text: string): string {
-  return text.replace(/</g, '(').replace(/>/g, ')').replace(/`/g, "'")
 }
 
 /** El contenido de los archivos va SIN escapar: es el objeto de la revision. */
@@ -45,15 +41,15 @@ export function buildOmegaPrompt(input: OmegaPromptInput): string {
     '',
     ...(docs === '' ? [] : [docs, '']),
     '<hallazgo>',
-    `titulo: ${safe(a.target.title)}`,
-    `archivo: ${safe(a.target.file)}:${a.target.line ?? ''}`,
+    `titulo: ${sanearCampoDePrompt(a.target.title)}`,
+    `archivo: ${sanearCampoDePrompt(a.target.file)}:${a.target.line ?? ''}`,
     '</hallazgo>',
     '<analisis>',
-    `QUE_CAMBIAR: ${safe(a.whatToChange)}`,
-    `DONDE: ${safe(a.where)}`,
-    `PATRON: ${safe(a.patternToCopy)}`,
-    `NO_TOCAR: ${safe(a.doNotTouch)}`,
-    `RIESGO: ${safe(a.risk)}`,
+    `QUE_CAMBIAR: ${sanearCampoDePrompt(a.whatToChange)}`,
+    `DONDE: ${sanearCampoDePrompt(a.where)}`,
+    `PATRON: ${sanearCampoDePrompt(a.patternToCopy)}`,
+    `NO_TOCAR: ${sanearCampoDePrompt(a.doNotTouch)}`,
+    `RIESGO: ${sanearCampoDePrompt(a.risk)}`,
     '</analisis>',
     '',
     '=== DIFF DEL FIX ===',
