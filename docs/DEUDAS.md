@@ -927,26 +927,60 @@ ellos, el primer paso es re-verificar su evidencia contra el árbol de ese
 momento: esta lista es una guía de dónde mirar, no una prueba cerrada.
 
 **AVANCE DE LOS CUATRO URGENTES DE SEGURIDAD (2026-09-27).** Se arreglan de uno
-en uno con el método completo. **1 de 4 hecho:** el 100/100 en minúscula (§9.2),
-el más grave, en `26f4db4`. **Quedan tres:** el saneador de prompts con el hueco
-de `U+2028` y compañía (§9.1), `PGPASSWORD=` sin tachar (§9.2) y la nota de
+en uno con el método completo. **2 de 4 hechos:** el 100/100 en minúscula (§9.2)
+en `26f4db4`, y el saneador de prompts (§9.1) en `3810e5c`, que resultó ser el más
+grave de los dos: cerró la inyección de prompt desde el código del cliente hacia
+el agente que edita. **Quedan dos:** `PGPASSWORD=` sin tachar (§9.2) y la nota de
 parada del LOOP en crudo (§9.1). Los dos residuos medidos del primero quedan
-anotados en §9.2, debajo de su entrada.
+anotados en §9.2, debajo de su entrada; las cuatro correcciones que la medición
+del segundo hizo a esta auditoría, debajo de la suya en §9.1.
 
 ### 9.1 P0 — Seguridad que toca código de estos dos días
 
 Lo primero de la próxima sesión, porque son piezas recién mergeadas y la
 corrección es pequeña.
 
-- **El saneador de prompts se rodea con un carácter.** *Verificado, medido con la
-  función real.* `src/domain/shared/sanear-para-prompt.ts:21-25` aplana solo
-  `\r\n\t`, y la segunda sustitución exige dos blancos seguidos. Sobreviven
-  solos `U+2028` LINE SEPARATOR, `U+2029` PARAGRAPH SEPARATOR, `U+000B`, `U+000C`
-  y `U+0085`. Es el control ÚNICO de catorce llamantes, y entre ellos los tres
-  saneados del 2026-09-26: `cuales-barreras.ts`, `observacion-de-barrera.ts` y
-  `hermanos-del-hallazgo-texto.ts`. El docblock declara que su trabajo es que un
-  salto de línea no abra línea nueva dentro del prompt. **Arreglo:**
-  `/[\r\n\t\v\f\u0085\u2028\u2029]+/g` y el caso `U+2028` en el test.
+- **~~El saneador de prompts se rodea con un carácter.~~** — **ARREGLADO Y
+  VERIFICADO EN VIVO** `3810e5c` (2026-09-27). **El hueco era MUCHO mayor que los
+  cinco caracteres de este hallazgo: sobrevivían 19 de 22**, medidos con la
+  función compilada, y en DOS clases. Los que JavaScript sí considera blancos y no
+  estaban en la primera sustitución (VT, FF, `U+2028`, `U+2029`, NBSP, Ogham,
+  `U+202F`, `U+3000`, BOM) sobrevivían SOLOS y morían en pareja, porque la segunda
+  exigía dos blancos seguidos. Los que JavaScript **nunca** considera blancos (NEL,
+  espacio de ancho cero, los cuatro controles de dirección, nulo, SOH, ESC, DEL)
+  sobrevivían siempre.
+  **Y la medición destapó un VECTOR DE INYECCIÓN de punta a punta, sin un solo
+  carácter exótico.** Un título de hallazgo con un salto de línea NORMAL pasa el
+  parser del informe del escáner y `parse-analysis.ts:44`, que solo hacen `trim`, y
+  llega al prompt del GENERADOR, el único agente con permiso de escritura, donde
+  escribe `NO_TOCAR: nada` y `PERMITIDOS: todo el repo` como líneas propias; el
+  `NO_TOCAR` real aparecía después, contradicho. Es código del cliente forjando las
+  instrucciones del agente que edita.
+  **Arreglo aplicado, tres commits:** una sola clase de caracteres
+  (`/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\p{Zs}]+/gu`) reemplaza las dos sustituciones y
+  colapsa la RACHA, así que no depende de cuántos vengan seguidos; el control de
+  seguridad (`aplanarParaPrompt`) se separa del tope; y los cuatro neutralizadores
+  duplicados pasan al control compartido `sanearCampoDePrompt`.
+  **Verificado en vivo:** 0 de 22 sobreviven, el título envenenado llega en UNA
+  línea y ni `NO_TOCAR` ni `PERMITIDOS` se forjan. Diez mutantes muertos, gate 6/6
+  por commit y sobre main, las cuatro pruebas sin cambio.
+- **CUATRO cosas que la medición del saneador CORRIGIÓ de esta auditoría.**
+  *Medidas el 2026-09-27.* (1) Son **cuatro** neutralizadores duplicados, no tres.
+  (2) El del crítico vive en `src/domain/chat/critico-prompt.ts`, no en `repair/`.
+  (3) El cuarto, el juez del plan, **no debe aplanarse y por eso no se aplanó**: lo
+  que recibe es la prosa que el productor escribió, multilínea legítima y OBJETO
+  del juicio de OMEGA, igual que el diff. Solo le toca `neutralizarMarcas`. La
+  regla que queda: aplanar donde el texto es un dato de una línea, conservar donde
+  es el objeto del juicio. (4) El **tope de 200 caracteres habría mutilado análisis
+  legítimos**: `repair_proposals.analysis_reason` llega a **1526** caracteres en la
+  base viva, con media de 161. Por eso el control de campo va sin acotar.
+- **FUGA SECUNDARIA cazada por un mutante, y cerrada en el mismo arco.** *Medida
+  con un lanzamiento real.* El `message` del error de Node cuando un argumento
+  lleva un byte nulo trae el argumento ENTERO —«Received '…'»— y ese argumento es
+  el prompt, con las citas del repo auditado dentro. Ponerlo en la respuesta lo
+  habría escrito en el historial. El motivo se compone con `error.code` y nunca con
+  el mensaje, y un mutante lo prueba. Ni esta auditoría ni la medición inicial la
+  vieron.
 - **La observación de parada por error mete el mensaje crudo.** Código del arco
   #5 sub-pieza 4, mergeado en `ff59bcd`.
   `src/domain/loop/observacion-de-parada.ts:27-32` compone la nota con

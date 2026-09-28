@@ -549,9 +549,17 @@ efecto en vivo — porque tres de ellos tocan código recién integrado.
   parser devolvía lista vacía en vez de error, y el cierre escribía el score en el
   tablero sea cual fuera el motivo. Se arregló entero, más el rescate de las notas
   del sistema nervioso, que antes morían con el informe.
-- **2. El saneador de prompts.** `sanearParaPrompt` deja pasar `U+2028`, `U+2029`
-  y tres controles más cuando van solos. Es el control único de catorce llamantes,
-  entre ellos los tres saneados de esta misma semana.
+- **2. ~~El saneador de prompts~~** — **HECHO** `3810e5c` (2026-09-27), y resultó
+  ser **más grave que el primero**. El hueco no eran cinco caracteres sino
+  diecinueve de veintidós, y la medición destapó un vector de inyección completo:
+  un salto de línea normal en el título de un hallazgo del repo auditado forjaba
+  las instrucciones del prompt del generador, el único agente con permiso de
+  escritura, escribiendo un `NO_TOCAR` y un `PERMITIDOS` falsos que contradecían a
+  los reales. Se cerró en la única barrera compartida, que cubre los catorce
+  sitios de golpe, con una excepción medida: el juez del plan conserva sus líneas,
+  porque lo que juzga es la prosa del productor y esa es el objeto del juicio, no
+  un campo. De paso se cerraron las cuatro copias del neutralizador de marcas y
+  una fuga de la copia del grafo cuando el proceso no llegaba a lanzarse.
 - **3. `PGPASSWORD=` no se tacha, y un SHA de git sí.** El recibo de herramientas
   es el único campo que se persiste sin redacción, y la regla de la palabra clave
   nunca se midió con esta clase de nombre.
@@ -560,7 +568,10 @@ efecto en vivo — porque tres de ellos tocan código recién integrado.
   tope de 500.
 
 No son arcos nuevos del camino; son la letra pequeña que el camino dejó abierta, y
-el orden lo fija la gravedad medida, no el orden en que se encontraron.
+el orden lo fija la gravedad medida, no el orden en que se encontraron. Y la
+gravedad se ha reordenado dos veces al medir: el primero eran tres defectos y no
+dos, y el segundo resultó ser el peor de los cuatro. Medir antes de construir no
+solo confirma el hallazgo; a menudo lo corrige.
 
 ### Lo que la investigación añade como profundidad — no son arcos nuevos
 
