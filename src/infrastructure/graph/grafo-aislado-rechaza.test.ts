@@ -6,6 +6,19 @@ import { graphSlug } from '@domain/graph/graph-slug'
 import { prepararGrafoDelTurno } from './grafo-del-turno'
 import { cliAislado, esLaFijada, repoIndexado } from './grafo-rechaza-fixture'
 
+/**
+ * VEINTE SEGUNDOS y no los 5.000 ms por defecto de vitest, que es el patron que
+ * el repo ya usa seis veces en `build-verify-entorno.test.ts` y por la misma
+ * razon: estos tests lanzan el BINARIO real del grafo e indexan repositorios de
+ * verdad. Medido el 2026-09-28: aislado tarda 1,7 s, pero con las 862 suites en
+ * paralelo se pasaba del tope y tumbo el gate en dos arcos distintos —una de las
+ * veces llevo a comitear sobre rojo—. Un test que guarda seguridad y falla por
+ * carga se acaba ignorando, que es peor que no tenerlo.
+ *
+ * No cambia NADA de lo que el test prueba: solo deja de depender de la maquina.
+ */
+const TECHO = 20_000
+
 const raiz = mkdtempSync(join(tmpdir(), 'grafo-rechaza-'))
 const cli = cliAislado(raiz)
 afterAll(() => rmSync(raiz, { recursive: true, force: true }))
@@ -30,7 +43,7 @@ describe.skipIf(!esLaFijada)(
       } finally {
         grafo.liberar()
       }
-    })
+    }, TECHO)
 
     it('un proyecto sin .db deja el directorio vacio, y el servidor lo dice: nada indexado, no una lista vacia', async () => {
       const grafo = await prepararGrafoDelTurno(
@@ -45,6 +58,6 @@ describe.skipIf(!esLaFijada)(
       } finally {
         grafo.liberar()
       }
-    })
+    }, TECHO)
   }
 )
