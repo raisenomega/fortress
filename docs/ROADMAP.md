@@ -611,6 +611,58 @@ lo corrige, y dos veces ha cambiado qué se construía.
   re-correr una batería fija antes de dar una observación por atendida, con un
   check determinista decidiendo — nunca un modelo juzgando a otro en ese banco.
 
+## Balance del 27 y 28 de septiembre: qué está en producción y qué sigue
+
+**EN PRODUCCIÓN.** Binario `5b8daf3f` instalado el 28-sep 03:52, verificado sin
+deriva en los tres eslabones: el binario instalado es el AppImage construido, su
+asar es el de la construcción, y su bundle es idéntico al código de `main@32294b1`.
+Jojo confirmó el arranque: grafo alineado y los scores diciendo la verdad —un
+proyecto con un CRITICAL vivo marca 0, no 100—.
+
+Lo que ese binario lleva dentro, verificado por identificadores:
+
+- **Los seis arcos del camino a grado bancario**, completos: la caja del CLI, el
+  prompt que refleja la verdad, el contrato del hallazgo, el grafo más allá de
+  JavaScript, el aislamiento de clase A y toda la aplicación dentro del tribunal.
+- **La decisión D rehecha** sobre el main reconstruido y no mergeada en seco: las
+  defensas de la rama vieja, el recibo del bloqueo con sus saneados, y diez
+  hallazgos cerrados en la base viva con verificación fila a fila.
+- **Los cuatro urgentes de la auditoría**, cerrados y verificados en vivo.
+- **El gate determinista**, arreglado por la causa.
+- **Once decisiones firmadas**: la enmienda de ADR-095 y de la 098 a la 105.
+
+**LO QUE FALTA, por orden de lo que más pesa.**
+
+1. **Los tramos 2 a 7 de la auditoría** (DEUDAS §9.8). Lo hecho cubre `src/domain`
+   y un barrido mecánico; falta la infraestructura del motor y del escáner, el
+   resto de infraestructura, la aplicación, la presentación —430 ficheros con 74
+   tests— y `scripts/`, que son 106 ficheros sin tests que corren sobre la base
+   viva. Ese último es el que más asusta de los seis.
+2. **Los P0 de seguridad de los 118 que no eran los cuatro urgentes** (§9.2 y
+   §9.3): el corpus que declara el repo auditado entra crudo a nueve prompts, la
+   cota de la caja cuyo efecto real con `bwrap` sigue sin medir, y el analista que
+   pide el área en texto libre y colapsa sus notas en cinco filas.
+3. **El residuo del primer urgente** (§9.2): un informe PARCIALMENTE ilegible pasa
+   en silencio, y con una entrada buena de diez se pierden nueve sin que nada las
+   cuente.
+4. **Confirmar el determinismo** en la próxima sesión (§9.1). El techo global ya
+   cubre los 44 ficheros, pero el segundo intermitente solo apareció una vez de
+   tres, así que la estabilidad se afirma con más superficie, no con cuatro
+   pasadas.
+5. **Los cuatro de los trece de la decisión D** que esperan (§6.11), el
+   SECURITY-MODEL sin una palabra sobre la caja (§8.2), el arco de privacidad del
+   fichero de auto-mejora, los seis funcionales de la auditoría (§9.4) y las 35
+   erratas de documento (§9.5).
+
+**EL PRÓXIMO PASO RECOMENDADO.** Los cuatro urgentes ya están, así que la elección
+es entre seguir por el resto de P0 de seguridad —el corpus crudo y la cota de la
+caja, que son pequeños y tocan la superficie que da a los clientes— o abrir el
+barrido de los tramos 2 a 7, que es más largo y descubre más. Si se elige lo
+segundo, el tramo de `scripts/` primero.
+
+**AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto, o
+recomprar antes los cinco pausados.
+
 ## Cómo se firma cada dirección
 
 Ninguna de estas áreas se ejecuta por figurar aquí. Cada una se firma

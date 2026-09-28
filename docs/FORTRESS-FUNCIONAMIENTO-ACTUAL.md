@@ -1,7 +1,35 @@
-# FORTRESS — funcionamiento real a `main@052638b`
+# FORTRESS — funcionamiento real a `main@32294b1`
 
-**Fecha del recorrido:** 2026-09-07, **ampliado el 2026-09-19 y el 2026-09-24** ·
-**Commit de referencia:** `052638b` (2026-09-24)
+**Fecha del recorrido:** 2026-09-07, **ampliado el 2026-09-19, el 2026-09-24 y el
+2026-09-28** · **Commit de referencia:** `32294b1` (2026-09-28) · **En el binario
+instalado:** sí, `5b8daf3f` verificado sin deriva hasta el código.
+
+> ### ⚠ ACTUALIZACIÓN — 2026-09-28: el camino completo y los cuatro urgentes
+>
+> **Lo que cambia respecto a `052638b`,** y manda sobre el cuerpo de abajo donde
+> se contradigan:
+>
+> **El camino a grado bancario está COMPLETO** (seis arcos) y la decisión D quedó
+> rehecha sobre el main reconstruido, no mergeada en seco. Ver el ROADMAP.
+>
+> **Una auditoría end-to-end de `src/domain`** (446 ficheros, 18.246 líneas) dejó
+> 118 hallazgos en DEUDAS §9. De ellos, **los cuatro urgentes de seguridad están
+> cerrados y verificados en vivo**, y cada uno resultó ser mayor que el hallazgo:
+>
+> - El parser del escaneo ya no devuelve «proyecto limpio» cuando no entendió el
+>   informe, y la nota del cierre no puntúa un escaneo que no vio nada.
+> - El saneador de prompts aplana TODO separador y control Unicode, no solo el
+>   retorno: se cerró una inyección desde el código del cliente hacia el agente
+>   que edita, y los cuatro neutralizadores duplicados pasaron al control común.
+> - El tachado de secretos caza el prefijo pegado (`PGPASSWORD=`) y ya no borra la
+>   huella forense del recibo: el comodín del hash se retiró y lo que cubría por
+>   accidente se cubre por diseño.
+> - La nota de parada del loop sale de la clase del fallo, nunca del mensaje: ni
+>   baila, ni crece sin tope, ni lleva datos del cliente.
+>
+> **Y el propio gate volvió a ser determinista:** 44 ficheros de test lanzan
+> procesos reales y 41 corrían sin techo propio; se arregló la causa con un techo
+> global, no los casos con 41 parches.
 
 > ### ⚠ ACTUALIZACIÓN — 2026-09-24: cinco arcos que el cuerpo de abajo NO conoce
 >

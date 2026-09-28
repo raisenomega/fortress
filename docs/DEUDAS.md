@@ -1,9 +1,36 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-21 · **Commit de referencia:** `cd6a510`
+**Fecha:** 2026-09-28 · **Commit de referencia:** `32294b1`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
+
+> ### POR DÓNDE SEGUIR (2026-09-28)
+>
+> Los cuatro urgentes de la auditoría están cerrados y verificados en vivo, y el
+> gate volvió a ser determinista. Lo que queda, por lo que más pesa:
+>
+> | # | Qué | Dónde |
+> |---|---|---|
+> | 1 | Los tramos 2 a 7 de la auditoría, sin empezar | §9.8 |
+> | 2 | Los P0 de seguridad que no eran los cuatro urgentes | §9.2, §9.3 |
+> | 3 | El residuo del primero: informe PARCIALMENTE ilegible | §9.2 |
+> | 4 | Confirmar el determinismo con más superficie | §9.1 |
+> | 5 | Los cuatro de los trece de la decisión D | §6.11 |
+> | 6 | SECURITY-MODEL sin una palabra sobre la caja | §8.2 |
+> | 7 | Los seis funcionales de la auditoría | §9.4 |
+> | 8 | Las 35 erratas de documento | §9.5 |
+>
+> De los seis tramos que faltan, **`scripts/` es el que más pesa**: 106 ficheros
+> sin un solo test, y corren sobre la base viva.
+>
+> **La lección de los cuatro urgentes, que vale para lo que queda:** ninguno se
+> cerró con el arreglo que el informe proponía. En los cuatro la medición corrigió
+> el hallazgo, y dos veces cambió qué se construía. El hallazgo dice dónde mirar,
+> no qué construir.
+>
+> **AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto,
+> o recomprar antes los cinco pausados.
 
 > **Regla de este documento.** El tablero de la app acumula hallazgos vivos de
 > TODOS los escaneos; la fila de `scans` dice cuántos vio ESE escaneo. Leer la
