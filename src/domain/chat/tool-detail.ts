@@ -1,3 +1,5 @@
+import { REGLAS_DE_SECRETO } from './reglas-de-secreto'
+
 /**
  * El objetivo de una herramienta para la linea EN VIVO: archivo, patron o
  * comando. Es EFIMERO: el acumulador lo emite por onChunk pero NO lo persiste,
@@ -14,47 +16,14 @@ export interface ToolInput {
 }
 
 /**
- * Por el NOMBRE de lo que se asigna. Llevaba `\b` delante y el `\b` no existe
- * entre dos caracteres de palabra: en `GITHUB_TOKEN` no hay frontera entre el
- * `_` y la `T`, asi que NINGUN token con prefijo se tachaba. Medido:
- * `GITHUB_TOKEN=ghp_...`, `GH_TOKEN=`, `MI_SECRET=` y `npm_config_token=`
- * pasaban enteros. La `ANTHROPIC_API_KEY` se salvaba de casualidad, por el
- * patron `sk-ant-` de abajo y no por su nombre.
+ * Tacha lo que parezca secreto antes de mostrarlo o escribirlo.
  *
- * Ahora basta con que la palabra no venga pegada a otra LETRA, que es lo que
- * distingue `_KEY=` de `monkey=`. Sin eso, la version amplia tachaba `monkey`,
- * `donkey`, `turkey` y `keyboard`: acotar de mas destroza texto legitimo, y un
- * comando tachado entero no se puede leer ni auditar.
+ * Cada regla trae SU reemplazo (ver `reglas-de-secreto`): unas tachan la
+ * coincidencia entera y otras conservan un prefijo para que la linea siga siendo
+ * legible, y no se puede auditar lo que no se ve.
  */
-const POR_NOMBRE =
-  /(?<![A-Za-z])(?:api[_-]?key|key|token|secret|password|passwd|pwd|credentials?)\s*[=:]\s*\S+/gi
-
-/** Una clave PRIVADA en PEM (certificado y clave publica no lo son). ACOTADO y sin
- *  nada perezoso: un `[\s\S]*?` re-escanea hasta el final por cada cabecera sin pie
- *  —cuadratico— y el texto es de un repo auditado. El pie es opcional: log cortado. */
-// prettier-ignore
-const PEM = /-----BEGIN [A-Z ]{0,30}PRIVATE KEY-----\s{0,4}(?:[\w-]{1,20}: [^\n]{0,90}\n){0,4}\s{0,4}(?:[A-Za-z0-9+/=]{20,120}\s{0,4}){0,400}(?:(?:[A-Za-z0-9+/=]{1,19}\s{0,4})?-----END [A-Z ]{0,30}PRIVATE KEY-----)?/g
-
-/** Por la FORMA del valor, para los que se reconocen sin ver su nombre: viajan
- *  sueltos en una URL, en un log o en la salida de un agente. */
-const POR_VALOR: readonly RegExp[] = [
-  /sk-ant-[\w-]{6,}/gi,
-  /\bgh[pousr]_[A-Za-z0-9]{16,}/g,
-  /\bgithub_pat_[A-Za-z0-9_]{20,}/g,
-  /Bearer\s+\S+/gi,
-  /\b[0-9a-f]{32,}\b/gi,
-  /\bA[KS]IA[0-9A-Z]{16}\b/g,
-  /\bxox[abprs]-[A-Za-z0-9-]{10,}/g,
-  // Los TRES segmentos: con uno o dos se comeria cualquier base64 que empiece igual.
-  /\beyJ[\w-]{8,}\.eyJ[\w-]{8,}\.[\w-]{8,}/g,
-  PEM
-]
-
-const SECRET: readonly RegExp[] = [POR_NOMBRE, ...POR_VALOR]
-
-/** Tacha lo que parezca secreto antes de mostrar un comando en vivo. */
 export function redactSecrets(text: string): string {
-  return SECRET.reduce((acc, re) => acc.replace(re, '***'), text)
+  return REGLAS_DE_SECRETO.reduce((acc, [re, rep]) => acc.replace(re, rep), text)
 }
 
 const MAX = 120
