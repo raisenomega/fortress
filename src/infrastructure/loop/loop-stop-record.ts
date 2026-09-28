@@ -3,6 +3,7 @@ import { spentTodayByProject } from '@application/settings/read-budget'
 import type { LoopStopReason } from '@domain/loop/loop-decision'
 import { detalleDeParada, type StopFacts } from '@domain/loop/stop-detail'
 import type { LoopBudget } from '@domain/settings/loop-budget'
+import { claseDelFallo } from '@domain/loop/clase-del-fallo'
 import { LoopCancelled } from './loop-standby'
 
 /** Lo que se guarda de una parada. Ausente mientras la sesion sigue viva. */
@@ -10,6 +11,13 @@ export interface Parada {
   readonly stoppedReason: LoopStopReason
   readonly stoppedReasonDetail?: string
   readonly stoppedAt: string
+  /**
+   * De QUE se rompio, en vocabulario cerrado. Solo para la OBSERVACION: el
+   * `save` de la sesion mapea sus columnas por nombre y esta no es una, asi que
+   * viaja en memoria y no se persiste. El crudo si se persiste, en
+   * `stoppedReasonDetail`, que el operador ve y NO se exporta.
+   */
+  readonly claseDelFallo?: string
 }
 
 const con = (reason: LoopStopReason, detalle: string | null): Parada => ({
@@ -49,9 +57,11 @@ export function paradaLimpia(reason: LoopStopReason, hechos: StopFacts): Parada 
  * sesion quedaba inactiva sin decir por que — indistinguible de un final normal,
  * que es exactamente lo que hay que poder distinguir. Cancelar es una parada
  * limpia y pedida; cualquier otra excepcion es un error, y su mensaje es el
- * detalle mas util que existe de ella.
+ * detalle mas util que existe de ella PARA EL OPERADOR. Para la observacion va la
+ * clase: ver `claseDelFallo`.
  */
 export function paradaPorFallo(error: unknown): Parada {
   if (error instanceof LoopCancelled) return con('detenido', null)
-  return con('error', error instanceof Error ? error.message : String(error))
+  const crudo = error instanceof Error ? error.message : String(error)
+  return { ...con('error', crudo), claseDelFallo: claseDelFallo(error) }
 }

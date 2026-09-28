@@ -45,3 +45,24 @@ describe('parada por excepcion: cancelar no es lo mismo que romperse', () => {
     })
   })
 })
+
+describe('la parada por fallo separa lo que ve el operador de lo que se exporta', () => {
+  it('el CRUDO se queda en el registro local, y la CLASE va aparte', () => {
+    // Las dos mitades del arreglo del 2026-09-28: el operador sigue viendo el
+    // mensaje entero en la sesion, que NO se exporta; la observacion, que si se
+    // exporta, se queda con la clase.
+    const error = Object.assign(new TypeError('no such column "pacientes.dni"'), { name: 'TypeError' }) // prettier-ignore
+
+    const parada = paradaPorFallo(error)
+
+    expect(parada.stoppedReasonDetail).toBe('no such column "pacientes.dni"')
+    expect(parada.claseDelFallo).toBe('TypeError')
+  })
+
+  it('una cadena tirada tambien deja constancia, con el centinela', () => {
+    const parada = paradaPorFallo('algo se rompio')
+
+    expect(parada.stoppedReasonDetail).toBe('algo se rompio')
+    expect(parada.claseDelFallo).toBe('desconocido')
+  })
+})

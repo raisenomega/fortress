@@ -7,10 +7,15 @@ import type { LoopStopReason } from './loop-decision'
  *
  * SALE DEL DATO, no de la prosa. El motivo es un vocabulario cerrado y la cifra
  * ya se compone en `detalleDeParada`; nadie le pregunta al modelo. Un TOPE es
- * FORTRESS topandose con su propio techo: `limitacion`. Romperse es un `bug`,
- * y el mensaje de la excepcion es su detalle mas util (el cerco de `add` redacta
- * lo que traiga del cliente). Parar a mano y terminar resuelto no son limites:
- * no hay nada que observar, y observarlos inflaria el backlog con exitos.
+ * FORTRESS topandose con su propio techo: `limitacion`. Romperse es un `bug`.
+ * Parar a mano y terminar resuelto no son limites: no hay nada que observar, y
+ * observarlos inflaria el backlog con exitos.
+ *
+ * La rama del ERROR llevaba el `message` CRUDO, y era la unica del sistema
+ * nervioso que lo hacia: bailaba en cada reintento, no tenia tope y colaba datos
+ * del cliente que el cerco no alcanza. Ahora recibe la CLASE ya derivada
+ * (`claseDelFallo`) y el mensaje NO llega hasta aqui — ni por descuido, porque el
+ * parametro del detalle no se lee en esa rama.
  */
 const LIMITES: Partial<Record<LoopStopReason, string>> = {
   'tope-gasto': 'tope de gasto',
@@ -22,12 +27,13 @@ const LIMITES: Partial<Record<LoopStopReason, string>> = {
 
 export function observacionDeParada(
   reason: LoopStopReason,
-  detalle: string | null
+  detalle: string | null,
+  clase: string | null
 ): SelfNoteDraft | null {
   if (reason === 'error') {
-    const note = detalle
-      ? `El loop autonomo se rompio: ${detalle}`
-      : 'El loop autonomo se rompio sin mensaje'
+    const note = clase
+      ? `El loop autonomo se rompio: ${clase}`
+      : 'El loop autonomo se rompio sin clase reconocible'
     return { kind: 'bug', area: 'parada-del-loop', note }
   }
   const limite = LIMITES[reason]
