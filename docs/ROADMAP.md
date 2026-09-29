@@ -631,6 +631,14 @@ Lo que ese binario lleva dentro, verificado por identificadores:
 - **El gate determinista**, arreglado por la causa.
 - **Once decisiones firmadas**: la enmienda de ADR-095 y de la 098 a la 105.
 
+**EN MAIN Y NO EN EL BINARIO.** Dos arcos entraron DESPUÉS de ese rebuild, así que
+están en `main` y no en producción: la correa que el motor usó, que el revisor ya
+lee del libro de eventos (`44a7818`), y **el corpus crudo del repo auditado hacia
+los prompts** (`3c8a77d`, 29-sep), con una lección que se repite: el vector era
+solo la vía DECLARADA en `.fortress/config` —la descubierta es segura por
+construcción—, y medir antes de construir demostró que sanear no rompía ninguno de
+los 24 corpus reales. El rebuild queda pendiente, con la app cerrada.
+
 **LO QUE FALTA, por orden de lo que más pesa.**
 
 1. **Los tramos 2 a 7 de la auditoría** (DEUDAS §9.8). Lo hecho cubre `src/domain`
@@ -639,9 +647,14 @@ Lo que ese binario lleva dentro, verificado por identificadores:
    tests— y `scripts/`, que son 106 ficheros sin tests que corren sobre la base
    viva. Ese último es el que más asusta de los seis.
 2. **Los P0 de seguridad de los 118 que no eran los cuatro urgentes** (§9.2 y
-   §9.3): el corpus que declara el repo auditado entra crudo a nueve prompts, la
-   cota de la caja cuyo efecto real con `bwrap` sigue sin medir, y el analista que
-   pide el área en texto libre y colapsa sus notas en cinco filas.
+   §9.3). **El corpus crudo ya está cerrado** (`3c8a77d`, 29-sep): se sanea al
+   emitirlo en `docs-first-compose.ts:59`, un punto que cubre los OCHO
+   constructores —eran ocho y no nueve—, y de paso se tapó un residuo que salió
+   midiendo: el corpus heredaba categorías de `Object.prototype`, así que una
+   carpeta `docs/toString/` del repo auditado se citaba al agente como doctrina
+   firmada. Quedan **dos**: la cota de la caja, cuyo efecto real con `bwrap` sigue
+   sin medir, y el analista que pide el área en texto libre y colapsa sus notas en
+   cinco filas.
 3. **El residuo del primer urgente** (§9.2): un informe PARCIALMENTE ilegible pasa
    en silencio, y con una entrada buena de diez se pierden nueve sin que nada las
    cuente.
@@ -654,11 +667,11 @@ Lo que ese binario lleva dentro, verificado por identificadores:
    fichero de auto-mejora, los seis funcionales de la auditoría (§9.4) y las 35
    erratas de documento (§9.5).
 
-**EL PRÓXIMO PASO RECOMENDADO.** Los cuatro urgentes ya están, así que la elección
-es entre seguir por el resto de P0 de seguridad —el corpus crudo y la cota de la
-caja, que son pequeños y tocan la superficie que da a los clientes— o abrir el
-barrido de los tramos 2 a 7, que es más largo y descubre más. Si se elige lo
-segundo, el tramo de `scripts/` primero.
+**EL PRÓXIMO PASO RECOMENDADO.** Los cuatro urgentes y el corpus crudo ya están,
+así que la elección es entre cerrar los DOS P0 de seguridad que quedan —la cota de
+la caja, cuyo efecto con `bwrap` sigue sin medir, y el analista que pide el área en
+texto libre— o abrir el barrido de los tramos 2 a 7, que es más largo y descubre
+más. Si se elige lo segundo, el tramo de `scripts/` primero.
 
 **AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto, o
 recomprar antes los cinco pausados.

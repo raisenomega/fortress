@@ -1,19 +1,20 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-28 · **Commit de referencia:** `32294b1`
+**Fecha:** 2026-09-29 · **Commit de referencia:** `3c8a77d`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
 
-> ### POR DÓNDE SEGUIR (2026-09-28)
+> ### POR DÓNDE SEGUIR (2026-09-29)
 >
-> Los cuatro urgentes de la auditoría están cerrados y verificados en vivo, y el
-> gate volvió a ser determinista. Lo que queda, por lo que más pesa:
+> Los cuatro urgentes de la auditoría están cerrados y verificados en vivo, el
+> gate volvió a ser determinista, y el corpus crudo hacia los prompts también
+> está cerrado. Lo que queda, por lo que más pesa:
 >
 > | # | Qué | Dónde |
 > |---|---|---|
 > | 1 | Los tramos 2 a 7 de la auditoría, sin empezar | §9.8 |
-> | 2 | Los P0 de seguridad que no eran los cuatro urgentes | §9.2, §9.3 |
+> | 2 | Los DOS P0 de seguridad que quedan: la cota de la caja (efecto en `bwrap` sin medir) y el analista que pide el área en texto libre | §9.3, §9.2 |
 > | 3 | El residuo del primero: informe PARCIALMENTE ilegible | §9.2 |
 > | 4 | Confirmar el determinismo con más superficie | §9.1 |
 > | 5 | Los cuatro de los trece de la decisión D | §6.11 |
@@ -1245,23 +1246,58 @@ corrección es pequeña.
   cero fallos. Antes de la línea, tres pasadas daban un intermitente en la segunda.
   **Coste que tuvo antes de arreglarse:** tumbó el gate en dos arcos distintos, unos
   20 minutos de relanzar cada vez, y una vez llevó a comitear sobre rojo.
-- **El corpus que declara el repo auditado entra crudo a nueve prompts.**
-  *Verificado, cadena leída línea a línea.* `corpus-config.ts:10` valida solo que
-  sea una lista de cadenas; `discover-corpus.ts:61` la devuelve **sustituyendo**
-  al descubrimiento, sin comprobar que los ficheros existan;
-  `docs-first-compose.ts:65` las une con `, ` en el bloque DOCS FIRST, y lo
-  incluyen nueve constructores de prompt, entre ellos el del generador, el único
-  agente con permiso de escritura, y el de OMEGA, que juzga si un fix es seguro.
-  Ni saneado, ni contención de ruta, ni tope de cuenta. El hermano de su mismo
-  arco hace lo contrario y lo dice: `barreras-declaradas.ts:48-49`. **Arreglo:**
-  `sanearParaPrompt` por ruta, rechazar absolutas y con `..`, y acotar la cuenta.
-- **Tres prompts meten texto ajeno sin aplanar.** *Verificado: cero llamadas al
-  saneador compartido en los tres.* `generator-prompt.ts`, `omega-prompt.ts` y
-  `critico-prompt.ts` tienen cada uno su propio `safe()`, copia byte a byte, que
-  cambia `<`, `>` y el acento grave y **no toca los saltos de línea**. Su hermano
-  `plan-prompt.ts:23-26` documenta que hacen falta los DOS controles. El texto
-  que pasa por ahí lo redacta un modelo que acaba de leer el repo auditado.
-  **Arreglo:** un solo saneador compartido, y los dos tests que faltan.
+- **~~El corpus que declara el repo auditado entra crudo a nueve prompts.~~** —
+  **ARREGLADO Y VERIFICADO EN VIVO** `3c8a77d` (2026-09-29). **Eran OCHO
+  constructores y no nueve**: el noveno, `plantilla-ausente.ts:10`, solo nombra
+  `buildDocsFirst` en un docblock. Y los ocho pasan por un ÚNICO cuello, así que
+  el arreglo es UN punto: `docs-first-compose.ts:59` sanea cada entrada AL
+  EMITIRLA, con el `sanearCampoDePrompt` que ya existía, DESPUÉS del filtro por
+  categoría para que la categoría se siga decidiendo con el nombre real. En la
+  frontera del prompt y no en el dato: las rutas se guardan crudas y **nunca se
+  resuelven en disco** —el único uso es esa línea—, así que sanear no puede
+  romper ninguna lectura porque no hay lectura.
+  **La medición corrigió el hallazgo en lo que más importa: el corpus tiene DOS
+  orígenes con riesgo opuesto.** El DESCUBIERTO construye cada ruta con
+  constantes nuestras —búsqueda de nombre EXACTO contra 12 documentos y 4
+  carpetas—, así que no es vector. El DECLARADO en `.fortress/config` admite
+  cualquier cadena y SUSTITUYE al descubrimiento entero: ese es el vector, y es
+  el mismo fichero cuya huella ADR-102 §4 ya vigila para pausar el motor.
+  **Era PEOR que el título del saneador:** al corpus no se le aplicaba NINGUNO de
+  los dos controles, así que emitía `<` y `>` de verdad y falsificaba un BLOQUE
+  entero y no una línea, y su sitio es la última palabra que el generador lee
+  antes de las Reglas —medido: un `<permitidos>` forjado que se concedía el
+  `NO_TOCAR` real y `.fortress/`, la persistencia del propio ataque—.
+  **Pero PREVENTIVO, no daño en curso:** ninguno de los 8 proyectos declara
+  corpus (dos tienen `.fortress/config` sin la clave, seis no tienen fichero).
+  **El cuidado de medir ANTES de construir pagó:** los 24 corpus reales de los 8
+  proyectos salen con sus rutas LITERALES, **0 alteradas**, y no hay riesgo
+  multilínea porque la línea del corpus es de una sola línea por construcción.
+  **Verificado en vivo con los módulos reales:** la línea del corpus envenenado
+  sale con 0 saltos, 0 `<`, 0 `>` y 0 acentos graves; el generador queda con 1
+  `<permitidos>` y 1 `</permitidos>`, los de verdad, y su prompt crece 2 líneas y
+  no las 5 del payload; OMEGA queda con 1 `<hallazgo>`, 1 `<analisis>` y 1
+  `VERDICT:{`, los de la plantilla. Ocho mutantes muertos, gate 6/6 sobre main y
+  las cuatro pruebas sin cambio.
+- **~~RESIDUO DEL MISMO ARCO: el corpus heredaba doctrina de
+  `Object.prototype`.~~** — **ARREGLADO** `2482a25` (2026-09-29). No estaba en el
+  informe: salió al medir. `CATEGORY[name] ?? null` sobre un objeto literal
+  devuelve lo HEREDADO, que no es nulo. Medido en un repo de verdad: una carpeta
+  `docs/toString/` del proyecto auditado se citaba al agente como doctrina
+  FIRMADA del proyecto, y un `docs/constructor` se descubría con una FUNCIÓN por
+  categoría. No es inyección —los nombres están acotados al prototipo— pero es la
+  misma afirmación falsa que el corpus existe para quitar, colada por un agujero
+  del lenguaje en vez de por un nombre mal elegido. `Object.hasOwn` en las DOS
+  tablas, que es el patrón que la casa ya usaba en `registros-de-paquetes.ts:36` y
+  `defectos-de-auditoria.ts:41`: las del corpus eran las que no lo tenían. Un
+  mutante con el guard SOLO en los documentos cae, y era el que importaba: el daño
+  medido venía de la tabla de CARPETAS, no de la de documentos.
+- **~~Tres prompts meten texto ajeno sin aplanar.~~** — **YA ESTABA RESUELTA**
+  antes de que esta lista se escribiera, y la entrada estaba obsoleta. El arco del
+  saneador la cerró: `87c2e4c`, mergeado en `3810e5c` el 27-sep. **Medido hoy al
+  tocar el fichero de al lado, no supuesto:** cero `safe()` propios en los tres
+  (`generator-prompt.ts`, `omega-prompt.ts`, `critico-prompt.ts`) y los tres
+  llaman al control compartido `sanearCampoDePrompt`, que aplana Y neutraliza.
+  Queda dicho aquí para que no se vuelva a abrir.
 - **El analista pide el área en texto libre.** *Verificado.*
   `analysis-prompt-formato.ts:1` pide `"area":"zona"` en vez del
   `FORMA_DE_NOTA` compartido, que pide «de la lista» y enumera el vocabulario.
