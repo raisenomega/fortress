@@ -807,6 +807,44 @@ sin push como referencia de lo que se rehízo; se borran cuando el operador lo
 ordene. **El kit de cierres** de la parte 3 vive en
 `~/Escritorio/Raisen_FCC/cierres-parte-3-2026-09-27/`, fuera del repo.
 
+### 6.12 El revisor no ve lo que el motor ya sabía: medido, no construido (2026-09-28)
+
+Salió al trabajar el backlog de auto-mejora, no de la auditoría. **Dos
+observaciones distintas con la misma raíz**, y son las DOS ÚNICAS de las 31 que
+quedaron pendientes a propósito: `9fd9ff52` (el prompt del revisor no trae la
+lista de ficheros que la correa permitía) y `a608b41a` (tampoco trae el
+resultado del gate del worktree).
+
+**Por qué es real.** El prompt del GENERADOR lleva su bloque `<permitidos>`; el
+de OMEGA no lleva ninguno. Sin esa lista, el revisor no puede distinguir si un
+fichero quedó fuera del diff **porque la correa lo prohibía** o **porque el motor
+lo omitió**, que es la diferencia entre un fix correcto y uno incompleto. La
+observación lo dice con su caso: `account-handlers.ts`, que es IPC y está en la
+lista negra del cerco.
+
+**Por qué NO se cerró en la tanda, medido.** El orden del ciclo es generar →
+verificar → gate → revisar, así que el dato SÍ existe antes del juicio:
+`verify-and-commit.ts:28` usa `p.allowed` y `p.allows`. Pero ese `p` es el objeto
+`Produced` **en memoria de la generación**, y `Proposal` no lleva esos campos —
+comprobado en `proposal.ts`—. El revisor corre después, y puede correr mucho
+después porque las propuestas se encolan. Así que el dato muere donde se calcula.
+
+**Y el atajo obvio sería PEOR.** Recalcular la correa en el revisor con
+`computeAllowedFiles`, que es pura, da solo la correa universal: la real son DOS
+cosas, y la segunda —`allowsFor(primary, scopeGroups(worktreePath))`— son los
+grupos leídos del árbol. Una lista recalculada puede no ser la que se aplicó, y
+entonces el revisor juzgaría contra una correa que nunca existió. Eso es peor que
+no darle ninguna: cambia «no lo sé» por «lo sé mal».
+
+**El arreglo correcto, y su precio:** persistir en la propuesta lo que el motor
+usó de verdad —la correa, los grupos y el resultado del gate— y enseñar eso.
+Es una columna nueva con su migración, así que es un arco con su decisión, no un
+commit de tanda.
+
+**Se dejaron PENDIENTES a propósito.** Marcarlas atendidas perdería dos huecos
+reales; marcarlas descartadas afirmaría que no eran un problema. El registro de
+la tanda (`atendidos.json`, 29 de 31) las omite por eso.
+
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
 **No se duplican aquí.** La fuente de verdad es la **Historia de hallazgos del
