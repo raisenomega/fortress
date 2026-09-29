@@ -807,7 +807,7 @@ sin push como referencia de lo que se rehízo; se borran cuando el operador lo
 ordene. **El kit de cierres** de la parte 3 vive en
 `~/Escritorio/Raisen_FCC/cierres-parte-3-2026-09-27/`, fuera del repo.
 
-### 6.12 El revisor no ve lo que el motor ya sabía: medido, no construido (2026-09-28)
+### 6.12 ~~El revisor no ve lo que el motor ya sabía~~ — **RESUELTO** `44a7818` (2026-09-28)
 
 Salió al trabajar el backlog de auto-mejora, no de la auditoría. **Dos
 observaciones distintas con la misma raíz**, y son las DOS ÚNICAS de las 31 que
@@ -836,14 +836,38 @@ grupos leídos del árbol. Una lista recalculada puede no ser la que se aplicó,
 entonces el revisor juzgaría contra una correa que nunca existió. Eso es peor que
 no darle ninguna: cambia «no lo sé» por «lo sé mal».
 
-**El arreglo correcto, y su precio:** persistir en la propuesta lo que el motor
-usó de verdad —la correa, los grupos y el resultado del gate— y enseñar eso.
-Es una columna nueva con su migración, así que es un arco con su decisión, no un
-commit de tanda.
+**El precio que proyectamos NO existía, y medirlo lo descubrió.** Se proyectó una
+columna nueva con su migración y un ADR. Al medir el arreglo apareció el camino
+barato: el libro de eventos **ya guarda evidencia libre en JSON** y **ya se lee por
+propuesta**, y el motivo de una decisión es una cadena libre, no un vocabulario
+cerrado. Así que asentar la correa es ADITIVO PURO: un evento más, sin tocar el
+esquema, ni la migración, ni el contrato de la propuesta. Confirmado con el diff
+del merge: siete ficheros de producción y ninguno de esquema.
 
-**Se dejaron PENDIENTES a propósito.** Marcarlas atendidas perdería dos huecos
-reales; marcarlas descartadas afirmaría que no eran un problema. El registro de
-la tanda (`atendidos.json`, 29 de 31) las omite por eso.
+**Y el gate no necesitó ni una línea de emisión:** ya dejaba su resultado en el
+libro, con la evidencia en JSON, en las 62 propuestas que pasaron por él. Lo único
+que faltaba era leerlo. Las dos observaciones se cerraron con un solo mecanismo.
+
+**Dónde quedó cada mitad.** El verificador asienta la correa que APLICA, en la
+línea donde la aplica y ANTES del corte por alcance a propósito: así una violación
+también se autopsia sabiendo contra qué correa se midió. El revisor la lee al armar
+su entrada, del libro de SU propuesta —un mutante fija que pide el identificador
+correcto y no otro—.
+
+**Lo que no está en el libro se DICE.** Una propuesta anterior al asiento sale «sin
+correa registrada», y un JSON ilegible del gate sale «sin gate registrado» y nunca
+«NO verde»: un gate que no se puede leer no es un gate que falló. Esa segunda mitad
+la destapó un mutante vivo, no el diseño.
+
+**MATIZ HONESTO.** Ninguna de las 177 propuestas existentes tiene la correa
+asentada: el asiento nace con este merge. Todas dirán «sin correa registrada» hasta
+la siguiente generación del motor, así que hoy el caso de las propuestas viejas no
+es un borde raro, es el 100 %. El resultado del gate sí se lee ya.
+
+**Verificado en vivo:** la cadena entera contra SQLite real —el emisor escribe, la
+base guarda, el lector devuelve la correa con sus grupos— y sobre propuestas REALES
+de la base viva en solo lectura, que muestran el gate verde las que lo tienen y
+«sin registrar» las que no. El registro del backlog queda en **31 de 31**.
 
 ## 7. Dónde viven las deudas de FORTRESS sobre su propio código
 
