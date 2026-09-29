@@ -17,6 +17,10 @@ export interface OmegaPromptInput {
   readonly diffText: string
   readonly filesPost: readonly OmegaFile[]
   readonly filesPre: readonly OmegaFile[]
+  /** Lo que el MOTOR ya sabia: la correa que aplico y el gate. Se LEE del libro
+   *  de la propuesta (ver `loQueElMotorSupo`); ausente en el Terminal, que no
+   *  tiene propuesta ni correa que ensenar. */
+  readonly motorSupo?: readonly string[]
 }
 
 /** El contenido de los archivos va SIN escapar: es el objeto de la revision. */
@@ -51,6 +55,7 @@ export function buildOmegaPrompt(input: OmegaPromptInput): string {
     `NO_TOCAR: ${sanearCampoDePrompt(a.doNotTouch)}`,
     `RIESGO: ${sanearCampoDePrompt(a.risk)}`,
     '</analisis>',
+    ...(input.motorSupo === undefined ? [] : ['<lo-que-el-motor-supo>', ...input.motorSupo, '</lo-que-el-motor-supo>']), // prettier-ignore
     '',
     '=== DIFF DEL FIX ===',
     input.diffText,

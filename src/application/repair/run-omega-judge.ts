@@ -3,6 +3,7 @@ import { exceededBudget } from '@domain/repair/budget'
 import type { Proposal } from '@domain/repair/proposal'
 import type { AppContext } from '../context'
 import type { BookCursor } from './book-cursor'
+import { entradaDelJuicio } from './entrada-del-juicio'
 import { juzgar } from './juicio-de-omega'
 import { closeOmega, emitOmegaMismatch, emitOmegaRun } from './run-omega-emit'
 import { vetoDeLaPropuesta } from './run-omega-veto'
@@ -36,12 +37,7 @@ export async function judgeProposal(
 ): Promise<RunOmegaResult> {
   const veto = vetoDeLaPropuesta(ctx, cursor, proposal, deps.now())
 
-  // La doctrina se lee del WORKTREE, que es el arbol que OMEGA esta juzgando:
-  // asi el fix se mide contra las decisiones vigentes en su ancla y no contra
-  // las de un repo vivo que pudo moverse mientras la propuesta esperaba.
-  const corpus = ctx.corpus.of(worktreePath)
-  const entrada = { arbol: worktreePath, baseSha: proposal.baseSha, analysis, corpus }
-  const juicio = await juzgar(entrada, deps)
+  const juicio = await juzgar(await entradaDelJuicio(ctx, proposal, analysis, worktreePath), deps)
   // Igual que en generate: el id existe antes de que el asiento lo cite.
   const runId = recordMotorRun(ctx, proposal.projectId, 'sentinel-omega', juicio.crudo.runMeta, juicio.computed === null) // prettier-ignore
   const asienta = (meta: AnalystRunMeta): Promise<void> =>

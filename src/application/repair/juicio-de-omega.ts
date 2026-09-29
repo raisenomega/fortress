@@ -13,6 +13,7 @@ export interface EntradaDelJuicio {
   readonly baseSha: string
   readonly analysis: HallazgoJuzgado
   readonly corpus: CorpusDescriptor
+  readonly motorSupo?: readonly string[]
 }
 
 export interface DepsDelJuicio extends OmegaReads {
@@ -60,7 +61,7 @@ export type Juicio =
  * anotar el desacuerdo si lo hay.
  */
 export async function juzgar(e: EntradaDelJuicio, deps: DepsDelJuicio): Promise<Juicio> {
-  const { input, files } = await buildOmegaInput(deps, e.arbol, e.baseSha, e.analysis, e.corpus)
+  const { input, files } = await buildOmegaInput(deps, e.arbol, e.baseSha, e.analysis, e.corpus, e.motorSupo)
   const crudo = await deps.omega.run(e.arbol, buildOmegaPrompt(input))
   const evidencia = evidenciaOmega(crudo, files)
   if (!crudo.ok) return { crudo, files, evidencia, computed: null, declarado: null }
