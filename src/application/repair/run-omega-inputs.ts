@@ -20,7 +20,9 @@ export async function buildOmegaInput(
   worktreePath: string,
   baseSha: string,
   analysis: HallazgoJuzgado,
-  corpus: CorpusDescriptor
+  corpus: CorpusDescriptor,
+  /** Ausente en el Terminal: alli no hay propuesta ni libro que leer. */
+  motorSupo?: readonly string[]
 ): Promise<{ input: OmegaPromptInput; files: readonly string[] }> {
   const files = await reads.changedFiles(worktreePath, baseSha)
   const diffText = await reads.diffText(worktreePath)
@@ -28,5 +30,6 @@ export async function buildOmegaInput(
   const filesPre = await Promise.all(
     files.map(async (path) => ({ path, content: await reads.readPre(worktreePath, baseSha, path) })) // prettier-ignore
   )
-  return { input: { analysis, corpus, diffText, filesPost, filesPre }, files }
+  const supo = motorSupo === undefined ? {} : { motorSupo }
+  return { input: { analysis, corpus, diffText, filesPost, filesPre, ...supo }, files }
 }

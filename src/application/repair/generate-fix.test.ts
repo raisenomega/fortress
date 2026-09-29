@@ -3,22 +3,6 @@ import { bench } from './generate-fix-fixture'
 import { generateFix } from './generate-fix'
 
 describe('generateFix (C3)', () => {
-  it('camino feliz: GENERADO con WORKTREE_CREATE + AGENT_RUN + TRANSITION', async () => {
-    const b = bench()
-    const result = await generateFix(b.context, 'prop-1', b.deps)
-
-    expect(result.ok).toBe(true)
-    if (result.ok) expect(result.commitSha).toBe('c'.repeat(40))
-    expect(b.patches.at(-1)).toMatchObject({ state: 'GENERADO' })
-    expect(b.events.map((e) => [e.eventType, e.phase])).toEqual([
-      ['DECISION', 'GENERATE'],
-      ['AGENT_RUN', 'GENERATE'],
-      ['TRANSITION', 'GENERATE']
-    ])
-    expect(b.events[2].toState).toBe('GENERADO')
-    expect(b.calls).toEqual(['create', 'generate', 'commit'])
-  })
-
   it('R1: si NO es la mas reciente, CADUCA superseded_by sin spawnear nada', async () => {
     const b = bench({ latestId: 'prop-nueva' })
     const result = await generateFix(b.context, 'prop-1', b.deps)

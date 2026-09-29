@@ -1,5 +1,6 @@
 import { exceededBudget } from '@domain/repair/budget'
 import { canTransition } from '@domain/repair/proposal'
+import { MOTIVO_CORREA } from '@domain/repair/lo-que-el-motor-supo'
 import { checkScope } from '@domain/repair/scope-check'
 import { soloTocaPruebas } from '@domain/repair/solo-toca-pruebas'
 import { mensajeDelFix } from '@domain/repair/mensaje-del-fix'
@@ -7,7 +8,7 @@ import type { AppContext } from '../context'
 import type { GenerateDeps, GenerateResult, Produced } from './generate-types'
 import type { Admitted } from './generate-guards'
 import type { FailFn } from './generate-fail'
-import { emitOutcome } from './record-generate-events'
+import { emitDecision, emitOutcome } from './record-generate-events'
 
 /**
  * Post-generacion: diff real, correa de scope, presupuesto final y commit.
@@ -25,6 +26,13 @@ export async function verifyAndCommit(
   // Se limpia: termino sin diff, no hay nada que preservar.
   if (!(await deps.worktrees.hasChanges(p.worktreePath))) return fail('no_diff_produced', {}, false)
   const changed = await deps.worktrees.changedFiles(p.worktreePath)
+  // La correa que se APLICA queda asentada AQUI, que es donde se aplica y no
+  // donde se calculo: el revisor corre despues —y puede correr mucho despues,
+  // las propuestas se encolan— y hasta hoy no tenia como saber si un fichero
+  // quedo fuera porque la correa lo prohibia o porque el motor lo omitio. Va
+  // ANTES del corte a proposito: una violacion de alcance tambien se autopsia
+  // mejor sabiendo contra que correa se midio (DEUDAS §6.12).
+  await emitDecision(ctx.eventLog, a.cursor, a.proposal.id, MOTIVO_CORREA, { allowed: p.allowed, allows: p.allows }, deps.now()) // prettier-ignore
   const scope = checkScope(changed, p.allowed, p.allows)
   // CONSERVADO para autopsia: el generador produjo cambios FUERA de scope.
   if (!scope.ok) return fail('scope_violation', { violations: scope.violations }, true)
