@@ -4,6 +4,7 @@ import {
   type CorpusDescriptor,
   type CorpusDoc
 } from '../project/corpus-descriptor'
+import { sanearCampoDePrompt } from '../shared/sanear-campo-de-prompt'
 import { CABECERA, cabeceraSinPropia } from './docs-first-cabeceras'
 
 /**
@@ -56,7 +57,14 @@ export function buildDocsFirst(category: CorpusCategory, corpus: CorpusDescripto
   )
   const resto = corpus.directories.filter((dir) => !propias.includes(dir))
   const { docs, propia } = relevantes(category, corpus)
-  const citados = [...docs.map((doc) => doc.path), ...propias, ...resto]
+  // El corpus es texto AJENO: la via DECLARADA en `.fortress/config` admite
+  // cualquier cadena. Se sanea AQUI, al emitir —la frontera del prompt, donde
+  // viven los demas controles—, y no en el dato, que se guarda crudo. DESPUES
+  // del filtro a proposito: la categoria se decide con el nombre real, o una
+  // ruta envenenada ascenderia a carpeta propia y elegiria su sitio en la cita.
+  const citados = [...docs.map((doc) => doc.path), ...propias, ...resto].map(
+    sanearCampoDePrompt
+  )
 
   if (citados.length === 0) return ''
 

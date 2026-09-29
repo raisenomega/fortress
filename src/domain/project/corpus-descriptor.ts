@@ -64,12 +64,12 @@ export const CANONICAL_DOCS: readonly string[] = Object.keys(CATEGORY)
 /** Carpetas de documentacion reconocidas por nombre exacto. */
 export const CORPUS_DIRS: readonly string[] = ['docs', 'docs-nucleo', 'doc', 'documentation']
 
-/** La categoria de un nombre canonico, o null si no lo es. */
-export function categoryOf(name: string): CorpusCategory | null {
-  return CATEGORY[name] ?? null
-}
+/** La categoria de un nombre canonico, o null si no lo es. Se busca entre las
+ *  claves PROPIAS: un objeto literal hereda de `Object.prototype`, y sin el guard
+ *  una carpeta `toString` del repo auditado se citaba como doctrina firmada. */
+export const categoryOf = (name: string): CorpusCategory | null =>
+  Object.hasOwn(CATEGORY, name) ? (CATEGORY[name] ?? null) : null
 
-/** La categoria de una carpeta canonica, o null si su nombre no dice nada. */
-export function categoryOfDirectory(name: string): CorpusCategory | null {
-  return CATEGORY_DIRS[name] ?? null
-}
+/** La categoria de una carpeta canonica: la otra tabla tenia el mismo agujero. */
+export const categoryOfDirectory = (name: string): CorpusCategory | null =>
+  Object.hasOwn(CATEGORY_DIRS, name) ? (CATEGORY_DIRS[name] ?? null) : null
