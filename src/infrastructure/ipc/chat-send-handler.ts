@@ -4,7 +4,6 @@ import { negado } from '@domain/chat/envio-negado'
 import { err, type Result } from '@domain/shared/result'
 import { describeAssistantError } from '../ai/describe-error'
 import { getAppContext } from '../persistence/app-context'
-import { cancelLoop } from '../loop/loop-registry'
 import { cancelRun, endRun } from '../run-control'
 import { gastarAprobacion } from '../aprobacion-del-plan'
 import { editaElChat, guardBarrera } from '../barrera-guard'
@@ -64,7 +63,6 @@ export function registerChatSendHandler(): void {
   // el proceso vivo con escalada a SIGKILL. Devuelve cuantos corto (Promise<number>).
   ipcMain.handle(IPC.chatStop, (_event, projectId: string) => {
     const id = String(projectId)
-    cancelLoop(id)
     return cancelRun(id)
   })
 

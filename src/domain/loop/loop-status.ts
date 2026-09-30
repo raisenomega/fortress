@@ -1,4 +1,10 @@
-import type { LoopStopReason } from './loop-decision'
+/**
+ * Por que paro un loop. ADR-107 retiro el loop, pero este tipo se queda con la
+ * historia: `loop_sessions` guarda filas con estos valores y leerlas exige
+ * saber que significan. No nacen mas; las que hay no se borran.
+ */
+export type LoopStopReason = 'detenido' | 'tope-gasto' | 'tope-ciclos' | 'tope-denegaciones' | 'pool-agotado' | 'sin-avance' | 'resuelto' | 'error' // prettier-ignore
+
 
 /**
  * En que fase del ciclo esta el loop, para pintarlo en vivo. 'standby' = un

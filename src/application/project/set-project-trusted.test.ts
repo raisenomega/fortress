@@ -19,26 +19,27 @@ function fixture(): {
 }
 
 describe('setProjectTrusted', () => {
-  it('revocar la confianza APAGA el flag y DETIENE el loop en curso', () => {
+  /**
+   * ADR-107 retiro el loop, asi que ya no hay proceso que detener. El flag SI se
+   * sigue apagando: la columna vive con su historia, y dejarla encendida en un
+   * proyecto en el que ya no se confia seria un estado que miente.
+   */
+  it('revocar la confianza APAGA el flag del loop', () => {
     const { context, state } = fixture()
-    const stopped: string[] = []
 
-    const result = setProjectTrusted(context, 'p1', false, (id) => stopped.push(id))
+    const result = setProjectTrusted(context, 'p1', false)
 
     expect(result.ok).toBe(true)
     expect(state.trusted).toBe(false)
     expect(state.flag).toBe(false)
-    expect(stopped).toEqual(['p1'])
   })
 
-  it('otorgar la confianza no toca el loop', () => {
+  it('otorgar la confianza no toca el flag', () => {
     const { context, state } = fixture()
-    const stopped: string[] = []
 
-    setProjectTrusted(context, 'p1', true, (id) => stopped.push(id))
+    setProjectTrusted(context, 'p1', true)
 
     expect(state.trusted).toBe(true)
     expect(state.flag).toBeNull()
-    expect(stopped).toEqual([])
   })
 })

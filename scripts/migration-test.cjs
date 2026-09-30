@@ -10,6 +10,7 @@ const { checkMigracionesPorSql } = require('./lib/legacy-por-sql.cjs')
 const { checkProjectBackfills } = require('./lib/legacy-project-checks.cjs')
 const { createRecorder } = require('./lib/renderer-checks.cjs')
 const { report } = require('./lib/suite-runner.cjs')
+const { sesionDeLoop } = require('./lib/sesion-de-loop.cjs')
 
 harness.useTemporaryUserData()
 writeLegacyDatabase()
@@ -24,11 +25,11 @@ async function verify(window) {
   check('conserva el historial de chat', historial.length === 1, JSON.stringify(historial))
   check('rellena el motor por defecto', historial[0]?.engine === 'api')
 
-  // La sesion de loop es anterior a que se guardara el motivo: se conserva
-  // entera y sus campos nuevos quedan ausentes, que es "no consta".
-  const sesion = await run("window.api.chat.lastLoopSession('viejo')")
-  check('conserva la sesion de loop', sesion?.cyclesDone === 2, JSON.stringify(sesion))
-  check('la sesion vieja no consta con motivo', sesion?.stoppedReason === undefined)
+  // La sesion de loop es anterior al motivo: se conserva entera y sus campos
+  // nuevos quedan ausentes, que es "no consta". Por SQL (ADR-107, ver el lib).
+  const sesion = sesionDeLoop('viejo')
+  check('conserva la sesion de loop', sesion?.cycles_done === 2, JSON.stringify(sesion))
+  check('la sesion vieja no consta con motivo', sesion?.stopped_reason === null)
 
   const hallazgos = await run("window.api.scan.findings('viejo')")
   check(

@@ -13,7 +13,6 @@ import { registerGraphHandlers } from './graph-handlers'
 import { registerGraphActionHandlers } from './graph-action-handlers'
 import { registerGraphReindexHandlers } from './graph-reindex-handlers'
 import { registerHealthHandlers } from './health-handlers'
-import { registerLoopHandlers } from './loop-handlers'
 import { registerMaintenanceHandlers } from './maintenance-handlers'
 import { registerNewProjectHandlers } from './newproject-handlers'
 import { registerOmegaHandlers } from './omega-handlers'
@@ -46,7 +45,6 @@ export function registerIpcHandlers(): void {
   registerProjectHandlers()
   registerChatHandlers()
   registerChatSendHandler()
-  registerLoopHandlers()
   registerSettingsHandlers()
   registerHealthHandlers()
   registerScanHandlers()

@@ -1,4 +1,4 @@
-import { integracionAutomaticaPermitida } from '@domain/loop/loop-gate'
+import { integracionAutomaticaPermitida } from '@domain/repair/integracion-sin-firma'
 import type { AppContext } from '../context'
 
 /**

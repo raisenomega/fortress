@@ -2,11 +2,8 @@ import { costLabel } from '@domain/telemetry/billing-mode'
 import { formatCost, formatTokens } from '@domain/telemetry/format-usage'
 import { fraseSinMedir } from '../../format/sin-factura'
 import { totalTokens } from '@domain/telemetry/token-usage'
-import { useLoopStatus } from '../../stores/loop-store'
-import { useActiveProject } from '../../stores/project-store'
 import { useRunMeterStore } from '../../stores/run-meter-store'
 import { useTelemetryStore } from '../../stores/telemetry-store'
-import { LoopMeter } from './LoopMeter'
 import { RunMeter } from '../chat/RunMeter'
 
 const SIN_MEDIR_TITLE =
@@ -22,10 +19,6 @@ export function FooterMeter(): React.JSX.Element {
   const session = useTelemetryStore((state) => state.session)
   const sinMedir = useTelemetryStore((state) => state.sinMedir)
   const billing = useTelemetryStore((state) => state.billing)
-  const loop = useLoopStatus(useActiveProject()?.id ?? null)
-
-  // El loop corre en el main: se muestra en el pie en vivo, como el chat.
-  if (loop && loop.stopReason === null) return <LoopMeter status={loop} />
   if (running) return <RunMeter />
 
   const cost = formatCost(session.costUsd)

@@ -37,7 +37,7 @@ describe('evaluate: el interruptor corta antes que nada', () => {
   })
 
   it('basta UN archivo excluido para frenar el lote entero', () => {
-    const files = ['src/a/b.ts', 'src/domain/loop/loop-gate.ts']
+    const files = ['src/a/b.ts', 'src/domain/repair/integracion-sin-firma.ts']
     expect(evaluate(fix({ files }), ACTIVA).conditionFailed).toBe('blacklist')
   })
 })

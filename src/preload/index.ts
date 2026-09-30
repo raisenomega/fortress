@@ -23,7 +23,6 @@ const api: FortressApi = {
     pickFolder: () => ipcRenderer.invoke(IPC.projectsPickFolder),
     self: () => ipcRenderer.invoke(IPC.projectsSelf),
     setTrusted: (id, trusted) => ipcRenderer.invoke(IPC.projectsSetTrusted, id, trusted),
-    setLoopEnabled: (id, enabled) => ipcRenderer.invoke(IPC.projectsSetLoopEnabled, id, enabled),
     unblock: (id) => ipcRenderer.invoke(IPC.projectsUnblock, id)
   },
   health: {
@@ -52,10 +51,7 @@ const api: FortressApi = {
     send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
     stop: (projectId) => ipcRenderer.invoke(IPC.chatStop, projectId),
     onChunk: (listener) => subscribe(IPC.chatChunk, listener),
-    onProgress: (listener) => subscribe(IPC.chatProgress, listener),
-    lastLoopSession: (projectId) => ipcRenderer.invoke(IPC.loopLastSession, projectId),
-    onLoopStatus: (listener) => subscribe(IPC.loopStatus, listener),
-    onLoopChunk: (listener) => subscribe(IPC.loopChunk, listener)
+    onProgress: (listener) => subscribe(IPC.chatProgress, listener)
   },
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),

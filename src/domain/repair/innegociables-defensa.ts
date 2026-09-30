@@ -39,10 +39,10 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   'src/domain/repair/path-hints.ts',
   'src/domain/repair/solo-toca-pruebas.ts',
   // Los TURNOS sobre lo que no admite dos a la vez. `run-guard` ya estaba;
-  // `carril-del-merge` es quien lo toma para el arbol vivo y `loop-fix` quien lo
-  // aplica al bucle autonomo. Sin ellos el guard existe y nadie lo pide.
+  // `carril-del-merge` es quien lo toma para el arbol vivo. Sin el, el guard
+  // existe y nadie lo pide. El segundo tomador era `loop-fix`, y ADR-107 lo
+  // retiro con el LOOP.
   'src/application/repair/carril-del-merge.ts',
-  'src/infrastructure/loop/loop-fix.ts',
   // La PUERTA del plan (ADR-097 §4): en autonomo, un hallazgo del lote no corre
   // sin el ADELANTE de OMEGA. Y quien GUARDA la aprobacion, que vive en el main
   // porque un campo en el mensaje lo escribiria quien pide pasar. Si el
