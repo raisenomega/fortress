@@ -631,8 +631,11 @@ Lo que ese binario lleva dentro, verificado por identificadores:
 - **El gate determinista**, arreglado por la causa.
 - **Once decisiones firmadas**: la enmienda de ADR-095 y de la 098 a la 105.
 
-**EN MAIN Y NO EN EL BINARIO.** CUATRO arcos entraron DESPUÉS de ese rebuild, así
-que están en `main` y no en producción:
+**EN MAIN Y NO EN EL BINARIO.** El rebuild del 30-sep metió los cuatro arcos que
+esperaban (binario `c3ee4e23` = `main@9405b49`, cero deriva en los tres eslabones,
+la trifecta del aislamiento YA EN PRODUCCIÓN). Desde entonces ha entrado **uno
+más**: la pieza 1 del Motor (`15b7fbf`), los ojos de la huella. Los cuatro que sí
+llegaron al binario fueron:
 
 1. La correa que el motor usó, que el revisor ya lee del libro de eventos
    (`44a7818`).
@@ -655,7 +658,8 @@ que están en `main` y no en producción:
 por los que el código del cliente rompía el aislamiento —sus caracteres
 (`3810e5c`), su corpus declarado (`3c8a77d`) y su `.git` (`10d3a68`)— eran la
 misma clase de error, un dato del repo auditado tratado como fuente de verdad.
-El rebuild queda pendiente, con la app cerrada.
+**Y corre en producción desde el rebuild del 30-sep**, verificado en el asar por
+su CÓDIGO y no por su nombre. El próximo rebuild se lleva la pieza 1 del Motor.
 
 **LO QUE FALTA, por orden de lo que más pesa.**
 
@@ -682,12 +686,55 @@ El rebuild queda pendiente, con la app cerrada.
    fichero de auto-mejora, los seis funcionales de la auditoría (§9.4) y las 35
    erratas de documento (§9.5).
 
+## El arco del MOTOR de auto-reparación (abierto, 2026-09-30)
+
+La misión: que el motor repare a fondo sin caerse por tiempo, **manteniendo las
+fronteras** (`loopBlocked`, nunca `origin` sin la firma, DEBUT, el motor propone
+y el humano dispone).
+
+**DIMENSIÓN 1, MEDIDA.** El freno principal es el **techo de vueltas del CLI**
+(`--max-turns 30`), y vive **DENTRO** de la corrida: desde fuera no se ve. En
+1582 eventos disparó **20 veces** —con el **84-92 % del presupuesto sin tocar**—,
+frente a 3 del reloj del generador, 4 del presupuesto (todos de agosto, ya
+corregidos al dejar de contar la relectura de caché) y **0 del gate y 0 de OMEGA**.
+El motor **para por CONTADOR CIEGO**: la doctrina de convergencia por huella del
+diff existe implementada, pero **solo en el Terminal** (`ciclo-de-convergencia.ts`,
+«CONVERGER NO ES UN CONTADOR»). Dato que acota la ambición: el motor **nunca ha
+intentado un CRITICAL** —177 propuestas: 91 MEDIUM, 82 LOW, 4 HIGH, 0 CRITICAL—.
+
+**PIEZA 1 — LOS OJOS: HECHA** (`15b7fbf`). El motor asienta en el libro la
+**huella del trabajo** (`sha1`) de cada corrida del generador, con las vueltas y
+el gasto. Detalles que la hacen valer:
+
+- **Los creados van dentro.** Es la lección del Terminal, **reproducida y no
+  heredada**: medido aquí, cambiando SOLO un fichero nuevo, la huella sin ellos
+  **no se movía**; con ellos sí.
+- **El git va en la caja** (ADR-092 clase B). El árbol es de un cliente.
+- **Aditivo**: un `DECISION` en el libro, como la correa. Sin migración, sin tocar
+  el ciclo, los estados, ni `--max-turns`.
+- **No guarda el texto del diff**, solo 40 caracteres.
+- **`null` ≠ 0**: cuando nuestro reloj mata al CLI no hay factura, y la evidencia
+  lo dice en vez de inventar un cero.
+
+**LA REGLA PARA DECIDIR EL TECHO, cuando haya dato:** dos corridas del MISMO
+hallazgo con la **MISMA** huella → *giraba*, y subir el techo **no compra nada**;
+con huellas **DISTINTAS** → *avanzaba*, y subirlo **ayuda**.
+
+**EL LÍMITE, SIN ADORNOS: esto mide HACIA DELANTE.** Los 20 casos pasados **no se
+recuperan** (queda 1 worktree en disco). Hasta juntar corridas nuevas, la pieza da
+la **medida, no la decisión**.
+
+**LO QUE SIGUE EN ESTE ARCO:** dejar correr al motor con los ojos puestos →
+decidir el techo con el dato → dimensiones 2, 3 y 4 (severidad, profundidad, y la
+cadena OMEGA → firma).
+
 **EL PRÓXIMO PASO RECOMENDADO.** Con la trifecta del aislamiento cerrada y el P1
-del analista dentro, **la auditoría no deja ningún P0 de seguridad abierto**. Así
-que lo siguiente es abrir el barrido de los tramos 2 a 7, y el tramo de `scripts/`
-primero: 106 ficheros sin un solo test, corriendo sobre la base viva. Pendientes
-menores con dueño claro: las 5 filas viejas en `otro` (un lote con el kit, si Jojo
-quiere rescatar esa señal) y el rebuild, que acumula CUATRO arcos.
+del analista dentro, **la auditoría no deja ningún P0 de seguridad abierto**. Las
+dos vías abiertas son el **arco del Motor** —que ahora espera dato, no trabajo— y
+el **barrido de los tramos 2 a 7**, con `scripts/` primero: 106 ficheros sin un
+solo test, corriendo sobre la base viva. Pendientes menores con dueño claro: las 5
+filas viejas en `otro` (un lote con el kit, si Jojo quiere rescatar esa señal) y el
+rebuild, que acumula **CINCO** arcos.
 
 **AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto, o
 recomprar antes los cinco pausados.

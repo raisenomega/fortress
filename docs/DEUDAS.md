@@ -1,6 +1,6 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-29 · **Commit de referencia:** `d3abb45`
+**Fecha:** 2026-09-30 · **Commit de referencia:** `15b7fbf`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
@@ -23,8 +23,15 @@ entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destap�
 > está cerrado (`d3abb45`). Los cuatro urgentes siguen cerrados y verificados en
 > vivo, y el gate volvió a ser determinista. Lo que queda, por lo que más pesa:
 >
+> **EL ARCO DEL MOTOR está abierto y su pieza 1 HECHA** (`15b7fbf`): el motor ya
+> asienta la huella del trabajo de cada corrida del generador. Eso NO decide nada
+> todavía — **mide hacia delante**, y los 20 casos pasados no se recuperan. La
+> regla, cuando haya corridas nuevas: dos del MISMO hallazgo con la MISMA huella
+> → giraba, subir el techo no compra nada; con huellas DISTINTAS → avanzaba.
+>
 > | # | Qué | Dónde |
 > |---|---|---|
+> | 0 | **Dejar correr al Motor** para juntar huellas y decidir su techo de vueltas | ROADMAP |
 > | 1 | Los tramos 2 a 7 de la auditoría, sin empezar | §9.8 |
 > | 2 | El residuo del primer urgente: informe PARCIALMENTE ilegible | §9.2 |
 > | 3 | Las 5 filas viejas en `otro`: el 61 % de la señal del backlog sin reclasificar (lote aparte) | §9.2 |
