@@ -1617,3 +1617,38 @@ engañan a quien lea la documentación para decidir. Es exactamente la regla de
 tres categorías —**retirar** (lo que describe el presente), **conservar** (lo
 histórico) y **reescribir** (lo que ahora hace el Drenaje en su lugar)—. Es el
 mismo trabajo que el tramo 7 de §9.8 ya tiene planificado, y cabe dentro de él.
+
+### 10.2 CERRADA — La asimetría de los dos nacimientos
+
+**~~`planRepair` devolvía `null` sin motivo y `retryRepair` sí lo devolvía.~~** —
+**ARREGLADA el 2026-09-30** (`0cb6eda`, dentro del merge `4e82c0f`). Los cuatro
+finales sin propuesta del plan se contaban como uno, así que un proyecto negado
+por el perímetro de ADR-107 le llegaba al operador como «no queda nada elegible»:
+una frase falsa sobre un bloqueo deliberado. Ahora el motivo viaja **tipado**
+(`PlanResult` → `ChainOutcome.negado` → `FinDelDrenaje.negado` → el aviso de la
+UI). Cinco mutantes, uno por eslabón.
+
+**Lo que NO hace, y es deliberado:** el motivo **no se persiste**. No hay
+propuesta a la que colgar un evento, y asentarlo como observación llevaría el
+nombre del proyecto del CLIENTE al export de auto-mejora, contra el cerco de
+ADR-085. Queda igualado con `retryRepair`, que tampoco lo persiste.
+
+**Lo que destapó, y vale más que el arreglo:** desde la cura, **tres checks de
+integración pasaban por la razón equivocada**. `repair-checks.cjs` decía probar
+«sin hallazgos ACTIVE» y «sin repo git», y `mitigate-checks.cjs` «no lo puede
+elegir ni dirigido»; los tres usan proyectos en `/tmp`, así que el perímetro los
+negaba **antes** de llegar a lo que decían medir. Con el motivo en `null` los tres
+seguían en verde y nadie podía verlo. Reescritos para decir lo que prueban
+(`cebaa30`); los dos casos que decían cubrir viven donde sí se ejercitan, en
+`plan-repair.test.ts`.
+
+**La lección, para el barrido del tramo 7:** *retirar una capa no rompe los tests
+que la cruzaban — los deja pasando por otra razón.* Vale la pena buscar más casos
+de este patrón entre los checks de integración que tocan el Motor.
+
+### 10.3 P3 — `innegociables-defensa.ts` en 75/75 líneas
+
+Con las dos familias nuevas —perímetro (ADR-107) y selección (ADR-106)— el
+fichero queda **exactamente en el límite**. La siguiente familia no cabe. El
+`CLAUDE.md` ya dice qué hacer: **partir por familia, nunca subir el límite**. Se
+anota para que quien llegue con la tercera no descubra el techo a mitad del arco.

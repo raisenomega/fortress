@@ -635,9 +635,9 @@ Lo que ese binario lleva dentro, verificado por identificadores:
 
 **EN MAIN Y NO EN EL BINARIO.** El rebuild del 30-sep metió los cuatro arcos que
 esperaban (binario `c3ee4e23` = `main@9405b49`, cero deriva en los tres eslabones,
-la trifecta del aislamiento YA EN PRODUCCIÓN). Desde entonces han entrado **dos
-más**: la pieza 1 del Motor (`15b7fbf`), los ojos de la huella, y **la cura del
-perímetro** (`d5e9945`). Los cuatro que sí
+la trifecta del aislamiento YA EN PRODUCCIÓN). Desde entonces han entrado **tres
+más**: la pieza 1 del Motor (`15b7fbf`), los ojos de la huella; **la cura del
+perímetro** (`d5e9945`); y **ADR-106** (`4e82c0f`), el debut a HIGH. Los cuatro que sí
 llegaron al binario fueron:
 
 1. La correa que el motor usó, que el revisor ya lee del libro de eventos
@@ -662,7 +662,7 @@ por los que el código del cliente rompía el aislamiento —sus caracteres
 (`3810e5c`), su corpus declarado (`3c8a77d`) y su `.git` (`10d3a68`)— eran la
 misma clase de error, un dato del repo auditado tratado como fuente de verdad.
 **Y corre en producción desde el rebuild del 30-sep**, verificado en el asar por
-su CÓDIGO y no por su nombre. El próximo rebuild se lleva la pieza 1 del Motor y la cura del perímetro.
+su CÓDIGO y no por su nombre. El próximo rebuild se lleva la pieza 1 del Motor, la cura del perímetro y ADR-106.
 
 **LO QUE FALTA, por orden de lo que más pesa.**
 
@@ -770,16 +770,56 @@ observación —las notas viejas las llevan y sin ellas no se leerían— y
 `read-loop-budget`, que es quien sirve los dos topes al Drenaje. Las claves de
 ajuste siguen diciendo `loop*` para no migrar lo que el operador ya fijó.
 
-**LA DIMENSIÓN 2 (ADR-106) AHORA CAE EXACTA.** El debut a HIGH está **firmado y
-construido** (`81f7b8c`) y esperaba a esta cura por una razón concreta: sin ella
-abría HIGH sobre código de CLIENTE. Con el Motor acotado, el **único camino que le
-queda es el Drenaje sobre FORTRESS**, que es justo el terreno donde el ADR midió
-su respaldo —12 HIGH trabajables en el repo propio—. Reconstruido sobre este main
-y **pendiente de que el operador lo revise antes de mergear**.
+**DIMENSIÓN 2 — ADR-106: HECHO, MERGEADO (`4e82c0f`) Y VERIFICADO.** El debut sube
+a **HIGH** (`DEBUT = ['LOW','MEDIUM','HIGH']`), la **selección prioriza por
+severidad** anteponiendo `compareSeverity` a los cinco desempates —que quedan
+intactos—, y las **cuatro piezas de la selección** entran en los innegociables
+como familia propia. Cayó exacto detrás de la cura: `selectTarget` filtra por el
+debut **incondicionalmente** y la guarda del perímetro corre **antes**, en
+`planRepair`, así que el único camino que le queda es el **Drenaje sobre
+FORTRESS**.
+
+**LA PUERTA DE CRITICAL, CONDICIONADA Y VERIFICABLE:** entra cuando exista una
+propuesta de hallazgo **HIGH** en estado MERGEADO con `gate verde`, `omega aprobo`
+e `integracion firmada por el operador`, y con `created_at` **posterior al sello
+de ADR-106** —sin ese corte la condición nacería cumplida, porque ya hay un HIGH
+con esa firma exacta del 19-ago bajo la puerta vieja—. **Hoy solo puede cumplirla
+un HIGH de FORTRESS**, y eso la estrecha: medido el 30-sep, el repo propio tiene
+**7 HIGH abiertos y 0 CRITICAL —nunca tuvo ninguno—**, mientras los **48 CRITICAL
+de la base están todos en proyectos de cliente**, fuera del alcance del Motor. Va
+escrito en la **errata §0** del propio ADR, que también retira su mención a
+`loopBlocked`.
+
+**CON LA CURA + ADR-106: el Drenaje repara FORTRESS a grado bancario, HIGH
+incluido, y CRITICAL con prueba.** Abrir el debut **no abre el auto-merge**: un
+HIGH cuya política no lo liste sigue exigiendo la firma del operador para
+integrarse. El motor trabaja; integrarlo sigue siendo humano.
+
+**LA ASIMETRÍA DE LOS DOS NACIMIENTOS, CERRADA ANTES DE MERGEAR.** `retryRepair`
+ya devolvía su motivo y `planRepair` devolvía `null` a secas, así que sus cuatro
+finales sin propuesta se contaban como uno: un proyecto negado por el perímetro
+llegaba al operador como «no queda nada elegible». Ahora el motivo viaja **tipado**
+(`PlanResult`) hasta el desenlace de la cadena (`negado`), el parte del drenaje y
+el aviso de la UI, que dice a dónde ir. Cinco mutantes, uno por eslabón. **No se
+escribe en ningún libro y es a propósito:** no hay propuesta a la que colgar un
+evento, y asentarlo como observación llevaría el nombre del proyecto del cliente
+al export de auto-mejora, contra el cerco de ADR-085.
+
+**Y destapó algo:** desde la cura, **tres checks de integración pasaban por la
+razón equivocada**. Decían probar «sin candidato» y «sin ancla», pero su proyecto
+vive en `/tmp`, así que el perímetro los cortaba antes de llegar a mirarlo.
+Mientras el motivo era `null` no había forma de verlo. Reescritos para decir lo
+que prueban; los dos casos que decían cubrir viven donde sí se ejercitan
+(`plan-repair.test.ts`, con sus motivos `sin-candidato` y `sin-head-de-git`).
+
+**AVISO DE TECHO:** `innegociables-defensa.ts` queda en **75/75 líneas** con las
+dos familias nuevas (perímetro + selección). La siguiente familia **parte el
+fichero por familia**, no sube el límite. Es la regla del `CLAUDE.md`, y este
+fichero ya es el caso de prueba.
 
 **LO QUE SIGUE EN ESTE ARCO:** dejar correr al motor con los ojos puestos →
-decidir el techo con el dato → dimensiones 2, 3 y 4 (severidad, profundidad, y la
-cadena OMEGA → firma).
+decidir el techo con el dato → dimensiones 3 y 4 (profundidad, y la cadena
+OMEGA → firma).
 
 **EL PRÓXIMO PASO RECOMENDADO.** Con la trifecta del aislamiento cerrada y el P1
 del analista dentro, **la auditoría no deja ningún P0 de seguridad abierto**. Las
