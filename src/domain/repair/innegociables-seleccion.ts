@@ -5,7 +5,8 @@
  * POR QUÉ, medido el 2026-09-30 antes de decidirlo: la puerta de INTEGRACIÓN ya
  * estaba protegida —`alcance`, `scope-check`, `firma-limite` y el par de
  * auto-merge— y la de SELECCIÓN no lo estaba. Con el debut abierto a HIGH quedan
- * 12 HIGH trabajables en el repo propio, así que el motor podría proponer un fix
+ * HIGH trabajables en el repo propio —12 al firmar; 7 abiertos y activos tras
+ * ADR-107, ver la errata §0 del ADR—, así que el motor podría proponer un fix
  * sobre la puerta que acaba de subir. Se cierra donde se abre.
  *
  * No es economía de lista: es la misma razón por la que `firma-limite` se aplica

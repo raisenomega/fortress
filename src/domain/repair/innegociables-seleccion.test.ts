@@ -8,8 +8,9 @@ import { puedeTrabajarse } from './alcance'
  * Medido el 2026-09-30, antes de decidirlo: la puerta de INTEGRACION ya estaba
  * protegida (`alcance`, `scope-check`, `firma-limite`, el par de auto-merge) y la
  * de SELECCION no lo estaba —ni `debut`, ni `select-target`, ni el orden, ni
- * quien elige—. Abrir HIGH deja 12 HIGH trabajables en el repo propio, y una
- * defensa que dependa de que nadie proponga tocarla no sobrevive a un lote.
+ * quien elige—. Abrir HIGH deja HIGH trabajables en el repo propio (12 al
+ * firmar; 7 abiertos y activos tras ADR-107), y una defensa que dependa de que
+ * nadie proponga tocarla no sobrevive a un lote.
  */
 const SELECCION = [
   'src/domain/repair/debut.ts',
