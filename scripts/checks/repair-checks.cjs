@@ -1,9 +1,15 @@
 /**
  * I1 — repair:propose / repair:list / repair:get por el stack real (renderer ->
- * preload -> IPC -> caso de uso -> SQLite). Ningun camino spawnea un agente:
- * el analista solo corre cuando hay candidato Y repo git, y aqui se corta
- * antes a proposito. Los veredictos REAL/OBSOLETO se prueban a nivel unitario
- * con analista fake (plan-repair.test.ts).
+ * preload -> IPC -> caso de uso -> SQLite). Ningun camino spawnea un agente.
+ *
+ * OJO CON LO QUE ESTO PRUEBA Y LO QUE NO. El proyecto de prueba vive en /tmp,
+ * asi que desde ADR-107 el PERIMETRO lo niega antes de mirar la cola o el HEAD:
+ * lo que se ejercita aqui es el stack entero y que el MOTIVO cruza el puente
+ * intacto, no la seleccion. Mientras el motivo era `null`, estos checks decian
+ * probar «sin candidato» y «sin ancla» y en realidad no llegaban ni a mirarlo
+ * —pasaban por la razon equivocada—. Esos dos casos viven donde si se pueden
+ * ejercitar: `plan-repair.test.ts`, con sus motivos `sin-candidato` y
+ * `sin-head-de-git`. Los veredictos REAL/OBSOLETO, igual, con analista fake.
  */
 const { insertFinding } = require('../lib/findings-seed.cjs')
 const { addProject, createRecorder } = require('../lib/renderer-checks.cjs')
@@ -20,19 +26,21 @@ module.exports = async function repairChecks(window) {
 
   const sinHallazgos = await run(`window.api.repair.propose('${id}')`)
   check(
-    'sin hallazgos ACTIVE, propose devuelve null (C1 no elige nada)',
-    sinHallazgos.ok === true && sinHallazgos.value === null,
+    'el perimetro niega un proyecto ajeno, y el motivo cruza el puente',
+    sinHallazgos.ok === true &&
+      sinHallazgos.value.ok === false &&
+      sinHallazgos.value.reason === 'no-es-su-vehiculo',
     JSON.stringify(sinHallazgos)
   )
 
-  // Con hallazgo pero SIN repo git: C1 SI elige, el ancla de HEAD falla y no
-  // se inserta nada. Ejercita la seleccion real sin llegar al analista.
+  // Con hallazgo, el perimetro sigue mandando: la guarda esta en el NACIMIENTO
+  // y no despues de elegir, asi que tener candidato no cambia la respuesta.
   insertFinding(id, 'LOW', 'hallazgo de prueba para C1')
-  const sinGit = await run(`window.api.repair.propose('${id}')`)
+  const conHallazgo = await run(`window.api.repair.propose('${id}')`)
   check(
-    'con hallazgo pero sin repo git, propose devuelve null (sin ancla)',
-    sinGit.ok === true && sinGit.value === null,
-    JSON.stringify(sinGit)
+    'tener candidato no ablanda el perimetro: mismo motivo',
+    conHallazgo.ok === true && conHallazgo.value.reason === 'no-es-su-vehiculo',
+    JSON.stringify(conHallazgo)
   )
 
   const despues = await run(`window.api.repair.list('${id}')`)

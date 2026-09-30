@@ -38,10 +38,12 @@ module.exports = async function mitigateChecks(window) {
   const visible = await run(`window.api.scan.findings('${id}')`)
   check('sigue a la vista en el tablero, con su nota', visible.length === 1 && visible[0].mitigatedNote === NOTA, JSON.stringify(visible[0] && visible[0].mitigatedNote)) // prettier-ignore
 
-  // vivo() = ACTIVE && open, asi que MITIGATED lo saca de la cola por las dos
-  // vias: la seleccion automatica y la dirigida. Aqui se ve por la dirigida.
+  // Que MITIGATED salga de la cola por las dos vias —automatica y dirigida— se
+  // prueba en `candidatos-mitigado.test.ts`: aqui el proyecto vive en /tmp y el
+  // perimetro (ADR-107) contesta antes, asi que esto solo dice que NO nace
+  // propuesta. Se deja porque esa parte si vale: ninguna via la engendra.
   const dirigido = await run(`window.api.repair.propose('${id}', '${hallazgo}')`)
-  check('el motor ya no lo puede elegir ni dirigido', dirigido.ok && dirigido.value === null, JSON.stringify(dirigido)) // prettier-ignore
+  check('ni dirigido nace propuesta, y el motivo viene dicho', dirigido.ok && dirigido.value.ok === false && typeof dirigido.value.reason === 'string', JSON.stringify(dirigido)) // prettier-ignore
 
   const deshecho = await run(`window.api.scan.unmitigate('${hallazgo}')`)
   check('deshacer lo devuelve a ACTIVE sin nota', deshecho.ok && fila(hallazgo).lifecycle === 'ACTIVE' && fila(hallazgo).mitigated_note === null, JSON.stringify(fila(hallazgo))) // prettier-ignore
