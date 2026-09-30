@@ -1586,3 +1586,34 @@ Falta la profundidad por capa, en este orden y por esta razón:
 | 5 | Puente y presentación, 430 ficheros | cobertura baja: 74 tests para 410 fuente |
 | 6 | `scripts/`, 106 ficheros | cero tests, y corren sobre la base viva |
 | 7 | Barrido documental completo | cerrar las erratas de §9.5 con método |
+
+## 10. Lo que la cura del perímetro dejó desalineado (2026-09-30)
+
+### 10.1 P2 — Seis documentos describen el LOOP como si existiera
+
+ADR-107 (`d5e9945`) retiró el LOOP de raíz. La documentación que cuenta **cómo
+funciona hoy** no se ha tocado, así que describe un subsistema que ya no está.
+Medido por `grep -ci loop` sobre cada fichero, el mismo día del merge:
+
+| Documento | Líneas con «loop» | Lo peor que afirma |
+|---|---|---|
+| `docs/FORTRESS-FUNCIONAMIENTO-ACTUAL.md` | 27 | es el documento del presente |
+| `docs/IPC.md` | 9 | tabula `loop:last-session`, `loop:status` y `loop:chunk`, tres canales que ya no se registran |
+| `docs/DATA-MODEL.md` | 8 | — |
+| `docs/GLOSSARY.md` | 6 | define el término como vivo |
+| `docs/OVERVIEW.md` | 5 | — |
+| `docs/PRINCIPLES.md` | 3 | — |
+
+`docs/FLOWS/LOOP-VIEJO.md` (26) ya se llamaba «viejo» y queda como historia;
+`docs/HISTORY.md` y `docs/CHANGELOG.md` **deben** seguir nombrándolo, porque
+cuentan lo que pasó.
+
+**Por qué P2 y no P1:** ninguna de estas líneas gobierna código ni engaña a un
+agente en ejecución —el bloque de barreras y los prompts no las leen—, pero sí
+engañan a quien lea la documentación para decidir. Es exactamente la regla de
+«dónde vive cada verdad» del `CLAUDE.md` incumplida por un día.
+
+**Arreglo:** un barrido documental corto, fichero por fichero, distinguiendo las
+tres categorías —**retirar** (lo que describe el presente), **conservar** (lo
+histórico) y **reescribir** (lo que ahora hace el Drenaje en su lugar)—. Es el
+mismo trabajo que el tramo 7 de §9.8 ya tiene planificado, y cabe dentro de él.
