@@ -1,6 +1,6 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-29 · **Commit de referencia:** `10d3a68`
+**Fecha:** 2026-09-29 · **Commit de referencia:** `d3abb45`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
@@ -17,14 +17,17 @@ entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destap�
 > repo auditado tratado como fuente de verdad. La promesa «un cliente no toca a
 > otro» ya no tiene excepción medida.
 >
-> Los cuatro urgentes de la auditoría están cerrados y verificados en vivo, y el
-> gate volvió a ser determinista. Lo que queda, por lo que más pesa:
+> **Y CON ÉL, LOS P0 DE SEGURIDAD DE LA AUDITORÍA ESTÁN CERRADOS.** El que
+> quedaba en la lista —el analista y su área en texto libre— **no era un P0**: al
+> medirlo, el embudo ya cerraba el vector, así que era P1 de calidad, y también
+> está cerrado (`d3abb45`). Los cuatro urgentes siguen cerrados y verificados en
+> vivo, y el gate volvió a ser determinista. Lo que queda, por lo que más pesa:
 >
 > | # | Qué | Dónde |
 > |---|---|---|
 > | 1 | Los tramos 2 a 7 de la auditoría, sin empezar | §9.8 |
-> | 2 | El P0 de seguridad que queda: el analista pide el área en texto libre | §9.2 |
-> | 3 | El residuo del primero: informe PARCIALMENTE ilegible | §9.2 |
+> | 2 | El residuo del primer urgente: informe PARCIALMENTE ilegible | §9.2 |
+> | 3 | Las 5 filas viejas en `otro`: el 61 % de la señal del backlog sin reclasificar (lote aparte) | §9.2 |
 > | 4 | Confirmar el determinismo con más superficie | §9.1 |
 > | 5 | Los cuatro de los trece de la decisión D | §6.11 |
 > | 6 | SECURITY-MODEL sin una palabra sobre la caja | §8.2 |
@@ -1307,13 +1310,44 @@ corrección es pequeña.
   (`generator-prompt.ts`, `omega-prompt.ts`, `critico-prompt.ts`) y los tres
   llaman al control compartido `sanearCampoDePrompt`, que aplana Y neutraliza.
   Queda dicho aquí para que no se vuelva a abrir.
-- **El analista pide el área en texto libre.** *Verificado.*
-  `analysis-prompt-formato.ts:1` pide `"area":"zona"` en vez del
-  `FORMA_DE_NOTA` compartido, que pide «de la lista» y enumera el vocabulario.
-  `aArea` hunde todo lo que no reconoce a `otro`, y la dedup funde por
-  `(kind, area)`, así que **todas** las observaciones del analista colapsan en
-  cinco filas como máximo. Tampoco está en el guardián `quien-observa.test.ts`.
-  **Arreglo:** usar `NOTAS_COMO_CLAVE` y añadirlo a la lista del guardián.
+- **~~El analista pide el área en texto libre.~~** — **ARREGLADO** `d3abb45`
+  (2026-09-29), y **RECLASIFICADO: es P1 de CALIDAD, no P0 de seguridad.** La
+  auditoría lo marcó P0 por un vector que el embudo ya cerraba, y medirlo lo
+  desmintió: `toSelfNotes` llama a `aArea` en el embudo por el que pasan las DOS
+  puertas, así que el texto libre **no llega a la columna**. Lo comprobé donde de
+  verdad podía haber quedado crudo —`proposal_events.evidence_json`, que persiste
+  el análisis ENTERO con sus `notes`— y el texto libre **se corta exactamente en
+  el cierre del vocabulario** (12-sep): 115 eventos antes con 352 áreas libres y
+  0 cerradas; 39 eventos después con 95 cerradas y **0 libres**. Además
+  `analysis_reason` (177 filas) no contiene ni una vez la clave `"area"`, y
+  `agent_runs` no guarda salida cruda. Los P0 de seguridad los cerró la trifecta.
+  **La mitad de CALIDAD sí era real, y grande.** La era del vocabulario cerrado
+  tiene 31 filas —las 31 del backlog—: **5 en `otro` con 196 avistamientos** y 26
+  clasificadas con 124. Las cinco son **una por cada `kind`**, que es la huella
+  exacta de un agente cuyo área siempre colapsa, porque la dedup funde por
+  `(kind, area)`. **El 16 % de las filas se comía el 61 % de la señal.**
+  **El arreglo:** el analista pide el área por la constante COMPARTIDA, que
+  enumera las 18 y dice «se ELIGE de esta lista, no se inventa»; se fueron su
+  `NOTA` propia y sus nueve líneas de párrafo duplicado —una quinta redacción de
+  lo que el módulo compartido existe para unificar—. Se conserva a propósito su
+  ejemplo con el objeto ENTERO: es la lección de ESTE prompt, que leyó «notes»
+  como sección aparte y respondió en dos bloques. Y entra en el guardián
+  `quien-observa.test.ts`.
+  **UN MUTANTE MÍO SOBREVIVIÓ Y TENÍA RAZÓN:** sacar al analista de la lista del
+  guardián NO rompía nada, porque un `it.each` con una fila menos corre menos
+  casos y pasa — el guardián no se guardaba a sí mismo. Se cerraron los dos
+  agujeros que eso destapó: un PISO en la lista (quitar una fila ahora falla) y
+  un test DERIVADO DEL FUENTE que exige que quien lleve el texto de la petición
+  lo importe. Medido antes de escribirlo: ese texto vive en UN solo sitio y lo
+  importan exactamente cinco ficheros; una copia falsa metida en
+  `generator-prompt.ts` lo tumba, así que cubre también el prompt de mañana.
+  **DOS AVISOS HONESTOS.** (1) El fichero **NO encogió: creció**, 71 → 73 líneas.
+  Las nueve duplicadas se fueron a una importada, pero la explicación ocupa
+  sitio; se proyectó que encogería y no fue así. (2) El arreglo **no toca la
+  base**: las 5 filas viejas en `otro`, con el 61 % de la señal, siguen ahí. El
+  arreglo endereza la señal FUTURA; reclasificar las viejas es un lote aparte con
+  el kit, y es decisión de Jojo. Tres mutantes muertos, gate 6/6 sobre main y las
+  cuatro pruebas sin cambio.
 
 ### 9.3 P0 — Seguridad con efecto SIN MEDIR: medir antes de priorizar
 

@@ -631,7 +631,7 @@ Lo que ese binario lleva dentro, verificado por identificadores:
 - **El gate determinista**, arreglado por la causa.
 - **Once decisiones firmadas**: la enmienda de ADR-095 y de la 098 a la 105.
 
-**EN MAIN Y NO EN EL BINARIO.** TRES arcos entraron DESPUÉS de ese rebuild, así
+**EN MAIN Y NO EN EL BINARIO.** CUATRO arcos entraron DESPUÉS de ese rebuild, así
 que están en `main` y no en producción:
 
 1. La correa que el motor usó, que el revisor ya lee del libro de eventos
@@ -644,8 +644,14 @@ que están en `main` y no en producción:
    entero —y el repo de OTRO cliente— en escritura DENTRO de la caja. Medido con
    un `bwrap` real, porque la pregunta que decidía si era P0 o costura era si un
    `--bind` posterior destapa el `--tmpfs` anterior. Lo destapa.
+4. **El analista alineado con el vocabulario cerrado** (`d3abb45`): pedía el área
+   en texto libre y era el único de los cinco prompts que no podía clasificar, así
+   que sus notas caían al cajón `otro` y la dedup —que funde por `(kind, area)`—
+   las dejaba en cinco filas con **196 de 320 avistamientos**: el 16 % de las
+   filas con el 61 % de la señal del backlog. Su guardián además no se guardaba a
+   sí mismo, y eso lo destapó un mutante que sobrevivió.
 
-**Con ese tercero, la TRIFECTA DEL AISLAMIENTO queda cerrada:** los tres vectores
+**Con la cota de la caja, la TRIFECTA DEL AISLAMIENTO queda cerrada:** los tres vectores
 por los que el código del cliente rompía el aislamiento —sus caracteres
 (`3810e5c`), su corpus declarado (`3c8a77d`) y su `.git` (`10d3a68`)— eran la
 misma clase de error, un dato del repo auditado tratado como fuente de verdad.
@@ -658,13 +664,12 @@ El rebuild queda pendiente, con la app cerrada.
    resto de infraestructura, la aplicación, la presentación —430 ficheros con 74
    tests— y `scripts/`, que son 106 ficheros sin tests que corren sobre la base
    viva. Ese último es el que más asusta de los seis.
-2. **Los P0 de seguridad de los 118 que no eran los cuatro urgentes** (§9.2 y
-   §9.3). Dos de los tres están cerrados: **el corpus crudo** (`3c8a77d`), saneado
-   al emitirlo en `docs-first-compose.ts:59` —un punto que cubre los OCHO
-   constructores, que eran ocho y no nueve— con el residuo del prototipo tapado de
-   paso; y **la cota de la caja** (`10d3a68`), con su efecto medido en `bwrap` real
-   y las tres piezas puestas. Queda **uno**: el analista que pide el área en texto
-   libre y colapsa sus notas en cinco filas.
+2. **~~Los P0 de seguridad de los 118 que no eran los cuatro urgentes~~**
+   (§9.2 y §9.3): **CERRADOS.** El corpus crudo (`3c8a77d`), la cota de la caja
+   (`10d3a68`) y —el tercero de la lista— el analista, que al medirlo **no era un
+   P0**: el embudo ya cerraba su vector, así que era P1 de calidad, y también está
+   cerrado (`d3abb45`). Tres de los tres: en los tres la medición corrigió el
+   hallazgo, y en uno cambió hasta su severidad.
 3. **El residuo del primer urgente** (§9.2): un informe PARCIALMENTE ilegible pasa
    en silencio, y con una entrada buena de diez se pierden nueve sin que nada las
    cuente.
@@ -677,11 +682,12 @@ El rebuild queda pendiente, con la app cerrada.
    fichero de auto-mejora, los seis funcionales de la auditoría (§9.4) y las 35
    erratas de documento (§9.5).
 
-**EL PRÓXIMO PASO RECOMENDADO.** Con la trifecta del aislamiento cerrada, queda un
-solo P0 de seguridad —el analista que pide el área en texto libre, que es pequeño—,
-así que la elección real es abrir el barrido de los tramos 2 a 7, que es más largo
-y descubre más. Si se elige eso, el tramo de `scripts/` primero: 106 ficheros sin
-un solo test, corriendo sobre la base viva.
+**EL PRÓXIMO PASO RECOMENDADO.** Con la trifecta del aislamiento cerrada y el P1
+del analista dentro, **la auditoría no deja ningún P0 de seguridad abierto**. Así
+que lo siguiente es abrir el barrido de los tramos 2 a 7, y el tramo de `scripts/`
+primero: 106 ficheros sin un solo test, corriendo sobre la base viva. Pendientes
+menores con dueño claro: las 5 filas viejas en `otro` (un lote con el kit, si Jojo
+quiere rescatar esa señal) y el rebuild, que acumula CUATRO arcos.
 
 **AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto, o
 recomprar antes los cinco pausados.
