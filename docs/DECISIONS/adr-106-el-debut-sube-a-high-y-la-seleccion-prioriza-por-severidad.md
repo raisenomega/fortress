@@ -16,6 +16,33 @@
   de los 8 proyectos, ninguno con propuesta, y **122 HIGH abiertos** de los que
   solo 4 se intentaron, todos por la vía dirigida.
 
+## 0. ERRATA DE FONDO — lo que ADR-107 cambió por debajo (2026-09-30)
+
+Este ADR se firmó por la mañana; **ADR-107 se firmó y se mergeó después, el mismo
+día** (`d5e9945`). **La decisión no cambia. Tres de sus datos sí**, y hay que
+leerlos antes de mergear:
+
+1. **`loopBlocked` ya no existe.** El §4 lo lista entre lo que no cambia. ADR-107
+   retiró el LOOP de raíz y su gate con él. La frontera que sigue viva —y que este
+   ADR tampoco toca— es `integracionAutomaticaPermitida`
+   (`domain/repair/integracion-sin-firma.ts`): el código propio no se integra solo.
+2. **El volumen que motivaba el escalón queda FUERA del alcance del Motor.** Los
+   «50 CRITICAL en 7 de los 8 proyectos» y los «122 HIGH abiertos» del encabezado
+   son, casi todos, de proyectos de CLIENTE, y desde ADR-107 el Motor no los ve.
+   Medido hoy sobre la base viva (`status=open` y `lifecycle=ACTIVE`): **48
+   CRITICAL fuera del repo propio**, y en el repo propio **0 CRITICAL —nunca hubo
+   ninguno—**, **7 HIGH**, 17 MEDIUM y 6 LOW.
+3. **Lo que este ADR abre, por tanto, son esos 7 HIGH.** El §3.4 dice «12 HIGH
+   trabajables en el repo propio»; hoy son **7** abiertos y activos (más 13
+   `EXTINCT` y 1 `false_positive`). **La diferencia no está explicada**, y quien
+   firme el merge debe leer el escalón con el número de hoy, no con el de la
+   mañana.
+
+**Consecuencia para el §3.3, la puerta de CRITICAL:** su condición sigue siendo
+correcta y verificable, pero ahora **solo puede cumplirse con un HIGH del repo
+propio**, porque es el único terreno donde el Motor trabaja. Es un escalón más
+estrecho, y más lento, de lo que este ADR suponía al firmarse.
+
 ## 1. La firma del operador
 
 > «YO Jojo dueño del proyecto FORTRESS firmo ADR-XXX: subir DEBUT a incluir HIGH
