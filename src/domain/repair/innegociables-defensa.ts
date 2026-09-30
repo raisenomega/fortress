@@ -5,6 +5,7 @@ import { DEFENSAS_DE_LA_RED } from './innegociables-red'
 import { FRENOS_DE_GASTO } from './innegociables-gasto'
 import { DEFENSAS_DEL_GRAFO_POR_TURNO } from './innegociables-grafo'
 import { DEFENSAS_DEL_SANEADO } from './innegociables-saneado'
+import { DEFENSAS_DEL_PERIMETRO } from './innegociables-perimetro'
 /**
  * La TERCERA familia del criterio innegociable: ficheros que IMPLEMENTAN una
  * defensa, sin gobernar la autonomia ni validar una entrada. Ver
@@ -24,6 +25,7 @@ export const DEFENSAS_INNEGOCIABLES: readonly string[] = [
   ...FRENOS_DE_GASTO,
   ...DEFENSAS_DEL_GRAFO_POR_TURNO,
   ...DEFENSAS_DEL_SANEADO,
+  ...DEFENSAS_DEL_PERIMETRO,
   // El ENTORNO de todo hijo: `build-env` recorta la sesion viva del operador
   // —agente ssh, keyring, GPG— y `git-env` hace lo propio para los cinco `git`
   // que corren en el repo auditado y ejecutan sus hooks.

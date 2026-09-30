@@ -11,4 +11,11 @@ export interface ProyectoEnVista extends Project {
    * ve; la casilla del lote pide las dos cosas.
    */
   readonly resoluble: boolean
+  /**
+   * Si ES el repo de FORTRESS. Viaja porque el renderer no puede mirar el
+   * package.json ni git, y de eso depende QUE HERRAMIENTA le toca (ADR-107): el
+   * Motor repara FORTRESS, y a un proyecto de cliente se le dice que su camino
+   * es el Terminal en vez de ensenarle un boton que su guarda va a negar.
+   */
+  readonly esRepoPropio: boolean
 }

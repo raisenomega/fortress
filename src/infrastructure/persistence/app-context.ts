@@ -12,6 +12,7 @@ import { createFsProbe } from '../omega/fs-probe'
 import { discoverCorpus } from '../project/discover-corpus'
 import { barrerasDeclaradasDelProyecto } from '../project/barreras-declaradas-del-proyecto'
 import { huellaDeConfig, readFortressConfig } from '../project/fortress-config'
+import { isFortressRepo } from '../system/self-project'
 import { puertosDeAutoMejora } from './app-context-automejora'
 import { createGraphAnalyst } from '../repair/graph-analyst'
 import { createSqliteActivityRepository } from './sqlite-activity-repository'
@@ -42,8 +43,8 @@ export function getAppContext(): AppContext {
   context = {
     projects: createSqliteProjectRepository(db),
     corpus: { of: discoverCorpus },
-    fortressConfig: readFortressConfig,
-    huellaDeConfig,
+    fortressConfig: readFortressConfig, huellaDeConfig,
+    esRepoPropio: isFortressRepo, // ADR-107
     barrerasDeclaradas: barrerasDeclaradasDelProyecto,
     findings: createSqliteFindingRepository(db),
     fileHistory: createGitFileHistory(),

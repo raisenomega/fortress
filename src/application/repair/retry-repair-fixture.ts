@@ -20,6 +20,7 @@ interface Opciones {
   readonly otras?: readonly Proposal[]
   readonly findings?: readonly FindingMemory[]
   readonly verdictStatus?: string
+  readonly esRepoPropio?: boolean
   readonly sha?: string | null
   readonly cerradas?: readonly SelfObservation[]
 }
@@ -34,6 +35,7 @@ export function retryBench(opts: Opciones = {}): Bench {
     findings: opts.findings ?? [hallazgo('f1', 'a.ts')],
     verdictStatus: opts.verdictStatus,
     cerradas: opts.cerradas,
+    esRepoPropio: opts.esRepoPropio,
     sha: opts.sha
   })
   Object.assign(b.context.repairProposals, {

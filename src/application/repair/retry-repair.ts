@@ -10,6 +10,7 @@ import { estudiar } from './estudiar-con-memoria'
 import { safeRecord } from './book-cursor'
 import { recordAnalyzed } from './record-plan-events'
 import { admitRetry } from './retry-guards'
+import { NO_ES_SU_VEHICULO, esVehiculoDelMotor } from '@domain/repair/vehiculo-del-motor'
 
 export type RetryResult =
   | { readonly ok: true; readonly newProposalId: string }
@@ -39,6 +40,7 @@ export async function retryRepair(ctx: AppContext, oldProposalId: string): Promi
   const admitted = admitRetry(ctx, oldProposalId)
   if ('reason' in admitted) return admitted
   const { old, project, finding } = admitted
+  if (!esVehiculoDelMotor(ctx.esRepoPropio(project.path))) return { ok: false, reason: NO_ES_SU_VEHICULO } // prettier-ignore
   const baseSha = ctx.headSha(project.path)
   if (baseSha === null) return { ok: false, reason: 'no_git_head' }
 
