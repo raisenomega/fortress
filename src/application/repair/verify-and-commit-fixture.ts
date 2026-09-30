@@ -41,6 +41,7 @@ export function banco(state: ProposalState): Banco {
       hasChanges: () => Promise.resolve(true),
       changedFiles: () => Promise.resolve(['src/a.ts']),
       commit: () => Promise.resolve({ ok: true as const, sha: 'c'.repeat(40) }),
+      huella: () => Promise.resolve('h'.repeat(40)),
       diff: () => Promise.resolve({ files: ['src/a.ts'], insertions: 1, deletions: 0 })
     },
     now: () => 1

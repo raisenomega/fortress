@@ -1,3 +1,4 @@
+import { MOTIVO_HUELLA } from '@domain/repair/motivo-de-la-huella'
 import { MOTIVO_CORREA } from '@domain/repair/lo-que-el-motor-supo'
 import { describe, expect, it } from 'vitest'
 import { bench } from './generate-fix-fixture'
@@ -15,17 +16,20 @@ describe('generateFix (C3), camino feliz', () => {
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.commitSha).toBe('c'.repeat(40))
     expect(b.patches.at(-1)).toMatchObject({ state: 'GENERADO' })
-    // El SCOPE es nuevo (DEUDAS §6.12): la correa que se APLICA queda asentada
-    // para que el revisor la lea del libro en vez de recalcularla. Va entre la
-    // corrida y la transicion porque se asienta donde se aplica, al medir el diff.
+    // Dos DECISION entre la corrida y la transicion, y su orden dice cuando se
+    // supo cada cosa: la HUELLA en cuanto el generador vuelve —antes de que el
+    // commit vacie el diff, y por eso tambien existe cuando la corrida falla—, y
+    // el SCOPE al medir el diff, que es donde la correa se APLICA (DEUDAS §6.12).
     expect(b.events.map((e) => [e.eventType, e.phase])).toEqual([
       ['DECISION', 'GENERATE'],
       ['AGENT_RUN', 'GENERATE'],
       ['DECISION', 'GENERATE'],
+      ['DECISION', 'GENERATE'],
       ['TRANSITION', 'GENERATE']
     ])
-    expect(b.events[2].reason).toBe(MOTIVO_CORREA)
-    expect(b.events[3].toState).toBe('GENERADO')
+    expect(b.events[2].reason).toBe(MOTIVO_HUELLA)
+    expect(b.events[3].reason).toBe(MOTIVO_CORREA)
+    expect(b.events[4].toState).toBe('GENERADO')
     expect(b.calls).toEqual(['create', 'generate', 'commit'])
   })
 })

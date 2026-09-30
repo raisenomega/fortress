@@ -15,6 +15,9 @@ export interface WorktreePort {
   hasChanges(worktreePath: string): Promise<boolean>
   changedFiles(worktreePath: string): Promise<string[]>
   diff(worktreePath: string, baseSha: string): Promise<WorktreeDiffInfo>
+  /** sha1 del trabajo SIN comitear —ediciones Y creados—, o null si git no se
+   *  dejo leer. Se pide ANTES del commit: despues el diff esta vacio. */
+  huella(worktreePath: string): Promise<string | null>
   commit(worktreePath: string, message: string): Promise<{ ok: true; sha: string } | { ok: false; error: string }> // prettier-ignore
 }
 

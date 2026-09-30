@@ -18,7 +18,7 @@ export function generadorFake(
     generate: (_wt: string, prompt: string) => {
       calls.push('generate')
       prompts.push(prompt)
-      const runMeta = { tokensUsed: opts.genCost ?? 50_000, durationMs: 9, startedAt: 1, endedAt: 10, usage: EMPTY_USAGE } // prettier-ignore
+      const runMeta = { tokensUsed: opts.genCost ?? 50_000, durationMs: 9, startedAt: 1, endedAt: 10, usage: { ...EMPTY_USAGE, numTurns: opts.turnos ?? 0 } } // prettier-ignore
       if (opts.turnosAgotados === true) return Promise.resolve({ ok: false as const, error: 'no completo en 30 turnos', turnosAgotados: true as const, runMeta }) // prettier-ignore
       if (opts.timedOut === true) return Promise.resolve({ ok: false as const, error: 'timeout tras 15 min', timedOut: true as const, runMeta: SIN_FACTURA }) // prettier-ignore
       if (opts.generatorFails === true) return Promise.resolve({ ok: false as const, error: 'kaput', runMeta }) // prettier-ignore

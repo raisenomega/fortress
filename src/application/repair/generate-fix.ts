@@ -5,7 +5,8 @@ import { admitProposal } from './generate-guards'
 import { prepareWorktree } from './generate-setup'
 import { loadAnalysis } from './load-analysis'
 import { motivoDelGenerador } from './motivo-del-generador'
-import { emitGeneratorRun } from './record-generate-events'
+import { MOTIVO_HUELLA } from '@domain/repair/motivo-de-la-huella'
+import { emitDecision, emitGeneratorRun } from './record-generate-events'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { verifyAndCommit } from './verify-and-commit'
 
@@ -36,6 +37,11 @@ export async function generateFix(
   // no existia, y la cita quedaba vacia para siempre.
   const result = conAgentRun(crudo, recordMotorRun(ctx, a.proposal.projectId, null, crudo.runMeta, !crudo.ok)) // prettier-ignore
   await emitGeneratorRun(ctx.eventLog, a.cursor, a.proposal.id, result.runMeta)
+  // La huella de lo que dejo, AQUI y no mas abajo: sirve para los DOS caminos y
+  // el commit del feliz vaciaria el diff. El caso que la pide es el del fallo
+  // —el worktree conservado de un techo agotado—, y ahi abajo ya no se pasa.
+  const huella = await deps.worktrees.huella(worktreePath)
+  await emitDecision(ctx.eventLog, a.cursor, a.proposal.id, MOTIVO_HUELLA, { huella, turnos: result.runMeta.usage?.numTurns ?? null, gasto: result.runMeta.tokensUsed ?? null }, deps.now()) // prettier-ignore
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
   if (!result.ok) return fail(motivoDelGenerador(result), { error: result.error }, true)
 

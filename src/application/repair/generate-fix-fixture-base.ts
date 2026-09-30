@@ -30,6 +30,8 @@ export interface Opciones {
   readonly arreglo?: Arreglo
   /** Un analisis anterior al ADR-102, o un analista que no contesto. */
   readonly sinArreglo?: boolean
+  /** Las vueltas que el CLI declaro en su factura. */
+  readonly turnos?: number
   /** La huella de `.fortress/config` del worktree. */
   readonly huella?: string
 }
