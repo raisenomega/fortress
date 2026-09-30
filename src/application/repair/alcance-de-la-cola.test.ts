@@ -48,9 +48,11 @@ describe('la cola elige con el alcance de su vuelta', () => {
     expect(await elegido([DEFENSA])).toBe('ninguno')
   })
 
-  it('un HIGH sigue fuera: lo para el estreno, no el alcance', async () => {
-    // `puedeTrabajarse` lo admitiria; DEBUT no. Ampliar el estreno es otra
-    // decision, y esta pieza no la toma de rebote.
-    expect(await elegido([ALTO], 'hasta-omega')).toBe('ninguno')
+  it('un HIGH ya entra por el estreno (ADR-106), y el alcance no lo para', async () => {
+    // Antes lo paraba DEBUT y esta pieza no lo tocaba. ADR-106 abrio el estreno a
+    // HIGH con una decision firmada, y lo que se comprueba aqui sigue siendo lo
+    // mismo: que el ALCANCE no es quien decide la severidad cuando la vuelta para
+    // antes del merge. Un CRITICAL seguiria fuera, y por el estreno.
+    expect(await elegido([ALTO], 'hasta-omega')).toBe('f-alto')
   })
 })

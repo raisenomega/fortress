@@ -14,13 +14,8 @@ const candidate = (severity: Severity, title: string, file: string): Candidate =
   simbolo: 'handleverify'
 })
 
-/** El hallazgo real que motivo la ampliacion: MEDIUM, aditivo, superficie 1. */
-const SSRF = candidate(
-  'MEDIUM',
-  'SSRF: el filtro de host privado no valida la IP resuelta por DNS',
-  'src/domain/posture/target-url.ts'
-)
-/** LOW pero reescritura: severidad menor NO significa fix mas contenido. */
+/** LOW pero reescritura: severidad menor NO significa fix mas contenido. Su
+ *  hermano del escalon de HIGH vive en `debut-high.test.ts`. */
 const LOW_REESCRITURA = candidate(
   'LOW',
   'La API key del entorno se hereda a los scripts del repositorio auditado',
@@ -28,10 +23,10 @@ const LOW_REESCRITURA = candidate(
 )
 
 describe('modo estreno (que severidades puede tocar el motor)', () => {
-  it('LOW y MEDIUM entran; HIGH y CRITICAL siguen fuera', () => {
+  it('LOW, MEDIUM y HIGH entran; CRITICAL sigue fuera (ADR-106)', () => {
     expect(isDebutEligible(candidate('LOW', 'sin guarda', 'a.ts'))).toBe(true)
     expect(isDebutEligible(candidate('MEDIUM', 'sin guarda', 'a.ts'))).toBe(true)
-    expect(isDebutEligible(candidate('HIGH', 'sin guarda', 'a.ts'))).toBe(false)
+    expect(isDebutEligible(candidate('HIGH', 'sin guarda', 'a.ts'))).toBe(true)
     expect(isDebutEligible(candidate('CRITICAL', 'sin guarda', 'a.ts'))).toBe(false)
   })
 
@@ -39,25 +34,31 @@ describe('modo estreno (que severidades puede tocar el motor)', () => {
     // Si manana se agrega una severidad nueva, este test obliga a clasificarla
     // a mano en vez de dejarla colarse (o quedarse fuera) por descuido.
     const dentro = SEVERITIES.filter((s) => isDebutEligible(candidate(s, 'sin guarda', 'a.ts')))
-    expect([...dentro]).toEqual(['MEDIUM', 'LOW'])
+    expect([...dentro]).toEqual(['HIGH', 'MEDIUM', 'LOW'])
   })
 
-  it('el SSRF (MEDIUM) ya es elegible y gana a un LOW que exige reescritura', () => {
-    expect(isDebutEligible(SSRF)).toBe(true)
-    expect(surface(SSRF)).toBe(1)
-    expect(surface(LOW_REESCRITURA)).toBeGreaterThan(surface(SSRF))
-    expect(selectTarget([LOW_REESCRITURA, SSRF])?.target.id).toBe(SSRF.id)
+  /**
+   * ADR-106 invierte el criterio de arriba a proposito. Antes mandaba la
+   * SUPERFICIE entre los elegibles, y con HIGH admitido eso habria dejado el
+   * cambio sin efecto observable: el fix mas pequeno casi nunca es el mas grave,
+   * asi que un HIGH admitido no habria salido elegido nunca.
+   */
+  it('la severidad ordena PRIMERO, aunque el grave sea el fix MAS GRANDE', () => {
+    // El caso que prueba el orden nuevo: el HIGH exige reescritura (superficie
+    // 11) y el LOW es agregar una guarda (1). Con el orden viejo ganaba el LOW.
+    const grave = candidate('HIGH', 'el token se reescribe en cada turno', 'b.ts')
+    const leve = candidate('LOW', 'sin guarda de concurrencia', 'a.ts')
+    expect(surface(grave)).toBeGreaterThan(surface(leve))
+    expect(selectTarget([leve, grave])?.target.id).toBe(grave.id)
   })
 
-  it('la severidad NO ordena: entre elegibles manda la superficie', () => {
-    const medium = candidate('MEDIUM', 'el handler no valida el origen', 'b.ts')
-    const low = candidate('LOW', 'el score se calcula dos veces', 'a.ts')
-    expect(selectTarget([low, medium])?.target.id).toBe(medium.id)
+  it('con la severidad empatada, la superficie sigue desempatando', () => {
+    expect(selectTarget([LOW_REESCRITURA, candidate('LOW', 'sin guarda', 'c.ts')])?.target.id).toBe('LOW:c.ts') // prettier-ignore
   })
 
-  it('un HIGH aditivo y contenido sigue sin entrar: el estreno es por confianza', () => {
-    const high = candidate('HIGH', 'el endpoint no valida el token', 'a.ts')
-    expect(surface(high)).toBe(1) // contenido, pero fuera del estreno
-    expect(selectTarget([high])).toBeNull()
+  it('CRITICAL sigue sin entrar: su puerta es CONDICIONADA (ADR-106 §3.3)', () => {
+    const critico = candidate('CRITICAL', 'el endpoint no valida el token', 'a.ts')
+    expect(surface(critico)).toBe(1) // contenido, y aun asi fuera
+    expect(selectTarget([critico])).toBeNull()
   })
 })

@@ -4,10 +4,12 @@ import { APARTE, CONTENIDO } from './plan-repair-dirigido-fixture'
 import { planRepair } from './plan-repair'
 
 describe('lo que dirigir NO puede saltarse', () => {
-  it('un dirigido fuera del estreno (HIGH) no se trabaja: dirigir no lo amplia', async () => {
-    // Que el operador pregunte no acumula confianza. Subir el estreno a HIGH es
-    // una decision deliberada, y un clic no puede tomarla de lado.
-    const b = bench({ findings: [APARTE({ severity: 'HIGH' })] })
+  it('un dirigido fuera del estreno (CRITICAL) no se trabaja: dirigir no lo amplia', async () => {
+    // Que el operador pregunte no acumula confianza, y eso no cambia. HIGH dejo
+    // de ser el caso porque ADR-106 lo metio en el estreno con una decision
+    // firmada; CRITICAL sigue fuera y su puerta es condicionada, asi que es el
+    // que prueba la regla ahora.
+    const b = bench({ findings: [APARTE({ severity: 'CRITICAL' })] })
     expect(await planRepair(b.context, 'p1', 'f-dirigido')).toBeNull()
     expect(b.inserted).toHaveLength(0)
   })
