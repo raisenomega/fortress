@@ -184,6 +184,51 @@ un humano, o no se aplica.
 ### Neutras
 - Los fixes de ABI nativo siguen fuera del alcance del Motor, por decisión.
 
+## 4bis. ADDENDUM MEDIDO TRAS LA FIRMA — hacen falta TRES directorios, no dos
+
+**Léase antes de mergear. No cambia la decisión firmada; la completa con lo que
+se midió al construirla.**
+
+Con los dos directorios de la firma, el `npm ci` **completo** dentro de la caja
+—por el proxy real, sobre el worktree conservado— **sigue fallando**, y en un
+paso ANTERIOR a `node-gyp`:
+
+```
+npm error path .../node_modules/electron
+npm error command sh -c node install.js
+npm error RequestError: getaddrinfo ENOTFOUND github.com
+```
+
+El paquete `electron` baja su **binario** (un zip de 109 MB) en su propio
+`install.js`, de **`github.com`**, que la tabla del proxy no abre. Con el HOME
+tapado no ve la caché donde ese zip YA ESTÁ:
+`~/.cache/electron/<hash>/electron-v39.8.10-linux-x64.zip`.
+
+**Con un TERCER `--ro-bind` de `~/.cache/electron`, el `npm ci` completo pasa:**
+
+```
+hosts que el proxy abrira: registry.npmjs.org
+added 639 packages in 28s
+  • completed installing native dependencies
+rc=0  ·  28s
+```
+
+Ese directorio contiene **un solo fichero**: el zip oficial del release de
+Electron. Cero enlaces simbólicos, nada más. Misma clase de artefacto público
+que las cabeceras, y por las mismas razones (parent, solo lectura, sin red).
+
+**Y una corrección al §3.5.** El fix del Electron que disparó todo esto **no
+subía el ABI**: pinchaba el rango (`^39.2.6` → `39.8.10`), así que el lock sigue
+en 39.8.10 y su zip está en caché. Con el tercer bind, **ese fix habría pasado el
+gate**. Lo que el §3.5 dice sigue siendo cierto para un salto de major de verdad
+—probado con `target=40.0.0`, que falla en el `mkdir` del devdir en solo
+lectura—, pero no describía este fix.
+
+**Queda a la firma del operador**, porque amplía lo que él firmó: añadir
+`~/.cache/electron` a `CABECERAS_PUBLICAS` con los mismos cuatro tests. Sin ese
+tercer directorio, este ADR arregla el paso de `node-gyp` y **el `npm ci` del
+gate sigue sin pasar**.
+
 ## 5. Lo que queda pendiente, y es lo que de verdad cierra esto
 
 **UNA CORRIDA REAL DEL GATE sobre FORTRESS** con un fix ordinario —no el
