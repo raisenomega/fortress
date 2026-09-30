@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync } from 'node:fs'
 import { rmdirSiVacio } from './directorio-vacio'
 import { git, lastLine, porcelainFiles, shortstat } from './repair-git'
+import { huellaDelTrabajo } from './huella-del-trabajo'
 
 export interface WorktreeDiff {
   readonly files: readonly string[]
@@ -19,6 +20,7 @@ export interface WorktreeManager {
   changedFiles(worktreePath: string): Promise<string[]>
   /** Post-commit: lo que separa a HEAD del ancla, para la evidencia del libro. */
   diff(worktreePath: string, baseSha: string): Promise<WorktreeDiff>
+  huella(worktreePath: string): Promise<string | null>
   commit(worktreePath: string, message: string): Promise<{ ok: true; sha: string } | { ok: false; error: string }> // prettier-ignore
 }
 
@@ -60,6 +62,7 @@ export function createWorktreeManager(): WorktreeManager {
         ...shortstat(stat.out)
       }
     },
+    huella: (worktreePath) => huellaDelTrabajo(worktreePath),
     commit: async (worktreePath, message) => {
       await git(worktreePath, ['add', '-A'])
       const result = await git(worktreePath, ['commit', '-m', message, '--no-verify'])

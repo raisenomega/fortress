@@ -17,6 +17,7 @@ function depsDe(opts: Opciones, calls: string[], prompts: string[]): GenerateDep
       remove: () => (calls.push('remove'), Promise.resolve()),
       hasChanges: () => Promise.resolve(opts.hasChanges ?? true),
       changedFiles: () => Promise.resolve([...(opts.changed ?? ['src/a/b.ts'])]),
+      huella: () => Promise.resolve('h'.repeat(40)),
       diff: () => Promise.resolve({ files: [...(opts.changed ?? ['src/a/b.ts'])], insertions: 3, deletions: 1 }), // prettier-ignore
       commit: () => (calls.push('commit'), Promise.resolve({ ok: true as const, sha: 'c'.repeat(40) })) // prettier-ignore
     },
