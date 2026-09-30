@@ -30,4 +30,30 @@ describe('que se puede montar en la caja', () => {
     expect(ancho).toBe('proyecto-demasiado-ancho')
     expect(porQueNoSeMonta(rutas({ cwd: '/home/ana/otro' }))).toBe('cwd-fuera-del-proyecto')
   })
+
+  /**
+   * La anchura no es solo cosa del proyecto. Medido el 2026-09-29 con un bwrap
+   * real: una ruta de las LISTAS que contenga el HOME se monta con `--bind`
+   * DESPUES del `--tmpfs` que lo tapa, y el `--bind` gana — el proceso de dentro
+   * listaba el HOME entero, leia un testigo y dejaba un fichero en el disco de
+   * verdad, fuera de la caja. No lo contiene bwrap: lo tiene que negar la cota.
+   */
+  it('una ruta de las listas que CONTIENE el HOME no se monta', () => {
+    expect(porQueNoSeMonta(rutas({ otras: ['/home/ana'] }))).toBe('ruta-demasiado-ancha')
+    expect(porQueNoSeMonta(rutas({ otras: ['/home'] }))).toBe('ruta-demasiado-ancha')
+    expect(porQueNoSeMonta(rutas({ otras: ['/'] }))).toBe('ruta-demasiado-ancha')
+  })
+
+  it('las rutas legitimas de las listas pasan: ninguna contiene el HOME', () => {
+    // Las tres reales, medidas sobre el worktree vivo del motor: el `.git` comun
+    // del repo, el destino del `worktree add` en userData, y el node del PATH
+    // —que vive DENTRO del HOME y por eso «no leer el home» nunca fue literal—.
+    const legitimas = [
+      '/home/ana/repos/tienda/.git',
+      '/home/ana/.config/app/repair-worktrees/ca8f8770',
+      '/home/ana/.nvm/versions/node/v24.18.0',
+      '/usr'
+    ]
+    expect(porQueNoSeMonta(rutas({ otras: legitimas }))).toBeNull()
+  })
 })

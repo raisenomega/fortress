@@ -54,7 +54,10 @@ const red = (socket: string | null): string[] =>
  */
 export function flagsDeBwrap(caja: Caja): Result<readonly string[]> {
   const otras = [...caja.sistema.map((s) => s.ruta), ...caja.soloLectura, ...caja.escritura]
-  const motivo = porQueNoSeMonta({ ...caja, otras: [...otras, caja.socketDelProxy ?? '/'] })
+  // Sin red NO hay ruta que validar. Antes iba un `/` de relleno, que pasaba el
+  // filtro de forma y ahora seria justo lo mas ancho que existe.
+  const socket = caja.socketDelProxy === null ? [] : [caja.socketDelProxy]
+  const motivo = porQueNoSeMonta({ ...caja, otras: [...otras, ...socket] })
   if (motivo !== null) return err(motivo)
 
   return ok([
