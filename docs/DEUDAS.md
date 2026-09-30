@@ -1003,7 +1003,15 @@ el bloque de barreras declaradas (ADR-104). Medido: hoy ningún proyecto
 registrado tiene hooks en `settings.local.json` (este repo solo tiene ese fichero,
 sin hooks; el settings global del operador tampoco los tiene). Real, bajo.
 
-### 8.6 BAJO — Gap de diseño: «Loop blindado» arranca un agente real en cada integración
+### 8.6 ~~BAJO — Gap de diseño: «Loop blindado» arranca un agente real en cada integración~~
+
+**CERRADA POR RETIRADA el 2026-09-30 (ADR-107, merge `d5e9945`).** Los dos
+ficheros de la medida ya no existen: el guión se rehízo como
+`scripts/checks/confianza-checks.cjs`, que **no registra el repo propio ni
+enciende nada** —conserva los dos checks que sí valían, «revocar la confianza
+apaga el flag» y «`chat:stop` cumple su contrato»—, y el controlador del loop se
+borró con el LOOP. **No se arregló: se retiró.** La medida original, para la
+historia:
 
 `scripts/checks/loop-guard-checks.cjs:42-49` registra el repo propio
 (`projects.self()`) y lo enciende con `setLoopEnabled(true)`, que es `startLoop`
@@ -1428,7 +1436,14 @@ corrección es pequeña.
 
 ### 9.4 P1 — Funcionales graves
 
-- **El clasificador de fallos del loop marca terminal como transitorio.**
+- **~~El clasificador de fallos del loop marca terminal como transitorio.~~** —
+  **CERRADA POR RETIRADA el 2026-09-30 (ADR-107).** `failure-kind.ts` y su
+  hermana `clase-del-fallo.ts` se borraron con el LOOP, y **hoy no queda ningún
+  clasificador de fallos en el repo** (verificado por grep: 0 referencias a
+  `classifyFailure`, `failure-kind` y `clase-del-fallo`). El `\bred\b` que
+  faltaba **nunca se aplicó**: el fichero se fue con su bug dentro. Si algún día
+  vuelve a hacer falta clasificar un fallo, esta medida es el aviso de por dónde
+  se rompe. La medida original:
   *Verificado, medido con la regex real.* En
   `src/domain/loop/failure-kind.ts:10-11` la palabra `red` va sin límites de
   palabra y casa dentro de `required`, `reviewer`, `occurred` y `hundred`:

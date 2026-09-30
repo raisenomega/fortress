@@ -460,7 +460,9 @@ emitir en vivo. Queda aparte, distinta de las notas, la deuda de los **denials
 del ejecutor** (DEUDAS §6.7).
 
 **Sub-pieza 4 HECHA el 2026-09-26** (merge `ff59bcd`, sin ADR: calco de las
-barreras): LOOP observa sus paradas y sus standbys **del dato duro**, no del
+barreras) y **RETIRADA el 2026-09-30 con el LOOP** (ADR-107): el código se fue,
+las dos áreas del vocabulario se **conservan** porque las notas ya escritas las
+llevan y sin ellas no se leerían. Lo que hizo, para la historia: LOOP observa sus paradas y sus standbys **del dato duro**, no del
 modelo: el motivo cerrado y la cifra que ya se guardan en `loop_sessions`, y la
 causa del standby clasificada. Dos áreas nuevas, `parada-del-loop` y
 `standby-del-loop`, porque la dedup funde por tipo y área y un solo cajón
@@ -633,8 +635,9 @@ Lo que ese binario lleva dentro, verificado por identificadores:
 
 **EN MAIN Y NO EN EL BINARIO.** El rebuild del 30-sep metió los cuatro arcos que
 esperaban (binario `c3ee4e23` = `main@9405b49`, cero deriva en los tres eslabones,
-la trifecta del aislamiento YA EN PRODUCCIÓN). Desde entonces ha entrado **uno
-más**: la pieza 1 del Motor (`15b7fbf`), los ojos de la huella. Los cuatro que sí
+la trifecta del aislamiento YA EN PRODUCCIÓN). Desde entonces han entrado **dos
+más**: la pieza 1 del Motor (`15b7fbf`), los ojos de la huella, y **la cura del
+perímetro** (`d5e9945`). Los cuatro que sí
 llegaron al binario fueron:
 
 1. La correa que el motor usó, que el revisor ya lee del libro de eventos
@@ -659,7 +662,7 @@ por los que el código del cliente rompía el aislamiento —sus caracteres
 (`3810e5c`), su corpus declarado (`3c8a77d`) y su `.git` (`10d3a68`)— eran la
 misma clase de error, un dato del repo auditado tratado como fuente de verdad.
 **Y corre en producción desde el rebuild del 30-sep**, verificado en el asar por
-su CÓDIGO y no por su nombre. El próximo rebuild se lleva la pieza 1 del Motor.
+su CÓDIGO y no por su nombre. El próximo rebuild se lleva la pieza 1 del Motor y la cura del perímetro.
 
 **LO QUE FALTA, por orden de lo que más pesa.**
 
@@ -689,8 +692,10 @@ su CÓDIGO y no por su nombre. El próximo rebuild se lleva la pieza 1 del Motor
 ## El arco del MOTOR de auto-reparación (abierto, 2026-09-30)
 
 La misión: que el motor repare a fondo sin caerse por tiempo, **manteniendo las
-fronteras** (`loopBlocked`, nunca `origin` sin la firma, DEBUT, el motor propone
-y el humano dispone).
+fronteras** (el **perímetro** de ADR-107 —el Motor solo sobre FORTRESS—, nunca
+`origin` sin la firma, `integracionAutomaticaPermitida`, DEBUT, el motor propone
+y el humano dispone). `loopBlocked` **ya no figura**: era del LOOP, y ADR-107 lo
+retiró con él.
 
 **DIMENSIÓN 1, MEDIDA.** El freno principal es el **techo de vueltas del CLI**
 (`--max-turns 30`), y vive **DENTRO** de la corrida: desde fuera no se ve. En
@@ -724,6 +729,54 @@ con huellas **DISTINTAS** → *avanzaba*, y subirlo **ayuda**.
 recuperan** (queda 1 worktree en disco). Hasta juntar corridas nuevas, la pieza da
 la **medida, no la decisión**.
 
+**LA CURA DEL PERÍMETRO — ADR-107: HECHA, MERGEADA (`d5e9945`) Y VERIFICADA EN
+VIVO.** Medir la dimensión 2 destapó algo que no era del techo ni de la
+severidad: **subir el debut a HIGH habría abierto HIGH sobre proyectos de
+CLIENTE**, contra la doctrina de los dos mundos que el operador tenía escrita
+desde el 14-sep, y donde la desviación ya constaba con su nombre
+(`motor-expuesto-en-proyectos-ajenos`). Lo cerrado:
+
+- **El Motor queda SOLO sobre FORTRESS.** La guarda se pregunta en el
+  **NACIMIENTO** de la propuesta —`planRepair` y `retryRepair`, los dos únicos
+  sitios que la crean—, no en los bordes: por ahí pasaban los tres disparadores, y
+  una guarda por borde depende de que alguien se acuerde del cuarto. Las tres
+  piezas entran en los innegociables como **familia propia**
+  (`innegociables-perimetro.ts`).
+- **El LOOP se elimina de raíz**: **62 módulos** de `src/` fuera —36 de código y
+  26 de test— más sus dos guiones de `scripts/checks`. Se **conservan** los dos
+  **frenos duros de gasto** —`costCapUsd` y `maxCycles`, **sin default a
+  propósito**, «nadie decide por él cuánto está dispuesto a gastar»— en la sección
+  **«Topes del motor»** de Configuración, porque el **Drenaje** los usa; y la
+  tabla `loop_sessions` **intacta**, porque es historia.
+- **La frontera de integración, RESCATADA.** `integracionAutomaticaPermitida`
+  vivía en el gate del loop y **nunca fue del loop**: se muda a
+  `domain/repair/integracion-sin-firma.ts`. Borrar el loop sin verla se habría
+  llevado por descuido el invariante de que el código propio no se integra solo.
+- **El cartel en `MotorView`**: un proyecto de cliente ya no ve el Motor, ve a
+  dónde ir —«El Motor repara FORTRESS. Este proyecto se repara por el Terminal»—.
+- **`mailbd` apagado en la base viva**, por el operador y con la app cerrada:
+  `loop_enabled` 1→0 en esa sola fila, 0 flags encendidos, `loop_sessions` 2→2, y
+  backup `fortress.db.bak-pre-loop-enabled-2026-09-30`.
+
+**SUPERA A ADR-063, y con respeto.** ADR-063 abrió el Motor a cualquier proyecto
+registrado en agosto, y fue **correcto ENTONCES**: no había Terminal de grado
+bancario para el cliente. Ahora lo hay, así que lo superado es el **VEHÍCULO**, no
+la capacidad. **Lo que se pierde, aceptado por escrito y firmado:** FORTRESS deja
+de tener **autonomía continua desatendida**; se repara cuando alguien drena.
+
+**LO QUE QUEDA DEL LOOP, A PROPÓSITO:** `loop_sessions` y su repositorio, el tipo
+`LoopSession`, las áreas `parada-del-loop`/`standby-del-loop` del vocabulario de
+observación —las notas viejas las llevan y sin ellas no se leerían— y
+`read-loop-budget`, que es quien sirve los dos topes al Drenaje. Las claves de
+ajuste siguen diciendo `loop*` para no migrar lo que el operador ya fijó.
+
+**LA DIMENSIÓN 2 (ADR-106) AHORA CAE EXACTA.** El debut a HIGH está **firmado y
+construido** (`81f7b8c`) y esperaba a esta cura por una razón concreta: sin ella
+abría HIGH sobre código de CLIENTE. Con el Motor acotado, el **único camino que le
+queda es el Drenaje sobre FORTRESS**, que es justo el terreno donde el ADR midió
+su respaldo —12 HIGH trabajables en el repo propio—. Reconstruido sobre este main
+y **pendiente de que el operador lo revise antes de mergear**.
+
 **LO QUE SIGUE EN ESTE ARCO:** dejar correr al motor con los ojos puestos →
 decidir el techo con el dato → dimensiones 2, 3 y 4 (severidad, profundidad, y la
 cadena OMEGA → firma).
@@ -737,7 +790,10 @@ filas viejas en `otro` (un lote con el kit, si Jojo quiere rescatar esa señal) 
 rebuild, que acumula **CINCO** arcos.
 
 **AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto, o
-recomprar antes los cinco pausados.
+recomprar antes los cinco pausados. Con ADR-107 el **LOOP ya no existe**, así que
+el único gasto que puede arrancar solo es el **Drenaje**, y sus dos topes salen en
+**0** mientras nadie los fije: corta en la primera vuelta en vez de gastar a
+ciegas.
 
 ## Cómo se firma cada dirección
 
