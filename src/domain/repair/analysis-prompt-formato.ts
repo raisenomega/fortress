@@ -1,4 +1,4 @@
-const NOTA = '{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note":"que paso"}'
+import { FORMA_DE_NOTA, NOTAS_COMO_CLAVE } from '../system/peticion-de-notas'
 
 /**
  * El contrato de formato, DICHO AL MODELO y no solo sabido por el codigo.
@@ -15,6 +15,11 @@ const NOTA = '{"kind":"limitacion|bug|gap|falta|oportunidad","area":"zona","note
  *
  * Vive aparte del prompt porque son dos cosas distintas —que se pide y como se
  * responde— y juntas ya no cabian en un archivo.
+ *
+ * La peticion de notas es la COMPARTIDA. Este prompt tenia su copia y pedia el
+ * `area` en TEXTO LIBRE —«zona»—: era el unico de los cinco que no podia
+ * clasificar, y sus notas acabaron en cinco filas de `otro` con 196 de 320
+ * avistamientos del backlog (medido en la base viva).
  */
 export const FORMATO = [
   '',
@@ -59,13 +64,11 @@ export const FORMATO = [
   'evidencia de que el defecto no este; si el defecto sigue, el status es "REAL".',
   '{"status":"OBSOLETO","evidencia":{"marcador":"execFile(","forma":"ausente"},...}',
   '',
-  'Clave OPCIONAL "notes": si FORTRESS (la herramienta que te ejecuta, NO el proyecto',
-  'que analizas) te limito o te falto algo —un bug, un gap, una restriccion de entorno,',
-  'permisos o plan-mode que te impidio trabajar, o la OPORTUNIDAD de una capacidad que',
-  'te habria ayudado—, anotalo ahi. No es un hallazgo del proyecto; es para que FORTRESS',
-  'madure. Si no hubo nada, omite la clave.',
+  NOTAS_COMO_CLAVE,
   '',
-  '"notes" va DENTRO del objeto, como una clave mas. NUNCA en un bloque aparte:',
+  // El objeto ENTERO es la leccion de ESTE prompt: el analista leyo «notes» como
+  // seccion propia, respondio en dos bloques y el barrido se trago los dos. El
+  // texto compartido dice la regla; esta linea la ENSENA.
   '{"status":"REAL","whatToChange":"...","where":"...","arreglo":{"file":"...","line":12},',
-  ` "patternToCopy":"...","doNotTouch":"...","risk":"...","notes":[${NOTA}]}`
+  ` "patternToCopy":"...","doNotTouch":"...","risk":"...","notes":[${FORMA_DE_NOTA}]}`
 ]

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { EMPTY_CORPUS } from '../project/corpus-descriptor'
+import { AREAS_DE_OBSERVACION } from '../system/area-de-observacion'
 import { CON_BASH } from '../agent/capacidades-fixture'
 import { buildAnalysisPrompt } from './analysis-prompt'
 
@@ -54,5 +55,19 @@ describe('el prompt le dice al modelo la regla que antes solo sabia el codigo', 
     // Es literalmente lo que hicieron los dos dudosos, y el motor lo guardaba
     // como razon de la extincion porque la razon sale del campo `risk`.
     expect(prompt()).toContain('Argumentar que tocarlo es arriesgado NO es')
+  })
+})
+
+describe('el area de una nota se elige, no se redacta', () => {
+  it('el prompt enumera la lista cerrada, como los otros cuatro', () => {
+    // Era el UNICO de los cinco que la pedia en TEXTO LIBRE («zona»), asi que
+    // todas sus notas caian al cajon: medido en la base viva, 5 filas —una por
+    // cada kind, porque la dedup funde por (kind, area)— se comian 196 de 320
+    // avistamientos del backlog. El 61 % de la senal en el 16 % de las filas.
+    const texto = prompt()
+
+    expect(texto).toContain('se ELIGE de esta lista, no se inventa')
+    for (const area of AREAS_DE_OBSERVACION) expect(texto).toContain(area)
+    expect(texto).not.toContain('"area":"zona"')
   })
 })
