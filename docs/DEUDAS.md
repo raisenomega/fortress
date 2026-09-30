@@ -1,20 +1,29 @@
 # Deudas medidas
 
-**Fecha:** 2026-09-29 · **Commit de referencia:** `3c8a77d`
+**Fecha:** 2026-09-29 · **Commit de referencia:** `10d3a68`
 
 Lo que se sabe que falta, con evidencia. **Nada entra aquí por intuición**: cada
 entrada lleva `fichero:línea`, una fila de la base, o la corrida que lo destapó.
 
 > ### POR DÓNDE SEGUIR (2026-09-29)
 >
-> Los cuatro urgentes de la auditoría están cerrados y verificados en vivo, el
-> gate volvió a ser determinista, y el corpus crudo hacia los prompts también
-> está cerrado. Lo que queda, por lo que más pesa:
+> **LA TRIFECTA DEL AISLAMIENTO ESTÁ CERRADA.** Los tres vectores por los que el
+> CÓDIGO DEL CLIENTE rompía el aislamiento están arreglados y verificados en
+> vivo: los **caracteres** de un texto suyo, que forjaban campos del prompt del
+> generador (el saneador, `3810e5c`); el **corpus declarado** en su
+> `.fortress/config`, que forjaba un bloque entero de permisos (`3c8a77d`); y su
+> **`.git`**, que abría el HOME —y el repo de OTRO cliente— en escritura dentro
+> de la caja (`10d3a68`). Los tres eran la misma clase de error: un dato del
+> repo auditado tratado como fuente de verdad. La promesa «un cliente no toca a
+> otro» ya no tiene excepción medida.
+>
+> Los cuatro urgentes de la auditoría están cerrados y verificados en vivo, y el
+> gate volvió a ser determinista. Lo que queda, por lo que más pesa:
 >
 > | # | Qué | Dónde |
 > |---|---|---|
 > | 1 | Los tramos 2 a 7 de la auditoría, sin empezar | §9.8 |
-> | 2 | Los DOS P0 de seguridad que quedan: la cota de la caja (efecto en `bwrap` sin medir) y el analista que pide el área en texto libre | §9.3, §9.2 |
+> | 2 | El P0 de seguridad que queda: el analista pide el área en texto libre | §9.2 |
 > | 3 | El residuo del primero: informe PARCIALMENTE ilegible | §9.2 |
 > | 4 | Confirmar el determinismo con más superficie | §9.1 |
 > | 5 | Los cuatro de los trece de la decisión D | §6.11 |
@@ -1308,22 +1317,54 @@ corrección es pequeña.
 
 ### 9.3 P0 — Seguridad con efecto SIN MEDIR: medir antes de priorizar
 
-- **La cota de anchura de la caja solo mira el proyecto.** *Mecánica verificada
-  en el código; el efecto dentro de `bwrap` NO se midió.*
-  `src/domain/sandbox/ruta-de-la-caja.ts:29` aplica la cota de «demasiado ancho»
-  únicamente a `r.proyecto`; las listas de escritura y de lectura pasan solo por
-  `rutaLimpia`. `flags-de-bwrap.ts:68` monta la de escritura con `--bind`
-  **después** del `--tmpfs` que tapa el HOME, y ese orden es el contrato que
-  exige su test. Quien rellena esa lista es
-  `infrastructure/sandbox/lo-que-ve-la-caja.ts:38`, que lee el fichero `.git` del
-  `cwd` y devuelve sin validar el texto anterior a `/worktrees/`. En
-  `run-command.ts:34` y `git-del-merge.ts:34` ese `cwd` es carpeta del cliente.
-  Un `.git` que sea un FICHERO con `gitdir: /home/jojo/worktrees/x` produciría
-  `--bind /home/jojo /home/jojo` dentro de la caja. **Lo que falta por medir:**
-  si un `--bind` posterior sobrescribe de verdad el `--tmpfs` anterior sobre la
-  misma ruta, con un `bwrap` real. De eso depende si esto es P0 o una costura.
-  Nota aparte: `lo-que-ve-la-caja.ts` no está en el barrido de innegociables, así
-  que ensancharlo no exige firma.
+- **~~La cota de anchura de la caja solo mira el proyecto.~~** — **ARREGLADO Y
+  VERIFICADO EN VIVO** `10d3a68` (2026-09-29). **El efecto que faltaba se midió
+  con un `bwrap` 0.9.0 real, y salió lo peor de las dos opciones: un `--bind`
+  posterior SÍ destapa el `--tmpfs` anterior sobre la misma ruta.** Con control:
+  sin el `.git` envenenado la caja solo mostraba `.nvm` dentro de `/home/jojo` y
+  el testigo no existía para ella; con él, el proceso listaba el HOME real
+  entero, lo leía, y **dejó un fichero en el disco de verdad, fuera de la caja**.
+  Alcance medido: `~/.claude` con `settings.json` y `settings.local.json` —las
+  barreras mismas— y `~/.config/.../fortress.db`, la base viva, con `test -w` en
+  rc=0. Y una **variante CRUZADA que el informe no vio**: con
+  `gitdir: …/Escritorio/Trade99PRO/worktrees/x` la caja listaba el repo de OTRO
+  cliente. Era P0, no una costura.
+  **Tres piezas, y la de la anchura sola no bastaba.**
+  **(a)** La cota de «demasiado ancho» rige ahora para TODAS las rutas que se
+  montan en su propio sitio, no solo el proyecto (`ruta-de-la-caja.ts`). `r.home`
+  queda fuera a propósito: no es contenido que se monte, es el destino del tmpfs
+  que TAPA. **Y con ella salió un fallo que habría sido total y silencioso:**
+  `flags-de-bwrap.ts` metía `caja.socketDelProxy ?? '/'` como relleno en la
+  lista, y `/` es lo más ancho que existe; sin red es el camino por DEFECTO del
+  motor, así que la caja habría dejado de levantarse entera diciendo «ruta
+  demasiado ancha» de una ruta que nadie pidió montar. Corregido en el MISMO
+  commit porque son dos mitades de un cambio: el mutante que restaura el relleno
+  tumba NUEVE tests.
+  **(b)** El `.git` del repo auditado ya no es fuente de verdad: solo abre
+  escritura si el worktree que nombra EXISTE como directorio
+  (`lo-que-ve-la-caja.ts`). Es lo único que caza la variante cruzada —ese
+  directorio el atacante no lo puede crear dentro del repo de otro— y la anchura
+  no llegaba. El mutante que importó: comprobar que existe el COMÚN en vez del
+  gitdir completo deja pasar el vector, porque `/home/jojo` sí existe.
+  **(c)** La defensa atada a lo que el fichero DEFINE y no a su carpeta
+  (`innegociables-caja.test.ts`).
+  **CORRECCIÓN de la nota que llevaba esta misma entrada.** Decía que
+  `lo-que-ve-la-caja.ts` no estaba en el barrido de innegociables y que
+  ensancharlo no exigía firma. **Es FALSO**, medido con `cubierto()`:
+  `innegociables-disco.ts:22` ya lo cubre con el glob
+  `src/infrastructure/sandbox/**`, así que ya exigía firma. Lo que añade (c) es
+  atar esa defensa a la FUNCIÓN en vez de a la ruta —si el fichero se muda, el
+  glob deja de cubrirlo y nada avisa—, que es justo lo que promete el docblock
+  del barrido. Y un dato que salió midiendo: **ese módulo no tenía ni un test**,
+  siendo el que rellena la lista de escritura de la caja desde un fichero del
+  cliente; ahora tiene CINCO casos.
+  **Verificado en vivo tras el arreglo, con el mismo `bwrap`:** el vector da `[]`,
+  no hay `--bind` del HOME, la caja vuelve a ver solo `.nvm`, leer el testigo da
+  rc=1, escribir fuera da rc=1 y no queda nada, y `~/.claude` y la base viva son
+  invisibles; el cruzado da `[]` y el repo del otro cliente es invisible; y el
+  worktree LEGÍTIMO del motor sigue pasando —dentro de la caja `git status` y
+  `git rev-parse` dan rc=0, con su rama real—. Cinco mutantes muertos, gate 6/6
+  sobre main y las cuatro pruebas sin cambio.
 
 ### 9.4 P1 — Funcionales graves
 
