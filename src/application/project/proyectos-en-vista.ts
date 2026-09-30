@@ -21,12 +21,12 @@ export function proyectosEnVista(
   context: AppContext,
   sondas: SondasDelProyecto
 ): readonly ProyectoEnVista[] {
-  return listProjects(context).map((project) => ({
-    ...project,
-    resoluble: terminalPuedeResolver({
-      project,
-      selfRepo: sondas.esRepoPropio(project.path),
-      redGit: sondas.redGit(project.path)
-    })
-  }))
+  return listProjects(context).map((project) => {
+    const selfRepo = sondas.esRepoPropio(project.path)
+    return {
+      ...project,
+      resoluble: terminalPuedeResolver({ project, selfRepo, redGit: sondas.redGit(project.path) }),
+      esRepoPropio: selfRepo
+    }
+  })
 }

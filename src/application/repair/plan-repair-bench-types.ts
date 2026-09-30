@@ -36,6 +36,8 @@ export interface Opciones {
   readonly liveIds?: readonly string[]
   /** Propuestas ya existentes del proyecto, de la mas reciente a la mas vieja. */
   readonly proposals?: readonly Proposal[]
+  /** Si el proyecto es el repo propio. Por defecto SI: el Motor es de FORTRESS. */
+  readonly esRepoPropio?: boolean
   /** HEAD del repo; null simula un proyecto sin git. */
   readonly sha?: string | null
   /** true: el libro de vida LANZA al asentar (probar que no revierte nada). */

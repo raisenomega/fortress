@@ -7,6 +7,7 @@ import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { estudiar } from './estudiar-con-memoria'
 import { elegirObjetivo } from './elegir-objetivo'
+import { esVehiculoDelMotor } from '@domain/repair/vehiculo-del-motor'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
 
@@ -35,6 +36,7 @@ export async function planRepair(
 ): Promise<Proposal | null> {
   const project = context.projects.findById(projectId)
   if (!project) return null
+  if (!esVehiculoDelMotor(context.esRepoPropio(project.path))) return null
   const scanId = context.scans.listByProject(projectId, 1)[0]?.id ?? ''
   // El HEAD se ancla ANTES de elegir: saber donde esta el arbol es parte de
   // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.

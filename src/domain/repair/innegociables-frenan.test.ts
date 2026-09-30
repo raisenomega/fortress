@@ -28,7 +28,6 @@ const DEFENSAS = [
   'src/domain/repair/glob-de-alcance.ts',
   'src/domain/shared/sanear-para-prompt.ts',
   'src/application/repair/carril-del-merge.ts',
-  'src/infrastructure/loop/loop-fix.ts',
   'src/infrastructure/repair/motor-tools.ts',
   'src/domain/repair/auto-merge-blacklist.ts',
   'src/domain/repair/innegociables-defensa.ts',

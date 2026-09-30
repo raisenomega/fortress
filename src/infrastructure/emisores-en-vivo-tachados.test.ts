@@ -41,7 +41,8 @@ const conTextoLibre = emisores.filter((f) => TEXTO_LIBRE.test(f.texto))
 describe('ningun emisor en vivo manda texto de agente sin tachar', () => {
   it('el barrido encuentra emisores de los dos tipos', () => {
     expect(emisores.length).toBeGreaterThan(5)
-    expect(conTextoLibre.length).toBeGreaterThanOrEqual(5)
+    // Cuatro desde ADR-107: el emisor del loop se fue con el loop.
+    expect(conTextoLibre.length).toBeGreaterThanOrEqual(4)
   })
 
   it.each(conTextoLibre.map((f) => f.ruta))('%s tacha lo que emite', (ruta) => {

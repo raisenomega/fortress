@@ -4,7 +4,7 @@
  * Al arrancar, un proyecto con el loop encendido y sesion activa se reanuda
  * desde aqui —mismas propuestas cerradas, mismos scores— y nada se pierde.
  */
-import type { LoopStopReason } from './loop-decision'
+import type { LoopStopReason } from './loop-status'
 
 export interface LoopSession {
   readonly projectId: string

@@ -2,8 +2,6 @@ import type { SendMessageInput, SendMessageOutput } from '@application/chat/send
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import type { EnvioNegado } from '@domain/chat/envio-negado'
-import type { LoopSession } from '@domain/loop/loop-session'
-import type { LoopStatus } from '@domain/loop/loop-status'
 import type { NewProject, Project } from '@domain/project/project'
 import type { ProyectoEnVista } from '@domain/project/proyecto-en-vista'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
@@ -18,7 +16,6 @@ export interface ProjectsApi {
   pickFolder(): Promise<NewProject | null>
   self(): Promise<NewProject | null>
   setTrusted(id: string, trusted: boolean): Promise<Result<null>>
-  setLoopEnabled(id: string, enabled: boolean): Promise<Result<null>>
   unblock(id: string): Promise<Result<null>>
 }
 
@@ -33,9 +30,6 @@ export interface ChatApi {
   onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
   onProgress(listener: (p: ChatProgress) => void): Unsubscribe
   /** La sesion de loop guardada del proyecto: dice por que paro la ultima. */
-  lastLoopSession(projectId: string): Promise<LoopSession | null>
-  onLoopStatus(listener: (status: LoopStatus) => void): Unsubscribe
-  onLoopChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
 }
 
 export interface SettingsApi {

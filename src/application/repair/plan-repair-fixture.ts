@@ -67,7 +67,7 @@ export function bench(opts: Opciones): Bench {
     }),
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha),
     fortressConfig: () => opts.cerco ?? { kind: 'not-present' },
-    huellaDeConfig: () => 'none',
+    huellaDeConfig: () => 'none', esRepoPropio: () => opts.esRepoPropio ?? true,
     barrerasDeclaradas: () => SIN_BARRERAS
   } as unknown as AppContext
   // prettier-ignore

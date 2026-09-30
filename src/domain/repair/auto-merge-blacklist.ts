@@ -15,7 +15,7 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/settings/permission-mode.ts',
   'src/domain/settings/safe-commands.ts',
   'src/domain/settings/modo-efectivo.ts',
-  'src/domain/loop/loop-gate.ts',
+  'src/domain/repair/integracion-sin-firma.ts',
   'src/infrastructure/run-guard.ts',
   // Sobre QUE proyectos se puede actuar, y con que entorno.
   'src/domain/repair/confianza.ts',

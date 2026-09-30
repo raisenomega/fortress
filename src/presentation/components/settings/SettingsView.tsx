@@ -1,7 +1,7 @@
 import { AccountSection } from './AccountSection'
 import { ApiKeySection } from './ApiKeySection'
 import { BudgetSection } from './BudgetSection'
-import { LoopBudgetSection } from './LoopBudgetSection'
+import { TopesDelMotorSection } from './TopesDelMotorSection'
 import { GenesisBudgetSection } from './GenesisBudgetSection'
 import { OperationModeSection } from './OperationModeSection'
 
@@ -20,7 +20,7 @@ export function SettingsView(): React.JSX.Element {
         <AccountSection />
         <ApiKeySection />
         <BudgetSection />
-        <LoopBudgetSection />
+        <TopesDelMotorSection />
         <GenesisBudgetSection />
         <OperationModeSection />
       </div>

@@ -1356,6 +1356,25 @@ corrección es pequeña.
   el kit, y es decisión de Jojo. Tres mutantes muertos, gate 6/6 sobre main y las
   cuatro pruebas sin cambio.
 
+### 9.2bis P1 — El hueco de las listas-guardián que se recorren a sí mismas
+
+- **Una lista-guardián verificada con `it.each` sobre SÍ MISMA no se guarda a sí
+  misma.** *Medido tres veces, las tres con un mutante que SOBREVIVIÓ.* El patrón
+  es `it.each(LISTA)('%s …')`: quitar un elemento de `LISTA` hace que el test
+  corra **un caso menos** y **pase**, en vez de fallar. La lista es a la vez el
+  sujeto y el juez.
+  **Apareció en tres sitios y los tres están cerrados** —fijando la lista ENTERA
+  con `toEqual`, o con un piso de longitud—: el guardián de las notas
+  (`quien-observa.test.ts`, 2026-09-29), el de la puerta de selección
+  (`innegociables-seleccion.test.ts`, ADR-106) y el del perímetro del Motor
+  (`innegociables-perimetro.test.ts`, ADR-107).
+  **SIN REVISAR: las demás listas-guardián del repo.** No se han buscado, así que
+  no se sabe cuántas hay ni cuáles tienen el hueco. **Arco propio, barrido corto
+  de una tarde:** encontrar todo `it.each` cuyo argumento sea la lista que el
+  propio test protege, y cerrarlo con `toEqual` de la lista entera. Se anota en
+  vez de hacerse ahora porque mezclarlo con la cura del perímetro juntaría dos
+  sujetos en un arco, y el hueco no es de seguridad: es de confianza en el test.
+
 ### 9.3 P0 — Seguridad con efecto SIN MEDIR: medir antes de priorizar
 
 - **~~La cota de anchura de la caja solo mira el proyecto.~~** — **ARREGLADO Y

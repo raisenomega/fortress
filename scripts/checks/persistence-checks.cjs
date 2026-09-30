@@ -51,13 +51,11 @@ module.exports = `(async () => {
   check('persiste settings', (await window.api.settings.get('budget_per_run_usd')) === '2.5')
 
   const fieldOf = async (id, f) => (await window.api.projects.list()).find((p) => p.id === id)?.[f]
-  check('el loop nace apagado', (await fieldOf(otherId, 'loopEnabled')) === false)
-  // Encenderlo de verdad arrancaria un motor real: el detalle del gate esta en loop-guard-checks.
-  check('encenderlo sin confianza ni topes se RECHAZA',
-        !(await window.api.projects.setLoopEnabled(otherId, true)).ok)
-  await window.api.projects.setLoopEnabled(otherId, false)
-  check('apaga el loop', (await fieldOf(otherId, 'loopEnabled')) === false)
-  check('setLoopEnabled rechaza inexistente', !(await window.api.projects.setLoopEnabled('x', true)).ok)
+  // La columna vive con su historia aunque ADR-107 retirara el loop: nace apagada
+  // y ya no hay canal que la encienda. Revocar la confianza la apaga, y eso lo
+  // cubre confianza-checks (sin comillas invertidas: esto va dentro de una
+  // plantilla, y una comilla invertida la cerraria).
+  check('el flag del loop nace apagado', (await fieldOf(otherId, 'loopEnabled')) === false)
   check('el proyecto nace no confiable', (await fieldOf(otherId, 'trusted')) === false)
   await window.api.projects.setTrusted(otherId, true)
   check('marca de confianza', (await fieldOf(otherId, 'trusted')) === true)

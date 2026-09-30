@@ -7,6 +7,7 @@ import { MotorAcciones } from './MotorAcciones'
 import { colaDeFirma } from './cola-de-firma'
 import { RepairProposalRow } from './RepairProposalRow'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
+import { VaPorElTerminal } from './VaPorElTerminal'
 import { usePaginado } from '../../hooks/usePaginado'
 import { Paginador } from './Paginador'
 
@@ -41,6 +42,10 @@ export function MotorView(): React.JSX.Element {
   const ordered = alDia ? [...proposals].sort((a, b) => b.updatedAt - a.updatedAt) : []
   const cola = alDia ? colaDeFirma(proposals, findings) : []
   const { visibles, pagina, irA } = usePaginado(ordered)
+
+  // ADR-107: el Motor es de FORTRESS. DESPUES de los hooks —un return antes
+  // dejaria `usePaginado` en llamada condicional y rompe su orden en React—.
+  if (project !== null && !project.esRepoPropio) return <VaPorElTerminal nombre={project.name} />
 
   return (
     <div className="h-full space-y-3 overflow-y-auto px-4 py-4">

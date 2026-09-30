@@ -61,13 +61,3 @@ export async function desbloquearProyecto(id: string): Promise<void> {
     reportError(error instanceof Error ? error.message : 'No se pudo desbloquear el proyecto')
   }
 }
-
-export async function setProjectLoopEnabled(id: string, enabled: boolean): Promise<void> {
-  try {
-    const result = await api().projects.setLoopEnabled(id, enabled)
-    if (result.ok) await loadProjects()
-    else reportError(result.error)
-  } catch (error) {
-    reportError(error instanceof Error ? error.message : 'No se pudo cambiar el loop')
-  }
-}

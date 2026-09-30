@@ -12,7 +12,7 @@ import type { BarrerasDeclaradas } from '@domain/project/barreras-declaradas'
 import type { FileHistory } from '@domain/project/file-history'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { CorpusReader } from '@domain/project/corpus-reader'
-import type { ConfigState } from '@domain/repair/auto-merge-config'
+import type { LecturasDelDisco } from './lecturas-del-disco'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import type { Analyst } from '@domain/repair/analysis'
 import type { RepairProposalRepository } from '@domain/repair/proposal-repository'
@@ -33,13 +33,10 @@ import type { RunInTransaction } from '@domain/shared/transaction'
  * interfaces; quien las implementa (SQLite, Anthropic, safeStorage) es cosa
  * de la infraestructura.
  */
-export interface AppContext extends EscritoresDeFichero, Telemetria {
+export interface AppContext extends EscritoresDeFichero, Telemetria, LecturasDelDisco {
   readonly projects: ProjectRepository
   /** Que doctrina tiene escrita un proyecto, mirada en su disco. */
   readonly corpus: CorpusReader
-  /** El cerco `.fortress/config` que declara el proyecto (ausente, bien o ilegible) y su huella (ADR-102 §4). */
-  readonly fortressConfig: (projectPath: string) => ConfigState
-  readonly huellaDeConfig: (projectPath: string) => string
   readonly barrerasDeclaradas: (projectPath: string) => BarrerasDeclaradas // hooks y cerco, para el prompt (ADR-104)
   readonly findings: FindingRepository
   /** git: si el archivo de un hallazgo cambio desde que se detecto. */

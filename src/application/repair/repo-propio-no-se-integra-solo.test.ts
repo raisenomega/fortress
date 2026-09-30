@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { integracionAutomaticaPermitida } from '@domain/loop/loop-gate'
+import { integracionAutomaticaPermitida } from '@domain/repair/integracion-sin-firma'
 import type { AutoMergeDeps } from './auto-merge-types'
 import { judgeAndIntegrate } from './judge-and-integrate'
 import { APROBADO, bench, type Bench } from './run-omega-fixture'
