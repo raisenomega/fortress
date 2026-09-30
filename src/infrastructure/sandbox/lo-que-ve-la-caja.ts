@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, realpathSync } from 'node:fs'
+import { existsSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import type { RaizDelSistema } from '@domain/sandbox/flags-de-bwrap'
 import { interpreteExiste } from '../project/interprete-existe'
@@ -31,12 +31,25 @@ export function directorioDeNode(path: string): string | null {
   }
 }
 
-/** El `.git` comun de un worktree: su `.git` es un FICHERO `gitdir: …/.git/worktrees/x`,
- *  y git necesita el repo entero. Sin eso, `git` dentro de la caja no ve nada. */
+/**
+ * El `.git` comun de un worktree: su `.git` es un FICHERO `gitdir: …/.git/worktrees/x`,
+ * y git necesita el repo entero. Sin eso, `git` dentro de la caja no ve nada.
+ *
+ * Este fichero LO ESCRIBE EL REPO AUDITADO, asi que no es fuente de verdad: lo
+ * que diga acaba en la lista de ESCRITURA de la caja. Por eso no basta con leer
+ * el texto — se exige que el worktree que nombra EXISTA como directorio. Medido
+ * el 2026-09-29 con un bwrap real: sin esa comprobacion, un `gitdir:
+ * /home/jojo/worktrees/x` montaba el HOME entero en escritura, y uno que
+ * apuntaba al repo de OTRO cliente lo abria igual. Lo segundo la cota de anchura
+ * no lo caza; esto si, porque ese directorio el cliente no lo puede crear ahi.
+ *
+ * Fail-closed: si no existe, `statSync` lanza y no se monta nada.
+ */
 export function gitComunDe(cwd: string): readonly string[] {
   try {
-    const m = /^gitdir: (.+?)\/worktrees\//.exec(readFileSync(join(cwd, '.git'), 'utf8'))
-    return m?.[1] === undefined ? [] : [m[1]]
+    const m = /^gitdir: (.+?)\/worktrees\/(.+)/.exec(readFileSync(join(cwd, '.git'), 'utf8'))
+    if (m?.[1] === undefined || m[2] === undefined) return []
+    return statSync(join(m[1], 'worktrees', m[2].trim())).isDirectory() ? [m[1]] : []
   } catch {
     return []
   }
