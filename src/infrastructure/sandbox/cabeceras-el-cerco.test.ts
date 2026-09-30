@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { homedir } from 'node:os'
 import { argsDelSandbox } from '@domain/sandbox/config-del-cli'
 import { porQueNoSeMonta } from '@domain/sandbox/ruta-de-la-caja'
-import { CABECERAS_PUBLICAS } from './cabeceras-publicas'
+import { ARTEFACTOS_PUBLICOS } from './artefactos-publicos'
 import { conSandbox } from './con-sandbox'
 import { olvidarSonda } from './sonda-de-bwrap'
 
@@ -13,6 +13,12 @@ afterEach(olvidarSonda)
  * editan, no compilan) y la cota de anchura no se toca.
  */
 describe('el cerco del bind de cabeceras (ADR-108)', () => {
+  it('ninguno lleva version: se monta el padre, no un hijo suyo', () => {
+    for (const c of ARTEFACTOS_PUBLICOS) {
+      expect({ c, conVersion: /\/\d+\.\d+\.\d+$/.test(c) }).toEqual({ c, conVersion: false })
+    }
+  })
+
   /**
    * SOLO LA CLASE B. La clase A es la de los AGENTES —los turnos del Terminal,
    * el generador, el grafo— y el generador EDITA, no compila: no las necesita.
@@ -24,7 +30,7 @@ describe('el cerco del bind de cabeceras (ADR-108)', () => {
     const settings = JSON.parse(a.value[a.value.indexOf('--settings') + 1] ?? '{}')
     const permitido: readonly string[] = settings.sandbox?.filesystem?.allowRead ?? []
 
-    for (const c of CABECERAS_PUBLICAS) expect(permitido).not.toContain(c)
+    for (const c of ARTEFACTOS_PUBLICOS) expect(permitido).not.toContain(c)
   })
 
   /** La cota no se toca: rechaza rutas que CONTIENEN el HOME, y estas viven
@@ -34,7 +40,7 @@ describe('el cerco del bind de cabeceras (ADR-108)', () => {
       proyecto: '/repo/cliente',
       cwd: '/repo/cliente',
       home: homedir(),
-      otras: [...CABECERAS_PUBLICAS]
+      otras: [...ARTEFACTOS_PUBLICOS]
     })
 
     expect(motivo).toBeNull()
@@ -47,7 +53,7 @@ describe('el cerco del bind de cabeceras (ADR-108)', () => {
   it('el contrato de la clase A no las nombra', () => {
     const conCabeceras = argsDelSandbox({
       proyecto: '/repo/cliente',
-      soloLectura: [...CABECERAS_PUBLICAS],
+      soloLectura: [...ARTEFACTOS_PUBLICOS],
       registros: []
     })
 

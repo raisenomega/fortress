@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
-import { CABECERAS_PUBLICAS } from './cabeceras-publicas'
+import { ARTEFACTOS_PUBLICOS } from './artefactos-publicos'
 import { enCaja } from './en-caja'
 import { olvidarSonda } from './sonda-de-bwrap'
 
@@ -24,14 +24,18 @@ const argsDeLaCaja = (proyecto: string): readonly string[] => {
  * caja, 0 de 3 despues (DEUDAS §11.1).
  */
 describe('las cabeceras publicas entran en la caja clase B (ADR-108)', () => {
-  it('estan, y son los DOS directorios padre', () => {
+  it('estan, y son los TRES directorios padre', () => {
     const ro = montadas(argsDeLaCaja(process.cwd()), '--ro-bind')
 
-    expect(CABECERAS_PUBLICAS).toEqual([
+    // El tercero es el que hace pasar el `npm ci` completo: el paquete
+    // `electron` baja su BINARIO de github.com, que el proxy no abre, y con el
+    // HOME tapado no ve la cache donde ese zip ya esta (ADR-108 §3.1bis).
+    expect(ARTEFACTOS_PUBLICOS).toEqual([
       join(homedir(), '.electron-gyp'),
-      join(homedir(), '.cache', 'node-gyp')
+      join(homedir(), '.cache', 'node-gyp'),
+      join(homedir(), '.cache', 'electron')
     ])
-    for (const c of CABECERAS_PUBLICAS) expect({ c, montada: ro.includes(c) }).toEqual({ c, montada: true }) // prettier-ignore
+    for (const c of ARTEFACTOS_PUBLICOS) expect({ c, montada: ro.includes(c) }).toEqual({ c, montada: true }) // prettier-ignore
   })
 
   /**
@@ -47,7 +51,7 @@ describe('las cabeceras publicas entran en la caja clase B (ADR-108)', () => {
     const ro = montadas(args, '--ro-bind')
     const rw = montadas(args, '--bind')
 
-    for (const c of CABECERAS_PUBLICAS) {
+    for (const c of ARTEFACTOS_PUBLICOS) {
       expect({ c, soloLectura: ro.includes(c), escritura: rw.includes(c) }).toEqual({ c, soloLectura: true, escritura: false }) // prettier-ignore
     }
   })
@@ -60,16 +64,10 @@ describe('las cabeceras publicas entran en la caja clase B (ADR-108)', () => {
    * ninguna entrada, asi que dos proyectos distintos montan lo MISMO.
    */
   it('no se derivan del proyecto: dos proyectos distintos montan lo mismo', () => {
-    const unas = montadas(argsDeLaCaja(process.cwd()), '--ro-bind').filter((r) => CABECERAS_PUBLICAS.includes(r)) // prettier-ignore
-    const otras = montadas(argsDeLaCaja(join(process.cwd(), 'src')), '--ro-bind').filter((r) => CABECERAS_PUBLICAS.includes(r)) // prettier-ignore
+    const unas = montadas(argsDeLaCaja(process.cwd()), '--ro-bind').filter((r) => ARTEFACTOS_PUBLICOS.includes(r)) // prettier-ignore
+    const otras = montadas(argsDeLaCaja(join(process.cwd(), 'src')), '--ro-bind').filter((r) => ARTEFACTOS_PUBLICOS.includes(r)) // prettier-ignore
 
     expect(unas).toEqual(otras)
-    expect(unas).toEqual([...CABECERAS_PUBLICAS])
-  })
-
-  it('y ninguna lleva version: se monta el padre, no un hijo suyo', () => {
-    for (const c of CABECERAS_PUBLICAS) {
-      expect({ c, conVersion: /\/\d+\.\d+\.\d+$/.test(c) }).toEqual({ c, conVersion: false })
-    }
+    expect(unas).toEqual([...ARTEFACTOS_PUBLICOS])
   })
 })

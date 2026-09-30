@@ -1,9 +1,9 @@
 # ADR-108 — Las cabeceras públicas entran en la caja: el gate del Motor recupera la capacidad de verificar
 
 - **Estado**: Aceptada (firmada por el operador el 2026-09-30)
-- **Alcance**: los **dos directorios padre** de cabeceras públicas
-  (`~/.electron-gyp`, `~/.cache/node-gyp`) se montan en la caja **clase B** en
-  **solo lectura** (`--ro-bind`), **nunca por versión**. **No abre red.** **No
+- **Alcance**: los **TRES directorios padre** de artefactos públicos
+  (`~/.electron-gyp`, `~/.cache/node-gyp` y `~/.cache/electron`) se montan en la
+  caja **clase B** en **solo lectura** (`--ro-bind`), **nunca por versión**. **No abre red.** **No
   toca**: la clase A, la cura (ADR-107), ADR-106, la trifecta del aislamiento, la
   cota de anchura, ni la tabla de registros del proxy.
 - **Nace de**: la medición del 2026-09-30 sobre `main@85c8b05` (DEUDAS §11.1). El
@@ -31,6 +31,23 @@
 > opción ancha). NO toca la cura, ADR-106, la trifecta, ni la cota. Los fixes que
 > suban el ABI nativo (subir Electron de major) quedan FUERA del alcance del
 > Motor —esos los hago yo con Claude Code en mi terminal, fuera de la caja—.»
+
+### 1bis. La AMPLIACIÓN, firmada el mismo día
+
+El ADR se firmó con dos directorios; al construirlo se midió el `npm ci`
+**completo** y hacían falta tres. El operador amplió su firma:
+
+> «AMPLÍO ADR-108 a un TERCER directorio: ~/.cache/electron (el binario oficial
+> de Electron, un solo fichero público, el zip del release), también en SOLO
+> LECTURA (--ro-bind), directorio padre nunca por versión. Medido: con dos
+> directorios npm ci NO pasa (el paquete electron baja su binario de github.com
+> que el proxy no abre); con el tercero pasa (rc=0, 28s, sin red, hosts del
+> proxy sin cambio). Es la misma clase de artefacto público que las cabeceras,
+> mismo riesgo (ninguno nuevo: un fichero, solo lectura, sin red). Y corrijo el
+> §3.5: el fix del Electron de anoche NO subía el ABI (pinchaba el rango
+> ^39.2.6→39.8.10, lock en 39.8.10 cacheado), así que con el tercer bind SÍ lo
+> resuelve el Motor; los saltos de major de verdad (40.0.0, sin caché) siguen
+> fuera, para Claude Code en mi terminal.»
 
 ## 2. Lo medido, antes de decidir
 
@@ -76,9 +93,16 @@ El bind aporta una comodidad, no un poder.
 
 ## 3. Lo decidido
 
-### 3.1 Los dos directorios PADRE, nunca la versión
+### 3.1 Los TRES directorios PADRE, nunca la versión
 
-`Caja.soloLectura` recibe `~/.electron-gyp` y `~/.cache/node-gyp`. **Los padres.**
+`Caja.soloLectura` recibe `~/.electron-gyp`, `~/.cache/node-gyp` y
+`~/.cache/electron`. **Los padres.**
+
+**Son DOS fallos distintos, y el segundo solo apareció al probar el `npm ci`
+completo.** Las cabeceras arreglan `node-gyp configure`; el zip arregla el
+`install.js` del paquete `electron`, que baja su **binario** desde `github.com`
+—host que la tabla del proxy no abre— sin ver la caché donde ya está. Con solo
+las cabeceras, `npm ci` muere en `getaddrinfo ENOTFOUND github.com`.
 
 Montar `<padre>/<versión>` obligaría a sacar la versión de algún sitio, y el
 sitio natural sería el `package.json` del proyecto: **un dato que el repo
@@ -141,7 +165,13 @@ gyp ERR! stack Error: ENOENT: no such file or directory,
 ```
 
 Así que subir Electron de major **no** entra por aquí. El operador lo firma
-explícitamente: **esos los hace él con Claude Code, fuera de la caja.** No es una
+explícitamente: **esos los hace él con Claude Code, fuera de la caja.**
+
+**CORRECCIÓN, firmada en la ampliación:** el fix del Electron que disparó todo
+esto **no subía el ABI**. Pinchaba el rango (`^39.2.6` → `39.8.10`), así que el
+lock sigue en 39.8.10 y su zip está en caché. **Con el tercer bind, ese fix SÍ lo
+resuelve el Motor** —medido: `npm ci` completo sobre su propio worktree, rc=0 en
+65 s—. Lo de arriba sigue siendo cierto para un salto de major de verdad. No es una
 carencia del Motor; es un fix que necesita red para construirse, y abrirla para
 todos los clientes por un hallazgo al año no vale la pena (la **opción ancha**,
 que este ADR **rechaza**: añadir `electronjs.org` a la tabla la abriría para todo
@@ -184,59 +214,18 @@ un humano, o no se aplica.
 ### Neutras
 - Los fixes de ABI nativo siguen fuera del alcance del Motor, por decisión.
 
-## 4bis. ADDENDUM MEDIDO TRAS LA FIRMA — hacen falta TRES directorios, no dos
+## 5. Lo que queda pendiente
 
-**Léase antes de mergear. No cambia la decisión firmada; la completa con lo que
-se midió al construirla.**
+**UNA CORRIDA REAL DEL GATE sobre FORTRESS.** El `npm ci` **completo** ya está
+probado dentro de la caja, con los args REALES de `enCaja`: **rc=0 en 65 s**, un
+solo host en el proxy (`registry.npmjs.org`), «completed installing native
+dependencies», y sobre el worktree del fix del Electron de anoche. Lo que falta
+es verlo **en producción**: el gate de verdad, con `typecheck`, `lint` y
+`test:unit` detrás del `npm ci`, sobre un fix ordinario. El candidato natural es
+ese mismo fix del Electron, que con el tercer bind pasa.
 
-Con los dos directorios de la firma, el `npm ci` **completo** dentro de la caja
-—por el proxy real, sobre el worktree conservado— **sigue fallando**, y en un
-paso ANTERIOR a `node-gyp`:
-
-```
-npm error path .../node_modules/electron
-npm error command sh -c node install.js
-npm error RequestError: getaddrinfo ENOTFOUND github.com
-```
-
-El paquete `electron` baja su **binario** (un zip de 109 MB) en su propio
-`install.js`, de **`github.com`**, que la tabla del proxy no abre. Con el HOME
-tapado no ve la caché donde ese zip YA ESTÁ:
-`~/.cache/electron/<hash>/electron-v39.8.10-linux-x64.zip`.
-
-**Con un TERCER `--ro-bind` de `~/.cache/electron`, el `npm ci` completo pasa:**
-
-```
-hosts que el proxy abrira: registry.npmjs.org
-added 639 packages in 28s
-  • completed installing native dependencies
-rc=0  ·  28s
-```
-
-Ese directorio contiene **un solo fichero**: el zip oficial del release de
-Electron. Cero enlaces simbólicos, nada más. Misma clase de artefacto público
-que las cabeceras, y por las mismas razones (parent, solo lectura, sin red).
-
-**Y una corrección al §3.5.** El fix del Electron que disparó todo esto **no
-subía el ABI**: pinchaba el rango (`^39.2.6` → `39.8.10`), así que el lock sigue
-en 39.8.10 y su zip está en caché. Con el tercer bind, **ese fix habría pasado el
-gate**. Lo que el §3.5 dice sigue siendo cierto para un salto de major de verdad
-—probado con `target=40.0.0`, que falla en el `mkdir` del devdir en solo
-lectura—, pero no describía este fix.
-
-**Queda a la firma del operador**, porque amplía lo que él firmó: añadir
-`~/.cache/electron` a `CABECERAS_PUBLICAS` con los mismos cuatro tests. Sin ese
-tercer directorio, este ADR arregla el paso de `node-gyp` y **el `npm ci` del
-gate sigue sin pasar**.
-
-## 5. Lo que queda pendiente, y es lo que de verdad cierra esto
-
-**UNA CORRIDA REAL DEL GATE sobre FORTRESS** con un fix ordinario —no el
-Electron—. La medición probó el paso que fallaba (`configure`, ahora `gyp info
-ok` sin red), pero **no el `npm ci` completo**: las descargas de tarballs del
-registro ya funcionan hoy por el proxy, y la compilación del módulo nativo no se
-llegó a ejercitar. Eso solo se mide de verdad con el gate corriendo. Hasta
-entonces, este ADR está **construido y probado, pero no confirmado en producción**.
+Hasta entonces, este ADR está **construido y probado en bwrap aislado, no
+confirmado en producción**.
 
 ## Referencias
 

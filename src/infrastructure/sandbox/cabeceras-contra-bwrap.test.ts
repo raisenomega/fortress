@@ -18,11 +18,13 @@ describe('las cabeceras en la caja, contra bwrap de verdad (ADR-108)', () => {
    * proceso de la caja de un CLIENTE envenenaria la cache que despues compila
    * el modulo nativo de FORTRESS.
    */
-  it('de ~/.cache solo asoma node-gyp, y las cabeceras no se dejan escribir', async () => {
+  it('de ~/.cache solo asoman los DOS firmados, y no se dejan escribir', async () => {
     const salida = await corre(e, ['fuga.js'])
     const cache = (salida['cache'] ?? '').replace(/^OK:/, '').split(',').filter((x) => x !== '') // prettier-ignore
 
-    expect(cache).toEqual(['node-gyp'])
+    // `electron` entra con la ampliacion de ADR-108 (el zip del release). Nada
+    // mas del operador asoma: ni `.npm` con su token, ni el resto de la cache.
+    expect([...cache].sort()).toEqual(['electron', 'node-gyp'])
     expect(salida['cabeceras']).toBe('NO:EROFS')
   })
 })
