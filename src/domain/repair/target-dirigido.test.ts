@@ -28,10 +28,12 @@ describe('el operador senala un hallazgo y el motor lo atiende', () => {
     expect(dirigirA(candidato('MEDIUM'))?.target.severity).toBe('MEDIUM')
   })
 
-  it('un HIGH dirigido NO se atiende: dirigir no amplia el estreno', () => {
-    // Que el operador pregunte no acumula confianza. Subir el estreno a HIGH es
-    // una decision aparte, y un clic no puede tomarla de lado.
-    expect(dirigirA(candidato('HIGH'))).toBeNull()
+  it('dirigir sigue sin ampliar el estreno: CRITICAL dirigido NO se atiende', () => {
+    // Que el operador pregunte no acumula confianza, y esa regla no cambia. Lo
+    // que cambio es el terreno: ADR-106 metio HIGH en el debut con una decision
+    // firmada, asi que ahora un HIGH dirigido SI se atiende —por el debut, no
+    // por el clic—. CRITICAL sigue fuera, y su puerta es condicionada.
+    expect(dirigirA(candidato('HIGH'))).not.toBeNull()
     expect(dirigirA(candidato('CRITICAL'))).toBeNull()
   })
 })

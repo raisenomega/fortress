@@ -53,6 +53,8 @@ export async function drenarHastaOmega(
     // una se arregla esperando y la otra mirando la maquina.
     if (!salida.ok) return fin(esEntorno(salida.error) ? 'entorno' : 'averia', salida.error)
     if (salida.value.kind === 'sin-candidato') return fin('sin-candidato')
+    // El perimetro lo nego: no es que se agotara el pozo, es que no era suyo.
+    if (salida.value.kind === 'negado') return fin('negado')
 
     cuenta.trabajadas += 1
     if (salida.value.kind === 'espera-firma') cuenta.acumuladas += 1

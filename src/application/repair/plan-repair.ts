@@ -7,7 +7,9 @@ import { newId, nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
 import { estudiar } from './estudiar-con-memoria'
 import { elegirObjetivo } from './elegir-objetivo'
-import { esVehiculoDelMotor } from '@domain/repair/vehiculo-del-motor'
+import { NO_ES_SU_VEHICULO, esVehiculoDelMotor } from '@domain/repair/vehiculo-del-motor'
+import { negado, planificada, type PlanResult } from './resultado-del-plan'
+import { asentarNotasDelAnalista } from './asentar-notas-del-analista'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
 
@@ -33,17 +35,17 @@ export async function planRepair(
   projectId: string,
   findingId?: string,
   modo: ModoDeVuelta = 'completo'
-): Promise<Proposal | null> {
+): Promise<PlanResult> {
   const project = context.projects.findById(projectId)
-  if (!project) return null
-  if (!esVehiculoDelMotor(context.esRepoPropio(project.path))) return null
+  if (!project) return negado('proyecto-desconocido')
+  if (!esVehiculoDelMotor(context.esRepoPropio(project.path))) return negado(NO_ES_SU_VEHICULO)
   const scanId = context.scans.listByProject(projectId, 1)[0]?.id ?? ''
   // El HEAD se ancla ANTES de elegir: saber donde esta el arbol es parte de
   // decidir que reparar, porque un fracaso previo sobre esta misma base excluye.
   const baseSha = context.headSha(project.path)
-  if (baseSha === null) return null
+  if (baseSha === null) return negado('sin-head-de-git')
   const selection = elegirObjetivo(context, projectId, baseSha, project.path, modo, findingId)
-  if (!selection) return null
+  if (!selection) return negado('sin-candidato')
 
   const now = Date.now()
   const proposal: Proposal = { id: newId(), projectId, findingId: selection.target.id, baseSha, state: 'ELEGIDO', createdAt: now, updatedAt: now } // prettier-ignore
@@ -52,17 +54,9 @@ export async function planRepair(
 
   const crudo = await estudiar(context, project, selection)
   const result = conAgentRun(crudo, recordMotorRun(context, projectId, null, crudo.runMeta))
-  // Lo que el analista noto de FORTRESS se guarda pase lo que pase con el
-  // hallazgo: un limite del que se topo vale igual si el hallazgo era un fantasma.
-  for (const nota of result.analysis.notes ?? []) {
-    context.selfObservations.add({
-      ...nota,
-      sourceProject: project.name,
-      projectPath: project.path
-    })
-  }
+  asentarNotasDelAnalista(context, project, result.analysis)
   const veredicto = veredictoDelAnalisis(result.analysis)
-  if (!canTransition(proposal.state, veredicto.state)) return proposal
+  if (!canTransition(proposal.state, veredicto.state)) return planificada(proposal)
   const patch = { state: veredicto.state, analysisVerdict: veredicto.verdict, analysisReason: veredicto.reason, updatedAt: Date.now() } // prettier-ignore
   context.repairProposals.update(proposal.id, patch)
   // El juicio del agente es lo unico que cierra un hallazgo, y solo si trae
@@ -71,5 +65,5 @@ export async function planRepair(
   // El juicio «mismo defecto» se persiste como fusion mas alias (ADR-101, corte 2).
   const fundido = fundirPorJuicio(context, project, { ...proposal, ...patch }, result.analysis)
   await recordAnalyzed(context.eventLog, proposal, result, veredicto)
-  return { ...proposal, ...patch, ...(fundido ?? {}) }
+  return planificada({ ...proposal, ...patch, ...(fundido ?? {}) })
 }

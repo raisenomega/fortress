@@ -1,4 +1,6 @@
 import type { FailedCondition } from '@domain/repair/auto-merge-policy'
+import { NO_ES_SU_VEHICULO, VA_POR_EL_TERMINAL } from '@domain/repair/vehiculo-del-motor'
+import type { PlanNegado } from './resultado-del-plan'
 
 /**
  * Donde acabo una vuelta del motor. TODAS son finales legitimas: que el revisor
@@ -7,6 +9,8 @@ import type { FailedCondition } from '@domain/repair/auto-merge-policy'
  */
 export type ChainOutcome =
   | { readonly kind: 'sin-candidato' }
+  /** El perimetro lo nego (ADR-107): no es que no haya nada, es que no es suyo. */
+  | { readonly kind: 'negado' }
   | { readonly kind: 'obsoleto'; readonly proposalId: string }
   | { readonly kind: 'descartada'; readonly proposalId: string; readonly motivo: string }
   | {
@@ -44,8 +48,18 @@ export function esDenegacion(condition: FailedCondition | null): boolean {
 }
 
 /** Como se cuenta la vuelta en el chat del proyecto. */
+/**
+ * El motivo del plan, traducido a desenlace. Solo el bloqueo del perimetro gana
+ * casilla propia: los otros dos —proyecto desconocido y sin HEAD de git— se
+ * cuentan como antes para no ensanchar el vocabulario del parte sin dato que lo
+ * pida, y quedan anotados como tales en el tipo del plan.
+ */
+export const desenlaceDelPlan = (reason: PlanNegado): ChainOutcome =>
+  reason === NO_ES_SU_VEHICULO ? { kind: 'negado' } : { kind: 'sin-candidato' }
+
 export function describir(outcome: ChainOutcome): string {
   if (outcome.kind === 'sin-candidato') return 'No queda hallazgo elegible que reparar.'
+  if (outcome.kind === 'negado') return VA_POR_EL_TERMINAL
   const corto = 'proposalId' in outcome ? outcome.proposalId.slice(0, 8) : ''
   if (outcome.kind === 'obsoleto') return `${corto}: el hallazgo ya no existe en el codigo.`
   if (outcome.kind === 'descartada') return `${corto}: descartada — ${outcome.motivo}.`

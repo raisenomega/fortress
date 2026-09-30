@@ -136,6 +136,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-103](adr-103-la-severidad-de-las-familias-de-auditoria.md) | La severidad de las familias de auditoría: los ejes de seguridad no juzgan lo que no es de seguridad | 2026-09-23 | Aceptada | Escaneo |
 | [ADR-104](adr-104-lo-que-el-grafo-no-ve-y-las-barreras-declaradas.md) | Lo que el grafo no ve y las barreras declaradas: el agente sabe dónde el grafo no llega, y lee ahí | 2026-09-24 | Aceptada | Grafo |
 | [ADR-105](adr-105-la-guarda-de-barrera-cubre-todo-turno-que-edita.md) | La guarda de barrera cubre todo turno que edita: barrera sana edita, barrera muerta bloquea con recibo | 2026-09-26 | Aceptada | Seguridad |
+| [ADR-106](adr-106-el-debut-sube-a-high-y-la-seleccion-prioriza-por-severidad.md) | El debut sube a HIGH, la selección prioriza por severidad, y la puerta de CRITICAL queda condicionada a su prueba | 2026-09-30 | Aceptada | Motor |
 | [ADR-107](adr-107-la-cura-del-perimetro-del-motor.md) | La cura del perímetro del Motor: el Motor es de FORTRESS, el Terminal es del cliente | 2026-09-30 | Aceptada | Motor |
 
 ## Referencias

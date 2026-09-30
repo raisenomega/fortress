@@ -4,6 +4,8 @@ import type { NoticeTone } from '../components/common/Notice'
 /** Por que se detuvo, en una frase. Solo agotar el pozo es un exito. */
 const CIERRE: Record<FinDelDrenaje, { texto: string; tono: NoticeTone }> = {
   'sin-candidato': { texto: 'no queda nada elegible', tono: 'ok' },
+  // No es un pozo agotado: el Motor solo repara FORTRESS (ADR-107).
+  negado: { texto: 'este proyecto se repara por el Terminal', tono: 'aviso' },
   'tope-vueltas': { texto: 'tope de vueltas alcanzado', tono: 'aviso' },
   'tope-gasto': { texto: 'tope de gasto alcanzado', tono: 'aviso' },
   detenido: { texto: 'detenido por ti', tono: 'aviso' },

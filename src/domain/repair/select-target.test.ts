@@ -14,9 +14,10 @@ const POSTURE = at('l3', 'LOW', 'El handler postureRun no pasa por guardRun: esc
 const ALL = [HIGH, MEDIUM, FS, ACCOUNT, POSTURE]
 
 describe('selectTarget (C1 seleccion)', () => {
-  it('modo estreno: MEDIUM entra, HIGH no (sin elegibles -> null)', () => {
-    expect(selectTarget([HIGH, MEDIUM])?.target.id).toBe(MEDIUM.id)
-    expect(selectTarget([HIGH])).toBeNull()
+  it('modo estreno (ADR-106): HIGH entra y GANA; CRITICAL sigue fuera', () => {
+    expect(selectTarget([HIGH, MEDIUM])?.target.id).toBe(HIGH.id)
+    expect(selectTarget([HIGH])?.target.id).toBe(HIGH.id)
+    expect(selectTarget([at('c', 'CRITICAL', 'sin guarda', 'a.ts', 1)])).toBeNull()
   })
 
   it('determinista: mismo input en cualquier orden -> mismo elegido', () => {
@@ -25,7 +26,7 @@ describe('selectTarget (C1 seleccion)', () => {
     const c = selectTarget([...ALL].reverse())
     expect(a?.target.id).toBe(b?.target.id)
     expect(a?.target.id).toBe(c?.target.id)
-    expect(a?.target.id).toBe(MEDIUM.id) // aditivo de 1 control: la menor superficie
+    expect(a?.target.id).toBe(HIGH.id) // ADR-106: el mas grave de los elegibles
   })
 
   it('C1 NO propone ni edita: pura, devuelve solo {target, reason}, no muta el input', () => {

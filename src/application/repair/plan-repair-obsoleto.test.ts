@@ -22,7 +22,7 @@ describe('planRepair — el descuento por obsoleto se ancla al arbol', () => {
       obsoleteIds: ['f1'],
       sha: 'head-vivo'
     })
-    expect(await planRepair(b.context, 'p1')).toBeNull()
+    expect(await planRepair(b.context, 'p1')).toMatchObject({ ok: false, reason: 'sin-candidato' })
     expect(b.inserted).toEqual([])
   })
 

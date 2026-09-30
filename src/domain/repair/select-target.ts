@@ -1,6 +1,7 @@
 import { isAdditive } from './additive'
-import { DEBUT, isDebutEligible } from './debut'
-import type { Severity } from '../shared/severity'
+import { isDebutEligible } from './debut'
+import { razonDeLaSeleccion } from './razon-de-la-seleccion'
+import { compareSeverity, type Severity } from '../shared/severity'
 import { cargaPorDirectorio, directorio } from './orden-candidatos'
 
 /** Subconjunto puro de un hallazgo, suficiente para ELEGIR cual reparar. */
@@ -42,11 +43,13 @@ export function surface(c: Candidate): number {
   return (isAdditive(c.title) ? 0 : 10) + concerns(c.title)
 }
 
-/** Orden total DETERMINISTA: menor superficie; luego el mas viejo; luego el de
- *  la carpeta menos cargada; y linea e id para cerrar el orden. */
+/** Orden total DETERMINISTA: la SEVERIDAD primero (ADR-106, con la autoridad
+ *  unica `compareSeverity`) y los cinco desempates de siempre detras, intactos:
+ *  superficie, antiguedad, carpeta menos cargada, linea, id. */
 function order(carga: ReadonlyMap<string, number>) {
   const pendientes = (c: Candidate): number => carga.get(directorio(c.file)) ?? 0
   return (a: Candidate, b: Candidate): number =>
+    compareSeverity(a.severity, b.severity) ||
     surface(a) - surface(b) ||
     a.firstSeen.localeCompare(b.firstSeen) ||
     pendientes(a) - pendientes(b) ||
@@ -67,9 +70,5 @@ export function selectTarget(candidates: readonly Candidate[]): Selection | null
   // selector sigue siendo una funcion pura de su entrada, y la cuenta cambia
   // sola conforme el pozo se vacia.
   const target = [...eligible].sort(order(cargaPorDirectorio(eligible)))[0]
-  const reason =
-    `${target.title} (${target.file}:${target.line}, ${target.severity}). Elegido: MENOR ` +
-    `superficie (${surface(target)}) entre los elegibles (${DEBUT.join('/')}), y el mas antiguo ` +
-    `sin atender (${target.firstSeen}), de la carpeta menos cargada. Contenido y verificable.`
-  return { target, reason }
+  return { target, reason: razonDeLaSeleccion(target) }
 }

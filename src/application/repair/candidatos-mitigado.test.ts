@@ -14,7 +14,7 @@ const mitigado = (f: FindingMemory): FindingMemory => ({ ...f, lifecycle: 'MITIG
 describe('un hallazgo mitigado no vuelve a la cola del motor', () => {
   it('mitigado: no hay a quien elegir', async () => {
     const b = bench({ findings: [mitigado(hallazgo('f1', 'a.ts'))], sha: 'head-vivo' })
-    expect(await planRepair(b.context, 'p1')).toBeNull()
+    expect(await planRepair(b.context, 'p1')).toMatchObject({ ok: false, reason: 'sin-candidato' })
     expect(b.inserted).toEqual([])
   })
 
