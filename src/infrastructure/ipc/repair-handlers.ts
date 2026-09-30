@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron'
 import { planRepair } from '@application/repair/plan-repair'
+import type { PlanResult } from '@application/repair/resultado-del-plan'
 import { resumenCerco } from '@application/repair/resumen-cerco'
 import { err, ok, type Result } from '@domain/shared/result'
-import type { Proposal } from '@domain/repair/proposal'
 import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
 import { guardRun } from '../run-guard'
@@ -25,7 +25,7 @@ export function registerRepairHandlers(): void {
   // llamador que no lo pase recibe el comportamiento de siempre.
   ipcMain.handle(
     IPC.repairPropose,
-    async (_event, projectId: string, findingId?: string): Promise<Result<Proposal | null>> => {
+    async (_event, projectId: string, findingId?: string): Promise<Result<PlanResult>> => {
       const context = getAppContext()
       const id = String(projectId)
       const dirigido = findingId === undefined ? undefined : String(findingId)

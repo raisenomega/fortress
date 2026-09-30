@@ -1,4 +1,5 @@
 import type { GenerateResult } from '@application/repair/generate-types'
+import type { PlanResult } from '@application/repair/resultado-del-plan'
 import type { RetryResult } from '@application/repair/retry-repair'
 import type { RunGateResult } from '@application/repair/run-gate'
 import type { AutoMergeResult } from '@application/repair/auto-merge-types'
@@ -19,10 +20,11 @@ export interface RepairApi extends VerificacionApi {
    * genera fix ni toca el arbol.
    *
    * Con `findingId` no elige: atiende ESE hallazgo, quepa o no en el cerco de
-   * integracion automatica. null si ya tiene propuesta viva, si no esta activo
-   * o si su severidad cae fuera del estreno del motor.
+   * integracion automatica. Cuando no hay propuesta VIENE EL MOTIVO: ya tiene
+   * una viva, no esta activo, su severidad cae fuera del estreno, o el Motor
+   * nego el proyecto entero por el perimetro de ADR-107.
    */
-  propose(projectId: string, findingId?: string): Promise<Result<Proposal | null>>
+  propose(projectId: string, findingId?: string): Promise<Result<PlanResult>>
   /** Expediente del proyecto, del mas reciente al mas antiguo. */
   list(projectId: string): Promise<readonly Proposal[]>
   /** Cuantos hallazgos vivos quedan fuera del cerco: la cola no los elige sola. */

@@ -36,7 +36,7 @@ describe('proposeRepair: un clic que no produce nada tiene que decirlo', () => {
   it('sin candidato: avisa en vez de tragarse el clic', async () => {
     // Sobre el propio repo no se notaba nunca porque siempre hay escaneo. En
     // un proyecto recien registrado este es el caso normal, y era mudo.
-    stubRepair(() => Promise.resolve({ ok: true, value: null }))
+    stubRepair(() => Promise.resolve({ ok: true, value: { ok: false, reason: 'sin-candidato' } }))
     await proposeRepair('proj')
 
     expect(avisos()[0]).toContain('No hay hallazgo que reparar')
@@ -44,7 +44,7 @@ describe('proposeRepair: un clic que no produce nada tiene que decirlo', () => {
   })
 
   it('con propuesta nueva: no molesta con avisos', async () => {
-    stubRepair(() => Promise.resolve({ ok: true, value: PROPUESTA }))
+    stubRepair(() => Promise.resolve({ ok: true, value: { ok: true, proposal: PROPUESTA } }))
     await proposeRepair('proj')
 
     expect(avisos()).toHaveLength(0)

@@ -6,7 +6,7 @@ import { generateFix } from './generate-fix'
 import type { JudgeDeps } from './judge-and-integrate'
 import { judgeAndIntegrate } from './judge-and-integrate'
 import { esAveria } from '@domain/repair/averia'
-import type { ChainOutcome } from './motor-chain-outcome'
+import { desenlaceDelPlan, type ChainOutcome } from './motor-chain-outcome'
 import { planRepair } from './plan-repair'
 import { runGate, type GateDeps } from './run-gate'
 
@@ -45,8 +45,9 @@ export async function runMotorChain(
   modo: ModoDeVuelta = 'completo'
 ): Promise<Result<ChainOutcome>> {
   // Sin hallazgo dirigido: la cola elige, y el modo le dice con que alcance.
-  const proposal = await planRepair(ctx, projectId, undefined, modo)
-  if (proposal === null) return ok({ kind: 'sin-candidato' })
+  const plan = await planRepair(ctx, projectId, undefined, modo)
+  if (!plan.ok) return ok(desenlaceDelPlan(plan.reason))
+  const { proposal } = plan
   if (proposal.state !== 'ANALIZADO') return ok({ kind: 'obsoleto', proposalId: proposal.id })
 
   const generado = await generateFix(ctx, proposal.id, deps.generate)
@@ -65,11 +66,10 @@ export async function runMotorChain(
   const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge, modo === 'completo')
   if (!juicio.omega.ok) return cortar(proposal.id, juicio.omega.reason)
 
-  const proposalId = proposal.id
-  if (ctx.repairProposals.findById(proposalId)?.state === 'MERGEADO') {
-    return ok({ kind: 'integrada', proposalId })
+  if (ctx.repairProposals.findById(proposal.id)?.state === 'MERGEADO') {
+    return ok({ kind: 'integrada', proposalId: proposal.id })
   }
   // La condicion viaja tipada hasta aqui: quien cuente denegaciones necesita
   // saber CUAL freno, y `espera-firma` a secas las hacia indistinguibles.
-  return ok({ kind: 'espera-firma', proposalId, condition: juicio.merge?.denial ?? null })
+  return ok({ kind: 'espera-firma', proposalId: proposal.id, condition: juicio.merge?.denial ?? null }) // prettier-ignore
 }

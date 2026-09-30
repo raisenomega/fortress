@@ -14,11 +14,26 @@ describe('el Motor solo trabaja FORTRESS (ADR-107)', () => {
     expect(esVehiculoDelMotor(false)).toBe(false)
   })
 
-  it('un proyecto de CLIENTE no engendra propuesta', async () => {
+  /**
+   * DICE POR QUE. Devolver `null` a secas juntaba el bloqueo del perimetro con
+   * «no queda nada elegible», y el operador leia la frase falsa sobre un
+   * proyecto que el Motor habia negado a proposito.
+   */
+  it('un proyecto de CLIENTE no engendra propuesta, y el plan dice por que', async () => {
     const b = banco(false)
 
-    expect(await planRepair(b.context, 'p1')).toBeNull()
+    expect(await planRepair(b.context, 'p1')).toEqual({ ok: false, reason: NO_ES_SU_VEHICULO })
     expect(b.inserted).toHaveLength(0)
+  })
+
+  /** Los DOS nacimientos, uno al lado del otro: misma forma, mismo motivo. */
+  it('los dos nacimientos niegan con la MISMA forma', async () => {
+    const plan = await planRepair(banco(false).context, 'p1')
+    const rb = retryBench({ old: vieja({ state: 'RECHAZADO' }), esRepoPropio: false })
+    const retry = await retryRepair(rb.context, vieja().id)
+
+    expect(plan).toMatchObject({ ok: false, reason: NO_ES_SU_VEHICULO })
+    expect(retry).toMatchObject({ ok: false, reason: NO_ES_SU_VEHICULO })
   })
 
   it('FORTRESS si: la cura no rompe su propio drenaje', async () => {

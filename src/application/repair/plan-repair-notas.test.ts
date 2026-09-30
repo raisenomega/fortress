@@ -3,6 +3,7 @@ import { bench, hallazgo } from './plan-repair-fixture'
 import { planRepair } from './plan-repair'
 
 import type { SelfNoteDraft } from '@domain/system/self-observation'
+import { propuesta } from './propuesta-del-plan'
 
 const NOTA: SelfNoteDraft = {
   kind: 'gap',
@@ -47,7 +48,7 @@ describe('planRepair: lo que el analista nota de FORTRESS', () => {
       verdictStatus: 'OBSOLETO',
       notes: [NOTA]
     })
-    const proposal = await planRepair(b.context, 'p1')
+    const proposal = propuesta(await planRepair(b.context, 'p1'))
 
     expect(proposal?.state).toBe('CADUCADO')
     expect(b.observadas).toHaveLength(1)

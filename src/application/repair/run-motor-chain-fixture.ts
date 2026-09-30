@@ -14,8 +14,15 @@ export function ctx(estadoFinal = 'OMEGA'): AppContext {
   return { repairProposals: { findById: () => ({ state: estadoFinal }) } } as unknown as AppContext
 }
 
+/** El plan encuentra a quien atender. `null` mantiene el caso «sin candidato». */
 export const elige = (p: unknown): void =>
-  void vi.spyOn(elegir, 'planRepair').mockResolvedValue(p as never)
+  void vi.spyOn(elegir, 'planRepair').mockResolvedValue(
+    (p === null ? { ok: false, reason: 'sin-candidato' } : { ok: true, proposal: p }) as never
+  )
+
+/** El plan NIEGA con su motivo: el otro camino que la cadena tiene que leer. */
+export const niega = (reason: string): void =>
+  void vi.spyOn(elegir, 'planRepair').mockResolvedValue({ ok: false, reason } as never)
 export const genera = (r: unknown): void => void vi.spyOn(generar, 'generateFix').mockResolvedValue(r as never) // prettier-ignore
 export const compila = (r: unknown): void =>
   void vi.spyOn(compilar, 'runGate').mockResolvedValue(r as never)

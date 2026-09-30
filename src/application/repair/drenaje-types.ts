@@ -7,7 +7,7 @@ import type { MotorChainDeps } from './run-motor-chain'
  * (tope diario, otra corrida, proyecto en revision) haciendo su trabajo.
  */
 // prettier-ignore
-export type FinDelDrenaje = 'sin-candidato' | 'tope-vueltas' | 'tope-gasto' | 'detenido' | 'ocupado' | 'averia' | 'entorno'
+export type FinDelDrenaje = 'sin-candidato' | 'negado' | 'tope-vueltas' | 'tope-gasto' | 'detenido' | 'ocupado' | 'averia' | 'entorno'
 
 /**
  * Lo que la corrida HIZO, no solo lo que dejo. Un parte que solo contaba las

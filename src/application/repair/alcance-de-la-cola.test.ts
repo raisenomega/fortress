@@ -4,6 +4,7 @@ import type { ConfigState } from '@domain/repair/auto-merge-config'
 import { DEFAULT_POLICY } from '@domain/repair/auto-merge-policy'
 import { bench, hallazgo } from './plan-repair-fixture'
 import { planRepair } from './plan-repair'
+import { propuesta } from './propuesta-del-plan'
 
 /** El cerco de este repo: solo LOW y con `ipc/**` excluido. */
 const CERCO: ConfigState = {
@@ -30,7 +31,7 @@ const elegido = async (
     modo === undefined
       ? await planRepair(b.context, 'p1')
       : await planRepair(b.context, 'p1', undefined, modo)
-  return p?.findingId ?? 'ninguno'
+  return propuesta(p)?.findingId ?? 'ninguno'
 }
 
 describe('la cola elige con el alcance de su vuelta', () => {

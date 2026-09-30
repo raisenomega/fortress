@@ -1,3 +1,5 @@
+import type { PlanNegado } from '@application/repair/resultado-del-plan'
+import { NO_ES_SU_VEHICULO, VA_POR_EL_TERMINAL } from '@domain/repair/vehiculo-del-motor'
 import { api } from '../adapters/fortress-api'
 import { notify, reportError } from '../stores/toast-store'
 import { useRepairStore } from '../stores/repair-store'
@@ -6,7 +8,17 @@ const SIN_CANDIDATO =
   'No hay hallazgo que reparar en este proyecto: escanealo primero, o los que quedan ya tienen propuesta viva.'
 
 const SIN_DIRIGIDO =
-  'El motor no puede atender ese hallazgo: o ya tiene una propuesta viva, o su severidad queda fuera de lo que estrena (LOW y MEDIUM).'
+  'El motor no puede atender ese hallazgo: o ya tiene una propuesta viva, o su severidad queda fuera de lo que estrena (LOW, MEDIUM y HIGH).'
+
+/**
+ * Por que no hubo propuesta, en la frase que toca. El perimetro tiene la suya
+ * (ADR-107): decirle «no hay nada que reparar» a quien pulsa sobre un proyecto
+ * de cliente seria falso, y ademas no le diria a donde ir.
+ */
+const motivoDelPlan = (reason: PlanNegado, dirigido: boolean): string => {
+  if (reason === NO_ES_SU_VEHICULO) return VA_POR_EL_TERMINAL
+  return dirigido ? SIN_DIRIGIDO : SIN_CANDIDATO
+}
 
 /**
  * Relee el expediente de propuestas y los hallazgos (para pintar cada fila).
@@ -47,7 +59,7 @@ export async function proposeRepair(projectId: string, findingId?: string): Prom
   try {
     const result = await api().repair.propose(projectId, findingId)
     if (!result.ok) reportError(result.error)
-    else if (result.value === null) notify(findingId === undefined ? SIN_CANDIDATO : SIN_DIRIGIDO)
+    else if (!result.value.ok) notify(motivoDelPlan(result.value.reason, findingId !== undefined))
   } catch (error) {
     reportError(error instanceof Error ? error.message : 'Fallo al proponer la reparacion')
   } finally {

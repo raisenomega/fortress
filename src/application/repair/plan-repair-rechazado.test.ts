@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Proposal } from '@domain/repair/proposal'
 import { bench, hallazgo } from './plan-repair-fixture'
 import { planRepair } from './plan-repair'
+import { propuesta } from './propuesta-del-plan'
 
 const HEAD = 'abc1234'
 
@@ -25,7 +26,7 @@ const rechazada = (findingId: string, baseSha = HEAD): Proposal => ({
 describe('planRepair: hallazgos que ya fracasaron sobre esta misma base', () => {
   it('no vuelve a elegir el que murio en el gate con el arbol quieto', async () => {
     const b = bench({ findings: [hallazgo('f1', 'a.ts')], proposals: [rechazada('f1')] })
-    expect(await planRepair(b.context, 'p1')).toBeNull()
+    expect(await planRepair(b.context, 'p1')).toMatchObject({ ok: false, reason: 'sin-candidato' })
     expect(b.inserted).toHaveLength(0)
   })
 
@@ -34,7 +35,7 @@ describe('planRepair: hallazgos que ya fracasaron sobre esta misma base', () => 
       findings: [hallazgo('f1', 'a.ts'), hallazgo('f2', 'b.ts')],
       proposals: [rechazada('f1')]
     })
-    expect((await planRepair(b.context, 'p1'))?.findingId).toBe('f2')
+    expect(propuesta(await planRepair(b.context, 'p1'))?.findingId).toBe('f2')
   })
 
   it('movido el arbol, el hallazgo vuelve a la baraja', async () => {
@@ -42,13 +43,13 @@ describe('planRepair: hallazgos que ya fracasaron sobre esta misma base', () => 
       findings: [hallazgo('f1', 'a.ts')],
       proposals: [rechazada('f1', 'sha-viejo')]
     })
-    expect((await planRepair(b.context, 'p1'))?.findingId).toBe('f1')
+    expect(propuesta(await planRepair(b.context, 'p1'))?.findingId).toBe('f1')
   })
 
   it('un veto de OMEGA no bloquea: ese camino es el del reintento', async () => {
     const vetada: Proposal = { ...rechazada('f1'), analysisReason: 'omega_vetado: no cubre' }
     const b = bench({ findings: [hallazgo('f1', 'a.ts')], proposals: [vetada] })
-    expect((await planRepair(b.context, 'p1'))?.findingId).toBe('f1')
+    expect(propuesta(await planRepair(b.context, 'p1'))?.findingId).toBe('f1')
   })
 
   it('sin candidatos que queden, C1 devuelve null y el loop dira "baraja agotada"', async () => {
@@ -56,6 +57,6 @@ describe('planRepair: hallazgos que ya fracasaron sobre esta misma base', () => 
       findings: [hallazgo('f1', 'a.ts'), hallazgo('f2', 'b.ts')],
       proposals: [rechazada('f1'), rechazada('f2')]
     })
-    expect(await planRepair(b.context, 'p1')).toBeNull()
+    expect(await planRepair(b.context, 'p1')).toMatchObject({ ok: false, reason: 'sin-candidato' })
   })
 })

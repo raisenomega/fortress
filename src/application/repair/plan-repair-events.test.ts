@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { bench, hallazgo } from './plan-repair-fixture'
 import { planRepair } from './plan-repair'
+import { propuesta } from './propuesta-del-plan'
 
 describe('planRepair — libro de vida', () => {
   it('caso REAL: 3 eventos — SELECT, AGENT_RUN y TRANSITION a ANALIZADO', async () => {
@@ -30,7 +31,7 @@ describe('planRepair — libro de vida', () => {
 
   it('si el libro LANZA, la transicion persistida queda: telemetria, no gate', async () => {
     const b = bench({ findings: [hallazgo('f1', 'a.ts')], eventLogThrows: true })
-    const proposal = await planRepair(b.context, 'p1')
+    const proposal = propuesta(await planRepair(b.context, 'p1'))
 
     // El estado se escribio (insert + patch) aunque ningun evento se asento.
     expect(proposal?.state).toBe('ANALIZADO')
