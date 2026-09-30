@@ -20,6 +20,13 @@ export function escenario(): Escenario {
   mkdirSync(proyecto)
   mkdirSync(vecino)
   writeFileSync(join(vecino, 'canario.txt'), 'SECRETO-DE-OTRO-CLIENTE')
+  // OJO AL MUTAR: si alguien mueve las cabeceras a la lista de ESCRITURA para
+  // matar el mutante de ADR-108, la sonda de abajo escribe DE VERDAD en la cache
+  // del operador (un COLADO de 1 byte). Paso el 2026-09-30 al probarlo; se borra
+  // a mano, y el nombre esta elegido para que no pueda pasar por cabecera.
+  //
+  // Y el comentario va AQUI, fuera de la plantilla: dentro, sus comillas
+  // invertidas la cerraban. Es la segunda vez que pasa (ver persistence-checks).
   writeFileSync(
     join(proyecto, 'fuga.js'),
     `const fs=require('fs'),os=require('os');
@@ -27,10 +34,6 @@ const t=(n,f)=>{try{console.log(n+'=OK:'+f())}catch(e){console.log(n+'=NO:'+e.co
 t('vecino',()=>fs.readFileSync('${vecino}/canario.txt','utf8').trim());
 t('home',()=>fs.readdirSync(os.homedir()).filter(x=>!x.startsWith('.fortress-caja-test-')).join(','));
 t('cache',()=>fs.readdirSync(os.homedir()+'/.cache').join(','));
-// OJO AL MUTAR: si alguien mueve las cabeceras a `escritura` para matar el
-// mutante de ADR-108, esta sonda ESCRIBE DE VERDAD en la cache del operador
-// (`~/.electron-gyp/COLADO`, 1 byte). Paso el 2026-09-30 al probarlo. Se
-// borra a mano; el nombre esta elegido para que no pueda pasar por cabecera.
 t('cabeceras',()=>{fs.writeFileSync(os.homedir()+'/.electron-gyp/COLADO','x');return 'ESCRITAS'});
 t('fuera',()=>{fs.writeFileSync('${raiz}/escrito.txt','x');return 'escrito'});
 t('dentro',()=>{fs.writeFileSync('${proyecto}/dentro.txt','x');return 'escrito'});

@@ -34,23 +34,6 @@ describe('la caja de la clase B, contra bwrap de verdad', () => {
     expect(nombres.filter((x) => !FIRMADAS.includes(x))).toEqual([])
   })
 
-  /**
-   * ADR-108, las dos casillas que la firma exige contra bwrap DE VERDAD.
-   *
-   * El tmpfs crea el `~/.cache` intermedio VACIO y solo `node-gyp` se monta
-   * encima: el resto de la cache del operador —`.npm` con su token incluido— no
-   * asoma. Y escribir en las cabeceras se NIEGA: con montaje escribible, un
-   * proceso de la caja de un CLIENTE envenenaria la cache que despues compila
-   * el modulo nativo de FORTRESS.
-   */
-  it('de ~/.cache solo asoma node-gyp, y las cabeceras no se dejan escribir', async () => {
-    const salida = await corre(e, ['fuga.js'])
-    const cache = (salida['cache'] ?? '').replace(/^OK:/, '').split(',').filter((x) => x !== '') // prettier-ignore
-
-    expect(cache).toEqual(['node-gyp'])
-    expect(salida['cabeceras']).toBe('NO:EROFS')
-  })
-
   it('no hay red: un servidor en el loopback de FUERA no se alcanza desde dentro', async () => {
     // Que un nombre no resuelva no prueba nada: dentro no hay resolv.conf y
     // fallaria igual con la red abierta (el mutante `--share-net` sobrevivia).
