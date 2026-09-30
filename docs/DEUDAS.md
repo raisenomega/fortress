@@ -1652,3 +1652,72 @@ Con las dos familias nuevas —perímetro (ADR-107) y selección (ADR-106)— el
 fichero queda **exactamente en el límite**. La siguiente familia no cabe. El
 `CLAUDE.md` ya dice qué hacer: **partir por familia, nunca subir el límite**. Se
 anota para que quien llegue con la tercera no descubra el techo a mitad del arco.
+
+## 11. El gate del Motor no pasa en la caja (medido 2026-09-30)
+
+### 11.1 P0 FUNCIONAL — `npm ci` del gate no ha pasado NUNCA dentro de la caja
+
+**Medido sobre `proposal_events`, partido por la fecha de ADR-092 (21-sep):**
+
+| Proyecto | Antes de la caja | Después |
+|---|---|---|
+| `fortress-command-center` | **52 OK** | **3 FALLO** |
+| `mailbd-main` | **47 OK** | — |
+
+**99 de 99 verdes antes. 0 de 3 después.** El último verde es del **19-sep**; la
+caja entró el **21-sep**; las tres primeras corridas posteriores son las del
+**30-sep 21:26, 21:29 y 21:32**, y las tres murieron en `node-gyp`. Solo una de
+las tres tocaba `package.json`: las otras dos eran fixes sin relación alguna.
+
+**La cadena, trazada:** `npm ci` dispara el `postinstall` del repo
+(`electron-builder install-app-deps`), que recompila los nativos contra el ABI de
+Electron; `node-gyp configure` busca las cabeceras en su `devdir`; la caja **tapa
+el HOME con un tmpfs**, así que no ve `~/.electron-gyp/39.8.10` ni
+`~/.cache/node-gyp/24.18.0` —que SÍ están en la máquina, 125 y 2727 ficheros—; y
+sale a descargarlas. El proxy abre **un solo host** para Node.js
+(`registry.npmjs.org`), no el de cabeceras, y contesta `NEGADO`. Lo que llega al
+operador es `gyp ERR! Request was cancelled`, a ocho capas de la causa.
+
+**Reproducido con un `bwrap` real** el 30-sep: con la forma de la caja de hoy,
+`node-gyp configure` falla con el MISMO stack que el gate
+(`async install ← getNodeDir`).
+
+**CHOCA CON ADR-107.** La cura dejó al Motor **solo** sobre FORTRESS, que es
+precisamente el proyecto cuyo gate la caja no deja pasar. Las dos decisiones se
+cruzaron por primera vez la noche del 30-sep.
+
+**El arreglo está MEDIDO y espera firma** (toca el perímetro del sandbox): ver el
+informe del 30-sep. En corto: montar las dos cachés de cabeceras en
+**`--ro-bind`** (el mecanismo ya existe, `Caja.soloLectura`) hace que
+`node-gyp configure` termine en `gyp info ok` **sin red** —probado—; pero NO
+alcanza para un fix que suba el major de Electron, porque la versión destino no
+está en la caché del HOST y el devnode en solo lectura falla antes de descargar
+(`ENOENT: mkdir '/home/jojo/.electron-gyp/40.0.0'`, probado).
+
+### 11.2 P2 — El proxy de registros niega en SILENCIO
+
+`proxy-de-registros.ts:51` responde `cliente.end(NEGADO)` y **no registra nada**:
+ni el host pedido, ni la propuesta, ni el momento. Un host fuera de la tabla
+cierra la conexión sin traza, y el síntoma aparece en el error de la herramienta
+que lo pidió, no donde se decidió. Diagnosticar §11.1 exigió bajar a la base y
+leer un stack de `undici`. **Arreglo:** apuntar el host denegado donde ya se
+apunta el resto de la corrida.
+
+### 11.3 P2 — `intentosPrevios` se cuenta a sí misma
+
+`planRepair` inserta la propuesta y **después** llama a `estudiar`, que lista las
+propuestas del hallazgo (`estudiar-con-memoria.ts:31`). En un primer intento
+`suyas.length === 1` —su propia fila— y el analista recibe «*Este hallazgo ya
+tuvo 1 propuesta(s) de reparación; ninguno llegó a integrarse*». **Medido:** sobre
+el hallazgo del Electron existe **una** propuesta, y es la que se estaba
+analizando. Le fabrica un historial de fracasos que no hubo. Misma familia que el
+arco del prompt que miente al agente. **Arreglo:** excluir la propuesta en curso.
+
+### 11.4 P1 — La cobertura del gate en la caja nunca se midió
+
+El docblock de `registros-de-paquetes.ts` es honesto sobre su límite: «MEDIDO, y
+hasta donde: npm, de punta a punta —**`npm view`** real a través del proxy, el
+2026-09-21—». Se midió `npm view`. **Nadie midió un `npm ci` con recompilación
+nativa**, que es lo que el gate corre en cada vuelta, y el primer proyecto en
+tropezar fue el propio. La casilla que faltaba no era la red: era **el gate
+entero dentro de la caja**, sobre un repo con dependencias nativas.
