@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { delKit, enCarpeta } from './plantilla-fixture'
+import { enCarpeta } from './plantilla-fixture'
+import { sintetica } from './plantilla-sintetica'
 import { buildScanPrompt } from './scan-prompt'
 import { SECURITY_CHECKLIST } from './scan-checklist'
 
@@ -9,7 +10,7 @@ const prompt = (temas: Parameters<typeof buildScanPrompt>[3]): string =>
 
 /** M8 aplica y el operador NO sembro su plantilla: el lector devolvio null. */
 const SIN_SEMBRAR = { ...enCarpeta('src/api'), modulos: ['M8'] as const, plantillas: [] }
-const SEMBRADA = { ...enCarpeta('src/api'), modulos: ['M8'] as const, plantillas: [delKit('M8')] }
+const SEMBRADA = { ...enCarpeta('src/api'), modulos: ['M8'] as const, plantillas: [sintetica('M8')] }
 const ROTA = {
   ...enCarpeta('src/api'),
   modulos: ['M8'] as const,

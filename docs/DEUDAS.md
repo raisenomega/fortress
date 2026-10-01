@@ -1739,3 +1739,64 @@ hasta donde: npm, de punta a punta —**`npm view`** real a través del proxy, e
 nativa**, que es lo que el gate corre en cada vuelta, y el primer proyecto en
 tropezar fue el propio. La casilla que faltaba no era la red: era **el gate
 entero dentro de la caja**, sobre un repo con dependencias nativas.
+
+### 11.5 ~~P0 FUNCIONAL — el gate del Motor no probaba el extractor en worktree~~
+
+**CERRADA el 2026-09-30, y la destapó ADR-108.** Al arreglar el `npm ci` el gate
+llegó por fin a `test:unit`… y estaba rojo. **Era una ceguera MÁS VIEJA, y la
+nueva la tapaba:**
+
+| Ceguera | Desde | Por qué |
+|---|---|---|
+| `test:unit` rojo en todo worktree | **10-sep** | 5 ficheros leían `internal/AUDIT-KIT/`, que está en `.gitignore` y **no viaja a un worktree** |
+| `npm ci` rojo en la caja | 21-sep | ADR-108, cerrada |
+
+Medido en `proposal_events`: **último `test:unit` verde del gate el 04-sep** —seis
+días ANTES de que naciera el fixture—, y **trece rojos** después (11 el 14-sep, 2
+el 19-sep). Desde el 21-sep el gate moría antes, en `npm ci`, así que nadie vio
+que `test:unit` llevaba once días muerto. **El gate del Motor no dio un veredicto
+útil sobre FORTRESS durante 26 días.**
+
+**La ceguera era SOLO del Motor:** en el repo real los cinco ficheros pasan (55
+tests), porque `internal/` existe ahí. El `npm run test:unit` del operador nunca
+lo vio.
+
+**Lo medido antes de elegir.** Las tres vías, y por qué se descartaron dos:
+
+- **El kit a git** — *descartada.* Las 17 plantillas son **publicables** (0
+  rastros de cliente, operador o secretos; los tres `sk-`/`token`/`password` son
+  patrones de búsqueda DENTRO de los prompts). Pero **son el producto**, y
+  `.gitignore` las excluye a propósito. El coste no era privacidad: era regalar
+  el contenido.
+- **Saltar los cinco** — *descartada, y es la peor.* Medido: sin el kit **no
+  sobrevive NI UN test del extractor** (`cuerpoAccionable`, `resumenDeModulo`,
+  `sustituirHuecos` y `bloqueDePlantillas` solo los cubren esos cinco). Un fix
+  que rompiera el extractor saldría **verde**, y el extractor roto devuelve
+  `null`: silencio sin bloque. Es instalar la misma ceguera a propósito.
+- **Vía 3** — *elegida.* Los cinco tests **eran dos clases distintas**.
+
+**Lo construido.** Cuatro tests prueban el CÓDIGO → leen una **plantilla
+sintética** versionada (`plantilla-sintetica.ts`), escrita PARA el test, con las
+cuatro anclas del contrato y marcas que podar. **No es un recorte** de una real:
+eso sería producto en git y envejecería sin avisar. Un test prueba LOS DOCUMENTOS
+(`plantilla-contrato`) → sigue leyendo `internal/` y **se salta diciéndolo**
+donde el kit no está.
+
+**La línea que lo separa de la vía 2**, y tiene su propio guardián
+(`contrato-del-kit.test.ts`): **falla** si el kit está y alguno no encaja,
+**salta** si el kit no está, **nunca pasa en silencio por ausencia**. El guardián
+juzga el código del test —`skipIf` atado a `kitDisponible`, la razón impresa,
+ningún `return` de escape dentro de un `it`—, igual que `clase-b-en-caja`.
+
+**Verificado en un worktree real** (`git worktree add` desde la rama, sin
+`internal/`): **865 ficheros verdes, 1 saltado; 4595 tests verdes, 1 saltado,
+cero rojos.** Y el salto se LEE: `[plantilla-contrato] SALTADO — kit ausente
+(internal/AUDIT-KIT no viaja a un worktree): no hay plantillas que medir aqui`.
+
+**Dos datos falsos que caí al medir, y quedan corregidos en el código:** el
+extractor tiene **TRES** ramas `null`, no cuatro —la falta de `═══ FIN ═══` no
+devuelve `null`, se queda con todo—; y el contrato exigía «del paso A al I»,
+**falso en nueve de las doce**: los cuerpos van de **seis** pasos (M1, M4, M7) a
+nueve (M5, M8, M12). Ahora exige lo que sí es el contrato: una **tira seguida
+desde A**, porque un hueco en medio significa que el extractor cortó por donde no
+debía.
