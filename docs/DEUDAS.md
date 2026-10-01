@@ -1976,12 +1976,10 @@ destapo**: la `7998aa13`, el primer fix del Motor con el gate reparado.
 
 **La frontera, medida en el libro vivo** (12 propuestas de FORTRESS, lectura
 `readonly`): las cuatro del **19-sep** llevan **un solo** `GENERATE DECISION`
-—`[WORKTREE_CREATE]`—, y por eso «el ultimo» acertaba y dos de ellas
-(`d34a5ed7`, `31452135`) tienen hoy el expediente completo. Las del **30-sep en
-adelante** llevan `[WORKTREE_CREATE , HUELLA , SCOPE]`: ahi el fallo muerde. La
-primera corrida afectada fue `6f8bbadd` (30-sep 21:26). Entre la ultima propuesta
-con expediente completo y la primera que choco con el fallo pasaron **once dias
-sin una sola firma** —el intervalo que explica el silencio, no la vida del bug—.
+—`[WORKTREE_CREATE]`—, y por eso «el ultimo» acertaba en ellas. Las del **30-sep
+en adelante** llevan `[WORKTREE_CREATE , HUELLA , SCOPE]`: ahi el fallo muerde.
+La primera corrida afectada fue `6f8bbadd` (30-sep 21:26), y la `7998aa13` fue la
+primera que llego a OMEGA y lo destapo.
 
 **EL ARREGLO:** `MOTIVO_WORKTREE` en el dominio, **compartido por quien escribe
 y quien lee** —el patron que `MOTIVO_CORREA` y `MOTIVO_HUELLA` ya seguian y que a
@@ -1993,10 +1991,18 @@ un motivo, y el expediente **busca el asiento que ES, no el que cae ultimo**.
 `defensasQueToca=[]` → **FIRMABLE**. Cuatro mutantes muertos.
 
 **Las otras cinco** con asientos detras murieron RECHAZADAS, y el gather las lee
-**bien**: devuelve `null` por la razon correcta —a las tres del `npm ci` les falta
-el veredicto de OMEGA; a `cec30bc5` (`provider_error`) y `a3ef0d14`
-(`no_diff_produced`), el del gate y el de OMEGA—. No hay nada que firmar en
-ninguna. No se revivio ninguna.
+**bien**: devuelve `null` por la razon correcta —a `33910cce`, `130d9c14` y
+`6f8bbadd` les falta el veredicto de OMEGA; a `cec30bc5` (`provider_error`) y
+`a3ef0d14` (`no_diff_produced`), el commit, el tamano del diff y los dos
+veredictos—. No hay nada que firmar en ninguna. No se revivio ninguna.
+
+**Verificado con el CODIGO REAL sobre el LIBRO REAL**, no con un doble:
+`collectPostOmegaState` y `toEvent` del repo, empaquetados aparte y corridos
+contra la base viva en `readonly` (el guion vive fuera del repo). De las **doce**
+propuestas de FORTRESS, **una sola** devuelve expediente —la `7998aa13`— y las
+once restantes `null`. Las cuatro del 19-sep tambien caen a `null`, pero **no por
+este fallo**: su `OMEGA TRANSITION` no lleva `verdict`. Dicho de otro modo, el
+arreglo no revive nada: solo deja pasar lo que ya estaba completo.
 
 ### 13.2 LA LECCION, con su segunda causa
 
