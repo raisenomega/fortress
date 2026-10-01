@@ -15,11 +15,17 @@ const TIMEOUT_MS = 2 * 60 * 1000
 // Sobre `buildEnv` y no sobre `process.env`: `git merge` ejecuta los HOOKS del
 // repo auditado —codigo ajeno en el arbol vivo— y heredaban el agente ssh y el
 // keyring del operador.
-const ENV: NodeJS.ProcessEnv = {
-  ...buildEnv(null),
-  GIT_TERMINAL_PROMPT: '0',
-  LC_ALL: 'C',
-  LANG: 'C'
+/**
+ * SE COMPONE AL LLAMAR, NUNCA AL CARGAR EL MODULO, como sus tres hermanos
+ * (`spawn-command`, `repair-git`, `run-command`). Era un `const` de modulo, y
+ * los imports se evaluan ANTES del `augmentPath()` del arranque: una app abierta
+ * con doble clic congelaba aqui su PATH minimo, sin `node`, y la caja no podia
+ * levantarse. El merge —el ULTIMO paso de la firma— moria con
+ * `sin-caja:falta-node` y se archivaba como `target-branch-detached`, con el
+ * HEAD en su rama. Medido el 2026-10-01: la primera firma del operador, DEUDAS §14.
+ */
+function entornoDelMerge(): NodeJS.ProcessEnv {
+  return { ...buildEnv(null), GIT_TERMINAL_PROMPT: '0', LC_ALL: 'C', LANG: 'C' }
 }
 
 export interface Corrida {
@@ -31,10 +37,11 @@ export interface Corrida {
  *  DENTRO DE LA CAJA (ADR-092, clase B): el arbol vivo del cliente, y nada mas.
  *  Sin caja no hay merge: fail-closed con el motivo en stderr. */
 export function git(cwd: string, args: readonly string[]): Promise<Corrida> {
-  const caja = enCaja('git', [...SIN_HOOKS, ...args], cwd, cwd, ENV['PATH'])
+  const env = entornoDelMerge()
+  const caja = enCaja('git', [...SIN_HOOKS, ...args], cwd, cwd, env['PATH'])
   if (!caja.ok) return Promise.resolve({ fallo: true, salida: caja.error })
   return new Promise((resolve) => {
-    const options = { cwd, env: ENV, timeout: TIMEOUT_MS }
+    const options = { cwd, env, timeout: TIMEOUT_MS }
     execFile(caja.value.bin, [...caja.value.args], options, (error, stdout, stderr) => {
       // git escribe el progreso en stderr aunque todo vaya bien.
       resolve({ fallo: error !== null, salida: `${stdout}${stderr}`.trim() })

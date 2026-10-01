@@ -23,7 +23,7 @@ export function createGitMergeApplier(): MergeApplier {
       const head = await git(projectPath, ['rev-parse', '--abbrev-ref', 'HEAD'])
       const targetBranch = head.salida
       if (head.fallo || targetBranch === '' || targetBranch === 'HEAD') {
-        return { ok: false, kind: 'target-branch-detached' }
+        return { ok: false, kind: 'target-branch-detached', gitOutput: head.salida }
       }
 
       const merge = await git(projectPath, ['merge', '--no-ff', sourceBranch, '-m', commitMessage])
