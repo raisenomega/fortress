@@ -24,12 +24,14 @@ describe('la caja de la clase B, contra bwrap de verdad', () => {
     expect(existsSync(join(e.proyecto, 'dentro.txt'))).toBe(true)
   })
 
-  it('el HOME es un tmpfs vacio: solo asoma el camino hasta node, la excepcion firmada', async () => {
-    // Si node vive en el HOME (nvm), su camino se ve; nada mas: ni .ssh, ni
-    // .config, ni .npm. Es la excepcion medida y firmada («salvo la ruta de node»).
+  it('el HOME es un tmpfs vacio: solo asoman las excepciones firmadas', async () => {
+    // Si node vive en el HOME (nvm), su camino se ve; y desde ADR-108, las dos
+    // cachés de cabeceras publicas. Nada mas: ni .ssh, ni .config, ni .npm.
+    const FIRMADAS = ['.nvm', '.fnm', '.cache', '.electron-gyp']
     const asoma = ((await corre(e, ['fuga.js']))['home'] ?? '').replace(/^OK:/, '')
     const nombres = asoma.split(',').filter((x) => x !== '')
-    expect(nombres.every((x) => x === '.nvm' || x === '.fnm')).toBe(true)
+
+    expect(nombres.filter((x) => !FIRMADAS.includes(x))).toEqual([])
   })
 
   it('no hay red: un servidor en el loopback de FUERA no se alcanza desde dentro', async () => {

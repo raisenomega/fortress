@@ -2,6 +2,7 @@ import { homedir } from 'node:os'
 import { err, ok, type Result } from '@domain/shared/result'
 import { flagsDeBwrap } from '@domain/sandbox/flags-de-bwrap'
 import { dentroDe } from '@domain/sandbox/ruta-de-la-caja'
+import { ARTEFACTOS_PUBLICOS } from './artefactos-publicos'
 import { directorioDeNode, gitComunDe, raicesDelSistema } from './lo-que-ve-la-caja'
 import { conPuente } from './puente-del-proxy'
 import { BWRAP, cajaDisponible } from './sonda-de-bwrap'
@@ -52,7 +53,7 @@ export function enCaja(
     cwd,
     home: homedir(),
     sistema: raicesDelSistema(),
-    soloLectura: [node, ...propio].filter((r) => !dentroDe(proyecto, r)),
+    soloLectura: [node, ...propio, ...ARTEFACTOS_PUBLICOS].filter((r) => !dentroDe(proyecto, r)),
     escritura: [...gitComunDe(cwd), ...escritura].filter((r) => r !== proyecto),
     socketDelProxy
   })
