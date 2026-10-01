@@ -29,7 +29,21 @@ export type GateOutcome =
       readonly ok: true
       readonly commands: readonly CommandOutcome[]
       readonly skipped?: readonly string[]
-      /** Reservado a (ii-b): hoy un verde no puede traer nada heredado. */
+      /**
+       * Comandos que fallaron y YA fallaban sobre la base, sin que el fix
+       * anadiera nada suyo. **Un verde SI puede traerlos**, y es la via normal:
+       * `correrComandos` no corta en un rojo heredado y, si TODO lo que fallo
+       * era heredado, devuelve `ok: true` con la lista.
+       *
+       * El docblock decia «hoy un verde no puede traer nada heredado». Era
+       * FALSO, y describia un diseno anterior al que corre: medido el
+       * 2026-09-30, habia pasado DOCE veces sobre FORTRESS —los doce
+       * `test:unit`— y ocho de esos fixes llegaron a MERGEADO (DEUDAS §11.6).
+       *
+       * Quien lea un verde con esto DENTRO no esta leyendo un verde limpio:
+       * `avisoDeHerencia` pone la diferencia en palabras, y viaja a OMEGA, a la
+       * linea que el operador firma y al parte del drenaje.
+       */
       readonly heredado?: readonly string[]
     }
   | {
@@ -40,9 +54,14 @@ export type GateOutcome =
       readonly skipped?: readonly string[]
       /**
        * Comandos que fallaron y YA fallaban sobre la base, sin que el fix
-       * anadiera nada suyo. No cambia el veredicto —rojo es rojo— pero cambia
-       * de quien es: heredarlo no es haberlo roto. Son TODOS los heredados que
-       * se encontraron, no solo el primero: la cadena ya no se para en ellos.
+       * anadiera nada suyo. Son TODOS los heredados que se encontraron, no solo
+       * el primero: la cadena no se para en ellos.
+       *
+       * El docblock decia «No cambia el veredicto —rojo es rojo—», y eso
+       * CONTRADECIA al codigo: en `correrComandos`, si todo lo que fallo era
+       * heredado el veredicto pasa a VERDE. Aqui, en la rama roja, lo heredado
+       * conviene igual —dice de quien es cada rojo— pero el que decide el
+       * veredicto es el conjunto: queda rojo porque algo NO heredado fallo.
        */
       readonly heredado?: readonly string[]
     }

@@ -1,3 +1,4 @@
+import { gateEnUnaLinea } from './aviso-de-herencia'
 import type { ProposalEvent } from './proposal-event'
 
 /** El motivo con el que el verificador asienta la correa que APLICO. Lo comparten
@@ -32,11 +33,16 @@ function laCorrea(eventos: readonly ProposalEvent[]): string {
   return `CORREA aplicada: ${ficheros.join(', ') || '(ninguno por extension)'}${conGrupos}`
 }
 
+/**
+ * La linea del gate para el revisor. Lleva la HERENCIA porque un verde con una
+ * prueba absuelta no es un verde limpio, y juzgar como si lo fuera es juzgar con
+ * menos de lo que el motor sabia. Decia «verde en todos los comandos» sobre doce
+ * gates en los que `test:unit` se habia heredado: era falso, y lo leia el juez.
+ */
 function elGate(eventos: readonly ProposalEvent[]): string {
   const datos = evidencia(eventos.find((e) => e.toState === 'GATE'))
   if (datos === null) return SIN_GATE
-  const verde = datos.allCommandsGreen === true
-  return `GATE: ${verde ? 'verde en todos los comandos' : 'NO verde'}`
+  return `GATE: ${gateEnUnaLinea(datos.allCommandsGreen === true, lista(datos.heredado))}`
 }
 
 /**
