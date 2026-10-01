@@ -2029,3 +2029,70 @@ comprobaba `MOTIVO_HUELLA` y `MOTIVO_CORREA`… y **no el del worktree**. Los do
 que tenian constante se afirmaban; el que era literal suelto, no. Un mutante que
 le quitaba el motivo al ESCRITOR sobrevivia a todas las suites. Cerrado con la
 linea que faltaba.
+
+## 14. La QUINTA ceguera: el merge de la firma, con el PATH congelado (2026-10-01)
+
+### 14.1 ~~P0 FUNCIONAL — la firma moria en el ULTIMO paso, y con la etiqueta equivocada~~
+
+**CERRADA el 2026-10-01.** El operador firmo la `7998aa13` y la app contesto
+**`merge-failed-target-branch-detached`**. `main` estaba en su rama, limpio, en
+`47c6825`: el HEAD **nunca** estuvo suelto.
+
+**LA CAUSA, reproducida.** El `git` del merge corre DENTRO de la caja, y la caja
+necesita `node` en el PATH. `git-del-merge.ts:18` componia el entorno en un
+**`const` de modulo**:
+
+```ts
+const ENV = { ...buildEnv(null), GIT_TERMINAL_PROMPT: '0', ... }
+```
+
+Los imports se evaluan **ANTES** del `augmentPath()` de `main/index.ts:30` —en
+el bundle, el `const` esta en el byte 483 348 y la llamada en el 612 553—. Asi
+que `ENV.PATH` era el PATH crudo de una app abierta con doble clic, **sin nvm y
+sin `node`**. Medido con el PATH real del proceso de la app:
+
+| | |
+|---|---|
+| PATH crudo de la app | `/home/jojo/.local/bin:/usr/local/sbin:…:/snap/bin` — sin `node` |
+| con ese PATH | `CAJA ok=false error=sin-caja:falta-node` → `git fallo=true` |
+| con el PATH que `augmentPath` completa | `CAJA ok=true` → `git` devuelve `main` |
+
+**ERA UN SOLO PUNTO, y sus tres hermanos ya lo hacian bien.** `spawn-command`,
+`repair-git` y `run-command` componen el entorno **en la llamada** y lo dicen en
+su docblock —«se compone al lanzar y no al cargar el modulo»—. `git-del-merge`
+era el unico que lo congelaba. Por eso el Motor podia hacer TODO desde la app
+menos el ultimo paso: crear el worktree, generar, pasar el gate entero y recibir
+el veredicto de OMEGA, y morir al integrar.
+
+**POR QUE NADIE LO VIO ANTES:** las corridas del Motor se habian hecho desde un
+arnes con el PATH de una shell —con nvm—, no desde el AppImage. **La firma del
+operador fue la PRIMERA vez que la caja se levanto desde la app empaquetada.**
+
+**Y LA SEGUNDA MITAD DEL DEFECTO, que es la que cuesta tiempo:** la etiqueta
+`target-branch-detached` cubre **dos** cosas —HEAD suelto de verdad, y la
+consulta de la rama que no se pudo hacer— y `integrar-midiendo-el-arbol.ts:14`
+**tiraba el `gitOutput`** justo en ese caso. El libro y el `omega_log` guardaron
+`merge-failed-target-branch-detached — target-branch-detached`: una etiqueta
+repetida, cero diagnostico. El motivo real (`sin-caja:falta-node`) no se
+persistio en ningun sitio. **Arreglado:** el fallo de la rama destino lleva su
+salida como los otros tres, y `detalleDe` ya no tiene caso especial.
+
+**EL PRECIO.** La `7998aa13` paso a **CADUCADO**, que es terminal
+(`CADUCADO: []`), por diseno: *«un merge que falla CADUCA la propuesta, nunca se
+reintenta ni se rebasa sola»*. El estado quedo **coherente** —no se marco
+MERGEADO sin merge, y el hallazgo `fa86739d` siguio `open`—, pero el trabajo
+quedo huerfano: el fix, su gate verde de 242 s, el APROBADO de OMEGA y $0,97.
+**El commit `8913dab` y su rama siguen intactos.**
+
+### 14.2 LA LECCION, y es la cuarta vez que la misma forma muerde
+
+**Un valor que se lee al CARGAR el modulo congela el mundo de ese instante.** El
+arranque muta `process.env` a proposito —`augmentPath()` existe porque una app
+de escritorio no pasa por `~/.bashrc`—, y cualquier modulo que fotografie el
+entorno antes de eso trabaja con un mundo que ya no existe. Los tres hermanos lo
+tenian escrito en el docblock; este no, y la asimetria no la vio nadie porque
+**el camino que la recorria nunca se habia andado desde la app**.
+
+Y la de siempre, por quinta vez en esta sesion: **una etiqueta no es un
+diagnostico**. `target-branch-detached` mandaba a mirar el HEAD, que estaba
+perfecto, mientras el motivo verdadero se tiraba en la linea 14.
