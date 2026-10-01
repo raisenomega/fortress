@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { cadenaCompleta, cadenaSin, evento, VERDICT } from './collect-post-omega-fixture'
 import { collectPostOmegaState } from './collect-post-omega-state'
+import { MOTIVO_WORKTREE } from '@domain/repair/motivo-del-worktree'
 
 describe('collectPostOmegaState: el expediente entero o nada', () => {
   it('con la cadena completa devuelve los ocho campos', () => {
@@ -29,7 +30,7 @@ describe('collectPostOmegaState: el expediente entero o nada', () => {
     // Una rama que no sigue la convencion se devuelve tal cual: es la que existe.
     const raros = cadenaCompleta().map((e) =>
       e.phase === 'GENERATE' && e.eventType === 'DECISION'
-        ? evento('GENERATE', 'DECISION', { branch: 'otra-convencion', baseSha: 'b', ok: true })
+        ? evento('GENERATE', 'DECISION', { branch: 'otra-convencion', baseSha: 'b', ok: true }, { reason: MOTIVO_WORKTREE }) // prettier-ignore
         : e
     )
     expect(collectPostOmegaState(raros)?.branch).toBe('otra-convencion')

@@ -1,6 +1,7 @@
 import { computeAllowedFiles } from '@domain/repair/allowed-files'
 import { allowsFor } from '@domain/repair/scope-check'
 import { toSlug } from '@domain/repair/slug'
+import { MOTIVO_WORKTREE } from '@domain/repair/motivo-del-worktree'
 import type { AppContext } from '../context'
 import type { GenerateDeps, GenerateResult } from './generate-types'
 import type { Admitted } from './generate-guards'
@@ -34,7 +35,7 @@ export async function prepareWorktree(
   const created = await deps.worktrees.create(a.proposal.baseSha, a.project.path, worktreePath, branch) // prettier-ignore
   // keep=true: git rechazo crearlo — no hay worktree que limpiar.
   if (!created.ok) return { failed: await fail('worktree_contaminated', { error: created.error }, true) } // prettier-ignore
-  await emitDecision(ctx.eventLog, a.cursor, a.proposal.id, 'WORKTREE_CREATE', { worktreePath, branch, baseSha: a.proposal.baseSha, ok: true }, deps.now()) // prettier-ignore
+  await emitDecision(ctx.eventLog, a.cursor, a.proposal.id, MOTIVO_WORKTREE, { worktreePath, branch, baseSha: a.proposal.baseSha, ok: true }, deps.now()) // prettier-ignore
 
   const sandbox = deps.sandbox(worktreePath, a.proposal.id, a.project.path)
   if (!sandbox.ok) return { failed: await fail('worktree_contaminated', { error: sandbox.error }, false) } // prettier-ignore

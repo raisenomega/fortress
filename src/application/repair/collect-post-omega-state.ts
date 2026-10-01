@@ -1,5 +1,6 @@
 import type { GateOutcome } from '@domain/repair/gate-result'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+import { MOTIVO_WORKTREE } from '@domain/repair/motivo-del-worktree'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { collectGateOutcome } from './collect-gate-outcome'
 
@@ -19,11 +20,24 @@ export interface PostOmegaState {
   readonly omega: OmegaVerdict
 }
 
-/** El ultimo evento de una fase y tipo, o undefined. El mas reciente manda. */
-function ultimo(events: readonly ProposalEvent[], phase: string, type: string): unknown {
+/**
+ * El ultimo evento de una fase y tipo, o undefined. El mas reciente manda.
+ *
+ * `motivo` acota la busqueda al asiento que SE BUSCA, y no es un lujo: el
+ * `GENERATE DECISION` que lleva `branch` y `baseSha` es el del worktree, y desde
+ * el 28-sep hay otros DECISION detras —la correa y la huella—. Buscar «el
+ * ultimo» cogia uno de esos y el expediente salia incompleto (DEUDAS §13).
+ */
+function ultimo(
+  events: readonly ProposalEvent[],
+  phase: string,
+  type: string,
+  motivo?: string
+): unknown {
   for (let i = events.length - 1; i >= 0; i -= 1) {
     const e = events[i]
     if (e.phase !== phase || e.eventType !== type || e.evidenceJson === undefined) continue
+    if (motivo !== undefined && e.reason !== motivo) continue
     try {
       return JSON.parse(e.evidenceJson)
     } catch {
@@ -47,7 +61,7 @@ const numero = (v: unknown): number | null => (typeof v === 'number' ? v : null)
  * expediente incompleto no es un expediente.
  */
 export function collectPostOmegaState(events: readonly ProposalEvent[]): PostOmegaState | null {
-  const decision = ultimo(events, 'GENERATE', 'DECISION') as Record<string, unknown> | undefined
+  const decision = ultimo(events, 'GENERATE', 'DECISION', MOTIVO_WORKTREE) as Record<string, unknown> | undefined // prettier-ignore
   const salida = ultimo(events, 'GENERATE', 'TRANSITION') as Record<string, unknown> | undefined
   const juicio = ultimo(events, 'OMEGA', 'TRANSITION') as { verdict?: OmegaVerdict } | undefined
   if (decision === undefined || salida === undefined) return null

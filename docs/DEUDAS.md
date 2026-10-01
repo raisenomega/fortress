@@ -1953,3 +1953,58 @@ analisis, y por eso valen doble:
 decidir COMO (un `--ignore-scripts` cambia lo que el paquete puede hacer al
 instalarse; un hash exige de donde sale la referencia), y eso es una decision del
 operador, no una linea mas en el mismo fix.
+
+## 13. La firma no podia leer su propio expediente (2026-10-01)
+
+### 13.1 ~~P0 FUNCIONAL — ninguna propuesta del Motor se podia firmar~~
+
+**CERRADA el 2026-10-01.** `collectPostOmegaState` buscaba `branch` y `baseSha`
+cogiendo **el ULTIMO `GENERATE DECISION`**, dando por hecho que seria el del
+worktree —el unico asiento que los lleva—. Dos arcos **BUENOS** le pusieron
+asientos detras:
+
+| | | |
+|---|---|---|
+| `e90ed58` | **28-sep** | la correa al libro (`SCOPE`), para que el revisor la lea |
+| `3e223d9` | **30-sep** | la huella del trabajo (`HUELLA`), la pieza 1 del Motor |
+
+Desde el 28-sep el ultimo era otro, sin `branch` → el expediente salia `null` y
+`repair:sign` contestaba **`incomplete-state`**. **Once dias en que NINGUNA
+propuesta del Motor se podia integrar**, y nadie lo vio porque el gate estaba
+ciego (§11.1, §11.5) y ninguna llegaba a OMEGA. **La primera que llego lo
+destapo**: la `7998aa13`, el primer fix del Motor con el gate reparado.
+
+**EL ARREGLO:** `MOTIVO_WORKTREE` en el dominio, **compartido por quien escribe
+y quien lee** —el patron que `MOTIVO_CORREA` y `MOTIVO_HUELLA` ya seguian y que a
+este asiento le faltaba: era un literal suelto, y se desfaso—. `ultimo()` acepta
+un motivo, y el expediente **busca el asiento que ES, no el que cae ultimo**.
+
+**Verificado contra el libro REAL** de la `7998aa13`: `branch`, `baseSha`,
+`commitSha`, ficheros (+79/−15), `gate.ok=true`, `omega=APROBADO`,
+`defensasQueToca=[]` → **FIRMABLE**. Cuatro mutantes muertos.
+
+**Las otras cinco** con asientos detras murieron RECHAZADAS, y el gather las lee
+**bien**: devuelve `null` por la razon correcta —a las tres del `npm ci` les falta
+el veredicto de OMEGA; a `cec30bc5` (`provider_error`) y `a3ef0d14`
+(`no_diff_produced`), el del gate y el de OMEGA—. No hay nada que firmar en
+ninguna. No se revivio ninguna.
+
+### 13.2 LA LECCION, con su segunda causa
+
+**Un dato nuevo en el libro obliga a mirar QUIEN LO LEE.** Los dos arcos eran
+correctos y el asiento que anadieron era util; lo que faltaba era recorrer sus
+lectores. El lector que importaba era la firma, que es la accion mas cara del
+sistema.
+
+**Y la segunda causa, que explica el silencio: el fixture no se parecia al libro
+real.** `cadenaCompleta()` tenia **un solo** `GENERATE DECISION` y **sin
+`reason`**. Ningun test podia notar que se cogia «el ultimo» si en el doble no
+habia mas que uno, y encima sin motivo que lo distinguiera. **Un doble que no se
+parece al original no prueba lo que dice probar.** Arreglado: el asiento del
+worktree lleva su motivo en el fixture.
+
+**Y un hueco de aserciones que lo dice todo:** `generate-fix-camino-feliz` ya
+comprobaba `MOTIVO_HUELLA` y `MOTIVO_CORREA`… y **no el del worktree**. Los dos
+que tenian constante se afirmaban; el que era literal suelto, no. Un mutante que
+le quitaba el motivo al ESCRITOR sobrevivia a todas las suites. Cerrado con la
+linea que faltaba.
