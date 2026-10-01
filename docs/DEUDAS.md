@@ -1838,8 +1838,53 @@ que el contrato del kit: **lo no verificado se declara donde se lee, no se
 entierra.** Donde inyectarlo esta sin medir: `ChainOutcome` -> el parte -> la
 firma.
 
+**DATO AMPLIADO (2026-09-30, al verificar el arreglo contra el libro).** Los doce
+de la tabla eran **solo FORTRESS**. En TODA la base son **29**:
+
+| Proyecto | Heredado | Desenlace | |
+|---|---|---|---|
+| fortress-command-center | `test:unit` | **MERGEADO** | **8** |
+| fortress-command-center | `test:unit` | OMEGA | 1 |
+| fortress-command-center | `test:unit` | RECHAZADO | 3 |
+| **mailbd-main** | `lint` | CADUCADO | **15** |
+| mailbd-main | `lint` | RECHAZADO | 2 |
+
+**`mailbd` —un CLIENTE— heredo `lint` diecisiete veces.** La misma absolucion
+silenciosa sobre codigo ajeno, de cuando el Motor aun tocaba clientes (antes de
+ADR-107). **Lo unico que lo salva es que las quince CADUCARON: ninguna de cliente
+llego a integrarse.** El dano quedo en FORTRESS, en los ocho mergeados; el
+mecanismo, no.
+
 **Nota:** el diseno de la herencia NO se discute, es correcto. Lo que falta es
 que su consecuencia se vea.
+
+### 11.6b ARREGLADO — el gate declara lo que absuelve (merge `b1645b9`)
+
+**El mecanismo de la herencia queda EXACTAMENTE igual**; lo que cambia es que su
+consecuencia se lee. `avisoDeHerencia` (dominio) es la unica fuente del texto, y
+llega a los tres sitios donde se decide:
+
+| Destino | Antes | Ahora |
+|---|---|---|
+| **OMEGA** (`elGate`) | `GATE: verde en todos los comandos` — **falso en los 12** | `GATE: verde CON HERENCIA (… NO verificado)` |
+| **La firma** (`reason` del evento) | `gate verde`, y la herencia detras de DOS CLICS en JSON crudo | `gate verde — … heredado de la base, NO verificado` |
+| **El parte** (`ChainOutcome`) | no llevaba nada | `aprobada (… heredado…), esperando firma humana` |
+
+**El punto de la firma resulto mejor que un cuello unico:** es el `reason` del
+evento, que la UI **ya pinta**, asi que el operador lo lee sin un solo cambio de
+interfaz y queda escrito en el libro para siempre.
+
+**El caso limpio no paga NADA**, y tiene su test: sin herencia las tres frases
+son identicas a las de antes. Seis mutantes muertos, uno por cada parte del
+camino —incluido «meter ruido en el caso limpio»—.
+
+**Verificado contra el libro real** (propuesta `6726f1eb`): lo que el operador
+leia era `"gate verde"`; lo que leera, `"gate verde — lint heredado de la base,
+NO verificado"`.
+
+**PENDIENTE, y es lo unico:** donde vive formalmente la firma del operador
+—**ADR-109 propio o esta seccion**—. El arreglo esta en main en cualquier caso; la
+eleccion es del operador y no cambia una linea de codigo.
 
 ### 11.7 P2 — Dos docblocks mentirosos en el tipo que define el veredicto
 
@@ -1853,6 +1898,13 @@ dice «No cambia el veredicto —rojo es rojo—», que es **lo contrario** de l
 ANTERIOR al que corre: el codigo evoluciono al anadir la herencia y los docblocks
 se quedaron en la version vieja. **En el tipo que define el veredicto del gate**,
 que es el peor sitio posible para un comentario que miente.
+
+**ARREGLADOS en el merge `b1645b9`.** Las dos frases viejas **se conservan entre
+comillas**, no se borran: el fichero dice ahora «El docblock decia «…». Era
+FALSO», con el dato de las doce veces. Y su test lo exige asi —que no se
+**afirmen**, que aparezcan **citadas** y con su correccion al lado—: borrar una
+mentira vieja deja al siguiente sin saber que se creyo, ni por que dejo de
+creerse.
 
 ### 11.8 PENDIENTE — Los ocho fixes mergeados sin verificar los tests
 
