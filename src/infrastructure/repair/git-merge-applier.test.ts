@@ -37,7 +37,9 @@ describe('createGitMergeApplier: integra en la rama viva, resuelta y no supuesta
   it('HEAD suelto: no intenta el merge siquiera', async () => {
     const dir = repo(false)
     git(dir, 'checkout', '--detach')
-    expect(await aplicar(dir)).toEqual({ ok: false, kind: 'target-branch-detached' })
+    // `gitOutput` es lo que git CONTESTO: aqui, la palabra HEAD. Distinguir eso
+    // de un `sin-caja:` es justo lo que faltaba el 2026-10-01 (DEUDAS §14).
+    expect(await aplicar(dir)).toEqual({ ok: false, kind: 'target-branch-detached', gitOutput: 'HEAD' }) // prettier-ignore
   })
 })
 

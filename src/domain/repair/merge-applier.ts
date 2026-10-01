@@ -27,10 +27,17 @@ export interface MergeApplyInput {
  * Los tres primeros fallos garantizan que nada quedo escrito. `unknown` es el
  * cajon de lo que no se supo clasificar y NO lo garantiza: por eso se trata
  * como el peor caso y su salida de git se asienta entera.
+ *
+ * TODOS llevan su `gitOutput`, tambien el de la rama destino, y no es simetria
+ * cosmetica: ese caso cubre DOS cosas —que el HEAD este suelto de verdad, y que
+ * la consulta de la rama no se pudiera hacer (la caja que no levanta)—. Sin su
+ * salida, la etiqueta se lee como un diagnostico y miente: paso el 2026-10-01
+ * con la primera firma del operador, que archivo `target-branch-detached`
+ * mientras `main` estaba en su rama (DEUDAS §14).
  */
 export type MergeApplyOutcome =
   | { readonly ok: true; readonly mergeCommitSha: string; readonly targetBranch: string }
-  | { readonly ok: false; readonly kind: 'target-branch-detached' }
+  | { readonly ok: false; readonly kind: 'target-branch-detached'; readonly gitOutput: string }
   | { readonly ok: false; readonly kind: 'conflict'; readonly gitOutput: string }
   | { readonly ok: false; readonly kind: 'dirty-tree'; readonly gitOutput: string }
   | { readonly ok: false; readonly kind: 'unknown'; readonly gitOutput: string }

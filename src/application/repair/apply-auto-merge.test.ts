@@ -51,10 +51,13 @@ describe('applyAutoMerge: un merge que falla CADUCA y lo dice', () => {
     expect(b.patches.map((p) => p.state)).toEqual(['CADUCADO'])
   })
 
-  it('HEAD suelto: sin rama destino no hay donde integrar', async () => {
-    const { r, b } = await correr(fallo({ ok: false, kind: 'target-branch-detached' }))
+  it('sin rama destino no hay donde integrar, y el asiento dice QUE lo impidio', async () => {
+    const { r, b } = await correr(fallo({ ok: false, kind: 'target-branch-detached', gitOutput: 'sin-caja:falta-node' })) // prettier-ignore
     expect(r).toMatchObject({ applied: false, reason: 'merge-failed-target-branch-detached' })
     expect(b.entries[0].summary).toContain('git — target-branch-detached')
+    // La etiqueta sola se leia como diagnostico y mintio una vez: el HEAD estaba
+    // en su rama y lo que fallaba era la caja.
+    expect(b.entries[0].summary).toContain('sin-caja:falta-node')
   })
 
   it('fallo sin clasificar: se asienta entero, es el peor caso', async () => {

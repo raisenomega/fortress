@@ -9,9 +9,10 @@ export type Integracion =
   | { readonly ok: true; readonly mergeCommitSha: string; readonly asiento: string }
   | { readonly ok: false; readonly reason: string; readonly detalle: string }
 
-/** La salida de git, acotada: el asiento tiene que caber en una pantalla. */
+/** La salida de git, acotada: el asiento tiene que caber en una pantalla.
+ *  NINGUN fallo se asienta ya sin su motivo —el de la rama destino se asentaba
+ *  con la etiqueta sola, y por eso la primera firma quedo sin diagnostico. */
 function detalleDe(outcome: Exclude<MergeApplyOutcome, { ok: true }>): string {
-  if (outcome.kind === 'target-branch-detached') return outcome.kind
   return `${outcome.kind} — ${outcome.gitOutput.slice(0, 400)}`
 }
 
