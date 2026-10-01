@@ -1,29 +1,40 @@
-import { execFileSync } from 'child_process'
+import { execFileSync, spawnSync } from 'child_process'
 import { GRAPH_BIN, GRAPH_MCP_VERSION } from '@domain/connectors/graph-mcp'
 
-function installed(): boolean {
-  try {
-    execFileSync('which', [GRAPH_BIN], { stdio: 'ignore' })
-    return true
-  } catch {
-    return false
-  }
+/** La version del binario en el PATH, o null si no esta o no responde a `--version`. */
+export function versionDelBinario(): string | null {
+  const r = spawnSync(GRAPH_BIN, ['--version'], { encoding: 'utf8', timeout: 10_000 })
+  return r.status === 0 ? (/(\d+\.\d+\.\d+)/.exec(r.stdout)?.[1] ?? null) : null
 }
 
 /**
- * Asegura el binario del grafo en PATH. Si falta, lo instala pineado (npm i -g).
+ * Asegura en PATH el binario del grafo en la version fijada. Que exista no basta:
+ * otra version, una vieja o una plantada delante en el PATH no se dan por buenas.
+ * Si falta o no coincide, lo instala pineado (npm i -g) y vuelve a medir: si lo que
+ * responde sigue sin ser la fijada, falla con el motivo en vez de seguir a ciegas.
  * Es lo que hace que el spawn headless conecte: el binario, no npx (que falla el
- * handshake). En una maquina que ya lo tiene, es un no-op instantaneo.
+ * handshake). En una maquina que ya tiene la fijada, es un no-op.
  */
 export function ensureGraphBinary(log: (line: string) => void): void {
-  if (installed()) {
-    log('Binario codebase-memory-mcp ya presente.\n')
+  const previa = versionDelBinario()
+  if (previa === GRAPH_MCP_VERSION) {
+    log(`Binario codebase-memory-mcp ${previa} ya presente.\n`)
     return
   }
-  log('Instalando codebase-memory-mcp (una vez)...\n')
+  log(
+    previa === null
+      ? 'Instalando codebase-memory-mcp (una vez)...\n'
+      : `codebase-memory-mcp ${previa} no es la fijada ${GRAPH_MCP_VERSION}: reinstalando...\n`
+  )
   execFileSync('npm', ['install', '-g', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`], {
-    stdio: 'ignore',
+    stdio: ['ignore', 'ignore', 'pipe'],
     timeout: 180_000
   })
-  log('Binario instalado.\n')
+  const instalada = versionDelBinario()
+  if (instalada !== GRAPH_MCP_VERSION) {
+    throw new Error(
+      `Tras instalar, ${GRAPH_BIN} en PATH responde ${instalada ?? 'nada'} y no ${GRAPH_MCP_VERSION}: revisa que binario lo precede en el PATH`
+    )
+  }
+  log(`Binario codebase-memory-mcp ${instalada} instalado.\n`)
 }
