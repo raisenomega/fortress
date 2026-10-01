@@ -944,20 +944,27 @@ arreglando cuando el gate rechaza, como `claude -p` con `--resume`; medido en
 DEUDAS §10.2 y ya construido para el Terminal en `hastaConverger`). El lazo tiene
 sentido **solo ahora**: persistir contra un gate ciego no servía de nada.
 
-### El primer fix del Motor, y las TRES capas que lo tenian parado (2026-10-01)
+### El primer fix del Motor, y las CINCO capas que lo tenian parado (2026-10-01)
 
-La corrida real llego. Y al correrla salio que el gate del Motor no tenia **una**
-ceguera sino **tres apiladas**, cada una tapando a la siguiente:
+Todo esto salio de una intuicion del operador —«no me cuadra que el Motor
+rechace y Claude Code resuelva»— y de pelar capas una a una. **Eran cinco**, y
+cada una tapaba a la siguiente: hasta que no se quitaba la de arriba, la de abajo
+no se podia ni ver.
 
 | | | |
 |---|---|---|
 | 1 | **`npm ci` no pasaba en la caja** | ADR-108, merge `39e919e` — los tres artefactos publicos en solo lectura |
 | 2 | **`test:unit` rojo en todo worktree** desde el 10-sep | la via 3, merge `2537fd6` — plantilla sintetica + guardian del kit |
 | 3 | **el gate ABSOLVIA la herencia en silencio** | ADR-109, merge `b1645b9` — el heredado llega al revisor, a la firma y al parte |
+| 4 | **la firma no leia su expediente** | merge `5a62c8b` — el asiento se busca por su motivo, no por su posicion (DEUDAS §13) |
+| 5 | **el merge de la firma con el PATH congelado** | merge `fecdd37` — el entorno se compone al llamar, y el fallo lleva su motivo (DEUDAS §14) |
 
-Las dos primeras eran la **causa**; la tercera es el **mecanismo**, y es la unica
-que impide la reincidencia: sin ella, la siguiente prueba que se apague volvera a
-pasar por heredada y a anotarse donde nadie lee.
+Las dos primeras eran la **causa** del gate; la tercera es el **mecanismo**, y es
+la unica que impide la reincidencia: sin ella, la siguiente prueba que se apague
+volvera a pasar por heredada y a anotarse donde nadie lee. La cuarta y la quinta
+estaban **detras** del gate, en el camino de la firma, y solo se podian ver
+cuando una propuesta llegaba hasta alli: la 4 al pulsar Firmar, la 5 en el
+ULTIMO paso de ese mismo gesto.
 
 **LAS DOS CORRIDAS REALES.** El HIGH del Electron (`9e64bb68`) murio en
 `no_diff_produced`: el generador no dejo diff. El MEDIUM `fa86739d` fue **punta a
@@ -988,12 +995,34 @@ lee**. Con su corolario de pruebas: el fixture tenia **un solo** `GENERATE
 DECISION` y **sin `reason`**, asi que ningun test podia notarlo —**un doble que
 no se parece al original no prueba lo que dice probar**—.
 
+**LA QUINTA CAPA, y el precio que cobro.** El operador hizo el rebuild, pulso
+Firmar, y la app contesto `merge-failed-target-branch-detached` con `main` en su
+rama. `git-del-merge.ts` componia su entorno en un **`const` de modulo**, y los
+imports se evaluan ANTES del `augmentPath()` del arranque: una app abierta con
+doble clic congelaba ahi su PATH minimo, sin `node`, y la caja del merge no podia
+levantarse. **Sus tres hermanos ya lo hacian bien** y lo decian en su docblock
+—«se compone al lanzar y no al cargar el modulo»—; `git-del-merge` era el unico
+que lo congelaba. Nadie lo vio antes porque **la firma del operador fue la
+PRIMERA vez que la caja se levanto desde el AppImage**: las corridas del Motor se
+habian hecho desde un arnes con el PATH de una shell. Arreglado y verificado con
+el PATH real del proceso de la app (DEUDAS §14).
+
+**EL FIX RESCATADO A MANO.** El merge fallido **caduco** la propuesta, que es
+terminal y por diseno. El estado quedo coherente —nada se marco MERGEADO sin
+merge— pero el trabajo quedaba huerfano: el fix, su gate verde de 242 s, el
+APROBADO de OMEGA y $0,97. El commit `8913dab` seguia intacto en su rama, asi que
+**entro a main por un merge a mano** (`e659c14`), que es exactamente lo que el
+Motor iba a hacer: **el camino completo del Motor funciono, de la seleccion al
+veredicto; lo unico que fallo fue integrar.** Y el merge a mano **NO mitiga el
+hallazgo**: `marcarElHallazgoIntegrado` cuelga de `to === 'MERGEADO'`, que no se
+alcanzo, asi que `fa86739d` sigue **`open`** —sin nota, sin fecha— y **la mitad
+pendiente de DEUDAS §12.1 sigue a la vista**, que es lo que convenia: firmar la
+habria tapado.
+
 **LO QUE SIGUE, en orden y sin saltarse un paso:** el **rebuild+install en frio**
 (la firma es un boton de la app, no un comando: `repair:sign` es IPC, y el
-binario instalado es del 30-sep 16:46, anterior a los cuatro arcos) → **la firma
-de Jojo** sobre la `7998aa13` → la limpieza del `node_modules` del worktree
-—**solo despues de firmar**, o el arranque la caduca por `worktree_ausente`— → y
-entonces si, **el LAZO**.
+arreglo del merge todavia no esta en el binario) → **la proxima firma desde la
+app**, que es lo que cierra el camino punta a punta → y entonces si, **el LAZO**.
 
 **AVISO DE TECHO:** `innegociables-defensa.ts` queda en **75/75 líneas** con las
 dos familias nuevas (perímetro + selección). La siguiente familia **parte el

@@ -1954,11 +1954,20 @@ decidir COMO (un `--ignore-scripts` cambia lo que el paquete puede hacer al
 instalarse; un hash exige de donde sale la referencia), y eso es una decision del
 operador, no una linea mas en el mismo fix.
 
-**ESTADO AL 2026-10-01:** la `7998aa13` sigue **sin firmar**, y no por falta de
-arreglo: firmar es el boton de la app (`repair:sign` es IPC), y el AppImage
-instalado es del **30-sep 16:46**, anterior a los cuatro arcos de codigo que main
-acumula. **El rebuild+install en frio va ANTES de la firma**; pulsar Firmar con
-el binario de hoy repetiria `incomplete-state` con el codigo ya reparado.
+**ESTADO AL 2026-10-01, y sigue ABIERTA:** el fix **esta en main** —merge a mano
+`e659c14`, despues de que la firma caducara la propuesta por la quinta ceguera
+(§14)—, pero el hallazgo `fa86739d` sigue **`open`**: `mitigated_note` y
+`mitigated_at` en `null`, `extinguido_por` en `null`, y la propuesta en
+`CADUCADO`. La mitigacion cuelga de `to === 'MERGEADO'` en `advance-proposal.ts`
+y ese salto no se dio, asi que **un merge a mano trae el codigo y no cierra
+nada**. Es la salida buena para esta deuda: firmar la habria mitigado y esta
+mitad habria dejado de verse.
+
+**Y un detalle medido que es el patron A en vivo** (§6.5, «la linea que ya no
+es»): el ancla del hallazgo es `graph-binary.ts:24`, que antes era el
+`execFileSync('npm', ['install', '-g', …])` —justo la mitad pendiente— y hoy es
+un `log(`. La linea del `npm install -g` vive ahora en la **29**. El ancla
+derivo con el fix, como estaba previsto.
 
 ## 13. La firma no podia leer su propio expediente (2026-10-01)
 
@@ -2034,7 +2043,7 @@ linea que faltaba.
 
 ### 14.1 ~~P0 FUNCIONAL — la firma moria en el ULTIMO paso, y con la etiqueta equivocada~~
 
-**CERRADA el 2026-10-01.** El operador firmo la `7998aa13` y la app contesto
+**CERRADA el 2026-10-01**, merge `fecdd37` en main. El operador firmo la `7998aa13` y la app contesto
 **`merge-failed-target-branch-detached`**. `main` estaba en su rama, limpio, en
 `47c6825`: el HEAD **nunca** estuvo suelto.
 
