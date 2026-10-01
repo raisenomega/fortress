@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { modulosDeParada } from './modulos-de-carpeta'
-import { delKit, enCarpeta } from './plantilla-fixture'
+import { enCarpeta } from './plantilla-fixture'
+import { sintetica } from './plantilla-sintetica'
 import { buildScanPrompt } from './scan-prompt'
 import { SECURITY_CHECKLIST } from './scan-checklist'
 
@@ -20,7 +21,7 @@ describe('sin modulos que apliquen, el prompt es el de siempre', () => {
 
 describe('solo viaja lo que aplica a ESTA parada', () => {
   it('con M9 aplicable y M8 no, el prompt lleva M9 y no menciona M8', () => {
-    const soloM9 = prompt({ ...enCarpeta('src/ui'), modulos: ['M9'], plantillas: [delKit('M9')] })
+    const soloM9 = prompt({ ...enCarpeta('src/ui'), modulos: ['M9'], plantillas: [sintetica('M9')] })
 
     expect(soloM9).toContain('M9 Accesibilidad')
     expect(soloM9).not.toContain('M8')
@@ -33,7 +34,7 @@ describe('solo viaja lo que aplica a ESTA parada', () => {
 })
 
 describe('el orden del prompt', () => {
-  const con = prompt({ ...enCarpeta('src/api'), modulos: ['M8'], plantillas: [delKit('M8')] })
+  const con = prompt({ ...enCarpeta('src/api'), modulos: ['M8'], plantillas: [sintetica('M8')] })
 
   it('el bloque va DESPUES de la checklist y ANTES de las reglas', () => {
     expect(con.indexOf(SECURITY_CHECKLIST)).toBeLessThan(con.indexOf('M8 Integridad'))
