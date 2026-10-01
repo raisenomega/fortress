@@ -812,6 +812,62 @@ Mientras el motivo era `null` no había forma de verlo. Reescritos para decir lo
 que prueban; los dos casos que decían cubrir viven donde sí se ejercitan
 (`plan-repair.test.ts`, con sus motivos `sin-candidato` y `sin-head-de-git`).
 
+**EL GATE ESTABA CIEGO NUEVE DÍAS, Y ADR-108 LO DEVUELVE A VER** (merge
+`39e919e`, HECHO Y VERIFICADO EN VIVO). La intuición del operador —«el Motor
+rechaza y Claude Code resuelve»— no destapó un motor cobarde: destapó que **su
+gate no podía pasar `npm ci` desde que existe la caja**. Medido sobre
+`proposal_events`: **99 de 99 verdes antes del 21-sep, 0 de 3 después**, y las
+tres de la noche del 30-sep murieron en `node-gyp` —solo una tocaba
+`package.json`; las otras dos eran fixes sin relación—. Choca de frente con
+ADR-107, que dejó al Motor **solo** sobre FORTRESS: el único proyecto cuyo gate
+la caja no dejaba pasar.
+
+**Lo cerrado: TRES artefactos públicos en la caja clase B**, `--ro-bind`, padres
+y nunca por versión —sin entrada del repo, que es el vector de la trifecta—:
+
+| Artefacto | Qué desbloquea |
+|---|---|
+| `~/.electron-gyp` | `node-gyp configure`, que salía a descargar cabeceras |
+| `~/.cache/node-gyp` | las de Node, por lo mismo |
+| `~/.cache/electron` | el `install.js` del paquete `electron`, que baja su **binario** de `github.com` |
+
+**Eran DOS fallos, y el segundo solo apareció al probar el `npm ci` COMPLETO.**
+Con solo las cabeceras, `npm ci` moría en `getaddrinfo ENOTFOUND github.com`. El
+operador amplió su firma al tercero el mismo día.
+
+**VERIFICADO EN VIVO con `bwrap` real y los args REALES de `enCaja`**, sobre el
+worktree del fix del Electron: `npm ci` **completo rc=0 en 65 s**, «completed
+installing native dependencies», **un solo host en el proxy**
+(`registry.npmjs.org`, sin cambio). Y el aislamiento en la misma corrida: **red
+NO**, `/media` en 0, `~/.ssh` y `~/.config` inexistentes, escribir en las
+cabeceras y en el zip → **EROFS**, y `~/.cache` mostrando **solo** `node-gyp` y
+`electron`. **La trifecta intacta.** 5 mutantes muertos —el peor caso es el
+montaje escribible: un cliente envenenando la caché que después compila el módulo
+nativo de FORTRESS—.
+
+**NO abre red** (la opción ancha —`electronjs.org` en la tabla— se rechazó: la
+habría abierto para todo agente sobre todo proyecto con `package.json`, el
+Terminal en repos de cliente incluido). **Solo clase B**: los agentes editan, no
+compilan.
+
+**CORRECCIÓN FIRMADA al §3.5:** el fix del Electron de anoche **no subía el
+ABI** —pinchaba el rango `^39.2.6` → `39.8.10`, y el lock sigue en 39.8.10, cuyo
+zip está en caché—. **Ese fix sí lo resuelve el Motor.** Los saltos de major de
+verdad siguen fuera, por decisión: `node-gyp` falla en el `mkdir` del devdir en
+solo lectura antes de tocar la red, y esos los hace el operador con Claude Code,
+fuera de la caja.
+
+**LA PRUEBA QUE QUEDA, y es el momento de verdad:** una **corrida real del gate**
+sobre un fix ordinario de FORTRESS. El `bwrap` probó que `npm ci` pasa; la
+corrida real prueba que **el gate entero** pasa —`typecheck`, `lint`,
+`test:unit` detrás—, que es lo que el Motor necesita para verificar un fix.
+
+**Y EL CAMINO DE LA MISIÓN, con el orden que importa:** ADR-108 (el gate vuelve a
+ver) → confirmar con la corrida real → **el LAZO** (que el Motor persista
+arreglando cuando el gate rechaza, como `claude -p` con `--resume`; medido en
+DEUDAS §10.2 y ya construido para el Terminal en `hastaConverger`). El lazo tiene
+sentido **solo ahora**: persistir contra un gate ciego no servía de nada.
+
 **AVISO DE TECHO:** `innegociables-defensa.ts` queda en **75/75 líneas** con las
 dos familias nuevas (perímetro + selección). La siguiente familia **parte el
 fichero por familia**, no sube el límite. Es la regla del `CLAUDE.md`, y este

@@ -1655,7 +1655,19 @@ anota para que quien llegue con la tercera no descubra el techo a mitad del arco
 
 ## 11. El gate del Motor no pasa en la caja (medido 2026-09-30)
 
-### 11.1 P0 FUNCIONAL — `npm ci` del gate no ha pasado NUNCA dentro de la caja
+### 11.1 ~~P0 FUNCIONAL — `npm ci` del gate no ha pasado NUNCA dentro de la caja~~
+
+**CERRADA el 2026-09-30 (ADR-108, merge `39e919e`) Y VERIFICADA EN VIVO.** Tres
+artefactos públicos en la caja clase B, `--ro-bind`, padres y nunca por versión:
+`~/.electron-gyp`, `~/.cache/node-gyp` y `~/.cache/electron`. **Eran DOS fallos**,
+y el segundo solo apareció al probar el `npm ci` COMPLETO: con solo las cabeceras
+moría en `getaddrinfo ENOTFOUND github.com`, porque el paquete `electron` baja su
+**binario** de ahí. Con los tres: **`npm ci` completo rc=0 en 65 s** con los args
+REALES de `enCaja`, un solo host en el proxy, sin red, y el aislamiento intacto
+(`/media` 0, `~/.ssh` y `~/.config` inexistentes, EROFS al escribir). 5 mutantes.
+**Pendiente la corrida real del gate** en producción (ADR-108 §5). La medida
+original, para la historia:
+
 
 **Medido sobre `proposal_events`, partido por la fecha de ADR-092 (21-sep):**
 
@@ -1713,7 +1725,13 @@ el hallazgo del Electron existe **una** propuesta, y es la que se estaba
 analizando. Le fabrica un historial de fracasos que no hubo. Misma familia que el
 arco del prompt que miente al agente. **Arreglo:** excluir la propuesta en curso.
 
-### 11.4 P1 — La cobertura del gate en la caja nunca se midió
+### 11.4 ~~P1 — La cobertura del gate en la caja nunca se midió~~
+
+**CERRADA el 2026-09-30: ahora está medida** (ADR-108). Lo que faltaba no era la
+red: era **el gate entero dentro de la caja** sobre un repo con dependencias
+nativas. Medido de punta a punta con `bwrap` real y el proxy real, y lo que se
+midió es exactamente lo que el gate corre. La medida original:
+
 
 El docblock de `registros-de-paquetes.ts` es honesto sobre su límite: «MEDIDO, y
 hasta donde: npm, de punta a punta —**`npm view`** real a través del proxy, el
