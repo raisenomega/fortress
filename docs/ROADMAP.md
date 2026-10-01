@@ -923,7 +923,8 @@ tests), el gate del Motor vuelve a dar veredicto sobre FORTRESS.
 1. **Los ocho fixes mergeados con `test:unit` heredado.** Hoy main esta verde
    entero (4632 tests), asi que no quedo nada roto —pero nadie lo comprobo
    entonces—. Auditoria retrospectiva barata.
-2. **Que el `heredado` LLEGUE al operador.** Es la raiz: el gate lo anoto doce
+2. ~~**Que el `heredado` LLEGUE al operador.**~~ **FIRMADO Y CONSTRUIDO** el
+   30-sep: **ADR-109**, merge `b1645b9`. Es la raiz: el gate lo anoto doce
    veces y nadie lo leyo. Un verde-con-heredado deberia firmarse SABIENDOLO
    —«paso, pero `test:unit` estaba heredado, no verificado»— en vez de en
    silencio. Mismo principio que la via 3: lo no verificado se **declara donde se
@@ -943,6 +944,57 @@ arreglando cuando el gate rechaza, como `claude -p` con `--resume`; medido en
 DEUDAS §10.2 y ya construido para el Terminal en `hastaConverger`). El lazo tiene
 sentido **solo ahora**: persistir contra un gate ciego no servía de nada.
 
+### El primer fix del Motor, y las TRES capas que lo tenian parado (2026-10-01)
+
+La corrida real llego. Y al correrla salio que el gate del Motor no tenia **una**
+ceguera sino **tres apiladas**, cada una tapando a la siguiente:
+
+| | | |
+|---|---|---|
+| 1 | **`npm ci` no pasaba en la caja** | ADR-108, merge `39e919e` — los tres artefactos publicos en solo lectura |
+| 2 | **`test:unit` rojo en todo worktree** desde el 10-sep | la via 3, merge `2537fd6` — plantilla sintetica + guardian del kit |
+| 3 | **el gate ABSOLVIA la herencia en silencio** | ADR-109, merge `b1645b9` — el heredado llega al revisor, a la firma y al parte |
+
+Las dos primeras eran la **causa**; la tercera es el **mecanismo**, y es la unica
+que impide la reincidencia: sin ella, la siguiente prueba que se apague volvera a
+pasar por heredada y a anotarse donde nadie lee.
+
+**LAS DOS CORRIDAS REALES.** El HIGH del Electron (`9e64bb68`) murio en
+`no_diff_produced`: el generador no dejo diff. El MEDIUM `fa86739d` fue **punta a
+punta**: propuesta **`7998aa13`** sobre `graph-binary.ts`, fix **con su propio
+test**, **gate verde limpio en 242 s** —sin un solo heredado—, OMEGA
+**APROBADO** con `resuelve_el_hallazgo: PARCIAL`, **$0,97**. La mitad que queda
+abierta se anoto ANTES de firmar, en DEUDAS §12.1, porque firmar MITIGA el
+hallazgo entero y lo pendiente dejaria de verse.
+
+**Y AL LLEGAR A LA FIRMA, LA CUARTA CAPA.** Pulsar `Firmar` contesto
+**`incomplete-state`**. `collectPostOmegaState` buscaba `branch` y `baseSha`
+cogiendo **el ULTIMO `GENERATE DECISION`**, y dos arcos **BUENOS** le habian
+puesto asientos detras: la correa al libro (`SCOPE`, 28-sep 22:10) y la huella
+del trabajo (`HUELLA`, 30-sep 01:28). Arreglado y en main: **merge `5a62c8b`** —
+el asiento se busca **por su motivo** (`MOTIVO_WORKTREE`, compartido por quien
+escribe y quien lee), no por su posicion. Verificado con el codigo real sobre el
+libro real: la `7998aa13` sale **FIRMABLE** y de las doce propuestas de FORTRESS
+**ninguna otra**, asi que el arreglo no revive nada. Detalle en DEUDAS §13.
+
+**EL PATRON, y conviene nombrarlo sin rebaja: esta vez el autor fui yo.** Los dos
+asientos que rompieron la firma los escribi en dos arcos correctos, utiles y
+probados, y en ninguno de los dos recorri a sus LECTORES. El gate ciego lo
+mantuvo invisible tres dias; la **primera** propuesta que llego a la firma lo
+destapo. La leccion que queda escrita en el dominio
+(`src/domain/repair/motivo-del-worktree.ts`): **un asiento se busca por lo que
+ES, nunca por su POSICION**, y **anadir un dato al libro obliga a mirar quien lo
+lee**. Con su corolario de pruebas: el fixture tenia **un solo** `GENERATE
+DECISION` y **sin `reason`**, asi que ningun test podia notarlo —**un doble que
+no se parece al original no prueba lo que dice probar**—.
+
+**LO QUE SIGUE, en orden y sin saltarse un paso:** el **rebuild+install en frio**
+(la firma es un boton de la app, no un comando: `repair:sign` es IPC, y el
+binario instalado es del 30-sep 16:46, anterior a los cuatro arcos) → **la firma
+de Jojo** sobre la `7998aa13` → la limpieza del `node_modules` del worktree
+—**solo despues de firmar**, o el arranque la caduca por `worktree_ausente`— → y
+entonces si, **el LAZO**.
+
 **AVISO DE TECHO:** `innegociables-defensa.ts` queda en **75/75 líneas** con las
 dos familias nuevas (perímetro + selección). La siguiente familia **parte el
 fichero por familia**, no sube el límite. Es la regla del `CLAUDE.md`, y este
@@ -958,7 +1010,8 @@ dos vías abiertas son el **arco del Motor** —que ahora espera dato, no trabaj
 el **barrido de los tramos 2 a 7**, con `scripts/` primero: 106 ficheros sin un
 solo test, corriendo sobre la base viva. Pendientes menores con dueño claro: las 5
 filas viejas en `otro` (un lote con el kit, si Jojo quiere rescatar esa señal) y el
-rebuild, que acumula **CINCO** arcos.
+rebuild, que acumula **CUATRO** arcos de código desde el binario del 30-sep
+(ADR-108, la vía 3, ADR-109 y el expediente de la firma) y **bloquea la firma**.
 
 **AVISO OPERATIVO:** no drenar al abrir la app hasta decidir el bucle de gasto, o
 recomprar antes los cinco pausados. Con ADR-107 el **LOOP ya no existe**, así que

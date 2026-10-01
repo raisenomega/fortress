@@ -1892,7 +1892,7 @@ firma humana es la ultima red, cambiar lo que el firmante ve es una decision de
 arquitectura aunque el mecanismo no se toque. La firma literal vive en
 **ADR-109 §1**; la medicion, aqui.
 
-### 11.7 P2 — Dos docblocks mentirosos en el tipo que define el veredicto
+### 11.7 ~~P2 — Dos docblocks mentirosos en el tipo que define el veredicto~~
 
 `src/domain/repair/gate-result.ts:32`, rama `ok: true`:
 
@@ -1954,11 +1954,17 @@ decidir COMO (un `--ignore-scripts` cambia lo que el paquete puede hacer al
 instalarse; un hash exige de donde sale la referencia), y eso es una decision del
 operador, no una linea mas en el mismo fix.
 
+**ESTADO AL 2026-10-01:** la `7998aa13` sigue **sin firmar**, y no por falta de
+arreglo: firmar es el boton de la app (`repair:sign` es IPC), y el AppImage
+instalado es del **30-sep 16:46**, anterior a los cuatro arcos de codigo que main
+acumula. **El rebuild+install en frio va ANTES de la firma**; pulsar Firmar con
+el binario de hoy repetiria `incomplete-state` con el codigo ya reparado.
+
 ## 13. La firma no podia leer su propio expediente (2026-10-01)
 
 ### 13.1 ~~P0 FUNCIONAL — ninguna propuesta del Motor se podia firmar~~
 
-**CERRADA el 2026-10-01.** `collectPostOmegaState` buscaba `branch` y `baseSha`
+**CERRADA el 2026-10-01**, merge `5a62c8b` en main. `collectPostOmegaState` buscaba `branch` y `baseSha`
 cogiendo **el ULTIMO `GENERATE DECISION`**, dando por hecho que seria el del
 worktree —el unico asiento que los lleva—. Dos arcos **BUENOS** le pusieron
 asientos detras:
