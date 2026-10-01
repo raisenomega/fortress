@@ -4,14 +4,8 @@ import { canTransition } from '@domain/repair/proposal'
 import type { AppContext } from '../context'
 import { cursorFrom } from './book-cursor'
 import { emitGateCommand, emitGateOutcome, rejectGate } from './run-gate-emit'
+import { anotaciones, razonDelVerde } from './cierre-del-gate'
 import { gateBlocked } from './gate-guards'
-
-/** Lo no verificado y lo que ya venia roto, en la evidencia y solo si los hubo:
- *  el libro no afirma "no hubo" cuando la pregunta no aplicaba. */
-const anotaciones = (o: GateOutcome): Record<string, readonly string[]> => ({
-  ...(o.skipped?.length ? { skipped: o.skipped } : {}),
-  ...(o.heredado?.length ? { heredado: o.heredado } : {})
-})
 
 export interface GateDeps {
   readonly worktreeRoot: string
@@ -26,7 +20,11 @@ export interface GateDeps {
   readonly now: () => number
 }
 
-export type RunGateResult = { ok: true } | { ok: false; reason: string }
+/** El verde viaja con lo que se absolvio: el parte del drenaje lo necesita, y
+ *  sin el campo tendria que volver a leer el libro para saberlo. */
+export type RunGateResult =
+  | { ok: true; heredado?: readonly string[] }
+  | { ok: false; reason: string }
 
 /**
  * I3 — el juicio hermetico del fix DENTRO del worktree. Verde total -> GATE
@@ -67,7 +65,11 @@ export async function runGate(
       updatedAt: deps.now()
     })
     const total = outcome.commands.reduce((sum, c) => sum + c.durationMs, 0)
-    await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'GATE', 'gate verde', { allCommandsGreen: true, totalDurationMs: total, ...anotaciones(outcome) }, deps.now()) // prettier-ignore
-    return { ok: true }
+    // La RAZON, no solo la evidencia: es la unica linea del gate que el operador
+    // lee en la fila de Firma sin abrir nada, y la que queda en el libro para
+    // siempre. «gate verde» a secas es lo que dejo firmar ocho fixes con los
+    // tests absueltos (DEUDAS §11.6).
+    await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'GATE', razonDelVerde(outcome), { allCommandsGreen: true, totalDurationMs: total, ...anotaciones(outcome) }, deps.now()) // prettier-ignore
+    return { ok: true, heredado: outcome.heredado }
   })
 }

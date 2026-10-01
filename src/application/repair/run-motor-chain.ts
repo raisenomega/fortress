@@ -58,7 +58,7 @@ export async function runMotorChain(
   // Hasta aqui nada salio del worktree. OMEGA no se ha llamado: la propuesta
   // queda en GATE, que no es terminal, asi que cuenta como viva y su hallazgo
   // no vuelve a salir elegido. Las siguientes vueltas atacan otros y se apilan.
-  if (modo === 'hasta-gate') return ok({ kind: 'espera-omega', proposalId: proposal.id })
+  if (modo === 'hasta-gate') return ok({ kind: 'espera-omega', proposalId: proposal.id, ...(gate.heredado?.length ? { heredado: gate.heredado } : {}) }) // prettier-ignore
 
   // En hasta-omega el revisor juzga y ahi se para: un veto cierra en RECHAZADO
   // y no llega a la cola de firma; una aprobacion sale por `espera-firma` con
@@ -71,5 +71,5 @@ export async function runMotorChain(
   }
   // La condicion viaja tipada hasta aqui: quien cuente denegaciones necesita
   // saber CUAL freno, y `espera-firma` a secas las hacia indistinguibles.
-  return ok({ kind: 'espera-firma', proposalId: proposal.id, condition: juicio.merge?.denial ?? null }) // prettier-ignore
+  return ok({ kind: 'espera-firma', proposalId: proposal.id, condition: juicio.merge?.denial ?? null, ...(gate.heredado?.length ? { heredado: gate.heredado } : {}) }) // prettier-ignore
 }

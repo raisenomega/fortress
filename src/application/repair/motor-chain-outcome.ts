@@ -1,5 +1,7 @@
 import type { FailedCondition } from '@domain/repair/auto-merge-policy'
 import { NO_ES_SU_VEHICULO, VA_POR_EL_TERMINAL } from '@domain/repair/vehiculo-del-motor'
+import { avisoDeHerencia } from '@domain/repair/aviso-de-herencia'
+export { esDenegacion } from './denegaciones-de-la-politica'
 import type { PlanNegado } from './resultado-del-plan'
 
 /**
@@ -18,6 +20,9 @@ export type ChainOutcome =
       readonly proposalId: string
       /** Que freno la integracion, o null si no se llego a mirar la politica. */
       readonly condition: FailedCondition | null
+      /** Lo que el gate ABSOLVIO para dar verde (DEUDAS §11.6): un verde con
+       *  herencia no se presenta como un verde limpio. Ausente = limpio. */
+      readonly heredado?: readonly string[]
     }
   /**
    * Gate verde y OMEGA SIN CORRER: el motor paro por encargo, no por un juicio.
@@ -27,24 +32,13 @@ export type ChainOutcome =
    * ha juzgado todavia. El trabajo esta hecho y guardado en su worktree, y lo
    * que espera es que un humano autorice el juicio.
    */
-  | { readonly kind: 'espera-omega'; readonly proposalId: string }
+  | { readonly kind: 'espera-omega'; readonly proposalId: string; readonly heredado?: readonly string[] }
   | { readonly kind: 'integrada'; readonly proposalId: string }
 
-/**
- * Las cuatro condiciones que son una DENEGACION: la politica estaba activa y
- * freno por un criterio concreto. Se distinguen de la quinta, `disabled`, que
- * es la integracion automatica apagada — el proyecto que la apago quiere que
- * todo espere firma, y cada propuesta aprobada saliendo por esa puerta es el
- * comportamiento pedido, no un bloqueo. Contarla seria frenar al operador por
- * haber elegido bien.
- *
- * `null` tampoco cuenta: ahi ni se llego a mirar la politica.
- */
-// prettier-ignore
-const DENEGACIONES: readonly FailedCondition[] = ['severity', 'diff', 'files', 'blacklist', 'max-lines']
-
-export function esDenegacion(condition: FailedCondition | null): boolean {
-  return condition !== null && DENEGACIONES.includes(condition)
+/** El parentesis de la herencia, o nada: el verde limpio no paga ruido. */
+const conHerencia = (o: ChainOutcome): string => {
+  const aviso = 'heredado' in o ? avisoDeHerencia(o.heredado) : null
+  return aviso === null ? '' : ` (${aviso})`
 }
 
 /** Como se cuenta la vuelta en el chat del proyecto. */
@@ -63,10 +57,10 @@ export function describir(outcome: ChainOutcome): string {
   const corto = 'proposalId' in outcome ? outcome.proposalId.slice(0, 8) : ''
   if (outcome.kind === 'obsoleto') return `${corto}: el hallazgo ya no existe en el codigo.`
   if (outcome.kind === 'descartada') return `${corto}: descartada — ${outcome.motivo}.`
-  if (outcome.kind === 'espera-firma') return `${corto}: aprobada, esperando firma humana.`
+  if (outcome.kind === 'espera-firma') return `${corto}: aprobada${conHerencia(outcome)}, esperando firma humana.`
   // Antes de este caso el `return` final se tragaba cualquier kind nuevo y lo
   // anunciaba como integrada. Una propuesta parada en el gate contada como
   // integrada es la peor linea posible en el chat del operador.
-  if (outcome.kind === 'espera-omega') return `${corto}: gate verde, esperando firma para juzgarla.`
+  if (outcome.kind === 'espera-omega') return `${corto}: gate verde${conHerencia(outcome)}, esperando firma para juzgarla.`
   return `${corto}: integrada.`
 }
