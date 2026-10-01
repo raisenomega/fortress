@@ -1,7 +1,9 @@
 import type { GateOutcome } from '@domain/repair/gate-result'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+import { MOTIVO_WORKTREE } from '@domain/repair/motivo-del-worktree'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
 import { collectGateOutcome } from './collect-gate-outcome'
+import { numero, texto, ultimo } from './lectura-del-libro'
 
 /**
  * Lo que hizo falta para llegar hasta el veredicto, reunido. Ningun campo es
@@ -19,23 +21,6 @@ export interface PostOmegaState {
   readonly omega: OmegaVerdict
 }
 
-/** El ultimo evento de una fase y tipo, o undefined. El mas reciente manda. */
-function ultimo(events: readonly ProposalEvent[], phase: string, type: string): unknown {
-  for (let i = events.length - 1; i >= 0; i -= 1) {
-    const e = events[i]
-    if (e.phase !== phase || e.eventType !== type || e.evidenceJson === undefined) continue
-    try {
-      return JSON.parse(e.evidenceJson)
-    } catch {
-      continue
-    }
-  }
-  return undefined
-}
-
-const texto = (v: unknown): string | null => (typeof v === 'string' && v !== '' ? v : null)
-const numero = (v: unknown): number | null => (typeof v === 'number' ? v : null)
-
 /**
  * Reune desde el libro todo lo que una propuesta dejo al llegar al veredicto:
  * la rama y el ancla del worktree, el commit del fix con su tamano, el juicio
@@ -47,7 +32,7 @@ const numero = (v: unknown): number | null => (typeof v === 'number' ? v : null)
  * expediente incompleto no es un expediente.
  */
 export function collectPostOmegaState(events: readonly ProposalEvent[]): PostOmegaState | null {
-  const decision = ultimo(events, 'GENERATE', 'DECISION') as Record<string, unknown> | undefined
+  const decision = ultimo(events, 'GENERATE', 'DECISION', MOTIVO_WORKTREE) as Record<string, unknown> | undefined // prettier-ignore
   const salida = ultimo(events, 'GENERATE', 'TRANSITION') as Record<string, unknown> | undefined
   const juicio = ultimo(events, 'OMEGA', 'TRANSITION') as { verdict?: OmegaVerdict } | undefined
   if (decision === undefined || salida === undefined) return null

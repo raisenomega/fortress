@@ -1,3 +1,4 @@
+import { MOTIVO_WORKTREE } from '@domain/repair/motivo-del-worktree'
 import type { EventPhase, EventType, ProposalEvent } from '@domain/repair/proposal-event'
 
 let seq = 0
@@ -22,10 +23,18 @@ export const VERDICT = {
   razon: 'fix minimo'
 } as const // prettier-ignore
 
-/** La cadena completa de una propuesta que llego al veredicto aprobado. */
+/**
+ * La cadena completa de una propuesta que llego al veredicto aprobado.
+ *
+ * EL ASIENTO DEL WORKTREE LLEVA SU MOTIVO, como en el libro de verdad. No lo
+ * llevaba, y esa infidelidad del fixture es lo que dejo pasar la regresion de
+ * DEUDAS §13: ningun test podia notar que la firma cogia «el ultimo DECISION»
+ * si en el fixture no habia mas que uno y encima sin motivo que lo distinguiera.
+ * Un doble que no se parece al original no prueba lo que dice probar.
+ */
 export function cadenaCompleta(): ProposalEvent[] {
   return [
-    evento('GENERATE', 'DECISION', { worktreePath: '/wt/p-1', branch: 'repair/p-1-slug', baseSha: 'base123', ok: true }), // prettier-ignore
+    evento('GENERATE', 'DECISION', { worktreePath: '/wt/p-1', branch: 'repair/p-1-slug', baseSha: 'base123', ok: true }, { reason: MOTIVO_WORKTREE }), // prettier-ignore
     evento('GENERATE', 'TRANSITION', { commitSha: 'fix9876', files: ['src/a.ts'], insertions: 6, deletions: 2 }), // prettier-ignore
     evento('GATE', 'AGENT_RUN', { command: 'npm ci', exitCode: 0, stdoutTail: 'ok', stderrTail: '', timedOut: false }, { durationMs: 29_000 }), // prettier-ignore
     evento('GATE', 'AGENT_RUN', { command: 'lint', exitCode: 0, stdoutTail: 'ok', stderrTail: '', timedOut: false }, { durationMs: 35_000 }), // prettier-ignore

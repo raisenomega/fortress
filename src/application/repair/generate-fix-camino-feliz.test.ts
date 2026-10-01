@@ -1,4 +1,5 @@
 import { MOTIVO_HUELLA } from '@domain/repair/motivo-de-la-huella'
+import { MOTIVO_WORKTREE } from '@domain/repair/motivo-del-worktree'
 import { MOTIVO_CORREA } from '@domain/repair/lo-que-el-motor-supo'
 import { describe, expect, it } from 'vitest'
 import { bench } from './generate-fix-fixture'
@@ -27,6 +28,11 @@ describe('generateFix (C3), camino feliz', () => {
       ['DECISION', 'GENERATE'],
       ['TRANSITION', 'GENERATE']
     ])
+    // El PRIMERO tambien lleva su motivo, y faltaba justo esa linea: es el unico
+    // asiento con `branch` y `baseSha`, y la firma lo busca POR el motivo. Los
+    // dos de abajo se afirmaban porque tenian constante; este era un literal
+    // suelto, y por eso pudo desfasarse sin que nada cayera (DEUDAS §13).
+    expect(b.events[0].reason).toBe(MOTIVO_WORKTREE)
     expect(b.events[2].reason).toBe(MOTIVO_HUELLA)
     expect(b.events[3].reason).toBe(MOTIVO_CORREA)
     expect(b.events[4].toState).toBe('GENERADO')
