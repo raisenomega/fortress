@@ -857,6 +857,81 @@ verdad siguen fuera, por decisión: `node-gyp` falla en el `mkdir` del devdir en
 solo lectura antes de tocar la red, y esos los hace el operador con Claude Code,
 fuera de la caja.
 
+**LA SEGUNDA CEGUERA, Y LA HISTORIA ENTERA** (merge `2537fd6`, la via 3 HECHA Y
+VERIFICADA). Arreglar el `npm ci` hizo que el gate llegara por fin a `test:unit`
+—y ahi aparecio una ceguera **mas vieja y de signo contrario**.
+
+**El gate del Motor no dio un veredicto COMPLETO sobre FORTRESS desde el 4-sep.**
+Dos cegueras apiladas, y la segunda tapaba la primera:
+
+| Ceguera | Desde | Efecto |
+|---|---|---|
+| `test:unit` rojo en la base de todo worktree | **10-sep** | el kit `internal/AUDIT-KIT/` esta en `.gitignore` y no viaja |
+| `npm ci` rojo en la caja | 21-sep | ADR-108, cerrada |
+
+**Y EL GATE NO MENTIA: ABSOLVIA, Y LO ANOTABA.** Esta es la correccion que la
+medicion impuso sobre lo que creiamos. `gate-sequence.ts` tiene un mecanismo
+deliberado y bien razonado: cuando un comando falla, el gate **vuelve a
+`baseSha`** y lo corre ahi; si ya estaba rojo en la base y el fix no anade ruido
+en sus propios ficheros, no se lo achaca al fix —«exigirle a un fix que deje
+verde un arbol que ya estaba rojo antes de tocarlo es pedirle que arregle el
+proyecto entero para arreglar una linea»—. Si TODO lo que fallo era heredado, el
+gate **pasa**.
+
+Asi que desde el 10-sep `test:unit` se heredaba SIEMPRE, y el gate pasaba con su
+comprobacion de tests **estructuralmente apagada**. Medido:
+
+- **44 gates verdes** de FORTRESS; **12 con algo heredado, los doce `test:unit`**
+  (1 el 21-ago, 9 el 14-sep, 2 el 19-sep).
+- **OCHO fixes llegaron a MERGEADO con los tests sin verificar** —siete firmados
+  por el operador el 14-sep—.
+- De los **11 rechazos** de FORTRESS, **7 fueron LEGITIMOS** (4 lint, 3
+  typecheck, **todos anteriores al 10-sep**): ahi el gate funcionaba y el fix
+  fallaba de verdad. **Solo UNO** se rechazo por `gate_failed_at=test:unit`.
+
+**No era un juez ciego que condenaba: era un juez al que le habian quitado una
+prueba, que lo anoto en el acta doce veces, y nadie leyo el acta.** El bug es el
+OPUESTO al que se supuso: no rechazaba de mas, **absolvia de mas**. Y eso es peor
+de ver, porque lo de mas se ve —`RECHAZADO`— y lo de menos no —`VERDE` con una
+prueba apagada—.
+
+**LO CONSTRUIDO (la via 3).** Los cinco tests eran **dos clases**: cuatro prueban
+el CODIGO —leen ahora una **plantilla sintetica** versionada, escrita PARA el
+test, con las cuatro anclas del contrato; **no** un recorte de una real, que
+seria producto en git y envejeceria sin avisar— y uno prueba LOS DOCUMENTOS
+—`plantilla-contrato`, que sigue leyendo el kit y **se salta DICIENDOLO** donde no
+esta—. Con **guardian de codigo** (`contrato-del-kit.test.ts`) que impide la
+regresion a «saltar callado»: exige el `skipIf` atado a `kitDisponible`, la razon
+impresa, y ningun `return` de escape dentro de un `it`. Seis mutantes muertos.
+
+**Verificado en la condicion exacta del Motor** (`git worktree add`, sin
+`internal/`): **865 ficheros verdes, 1 saltado; 4595 tests verdes, 1 saltado,
+cero rojos**, y el salto se lee en `stderr` con su razon entera.
+
+**Y dos datos que la medicion corrigio de paso:** el extractor tiene **TRES**
+ramas `null`, no cuatro —la falta de `═══ FIN ═══` no devuelve `null`—; y el
+contrato exigia «del paso A al I», **falso en nueve de las doce** (los cuerpos van
+de **seis** pasos a nueve). Ahora exige lo que si es el contrato —una **tira
+seguida desde A**— y recorre las doce: mas estricto que antes.
+
+**AHORA el gate prueba `test:unit` de verdad**, porque en un worktree la base ya
+esta verde y la herencia no se aplica. Con ADR-108 (el `npm ci`) y la via 3 (los
+tests), el gate del Motor vuelve a dar veredicto sobre FORTRESS.
+
+**DOS COSAS QUE QUEDAN A LA FIRMA DEL OPERADOR** (medidas, sin construir):
+
+1. **Los ocho fixes mergeados con `test:unit` heredado.** Hoy main esta verde
+   entero (4632 tests), asi que no quedo nada roto —pero nadie lo comprobo
+   entonces—. Auditoria retrospectiva barata.
+2. **Que el `heredado` LLEGUE al operador.** Es la raiz: el gate lo anoto doce
+   veces y nadie lo leyo. Un verde-con-heredado deberia firmarse SABIENDOLO
+   —«paso, pero `test:unit` estaba heredado, no verificado»— en vez de en
+   silencio. Mismo principio que la via 3: lo no verificado se **declara donde se
+   lee**, no se entierra. Y con ello, **dos docblocks que mienten** en
+   `gate-result.ts:32`: la rama `ok:true` dice «hoy un verde no puede traer nada
+   heredado» —falso, doce veces— y la `ok:false` dice «rojo es rojo», que
+   contradice lo que `gate-sequence.ts` hace.
+
 **LA PRUEBA QUE QUEDA, y es el momento de verdad:** una **corrida real del gate**
 sobre un fix ordinario de FORTRESS. El `bwrap` probó que `npm ci` pasa; la
 corrida real prueba que **el gate entero** pasa —`typecheck`, `lint`,

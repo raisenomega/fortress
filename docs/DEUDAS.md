@@ -1800,3 +1800,63 @@ devuelve `null`, se queda con todo—; y el contrato exigía «del paso A al I»
 nueve (M5, M8, M12). Ahora exige lo que sí es el contrato: una **tira seguida
 desde A**, porque un hueco en medio significa que el extractor cortó por donde no
 debía.
+
+### 11.6 P1 — El gate ABSUELVE en silencio lo que hereda, y nadie lee el acta
+
+**Medido el 2026-09-30 al cerrar §11.5, y es el hallazgo de raiz de toda la
+investigacion.** `gate-sequence.ts` hace algo deliberado y bien razonado: si un
+comando del gate falla, vuelve a `baseSha`, lo corre ahi, y si **ya estaba rojo
+en la base** y el fix no anade ruido en sus propios ficheros, no se lo achaca al
+fix. Si TODO lo que fallo era heredado, **el gate pasa**. La razon esta escrita:
+«exigirle a un fix que deje verde un arbol que ya estaba rojo antes de tocarlo es
+pedirle que arregle el proyecto entero para arreglar una linea».
+
+**El efecto, desde el 10-sep:** `test:unit` estaba rojo en la base de todo
+worktree (§11.5), se heredaba siempre, y el gate pasaba con su comprobacion de
+tests **estructuralmente apagada**.
+
+| Medida sobre FORTRESS | |
+|---|---|
+| gates verdes | **44** |
+| de ellos con algo heredado | **12 — los doce `test:unit`** (1 el 21-ago, 9 el 14-sep, 2 el 19-sep) |
+| fixes que llegaron a MERGEADO asi | **8** (7 firmados por el operador el 14-sep) |
+| rechazos de FORTRESS | 11 — **7 legitimos** (4 lint, 3 typecheck, todos ANTES del 10-sep) |
+| rechazados por `gate_failed_at=test:unit` | **1** |
+
+**El gate NUNCA mintio: lo anoto en el libro doce veces** (`heredado:
+["test:unit"]`, desde el 21-ago). **Nadie lo leyo.** No era un juez ciego que
+condenaba; era un juez al que le habian quitado una prueba y lo decia en el acta.
+
+**Es el bug OPUESTO al que se supuso**, y peor de ver: no rechazaba de mas
+—absolvia de mas—, y lo de mas se ve (`RECHAZADO`) mientras lo de menos no
+(`VERDE` con una prueba apagada).
+
+**EL ARREGLO DE RAIZ, a la firma del operador:** que el `heredado` **llegue al
+operador** —a OMEGA, a la firma, al parte— en vez de quedarse en el libro. Un
+verde-con-heredado se firmaria SABIENDOLO. Es el mismo principio que la via 3 y
+que el contrato del kit: **lo no verificado se declara donde se lee, no se
+entierra.** Donde inyectarlo esta sin medir: `ChainOutcome` -> el parte -> la
+firma.
+
+**Nota:** el diseno de la herencia NO se discute, es correcto. Lo que falta es
+que su consecuencia se vea.
+
+### 11.7 P2 — Dos docblocks mentirosos en el tipo que define el veredicto
+
+`src/domain/repair/gate-result.ts:32`, rama `ok: true`:
+
+> «Reservado a (ii-b): hoy un verde no puede traer nada heredado.»
+
+**Falso: ha pasado doce veces** (§11.6). Y la rama `ok: false` del mismo fichero
+dice «No cambia el veredicto —rojo es rojo—», que es **lo contrario** de lo que
+`gate-sequence.ts` hace con un rojo heredado. Los dos describen un diseno
+ANTERIOR al que corre: el codigo evoluciono al anadir la herencia y los docblocks
+se quedaron en la version vieja. **En el tipo que define el veredicto del gate**,
+que es el peor sitio posible para un comentario que miente.
+
+### 11.8 PENDIENTE — Los ocho fixes mergeados sin verificar los tests
+
+Main esta verde hoy (**4632 tests**), asi que no quedo nada roto —o se arreglo por
+el camino—. Pero **nadie verifico esos ocho entonces**, y la incognita se cierra
+barato: correr los tests de hoy contra lo que cada uno toco. A la firma del
+operador.
