@@ -11,7 +11,7 @@
  * otro, y el expediente salia incompleto: la firma contestaba
  * `incomplete-state` y NINGUNA propuesta del Motor se podia integrar.
  *
- * Once dias sin que nadie lo viera, porque el gate estaba ciego y ninguna
+ * Tres dias vivo sin que nadie lo viera, porque el gate estaba ciego y ninguna
  * propuesta llegaba a OMEGA. La primera que llego lo destapo.
  *
  * LA LECCION, que es la de toda la sesion: un asiento se busca por lo que ES,

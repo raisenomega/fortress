@@ -1968,11 +1968,20 @@ asientos detras:
 | `e90ed58` | **28-sep** | la correa al libro (`SCOPE`), para que el revisor la lea |
 | `3e223d9` | **30-sep** | la huella del trabajo (`HUELLA`), la pieza 1 del Motor |
 
-Desde el 28-sep el ultimo era otro, sin `branch` → el expediente salia `null` y
-`repair:sign` contestaba **`incomplete-state`**. **Once dias en que NINGUNA
-propuesta del Motor se podia integrar**, y nadie lo vio porque el gate estaba
-ciego (§11.1, §11.5) y ninguna llegaba a OMEGA. **La primera que llego lo
+Desde el 28-sep 22:10 el ultimo era otro, sin `branch` → el expediente salia
+`null` y `repair:sign` contestaba **`incomplete-state`**. **Tres dias en que
+NINGUNA propuesta del Motor se podia integrar**, y nadie lo vio porque el gate
+estaba ciego (§11.1, §11.5) y ninguna llegaba a OMEGA. **La primera que llego lo
 destapo**: la `7998aa13`, el primer fix del Motor con el gate reparado.
+
+**La frontera, medida en el libro vivo** (12 propuestas de FORTRESS, lectura
+`readonly`): las cuatro del **19-sep** llevan **un solo** `GENERATE DECISION`
+—`[WORKTREE_CREATE]`—, y por eso «el ultimo» acertaba y dos de ellas
+(`d34a5ed7`, `31452135`) tienen hoy el expediente completo. Las del **30-sep en
+adelante** llevan `[WORKTREE_CREATE , HUELLA , SCOPE]`: ahi el fallo muerde. La
+primera corrida afectada fue `6f8bbadd` (30-sep 21:26). Entre la ultima propuesta
+con expediente completo y la primera que choco con el fallo pasaron **once dias
+sin una sola firma** —el intervalo que explica el silencio, no la vida del bug—.
 
 **EL ARREGLO:** `MOTIVO_WORKTREE` en el dominio, **compartido por quien escribe
 y quien lee** —el patron que `MOTIVO_CORREA` y `MOTIVO_HUELLA` ya seguian y que a
