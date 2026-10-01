@@ -139,6 +139,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-106](adr-106-el-debut-sube-a-high-y-la-seleccion-prioriza-por-severidad.md) | El debut sube a HIGH, la selección prioriza por severidad, y la puerta de CRITICAL queda condicionada a su prueba | 2026-09-30 | Aceptada | Motor |
 | [ADR-107](adr-107-la-cura-del-perimetro-del-motor.md) | La cura del perímetro del Motor: el Motor es de FORTRESS, el Terminal es del cliente | 2026-09-30 | Aceptada | Motor |
 | [ADR-108](adr-108-las-cabeceras-publicas-en-la-caja.md) | Las cabeceras públicas entran en la caja: el gate del Motor recupera la capacidad de verificar | 2026-09-30 | Aceptada | Seguridad |
+| [ADR-109](adr-109-el-gate-declara-lo-que-absuelve.md) | El gate declara lo que absuelve: la herencia llega a quien juzga y a quien firma | 2026-09-30 | Aceptada | Motor |
 
 ## Referencias
 

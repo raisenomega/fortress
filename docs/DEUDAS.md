@@ -1801,7 +1801,10 @@ nueve (M5, M8, M12). Ahora exige lo que sí es el contrato: una **tira seguida
 desde A**, porque un hueco en medio significa que el extractor cortó por donde no
 debía.
 
-### 11.6 P1 — El gate ABSUELVE en silencio lo que hereda, y nadie lee el acta
+### 11.6 ~~P1 — El gate ABSUELVE en silencio lo que hereda, y nadie lee el acta~~
+
+**CERRADA el 2026-09-30: firmada en ADR-109, construida en el merge `b1645b9`.**
+La medida que la abrio queda abajo, entera.
 
 **Medido el 2026-09-30 al cerrar §11.5, y es el hallazgo de raiz de toda la
 investigacion.** `gate-sequence.ts` hace algo deliberado y bien razonado: si un
@@ -1882,9 +1885,12 @@ camino —incluido «meter ruido en el caso limpio»—.
 leia era `"gate verde"`; lo que leera, `"gate verde — lint heredado de la base,
 NO verificado"`.
 
-**PENDIENTE, y es lo unico:** donde vive formalmente la firma del operador
-—**ADR-109 propio o esta seccion**—. El arreglo esta en main en cualquier caso; la
-eleccion es del operador y no cambia una linea de codigo.
+**FIRMA: ADR-109.** El operador eligio ADR propio sobre esta seccion, con el
+criterio de ADR-106: lo que cambia es **la informacion sobre la que se decide**
+—OMEGA puede juzgar distinto un verde con herencia—, y en un sistema donde la
+firma humana es la ultima red, cambiar lo que el firmante ve es una decision de
+arquitectura aunque el mecanismo no se toque. La firma literal vive en
+**ADR-109 §1**; la medicion, aqui.
 
 ### 11.7 P2 — Dos docblocks mentirosos en el tipo que define el veredicto
 
@@ -1899,8 +1905,8 @@ ANTERIOR al que corre: el codigo evoluciono al anadir la herencia y los docblock
 se quedaron en la version vieja. **En el tipo que define el veredicto del gate**,
 que es el peor sitio posible para un comentario que miente.
 
-**ARREGLADOS en el merge `b1645b9`.** Las dos frases viejas **se conservan entre
-comillas**, no se borran: el fichero dice ahora «El docblock decia «…». Era
+**ARREGLADOS en el merge `b1645b9`** (decidido en **ADR-109 §4.4**). Las dos
+frases viejas **se conservan entre comillas**, no se borran: el fichero dice ahora «El docblock decia «…». Era
 FALSO», con el dato de las doce veces. Y su test lo exige asi —que no se
 **afirmen**, que aparezcan **citadas** y con su correccion al lado—: borrar una
 mentira vieja deja al siguiente sin saber que se creyo, ni por que dejo de
