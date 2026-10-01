@@ -1918,3 +1918,38 @@ Main esta verde hoy (**4632 tests**), asi que no quedo nada roto —o se arreglo
 el camino—. Pero **nadie verifico esos ocho entonces**, y la incognita se cierra
 barato: correr los tests de hoy contra lo que cada uno toco. A la firma del
 operador.
+
+## 12. La mitad que el primer fix del Motor dejo abierta (2026-10-01)
+
+### 12.1 P2 — `ensureGraphBinary` verifica la VERSION, no la INTEGRIDAD
+
+**Anotada ANTES de firmar, y a proposito.** El fix del Motor (propuesta
+`7998aa13`, hallazgo `fa86739d`) cierra la mitad principal de
+`graph-binary.ts:24`: un binario en el PATH ya no vale por existir, su
+`--version` tiene que casar con `GRAPH_MCP_VERSION`, y tras instalar se vuelve a
+medir y falla con el motivo. **OMEGA lo aprobo con `resuelve_el_hallazgo:
+PARCIAL`**, y la mitad que queda se anota aqui porque **firmar MITIGA el hallazgo
+entero**: `advance-proposal.ts:72` llama a `markMitigated` al llegar a MERGEADO,
+asi que la fila sale de la cola del Motor y lo pendiente dejaria de verse hasta
+que otro escaneo lo mirara.
+
+**Lo que sigue abierto, del titulo del hallazgo:**
+
+- la instalacion es `npm install -g`, **sin `--ignore-scripts`**: el postinstall
+  del paquete corre con el entorno del operador;
+- **sin hash de integridad**: no se comprueba que lo que se instalo sea lo que se
+  esperaba.
+
+**Y dos efectos que OMEGA encontro SOLO** —no estaban ni en el hallazgo ni en el
+analisis, y por eso valen doble:
+
+- **si la maquina ya tenia OTRA version, ahora se reinstala en global**, cosa que
+  antes no pasaba. El fix gana una escritura global que el codigo viejo no hacia;
+- **comprobar la version de un ejecutable no prueba su integridad**: uno plantado
+  delante en el PATH puede devolver `0.9.0` igual. La verificacion sube el coste
+  de la suplantacion, no la cierra.
+
+**Por que se anota y no se arregla ahora:** cerrar la integridad de verdad pide
+decidir COMO (un `--ignore-scripts` cambia lo que el paquete puede hacer al
+instalarse; un hash exige de donde sale la referencia), y eso es una decision del
+operador, no una linea mas en el mismo fix.
