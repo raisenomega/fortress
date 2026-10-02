@@ -19,7 +19,9 @@ export function ConstruirInput({ projectId }: ConstruirInputProps): React.JSX.El
       {attached ? (
         <p className="truncate px-2 pb-1 text-[11px] text-muted-foreground">Adjunto: {attached}</p>
       ) : null}
-      <div className="flex items-end gap-2 rounded-lg border border-border bg-background px-2 py-2">
+      {/* El textarea suprime su outline: el foco lo pinta la caja (WCAG 2.4.7). */}
+      <div className="flex items-end gap-2 rounded-lg border border-border bg-background px-2 py-2 has-[textarea:focus-visible]:outline-2 has-[textarea:focus-visible]:outline-offset-2 has-[textarea:focus-visible]:outline-ring">
+
         <button
           type="button"
           onClick={() => void attachFile()}

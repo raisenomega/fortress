@@ -75,20 +75,29 @@ finding() {
         OK)       icon="✅"; ((OK++));;
         INFO)     icon="🔵"; ((INFO++));;
     esac
-    echo -e "  ${icon} [${sev}] ${title}"
-    echo -e "     ${desc}" | fold -s -w 75 | sed '2,$s/^/     /'
+    # title/desc/fix pueden traer datos del servidor escaneado (cabeceras, DNS):
+    # se quitan los bytes de control y se imprimen como %s, nunca como formato
+    title=$(printf '%s' "$title" | LC_ALL=C tr '\t\n' '  ' | LC_ALL=C tr -d '\000-\037\177')
+    desc=$(printf '%s' "$desc" | LC_ALL=C tr '\t' ' ' | LC_ALL=C tr -d '\000-\011\013-\037\177')
+    fix=$(printf '%s' "$fix" | LC_ALL=C tr '\t\n' '  ' | LC_ALL=C tr -d '\000-\037\177')
+    printf '  %s [%s] %s\n' "$icon" "$sev" "$title"
+    printf '     %s\n' "$desc" | fold -s -w 75 | sed '2,$s/^/     /'
     if [ -n "$fix" ]; then
-        echo -e "     ${C}→ FIX: ${fix}${NC}" | fold -s -w 75 | sed '2,$s/^/       /'
+        printf "     ${C}→ FIX: %s${NC}\n" "$fix" | fold -s -w 75 | sed '2,$s/^/       /'
     fi
     echo ""
 
-    # Escribir al reporte
-    echo "#### ${icon} [${sev}] ${title}" >> "$REPORT"
+    # Escribir al reporte: una sola linea por campo y markdown escapado
+    local md_title md_desc md_fix
+    md_title=$(printf '%s' "$title" | sed 's/[][\\`<>#|]/\\&/g')
+    md_desc=$(printf '%s' "$desc" | tr '\n' ' ' | sed 's/[][\\`<>#|]/\\&/g')
+    md_fix=$(printf '%s' "$fix" | sed 's/[][\\`<>#|]/\\&/g')
+    printf '#### %s [%s] %s\n' "$icon" "$sev" "$md_title" >> "$REPORT"
     echo "" >> "$REPORT"
-    echo "${desc}" >> "$REPORT"
+    printf '%s\n' "$md_desc" >> "$REPORT"
     echo "" >> "$REPORT"
     if [ -n "$fix" ]; then
-        echo "> **FIX:** ${fix}" >> "$REPORT"
+        printf '> **FIX:** %s\n' "$md_fix" >> "$REPORT"
         echo "" >> "$REPORT"
     fi
 }

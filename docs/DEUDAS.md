@@ -2155,3 +2155,161 @@ arista en la maquina de estados, hay que recorrer quien LEE esa fase** — el mi
 movimiento que faltaba cuando dos arcos buenos rompieron la firma anadiendo
 asientos al libro (§13.2). Es la tercera vez en dos dias que la clase muerde por
 el mismo sitio: leer por posicion lo que hay que buscar por identidad.
+
+### 15.4 La mitad que el PARCIAL del lazo deja abierta (`54f04c09`)
+
+**Anotada ANTES de firmar, y a proposito** — igual que §12.1 con `graph-binary`, y
+por la MISMA razon: firmar lleva la propuesta a MERGEADO,
+`marcarElHallazgoIntegrado` dispara `markMitigated` sobre el hallazgo ENTERO, y la
+fila sale de la cola del Motor. **Lo que quede abierto deja de verse hasta que
+otro escaneo lo mire.**
+
+**El hallazgo:** `54f04c09`, LOW, `electron-builder.yml:7` — «la lista `files`
+del empaquetado excluye por negacion y deja entrar lo no nombrado, como `docs`».
+
+**La propuesta:** `735152ef`, el **primer PARCIAL que el lazo trabajo en
+produccion** (ADR-110). Dos vueltas, las dos juzgadas `PARCIAL`, parada por tope
+de vueltas:
+
+| | |
+|---|---|
+| vuelta 1 | commit `c968b090`, **+10/−0**: niega `docs/`, `.claude/`, `.fortress/`, `.vscode/`, `build/` y `*.tsbuildinfo` |
+| vuelta 2 | commit `655d5ea4`, **+22/−0**: los seis anteriores **mas** `*.md`, `*.sh`, `*.png`, secretos y BBDD |
+
+La vuelta 2 **avanzo de verdad**, y no solo en lineas: fue a leer
+`fileMatcher.js` de electron-builder y comprobo que **minimatch sin `matchBase`
+ancla esos patrones a la raiz**, asi que no alcanzan `resources/` ni
+`node_modules` y `asarUnpack` queda intacto. Eso es investigacion, no relleno.
+
+**LO QUE SIGUE ABIERTO, en palabras de OMEGA:**
+
+1. **La lista sigue siendo NEGRA**, y eso es el fondo del hallazgo: «un fichero
+   nuevo de otra familia en la raiz volveria a entrar en silencio». Pasar a lista
+   BLANCA es lo que el hallazgo pedia y lo que el analisis declaro demasiado
+   arriesgado para un LOW — **es una decision del operador, no una linea**.
+2. **`ADR-058` y `RELEASE.md` no se actualizaron**, y los dos describen el
+   empaquetado. Queda documentacion contradiciendo al codigo.
+3. **El asar no se ha verificado empaquetando.** Y no es un olvido del Motor: el
+   gate corre `electron-vite build`, **no `build:linux`**, asi que
+   **ningun paso de la verificacion ejerce la lista `files:`**. Las cuatro
+   propuestas de este drenaje que tocan `electron-builder.yml` —`b83270c2`,
+   `d5bbef5b`, `c1f851e5` y esta— estan verdes sobre algo que nadie comprobo.
+
+**ANTES DEL PROXIMO REBUILD: un `build:linux` real** y abrir el asar. Es la unica
+forma de saber que el empaquetado sigue llevando lo que tiene que llevar, y la
+unica de las tres que no es una decision: es una medicion que falta.
+
+**Por que no se arregla ahora:** la 1 es tu firma; la 2 se arregla a mano en
+cuanto decidas la 1 (la documentacion describe el diseno, no el parche); la 3 es
+una medicion que pide el binario y va con el rebuild.
+
+## 16. El guardian marco en rojo el codigo mas seguro (2026-10-02)
+
+### 16.1 ~~Main quedo ROJO por un falso positivo, y caduco una propuesta inocente~~
+
+**CERRADO el 2026-10-02**, merge `63dfc07`. Al firmar la segunda propuesta que
+tocaba `electron-builder.yml` (`d5bbef5b`), la firma re-midio el arbol integrado
+—como manda `arbol-que-se-movio`— y lo encontro **ROJO en `test:unit`**:
+`arbol-integrado-rojo`, y la propuesta **CADUCADA**. No tenia culpa: solo tocaba
+el `.yml`, y el test que fallaba lee `git-del-merge.ts`.
+
+**LA CAUSA: dos fixes BUENOS de la misma tanda, verdes por separado, rojos
+juntos.**
+
+| | |
+|---|---|
+| `dde8e100` | enseno al guardian a RASTREAR el `env` de cada spawn: `SEGURO` (cuatro nombres bendecidos) y `acota()`, que sigue una funcion **solo si su cuerpo es un `return` unico** |
+| `ccb969e6` | reescribio `entornoDelMerge()`: de un `return { ...buildEnv(null), … }` de una linea a **un bucle que construye una lista blanca desde `{}`** |
+
+- **Solo `dde8e100`:** `entornoDelMerge` era un `return` unico → el guardian lo
+  seguia hasta `buildEnv(` → verde.
+- **Solo `ccb969e6`:** el guardian de entonces no tenia `acota()` → nadie
+  rastreaba ese entorno → verde.
+- **Las dos:** la comprobacion existe **y** no sabe seguir la forma nueva →
+  **rojo**, marcando el codigo **mas seguro** de los dos: una lista BLANCA es
+  mas estricta que el recorte que `SEGURO` bendice por nombre.
+
+**EL ARREGLO es del GUARDIAN, no del fix:** `acota()` reconoce ahora la **FORMA**
+—una funcion que parte de un objeto literal y copia claves NOMBRADAS
+(`process.env[clave]`), sin esparcir el entorno— ademas de los cuatro nombres
+historicos. Asi un constructor nuevo y mas estricto pasa por **ser lo que ES**,
+no por estar en una lista. Y cerraba, de paso, una ironia: el docblock de ese
+mismo guardian denuncia «enumerar a mano lo que se puede derivar» mientras
+bendecia a sus constructores por una lista de cuatro nombres.
+
+**DOS HUECOS QUE LOS MUTANTES DESTAPARON**, y la primera version de la regla los
+tenia: el **MIXTO** (copia claves nombradas **y ademas** esparce el entorno:
+tiene pinta de lista blanca y no lo es) y el **OPACO** (no hereda, pero tampoco
+construye nada visible — no heredar NO prueba estar acotado). Los dos tienen su
+forma y su prueba; 4 mutantes muertos.
+
+### 16.2 LA LECCION: independencia TEXTUAL no es independencia SEMANTICA
+
+La medida que decide si la firma re-mide el arbol es `ficherosEnComun`: si el fix
+y el destino no comparten fichero, **no se mide**. Es la decision correcta y esta
+razonada con datos (medir siempre convertiria quince segundos de clics en media
+hora de gates), pero tiene un flanco: **dos fixes pueden romperse entre si sin
+compartir ni un fichero**. Aqui uno cambio el JUEZ (`spawn-entorno-acotado`) y el
+otro el JUZGADO (`git-del-merge`), en ficheros distintos.
+
+Lo mismo que el docblock de `arbol-que-se-movio` ya advertia para el interior de
+un fichero —«dos arreglos del mismo defecto por vias OPUESTAS caben en lineas
+distintas sin chocar»— vale entre ficheros, y con mas razon cuando uno de ellos
+es un test que lee a los demas.
+
+**COMO SE FIRMA UNA TANDA, entonces:** antes de firmar un lote, **medir el arbol
+COMBINADO** —no mirar si comparten ficheros—. Se hace con un worktree de sonda y
+un gate: una medida en vez de N, y responde la pregunta que importa. Se hizo asi
+con las nueve que quedaban: verdes juntas (`npm ci`, `typecheck`, `lint`,
+`test:unit`, `build`), y ademas **ningun test lee `templates/`**, eslint no cubre
+`.jsx` y el test del `electron-builder.yml` solo usa su ruta como cadena.
+
+### 16.3 PENDIENTE — `d5bbef5b` se regenera sola
+
+Caduco inocente. Su hallazgo (la firma de codigo del build de Windows) **vuelve a
+la baraja** —CADUCADO no bloquea— y el proximo drenaje la rehara contra el main
+nuevo, que ya lleva los fuses de `b83270c2`. No hace falta ningun gesto.
+
+### 16.4 MEJORA PENDIENTE — la pagina de firma deberia GUIAR el orden
+
+**Propuesta del operador el 2026-10-02, sin atender.** Hoy la cola de firma es
+una lista plana y **el orden seguro lo razona el operador a mano**. Eso fallo:
+`dde8e100` y `ccb969e6` interactuaban **sin compartir un solo fichero** —uno
+cambiaba el juez, el otro el juzgado— y el guion que se le dio trataba
+«no comparten fichero» como «no interactuan» (§16.2). La pagina deberia
+**decir cual firmar primero** (1, 2, 3…) o **avisar antes de firmar** si una
+caducaria contra el arbol de ese momento.
+
+**ESTO ES COMODIDAD, NO SEGURIDAD, y conviene no confundirlo.** La proteccion ya
+existe y funciono: `arbol-integrado-rojo` **no integro sobre un arbol roto** y
+caduco la propuesta, que es lo que tiene que pasar. Lo que falto fue que el
+operador supiera el orden ANTES de gastar clics y propuestas. Nada de lo que
+sigue debilita ese freno; lo que anade es que no haga falta chocar con el.
+
+**LAS CUATRO PREGUNTAS A MEDIR cuando se atienda:**
+
+1. **¿Orden ESTATICO o arbol COMBINADO?** El estatico sale de reglas —`package.json`
+   al final (por `tocaDependencias`), agrupar por fichero, el tamano del diff— y
+   es barato, pero **no caza la interaccion de hoy**, que no compartia fichero.
+   Medir el arbol combinado caza todo y cuesta **~5 min por medicion**; con 36
+   propuestas en cola, medir cada par es inviable y medir el conjunto no dice
+   que subconjunto falla. Hay un punto medio por explorar: medir **el conjunto
+   entero una vez** —que es lo que se hizo a mano hoy, y basto— y bajar a
+   medidas finas solo si sale rojo.
+2. **¿Orden fijo o GUIA VIVA?** El orden seguro **cambia conforme se firma**:
+   en cuanto `package.json` entra en el delta, la regla de arriba cambia de
+   sujeto. Un `1, 2, 3` fijo envejece en la primera firma. Una guia que se
+   recalcula tras cada integracion es mas honesta, y mas trabajo.
+3. **¿APLICA AL TERMINAL DE CLIENTES?** El Motor acumula —**36 propuestas hoy**—
+   y por eso el orden importa. El Terminal resuelve de una en una y es
+   interactivo, asi que puede que el problema no exista ahi. **Se mide cuando se
+   atienda**, no se supone: si el Terminal tambien acumula tanda de firma, la
+   mejora es de los dos mundos; si no, es solo del Motor (doctrina de los dos
+   mundos, ADR-090 §0).
+4. **¿Y que se le ensena al operador cuando el orden no se puede saber?** Una
+   guia que calla cuando no esta segura es mejor que una que adivina, y eso hay
+   que decidirlo con la forma de la pagina delante.
+
+**NO se implementa ahora.** Se anota con su evidencia —el fallo de hoy, su coste
+(una propuesta caducada, ~$0,74 de su generacion) y la regla estructural de
+`tocaDependencias`— para que quien lo atienda empiece midiendo y no diseñando.
