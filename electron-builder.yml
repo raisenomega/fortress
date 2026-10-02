@@ -78,3 +78,11 @@ nsis:
   uninstallDisplayName: 'FORTRESS. by Raisen'
   createDesktopShortcut: always
 npmRebuild: false
+# Sin estos fuses, ELECTRON_RUN_AS_NODE, NODE_OPTIONS o --inspect ejecutan codigo
+# en el main y leen la API key de safeStorage (docs/SECURITY-MODEL.md).
+electronFuses:
+  runAsNode: false
+  enableNodeOptionsEnvironmentVariable: false
+  enableNodeCliInspectArguments: false
+  onlyLoadAppFromAsar: true
+  enableCookieEncryption: true

@@ -62,12 +62,14 @@ export async function recordAnalyzed(
   // y esto va a la base para siempre. Lo efimero se redactaba y lo PERMANENTE no.
   const evidenceJson = raw === undefined ? undefined : JSON.stringify({ raw: redactSecrets(raw) })
   await safeRecord(log, evidenceJson === undefined ? corrida : { ...corrida, evidenceJson })
+  // El gemelo del crudo: se tacha cada CAMPO de texto, nunca el JSON ya montado.
   await safeRecord(
     log,
     buildTransitionEvent({
       proposalId: proposal.id, seq: 3, phase: veredicto.state === 'CADUCADO' ? 'EXPIRE' : 'ANALYZE',
-      fromState: 'ELEGIDO', toState: veredicto.state, reason: veredicto.reason,
-      evidenceJson: JSON.stringify(analysis), ts: Date.now()
+      fromState: 'ELEGIDO', toState: veredicto.state, reason: redactSecrets(veredicto.reason),
+      evidenceJson: JSON.stringify(analysis, (_k, v: unknown) => (typeof v === 'string' ? redactSecrets(v) : v)),
+      ts: Date.now()
     }) // prettier-ignore
   )
 }

@@ -127,6 +127,58 @@ verify_repo() {
     return 0
 }
 
+# ─── VEREDICTO DE PUSH ──────────────────────────────────────
+# El informe y el HEAD escaneado viven en $REPORTS_DIR, fuera del repo:
+# nada con escritura en el repo decide si el push sale. Falla cerrado.
+
+report_file()  { echo "$REPORTS_DIR/$1-FORTRESS-REPORT.md"; }
+scanned_head() { echo "$REPORTS_DIR/$1.scanned-head"; }
+
+# Recuento de la linea de resumen "- <ETIQUETA>: N". Vacio si falta o es ambiguo.
+report_count() {
+    local values
+    values=$(grep -iE "^[[:space:]]*[-*][[:space:]]*[*_]*($2)[*_]*[[:space:]]*:[*_[:space:]]*[0-9]+" "$1" 2>/dev/null \
+        | sed -E 's/^[^:]*:[*_[:space:]]*([0-9]+).*/\1/' | sort -u || true)
+    if [ -n "$values" ] && [ "$(printf '%s\n' "$values" | wc -l | tr -d ' ')" -eq 1 ]; then
+        echo "$values"
+    fi
+}
+
+# Imprime OK, NO_REPORT, STALE, UNPARSEABLE o CRITICAL:N.
+repo_verdict() {
+    local name="$1" path="$2"
+    local report=$(report_file "$name")
+    local headfile=$(scanned_head "$name")
+
+    if [ ! -f "$report" ]; then
+        echo "NO_REPORT"; return
+    fi
+
+    local head=$(git -C "$path" rev-parse HEAD 2>/dev/null || true)
+    local scanned=$(cat "$headfile" 2>/dev/null || true)
+    if [ -z "$head" ] || [ "$head" != "$scanned" ]; then
+        echo "STALE"; return
+    fi
+
+    local crits=$(report_count "$report" 'CRITICAL|CR(I|Í)TICOS?')
+    if [ -z "$crits" ]; then
+        echo "UNPARSEABLE"
+    elif [ "$crits" -gt 0 ]; then
+        echo "CRITICAL:$crits"
+    else
+        echo "OK"
+    fi
+}
+
+verdict_reason() {
+    case "$1" in
+        NO_REPORT)   echo "sin informe de escaneo en $REPORTS_DIR (ejecutar scan)";;
+        STALE)       echo "el informe no corresponde al HEAD actual (re-escanear)";;
+        UNPARSEABLE) echo "el informe no trae una linea '- CRITICAL: N' legible";;
+        CRITICAL:*)  echo "tiene ${1#CRITICAL:} hallazgo(s) CRITICAL sin resolver";;
+    esac
+}
+
 # ─── COMANDOS PRINCIPALES ──────────────────────────────────
 
 cmd_add() {
@@ -227,11 +279,9 @@ cmd_status() {
             push_status="${YELLOW}STAGED${NC}"
         fi
 
-        # Check for FORTRESS report with CRITICALs
-        if [ -f "$path/FORTRESS-REPORT.md" ]; then
-            if grep -q "CRITICAL" "$path/FORTRESS-REPORT.md" 2>/dev/null; then
-                push_status="${RED}BLOCKED${NC}"
-            fi
+        # Veredicto fuera del repo, ligado al HEAD; sin veredicto valido bloquea
+        if [ "$(repo_verdict "$name" "$path")" != "OK" ]; then
+            push_status="${RED}BLOCKED${NC}"
         fi
 
         printf "  %-18s %-10s %-9s %-9s %-10b %-9b %b\n" \
@@ -249,6 +299,7 @@ cmd_scan() {
 
     local pids=()
     local names=()
+    local heads=()
 
     while IFS= read -r line; do
         local name=$(get_repo_field "$line" 1)
@@ -258,23 +309,30 @@ cmd_scan() {
             continue
         fi
 
+        # El informe se escribe fuera del repo; el anterior no sobrevive al scan
+        local report=$(report_file "$name")
+        rm -f "$report" "$(scanned_head "$name")"
+        local report_rule="Escribe el reporte en $report (fuera del repo, NO en la raíz del proyecto) e incluye en el resumen la línea exacta '- CRITICAL: N'."
+
         local prompt=""
         case "$scan_type" in
             full)
-                prompt="Ejecuta una revisión completa del proyecto: seguridad (FASE 1), código muerto (FASE 2), bugs (FASE 3), consistencia (FASE 4). Genera un reporte en FORTRESS-REPORT.md en la raíz del proyecto con todos los hallazgos, severidades, y fixes propuestos. Si existe COGNITION-LOG.md, registra cada hallazgo nuevo como patrón."
+                prompt="Ejecuta una revisión completa del proyecto: seguridad (FASE 1), código muerto (FASE 2), bugs (FASE 3), consistencia (FASE 4). Genera un reporte con todos los hallazgos, severidades, y fixes propuestos. $report_rule Si existe COGNITION-LOG.md, registra cada hallazgo nuevo como patrón."
                 ;;
             security)
-                prompt="Ejecuta SOLO la FASE 1 del protocolo de limpieza: buscar secrets hardcodeados, vulnerabilidades de inyección (SQL, XSS, command injection), verificar autenticación y autorización en todos los endpoints, verificar headers de seguridad, verificar rate limiting. Genera reporte en FORTRESS-REPORT.md."
+                prompt="Ejecuta SOLO la FASE 1 del protocolo de limpieza: buscar secrets hardcodeados, vulnerabilidades de inyección (SQL, XSS, command injection), verificar autenticación y autorización en todos los endpoints, verificar headers de seguridad, verificar rate limiting. $report_rule"
                 ;;
             clean)
-                prompt="Ejecuta FASE 2 (código muerto y basura) + FASE 4 (consistencia). Identifica funciones que nadie llama, imports sin usar, console.log de debugging, código comentado. NO elimines nada sin confirmar que es safe-to-delete. Genera reporte en FORTRESS-REPORT.md."
+                prompt="Ejecuta FASE 2 (código muerto y basura) + FASE 4 (consistencia). Identifica funciones que nadie llama, imports sin usar, console.log de debugging, código comentado. NO elimines nada sin confirmar que es safe-to-delete. $report_rule"
                 ;;
             bugs)
-                prompt="Ejecuta FASE 3 completa: buscar errores no manejados, promises sin await, null/undefined sin verificar, comparaciones incorrectas, edge cases no cubiertos. Para cada bug: escribe test que lo reproduce, aplica fix, verifica test. Genera reporte en FORTRESS-REPORT.md."
+                prompt="Ejecuta FASE 3 completa: buscar errores no manejados, promises sin await, null/undefined sin verificar, comparaciones incorrectas, edge cases no cubiertos. Para cada bug: escribe test que lo reproduce, aplica fix, verifica test. $report_rule"
                 ;;
         esac
 
         log_info "Lanzando: ${CYAN}$name${NC} ($scan_type)"
+
+        heads+=("$(git -C "$path" rev-parse HEAD 2>/dev/null || true)")
 
         claude --headless --project "$path" "$prompt" \
             > "$LOGS_DIR/${name}-$(date +%Y%m%d).log" 2>&1 &
@@ -291,6 +349,8 @@ cmd_scan() {
     local failed=0
     for i in "${!pids[@]}"; do
         if wait "${pids[$i]}" 2>/dev/null; then
+            # Solo un scan completado liga el informe al HEAD que vio al empezar
+            echo "${heads[$i]}" > "$(scanned_head "${names[$i]}")"
             log_success "${names[$i]}: scan completado"
         else
             log_error "${names[$i]}: scan falló (ver $LOGS_DIR/${names[$i]}-*.log)"
@@ -334,17 +394,12 @@ cmd_push() {
             continue
         fi
 
-        # Verificar si hay CRITICALs
-        local has_critical=false
-        if [ -f "$path/FORTRESS-REPORT.md" ]; then
-            if grep -q "CRITICAL" "$path/FORTRESS-REPORT.md" 2>/dev/null; then
-                has_critical=true
-            fi
-        fi
+        # Veredicto fuera del repo, ligado al HEAD; sin veredicto valido bloquea
+        local verdict=$(repo_verdict "$name" "$path")
 
-        if [ "$has_critical" = true ]; then
+        if [ "$verdict" != "OK" ]; then
             blocked_repos+=("$name|$path|$remote|$branch")
-            log_error "$name: ${RED}BLOQUEADO${NC} — tiene hallazgos CRITICAL sin resolver"
+            log_error "$name: ${RED}BLOQUEADO${NC} — $(verdict_reason "$verdict")"
         else
             ready_repos+=("$name|$path|$remote|$branch")
             log_success "$name: ${GREEN}LISTO${NC} para push"
@@ -355,11 +410,12 @@ cmd_push() {
 
     # Bloquear si hay repos bloqueados
     if [ ${#blocked_repos[@]} -gt 0 ]; then
-        log_warn "Repos bloqueados por CRITICAL:"
+        log_warn "Repos bloqueados (sin informe valido del HEAD actual o con CRITICAL):"
         for repo in "${blocked_repos[@]}"; do
             local bname=$(echo "$repo" | cut -d'|' -f1)
-            echo -e "  ${RED}⛔${NC} $bname — resolver CRITICALs antes de push"
+            echo -e "  ${RED}⛔${NC} $bname — escanear el HEAD actual y resolver CRITICALs antes de push"
         done
+        log_info "FORTRESS-REPORT.md dentro del repo ya no cuenta; el veredicto sale de $REPORTS_DIR."
         echo ""
     fi
 
@@ -423,19 +479,19 @@ HEADER
         fi
 
         local changes=$(cd "$path" && git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-        local crits=0
-        local highs=0
+        local report=$(report_file "$name")
+        local crits=$(report_count "$report" 'CRITICAL|CR(I|Í)TICOS?')
+        local highs=$(report_count "$report" 'HIGH|ALTOS?')
+        local verdict=$(repo_verdict "$name" "$path")
         local push_status="✅ READY"
 
-        if [ -f "$path/FORTRESS-REPORT.md" ]; then
-            crits=$(grep -c "CRITICAL" "$path/FORTRESS-REPORT.md" 2>/dev/null || echo "0")
-            highs=$(grep -c "HIGH" "$path/FORTRESS-REPORT.md" 2>/dev/null || echo "0")
-            if [ "$crits" -gt 0 ]; then
-                push_status="⛔ BLOCKED"
-            fi
-        else
-            push_status="⚠️ NO REPORT"
-        fi
+        case "$verdict" in
+            OK)        ;;
+            NO_REPORT) push_status="⛔ BLOCKED (NO REPORT)";;
+            *)         push_status="⛔ BLOCKED ($verdict)";;
+        esac
+        crits="${crits:-?}"
+        highs="${highs:-?}"
 
         echo "| $name | $branch | $changes | $crits | $highs | $push_status |" >> "$UNIFIED_REPORT"
     done <<< "$(get_repos)"
@@ -447,12 +503,12 @@ HEADER
     # Agregar contenido de cada reporte individual
     while IFS= read -r line; do
         local name=$(get_repo_field "$line" 1)
-        local path=$(get_repo_field "$line" 2)
+        local report=$(report_file "$name")
 
-        if [ -f "$path/FORTRESS-REPORT.md" ]; then
+        if [ -f "$report" ]; then
             echo "## Reporte: $name" >> "$UNIFIED_REPORT"
             echo "" >> "$UNIFIED_REPORT"
-            cat "$path/FORTRESS-REPORT.md" >> "$UNIFIED_REPORT"
+            cat "$report" >> "$UNIFIED_REPORT"
             echo "" >> "$UNIFIED_REPORT"
             echo "---" >> "$UNIFIED_REPORT"
             echo "" >> "$UNIFIED_REPORT"
