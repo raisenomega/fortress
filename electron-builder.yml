@@ -35,8 +35,16 @@ mac:
   target:
     - dmg
     - zip
+  # Firma Developer ID + notarizacion: sin ellas Gatekeeper bloquea el .app y
+  # nadie puede comprobar que no se altero tras el build. Las credenciales
+  # entran por entorno al compilar, nunca en el repo (R1): CSC_LINK y
+  # CSC_KEY_PASSWORD; APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD y APPLE_TEAM_ID
+  # (o APPLE_API_KEY). Sin ellas el build falla en vez de salir sin firmar.
+  forceCodeSigning: true
+  hardenedRuntime: true
+  entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  notarize: false
+  notarize: true
 dmg:
   artifactName: FORTRESS-${version}.${ext}
 linux:
