@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { canTransition, type ProposalState } from './proposal'
+import type { ProposalState } from './proposal'
+import { canTransition } from './maquina-de-estados'
 
 const ESTADOS: readonly ProposalState[] = [
   'ELEGIDO', 'ANALIZADO', 'GENERADO', 'GATE', 'OMEGA',
