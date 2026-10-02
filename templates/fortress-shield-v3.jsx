@@ -278,7 +278,7 @@ export default function FortressV3() {
         {/* Input */}
         <div style={{display:"flex",gap:8,marginBottom:6,flexWrap:"wrap"}}>
           <input value={domain} onChange={e=>setDomain(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!scanning&&scan()}
-            placeholder="tu-dominio.com" disabled={scanning}
+            placeholder="tu-dominio.com" disabled={scanning} aria-label="Dominio a escanear"
             style={{flex:1,minWidth:200,padding:"11px 14px",fontSize:14,fontWeight:500,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,color:"#e2e8f0",outline:"none",fontFamily:"monospace"}}/>
           <button onClick={scan} disabled={scanning||!domain.trim()}
             style={{padding:"11px 22px",fontSize:13,fontWeight:700,background:scanning?"#1e293b":"linear-gradient(135deg,#ef4444,#f97316)",border:"none",borderRadius:10,color:"#fff",cursor:scanning?"not-allowed":"pointer",opacity:!domain.trim()?0.4:1,letterSpacing:0.5}}>
