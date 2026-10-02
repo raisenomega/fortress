@@ -285,7 +285,7 @@ export default function FortressV3() {
             {scanning?`⏳ ${completed}/${PHASES.length}`:"⚡ DEEP SCAN"}
           </button>
         </div>
-        <p style={{fontSize:10,color:"#334155",textAlign:"center",margin:"0 0 16px"}}>🔒 100% pasivo · legal · no intrusivo</p>
+        <p style={{fontSize:12,color:"#94a3b8",textAlign:"center",margin:"0 0 16px"}}><span aria-hidden="true">🔒</span> 100% pasivo · legal · no intrusivo</p>
 
         {/* Progress */}
         {scanning && (
