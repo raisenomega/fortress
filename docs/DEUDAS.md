@@ -2269,3 +2269,47 @@ con las nueve que quedaban: verdes juntas (`npm ci`, `typecheck`, `lint`,
 Caduco inocente. Su hallazgo (la firma de codigo del build de Windows) **vuelve a
 la baraja** —CADUCADO no bloquea— y el proximo drenaje la rehara contra el main
 nuevo, que ya lleva los fuses de `b83270c2`. No hace falta ningun gesto.
+
+### 16.4 MEJORA PENDIENTE — la pagina de firma deberia GUIAR el orden
+
+**Propuesta del operador el 2026-10-02, sin atender.** Hoy la cola de firma es
+una lista plana y **el orden seguro lo razona el operador a mano**. Eso fallo:
+`dde8e100` y `ccb969e6` interactuaban **sin compartir un solo fichero** —uno
+cambiaba el juez, el otro el juzgado— y el guion que se le dio trataba
+«no comparten fichero» como «no interactuan» (§16.2). La pagina deberia
+**decir cual firmar primero** (1, 2, 3…) o **avisar antes de firmar** si una
+caducaria contra el arbol de ese momento.
+
+**ESTO ES COMODIDAD, NO SEGURIDAD, y conviene no confundirlo.** La proteccion ya
+existe y funciono: `arbol-integrado-rojo` **no integro sobre un arbol roto** y
+caduco la propuesta, que es lo que tiene que pasar. Lo que falto fue que el
+operador supiera el orden ANTES de gastar clics y propuestas. Nada de lo que
+sigue debilita ese freno; lo que anade es que no haga falta chocar con el.
+
+**LAS CUATRO PREGUNTAS A MEDIR cuando se atienda:**
+
+1. **¿Orden ESTATICO o arbol COMBINADO?** El estatico sale de reglas —`package.json`
+   al final (por `tocaDependencias`), agrupar por fichero, el tamano del diff— y
+   es barato, pero **no caza la interaccion de hoy**, que no compartia fichero.
+   Medir el arbol combinado caza todo y cuesta **~5 min por medicion**; con 36
+   propuestas en cola, medir cada par es inviable y medir el conjunto no dice
+   que subconjunto falla. Hay un punto medio por explorar: medir **el conjunto
+   entero una vez** —que es lo que se hizo a mano hoy, y basto— y bajar a
+   medidas finas solo si sale rojo.
+2. **¿Orden fijo o GUIA VIVA?** El orden seguro **cambia conforme se firma**:
+   en cuanto `package.json` entra en el delta, la regla de arriba cambia de
+   sujeto. Un `1, 2, 3` fijo envejece en la primera firma. Una guia que se
+   recalcula tras cada integracion es mas honesta, y mas trabajo.
+3. **¿APLICA AL TERMINAL DE CLIENTES?** El Motor acumula —**36 propuestas hoy**—
+   y por eso el orden importa. El Terminal resuelve de una en una y es
+   interactivo, asi que puede que el problema no exista ahi. **Se mide cuando se
+   atienda**, no se supone: si el Terminal tambien acumula tanda de firma, la
+   mejora es de los dos mundos; si no, es solo del Motor (doctrina de los dos
+   mundos, ADR-090 §0).
+4. **¿Y que se le ensena al operador cuando el orden no se puede saber?** Una
+   guia que calla cuando no esta segura es mejor que una que adivina, y eso hay
+   que decidirlo con la forma de la pagina delante.
+
+**NO se implementa ahora.** Se anota con su evidencia —el fallo de hoy, su coste
+(una propuesta caducada, ~$0,74 de su generacion) y la regla estructural de
+`tocaDependencias`— para que quien lo atienda empiece midiendo y no diseñando.
