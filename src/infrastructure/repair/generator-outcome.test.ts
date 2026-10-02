@@ -50,3 +50,24 @@ describe('desenlaceDelGenerador', () => {
     expect(fin.usage).toBeUndefined()
   })
 })
+
+describe('desenlaceDelGenerador: la sesion, para poder reanudarla', () => {
+  it('la corrida buena deja su sesion', () => {
+    const fin = desenlaceDelGenerador(salida({ subtype: 'success', session_id: 'ses-1' }), 0)
+    expect(fin.sesion).toBe('ses-1')
+  })
+
+  it('la que agoto los turnos TAMBIEN: es la que mas merece continuarse', () => {
+    const fin = desenlaceDelGenerador(salida({ subtype: 'error_max_turns', session_id: 'ses-2' }), 1) // prettier-ignore
+    expect(fin.sesion).toBe('ses-2')
+  })
+
+  it('cero turnos NO es una sesion: es la firma de un --resume que no encontro nada', () => {
+    const out = JSON.stringify({ type: 'result', num_turns: 0, session_id: 'ses-nueva', usage: { input_tokens: 1, output_tokens: 1 } }) // prettier-ignore
+    expect(desenlaceDelGenerador(out, 1).sesion).toBeUndefined()
+  })
+
+  it('sin JSON no hay sesion que inventar', () => {
+    expect(desenlaceDelGenerador('cualquier cosa', 1).sesion).toBeUndefined()
+  })
+})
