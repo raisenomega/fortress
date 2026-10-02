@@ -19,6 +19,28 @@ files:
   - '!internal/**'
   # Kit universal: se distribuye a proyectos, no viaja en el binario.
   - '!templates/**'
+  # Documentacion versionada (ADR, DEUDAS, ROADMAP...): la app no la lee.
+  - '!docs/**'
+  # Configuracion del operador y del agente: no versionada o a medias.
+  - '!.claude/**'
+  - '!.fortress/**'
+  - '!.vscode/**'
+  # Recursos de empaquetado (iconos, entitlements): los lee electron-builder
+  # desde fuera; en tiempo de ejecucion el icono sale de resources/.
+  - '!build/**'
+  - '!*.tsbuildinfo'
+  # Familias de la raiz que .gitignore deja fuera del repo (documentos y
+  # scripts del operador, secretos, bases de datos locales) y config de MCP.
+  # Sin '**/' a proposito: estas negaciones tambien filtran node_modules y
+  # minimatch sin matchBase ancla '*.ext' a la raiz. Por extension y no por
+  # nombre, para que un fichero nuevo de la misma familia no entre en silencio.
+  - '!*.md'
+  - '!*.sh'
+  - '!*.png'
+  - '!*.{pem,key,p12,keystore}'
+  - '!*.{db,db-shm,db-wal,sqlite,sqlite3}'
+  - '!DOSSIER/**'
+  - '!.mcp.json'
   # Documentos del operador que viven en la raiz. Los que se movieron a
   # internal/ ya no se nombran aqui: los cubre el patron de arriba.
   - '!{CLAUDE.md,CONSTITUCION.md,COGNITION-LOG.md}'
