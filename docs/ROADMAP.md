@@ -1019,6 +1019,40 @@ alcanzo, asi que `fa86739d` sigue **`open`** —sin nota, sin fecha— y **la mi
 pendiente de DEUDAS §12.1 sigue a la vista**, que es lo que convenia: firmar la
 habria tapado.
 
+### EL LAZO, construido (ADR-110, 2026-10-02)
+
+El Motor ya no deja mitades. Cuando OMEGA **aprueba** un fix diciendo que
+resuelve el hallazgo **PARCIALMENTE**, el generador da **otra vuelta sobre su
+propia sesion** (`--resume --fork-session`) con la objecion del revisor en el
+prompt, y solo cuando no quedan vueltas se integra o se espera la firma.
+
+**Tres piezas, y la primera era una deuda que la arista convertia en defecto:**
+
+1. **La arista** `OMEGA -> GENERADO`, la unica que vuelve atras, y
+   **`collectGateOutcome` arreglado**: leia `find(TRANSITION)` —el PRIMER
+   cierre— y recogia TODOS los comandos de fase GATE, asi que con dos vueltas el
+   expediente de la firma habria mezclado las dos. Ahora el cierre es el ULTIMO
+   y sus comandos los de SU vuelta (clase DEUDAS §13).
+2. **El disparo y la vuelta**: el eje `resuelve_el_hallazgo` DENTRO de un
+   aprobado (por D19 un PARCIAL no veta), la sesion recapturada en cada vuelta
+   —`--fork-session` abre una nueva—, la objecion saneada como encargo que dice
+   «completa, no deshagas», y la guarda de presupuesto reusada sin exigir
+   `ANALIZADO`.
+3. **Las dos paradas**: la **huella** del diff (converger es un desenlace, no un
+   fallo) y el **tope de 2** corridas del generador, con un tope de **$5** por
+   propuesta como ultima red —en DOLARES, porque `trabajoReal` excluye la
+   relectura y `--resume` la multiplica: +47 % medido con el mismo trabajo—.
+
+**Medido en vivo:** sobre el libro real del unico PARCIAL que existe, el lazo
+**habria disparado** ($0,9674 de $5, 1 vuelta de 2); y la vuelta reanudada corrio
+de verdad —8 turnos, $0,2968, sesion nueva, `checkScope` limpio, arbol vivo
+intacto— y **se nego a cambiar nada diciendo por que**: la mitad que falta en ese
+hallazgo no es una edicion dentro de la correa, es una decision. Eso es el §7 del
+ADR apareciendo en el primer caso real, y el lazo lo archiva sin inventar nada.
+
+**Lo que el lazo NO hace:** ensanchar la correa. Los PARCIAL que piden terreno
+nuevo siguen esperando la correa de dependencias.
+
 **LO QUE SIGUE, en orden y sin saltarse un paso:** el **rebuild+install en frio**
 (la firma es un boton de la app, no un comando: `repair:sign` es IPC, y el
 arreglo del merge todavia no esta en el binario) → **la proxima firma desde la
