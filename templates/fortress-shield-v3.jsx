@@ -288,16 +288,18 @@ export default function FortressV3() {
         <p style={{fontSize:10,color:"#334155",textAlign:"center",margin:"0 0 16px"}}>🔒 100% pasivo · legal · no intrusivo</p>
 
         {/* Progress */}
-        {scanning && (
-          <div style={{marginBottom:16}}>
-            <div style={{display:"flex",gap:2,marginBottom:8}}>
+        {/* La region viva queda montada siempre: si naciera con el texto, el primer anuncio se perderia */}
+        <div style={{marginBottom:scanning?16:0}}>
+          {scanning && (
+            <div role="progressbar" aria-label="Progreso del escaneo" aria-valuemin={0} aria-valuemax={PHASES.length} aria-valuenow={completed} aria-valuetext={`${completed} de ${PHASES.length} fases`}
+              style={{display:"flex",gap:2,marginBottom:8}}>
               {PHASES.map((_,i)=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i<completed?"#3b82f6":i===phaseIdx?"#1e40af":"#1e293b",transition:"0.4s"}}/>)}
             </div>
-            <div style={{fontSize:12,color:"#94a3b8",textAlign:"center"}}>
-              {phaseIdx<PHASES.length ? `${PHASES[phaseIdx]?.icon} Escaneando: ${PHASES[phaseIdx]?.name}...` : "Generando resumen..."}
-            </div>
+          )}
+          <div role="status" aria-live="polite" style={{fontSize:12,color:"#94a3b8",textAlign:"center"}}>
+            {scanning ? (phaseIdx<PHASES.length ? `${PHASES[phaseIdx]?.icon} Escaneando: ${PHASES[phaseIdx]?.name}...` : "Generando resumen...") : ""}
           </div>
-        )}
+        </div>
 
         {error && <div style={{padding:12,background:"#1a0a0a",border:"1px solid #7f1d1d",borderRadius:10,marginBottom:14,fontSize:12,color:"#fca5a5"}}>⚠️ {error}</div>}
 
