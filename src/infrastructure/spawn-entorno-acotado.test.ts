@@ -23,6 +23,7 @@ const RAIZ = 'src'
 const SPAWN = /\b(?:spawn|spawnSync|execFile)\(/g
 const tiene = (t: string): boolean => new RegExp(SPAWN.source).test(t)
 const ES_TEST = /\.test\.ts$|fixture|fake/
+const sinComentarios = (t: string): string => t.replace(/(^|\s)(?:\/\*[\s\S]*?\*\/|\/\/.*$)/gm, '$1')
 
 function ficheros(dir: string): readonly string[] {
   return readdirSync(dir).flatMap((entrada) => {
@@ -38,9 +39,24 @@ const spawnean = ficheros(RAIZ)
   .map((ruta) => ({ ruta, fuente: readFileSync(ruta, 'utf8') }))
   .filter(({ fuente }) => fuente.includes("from 'child_process'") && tiene(fuente))
 
-const conCwd = spawnean.filter(({ fuente }) =>
-  [...fuente.matchAll(SPAWN)].some((m) => /\bcwd\b/.test(fuente.slice(m.index, m.index + 320)))
-)
+/** Las opciones de CADA llamada: las de linea y las de un `const options = {...}` previo, en su sitio. */
+function llamadas(f: string): readonly string[] {
+  const objetos = new Map([...f.matchAll(/\bconst (\w+) = (\{[^}\n]*\})/g)].map((m): [string, string] => [m[1], m[2]])) // prettier-ignore
+  return [...f.matchAll(SPAWN)].map((m) => f.slice(m.index, m.index + 320).replace(/\b\w+\b/g, (id) => objetos.get(id) ?? id)) // prettier-ignore
+}
+
+/** El `env` de ESA llamada llega a `buildEnv`/`gitEnv`; `process.env` o sin clave `env` (hereda todo), no. */
+const SEGURO = /^(?:build(?:Gate)?Env|gitEnv(?:Remoto)?)\(/
+function acota(f: string, valor: string, saltos = 3): boolean {
+  const id = /^(\w+)(\()?/.exec(valor)
+  if (SEGURO.test(valor) || id === null || saltos === 0) return SEGURO.test(valor)
+  const decl = id[2] ? `function ${id[1]}\\([^)]*\\)[^{]*\\{\\s*return ` : `\\bconst ${id[1]} = `
+  const m = new RegExp(`${decl}(?:\\{\\s*\\.\\.\\.)?([^\\n]+)`).exec(f)
+  return m !== null && acota(f, m[1], saltos - 1)
+}
+const envDe = (o: string): string => { const m = /\benv\b(?:\s*:\s*([^,}\n]+))?/.exec(o); return m === null ? '' : (m[1] ?? 'env') } // prettier-ignore
+const sinAcotar = (f: string): readonly string[] => llamadas(f).filter((o) => /\bcwd\b/.test(o) && !acota(f, envDe(o))) // prettier-ignore
+const conCwd = spawnean.filter(({ fuente }) => llamadas(sinComentarios(fuente)).some((o) => /\bcwd\b/.test(o)))
 
 describe('ningun spawn en el repo auditado hereda la sesion del operador', () => {
   it('la lista se deriva y NO esta vacia: si el barrido falla, se nota', () => {
@@ -49,9 +65,7 @@ describe('ningun spawn en el repo auditado hereda la sesion del operador', () =>
   })
 
   it.each(conCwd.map((s) => s.ruta))('%s acota su entorno', (ruta) => {
-    const fuente = readFileSync(ruta, 'utf8')
-
-    expect({ ruta, acota: /\bbuild(Env|GateEnv)\b|\bgitEnv(Remoto)?\(/.test(fuente) }).toEqual({ ruta, acota: true }) // prettier-ignore
+    expect({ ruta, sinAcotar: sinAcotar(sinComentarios(readFileSync(ruta, 'utf8'))) }).toEqual({ ruta, sinAcotar: [] }) // prettier-ignore
   })
 
   it.each(spawnean.map((s) => s.ruta))('%s no reparte `...process.env`', (ruta) => {
