@@ -5,6 +5,8 @@
   "main": "./out/main/index.js",
   "author": "raisenomega",
   "homepage": "https://github.com/raisenomega/fortress",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint .",
