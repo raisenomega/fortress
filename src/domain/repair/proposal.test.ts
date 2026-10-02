@@ -13,6 +13,8 @@ const VALIDAS: ReadonlyArray<readonly [ProposalState, ProposalState]> = [
   ['GENERADO', 'GATE'], ['GENERADO', 'RECHAZADO'], ['GENERADO', 'CADUCADO'],
   ['GATE', 'OMEGA'], ['GATE', 'RECHAZADO'], ['GATE', 'CADUCADO'],
   ['OMEGA', 'APROBADO'], ['OMEGA', 'RECHAZADO'], ['OMEGA', 'CADUCADO'],
+  // La arista del LAZO (ADR-110 §3): un PARCIAL aprobado vuelve al generador.
+  ['OMEGA', 'GENERADO'],
   ['APROBADO', 'MERGEADO'], ['APROBADO', 'CADUCADO']
 ] // prettier-ignore
 
@@ -40,6 +42,16 @@ describe('canTransition', () => {
         expect(canTransition(terminal, to)).toBe(false)
       }
     }
+  })
+
+  it('el lazo tiene su arista, y es la UNICA que vuelve atras (ADR-110)', () => {
+    expect(canTransition('OMEGA', 'GENERADO')).toBe(true)
+    // Y no abre las demas: la vuelta entra por el generador, no por el gate ni
+    // por el analisis. El freno NO vive en la tabla, vive en el lazo.
+    expect(canTransition('OMEGA', 'GATE')).toBe(false)
+    expect(canTransition('OMEGA', 'ANALIZADO')).toBe(false)
+    expect(canTransition('GATE', 'GENERADO')).toBe(false)
+    expect(canTransition('APROBADO', 'GENERADO')).toBe(false)
   })
 
   it('no hay saltos: ELEGIDO no llega a GENERADO ni a MERGEADO directo', () => {

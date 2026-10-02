@@ -48,7 +48,12 @@ const NEXT: Readonly<Record<ProposalState, readonly ProposalState[]>> = {
   ANALIZADO: ['GENERADO', 'RECHAZADO', 'CADUCADO'],
   GENERADO: ['GATE', 'RECHAZADO', 'CADUCADO'],
   GATE: ['OMEGA', 'RECHAZADO', 'CADUCADO'],
-  OMEGA: ['APROBADO', 'RECHAZADO', 'CADUCADO'],
+  // OMEGA -> GENERADO es la arista del LAZO (ADR-110 §3) y la UNICA que vuelve
+  // atras: un PARCIAL aprobado manda otra vuelta al generador, que vuelve a
+  // dejar la propuesta en GENERADO. Ni al gate ni al analisis se vuelve, y
+  // CUANTAS vueltas se dan no lo decide esta tabla —dice lo estructuralmente
+  // posible—: lo decide el lazo, con la huella y su tope.
+  OMEGA: ['APROBADO', 'RECHAZADO', 'CADUCADO', 'GENERADO'],
   APROBADO: ['MERGEADO', 'CADUCADO'],
   MERGEADO: [],
   RECHAZADO: [],
