@@ -35,4 +35,12 @@ export interface AgentRunRepository {
 
   /** Coste y duracion medios por ejecucion en un proyecto, o null sin datos. */
   averageRun(projectId: string): { readonly seconds: number; readonly usd: number } | null
+
+  /**
+   * Los DOLARES de unas corridas concretas, sumados. Lo pide el lazo del Motor
+   * (ADR-110 §5): su freno se mide en dinero y no en `trabajoReal`, que excluye
+   * la relectura —justo lo que una sesion reanudada multiplica—. Las corridas que
+   * no existan no cuentan: suma lo que hay, nunca estima lo que falta.
+   */
+  costUsdOf(ids: readonly string[]): number
 }

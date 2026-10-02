@@ -6,7 +6,12 @@ import { usageFromRow, type UsageColumns } from './usage-row'
 
 type Aggregates = Pick<
   AgentRunRepository,
-  'usageSince' | 'usageByProjectSince' | 'averageRun' | 'episodeTallySince' | 'sinFacturaSince'
+  | 'usageSince'
+  | 'usageByProjectSince'
+  | 'averageRun'
+  | 'episodeTallySince'
+  | 'sinFacturaSince'
+  | 'costUsdOf'
 >
 
 interface AverageRow {
@@ -24,6 +29,17 @@ export function createRunAggregates(db: Db): Aggregates {
   const sinFactura = db.prepare(SQL.SIN_FACTURA_SINCE)
 
   return {
+    // Placeholders por cada id, jamas valores interpolados: la lista la pone el
+    // motor, pero la regla de la casa no admite excepciones por confianza.
+    costUsdOf: (ids) => {
+      if (ids.length === 0) return 0
+      const huecos = ids.map(() => '?').join(', ')
+      const fila = db
+        .prepare(`SELECT COALESCE(SUM(cost_usd), 0) AS usd FROM agent_runs WHERE id IN (${huecos})`)
+        .get(...ids) as { usd: number }
+      return fila.usd
+    },
+
     usageSince: (since) => usageFromRow(usageSince.get(since) as UsageColumns),
 
     episodeTallySince: (since) => tally.get(since) as { episodes: number; failures: number },
