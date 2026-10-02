@@ -391,7 +391,7 @@ export default function FortressV3() {
               }}
               style={{
                 padding:"14px 32px",fontSize:14,fontWeight:700,
-                background:"linear-gradient(135deg,#3b82f6,#8b5cf6)",
+                background:"linear-gradient(135deg,#1d4ed8,#6d28d9)",
                 border:"none",borderRadius:12,color:"#fff",cursor:"pointer",
                 letterSpacing:0.5,boxShadow:"0 4px 20px rgba(59,130,246,0.3)",
                 display:"inline-flex",alignItems:"center",gap:8
