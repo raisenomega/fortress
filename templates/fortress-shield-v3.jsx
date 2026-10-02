@@ -84,20 +84,20 @@ function PhaseBlock({ phase, data }) {
 
   return (
     <div style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:12,marginBottom:8,overflow:"hidden"}}>
-      <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",cursor:"pointer"}}>
-        <span style={{fontSize:20}}>{phase.icon}</span>
-        <div style={{flex:1}}>
-          <div style={{fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{phase.name}</div>
-          <div style={{fontSize:10,color:"#475569"}}>
+      <button type="button" onClick={()=>setOpen(!open)} aria-expanded={open} aria-controls={`phase-${phase.id}`} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",cursor:"pointer",width:"100%",background:"none",border:"none",color:"inherit",font:"inherit",textAlign:"left"}}>
+        <span aria-hidden="true" style={{fontSize:20}}>{phase.icon}</span>
+        <span style={{display:"block",flex:1}}>
+          <span style={{display:"block",fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{phase.name}</span>
+          <span style={{display:"block",fontSize:10,color:"#475569"}}>
             {fs.length} hallazgo{fs.length!==1?"s":""}
-            {crits>0&&<span style={{color:"#ef4444",marginLeft:6}}>⬤ {crits} crítico{crits>1?"s":""}</span>}
-            {highs>0&&<span style={{color:"#f97316",marginLeft:6}}>⬤ {highs} alto{highs>1?"s":""}</span>}
-          </div>
-        </div>
-        <div style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${bar}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:bar,fontFamily:"monospace"}}>{sc}</div>
-        <span style={{color:"#475569",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
-      </div>
-      {open && <div style={{borderTop:"1px solid #1e293b"}}>{fs.map((f,i)=><FindingRow key={i} f={f}/>)}</div>}
+            {crits>0&&<span style={{color:"#ef4444",marginLeft:6}}><span aria-hidden="true">⬤ </span>{crits} crítico{crits>1?"s":""}</span>}
+            {highs>0&&<span style={{color:"#f97316",marginLeft:6}}><span aria-hidden="true">⬤ </span>{highs} alto{highs>1?"s":""}</span>}
+          </span>
+        </span>
+        <span style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${bar}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:bar,fontFamily:"monospace"}}>{sc}</span>
+        <span aria-hidden="true" style={{color:"#475569",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+      </button>
+      {open && <div id={`phase-${phase.id}`} style={{borderTop:"1px solid #1e293b"}}>{fs.map((f,i)=><FindingRow key={i} f={f}/>)}</div>}
     </div>
   );
 }
