@@ -13,6 +13,16 @@ const PHASES = [
   { id: "infra", name: "Infraestructura", icon: "🔗", prompt: `Analiza infraestructura de {D}. USA web_fetch en https://{D} para ver qué dominios externos carga (scripts src, links, iframes). Busca: hosting provider, DNS provider, CDN. Busca en web: "{D}" site:shodan.io, "{D}" hosting, "{D}" nameservers. ¿Tiene redundancia? ¿Single points of failure?` },
 ];
 
+// Cuota de cortesia en cliente (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora).
+// Cada escaneo son 9 llamadas; el control real va en el servidor o proxy de la API.
+const SCANS_PER_HOUR = 3;
+const HOUR_MS = 60 * 60 * 1000;
+const PHASE_GAP_MS = 1500;
+const MAX_SEARCHES = 5;
+const MAX_RETRIES = 3;
+const BACKOFF_MS = 5000;
+const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
 const SEV_CONFIG = {
   CRITICAL: { bg: "#450a0a", text: "#fca5a5", border: "#7f1d1d", dot: "#ef4444", label: "CRÍTICO", weight: 4 },
   HIGH:     { bg: "#431407", text: "#fdba74", border: "#7c2d12", dot: "#f97316", label: "ALTO", weight: 3 },
@@ -201,16 +211,30 @@ export default function FortressV3() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
+  const scanLog = useRef([]);
+
   const api = async (sys, usr) => {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3500, system: sys,
-        tools: [{ type: "web_search_20250305", name: "web_search" }],
-        messages: [{ role: "user", content: usr }] })
-    });
-    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error?.message || `API ${r.status}`); }
-    const d = await r.json();
-    return d.content.filter(c=>c.type==="text").map(c=>c.text).join("\n");
+    for (let attempt = 0; ; attempt++) {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3500, system: sys,
+          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES }],
+          messages: [{ role: "user", content: usr }] })
+      });
+      if (r.status === 429 && attempt < MAX_RETRIES) {
+        const wait = Number(r.headers.get("retry-after"));
+        await sleep(wait > 0 ? wait * 1000 : BACKOFF_MS * 2 ** attempt);
+        continue;
+      }
+      if (!r.ok) {
+        const e = await r.json().catch(()=>({}));
+        const err = new Error(e.error?.message || `API ${r.status}`);
+        err.rateLimited = r.status === 429;
+        throw err;
+      }
+      const d = await r.json();
+      return d.content.filter(c=>c.type==="text").map(c=>c.text).join("\n");
+    }
   };
 
   const parseJ = (t) => { try { const m = t.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); } catch{} return null; };
@@ -218,11 +242,26 @@ export default function FortressV3() {
   const scan = useCallback(async () => {
     const clean = domain.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     if (!clean) return;
+    const now = Date.now();
+    scanLog.current = scanLog.current.filter(t => now - t < HOUR_MS);
+    if (scanLog.current.length >= SCANS_PER_HOUR) {
+      const mins = Math.ceil((HOUR_MS - (now - scanLog.current[0])) / 60000);
+      setError(`Límite de ${SCANS_PER_HOUR} escaneos por hora alcanzado. Reintenta en ${mins} min.`);
+      return;
+    }
+    scanLog.current.push(now);
     setScanning(true); setResults({}); setPhaseIdx(0); setGlobalScore(null); setSummary(""); setDone(false); setError("");
 
     const all = {};
+    let limited = false;
     for (let i = 0; i < PHASES.length; i++) {
       setPhaseIdx(i);
+      if (limited) {
+        all[PHASES[i].id] = {score:50,findings:[{severity:"INFO",title:"Omitida por límite de API",description:"La API devolvió 429 tras los reintentos; esta capa no se lanzó.",fix:"Reintentar más tarde"}]};
+        setResults(prev => ({...prev, [PHASES[i].id]: all[PHASES[i].id]}));
+        continue;
+      }
+      if (i > 0) await sleep(PHASE_GAP_MS);
       try {
         const txt = await api(SYSTEM_PROMPT, PHASES[i].prompt.replace(/\{D\}/g, clean));
         const p = parseJ(txt);
@@ -232,6 +271,7 @@ export default function FortressV3() {
           setResults(prev => ({...prev, [PHASES[i].id]: all[PHASES[i].id]}));
         }
       } catch(e) {
+        if (e.rateLimited) limited = true;
         all[PHASES[i].id] = {score:50,findings:[{severity:"INFO",title:"Error",description:e.message,fix:"Reintentar"}]};
         setResults(prev => ({...prev, [PHASES[i].id]: all[PHASES[i].id]}));
       }
@@ -243,6 +283,7 @@ export default function FortressV3() {
     setGlobalScore(avg);
 
     try {
+      if (limited) throw new Error("API 429");
       const allFindings = Object.entries(all).map(([k,v])=>`${k}: score=${v.score}, crits=${(v.findings||[]).filter(f=>f.severity==="CRITICAL").length}, highs=${(v.findings||[]).filter(f=>f.severity==="HIGH").length}, total=${(v.findings||[]).length}`).join("; ");
       const st = await api(
         `Genera resumen ejecutivo en español (4-5 frases) de un análisis de seguridad EASM. Sé directo, honesto, sin alarmismo. Menciona los hallazgos más importantes y qué priorizar. Responde SOLO JSON: {"summary":"<texto>"}`,
