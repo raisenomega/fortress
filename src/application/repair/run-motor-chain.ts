@@ -7,6 +7,8 @@ import type { JudgeDeps } from './judge-and-integrate'
 import { judgeAndIntegrate } from './judge-and-integrate'
 import { esAveria } from '@domain/repair/averia'
 import { desenlaceDelPlan, type ChainOutcome } from './motor-chain-outcome'
+import { cerrarLaCadena } from './cierre-de-la-cadena'
+import { conLazo } from './con-lazo'
 import { planRepair } from './plan-repair'
 import { runGate, type GateDeps } from './run-gate'
 
@@ -60,16 +62,13 @@ export async function runMotorChain(
   // no vuelve a salir elegido. Las siguientes vueltas atacan otros y se apilan.
   if (modo === 'hasta-gate') return ok({ kind: 'espera-omega', proposalId: proposal.id, ...(gate.heredado?.length ? { heredado: gate.heredado } : {}) }) // prettier-ignore
 
-  // En hasta-omega el revisor juzga y ahi se para: un veto cierra en RECHAZADO
-  // y no llega a la cola de firma; una aprobacion sale por `espera-firma` con
-  // condicion nula, que es justo "aprobada sin que la politica llegara a mirar".
-  const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge, modo === 'completo')
+  // SIEMPRE sin integrar, tambien en `completo`: entre el juicio y el merge vive
+  // el LAZO (ADR-110), y un PARCIAL integrado antes de darle su vuelta es justo
+  // lo que el lazo existe para no hacer. Integrar es de `cerrarLaCadena`.
+  const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge, false)
   if (!juicio.omega.ok) return cortar(proposal.id, juicio.omega.reason)
 
-  if (ctx.repairProposals.findById(proposal.id)?.state === 'MERGEADO') {
-    return ok({ kind: 'integrada', proposalId: proposal.id })
-  }
-  // La condicion viaja tipada hasta aqui: quien cuente denegaciones necesita
-  // saber CUAL freno, y `espera-firma` a secas las hacia indistinguibles.
-  return ok({ kind: 'espera-firma', proposalId: proposal.id, condition: juicio.merge?.denial ?? null, ...(gate.heredado?.length ? { heredado: gate.heredado } : {}) }) // prettier-ignore
+  const lazo = await conLazo(ctx, proposal.id, deps, { juicio, sesion: generado.sesion })
+  if (!lazo.ok) return cortar(proposal.id, lazo.error)
+  return cerrarLaCadena(ctx, proposal.id, deps.judge, lazo.value, modo, gate.heredado)
 }

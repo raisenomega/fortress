@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import * as integrar from './integrar-si-procede'
 import * as juzgar from './judge-and-integrate'
-import { compila, ctx, DEPS, elige, genera, juzga, PROPUESTA } from './run-motor-chain-fixture'
+import { compila, ctx, DEPS, elige, genera, aprueba, juzga, PROPUESTA } from './run-motor-chain-fixture'
 import { runMotorChain } from './run-motor-chain'
 
 afterEach(() => vi.restoreAllMocks())
@@ -9,7 +10,7 @@ function hastaElJuicio(): void {
   elige(PROPUESTA)
   genera({ ok: true })
   compila({ ok: true })
-  juzga({ omega: { ok: true }, merge: null })
+  aprueba()
 }
 
 describe('el modo hasta-omega: juzgar sin integrar', () => {
@@ -46,11 +47,28 @@ describe('el modo hasta-omega: juzgar sin integrar', () => {
     expect(vuelta.ok && vuelta.value.kind).toBe('descartada')
   })
 
-  it('no-regresion: el modo completo si le deja integrar', async () => {
+})
+
+describe('el modo completo: integrar es de la cadena, no del juicio', () => {
+  it('al juicio SIEMPRE se le prohibe integrar: entre el y el merge vive el lazo', async () => {
     hastaElJuicio()
     const espia = vi.spyOn(juzgar, 'judgeAndIntegrate')
 
     await runMotorChain(ctx('MERGEADO'), 'p1', DEPS, 'completo')
-    expect(espia.mock.calls[0]?.[3]).toBe(true)
+    // Antes del lazo (ADR-110) este argumento era `true` en completo. La
+    // integracion no se perdio: se movio detras de las vueltas, y la prueba de
+    // abajo es la que ahora la vigila.
+    expect(espia.mock.calls[0]?.[3]).toBe(false)
+  })
+
+  it('no-regresion: en completo se integra, y en hasta-omega no', async () => {
+    hastaElJuicio()
+    const espia = vi.spyOn(integrar, 'integrarSiProcede').mockResolvedValue(null)
+
+    await runMotorChain(ctx('MERGEADO'), 'p1', DEPS, 'completo')
+    expect(espia).toHaveBeenCalledTimes(1)
+
+    await runMotorChain(ctx('OMEGA'), 'p1', DEPS, 'hasta-omega')
+    expect(espia).toHaveBeenCalledTimes(1)
   })
 })
