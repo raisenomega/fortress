@@ -141,3 +141,46 @@ Las tres capas llegan a la vuelta reanudada.
   GATE tiene que saberlo (§6).
 - **Lo que no cambia**: quién integra. Un fix completado por el lazo sigue
   esperando la firma del operador exactamente igual.
+
+## 9. Lo verificado EN VIVO al construirlo (2026-10-02)
+
+**La decision, con el codigo real sobre el libro real de la `7998aa13`** —la
+unica propuesta que llego con un PARCIAL de verdad— y en solo lectura:
+
+```
+huella de la vuelta 1 = 8b8a1daa82ae116b4016f767f208885ae0f642ed
+huellas anteriores    = []          vueltas dadas = 1 (tope 2)
+gastado               = $0,9674     (tope $5, margen $0,70)
+resuelve_el_hallazgo  = PARCIAL
+  con sesion -> { seguir: true }
+  sin sesion -> { seguir: false, parada: 'sin-sesion' }
+```
+
+El lazo **habria disparado**, y el encargo que recibiria el generador mide 985
+caracteres con la objecion literal del revisor dentro. Con el libro de **ayer**
+la respuesta es `sin-sesion`: la sesion no se capturaba hasta hoy, y el lazo
+**se niega a girar a ciegas** en vez de reintentar sin memoria.
+
+**La vuelta, de verdad**, sobre un worktree temporal de `main`, con la correa
+real y el sandbox puesto:
+
+| | |
+|---|---|
+| vuelta 1 | 2 turnos, **$0,1037**, sesion `f3b4d9cc` |
+| vuelta 2 (`--resume --fork-session`) | 8 turnos, **$0,2968**, sesion **nueva** `75974a55` |
+| `checkScope` del diff | `{ ok: true, violations: [] }` |
+| arbol vivo | intacto (`sucio=0`, HEAD sin moverse) |
+
+**Y la vuelta NO cambio nada, diciendo por que:** «Lo que falta no se puede
+cerrar bien dentro de `graph-binary.ts` y su test, y para dos de los puntos me
+falta un dato que no he podido conseguir. Por eso no lo he forzado.» Es la
+frontera del §7 apareciendo en el primer caso real: la mitad abierta de esa
+propuesta —`--ignore-scripts` y el hash— **no es una edicion dentro de la
+correa**, es una decision del operador, que es exactamente lo que DEUDAS §12.1
+dice. El lazo lo trata como lo que es: `no_diff_produced`, el PARCIAL de la
+vuelta 1 se conserva como desenlace y no se asienta nada falso.
+
+**Lo que esto NO prueba, y conviene decirlo:** que un PARCIAL se vuelva COMPLETO.
+Para eso hace falta un hallazgo cuya mitad abierta SI sea una edicion dentro de
+la correa, y el unico PARCIAL real disponible no lo era. Coste de las dos
+mediciones: **$0,4005**.
