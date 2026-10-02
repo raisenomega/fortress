@@ -2155,3 +2155,50 @@ arista en la maquina de estados, hay que recorrer quien LEE esa fase** — el mi
 movimiento que faltaba cuando dos arcos buenos rompieron la firma anadiendo
 asientos al libro (§13.2). Es la tercera vez en dos dias que la clase muerde por
 el mismo sitio: leer por posicion lo que hay que buscar por identidad.
+
+### 15.4 La mitad que el PARCIAL del lazo deja abierta (`54f04c09`)
+
+**Anotada ANTES de firmar, y a proposito** — igual que §12.1 con `graph-binary`, y
+por la MISMA razon: firmar lleva la propuesta a MERGEADO,
+`marcarElHallazgoIntegrado` dispara `markMitigated` sobre el hallazgo ENTERO, y la
+fila sale de la cola del Motor. **Lo que quede abierto deja de verse hasta que
+otro escaneo lo mire.**
+
+**El hallazgo:** `54f04c09`, LOW, `electron-builder.yml:7` — «la lista `files`
+del empaquetado excluye por negacion y deja entrar lo no nombrado, como `docs`».
+
+**La propuesta:** `735152ef`, el **primer PARCIAL que el lazo trabajo en
+produccion** (ADR-110). Dos vueltas, las dos juzgadas `PARCIAL`, parada por tope
+de vueltas:
+
+| | |
+|---|---|
+| vuelta 1 | commit `c968b090`, **+10/−0**: niega `docs/`, `.claude/`, `.fortress/`, `.vscode/`, `build/` y `*.tsbuildinfo` |
+| vuelta 2 | commit `655d5ea4`, **+22/−0**: los seis anteriores **mas** `*.md`, `*.sh`, `*.png`, secretos y BBDD |
+
+La vuelta 2 **avanzo de verdad**, y no solo en lineas: fue a leer
+`fileMatcher.js` de electron-builder y comprobo que **minimatch sin `matchBase`
+ancla esos patrones a la raiz**, asi que no alcanzan `resources/` ni
+`node_modules` y `asarUnpack` queda intacto. Eso es investigacion, no relleno.
+
+**LO QUE SIGUE ABIERTO, en palabras de OMEGA:**
+
+1. **La lista sigue siendo NEGRA**, y eso es el fondo del hallazgo: «un fichero
+   nuevo de otra familia en la raiz volveria a entrar en silencio». Pasar a lista
+   BLANCA es lo que el hallazgo pedia y lo que el analisis declaro demasiado
+   arriesgado para un LOW — **es una decision del operador, no una linea**.
+2. **`ADR-058` y `RELEASE.md` no se actualizaron**, y los dos describen el
+   empaquetado. Queda documentacion contradiciendo al codigo.
+3. **El asar no se ha verificado empaquetando.** Y no es un olvido del Motor: el
+   gate corre `electron-vite build`, **no `build:linux`**, asi que
+   **ningun paso de la verificacion ejerce la lista `files:`**. Las cuatro
+   propuestas de este drenaje que tocan `electron-builder.yml` —`b83270c2`,
+   `d5bbef5b`, `c1f851e5` y esta— estan verdes sobre algo que nadie comprobo.
+
+**ANTES DEL PROXIMO REBUILD: un `build:linux` real** y abrir el asar. Es la unica
+forma de saber que el empaquetado sigue llevando lo que tiene que llevar, y la
+unica de las tres que no es una decision: es una medicion que falta.
+
+**Por que no se arregla ahora:** la 1 es tu firma; la 2 se arregla a mano en
+cuanto decidas la 1 (la documentacion describe el diseno, no el parche); la 3 es
+una medicion que pide el binario y va con el rebuild.
