@@ -2105,3 +2105,53 @@ tenian escrito en el docblock; este no, y la asimetria no la vio nadie porque
 Y la de siempre, por quinta vez en esta sesion: **una etiqueta no es un
 diagnostico**. `target-branch-detached` mandaba a mirar el HEAD, que estaba
 perfecto, mientras el motivo verdadero se tiraba en la linea 14.
+
+## 15. El lazo del Motor, construido (2026-10-02)
+
+### 15.1 ~~El Motor dejaba las mitades: un PARCIAL aprobado salia a la firma como estaba~~
+
+**CERRADO el 2026-10-02**, ADR-110, merge `25241f3` en main. Por **D19** un
+`PARCIAL` **no veta**, asi que un fix que resolvia el hallazgo a medias llegaba a
+la cola de firma tal cual — y firmarlo **MITIGA el hallazgo ENTERO**
+(`marcarElHallazgoIntegrado` cuelga de `MERGEADO`), con lo que la mitad abierta
+dejaba de verse. Paso con el primer fix del Motor: la mitad de la `7998aa13`
+acabo anotada a mano aqui, en §12.1.
+
+**LO CONSTRUIDO Y PROBADO EN SU MECANICA** (29 tests nuevos, **12 mutantes
+muertos**, gate 11/11 sobre main):
+
+| | |
+|---|---|
+| **dispara** | por el eje `resuelve_el_hallazgo` DENTRO de un aprobado, no por un veto |
+| **la vuelta** | `--resume --fork-session` sobre la MISMA sesion, con la objecion del revisor saneada como encargo que dice «completa, no deshagas» |
+| **el id** | se **recaptura** en cada vuelta: `--fork-session` abre una nueva |
+| **la correa** | `correaDe` compartida con la primera vuelta: el lazo **no la ensancha**, y la objecion no entra en su calculo |
+| **el sandbox** | sigue puesto en la vuelta reanudada (medido: nombro su lista de lectura denegada) |
+| **dos paradas** | huella repetida (converger es un DESENLACE) y tope de **2** corridas; **$5** por propuesta en `cost_usd` como ultima red |
+| **no fuerza** | el unico PARCIAL real tenia la mitad FUERA de la correa y la vuelta se nego **diciendo por que**: `no_diff_produced`, el PARCIAL se conserva, nada falso se asienta |
+
+### 15.2 PENDIENTE — PARCIAL -> COMPLETO en vivo
+
+**Lo que NO esta probado**, y no por falta de arreglo: que una vuelta **cierre**
+la mitad abierta. Hace falta un hallazgo cuya mitad **SI** sea una edicion dentro
+de la correa, y el unico PARCIAL que existe hoy no lo era —la suya pide una
+decision del operador (`--ignore-scripts`, de donde sale el hash), no una
+linea—. **El primer drenaje real con un PARCIAL de ese tipo lo demostrara**, y no
+se fuerza con una corrida de ~$1,7 que depende del azar.
+
+**Y el lazo NO esta en el binario**: el instalado es del rebuild del 1-oct. Entra
+en el siguiente, y de ahi puede venir la demostracion.
+
+### 15.3 LA LECCION: una arista nueva convierte una lectura por posicion en un defecto
+
+El lazo destapo **otra instancia de la clase §13** y se cerro en el MISMO arco:
+`collectGateOutcome` tomaba `find(TRANSITION)` —el PRIMER cierre del gate— y
+recogia TODOS los `AGENT_RUN` de fase GATE. Con una sola vuelta era correcto; con
+dos, **el expediente que el operador firma habria descrito la vuelta 1 con los
+comandos de las dos mezclados**.
+
+Nadie lo introdujo: estaba bien hasta que la arista existio. **Al abrir una
+arista en la maquina de estados, hay que recorrer quien LEE esa fase** — el mismo
+movimiento que faltaba cuando dos arcos buenos rompieron la firma anadiendo
+asientos al libro (§13.2). Es la tercera vez en dos dias que la clase muerde por
+el mismo sitio: leer por posicion lo que hay que buscar por identidad.

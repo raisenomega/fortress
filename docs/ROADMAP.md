@@ -1053,6 +1053,17 @@ ADR apareciendo en el primer caso real, y el lazo lo archiva sin inventar nada.
 **Lo que el lazo NO hace:** ensanchar la correa. Los PARCIAL que piden terreno
 nuevo siguen esperando la correa de dependencias.
 
+**EN MAIN** (merge `25241f3`, gate 11/11 sobre main, 12 mutantes). **Y lo que
+queda por ver, dicho sin rebaja: PARCIAL -> COMPLETO en vivo.** La mecanica esta
+probada entera —dispara, da la vuelta, respeta correa y sandbox, para por las dos
+condiciones y no fuerza un fix malo—, pero que una vuelta CIERRE la mitad abierta
+necesita un hallazgo cuya mitad sea una edicion dentro de la correa, y el unico
+PARCIAL que existe hoy no lo era. **El primer drenaje real con uno de ese tipo lo
+demostrara** (DEUDAS §15.2); no se fuerza con una corrida que depende del azar.
+
+**Y no esta en el binario:** el instalado es del rebuild del 1-oct. El lazo entra
+en el siguiente, y de ahi puede venir esa demostracion.
+
 **LO QUE SIGUE, en orden y sin saltarse un paso:** el **rebuild+install en frio**
 (la firma es un boton de la app, no un comando: `repair:sign` es IPC, y el
 arreglo del merge todavia no esta en el binario) → **la proxima firma desde la
