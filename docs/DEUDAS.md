@@ -2202,3 +2202,70 @@ unica de las tres que no es una decision: es una medicion que falta.
 **Por que no se arregla ahora:** la 1 es tu firma; la 2 se arregla a mano en
 cuanto decidas la 1 (la documentacion describe el diseno, no el parche); la 3 es
 una medicion que pide el binario y va con el rebuild.
+
+## 16. El guardian marco en rojo el codigo mas seguro (2026-10-02)
+
+### 16.1 ~~Main quedo ROJO por un falso positivo, y caduco una propuesta inocente~~
+
+**CERRADO el 2026-10-02**, merge `63dfc07`. Al firmar la segunda propuesta que
+tocaba `electron-builder.yml` (`d5bbef5b`), la firma re-midio el arbol integrado
+—como manda `arbol-que-se-movio`— y lo encontro **ROJO en `test:unit`**:
+`arbol-integrado-rojo`, y la propuesta **CADUCADA**. No tenia culpa: solo tocaba
+el `.yml`, y el test que fallaba lee `git-del-merge.ts`.
+
+**LA CAUSA: dos fixes BUENOS de la misma tanda, verdes por separado, rojos
+juntos.**
+
+| | |
+|---|---|
+| `dde8e100` | enseno al guardian a RASTREAR el `env` de cada spawn: `SEGURO` (cuatro nombres bendecidos) y `acota()`, que sigue una funcion **solo si su cuerpo es un `return` unico** |
+| `ccb969e6` | reescribio `entornoDelMerge()`: de un `return { ...buildEnv(null), … }` de una linea a **un bucle que construye una lista blanca desde `{}`** |
+
+- **Solo `dde8e100`:** `entornoDelMerge` era un `return` unico → el guardian lo
+  seguia hasta `buildEnv(` → verde.
+- **Solo `ccb969e6`:** el guardian de entonces no tenia `acota()` → nadie
+  rastreaba ese entorno → verde.
+- **Las dos:** la comprobacion existe **y** no sabe seguir la forma nueva →
+  **rojo**, marcando el codigo **mas seguro** de los dos: una lista BLANCA es
+  mas estricta que el recorte que `SEGURO` bendice por nombre.
+
+**EL ARREGLO es del GUARDIAN, no del fix:** `acota()` reconoce ahora la **FORMA**
+—una funcion que parte de un objeto literal y copia claves NOMBRADAS
+(`process.env[clave]`), sin esparcir el entorno— ademas de los cuatro nombres
+historicos. Asi un constructor nuevo y mas estricto pasa por **ser lo que ES**,
+no por estar en una lista. Y cerraba, de paso, una ironia: el docblock de ese
+mismo guardian denuncia «enumerar a mano lo que se puede derivar» mientras
+bendecia a sus constructores por una lista de cuatro nombres.
+
+**DOS HUECOS QUE LOS MUTANTES DESTAPARON**, y la primera version de la regla los
+tenia: el **MIXTO** (copia claves nombradas **y ademas** esparce el entorno:
+tiene pinta de lista blanca y no lo es) y el **OPACO** (no hereda, pero tampoco
+construye nada visible — no heredar NO prueba estar acotado). Los dos tienen su
+forma y su prueba; 4 mutantes muertos.
+
+### 16.2 LA LECCION: independencia TEXTUAL no es independencia SEMANTICA
+
+La medida que decide si la firma re-mide el arbol es `ficherosEnComun`: si el fix
+y el destino no comparten fichero, **no se mide**. Es la decision correcta y esta
+razonada con datos (medir siempre convertiria quince segundos de clics en media
+hora de gates), pero tiene un flanco: **dos fixes pueden romperse entre si sin
+compartir ni un fichero**. Aqui uno cambio el JUEZ (`spawn-entorno-acotado`) y el
+otro el JUZGADO (`git-del-merge`), en ficheros distintos.
+
+Lo mismo que el docblock de `arbol-que-se-movio` ya advertia para el interior de
+un fichero —«dos arreglos del mismo defecto por vias OPUESTAS caben en lineas
+distintas sin chocar»— vale entre ficheros, y con mas razon cuando uno de ellos
+es un test que lee a los demas.
+
+**COMO SE FIRMA UNA TANDA, entonces:** antes de firmar un lote, **medir el arbol
+COMBINADO** —no mirar si comparten ficheros—. Se hace con un worktree de sonda y
+un gate: una medida en vez de N, y responde la pregunta que importa. Se hizo asi
+con las nueve que quedaban: verdes juntas (`npm ci`, `typecheck`, `lint`,
+`test:unit`, `build`), y ademas **ningun test lee `templates/`**, eslint no cubre
+`.jsx` y el test del `electron-builder.yml` solo usa su ruta como cadena.
+
+### 16.3 PENDIENTE — `d5bbef5b` se regenera sola
+
+Caduco inocente. Su hallazgo (la firma de codigo del build de Windows) **vuelve a
+la baraja** —CADUCADO no bloquea— y el proximo drenaje la rehara contra el main
+nuevo, que ya lleva los fuses de `b83270c2`. No hace falta ningun gesto.
