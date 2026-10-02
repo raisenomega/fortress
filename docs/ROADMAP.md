@@ -1061,8 +1061,49 @@ necesita un hallazgo cuya mitad sea una edicion dentro de la correa, y el unico
 PARCIAL que existe hoy no lo era. **El primer drenaje real con uno de ese tipo lo
 demostrara** (DEUDAS §15.2); no se fuerza con una corrida que depende del azar.
 
-**Y no esta en el binario:** el instalado es del rebuild del 1-oct. El lazo entra
-en el siguiente, y de ahi puede venir esa demostracion.
+**Y no esta en el binario:** el instalado era del rebuild del 1-oct. El operador
+reconstruyo esa misma noche (`838edbfb`, 2-oct 01:45) y el lazo entro.
+
+### EL PRIMER DRENAJE REAL CON EL LAZO (2026-10-02)
+
+Cinco horas de drenaje autonomo sobre FORTRESS, con el lazo en produccion por
+primera vez. **36 propuestas trabajadas, ~$32 de agentes, 21 fixes integrados con
+la firma del operador.**
+
+| | |
+|---|---|
+| **el lazo disparo DOS veces** | `8c7ac26d` (la vuelta produjo fix y **su propio gate la corto**: 75 lineas en un test) y `735152ef` (ciclo completo: vuelta 2, gate verde, **segundo juicio independiente**, `PARCIAL` otra vez, **parada por tope de vueltas**, y a firma con el fix mejorado) |
+| **y NO disparo** en los 18 `SI` | `gen=1` en todos: ni una vuelta de mas, ni un dolar de mas. El camino rapido del §4 probado en produccion |
+| **las tres salidas de OMEGA**, cada una por su camino | `SI` → a firma · `PARCIAL` → el lazo · `NO` → veto y `retryRepair` con analisis fresco, que acerto al segundo intento donde el primero fue vetado |
+| **el Motor auditó el codigo de ayer** | encontro que `git-del-merge.ts` usaba una lista NEGRA donde tocaba una lista BLANCA —`GIT_DIR` podia colarse a un `git merge` sobre el arbol vivo— y lo arreglo mejor de lo que estaba, nombrando su propio residuo |
+| **`collectGateOutcome` se gano el sueldo** | la `735152ef` es el primer expediente con DOS gates; sin el arreglo del 1-oct, la pagina de firma habria mezclado los comandos de las dos vueltas |
+
+**Y una rotura, cazada y cerrada el mismo dia:** dos fixes buenos de la misma
+tanda —el guardian de los spawns y el entorno del merge— **verdes por separado,
+rojos juntos sin compartir un solo fichero**, dejaron `main` en rojo y caducaron
+una propuesta inocente. El arreglo fue del **guardian**, que ahora juzga el
+entorno **por su FORMA y no por el nombre** de quien lo construye (DEUDAS §16).
+Nada se publico en rojo: `origin` espero en verde hasta que el arbol lo estuvo.
+
+**LAS DEUDAS QUE EL DIA DEJA**, todas con su evidencia y su numero:
+
+1. **El recibo del lazo** (§15.2): cuando el lazo **no** da la vuelta no deja
+   rastro —`cerrarLaCadena` ignora el campo `parada`—, asi que una parada
+   legitima y un fallo se ven igual: nada.
+2. **La mitad abierta del PARCIAL** (§15.4): la lista `files` del empaquetado
+   sigue siendo negra, `ADR-058`/`RELEASE.md` sin actualizar, y **el asar sin
+   verificar** — porque el gate corre `electron-vite build`, no `build:linux`.
+3. **La correa de dependencias**: ~**$4,20** quemados en hallazgos cuyo arreglo
+   vive en `package-lock.json` y que el Motor **no puede cerrar hoy** (el
+   Electron, los CVEs del tooling), con dos intentos por causa antes de la pausa.
+4. **La pagina de firma deberia GUIAR el orden** (§16.4), con sus cuatro
+   preguntas a medir. Es comodidad, no seguridad: `arbol-integrado-rojo` ya
+   protege.
+
+**Tres propuestas se regeneran solas** en el proximo drenaje, sin gesto de nadie:
+`d5bbef5b` (caduco inocente por el rojo), `b347d1e4` y `03ed20b0` (retiradas por
+chocar con su par). Sus hallazgos volvieron a la baraja al dejar de estar vivas, y
+naceran ancladas al main nuevo, que ya lleva el fix de su hermana.
 
 **LO QUE SIGUE, en orden y sin saltarse un paso:** el **rebuild+install en frio**
 (la firma es un boton de la app, no un comando: `repair:sign` es IPC, y el
