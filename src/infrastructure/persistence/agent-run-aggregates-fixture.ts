@@ -29,11 +29,14 @@ export function banco(): { db: Db; agg: ReturnType<typeof createRunAggregates> }
 
 let n = 0
 
-/** Asienta una corrida. Lo que no se diga toma un valor neutro para el agregado. */
-export function corrida(db: Db, c: Corrida = {}): void {
+/** Asienta una corrida y DEVUELVE SU ID: quien suma por ids lo necesita, y
+ *  reconstruirlo a mano desde fuera seria copiar el contador. Lo que no se diga
+ *  toma un valor neutro para el agregado. */
+export function corrida(db: Db, c: Corrida = {}): string {
   n += 1
+  const id = `run-${n}`
   db.prepare(INSERT).run({
-    id: `run-${n}`,
+    id,
     projectId: c.projectId ?? 'p1',
     agentId: c.agentId ?? null,
     kind: c.kind ?? 'chat',
@@ -42,6 +45,7 @@ export function corrida(db: Db, c: Corrida = {}): void {
     costUsd: c.costUsd ?? 0,
     at: c.at ?? '2026-08-15T10:00:00Z'
   })
+  return id
 }
 
 export const AYER = '2026-08-14T10:00:00Z'

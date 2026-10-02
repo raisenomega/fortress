@@ -3,6 +3,7 @@ import { entradaDelGrafo, GRAPH_SERVER } from '@domain/connectors/graph-mcp'
 import type { Result } from '@domain/shared/result'
 import { conSandbox } from '../sandbox/con-sandbox'
 import { TOOLS_EDICION, TOOLS_LECTURA } from './motor-tools'
+import { MAX_TURNS } from './techo-de-turnos'
 // El mismo servidor que `withGraph`, con la misma palanca: el GRAPH del motor era
 // el segundo camino al grafo, y sin esto el aislamiento quedaba medio hecho.
 const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GRAPH_SERVER]: entradaDelGrafo(dir) } }) // prettier-ignore
@@ -12,25 +13,6 @@ const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GR
 // lo tienen (medido en vivo el 2026-09-21). No se quita a proposito —seria un
 // freno (ADR-090 §0)— y la caja lo contiene (ADR-092). El commit y el gate
 // siguen siendo del motor, no del agente.
-
-/**
- * Techo de turnos del generador.
- *
- * Sale de los datos, no de una intuicion: las corridas que COMPLETARON el fix
- * dieron entre 4 y 25 vueltas; las cuatro que reventaron el tope dieron 32, 35,
- * 44 y 50. La separacion es limpia, y 30 deja cinco vueltas de margen sobre la
- * peor que termino sin llegar a la mas barata de las que divagaron.
- *
- * El techo no es solo un freno de coste: cada vuelta relee la transcripcion
- * entera, asi que los turnos son lo que inflaba la re-lectura que el tope
- * contaba. Las dos deudas atacaban el mismo problema por los dos lados.
- *
- * El analista NO lo lleva, a proposito: sus vueltas no distinguen a las que
- * completan (15-25) de las que revientan (18-25), y un analisis truncado sale
- * como JSON a medias, que el motor archiva como "ilegible" y acaba en CADUCADO.
- * Poner el techo ahi fabricaria justo esa mentira.
- */
-export const MAX_TURNS = 30
 
 /**
  * El prompt, o quien lo construye a partir de lo que el lanzamiento PUEDE. Un
@@ -50,14 +32,26 @@ const conFlags = (prompt: Prompt, flags: readonly string[]): readonly string[] =
   ...flags
 ]
 
+/**
+ * Reanudar la sesion de la vuelta anterior (ADR-110): el generador responde a la
+ * objecion en vez de empezar de cero. `--fork-session` deja intacta la sesion
+ * original y abre una NUEVA desde ese punto, asi que el id cambia en cada vuelta
+ * y hay que recapturarlo — medido el 2026-10-01, junto con que `--resume`
+ * funciona con estos mismos flags y la caja clase A puesta.
+ */
+const reanudando = (sesion: string | undefined): readonly string[] =>
+  sesion === undefined ? [] : ['--resume', sesion, '--fork-session']
+
 /** Con que se lanza C3: lee y edita, dentro del worktree, y con techo.
  *  Y dentro de la caja del CLI (ADR-092, clase A): sin caja, no hay args. */
 export function argsDelGenerador(
   prompt: Prompt,
   worktreePath: string,
-  grafoDir: string | null
+  grafoDir: string | null,
+  reanudar?: string
 ): Result<readonly string[]> {
-  return conSandbox(conFlags(prompt, flagsEdicion(grafoDir)), worktreePath)
+  const args = [...conFlags(prompt, flagsEdicion(grafoDir)), ...reanudando(reanudar)]
+  return conSandbox(args, worktreePath)
 }
 
 /** Con que se lanzan los que SOLO LEEN ficheros —analista, critico, OMEGA—: el

@@ -43,7 +43,10 @@ export async function generateFix(
   const huella = await deps.worktrees.huella(worktreePath)
   await emitDecision(ctx.eventLog, a.cursor, a.proposal.id, MOTIVO_HUELLA, { huella, turnos: result.runMeta.usage?.numTurns ?? null, gasto: result.runMeta.tokensUsed ?? null }, deps.now()) // prettier-ignore
   // CONSERVADO para autopsia: fallo con cambios posiblemente parciales.
-  if (!result.ok) return fail(motivoDelGenerador(result), { error: result.error }, true)
+  // La SESION viaja con el desenlace, tambien cuando falla: una corrida que se
+  // quedo sin turnos es trabajo a medias que el lazo puede continuar (ADR-110).
+  if (!result.ok) return { ...(await fail(motivoDelGenerador(result), { error: result.error }, true)), sesion: crudo.sesion } // prettier-ignore
 
-  return verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, allows, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
+  const hecho = await verifyAndCommit(ctx, a, deps, fail, { worktreePath, allowed, allows, cost: result.runMeta.tokensUsed ?? 0 }) // prettier-ignore
+  return { ...hecho, sesion: crudo.sesion }
 }

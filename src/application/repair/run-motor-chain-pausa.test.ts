@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as juzgar from './judge-and-integrate'
-import { compila, ctx, DEPS, elige, genera, juzga, PROPUESTA } from './run-motor-chain-fixture'
+import { aprueba, compila, ctx, DEPS, elige, genera, PROPUESTA } from './run-motor-chain-fixture'
 import { runMotorChain } from './run-motor-chain'
 
 afterEach(() => vi.restoreAllMocks())
@@ -10,7 +10,7 @@ function hastaElGate(): void {
   elige(PROPUESTA)
   genera({ ok: true })
   compila({ ok: true })
-  juzga({ omega: { ok: true }, merge: null })
+  aprueba()
 }
 
 describe('el motor puede parar tras el gate sin correr OMEGA', () => {

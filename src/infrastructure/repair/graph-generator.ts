@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
-import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { argsDelGenerador } from './generator-args'
+import type { GraphGenerator } from './graph-generator-types'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
@@ -10,17 +10,6 @@ import { buildEnv } from '../claude-code/build-env'
 /** El plazo, sacado del dato: las corridas que TERMINARON tardaron entre 205 y
  *  709 s, asi que 900 deja margen sobre la peor sin premiar a la que divaga. */
 const TIMEOUT_MS = 15 * 60 * 1000
-
-export type GeneratorResult =
-  | { ok: true; runMeta: AnalystRunMeta }
-  /** `turnosAgotados` y `timedOut` viajan DESDE AQUI porque solo aqui se sabe:
-   *  quien lee la salida despues no puede distinguir su reloj del ajeno. */
-  // prettier-ignore
-  | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; noArranco?: true; runMeta: AnalystRunMeta }
-
-export interface GraphGenerator {
-  generate(worktreePath: string, prompt: string): Promise<GeneratorResult>
-}
 
 /**
  * C3 — el UNICO agente del motor que EDITA, y solo dentro del worktree (cwd
@@ -33,10 +22,10 @@ export interface GraphGenerator {
 // el generador; sin atar, un directorio vacio: nunca la cache real.
 export function createGraphGenerator(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS, grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)): GraphGenerator { // prettier-ignore
   return {
-    generate: async (worktreePath, prompt) => {
+    generate: async (worktreePath, prompt, reanudar) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar()
-      const args = argsDelGenerador(prompt, worktreePath, store.dir)
+      const args = argsDelGenerador(prompt, worktreePath, store.dir, reanudar)
       // Sin caja no arranca: el mismo camino que un binario que no existe.
       if (!args.ok) return (store.liberar(), { ok: false, noArranco: true, error: args.error, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
@@ -60,8 +49,8 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
           clearTimeout(timer)
           store.liberar()
           const fin = desenlaceDelGenerador(out, code)
-          if (fin.ok) resolve({ ok: true, runMeta: meta(fin.usage) })
-          else resolve({ ...fin, error: fin.error, runMeta: meta(fin.usage) })
+          if (fin.ok) resolve({ ok: true, runMeta: meta(fin.usage), sesion: fin.sesion })
+          else resolve({ ...fin, error: fin.error, runMeta: meta(fin.usage), sesion: fin.sesion })
         })
         child.on('error', (error) => {
           clearTimeout(timer)
@@ -73,3 +62,5 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
     }
   }
 }
+
+export type { GeneratorResult, GraphGenerator } from './graph-generator-types'

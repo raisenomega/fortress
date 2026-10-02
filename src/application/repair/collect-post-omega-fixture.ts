@@ -43,6 +43,23 @@ export function cadenaCompleta(): ProposalEvent[] {
   ]
 }
 
+/**
+ * La cadena de una propuesta con DOS vueltas del lazo (ADR-110): el primer gate
+ * cierra, OMEGA aprueba un PARCIAL, el generador da otra vuelta y el gate vuelve
+ * a correr con comandos DISTINTOS. Es la forma que el libro tiene desde que la
+ * arista existe, y la que destapa leer el cierre por posicion (§6 del ADR).
+ */
+export function cadenaConDosVueltas(): ProposalEvent[] {
+  return [
+    ...cadenaCompleta(),
+    evento('GENERATE', 'TRANSITION', { commitSha: 'fix2222', files: ['src/a.ts'], insertions: 9, deletions: 1 }), // prettier-ignore
+    evento('GATE', 'AGENT_RUN', { command: 'npm ci', exitCode: 0, stdoutTail: 'ok2', stderrTail: '', timedOut: false }, { durationMs: 31_000 }), // prettier-ignore
+    evento('GATE', 'AGENT_RUN', { command: 'typecheck', exitCode: 0, stdoutTail: 'ok2', stderrTail: '', timedOut: false }, { durationMs: 12_000 }), // prettier-ignore
+    evento('GATE', 'TRANSITION', { allCommandsGreen: true, totalDurationMs: 43_000 }, { toState: 'GATE' }), // prettier-ignore
+    evento('OMEGA', 'TRANSITION', { verdict: { ...VERDICT, razon: 'ahora si, completo' } }, { toState: 'OMEGA' }) // prettier-ignore
+  ]
+}
+
 /** La cadena sin los eventos de una fase y tipo concretos. */
 export function cadenaSin(phase: EventPhase, eventType: EventType): ProposalEvent[] {
   return cadenaCompleta().filter((e) => !(e.phase === phase && e.eventType === eventType))

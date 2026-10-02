@@ -1,6 +1,5 @@
 import type { AppContext } from '../context'
-import { integrableSinFirma } from './integrable-sin-firma'
-import { autoMergeProposal } from './auto-merge-proposal'
+import { integrarSiProcede } from './integrar-si-procede'
 import type { AutoMergeDeps, AutoMergeResult } from './auto-merge-types'
 import { runOmega, type OmegaDeps, type RunOmegaResult } from './run-omega'
 
@@ -59,15 +58,5 @@ export async function judgeAndIntegrate(
   // codigo propio es lo mismo, y por una razon mas fuerte: ahi la firma es la
   // UNICA via, la pida quien la pida.
   if (!integrar) return { omega, merge: null }
-
-  // La comprobacion va DENTRO del try por lo mismo que el merge: si preguntar
-  // de quien es el codigo revienta, el veredicto tiene que salir igual —y no se
-  // integra, que es como la duda debe caer.
-  try {
-    if (!integrableSinFirma(ctx, proposalId, deps.esRepoPropio)) return { omega, merge: null }
-    return { omega, merge: await autoMergeProposal(ctx, deps.autoMerge, { proposalId }) }
-  } catch (error) {
-    console.error('[motor] fallo la integracion automatica', proposalId, error)
-    return { omega, merge: null }
-  }
+  return { omega, merge: await integrarSiProcede(ctx, proposalId, deps) }
 }
