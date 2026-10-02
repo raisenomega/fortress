@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
+import { llamadas, sinAcotar } from './spawn-acotado-fixture'
 
 /**
  * Ningun proceso hijo hereda la sesion viva del operador — y la lista de quien
@@ -23,6 +24,7 @@ const RAIZ = 'src'
 const SPAWN = /\b(?:spawn|spawnSync|execFile)\(/g
 const tiene = (t: string): boolean => new RegExp(SPAWN.source).test(t)
 const ES_TEST = /\.test\.ts$|fixture|fake/
+const sinComentarios = (t: string): string => t.replace(/(^|\s)(?:\/\*[\s\S]*?\*\/|\/\/.*$)/gm, '$1')
 
 function ficheros(dir: string): readonly string[] {
   return readdirSync(dir).flatMap((entrada) => {
@@ -38,8 +40,9 @@ const spawnean = ficheros(RAIZ)
   .map((ruta) => ({ ruta, fuente: readFileSync(ruta, 'utf8') }))
   .filter(({ fuente }) => fuente.includes("from 'child_process'") && tiene(fuente))
 
+/** Los que corren DONDE VIVE el repo auditado: su entorno es el que importa. */
 const conCwd = spawnean.filter(({ fuente }) =>
-  [...fuente.matchAll(SPAWN)].some((m) => /\bcwd\b/.test(fuente.slice(m.index, m.index + 320)))
+  llamadas(sinComentarios(fuente)).some((o) => /\bcwd\b/.test(o))
 )
 
 describe('ningun spawn en el repo auditado hereda la sesion del operador', () => {
@@ -49,9 +52,7 @@ describe('ningun spawn en el repo auditado hereda la sesion del operador', () =>
   })
 
   it.each(conCwd.map((s) => s.ruta))('%s acota su entorno', (ruta) => {
-    const fuente = readFileSync(ruta, 'utf8')
-
-    expect({ ruta, acota: /\bbuild(Env|GateEnv)\b|\bgitEnv(Remoto)?\(/.test(fuente) }).toEqual({ ruta, acota: true }) // prettier-ignore
+    expect({ ruta, sinAcotar: sinAcotar(sinComentarios(readFileSync(ruta, 'utf8'))) }).toEqual({ ruta, sinAcotar: [] }) // prettier-ignore
   })
 
   it.each(spawnean.map((s) => s.ruta))('%s no reparte `...process.env`', (ruta) => {

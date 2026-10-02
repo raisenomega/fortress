@@ -13,6 +13,16 @@ const PHASES = [
   { id: "infra", name: "Infraestructura", icon: "🔗", prompt: `Analiza infraestructura de {D}. USA web_fetch en https://{D} para ver qué dominios externos carga (scripts src, links, iframes). Busca: hosting provider, DNS provider, CDN. Busca en web: "{D}" site:shodan.io, "{D}" hosting, "{D}" nameservers. ¿Tiene redundancia? ¿Single points of failure?` },
 ];
 
+// Cuota de cortesia en cliente (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora).
+// Cada escaneo son 9 llamadas; el control real va en el servidor o proxy de la API.
+const SCANS_PER_HOUR = 3;
+const HOUR_MS = 60 * 60 * 1000;
+const PHASE_GAP_MS = 1500;
+const MAX_SEARCHES = 5;
+const MAX_RETRIES = 3;
+const BACKOFF_MS = 5000;
+const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
 const SEV_CONFIG = {
   CRITICAL: { bg: "#450a0a", text: "#fca5a5", border: "#7f1d1d", dot: "#ef4444", label: "CRÍTICO", weight: 4 },
   HIGH:     { bg: "#431407", text: "#fdba74", border: "#7c2d12", dot: "#f97316", label: "ALTO", weight: 3 },
@@ -84,20 +94,20 @@ function PhaseBlock({ phase, data }) {
 
   return (
     <div style={{background:"#0f172a",border:"1px solid #1e293b",borderRadius:12,marginBottom:8,overflow:"hidden"}}>
-      <div onClick={()=>setOpen(!open)} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",cursor:"pointer"}}>
-        <span style={{fontSize:20}}>{phase.icon}</span>
-        <div style={{flex:1}}>
-          <div style={{fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{phase.name}</div>
-          <div style={{fontSize:10,color:"#475569"}}>
+      <button type="button" onClick={()=>setOpen(!open)} aria-expanded={open} aria-controls={`phase-${phase.id}`} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",cursor:"pointer",width:"100%",background:"none",border:"none",color:"inherit",font:"inherit",textAlign:"left"}}>
+        <span aria-hidden="true" style={{fontSize:20}}>{phase.icon}</span>
+        <span style={{display:"block",flex:1}}>
+          <span style={{display:"block",fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{phase.name}</span>
+          <span style={{display:"block",fontSize:10,color:"#475569"}}>
             {fs.length} hallazgo{fs.length!==1?"s":""}
-            {crits>0&&<span style={{color:"#ef4444",marginLeft:6}}>⬤ {crits} crítico{crits>1?"s":""}</span>}
-            {highs>0&&<span style={{color:"#f97316",marginLeft:6}}>⬤ {highs} alto{highs>1?"s":""}</span>}
-          </div>
-        </div>
-        <div style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${bar}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:bar,fontFamily:"monospace"}}>{sc}</div>
-        <span style={{color:"#475569",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
-      </div>
-      {open && <div style={{borderTop:"1px solid #1e293b"}}>{fs.map((f,i)=><FindingRow key={i} f={f}/>)}</div>}
+            {crits>0&&<span style={{color:"#ef4444",marginLeft:6}}><span aria-hidden="true">⬤ </span>{crits} crítico{crits>1?"s":""}</span>}
+            {highs>0&&<span style={{color:"#f97316",marginLeft:6}}><span aria-hidden="true">⬤ </span>{highs} alto{highs>1?"s":""}</span>}
+          </span>
+        </span>
+        <span style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${bar}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:bar,fontFamily:"monospace"}}>{sc}</span>
+        <span aria-hidden="true" style={{color:"#475569",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+      </button>
+      {open && <div id={`phase-${phase.id}`} style={{borderTop:"1px solid #1e293b"}}>{fs.map((f,i)=><FindingRow key={i} f={f}/>)}</div>}
     </div>
   );
 }
@@ -201,16 +211,30 @@ export default function FortressV3() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
+  const scanLog = useRef([]);
+
   const api = async (sys, usr) => {
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3500, system: sys,
-        tools: [{ type: "web_search_20250305", name: "web_search" }],
-        messages: [{ role: "user", content: usr }] })
-    });
-    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error?.message || `API ${r.status}`); }
-    const d = await r.json();
-    return d.content.filter(c=>c.type==="text").map(c=>c.text).join("\n");
+    for (let attempt = 0; ; attempt++) {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3500, system: sys,
+          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES }],
+          messages: [{ role: "user", content: usr }] })
+      });
+      if (r.status === 429 && attempt < MAX_RETRIES) {
+        const wait = Number(r.headers.get("retry-after"));
+        await sleep(wait > 0 ? wait * 1000 : BACKOFF_MS * 2 ** attempt);
+        continue;
+      }
+      if (!r.ok) {
+        const e = await r.json().catch(()=>({}));
+        const err = new Error(e.error?.message || `API ${r.status}`);
+        err.rateLimited = r.status === 429;
+        throw err;
+      }
+      const d = await r.json();
+      return d.content.filter(c=>c.type==="text").map(c=>c.text).join("\n");
+    }
   };
 
   const parseJ = (t) => { try { const m = t.match(/\{[\s\S]*\}/); if(m) return JSON.parse(m[0]); } catch{} return null; };
@@ -218,11 +242,26 @@ export default function FortressV3() {
   const scan = useCallback(async () => {
     const clean = domain.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     if (!clean) return;
+    const now = Date.now();
+    scanLog.current = scanLog.current.filter(t => now - t < HOUR_MS);
+    if (scanLog.current.length >= SCANS_PER_HOUR) {
+      const mins = Math.ceil((HOUR_MS - (now - scanLog.current[0])) / 60000);
+      setError(`Límite de ${SCANS_PER_HOUR} escaneos por hora alcanzado. Reintenta en ${mins} min.`);
+      return;
+    }
+    scanLog.current.push(now);
     setScanning(true); setResults({}); setPhaseIdx(0); setGlobalScore(null); setSummary(""); setDone(false); setError("");
 
     const all = {};
+    let limited = false;
     for (let i = 0; i < PHASES.length; i++) {
       setPhaseIdx(i);
+      if (limited) {
+        all[PHASES[i].id] = {score:50,findings:[{severity:"INFO",title:"Omitida por límite de API",description:"La API devolvió 429 tras los reintentos; esta capa no se lanzó.",fix:"Reintentar más tarde"}]};
+        setResults(prev => ({...prev, [PHASES[i].id]: all[PHASES[i].id]}));
+        continue;
+      }
+      if (i > 0) await sleep(PHASE_GAP_MS);
       try {
         const txt = await api(SYSTEM_PROMPT, PHASES[i].prompt.replace(/\{D\}/g, clean));
         const p = parseJ(txt);
@@ -232,6 +271,7 @@ export default function FortressV3() {
           setResults(prev => ({...prev, [PHASES[i].id]: all[PHASES[i].id]}));
         }
       } catch(e) {
+        if (e.rateLimited) limited = true;
         all[PHASES[i].id] = {score:50,findings:[{severity:"INFO",title:"Error",description:e.message,fix:"Reintentar"}]};
         setResults(prev => ({...prev, [PHASES[i].id]: all[PHASES[i].id]}));
       }
@@ -243,6 +283,7 @@ export default function FortressV3() {
     setGlobalScore(avg);
 
     try {
+      if (limited) throw new Error("API 429");
       const allFindings = Object.entries(all).map(([k,v])=>`${k}: score=${v.score}, crits=${(v.findings||[]).filter(f=>f.severity==="CRITICAL").length}, highs=${(v.findings||[]).filter(f=>f.severity==="HIGH").length}, total=${(v.findings||[]).length}`).join("; ");
       const st = await api(
         `Genera resumen ejecutivo en español (4-5 frases) de un análisis de seguridad EASM. Sé directo, honesto, sin alarmismo. Menciona los hallazgos más importantes y qué priorizar. Responde SOLO JSON: {"summary":"<texto>"}`,
@@ -278,26 +319,28 @@ export default function FortressV3() {
         {/* Input */}
         <div style={{display:"flex",gap:8,marginBottom:6,flexWrap:"wrap"}}>
           <input value={domain} onChange={e=>setDomain(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!scanning&&scan()}
-            placeholder="tu-dominio.com" disabled={scanning}
+            placeholder="tu-dominio.com" disabled={scanning} aria-label="Dominio a escanear"
             style={{flex:1,minWidth:200,padding:"11px 14px",fontSize:14,fontWeight:500,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,color:"#e2e8f0",outline:"none",fontFamily:"monospace"}}/>
           <button onClick={scan} disabled={scanning||!domain.trim()}
             style={{padding:"11px 22px",fontSize:13,fontWeight:700,background:scanning?"#1e293b":"linear-gradient(135deg,#ef4444,#f97316)",border:"none",borderRadius:10,color:"#fff",cursor:scanning?"not-allowed":"pointer",opacity:!domain.trim()?0.4:1,letterSpacing:0.5}}>
             {scanning?`⏳ ${completed}/${PHASES.length}`:"⚡ DEEP SCAN"}
           </button>
         </div>
-        <p style={{fontSize:10,color:"#334155",textAlign:"center",margin:"0 0 16px"}}>🔒 100% pasivo · legal · no intrusivo</p>
+        <p style={{fontSize:12,color:"#94a3b8",textAlign:"center",margin:"0 0 16px"}}><span aria-hidden="true">🔒</span> 100% pasivo · legal · no intrusivo</p>
 
         {/* Progress */}
-        {scanning && (
-          <div style={{marginBottom:16}}>
-            <div style={{display:"flex",gap:2,marginBottom:8}}>
+        {/* La region viva queda montada siempre: si naciera con el texto, el primer anuncio se perderia */}
+        <div style={{marginBottom:scanning?16:0}}>
+          {scanning && (
+            <div role="progressbar" aria-label="Progreso del escaneo" aria-valuemin={0} aria-valuemax={PHASES.length} aria-valuenow={completed} aria-valuetext={`${completed} de ${PHASES.length} fases`}
+              style={{display:"flex",gap:2,marginBottom:8}}>
               {PHASES.map((_,i)=><div key={i} style={{flex:1,height:4,borderRadius:2,background:i<completed?"#3b82f6":i===phaseIdx?"#1e40af":"#1e293b",transition:"0.4s"}}/>)}
             </div>
-            <div style={{fontSize:12,color:"#94a3b8",textAlign:"center"}}>
-              {phaseIdx<PHASES.length ? `${PHASES[phaseIdx]?.icon} Escaneando: ${PHASES[phaseIdx]?.name}...` : "Generando resumen..."}
-            </div>
+          )}
+          <div role="status" aria-live="polite" style={{fontSize:12,color:"#94a3b8",textAlign:"center"}}>
+            {scanning ? (phaseIdx<PHASES.length ? `${PHASES[phaseIdx]?.icon} Escaneando: ${PHASES[phaseIdx]?.name}...` : "Generando resumen...") : ""}
           </div>
-        )}
+        </div>
 
         {error && <div style={{padding:12,background:"#1a0a0a",border:"1px solid #7f1d1d",borderRadius:10,marginBottom:14,fontSize:12,color:"#fca5a5"}}>⚠️ {error}</div>}
 

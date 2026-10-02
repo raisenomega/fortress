@@ -10,6 +10,7 @@ import {
 import { parseScanOutput } from '../src/domain/scan/parse-scan-output.ts'
 import { buildScanPrompt } from '../src/domain/scan/scan-prompt.ts'
 import { termometroDeOtro } from '../src/domain/scan/termometro-de-otro.ts'
+import { buildEnv } from '../src/infrastructure/claude-code/build-env.ts'
 import { discoverCorpus } from '../src/infrastructure/project/discover-corpus.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
 import { cruzar, reencontradas } from './medir-deriva-cruce.ts'
@@ -36,7 +37,7 @@ console.log(`${proyecto} · carpeta ${carpeta} · ${sinMemoria ? 'SIN memoria (c
 
 const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', '--allowedTools', 'Bash,Read,Grep,Glob'], p.path) // prettier-ignore
 if (!args.ok) throw new Error(`sin caja: ${args.error}`)
-const salida = spawnSync('claude', [...args.value], { cwd: p.path, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
+const salida = spawnSync('claude', [...args.value], { cwd: p.path, env: buildEnv(null), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
 if (salida.status !== 0)
   throw new Error(`el escaner salio con ${salida.status}: ${salida.stderr.slice(0, 300)}`)
 const res = JSON.parse(salida.stdout) as { result?: string; total_cost_usd?: number }
