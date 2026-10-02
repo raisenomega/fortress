@@ -20,13 +20,16 @@
   --border: 225 12% 16%;
   --input: 225 12% 14%;
   --ring: 38 85% 55%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 40 6% 90%;
+  /* Rojo a L 64%: como texto pequeno pasa 4.5:1 (WCAG 1.4.3) sobre background
+     (~5.8), card (~5.5), secondary (~4.7) y el tintado critical/15 (~4.6). Con
+     esa L el texto claro encima ya no llega; por eso el foreground es oscuro. */
+  --destructive: 0 72% 64%;
+  --destructive-foreground: 225 20% 5%;
   --sidebar-background: 225 15% 5%;
   --sidebar-border: 225 12% 16%;
 
   /* Escala de severidad FORTRESS — derivada de la paleta, nunca hardcodeada */
-  --critical: 0 72% 51%;
+  --critical: 0 72% 64%;
   --high: 25 88% 55%;
   --medium: 45 90% 55%;
   --low: 225 8% 55%;

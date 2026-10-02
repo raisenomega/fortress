@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3'
 import { homedir } from 'os'
 import { join } from 'path'
+import { appCerrada } from './app-cerrada.ts'
 
 // One-shot idempotente: caduca las propuestas VIVAS cuyo libro es entero
 // sintetico (backfill). Sin analisis persistido, C3 no puede generar y el guard
@@ -10,6 +11,8 @@ import { join } from 'path'
 //
 // Autocontenido a proposito, como el backfill: Node corre .ts sueltos sin
 // resolver los alias del src. Corre SOLO desde CLI y con la app cerrada.
+if (!appCerrada())
+  throw new Error('fail-closed: la app esta abierta; cierrala antes de escribir su base')
 const db = new Database(join(homedir(), '.config/fortress-command-center/fortress.db'))
 
 const RAZON = 'cadena_sintetica'
