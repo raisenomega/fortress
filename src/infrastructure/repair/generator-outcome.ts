@@ -1,5 +1,5 @@
 import type { TokenUsage } from '@domain/telemetry/token-usage'
-import { MAX_TURNS } from './generator-args'
+import { MAX_TURNS } from './techo-de-turnos'
 import { parseUsage } from '../claude-code/parse-usage'
 
 /** Como marca el CLI la corrida que se quedo sin turnos. */

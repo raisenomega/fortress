@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_TURNS } from './generator-args'
+import { MAX_TURNS } from './techo-de-turnos'
 import { desenlaceDelGenerador } from './generator-outcome'
 
 const salida = (extra: Record<string, unknown>): string =>

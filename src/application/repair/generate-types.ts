@@ -21,13 +21,15 @@ export interface WorktreePort {
   commit(worktreePath: string, message: string): Promise<{ ok: true; sha: string } | { ok: false; error: string }> // prettier-ignore
 }
 
-/** Puerto del generador (C3). El motor jamas le cree los archivos tocados. */
+/** Puerto del generador (C3). El motor jamas le cree los archivos tocados.
+ *  `reanudar` es la sesion de la vuelta anterior del lazo (ADR-110); sin ella,
+ *  sesion nueva, que es como corre la primera vuelta. */
 export interface GeneratorPort {
-  generate(worktreePath: string, prompt: string): Promise<
-    | { ok: true; runMeta: AnalystRunMeta }
+  generate(worktreePath: string, prompt: string, reanudar?: string): Promise<
+    | { ok: true; runMeta: AnalystRunMeta; sesion?: string }
     /** Los dos hechos que SOLO el origen conoce: si se acabaron las vueltas y
      *  si se acabo el plazo. Sin ellos, el motivo tendria que adivinarse. */
-    | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; runMeta: AnalystRunMeta }
+    | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; runMeta: AnalystRunMeta; sesion?: string }
   > // prettier-ignore
 }
 
@@ -52,5 +54,5 @@ export interface Produced {
 }
 
 export type GenerateResult =
-  | { ok: true; proposalId: string; commitSha: string; files: readonly string[] }
-  | { ok: false; reason: RejectionReason | 'invalid_state'; detail?: string }
+  | { ok: true; proposalId: string; commitSha: string; files: readonly string[]; sesion?: string }
+  | { ok: false; reason: RejectionReason | 'invalid_state'; detail?: string; sesion?: string }

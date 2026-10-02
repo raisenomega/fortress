@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { carpetaDePrueba, limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
-import { argsDelGenerador, MAX_TURNS } from './generator-args'
+import { argsDelGenerador } from './generator-args'
+import { MAX_TURNS } from './techo-de-turnos'
 
 afterAll(limpiarCarpetasDePrueba)
 
@@ -38,5 +39,32 @@ describe('el techo de turnos', () => {
 
   it('y con la caja del CLI: --settings va en los args', () => {
     expect(args()).toContain('--settings')
+  })
+})
+
+describe('argsDelGenerador: la vuelta del lazo reanuda la sesion (ADR-110)', () => {
+  const conSesion = (sesion?: string): readonly string[] => {
+    const r = argsDelGenerador('p', '/wt', null, sesion)
+    return r.ok ? r.value : []
+  }
+
+  it('sin sesion no se reanuda nada: la primera vuelta corre limpia', () => {
+    expect(conSesion()).not.toContain('--resume')
+    expect(conSesion()).not.toContain('--fork-session')
+  })
+
+  it('con sesion van --resume <id> y --fork-session, juntos', () => {
+    const a = conSesion('ses-7')
+    expect(a[a.indexOf('--resume') + 1]).toBe('ses-7')
+    // --fork-session deja intacta la original y abre una nueva desde ese punto:
+    // por eso el id cambia cada vuelta y el lazo lo recaptura (medido).
+    expect(a).toContain('--fork-session')
+  })
+
+  it('y la caja y el techo siguen puestos en la vuelta reanudada', () => {
+    const a = conSesion('ses-7')
+    expect(a).toContain('--settings')
+    expect(a).toContain('--max-turns')
+    expect(a[a.indexOf('--permission-mode') + 1]).toBe('acceptEdits')
   })
 })
