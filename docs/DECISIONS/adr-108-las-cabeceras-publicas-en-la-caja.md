@@ -167,6 +167,10 @@ gyp ERR! stack Error: ENOENT: no such file or directory,
 Así que subir Electron de major **no** entra por aquí. El operador lo firma
 explícitamente: **esos los hace él con Claude Code, fuera de la caja.**
 
+> **ENMENDADO el 2026-10-03** — ver §6: el major del ABI entra por el **gesto
+> de poblar** la caché del host, sin una línea de código. Esta sección queda
+> como registro de lo que se sabía al firmar.
+
 **CORRECCIÓN, firmada en la ampliación:** el fix del Electron que disparó todo
 esto **no subía el ABI**. Pinchaba el rango (`^39.2.6` → `39.8.10`), así que el
 lock sigue en 39.8.10 y su zip está en caché. **Con el tercer bind, ese fix SÍ lo
@@ -227,8 +231,89 @@ ese mismo fix del Electron, que con el tercer bind pasa.
 Hasta entonces, este ADR está **construido y probado en bwrap aislado, no
 confirmado en producción**.
 
+## 6. Enmienda firmada (2026-10-03): la pieza B — el ABI entra por el gesto de poblar
+
+### 6.1 La firma del operador
+
+> «YO Jojo dueño del proyecto FORTRESS enmiendo ADR-108 (§3.5, la pieza B del
+> Electron): para subir Electron de major (el ABI), poblar los directorios
+> padre de la caché del host (~/.electron-gyp, ~/.cache/node-gyp,
+> ~/.cache/electron) con las cabeceras + zip + SHASUMS de la versión destino,
+> fuera de la caja, con mi red — como ya tienen los de 39.8.10. Los montajes
+> de ADR-108 (los padres, nunca por versión) sirven el major sin una línea de
+> código. La versión se sabe por adelantado (npm audit fixAvailable) o
+> reactiva (el ENOENT nombra la versión que falta). Descarto el devdir
+> escribible: la clase B la usan las sondas de calidad sobre repos de CLIENTE,
+> y un devdir escribible dejaría que un cliente envenene mi caché real.
+> Descarto la red ancha (github.com en la caja): superficie de exfiltración
+> desproporcionada para 1 hallazgo en la historia. Con esto FORTRESS es tan
+> capaz como claude -p en cualquier severidad: los CVEs de JS por la correa
+> (ADR-111), el ABI por la correa + mi gesto de dos comandos. El gesto de
+> poblar queda como procedimiento firmado, no código.»
+
+### 6.2 Lo medido que la hizo posible (2026-10-03, main `64461da`)
+
+Tres datos que §3.5 no tenía al firmarse. (1) **ADR-111 hizo la mitad sin
+pedirlo**: `electron` es devDependency y el bump es *lock-only* al generarse
+(`--package-lock-only --ignore-scripts` no compila), así que el generador
+clase A ya produce el fix HOY; el muro vive solo en el gate. (2) **Los
+montajes ya sirven**: ADR-108 monta los PADRES, no `<padre>/<versión>` —
+poblados con la versión destino, el mismo `npm ci` que pasó con 39 pasa con
+44, sin red. (3) **La frontera con número**: de los 15 HIGH del día, 9 son JS
+puro (la pieza A los cierra) y los 6 de ABI son UNA raíz (electron→44.5.1,
+las otras cinco son sus transitivas); en toda la historia de la base hay UN
+hallazgo ABI.
+
+### 6.3 El procedimiento (el gesto de dos comandos, fuera de la caja)
+
+**Cuándo**: proactivo — `npm audit --package-lock-only` nombra la versión en
+`fixAvailable` ANTES de drenar—; o reactivo — el gate falla con
+`ENOENT: mkdir ~/.electron-gyp/<VER>`, que la nombra.
+
+**El gesto**, con `VER` la versión destino (p. ej. `44.5.1`):
+
+```bash
+# 1) Las cabeceras, al devdir que la caja monta en solo lectura:
+npx node-gyp install --target=VER \
+  --dist-url=https://electronjs.org/headers --devdir="$HOME/.electron-gyp"
+
+# 2) El zip + SHASUMS, a la cache que electron/install.js consulta:
+cd "$(mktemp -d)" && npm init -y >/dev/null && \
+  electron_config_cache="$HOME/.cache/electron" npm install electron@VER --no-save
+```
+
+Comprobación: `ls ~/.electron-gyp/` lista `VER` y `~/.cache/electron/` tiene
+un directorio nuevo con el zip. La receta se escribió de doctrina conocida y
+**se verifica en el primer gesto real**: si la herramienta cambió de flags, se
+corrige AQUÍ, no en código. El fichero no se consume: queda poblado para
+cualquier reintento.
+
+### 6.4 Las dos vías descartadas, con su razón medida
+
+- **Devdir escribible**: la clase B no es solo del Motor — las sondas de
+  calidad (`run-command` → `enCaja`) corren sobre repos de CLIENTE con los
+  artefactos montados. En solo lectura es inofensivo (contenido público);
+  escribible, un proceso del repo de un cliente envenenaría la caché REAL del
+  operador, que después compila el módulo nativo de FORTRESS.
+- **Red ancha**: el ciclo completo dentro de la caja exige el zip del binario
+  — `github.com` + `objects.githubusercontent.com` — una superficie de
+  exfiltración desproporcionada para un hallazgo en la historia, y contra el
+  espíritu de la tabla cerrada. (Si algún día se abriera un host Motor-only,
+  la forma es por punto de uso —como ADR-111 metió la regla npm solo en
+  `TOOLS_EDICION`—, nunca por la tabla global que comparten A, B y clientes.)
+
+### 6.5 El balance
+
+Con esta enmienda, **FORTRESS es tan capaz como `claude -p` en cualquier
+severidad**: los CVEs de JS por la correa (ADR-111, verificado en vivo), y el
+ABI por la correa + el gesto firmado de poblar. Lo que el Motor no hace solo
+—bajar artefactos de fuera con red abierta— lo hace el operador en dos
+comandos, exactamente donde la doctrina quiere la red: en sus manos.
+
 ## Referencias
 
 - **ADR-092** — la caja del proyecto; su casilla de red se midió con `npm view`.
 - **ADR-107** — la cura del perímetro: el Motor solo sobre FORTRESS.
+- **ADR-111** — la correa de dependencias: la pieza A, y el generador que ya
+  produce el bump del ABI que esta enmienda deja verificar.
 - `docs/DEUDAS.md` §11 — la medición completa y las tres deudas que salieron.
