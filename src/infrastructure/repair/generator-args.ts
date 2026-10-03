@@ -8,11 +8,11 @@ import { MAX_TURNS } from './techo-de-turnos'
 // el segundo camino al grafo, y sin esto el aislamiento quedaba medio hecho.
 const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GRAPH_SERVER]: entradaDelGrafo(dir) } }) // prettier-ignore
 
-// Lectura (grafo + Read/Grep/Glob) MAS edicion (Edit/Write). Bash NO va en la
-// lista y NO por eso falta: el allowlist solo pre-aprueba, y los cuatro agentes
-// lo tienen (medido en vivo el 2026-09-21). No se quita a proposito —seria un
-// freno (ADR-090 §0)— y la caja lo contiene (ADR-092). El commit y el gate
-// siguen siendo del motor, no del agente.
+// Lectura (grafo + Read/Grep/Glob) MAS edicion (Edit/Write) MAS la forma segura
+// de npm (ADR-111). «Bash lo tienen igual» resulto verdad SOLO para los comandos
+// de lectura que el CLI auto-aprueba: en headless todo npm se negaba (medido
+// 2026-10-02, 5 negativas). No se niega a proposito —seria un freno (ADR-090
+// §0)— y la caja lo contiene (ADR-092). El commit y el gate siguen del motor.
 
 /**
  * El prompt, o quien lo construye a partir de lo que el lanzamiento PUEDE. Un

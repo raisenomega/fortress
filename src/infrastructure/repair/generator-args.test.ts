@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { carpetaDePrueba, limpiarCarpetasDePrueba } from '../carpeta-de-prueba-fixture'
 import { argsDelGenerador } from './generator-args'
+import { NPM_SOLO_LOCK } from './motor-tools'
 import { MAX_TURNS } from './techo-de-turnos'
 
 afterAll(limpiarCarpetasDePrueba)
@@ -30,11 +31,12 @@ describe('el techo de turnos', () => {
     expect(a[a.indexOf('--max-turns') + 1]).toBe(String(MAX_TURNS))
   })
 
-  it('sigue lanzandose sin Bash: el commit y el gate son del motor', () => {
+  it('sin Bash ABIERTO: la unica entrada Bash es la forma segura del lock (ADR-111)', () => {
     const a = args()
     const tools = a[a.indexOf('--allowedTools') + 1] ?? ''
     expect(tools).toContain('Edit')
     expect(tools.split(',')).not.toContain('Bash')
+    expect(tools.split(',').filter((t) => t.startsWith('Bash'))).toEqual([NPM_SOLO_LOCK])
   })
 
   it('y con la caja del CLI: --settings va en los args', () => {
