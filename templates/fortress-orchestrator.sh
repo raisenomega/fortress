@@ -13,7 +13,8 @@
 #   ./fortress-orchestrator.sh clean         → limpieza de código en todos
 #   ./fortress-orchestrator.sh security      → scan de seguridad en todos
 #   ./fortress-orchestrator.sh report        → generar reporte unificado
-#   ./fortress-orchestrator.sh add <ruta>    → agregar un repo al orquestador
+#   ./fortress-orchestrator.sh add <ruta> [--trust] → agregar un repo (sin --trust queda NO confiable)
+#   ./fortress-orchestrator.sh trust <nombre> → declarar confianza: el scan solo lanza claude en repos confiables
 #   ./fortress-orchestrator.sh remove <nombre> → quitar un repo
 #   ./fortress-orchestrator.sh list          → listar repos configurados
 #
@@ -51,8 +52,10 @@ init() {
     mkdir -p "$FORTRESS_DIR" "$REPORTS_DIR" "$LOGS_DIR"
     if [ ! -f "$REPOS_FILE" ]; then
         echo "# FORTRESS ORCHESTRATOR — Repos configurados" > "$REPOS_FILE"
-        echo "# Formato: NOMBRE|RUTA|GIT_REMOTE|GIT_BRANCH" >> "$REPOS_FILE"
-        echo "# Ejemplo: nucleo|/home/user/projects/nucleo|origin|main" >> "$REPOS_FILE"
+        echo "# Formato: NOMBRE|RUTA|GIT_REMOTE|GIT_BRANCH|TRUSTED" >> "$REPOS_FILE"
+        echo "# TRUSTED: literal 'trusted', y SOLO lo declara el operador (comando trust)." >> "$REPOS_FILE"
+        echo "# Campo ausente o distinto = NO confiable: el scan no lanza claude sobre ese repo." >> "$REPOS_FILE"
+        echo "# Ejemplo: nucleo|/home/user/projects/nucleo|origin|main|trusted" >> "$REPOS_FILE"
     fi
 }
 
@@ -127,6 +130,14 @@ verify_repo() {
     return 0
 }
 
+# Confianza por repo: LEER no la pide, EJECUTAR si. El scan EJECUTA —
+# claude --headless carga hooks, .mcp.json y CLAUDE.md que controla el
+# repo auditado— asi que exige el campo 5 'trusted' declarado por el
+# operador. Ausente o distinto = NO confiable: falla cerrado.
+repo_trusted() {
+    [ "$(get_repo_field "$1" 5)" = "trusted" ]
+}
+
 # ─── VEREDICTO DE PUSH ──────────────────────────────────────
 # El informe y el HEAD escaneado viven en $REPORTS_DIR, fuera del repo:
 # nada con escritura en el repo decide si el push sale. Falla cerrado.
@@ -182,7 +193,8 @@ verdict_reason() {
 # ─── COMANDOS PRINCIPALES ──────────────────────────────────
 
 cmd_add() {
-    local path="${1:?Uso: fortress-orchestrator.sh add /ruta/al/proyecto}"
+    local path="${1:?Uso: fortress-orchestrator.sh add /ruta/al/proyecto [--trust]}"
+    local trust_flag="${2:-}"
     path=$(realpath "$path")
 
     if [ ! -d "$path" ]; then
@@ -205,9 +217,45 @@ cmd_add() {
         return
     fi
 
-    echo "${name}|${path}|${remote}|${branch}" >> "$REPOS_FILE"
+    # La confianza nace aqui y solo por gesto explicito del operador
+    local trusted=""
+    if [ "$trust_flag" = "--trust" ]; then
+        trusted="|trusted"
+    fi
+
+    echo "${name}|${path}|${remote}|${branch}${trusted}" >> "$REPOS_FILE"
     log_success "Repo agregado: $name ($path)"
     log_info "Remote: $remote | Branch: $branch"
+
+    if [ -n "$trusted" ]; then
+        log_info "Confianza declarada por el operador (--trust): el scan lanzara claude sobre este repo."
+    else
+        log_warn "$name queda SIN confianza: el scan NO lanzara claude sobre el."
+        log_info "Declararla con: ./fortress-orchestrator.sh trust $name"
+    fi
+}
+
+cmd_trust() {
+    local name="${1:?Uso: fortress-orchestrator.sh trust nombre}"
+    local line=$(get_repos | awk -F'|' -v name="$name" '$1 == name' | head -n 1)
+
+    if [ -z "$line" ]; then
+        log_error "Repo no configurado: $name"
+        exit 1
+    fi
+
+    if repo_trusted "$line"; then
+        log_info "$name ya tiene confianza declarada."
+        return
+    fi
+
+    local temp=$(mktemp)
+    awk -F'|' -v OFS='|' -v name="$name" \
+        '!/^#/ && $1 == name { $5 = "trusted" } { print }' "$REPOS_FILE" > "$temp"
+    mv "$temp" "$REPOS_FILE"
+
+    log_success "Confianza declarada: $name — el scan ya puede lanzar claude sobre el."
+    log_warn "Confiar un repo entrega sus hooks, .mcp.json y CLAUDE.md al claude del scan."
 }
 
 cmd_remove() {
@@ -227,6 +275,7 @@ cmd_list() {
         local path=$(get_repo_field "$line" 2)
         local remote=$(get_repo_field "$line" 3)
         local branch=$(get_repo_field "$line" 4)
+        local is_trusted=$(repo_trusted "$line" && echo "${GREEN}✓${NC}" || echo "${RED}✗ (scan lo salta)${NC}")
         count=$((count + 1))
 
         if [ -d "$path" ]; then
@@ -244,7 +293,7 @@ cmd_list() {
         echo -e "  ${CYAN}${count}.${NC} ${BOLD}${name}${NC}"
         echo -e "     Path:     $path"
         echo -e "     Branch:   $branch"
-        echo -e "     Status:   $status  Changes: $changes  CLAUDE.md: $has_claude  Graph: $has_graph"
+        echo -e "     Status:   $status  Changes: $changes  CLAUDE.md: $has_claude  Graph: $has_graph  Trust: $is_trusted"
         echo ""
     done <<< "$(get_repos)"
 
@@ -300,12 +349,22 @@ cmd_scan() {
     local pids=()
     local names=()
     local heads=()
+    local skipped=()
 
     while IFS= read -r line; do
         local name=$(get_repo_field "$line" 1)
         local path=$(get_repo_field "$line" 2)
 
         if ! verify_repo "$line" 2>/dev/null; then
+            continue
+        fi
+
+        # Este scan EJECUTA: claude carga hooks, .mcp.json y CLAUDE.md que
+        # controla el repo auditado, y los prompts le ordenan correr tests
+        # y aplicar fixes. Sin confianza declarada, no se lanza (ruidoso).
+        if ! repo_trusted "$line"; then
+            log_warn "$name: ${RED}SALTADO${NC} — sin confianza declarada. Declararla con: ./fortress-orchestrator.sh trust $name"
+            skipped+=("$name")
             continue
         fi
 
@@ -359,10 +418,18 @@ cmd_scan() {
     done
 
     echo ""
-    if [ $failed -eq 0 ]; then
+    if [ ${#pids[@]} -eq 0 ]; then
+        log_warn "Ningun scan lanzado: este scan NO escaneo nada."
+    elif [ $failed -eq 0 ]; then
         log_success "Todos los scans completados exitosamente."
     else
         log_warn "$failed scan(s) fallaron. Revisar logs en $LOGS_DIR/"
+    fi
+
+    # Un scan que salto repos no es un scan limpio de esos repos
+    if [ ${#skipped[@]} -gt 0 ]; then
+        log_warn "${#skipped[@]} repo(s) SIN ESCANEAR por falta de confianza: ${skipped[*]}"
+        log_info "Declararla con: ./fortress-orchestrator.sh trust <nombre>"
     fi
 
     # Generar reporte unificado
@@ -468,10 +535,16 @@ HEADER
     echo "| Repo | Branch | Changes | CRITICALs | HIGHs | Push |" >> "$UNIFIED_REPORT"
     echo "|------|--------|---------|-----------|-------|------|" >> "$UNIFIED_REPORT"
 
+    local untrusted_repos=()
+
     while IFS= read -r line; do
         local name=$(get_repo_field "$line" 1)
         local path=$(get_repo_field "$line" 2)
         local branch=$(get_repo_field "$line" 4)
+
+        if [ -n "$name" ] && ! repo_trusted "$line"; then
+            untrusted_repos+=("$name")
+        fi
 
         if [ ! -d "$path" ]; then
             echo "| $name | — | — | — | — | ❌ NOT FOUND |" >> "$UNIFIED_REPORT"
@@ -495,6 +568,20 @@ HEADER
 
         echo "| $name | $branch | $changes | $crits | $highs | $push_status |" >> "$UNIFIED_REPORT"
     done <<< "$(get_repos)"
+
+    # Los repos sin confianza no se escanearon: el reporte lo dice, no lo calla
+    if [ ${#untrusted_repos[@]} -gt 0 ]; then
+        echo "" >> "$UNIFIED_REPORT"
+        echo "## Repos SIN CONFIANZA — scan saltado" >> "$UNIFIED_REPORT"
+        echo "" >> "$UNIFIED_REPORT"
+        echo "El scan no lanza claude sobre repos sin confianza declarada (falla cerrado)." >> "$UNIFIED_REPORT"
+        echo "Declararla con: \`./fortress-orchestrator.sh trust <nombre>\`" >> "$UNIFIED_REPORT"
+        echo "" >> "$UNIFIED_REPORT"
+        local u
+        for u in "${untrusted_repos[@]}"; do
+            echo "- $u" >> "$UNIFIED_REPORT"
+        done
+    fi
 
     echo "" >> "$UNIFIED_REPORT"
     echo "---" >> "$UNIFIED_REPORT"
@@ -540,11 +627,12 @@ cmd_help() {
     echo "Uso: ./fortress-orchestrator.sh <comando> [argumentos]"
     echo ""
     echo "Comandos:"
-    echo -e "  ${CYAN}add${NC} <ruta>        Agregar un repositorio"
+    echo -e "  ${CYAN}add${NC} <ruta>        Agregar un repositorio (queda sin confianza salvo --trust)"
+    echo -e "  ${CYAN}trust${NC} <nombre>    Declarar confianza: habilita lanzar claude en ese repo"
     echo -e "  ${CYAN}remove${NC} <nombre>   Quitar un repositorio"
     echo -e "  ${CYAN}list${NC}              Listar repos configurados"
     echo -e "  ${CYAN}status${NC}            Ver estado de cada repo"
-    echo -e "  ${CYAN}scan${NC} [tipo]       Escanear todos los repos"
+    echo -e "  ${CYAN}scan${NC} [tipo]       Escanear todos los repos CON confianza declarada"
     echo -e "                    Tipos: full (default), security, clean, bugs"
     echo -e "  ${CYAN}push${NC}              Push coordinado (más seguro primero)"
     echo -e "  ${CYAN}report${NC}            Generar reporte unificado"
@@ -554,6 +642,7 @@ cmd_help() {
     echo "  ./fortress-orchestrator.sh add ~/projects/nucleo"
     echo "  ./fortress-orchestrator.sh add ~/projects/wudi"
     echo "  ./fortress-orchestrator.sh add ~/projects/omega"
+    echo "  ./fortress-orchestrator.sh trust nucleo"
     echo "  ./fortress-orchestrator.sh scan security"
     echo "  ./fortress-orchestrator.sh push"
 }
@@ -564,7 +653,8 @@ init
 check_dependencies
 
 case "${1:-help}" in
-    add)      cmd_add "${2:-}";;
+    add)      cmd_add "${2:-}" "${3:-}";;
+    trust)    cmd_trust "${2:-}";;
     remove)   cmd_remove "${2:-}";;
     list)     cmd_list;;
     status)   cmd_status;;
