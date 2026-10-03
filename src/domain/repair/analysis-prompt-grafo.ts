@@ -27,6 +27,13 @@ export const EL_GRAFO: readonly string[] = [
   'diga: compara con el fichero real. El grafo dice DONDE mirar;',
   'el disco dice QUE hay hoy, y es lo que decide.',
   '',
+  // Medido el 2026-10-03 contra el servidor real: `(?i)` devolvio total=0
+  // sobre una funcion indexada; `[eE]...` devolvio 5. Falla EN SILENCIO y el
+  // agente concluye «no existe» (backlog 61adf076).
+  'OJO con name_pattern: los flags inline como `(?i)` NO casan nada y devuelven',
+  'total=0 en silencio. Para ignorar mayusculas usa clases: `.*[eE]nsure.*`.',
+  'Un total=0 con `(?i)` dentro no prueba ausencia: reescribe el patron.',
+  '',
   LO_QUE_EL_GRAFO_NO_VE,
   ''
 ]
