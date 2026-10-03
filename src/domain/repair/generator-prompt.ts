@@ -1,7 +1,23 @@
+import { matchesGlob } from '../shared/path-glob'
 import { sanearCampoDePrompt } from '../shared/sanear-campo-de-prompt'
 import type { Analysis } from './analysis'
 import type { CorpusDescriptor } from '../project/corpus-descriptor'
 import { buildDocsFirst } from '../settings/docs-first-compose'
+
+/** ADR-111 pieza 3: la forma EXACTA que la regla pre-aprueba. El instinto del
+ *  generador es `npm install` normal —medido—, que se niega y, de correr,
+ *  moriria recompilando nativos. Solo aparece cuando el ancla es package.json
+ *  Y el grupo abrio el lock: sin terreno seria mandar a violar la correa. */
+const NPM_FORMA = [
+  'Dependencias: para subir una, corre EXACTAMENTE',
+  '  npm install <paquete>@<version> --save-dev --package-lock-only --ignore-scripts',
+  '(quita --save-dev si es de produccion; nada despues de --ignore-scripts).',
+  'Es la UNICA forma de npm pre-aprobada: sin esos dos flags al final se niega,',
+  'y npm run / npm exec se niegan. El fix es package.json + el lock regenerado.'
+]
+
+const fixDeDependencias = (ancla: string, allows: readonly string[]): boolean =>
+  ancla.trim() === 'package.json' && allows.some((g) => matchesGlob('package-lock.json', g))
 
 const RULES = [
   '- UN hallazgo, UN fix: el diff minimo que resuelva el problema.',
@@ -47,6 +63,7 @@ export function buildGeneratorPrompt(
     ...allows.map((glob) => `- ${glob} (puedes crear archivos aqui)`),
     '</permitidos>',
     '',
+    ...(fixDeDependencias(analysis.target.file, allows) ? [...NPM_FORMA, ''] : []),
     ...(docs === '' ? [] : [docs, '']),
     'Reglas:',
     RULES
