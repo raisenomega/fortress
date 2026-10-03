@@ -1,4 +1,13 @@
 {
+  "scope": {
+    "groups": [
+      {
+        "name": "correa-de-dependencias",
+        "when": "package.json",
+        "allow": ["package-lock.json"]
+      }
+    ]
+  },
   "autoMerge": {
     "enabled": true,
     "severities": ["LOW"],
