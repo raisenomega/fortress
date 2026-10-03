@@ -1087,9 +1087,14 @@ Nada se publico en rojo: `origin` espero en verde hasta que el arbol lo estuvo.
 
 **LAS DEUDAS QUE EL DIA DEJA**, todas con su evidencia y su numero:
 
-1. **El recibo del lazo** (§15.2): cuando el lazo **no** da la vuelta no deja
+1. **El recibo del lazo**: cuando el lazo **no** da la vuelta no deja
    rastro —`cerrarLaCadena` ignora el campo `parada`—, asi que una parada
-   legitima y un fallo se ven igual: nada.
+   legitima y un fallo se ven igual: nada. **CERRADA el 2026-10-03** (merge
+   `2c56621`, DEUDAS §15.5; el «(§15.2)» con que nacio apuntaba mal): las cinco
+   paradas declaran su motivo en el libro; `completo` y `paso-fallido` callan a
+   proposito. Telemetria, no ADR: el lazo para igual. No esta en el binario
+   recien instalado y **no urge**: solo se ve en un drenaje con el lazo parando
+   sin disparar; entra en el proximo rebuild.
 2. **La mitad abierta del PARCIAL** (§15.4): la lista `files` del empaquetado
    sigue siendo negra, `ADR-058`/`RELEASE.md` sin actualizar, y **el asar sin
    verificar** — porque el gate corre `electron-vite build`, no `build:linux`.

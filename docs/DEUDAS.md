@@ -2203,6 +2203,23 @@ unica de las tres que no es una decision: es una medicion que falta.
 cuanto decidas la 1 (la documentacion describe el diseno, no el parche); la 3 es
 una medicion que pide el binario y va con el rebuild.
 
+### 15.5 ~~El recibo del lazo: la parada sin vuelta no dejaba rastro~~ — CERRADA 2026-10-03
+
+Nacio como deuda nº1 del dia del drenaje (ROADMAP), citando «§15.2» por error —
+esa seccion es PARCIAL→COMPLETO en vivo—; se cierra aqui, pegada al arco del
+lazo que la pario. **El hueco:** `conLazo` ya calculaba `parada` y
+`cerrarLaCadena` la ignoraba: «convergio tras 1» y «sin-sesion tras 0» eran el
+mismo silencio. **El cierre** (merge `2c56621`): las CINCO paradas del lazo
+(sin-sesion, sin-huella, convergio, tope-de-vueltas, tope-de-dolares) asientan
+un DECISION en fase OMEGA, actor motor, evidencia `{parada, vueltas}` — el
+patron de `MOTIVO_HUELLA`, aditivo y sin migracion. `completo` NO deja recibo
+(no evaluo nada; gen=1 ya se lee) ni `paso-fallido` (el paso que corto ya
+asento el suyo: un segundo asiento mentiria el actor). Es la leccion de ADR-109
+aplicada al propio lazo —lo no hecho se declara donde se lee— y es telemetria,
+**no ADR**: el lazo para exactamente igual. 4 mutantes muertos, gate completo
+en verde. **No esta en el binario** instalado (73b30af0, anterior al merge) y
+no urge: solo se ve en un drenaje con el lazo parando sin disparar.
+
 ## 16. El guardian marco en rojo el codigo mas seguro (2026-10-02)
 
 ### 16.1 ~~Main quedo ROJO por un falso positivo, y caduco una propuesta inocente~~
