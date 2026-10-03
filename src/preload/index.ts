@@ -7,6 +7,7 @@ import { systemApi } from './system-impl'
 import { buildApi } from './build-impl'
 import { projectApis } from './project-apis'
 import { repairApi } from './repair-impl'
+import { tandaApi } from './tanda-impl'
 
 /**
  * Superficie minima expuesta al renderer: solo estas operaciones, nada de
@@ -29,6 +30,7 @@ const api: FortressApi = {
     run: () => ipcRenderer.invoke(IPC.healthRun)
   },
   repair: repairApi,
+  tanda: tandaApi,
   docs: {
     list: (projectId) => ipcRenderer.invoke(IPC.docsList, projectId),
     read: (projectId, name) => ipcRenderer.invoke(IPC.docsRead, projectId, name)

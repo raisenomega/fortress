@@ -17,6 +17,10 @@ export const REPAIR_CHANNELS = {
   repairDrainStop: 'repair:drain:stop',
   /** Cuantos hallazgos vivos no puede elegir la cola por si sola. */
   repairCerco: 'repair:cerco',
+  /** La guia ESTATICA del orden de firma: barata, sin correr nada. */
+  repairGuiaDeFirma: 'repair:guia-de-firma',
+  /** La sonda del conjunto + biseccion si sale roja. Nada caduca: no hay firma. */
+  repairMedirTanda: 'repair:medir-tanda',
   /** Empuje al renderer: el expediente de ese proyecto cambio. Solo el id. */
   repairChanged: 'repair:changed'
 } as const

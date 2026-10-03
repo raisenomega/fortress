@@ -6,6 +6,7 @@ import type { ConnectorsApi } from './connectors-api'
 import type { DocsApi, NewProjectApi } from './newproject-api'
 import type { OmegaApi } from './omega-api'
 import type { RepairApi } from './repair-api'
+import type { TandaApi } from './tanda-api'
 import type { SelfImprovementApi } from './self-improvement-api'
 import type {
   AccountApi,
@@ -34,6 +35,7 @@ export interface FortressApi {
   readonly build: BuildApi
   readonly scan: ScanApi
   readonly repair: RepairApi
+  readonly tanda: TandaApi
   readonly quality: QualityApi
   readonly activity: ActivityApi
   readonly telemetry: TelemetryApi
