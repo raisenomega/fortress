@@ -94,6 +94,13 @@ win:
     - portable
   executableName: fortress
   icon: build/icon.ico
+  # Firma Authenticode: sin ella SmartScreen frena el instalador y nadie puede
+  # comprobar que no se altero tras el build. Las credenciales entran por
+  # entorno al compilar, nunca en el repo (R1): WIN_CSC_LINK y
+  # WIN_CSC_KEY_PASSWORD (signtool), o el bloque azureSignOptions para Azure
+  # Trusted Signing. Sin ellas el build falla en vez de salir sin firmar,
+  # igual que ya hace el de mac.
+  forceCodeSigning: true
 nsis:
   artifactName: FORTRESS-${version}-setup.${ext}
   shortcutName: FORTRESS
