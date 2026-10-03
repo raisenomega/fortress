@@ -1105,7 +1105,11 @@ Nada se publico en rojo: `origin` espero en verde hasta que el arbol lo estuvo.
    el Electron sigue fuera a propósito (pieza B / §3.5).
 4. **La pagina de firma deberia GUIAR el orden** (§16.4), con sus cuatro
    preguntas a medir. Es comodidad, no seguridad: `arbol-integrado-rojo` ya
-   protege.
+   protege. **CERRADA el 2026-10-03** (merge `399fc7a`, DEUDAS §16.4): guia
+   estatica + «medir la tanda» con biseccion que nombra culpables + reset del
+   worktree solo tras rojo (el verde conserva la sonda: lo medido ES lo que
+   entra). Caza lo de §16.1 sin que nada caduque. No ADR: las politicas
+   firmadas quedaron intactas. Falta en el binario; va en el proximo rebuild.
 
 **Tres propuestas se regeneran solas** en el proximo drenaje, sin gesto de nadie:
 `d5bbef5b` (caduco inocente por el rojo), `b347d1e4` y `03ed20b0` (retiradas por

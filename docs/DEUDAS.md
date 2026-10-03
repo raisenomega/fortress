@@ -2287,7 +2287,36 @@ Caduco inocente. Su hallazgo (la firma de codigo del build de Windows) **vuelve 
 la baraja** —CADUCADO no bloquea— y el proximo drenaje la rehara contra el main
 nuevo, que ya lleva los fuses de `b83270c2`. No hace falta ningun gesto.
 
-### 16.4 MEJORA PENDIENTE — la pagina de firma deberia GUIAR el orden
+### 16.4 ~~La pagina de firma deberia GUIAR el orden~~ — CERRADA 2026-10-03
+
+**CERRADA con la tercera via acotada** (merge `399fc7a`; medida antes de
+construir, decidida por el operador): **guia estatica** en la pagina
+(dependencias al final con su porque, grupos transitivos por fichero comun,
+adyacentes) + **boton «medir la tanda»** (UNA sonda del conjunto, ~5 min; en
+rojo, biseccion a dos lados que NOMBRA a los culpables en ~2·log N medidas,
+no en N²/2 pares) + **el reset del worktree tras medida ROJA**. Caza la
+interaccion sin fichero compartido —la de §16.1: replicada en `tanda-fixture`
+con juez y juzgado, verdes solos y rojos juntos, culpables nombrados— y el
+aviso llega ANTES de firmar: **nada caduca**, porque no hay firma.
+**No es ADR y se verifico en el fuente:** `SIN_MEDIR` sigue donde estaba, la
+firma individual sigue caducando en rojo, la guia es un paso previo opcional.
+**El matiz que la historia impuso:** el VERDE de la medida individual conserva
+la sonda a proposito — el merge de la firma `13840d4` lleva la medida
+`3f98426` como segundo padre: lo medido ES lo que entra; el reset es SOLO del
+rojo. Las cuatro preguntas de abajo quedaron respondidas asi: estatica Y
+conjunto (no pares), guia viva (se recalcula al cargar), solo el Motor (el
+Terminal no acumula tanda), y en rojo la guia NOMBRA en vez de adivinar.
+**No esta en el binario** (anterior al merge); entra en el proximo rebuild y
+se estrena en el proximo drenaje con cola de firma.
+
+Lo que sigue es el expediente con el que nacio, conservado como contexto:
+
+**Propuesta del operador el 2026-10-02.** Hoy la cola de firma es
+una lista plana y **el orden seguro lo razona el operador a mano**. Eso fallo:
+`dde8e100` y `ccb969e6` interactuaban **sin compartir un solo fichero** —uno
+cambiaba el juez, el otro el juzgado— y el guion que se le dio trataba
+«no comparten fichero» como «no interactuan» (§16.2). La pagina deberia
+**decir cual firmar primero** (1, 2, 3…) o **avisar antes de firmar** si una
 
 **Propuesta del operador el 2026-10-02, sin atender.** Hoy la cola de firma es
 una lista plana y **el orden seguro lo razona el operador a mano**. Eso fallo:
