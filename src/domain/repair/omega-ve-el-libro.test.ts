@@ -43,7 +43,7 @@ describe('OMEGA ve lo que el motor supo, en su prompt', () => {
     // no tiene que adivinar si lo omitio el motor: la correa lo dice.
     const texto = prompt(loQueElMotorSupo(LIBRO))
 
-    expect(texto).toContain('CORREA aplicada: api/x.ts')
+    expect(texto).toContain('CORREA aplicada (lo que el fix podia tocar; el diff dice lo tocado): api/x.ts')
     expect(texto).not.toContain('account-handlers.ts')
   })
 

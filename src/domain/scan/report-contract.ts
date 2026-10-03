@@ -61,5 +61,8 @@ ${REGLA_DEL_SIMBOLO}
 ${NOTAS_COMO_CLAVE}
 
 \`tipo\` y \`simbolo\` son lo que permite reconocer un mismo defecto entre
-escaneos: el titulo se redacta distinto cada vez, esos dos no. Dos defectos
-distintos en el mismo archivo deben llevar simbolos distintos.`
+escaneos: el titulo se redacta distinto cada vez, esos dos no. El simbolo es
+el bloque REAL donde vive el defecto (la funcion, el componente, la clave):
+si varios defectos de tipo distinto viven en el mismo bloque, repite el
+simbolo — no inventes sub-bloques; la identidad ya los separa por tipo y
+por linea.`
