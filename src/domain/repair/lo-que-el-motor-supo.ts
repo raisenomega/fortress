@@ -30,7 +30,11 @@ function laCorrea(eventos: readonly ProposalEvent[]): string {
   const grupos = lista(datos.allows)
   if (ficheros.length === 0 && grupos.length === 0) return SIN_CORREA
   const conGrupos = grupos.length === 0 ? '' : ` | grupos declarados: ${grupos.join(', ')}`
-  return `CORREA aplicada: ${ficheros.join(', ') || '(ninguno por extension)'}${conGrupos}`
+  // PERMITIDOS, no tocados: un extra del hint puede no estar ni en el arbol, y
+  // etiquetarlo «aplicada: X» hizo leer al revisor que el motor declaraba
+  // ficheros que no toco (backlog 9145d20e). La lista dice lo que PODIA pasar;
+  // lo que paso lo dice el diff.
+  return `CORREA aplicada (lo que el fix podia tocar; el diff dice lo tocado): ${ficheros.join(', ') || '(ninguno por extension)'}${conGrupos}` // prettier-ignore
 }
 
 /**

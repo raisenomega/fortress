@@ -25,6 +25,16 @@ describe('el revisor LEE del libro lo que el motor supo', () => {
     expect(texto).toContain('src/nuevo/**')
   })
 
+  it('la correa se presenta como PERMITIDOS, no como tocados (backlog 9145d20e)', () => {
+    // «CORREA aplicada: X» se leyo como «el motor toco X» y X ni estaba en el
+    // diff: era un extra del hint, permitido pero jamas tocado. La etiqueta
+    // tiene que decir lo que la lista ES, o el revisor acusa al motor de
+    // declarar ficheros que no toco.
+    const texto = loQueElMotorSupo([CORREA]).join('\n')
+    expect(texto).toContain('podia tocar')
+    expect(texto).toContain('el diff dice lo tocado')
+  })
+
   it('el resultado del gate, que ya estaba en el libro sin escribir nada nuevo', () => {
     const texto = loQueElMotorSupo([GATE]).join('\n')
 
