@@ -1,6 +1,7 @@
 import type { ModoDeVuelta } from '@domain/repair/modo-vuelta'
 import { ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { asentarParadaDelLazo } from './asentar-parada-del-lazo'
 import type { DesenlaceDelLazo } from './desenlace-del-lazo'
 import { integrarSiProcede } from './integrar-si-procede'
 import type { JudgeDeps } from './judge-and-integrate'
@@ -22,6 +23,9 @@ export async function cerrarLaCadena(
   modo: ModoDeVuelta,
   heredado: readonly string[] | undefined
 ): Promise<Result<ChainOutcome>> {
+  // El recibo ANTES de integrar: la parada ya esta decidida y el libro la
+  // cuenta aunque el merge de despues falle por lo suyo (DEUDAS §15.2).
+  await asentarParadaDelLazo(ctx, proposalId, lazo)
   const final = lazo.juicio
   const aprobado = final.omega.ok && final.omega.verdict.veredicto_global === 'APROBADO'
   const merge = modo === 'completo' && aprobado ? await integrarSiProcede(ctx, proposalId, deps) : final.merge // prettier-ignore
