@@ -12,6 +12,9 @@ export function versionDelBinario(): string | null {
  * otra version, una vieja o una plantada delante en el PATH no se dan por buenas.
  * Si falta o no coincide, lo instala pineado (npm i -g) y vuelve a medir: si lo que
  * responde sigue sin ser la fijada, falla con el motivo en vez de seguir a ciegas.
+ * El install va con --ignore-scripts (ADR-111): ningun postinstall del paquete ni de
+ * sus dependencias corre con el entorno del operador; si el paquete dependiera de
+ * uno, la re-medicion lo convierte en fallo con motivo, no en binario mudo.
  * Es lo que hace que el spawn headless conecte: el binario, no npx (que falla el
  * handshake). En una maquina que ya tiene la fijada, es un no-op.
  */
@@ -26,10 +29,11 @@ export function ensureGraphBinary(log: (line: string) => void): void {
       ? 'Instalando codebase-memory-mcp (una vez)...\n'
       : `codebase-memory-mcp ${previa} no es la fijada ${GRAPH_MCP_VERSION}: reinstalando...\n`
   )
-  execFileSync('npm', ['install', '-g', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`], {
-    stdio: ['ignore', 'ignore', 'pipe'],
-    timeout: 180_000
-  })
+  execFileSync(
+    'npm',
+    ['install', '-g', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`, '--ignore-scripts'],
+    { stdio: ['ignore', 'ignore', 'pipe'], timeout: 180_000 }
+  )
   const instalada = versionDelBinario()
   if (instalada !== GRAPH_MCP_VERSION) {
     throw new Error(

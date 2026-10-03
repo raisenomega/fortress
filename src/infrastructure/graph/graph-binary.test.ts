@@ -30,7 +30,15 @@ describe('ensureGraphBinary: el binario vale por su version, no por existir', ()
   it('con otra version en PATH reinstala la fijada', () => {
     versiones = ['0.0.1', GRAPH_MCP_VERSION]
     ensureGraphBinary(nada)
-    expect(instalaciones).toEqual([['install', '-g', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`]])
+    expect(instalaciones).toEqual([
+      ['install', '-g', `codebase-memory-mcp@${GRAPH_MCP_VERSION}`, '--ignore-scripts']
+    ])
+  })
+
+  it('el install lleva --ignore-scripts al FINAL, nada despues (ADR-111)', () => {
+    versiones = [null, GRAPH_MCP_VERSION]
+    ensureGraphBinary(nada)
+    expect(instalaciones[0]?.at(-1)).toBe('--ignore-scripts')
   })
 
   it('sin binario lo instala y comprueba la version que quedo', () => {
