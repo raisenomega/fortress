@@ -1096,6 +1096,8 @@ Nada se publico en rojo: `origin` espero en verde hasta que el arbol lo estuvo.
 3. **La correa de dependencias**: ~**$4,20** quemados en hallazgos cuyo arreglo
    vive en `package-lock.json` y que el Motor **no puede cerrar hoy** (el
    Electron, los CVEs del tooling), con dos intentos por causa antes de la pausa.
+   **CERRADA para los CVEs de JS el 2026-10-03: ADR-111** (ver su entrada abajo);
+   el Electron sigue fuera a propósito (pieza B / §3.5).
 4. **La pagina de firma deberia GUIAR el orden** (§16.4), con sus cuatro
    preguntas a medir. Es comodidad, no seguridad: `arbol-integrado-rojo` ya
    protege.
@@ -1133,6 +1135,41 @@ recomprar antes los cinco pausados. Con ADR-107 el **LOOP ya no existe**, así q
 el único gasto que puede arrancar solo es el **Drenaje**, y sus dos topes salen en
 **0** mientras nadie los fije: corta en la primera vuelta en vez de gastar a
 ciegas.
+
+### LA CORREA DE DEPENDENCIAS (pieza A): HECHO Y VERIFICADO (ADR-111, 2026-10-03)
+
+**FORTRESS resuelve los CVEs de JS como `claude -p`.** Tres piezas, firmadas y
+mergeadas (`d206516`): el **grupo de alcance** (`when: package.json → allow:
+package-lock.json`, declarado en el `.fortress/config` propio), **npm
+pre-aprobado en el generador SOLO** con `--package-lock-only --ignore-scripts`
+(comodín en medio, jamás `:*` — trece mediciones contra la capa de permisos,
+ADR-111 §3), y **el prompt obliga la forma** cuando el ancla es `package.json`
+y el grupo abre el lock. Seis mutantes muertos; gate completo en verde sobre
+main.
+
+**Verificado en vivo** (worktree nacido de la rama, args reales): el generador
+cerró el CVE de vitest **a la primera** con la forma segura ($0,83, 7 turnos) —
+lock regenerado (173 líneas), `checkScope ok`, vitest y `@vitest/mocker` fuera
+del audit—, y los negativos con los MISMOS args: `npm install` a secas y
+`npm run build`, **DENIED**. **El Electron (el ABI) sigue fuera**: pieza B /
+§3.5, decisión del operador sobre las cabeceras; el camino queda muerto por dos
+capas (la regla niega el install que recompila, y la red niega `nodejs.org`).
+
+**Dos datos que la medición dejó, para no redescubrirlos:** (1) `touch`/`echo`
+encadenados tras el npm seguro CORREN — pero corren **con o sin la regla
+nueva**: es auto-aprobación preexistente del CLI (medida el 2026-10-02), no
+capacidad que ADR-111 abra, y la contienen la caja y la correa post-generación.
+(2) Lección de método: un mutante se revierte con **copia** (`cp` backup),
+nunca con `git checkout` — el checkout se llevó una edición sin commitear y
+hubo que rehacerla.
+
+**Lo que queda por ver en vivo:** OMEGA y el gate del Motor **juzgando un lock
+real** — llega solo, en el primer drenaje real tras este merge.
+
+**NOTA PARA EL REBUILD:** el binario instalado NO lleva ni ADR-111, ni el lazo
+(ADR-110), ni los 21 fixes del drenaje, ni el arreglo del guardián. **El
+próximo rebuild+install en frío los lleva todos**; hasta entonces la app corre
+sin la correa de dependencias.
 
 ## Cómo se firma cada dirección
 

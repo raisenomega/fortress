@@ -2313,3 +2313,30 @@ sigue debilita ese freno; lo que anade es que no haga falta chocar con el.
 **NO se implementa ahora.** Se anota con su evidencia —el fallo de hoy, su coste
 (una propuesta caducada, ~$0,74 de su generacion) y la regla estructural de
 `tocaDependencias`— para que quien lo atienda empiece midiendo y no diseñando.
+
+## 17. La correa de dependencias (pieza A), cerrada — y los dos datos que dejo (2026-10-03)
+
+**ADR-111 HECHO Y VERIFICADO** (merge `d206516`): el grupo `when: package.json
+→ allow: package-lock.json`, npm pre-aprobado en el generador SOLO con
+`--package-lock-only --ignore-scripts`, y el prompt obligando la forma. En vivo:
+vitest cerrado a la primera, 173 lineas de lock, `checkScope ok`, negativos
+DENIED. Cierra la deuda del ROADMAP «la correa de dependencias» (~$4,20 en
+negativas honestas) **para los CVEs de JS**; el Electron (ABI) sigue fuera a
+proposito (pieza B / §3.5, decision del operador).
+
+**§17.1 — El dato del `touch` (no es deuda nueva, es un dato medido).** Con la
+regla puesta, `npm install …seguro… && touch X` ejecuta el `touch`. Medido
+aparte: `touch` y `echo` corren TAMBIEN SIN la regla —auto-aprobacion
+preexistente del CLI (2026-10-02)—, asi que ADR-111 no abre esa capacidad. La
+contienen la caja (fs/red) y la correa post-generacion. Se anota para que nadie
+lo redescubra como «agujero de ADR-111»: es anterior y esta contenido.
+
+**§17.2 — Leccion de metodo: los mutantes se revierten con COPIA.** Un
+`git checkout <fichero>` para revertir un mutante se llevo tambien la edicion
+SIN COMMITEAR que el mutante mutaba, y el mutante siguiente corrio contra el
+fichero equivocado (parecio morir, pero por la razon equivocada). Regla: backup
+con `cp` antes del `sed`, restaurar con `cp`, y git solo para lo comiteado.
+
+**§17.3 — Pendiente de ver en vivo:** OMEGA y el gate del Motor juzgando un
+lock regenerado real. No se simulo a proposito; llega solo en el primer drenaje
+tras este merge, y ahi se mide (¿que dice OMEGA de 173 lineas de lock?).
