@@ -6,12 +6,15 @@ import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
 import { claudeModeArg, type ClaudePermissionMode } from '@domain/settings/permission-mode'
 import { buildAllowedTools, buildDisallowedTools } from './build-allowed-tools'
+import type { ConPrompt } from './prompt-por-stdin'
 
 export const CLAUDE_BIN = 'claude'
 
 /**
  * Argumentos del CLI (verificado en `claude --help` 2.1.220): el flag headless
  * es `-p`, no existe `--project` (el proyecto se fija con el cwd del proceso).
+ * ADR-112: `-p` va SIN valor y el prompt viaja APARTE, por stdin — los limites
+ * de argv del SO (Windows 32 KB TOTALES) no alcanzan a tocarlo.
  */
 export function buildArgs(
   prompt: string,
@@ -26,10 +29,10 @@ export function buildArgs(
   scripts: readonly string[] = [],
   /** El store del grafo de ESTE turno (ADR-095, enmienda); null = la cache real, solo FORTRESS. */
   grafoDir: string | null = null
-): string[] {
+): ConPrompt {
   // stream-json solo emite el flujo completo de eventos con --verbose.
   // prettier-ignore
-  const args = ['-p', prompt, '--output-format', 'stream-json', '--verbose', '--permission-mode', claudeModeArg(permissionMode)]
+  const args = ['-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', claudeModeArg(permissionMode)]
 
   // Red de seguridad: sin tope, un agente sobre un repo enorme sigue leyendo
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
@@ -51,7 +54,7 @@ export function buildArgs(
   // el flag estricto cierra el conjunto: el hijo monta esto y nada del entorno.
   args.push(MCP_CONFIG_FLAG, withGraph(mcpConfig, grafoDir), '--strict-mcp-config')
 
-  return args
+  return { args, prompt }
 }
 
 /** Comprueba que el CLI responde. El PATH ya viene completado por augmentPath. */

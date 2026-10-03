@@ -8,10 +8,10 @@ const entrada = (args: readonly string[]): { env?: unknown } =>
 
 describe('las acciones de FORTRESS sobre el grafo NO se aislan: escriben y leen la cache real (enmienda, casilla 3)', () => {
   it('instalar/indexar lanza el grafo sin CBM_CACHE_DIR: el indice de verdad va a la cache real', () => {
-    expect(entrada(argsDeIndexar()).env).toBeUndefined()
+    expect(entrada(argsDeIndexar().args).env).toBeUndefined()
   })
 
   it('verificar la conexion tampoco lleva CBM_CACHE_DIR', () => {
-    expect(entrada(verifyArgs()).env).toBeUndefined()
+    expect(entrada(verifyArgs().args).env).toBeUndefined()
   })
 })

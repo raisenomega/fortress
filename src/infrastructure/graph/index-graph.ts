@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import { GRAPH_INDEX_TOOL, withGraph } from '@domain/connectors/graph-mcp'
 import { buildEnv } from '../claude-code/build-env'
+import { escribirPrompt, type ConPrompt } from '../claude-code/prompt-por-stdin'
 import { conSandbox } from '../sandbox/con-sandbox'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
@@ -14,8 +15,8 @@ const PROMPT =
  * dispara desde la accion de instalar, con un prompt acotado.
  */
 /** Sin directorio de turno a proposito: este es el que ESCRIBE el indice de verdad, en la cache real. */
-export function argsDeIndexar(): string[] {
-  return ['-p', PROMPT, '--permission-mode', 'default', '--allowedTools', GRAPH_INDEX_TOOL, '--mcp-config', withGraph(null)] // prettier-ignore
+export function argsDeIndexar(): ConPrompt {
+  return { args: ['-p', '--permission-mode', 'default', '--allowedTools', GRAPH_INDEX_TOOL, '--mcp-config', withGraph(null)], prompt: PROMPT } // prettier-ignore
 }
 
 export function indexGraph(
@@ -23,16 +24,17 @@ export function indexGraph(
   apiKey: string | null,
   onLog: (line: string) => void
 ): Promise<void> {
-  const args = argsDeIndexar()
+  const lanzamiento = argsDeIndexar()
   // La caja del CLI (ADR-092, clase A). Sin caja no se indexa: se resuelve sin
   // lanzar nada, y el registro lo cuenta como no hecho.
-  const conCaja = conSandbox(args, projectPath)
+  const conCaja = conSandbox(lanzamiento.args, projectPath)
   if (!conCaja.ok) {
     onLog(conCaja.error)
     return Promise.resolve()
   }
   return new Promise((resolve) => {
     const child = spawn(CLAUDE_BIN, [...conCaja.value], { cwd: projectPath, env: buildEnv(apiKey) })
+    escribirPrompt(child.stdin, lanzamiento.prompt) // ADR-112
     const timer = setTimeout(() => {
       child.kill()
       resolve()

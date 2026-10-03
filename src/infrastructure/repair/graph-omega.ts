@@ -1,6 +1,7 @@
 import { argsDeLectura } from './generator-args'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
+import { escribirPrompt } from '../claude-code/prompt-por-stdin'
 import { trackChild } from '../claude-code/child-registry'
 import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
 import { senalAl } from '../claude-code/kill-signal'
@@ -33,7 +34,8 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
         // del grafo que el mismo levanta— ven las llaves de la sesion viva. Sin key
         // porque hoy se autentica con lo que hereda: quien paga no cambia aqui.
         const env = buildEnv(null)
-        const child = spawn(claudeBin, [...args.value], { cwd: worktreePath, detached: true, env })
+        const child = spawn(claudeBin, [...args.value.args], { cwd: worktreePath, detached: true, env })
+        escribirPrompt(child.stdin, args.value.prompt) // ADR-112
         // Detached: el registro tiene que matarlo por GRUPO o solo cae el lider.
         trackChild(child, projectId, 'grupo')
         let out = ''

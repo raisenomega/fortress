@@ -1,8 +1,9 @@
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { CodeAgentRequest } from '@domain/chat/code-agent'
 import { mergeMcpConfig } from '@domain/connectors/mcp-config'
-import type { Result } from '@domain/shared/result'
+import { ok, type Result } from '@domain/shared/result'
 import { conSandbox } from '../sandbox/con-sandbox'
+import type { ConPrompt } from './prompt-por-stdin'
 import { agentsForProject } from './agents-for-project'
 import { buildArgs } from './claude-cli'
 import { readProjectMcpServers } from './project-mcp'
@@ -21,12 +22,12 @@ export function argsDelTurno(
   maxUsd: number,
   /** El directorio del grafo de este turno: el servidor solo alcanza ese store. */
   grafoDir: string | null
-): Result<readonly string[]> {
+): Result<ConPrompt> {
   const agents = agentsForProject(request.projectPath, customAgents)
   // El grafo real (codebase-memory con su graph.db) y demas MCP viven en el
   // .mcp.json del proyecto; solo se pasan si es de confianza (ejecutan comandos).
   const projectMcp = request.trusted ? readProjectMcpServers(request.projectPath) : null
-  const args = buildArgs(
+  const lanzamiento = buildArgs(
     request.prompt,
     request.permissionMode,
     agents,
@@ -37,6 +38,8 @@ export function argsDelTurno(
     readProjectScripts(request.projectPath),
     grafoDir
   )
+  const args = [...lanzamiento.args]
   if (request.reanudarSesion) args.push('--resume', request.reanudarSesion, '--fork-session')
-  return conSandbox(args, request.projectPath)
+  const caja = conSandbox(args, request.projectPath)
+  return caja.ok ? ok({ args: caja.value, prompt: lanzamiento.prompt }) : caja
 }
