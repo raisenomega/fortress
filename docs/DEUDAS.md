@@ -1919,6 +1919,20 @@ el camino—. Pero **nadie verifico esos ocho entonces**, y la incognita se cier
 barato: correr los tests de hoy contra lo que cada uno toco. A la firma del
 operador.
 
+### 11.9 ~~La pieza B del Electron (el ABI, §3.5 de ADR-108)~~ — CERRADA 2026-10-03 por enmienda firmada
+
+**Procedimiento, no codigo** (ADR-108 §6): poblar los directorios PADRE de la
+cache del host (cabeceras + zip + SHASUMS de la version destino) fuera de la
+caja — los montajes de ADR-108 ya sirven el major porque montan padres, nunca
+`<padre>/<version>`. La version se sabe por adelantado (`npm audit
+fixAvailable`) o reactiva (el ENOENT la nombra). Con ADR-111 el generador YA
+produce el bump (lock-only); el muro era solo del gate, y el gesto lo quita.
+Descartados con razon medida el devdir escribible (las sondas de calidad
+corren clase B sobre repos de CLIENTE: envenenaria la cache real) y la red
+ancha (github.com en la caja). **Balance: FORTRESS tan capaz como `claude -p`
+en cualquier severidad** — JS por ADR-111, ABI por ADR-111 + el gesto. De los
+15 HIGH del dia: 9 JS puro, 6 ABI de UNA raiz (electron→44.5.1).
+
 ## 12. La mitad que el primer fix del Motor dejo abierta (2026-10-01)
 
 ### 12.1 P2 — `ensureGraphBinary` verifica la VERSION, no la INTEGRIDAD

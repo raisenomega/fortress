@@ -1180,6 +1180,28 @@ real** — llega solo, en el primer drenaje real tras este merge.
 próximo rebuild+install en frío los lleva todos**; hasta entonces la app corre
 sin la correa de dependencias.
 
+### LA PIEZA B DEL ELECTRON Y LA TANDA DEL BACKLOG (2026-10-03)
+
+**La pieza B, HECHA por enmienda firmada** (ADR-108 §6, DEUDAS §11.9):
+procedimiento, no código. Poblar los padres de la caché del host con la
+versión destino (cabeceras + zip + SHASUMS, receta en el ADR) hace que los
+montajes existentes sirvan el major; ADR-111 ya generaba el bump (lock-only) y
+el muro era solo del gate. Descartados con dato el devdir escribible (las
+sondas de calidad corren clase B sobre CLIENTES) y la red ancha (github.com).
+**Balance: FORTRESS tan capaz como `claude -p` en cualquier severidad** — los
+CVEs de JS por la correa, el ABI por la correa + el gesto de dos comandos.
+
+**La tanda del backlog, COMPLETA y mergeada** (`48ec2da`): 20 observaciones —
+4 arreglos (la correa se presenta como PERMITIDOS; el alcance dice carpeta
+ENTERA; el símbolo es el bloque REAL, fuera sub-bloques; el aviso del `(?i)`
+que falla en silencio, medido contra el servidor), 3 ya curadas con fecha
+probada (e90ed58, §6.12), 13 descartes de doctrina. `atendidos.json` escrito;
+el import es el botón del panel (idempotente, el fichero no se consume).
+
+**NOTA PARA EL REBUILD:** el binario instalado (`73b30af0`) acumula ya SIN
+llevar: el recibo del lazo, la guía de firma y esta tanda del backlog. El
+próximo rebuild+install en frío los lleva todos.
+
 ## Cómo se firma cada dirección
 
 Ninguna de estas áreas se ejecuta por figurar aquí. Cada una se firma
