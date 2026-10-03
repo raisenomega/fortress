@@ -4,6 +4,7 @@ import { useRepairStore } from '../../stores/repair-store'
 import { useRepairFeed } from '../../hooks/useRepairFeed'
 import { usePaginado } from '../../hooks/usePaginado'
 import { colaDeFirma } from './cola-de-firma'
+import { GuiaDeFirma } from './GuiaDeFirma'
 import { Paginador } from './Paginador'
 import { RepairProposalRow } from './RepairProposalRow'
 
@@ -50,6 +51,7 @@ export function FirmaView(): React.JSX.Element {
           <p className="text-primary text-xs">
             {cola.length} {cola.length === 1 ? 'propuesta espera' : 'propuestas esperan'} firma
           </p>
+          {projectId !== null && <GuiaDeFirma projectId={projectId} />}
           <div className="space-y-1">
             {visibles.map((item) => (
               <RepairProposalRow

@@ -11,9 +11,11 @@ import { registerDrainHandlers } from './repair-drain-handler'
 import { registerFindingVerifyHandler } from './finding-verify-handler'
 import { registerFindingVerifyAllHandler } from './finding-verify-all-handler'
 import { registerSignHandler } from './repair-sign-handler'
+import { registerTandaHandlers } from './repair-tanda-handler'
 
 export function registerRepairHandlers(): void {
   registerSignHandler()
+  registerTandaHandlers()
   registerDrainHandlers()
   registerFindingVerifyHandler()
   registerFindingVerifyAllHandler()

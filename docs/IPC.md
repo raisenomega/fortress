@@ -148,6 +148,8 @@ Los canales del flujo [SELF-REPAIR](FLOWS/SELF-REPAIR.md).
 | `repair:drain` | R/R | projectId → DrenajeResultado (recorre los elegibles hasta OMEGA) | guardRun |
 | `repair:drain:stop` | R/R | projectId → number (cancela el drenaje en curso) | — |
 | `repair:cerco` | R/R | projectId → ResumenCerco (cuántos elegibles y por qué) | — |
+| `repair:guia-de-firma` | R/R | projectId → { n, guia } (orden sugerido, grupos, dependencias al final) | — |
+| `repair:medir-tanda` | R/R | projectId → Result<ResultadoDeTanda> (sonda del conjunto; bisección en rojo) | guardMerge; solo mide: no firma, no integra, no caduca |
 | `repair:changed` | PUSH | projectId (el expediente de ese proyecto se movió) | — |
 
 #### Notas de estado
