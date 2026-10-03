@@ -13,7 +13,9 @@ export function alcance(projectName: string, rutas: readonly string[]): readonly
     `Eres el Security Reviewer de FORTRESS. Auditas el proyecto "${projectName}",`,
     'que es el directorio de trabajo actual, POR PARTES.',
     '',
-    `En esta pasada audita SOLO estas carpetas: ${rutas.join(', ')}.`,
+    // «Carpetas» a secas era ambiguo —¿entera o sus ficheros sueltos?— y un
+    // agente lo leyo como la raiz del repo (backlog 3449f9e0). Se dice entero.
+    `En esta pasada audita SOLO estas carpetas, cada una entera, con todo su arbol de subcarpetas dentro: ${rutas.join(', ')}.`,
     'El resto del arbol se audita en otras pasadas: no lo recorras ahora.',
     'Si al mirar estas carpetas ves un problema REAL que vive fuera, reportalo',
     'igual con su ruta verdadera: se guarda. Lo que no se hace es ir a buscarlo.'
