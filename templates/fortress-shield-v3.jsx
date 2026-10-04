@@ -387,8 +387,8 @@ export default function FortressV3() {
             </div>
             {PHASES.map((ph,i) => {
               const d = results[ph.id];
-              if (!d) return <div key={ph.id} style={{background:"#0f172a",border:"1px solid #0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,opacity:0.3,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:18}}>{ph.icon}</span><span style={{fontSize:12,color:"#334155"}}>{ph.name}</span><span style={{marginLeft:"auto",fontSize:10,color:"#1e293b"}}>pendiente</span>
+              if (!d) return <div key={ph.id} style={{background:"#0f172a",border:"1px solid #0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:18,opacity:0.3}}>{ph.icon}</span><span style={{fontSize:12,color:"#94a3b8"}}>{ph.name}</span><span style={{marginLeft:"auto",fontSize:10,color:"#94a3b8"}}>pendiente</span>
               </div>;
               return <PhaseBlock key={ph.id} phase={ph} data={d}/>;
             })}
