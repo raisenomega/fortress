@@ -212,12 +212,41 @@ repo_verdict() {
     fi
 }
 
+# Veredicto del ref que se empuja. El scan audita el working tree, asi
+# que el informe solo certifica el HEAD escaneado; el push publica la
+# punta de refs/heads/<rama registrada>. Si no son el mismo commit (otra
+# rama activa, HEAD desligado, rama borrada), saldria un commit que
+# nadie escaneo: bloquea. Solo para la ruta de push; status y report
+# siguen usando repo_verdict.
+push_verdict() {
+    local name="$1" path="$2" branch="$3"
+    local verdict=$(repo_verdict "$name" "$path")
+    if [ "$verdict" != "OK" ]; then
+        echo "$verdict"; return
+    fi
+
+    local tip=$(git -C "$path" rev-parse --verify --quiet "refs/heads/$branch" 2>/dev/null || true)
+    if [ -z "$tip" ]; then
+        echo "NO_BRANCH"; return
+    fi
+
+    local current=$(git -C "$path" branch --show-current 2>/dev/null || true)
+    local scanned=$(cat "$(scanned_head "$name")" 2>/dev/null || true)
+    if [ "$current" != "$branch" ] || [ "$tip" != "$scanned" ]; then
+        echo "BRANCH_MISMATCH"; return
+    fi
+
+    echo "OK"
+}
+
 verdict_reason() {
     case "$1" in
         NO_REPORT)   echo "sin informe de escaneo en $REPORTS_DIR (ejecutar scan)";;
         STALE)       echo "el informe no corresponde al HEAD actual (re-escanear)";;
         UNPARSEABLE) echo "el informe no trae una linea '- CRITICAL: N' legible";;
         CRITICAL:*)  echo "tiene ${1#CRITICAL:} hallazgo(s) CRITICAL sin resolver";;
+        NO_BRANCH)   echo "la rama registrada ya no existe en el repo (re-registrar o restaurarla)";;
+        BRANCH_MISMATCH) echo "la punta de la rama registrada no es el commit escaneado (checkout en otra rama o HEAD desligado; re-escanear sobre esa rama)";;
     esac
 }
 
@@ -268,12 +297,26 @@ cmd_add() {
 
 cmd_trust() {
     local name="${1:?Uso: fortress-orchestrator.sh trust nombre}"
-    local line=$(get_repos | awk -F'|' -v name="$name" '$1 == name' | head -n 1)
+    local matches=$(get_repos | awk -F'|' -v name="$name" '$1 == name')
 
-    if [ -z "$line" ]; then
+    if [ -z "$matches" ]; then
         log_error "Repo no configurado: $name"
         exit 1
     fi
+
+    # El nombre nace de basename (add) y puede repetirse entre rutas.
+    # La confianza es POR PROYECTO: con homonimos no se concede a
+    # ninguno — ambiguo = falla cerrado, igual que repo_trusted.
+    if [ "$(printf '%s\n' "$matches" | wc -l | tr -d ' ')" -gt 1 ]; then
+        log_error "Nombre ambiguo: '$name' corresponde a varios repos:"
+        printf '%s\n' "$matches" | cut -d'|' -f2 | while IFS= read -r repo_path; do
+            log_error "  - $repo_path"
+        done
+        log_info "Desambiguar renombrando el campo NOMBRE en $REPOS_FILE (la ruta es la clave unica)."
+        exit 1
+    fi
+
+    local line="$matches"
 
     if repo_trusted "$line"; then
         log_info "$name ya tiene confianza declarada."
@@ -502,8 +545,8 @@ cmd_push() {
             continue
         fi
 
-        # Veredicto fuera del repo, ligado al HEAD; sin veredicto valido bloquea
-        local verdict=$(repo_verdict "$name" "$path")
+        # Veredicto fuera del repo, atado al ref que se empuja; sin veredicto valido bloquea
+        local verdict=$(push_verdict "$name" "$path" "$branch")
 
         if [ "$verdict" != "OK" ]; then
             blocked_repos+=("$name|$path|$remote|$branch")
@@ -548,6 +591,14 @@ cmd_push() {
         local ppath=$(echo "$repo" | cut -d'|' -f2)
         local premote=$(echo "$repo" | cut -d'|' -f3)
         local pbranch=$(echo "$repo" | cut -d'|' -f4)
+
+        # Entre la clasificacion y este push mediaron la confirmacion y otros
+        # pushes: re-verificar aqui cierra esa ventana sin abortar el bucle.
+        local pverdict=$(push_verdict "$pname" "$ppath" "$pbranch")
+        if [ "$pverdict" != "OK" ]; then
+            log_error "$pname: ${RED}BLOQUEADO${NC} — $(verdict_reason "$pverdict")"
+            continue
+        fi
 
         log_info "Pushing $pname → $premote/$pbranch..."
 

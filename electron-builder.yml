@@ -5,48 +5,25 @@ directories:
   output: ../dist
   buildResources: build
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
-  - '!scripts/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!vitest.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-  # Documentacion interna: no viaja en el instalable (el asar se extrae con
-  # `npx asar extract`). Que el .gitignore la excluya del repo NO basta: son
-  # capas distintas y cada una declara la suya (ver docs/DECISIONS/ADR-058).
-  - '!internal/**'
-  # Kit universal: se distribuye a proyectos, no viaja en el binario.
-  - '!templates/**'
-  # Documentacion versionada (ADR, DEUDAS, ROADMAP...): la app no la lee.
-  - '!docs/**'
-  # Configuracion del operador y del agente: no versionada o a medias.
-  - '!.claude/**'
-  - '!.fortress/**'
-  - '!.vscode/**'
-  # Recursos de empaquetado (iconos, entitlements): los lee electron-builder
-  # desde fuera; en tiempo de ejecucion el icono sale de resources/.
-  - '!build/**'
-  - '!*.tsbuildinfo'
-  # Familias de la raiz que .gitignore deja fuera del repo (documentos y
-  # scripts del operador, secretos, bases de datos locales) y config de MCP.
-  # Sin '**/' a proposito: estas negaciones tambien filtran node_modules y
-  # minimatch sin matchBase ancla '*.ext' a la raiz. Por extension y no por
-  # nombre, para que un fichero nuevo de la misma familia no entre en silencio.
-  - '!*.md'
-  - '!*.sh'
-  - '!*.png'
-  - '!*.{pem,key,p12,keystore}'
-  - '!*.{db,db-shm,db-wal,sqlite,sqlite3}'
-  - '!DOSSIER/**'
-  - '!.mcp.json'
-  # Documentos del operador que viven en la raiz. Los que se movieron a
-  # internal/ ya no se nombran aqui: los cubre el patron de arriba.
-  - '!{CLAUDE.md,CONSTITUCION.md,COGNITION-LOG.md}'
-  - '!.ui-preview*.png'
-  - '!.render-smoke.png'
-  - '!install.sh'
+  # Lista BLANCA: se declara lo que la app necesita en runtime y todo lo demas
+  # queda fuera, incluido lo que todavia no existe. La lista negra anterior
+  # dejaba el fondo abierto: cuando todas las entradas son negaciones,
+  # electron-builder antepone '**/*' (minimatch con dot:true en fileMatcher.js)
+  # y un fichero nuevo que nadie nego entraba en silencio en el asar.
+  # Que el .gitignore excluya algo del repo NO basta: son capas distintas y
+  # cada una declara la suya (ver docs/DECISIONS/ADR-058); la verificacion
+  # sigue siendo extraer el instalable (`npx asar extract`) y mirar dentro.
+  #
+  # Salida de electron-vite (main, preload, renderer): el `main` de
+  # package.json apunta a out/main/index.js.
+  - out/**
+  # Icono y logo que la app usa en tiempo de ejecucion; asarUnpack (abajo)
+  # los deja fuera del asar como ficheros reales.
+  - resources/**
+  # electron-builder lo incluye y reescribe siempre; se nombra para que la
+  # lista se lea completa. Las dependencias de produccion de node_modules
+  # las anade electron-builder a partir de este fichero, no de esta lista.
+  - package.json
 asarUnpack:
   - resources/**
   # Modulo nativo: el .node debe quedar fuera del asar para poder cargarse
@@ -115,3 +92,15 @@ electronFuses:
   enableNodeCliInspectArguments: false
   onlyLoadAppFromAsar: true
   enableCookieEncryption: true
+  # Pareja de onlyLoadAppFromAsar: sin esta validacion, un app.asar editado
+  # tras instalar se carga sin protesta aunque el build saliera firmado
+  # (docs/SECURITY-MODEL.md, activo "integridad del propio binario").
+  # Fail-closed como la firma: ante un asar alterado la app aborta al
+  # arrancar en vez de cargarlo en silencio. Limites: Electron no la
+  # implementa en Linux (el AppImage queda fuera) y better-sqlite3 vive en
+  # asarUnpack, fuera del asar validado.
+  enableEmbeddedAsarIntegrityValidation: true
+  # Su default (true) da a file:// privilegios extra (salta CSP y lee
+  # ficheros locales); el renderer empaquetado no los necesita. Si un build
+  # frio falla al pintar, pasar npm run smoke sobre el artefacto.
+  grantFileProtocolExtraPrivileges: false

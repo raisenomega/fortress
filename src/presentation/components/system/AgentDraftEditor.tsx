@@ -17,6 +17,7 @@ export function AgentDraftEditor({ capabilityId }: AgentDraftEditorProps): React
         value={s.name}
         onChange={(e) => s.setName(e.target.value)}
         placeholder="Nombre"
+        aria-label="Nombre del agente"
         className={`mb-2 ${AREA}`}
       />
       <textarea

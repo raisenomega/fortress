@@ -1,4 +1,5 @@
 import { spawnSync } from 'child_process'
+import { fuentesDeSettings } from '../src/domain/settings/fuentes-de-settings.ts'
 import { BUDGET_FLAG, DEFAULT_PER_RUN } from '../src/domain/settings/run-budget.ts'
 import { buildEnv } from '../src/infrastructure/claude-code/build-env.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
@@ -26,8 +27,16 @@ export interface Respuesta {
  * leyendo hasta agotar la cuota, y los lotes la multiplican por N hallazgos.
  * Cero lo desactiva, si el operador lo decide asi.
  */
-export function argumentosDelAgente(prompt: string, maxUsd = DEFAULT_PER_RUN): string[] {
-  const base = ['-p', prompt, '--output-format', 'json', '--permission-mode', 'plan']
+export function argumentosDelAgente(
+  prompt: string,
+  maxUsd = DEFAULT_PER_RUN,
+  // trusted -> cargan las fuentes de proyecto; los scripts clasifican repos
+  // arbitrarios, asi que nadie lo supone: quien tenga el bit, que lo pase.
+  trusted = false
+): string[] {
+  // Sin confianza, los settings del repo auditado NO cargan (`fuentes-de-settings`).
+  // prettier-ignore
+  const base = ['-p', prompt, '--output-format', 'json', '--permission-mode', 'plan', ...fuentesDeSettings(trusted)]
   if (maxUsd > 0) base.push(BUDGET_FLAG, String(maxUsd))
   return base
 }
