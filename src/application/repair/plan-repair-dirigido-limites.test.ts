@@ -5,14 +5,14 @@ import { planRepair } from './plan-repair'
 import { propuesta } from './propuesta-del-plan'
 
 describe('lo que dirigir NO puede saltarse', () => {
-  it('un dirigido fuera del estreno (CRITICAL) no se trabaja: dirigir no lo amplia', async () => {
-    // Que el operador pregunte no acumula confianza, y eso no cambia. HIGH dejo
-    // de ser el caso porque ADR-106 lo metio en el estreno con una decision
-    // firmada; CRITICAL sigue fuera y su puerta es condicionada, asi que es el
-    // que prueba la regla ahora.
+  it('un dirigido CRITICAL SI se trabaja: la escalera se completo el 2026-10-04', async () => {
+    // La regla no cambio —dirigir pasa por isDebutEligible, el mismo guard que
+    // la cola—; cambio el terreno, con la enmienda firmada de ADR-106 (§3.3
+    // cumplida por 9f69a37c/2655c77). Ya no queda severidad fuera con la que
+    // probar el rechazo; si DEBUT se recortara, este camino volveria a negar.
     const b = bench({ findings: [APARTE({ severity: 'CRITICAL' })] })
-    expect(await planRepair(b.context, 'p1', 'f-dirigido')).toMatchObject({ ok: false, reason: 'sin-candidato' })
-    expect(b.inserted).toHaveLength(0)
+    expect(await planRepair(b.context, 'p1', 'f-dirigido')).toMatchObject({ ok: true })
+    expect(b.inserted).toHaveLength(1)
   })
 
   it('un dirigido que ya tiene propuesta viva no se paga dos veces', async () => {

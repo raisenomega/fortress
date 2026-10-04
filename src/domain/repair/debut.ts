@@ -17,21 +17,22 @@ import type { Severity } from '../shared/severity'
  *    MERGEADO sobre un hallazgo que hoy es HIGH se trabajo siendo MEDIUM y subio
  *    despues (ADR-103 re-graduo 48 filas). Este escalon se paga con VOLUMEN
  *    sobre LOW y MEDIUM, no con un HIGH superado, y el ADR lo dice asi.
- * 4. **CRITICAL: pendiente, y su puerta ya tiene condicion** (ADR-106 §3.3).
- *    Entra cuando exista una propuesta de hallazgo HIGH en estado MERGEADO con
- *    los eventos `gate verde`, `omega aprobo` e `integracion firmada por el
- *    operador`, y con `created_at` POSTERIOR al sello de ADR-106. El corte por
- *    fecha no es formalismo: ya hay un HIGH con esa firma exacta
- *    (`created_at=1787495660174`, 19-ago) bajo la puerta vieja, y sin el corte
- *    la condicion naceria cumplida. La subida sera UNA linea con la firma del
- *    operador; NO se hace sola.
+ * 4. **CRITICAL el 2026-10-04, con la condicion de ADR-106 §3.3 CUMPLIDA y
+ *    verificada asiento a asiento**: la propuesta HIGH `9f69a37c` nacio el
+ *    3-oct (POSTERIOR al sello del ADR — el corte por fecha existia porque un
+ *    HIGH del 19-ago la habria cumplido de nacimiento) y paso la cadena
+ *    entera con los tres eventos exactos que la puerta exigia: `gate verde`
+ *    (5 comandos), `omega aprobo` (resuelve SI) e `integracion firmada por el
+ *    operador` (merge `2655c77`). Subida firmada por el operador, como cada
+ *    escalon anterior; la enmienda vive en ADR-106.
  *
  * Ampliar el estreno NO relaja ninguna red: el elegido sigue pasando por las
  * tres zonas y la firma. Y **no abre el auto-merge**, que es otra puerta: un
- * HIGH cuya politica no lo liste sigue exigiendo firma para integrarse
- * (`auto-merge-evaluation.ts`). Solo cambia sobre que puede TRABAJAR el motor.
+ * HIGH o CRITICAL cuya politica no los lista sigue exigiendo firma para
+ * integrarse (`auto-merge-evaluation.ts`; la politica por defecto se queda en
+ * LOW y MEDIUM). Solo cambia sobre que puede TRABAJAR el motor.
  */
-export const DEBUT: readonly Severity[] = ['LOW', 'MEDIUM', 'HIGH']
+export const DEBUT: readonly Severity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']
 
 /** true si el hallazgo cae en el terreno que el motor tiene permitido estrenar. */
 export function isDebutEligible(c: Candidate): boolean {

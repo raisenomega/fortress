@@ -28,12 +28,13 @@ describe('el operador senala un hallazgo y el motor lo atiende', () => {
     expect(dirigirA(candidato('MEDIUM'))?.target.severity).toBe('MEDIUM')
   })
 
-  it('dirigir sigue sin ampliar el estreno: CRITICAL dirigido NO se atiende', () => {
-    // Que el operador pregunte no acumula confianza, y esa regla no cambia. Lo
-    // que cambio es el terreno: ADR-106 metio HIGH en el debut con una decision
-    // firmada, asi que ahora un HIGH dirigido SI se atiende —por el debut, no
-    // por el clic—. CRITICAL sigue fuera, y su puerta es condicionada.
+  it('dirigir pasa por el MISMO estreno que la cola, y la escalera ya esta completa', () => {
+    // El guard sigue siendo isDebutEligible: que el operador pregunte no
+    // acumula confianza. Lo que cambio es el terreno, dos veces con firma:
+    // ADR-106 metio HIGH, y la enmienda del 2026-10-04 metio CRITICAL con la
+    // condicion de §3.3 cumplida (9f69a37c/2655c77). Hoy no queda severidad
+    // fuera; si DEBUT volviera a recortarse, dirigir volveria a negarse solo.
     expect(dirigirA(candidato('HIGH'))).not.toBeNull()
-    expect(dirigirA(candidato('CRITICAL'))).toBeNull()
+    expect(dirigirA(candidato('CRITICAL'))).not.toBeNull()
   })
 })

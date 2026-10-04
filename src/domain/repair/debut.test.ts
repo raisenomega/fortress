@@ -23,18 +23,17 @@ const LOW_REESCRITURA = candidate(
 )
 
 describe('modo estreno (que severidades puede tocar el motor)', () => {
-  it('LOW, MEDIUM y HIGH entran; CRITICAL sigue fuera (ADR-106)', () => {
-    expect(isDebutEligible(candidate('LOW', 'sin guarda', 'a.ts'))).toBe(true)
-    expect(isDebutEligible(candidate('MEDIUM', 'sin guarda', 'a.ts'))).toBe(true)
-    expect(isDebutEligible(candidate('HIGH', 'sin guarda', 'a.ts'))).toBe(true)
-    expect(isDebutEligible(candidate('CRITICAL', 'sin guarda', 'a.ts'))).toBe(false)
+  it('la escalera COMPLETA entra: CRITICAL subio el 2026-10-04 con la condicion cumplida', () => {
+    for (const s of ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const) {
+      expect(isDebutEligible(candidate(s, 'sin guarda', 'a.ts'))).toBe(true)
+    }
   })
 
   it('la escala esta cubierta entera: ninguna severidad queda sin decidir', () => {
     // Si manana se agrega una severidad nueva, este test obliga a clasificarla
     // a mano en vez de dejarla colarse (o quedarse fuera) por descuido.
     const dentro = SEVERITIES.filter((s) => isDebutEligible(candidate(s, 'sin guarda', 'a.ts')))
-    expect([...dentro]).toEqual(['HIGH', 'MEDIUM', 'LOW'])
+    expect([...dentro]).toEqual(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'])
   })
 
   /**
@@ -56,9 +55,9 @@ describe('modo estreno (que severidades puede tocar el motor)', () => {
     expect(selectTarget([LOW_REESCRITURA, candidate('LOW', 'sin guarda', 'c.ts')])?.target.id).toBe('LOW:c.ts') // prettier-ignore
   })
 
-  it('CRITICAL sigue sin entrar: su puerta es CONDICIONADA (ADR-106 §3.3)', () => {
+  it('CRITICAL entra Y GANA: la condicion de su puerta se cumplio (9f69a37c/2655c77)', () => {
     const critico = candidate('CRITICAL', 'el endpoint no valida el token', 'a.ts')
-    expect(surface(critico)).toBe(1) // contenido, y aun asi fuera
-    expect(selectTarget([critico])).toBeNull()
+    expect(selectTarget([critico])?.target.id).toBe(critico.id)
+    expect(selectTarget([candidate('HIGH', 'sin guarda', 'b.ts'), critico])?.target.id).toBe(critico.id) // prettier-ignore
   })
 })

@@ -14,10 +14,10 @@ const POSTURE = at('l3', 'LOW', 'El handler postureRun no pasa por guardRun: esc
 const ALL = [HIGH, MEDIUM, FS, ACCOUNT, POSTURE]
 
 describe('selectTarget (C1 seleccion)', () => {
-  it('modo estreno (ADR-106): HIGH entra y GANA; CRITICAL sigue fuera', () => {
+  it('modo estreno: HIGH entra y gana a MEDIUM; CRITICAL (subido 2026-10-04) gana a todos', () => {
     expect(selectTarget([HIGH, MEDIUM])?.target.id).toBe(HIGH.id)
     expect(selectTarget([HIGH])?.target.id).toBe(HIGH.id)
-    expect(selectTarget([at('c', 'CRITICAL', 'sin guarda', 'a.ts', 1)])).toBeNull()
+    expect(selectTarget([at('c', 'CRITICAL', 'sin guarda', 'a.ts', 1), HIGH])?.target.id).toBe('c')
   })
 
   it('determinista: mismo input en cualquier orden -> mismo elegido', () => {
