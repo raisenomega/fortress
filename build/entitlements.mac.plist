@@ -6,7 +6,9 @@
     <true/>
     <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
     <true/>
-    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
-    <true/>
+    <!-- Sin allow-dyld-environment-variables a proposito: con esa clave dyld
+         honra DYLD_INSERT_LIBRARIES y demas DYLD_*, reabriendo la inyeccion por
+         entorno que los fuses de electron-builder.yml cierran del lado Node
+         (docs/SECURITY-MODEL.md). No reintroducirla desde plantillas. -->
   </dict>
 </plist>
