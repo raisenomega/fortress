@@ -31,15 +31,17 @@ ${report('{"findings":[{"severity":"HIGH","title":"nuevo","file":"b.ts","line":9
     const result = parseScanOutput(
       report('{"findings":[{"severity":"LOW","title":"x","line":"7"}]}')
     )
-    expect(result.ok && result.value[0]).toEqual({
-      severity: 'LOW',
-      title: 'x',
-      file: '',
-      line: null,
-      tipo: 'otro',
-      simbolo: '',
-      sinEjes: true
-    })
+    expect(result.ok && result.value).toEqual([
+      { severity: 'LOW', title: 'x', file: '', line: null, tipo: 'otro', simbolo: '', sinEjes: true } // prettier-ignore
+    ])
+  })
+
+  it('tacha los secretos que el modelo cita en el titulo y el simbolo', () => {
+    const body =
+      '{"findings":[{"severity":"HIGH","title":"Se filtro ghp_abcdefghijklmnop01 en el repo","simbolo":"Bearer x.y"}]}'
+    const result = parseScanOutput(report(body))
+    expect(result.ok && result.value[0].title).toBe('Se filtro *** en el repo')
+    expect(result.ok && result.value[0].simbolo).toBe('***')
   })
 })
 
@@ -62,10 +64,8 @@ describe('parseScanOutput ante informes rotos', () => {
   it('descarta entradas invalidas sin tumbar el informe entero', () => {
     const result = parseScanOutput(
       report(`{"findings":[
-        {"severity":"URGENTE","title":"severidad inventada"},
-        {"severity":"HIGH","title":"   "},
-        {"severity":"HIGH"},
-        "texto suelto",
+        {"severity":"URGENTE","title":"severidad inventada"}, {"severity":"HIGH","title":"   "},
+        {"severity":"HIGH"}, "texto suelto",
         {"severity":"MEDIUM","title":"valido","file":"c.py","line":2}
       ]}`)
     )
