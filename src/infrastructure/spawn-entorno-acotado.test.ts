@@ -38,7 +38,7 @@ function ficheros(dir: string): readonly string[] {
  *  dentro de una cadena de ejemplo contaria como spawn. */
 const spawnean = ficheros(RAIZ)
   .map((ruta) => ({ ruta, fuente: readFileSync(ruta, 'utf8') }))
-  .filter(({ fuente }) => fuente.includes("from 'child_process'") && tiene(fuente))
+  .filter(({ fuente }) => /from '(?:node:)?child_process'/.test(fuente) && tiene(fuente))
 
 /** Los que corren DONDE VIVE el repo auditado: su entorno es el que importa. */
 const conCwd = spawnean.filter(({ fuente }) =>

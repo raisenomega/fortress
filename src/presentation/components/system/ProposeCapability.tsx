@@ -26,6 +26,7 @@ export function ProposeCapability(): React.JSX.Element {
         <input
           value={name}
           onChange={(event) => setName(event.target.value)}
+          aria-label="Nombre de la capacidad"
           placeholder="Nombre de la capacidad"
           className={`min-w-0 flex-1 ${FIELD}`}
         />

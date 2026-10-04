@@ -1,4 +1,5 @@
 import { execFileSync } from 'child_process'
+import { gitEnv } from './git-env'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
 /**
@@ -15,6 +16,7 @@ export function isAncestor(dir: string, commit: string): boolean {
   try {
     execFileSync('git', [...SIN_HOOKS, 'merge-base', '--is-ancestor', commit, 'HEAD'], {
       cwd: dir,
+      env: gitEnv(),
       stdio: ['ignore', 'ignore', 'ignore']
     })
     return true
