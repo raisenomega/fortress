@@ -1226,6 +1226,28 @@ tan urgente como el transporte.**
 actual daría E2BIG en el juicio del CVE: **el juicio oficial de `7a3711a7`
 necesita merge + rebuild en frío.**
 
+### LA ESCALERA COMPLETA: DEBUT SUBE A CRITICAL (2026-10-04, firmado)
+
+**`DEBUT = [LOW, MEDIUM, HIGH, CRITICAL]` — el último escalón.** La condición
+de ADR-106 §3.3 se CUMPLIÓ y se verificó asiento a asiento: el HIGH
+`9f69a37c` (nacido el 3-oct, **el corte por fecha respetado** — el HIGH del
+19-ago no contó) cruzó la cadena entera: gate verde, OMEGA aprobó, firma del
+operador, merge `2655c77`. Cada escalón de la escalera, pagado con evidencia
+y firmado: LOW al nacer → MEDIUM (una ejecución auditada) → HIGH (el volumen
+del libro) → CRITICAL (un HIGH posterior al sello cruzando entero). La
+enmienda vive en ADR-106 con la firma literal.
+
+**Lo que NO cambia**: CRITICAL **jamás** auto-merge (la política sigue en
+LOW/MEDIUM: integrar un CRITICAL exige la firma del operador, siempre); solo
+FORTRESS (ADR-107: el único alcanzable es `351abcd1`; los ~50 CRITICAL de
+repos de clientes son del Terminal). **Con esto el Motor repara en CUALQUIER
+severidad, como `claude -p`** — con gate, revisor y firma que `claude -p` no
+tiene.
+
+**El orden de lo que viene**: rebuild en frío (el binario `23605d81` no
+lleva el DEBUT nuevo) → el drenaje dedicado donde el Motor ataca un CRITICAL
+por primera vez.
+
 ### LA PRIMERA SESIÓN DE FIRMA CON LA GUÍA: 8 DE 10 EN MAIN (2026-10-04)
 
 **El HIGH `9f69a37c` completó la cadena entera** —gate, OMEGA, firma, merge
