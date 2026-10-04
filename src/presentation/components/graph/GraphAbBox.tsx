@@ -26,8 +26,9 @@ export function GraphAbBox({ projectId, busy }: GraphAbBoxProps): React.JSX.Elem
       <div className="flex gap-2">
         <input
           value={question}
-          onChange={(event) => setQuestion(event.target.value)}
+          aria-label="Pregunta estructural para comparar A/B"
           placeholder="Pregunta estructural (ej: quien llama a X)"
+          onChange={(event) => setQuestion(event.target.value)}
           className={INPUT}
         />
         <button
