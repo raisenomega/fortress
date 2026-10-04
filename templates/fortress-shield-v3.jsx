@@ -15,8 +15,18 @@ const PHASES = [
 
 // Cuota de cortesia en cliente (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora).
 // Cada escaneo son 9 llamadas; el control real va en el servidor o proxy de la API.
+// El registro persiste en localStorage para sobrevivir recargas; si el storage esta
+// bloqueado (artefacto, iframe sandboxed) degrada al registro en memoria de la sesion.
 const SCANS_PER_HOUR = 3;
 const HOUR_MS = 60 * 60 * 1000;
+const SCAN_LOG_KEY = "fortress-shield-v3.scan-log";
+const readScanLog = () => {
+  try {
+    const log = JSON.parse(window.localStorage.getItem(SCAN_LOG_KEY) || "[]");
+    return Array.isArray(log) ? log.filter(t => typeof t === "number") : [];
+  } catch { return null; }
+};
+const writeScanLog = (log) => { try { window.localStorage.setItem(SCAN_LOG_KEY, JSON.stringify(log)); } catch {} };
 const PHASE_GAP_MS = 1500;
 const MAX_SEARCHES = 5;
 const MAX_RETRIES = 3;
@@ -99,7 +109,7 @@ function PhaseBlock({ phase, data }) {
         <span aria-hidden="true" style={{fontSize:20}}>{phase.icon}</span>
         <span style={{display:"block",flex:1}}>
           <span style={{display:"block",fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{phase.name}</span>
-          <span style={{display:"block",fontSize:10,color:"#475569"}}>
+          <span style={{display:"block",fontSize:10,color:"#94a3b8"}}>
             {fs.length} hallazgo{fs.length!==1?"s":""}
             {crits>0&&<span style={{color:"#ef4444",marginLeft:6}}><span aria-hidden="true">⬤ </span>{crits} crítico{crits>1?"s":""}</span>}
             {highs>0&&<span style={{color:"#f97316",marginLeft:6}}><span aria-hidden="true">⬤ </span>{highs} alto{highs>1?"s":""}</span>}
@@ -113,16 +123,23 @@ function PhaseBlock({ phase, data }) {
   );
 }
 
+// El dominio y los campos de findings/summary vienen de la web escaneada: input hostil
+// (templates/CLAUDE.md, Validacion de Input, punto 7). Escapar toda la puntuacion markdown
+// impide falsificar estructura del informe (headings, links, imagenes, fences, tablas).
+const escapeMd = (v) => String(v ?? "").replace(/[\\`*_{}[\]()#+\-.!<>|~=]/g, "\\$&");
+// Dentro de un fence ``` el backslash no escapa: se neutraliza el backtick del dato.
+const escapeFence = (v) => String(v ?? "").replace(/`/g, "'");
+
 function generateReport(domain, results, globalScore, summary) {
   const now = new Date().toISOString().split("T")[0];
   let md = `# FORTRESS SHIELD v3 — Informe de Seguridad\n`;
-  md += `## Dominio: ${domain}\n`;
+  md += `## Dominio: ${escapeMd(domain)}\n`;
   md += `### Fecha: ${now}\n`;
   md += `### Clasificación: CONFIDENCIAL · INTERNO\n\n`;
   md += `---\n\n`;
   md += `## RESUMEN EJECUTIVO\n\n`;
   md += `**Score Global: ${globalScore}/100**\n\n`;
-  md += `${summary}\n\n`;
+  md += `${escapeMd(summary)}\n\n`;
 
   const all = Object.values(results).flatMap(r => r.findings || []);
   const counts = {};
@@ -139,9 +156,9 @@ function generateReport(domain, results, globalScore, summary) {
   if (critsAndHighs.length > 0) {
     md += `## ⛔ ACCIONES PRIORITARIAS (resolver antes de producción)\n\n`;
     critsAndHighs.forEach((f, i) => {
-      md += `### ${i+1}. [${f.severity}] ${f.title}\n\n`;
-      md += `**Problema:** ${f.description}\n\n`;
-      md += `**Solución:** ${f.fix}\n\n`;
+      md += `### ${i+1}. [${f.severity}] ${escapeMd(f.title)}\n\n`;
+      md += `**Problema:** ${escapeMd(f.description)}\n\n`;
+      md += `**Solución:** ${escapeMd(f.fix)}\n\n`;
       md += `---\n\n`;
     });
   }
@@ -157,9 +174,9 @@ function generateReport(domain, results, globalScore, summary) {
     } else {
       data.findings?.forEach(f => {
         const icon = f.severity === "OK" ? "✅" : f.severity === "CRITICAL" ? "🔴" : f.severity === "HIGH" ? "🟠" : f.severity === "MEDIUM" ? "🟡" : f.severity === "LOW" ? "🟢" : "🔵";
-        md += `#### ${icon} [${f.severity}] ${f.title}\n\n`;
-        md += `${f.description}\n\n`;
-        if (f.fix) md += `> **FIX:** ${f.fix}\n\n`;
+        md += `#### ${icon} [${escapeMd(f.severity)}] ${escapeMd(f.title)}\n\n`;
+        md += `${escapeMd(f.description)}\n\n`;
+        if (f.fix) md += `> **FIX:** ${escapeMd(f.fix)}\n\n`;
       });
     }
     md += `---\n\n`;
@@ -172,7 +189,7 @@ function generateReport(domain, results, globalScore, summary) {
   ["CRITICAL","HIGH","MEDIUM","LOW"].forEach(sev => {
     const items = all.filter(f => f.severity === sev && f.fix);
     items.forEach(f => {
-      md += `- [ ] **${checkNum}.** [${sev}] ${f.title} → ${f.fix.slice(0,120)}${f.fix.length>120?"...":""}\n`;
+      md += `- [ ] **${checkNum}.** [${sev}] ${escapeMd(f.title)} → ${escapeMd(f.fix.slice(0,120))}${f.fix.length>120?"...":""}\n`;
       checkNum++;
     });
   });
@@ -185,7 +202,7 @@ function generateReport(domain, results, globalScore, summary) {
   md += `**Herramientas utilizadas:** web_fetch (inspección directa de headers/HTML), web_search (OSINT pasivo)\n\n`;
   md += `**8 capas analizadas:** Transporte/Cifrado, Cabeceras HTTP, Fingerprinting, Superficie de Ataque, Archivos Expuestos, Email/DNS, CVEs/Brechas, Infraestructura\n\n`;
   md += `---\n\n`;
-  md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${domain}\nScore: ${globalScore}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
+  md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${escapeFence(domain)}\nScore: ${globalScore}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
 
   return md;
 }
@@ -245,13 +262,16 @@ export default function FortressV3() {
     const clean = domain.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     if (!clean) return;
     const now = Date.now();
-    scanLog.current = scanLog.current.filter(t => now - t < HOUR_MS);
-    if (scanLog.current.length >= SCANS_PER_HOUR) {
-      const mins = Math.ceil((HOUR_MS - (now - scanLog.current[0])) / 60000);
+    const stored = readScanLog();
+    const log = (stored ?? scanLog.current).filter(t => now - t < HOUR_MS);
+    if (log.length >= SCANS_PER_HOUR) {
+      const mins = Math.ceil((HOUR_MS - (now - log[0])) / 60000);
       setError(`Límite de ${SCANS_PER_HOUR} escaneos por hora alcanzado. Reintenta en ${mins} min.`);
       return;
     }
-    scanLog.current.push(now);
+    log.push(now);
+    scanLog.current = log;
+    writeScanLog(log);
     setScanning(true); setResults({}); setPhaseIdx(0); setGlobalScore(null); setSummary(""); setDone(false); setError("");
 
     const all = {};
@@ -325,7 +345,7 @@ export default function FortressV3() {
             placeholder="tu-dominio.com" disabled={scanning} aria-label="Dominio a escanear"
             style={{flex:1,minWidth:200,padding:"11px 14px",fontSize:14,fontWeight:500,background:"#0f172a",border:focused&&!scanning?"1px solid #3b82f6":"1px solid #1e293b",borderRadius:10,color:"#e2e8f0",outline:"none",boxShadow:focused&&!scanning?"0 0 0 2px rgba(59,130,246,0.5)":"none",fontFamily:"monospace"}}/>
           <button onClick={scan} disabled={scanning||!domain.trim()}
-            style={{padding:"11px 22px",fontSize:13,fontWeight:700,background:scanning?"#1e293b":"linear-gradient(135deg,#ef4444,#f97316)",border:"none",borderRadius:10,color:"#fff",cursor:scanning?"not-allowed":"pointer",opacity:!domain.trim()?0.4:1,letterSpacing:0.5}}>
+            style={{padding:"11px 22px",fontSize:13,fontWeight:700,background:scanning?"#1e293b":"linear-gradient(135deg,#dc2626,#c2410c)",border:"none",borderRadius:10,color:"#fff",cursor:scanning?"not-allowed":"pointer",opacity:!domain.trim()?0.4:1,letterSpacing:0.5}}>
             {scanning?`⏳ ${completed}/${PHASES.length}`:"⚡ DEEP SCAN"}
           </button>
         </div>
@@ -345,7 +365,10 @@ export default function FortressV3() {
           </div>
         </div>
 
-        {error && <div style={{padding:12,background:"#1a0a0a",border:"1px solid #7f1d1d",borderRadius:10,marginBottom:14,fontSize:12,color:"#fca5a5"}}>⚠️ {error}</div>}
+        {/* Alert montado siempre por la misma razon que la region de progreso: si naciera con el texto, el primer anuncio se perderia */}
+        <div role="alert" style={error?{padding:12,background:"#1a0a0a",border:"1px solid #7f1d1d",borderRadius:10,marginBottom:14,fontSize:12,color:"#fca5a5"}:{}}>
+          {error ? `⚠️ ${error}` : ""}
+        </div>
 
         {/* Global Score */}
         {globalScore !== null && (
@@ -371,13 +394,13 @@ export default function FortressV3() {
         {/* Phase results */}
         {completed > 0 && (
           <div>
-            <div style={{fontSize:10,fontWeight:700,color:"#475569",letterSpacing:2,marginBottom:8}}>
+            <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:2,marginBottom:8}}>
               RESULTADOS POR CAPA · {completed}/{PHASES.length}
             </div>
             {PHASES.map((ph,i) => {
               const d = results[ph.id];
-              if (!d) return <div key={ph.id} style={{background:"#0f172a",border:"1px solid #0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,opacity:0.3,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:18}}>{ph.icon}</span><span style={{fontSize:12,color:"#334155"}}>{ph.name}</span><span style={{marginLeft:"auto",fontSize:10,color:"#1e293b"}}>pendiente</span>
+              if (!d) return <div key={ph.id} style={{background:"#0f172a",border:"1px solid #0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:18,opacity:0.3}}>{ph.icon}</span><span style={{fontSize:12,color:"#94a3b8"}}>{ph.name}</span><span style={{marginLeft:"auto",fontSize:10,color:"#94a3b8"}}>pendiente</span>
               </div>;
               return <PhaseBlock key={ph.id} phase={ph} data={d}/>;
             })}
@@ -402,7 +425,7 @@ export default function FortressV3() {
             >
               📥 Descargar Informe Completo (.md)
             </button>
-            <p style={{fontSize:10,color:"#475569",marginTop:8}}>
+            <p style={{fontSize:10,color:"#94a3b8",marginTop:8}}>
               Incluye: todos los hallazgos, fixes propuestos, checklist de remediación y metodología
             </p>
           </div>
@@ -413,7 +436,7 @@ export default function FortressV3() {
           <div style={{textAlign:"center",padding:"44px 20px"}}>
             <div style={{fontSize:52,marginBottom:12}}>🛡️</div>
             <div style={{fontSize:15,fontWeight:600,color:"#e2e8f0",marginBottom:6}}>Deep Scan + Informe Descargable</div>
-            <div style={{fontSize:11,color:"#64748b",maxWidth:420,margin:"0 auto",lineHeight:1.6}}>
+            <div style={{fontSize:11,color:"#94a3b8",maxWidth:420,margin:"0 auto",lineHeight:1.6}}>
               8 pasadas especializadas que inspeccionan tu dominio en profundidad.
               Al finalizar, descarga un informe .md completo con cada hallazgo,
               su causa, su fix, y un checklist de remediación priorizado.
@@ -423,7 +446,7 @@ export default function FortressV3() {
 
         {/* Footer */}
         {done && (
-          <div style={{marginTop:16,padding:12,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,fontSize:9,color:"#334155",textAlign:"center",lineHeight:1.6}}>
+          <div style={{marginTop:16,padding:12,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,fontSize:9,color:"#94a3b8",textAlign:"center",lineHeight:1.6}}>
             FORTRESS SHIELD v3 · EASM · OWASP WSTG + NIST CSF + PTES 1-3 · 100% pasivo y legal<br/>
             Para pentesting activo se requiere contrato de autorización firmado + profesional certificado
           </div>
