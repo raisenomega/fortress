@@ -2400,3 +2400,38 @@ con `cp` antes del `sed`, restaurar con `cp`, y git solo para lo comiteado.
 **§17.3 — Pendiente de ver en vivo:** OMEGA y el gate del Motor juzgando un
 lock regenerado real. No se simulo a proposito; llega solo en el primer drenaje
 tras este merge, y ahi se mide (¿que dice OMEGA de 173 lineas de lock?).
+
+## 18. ~~El expediente de OMEGA pesa en tokens, no solo en argv~~ — CERRADA 2026-10-03
+
+**CERRADA el mismo dia** (merge `e1da645`): `acotado-del-expediente.ts` —
+TOPE 32 KiB por fichero, aplicado en `buildOmegaInput` a los DOS lados (el
+pre del lock pesa igual que el post), con la nota legible EXACTA que el
+arnes probo: «[package-lock.json omitido por tamano (370 KB); el diff
+muestra sus cambios]». El tope deja pasar cualquier fichero de 75 lineas con
+margen y corta la clase lock/minificado/generado. 3 mutantes muertos (tope
+infinito, nota sin KB, solo-post). **Con (b) ADR-112 + (a), el ciclo de
+dependencias funciona end-to-end: la correa GENERA (ADR-111), stdin
+TRANSPORTA (ADR-112), el acotado deja JUZGAR BARATO — $8,90-sin-veredicto
+pasa a $1,04-APROBADO.** Lo que sigue es el expediente con el que nacio:
+
+**(a) EL CONTENIDO, pendiente con firma que lo nombra.** De la firma de
+ADR-112: «Aparte y despues, (a) el CONTENIDO: acotar el lock entero ×2 (~190k
+tokens de ruido) en el prompt de OMEGA con nota legible, porque OMEGA juzga
+con el diff — sigue haciendo falta con stdin, por coste, no por el limite.»
+
+El dato: `run-omega-inputs` mete pre+post ENTEROS de cada fichero del diff,
+sin tope. El lock son 370.544 B; ×2 ≈ ~190k tokens que el revisor no lee (la
+doctrina de ADR-111 §5 ya lo dice: nadie lee el lock linea a linea — lo
+contienen lock-only, ignore-scripts, la correa, OMEGA sobre el DIFF y la
+firma). Con ADR-112 el transporte aguanta, pero cada juicio de un fix de
+dependencias pagaria ese contexto. La forma barata cuando se ataque: un tope
+por bytes en los ficheros del expediente con nota legible («package-lock.json
+omitido por tamano (362 KB); el diff muestra sus cambios»), la clase
+lock/generados primero. Arco propio, con test rojo y mutante.
+
+**MEDIDO EN VIVO el mismo dia (la verificacion de ADR-112): NO es estetica,
+es dinero.** El expediente del CVE con el lock DENTRO: 765 KB por stdin,
+**$8,90 y EXIT=1 SIN veredicto**. El mismo expediente con el acotado aplicado
+en el arnes: 26 KB, 4 turnos, **$1,04 y APROBADO** (resuelve SI, diff BUENO)
+— con OMEGA citando ADR-111 y el perfil de ~173 lineas. Casi tan urgente como
+el transporte; el experimento es su test de diseno.

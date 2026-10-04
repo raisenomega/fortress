@@ -1,6 +1,6 @@
 /* TEMPLATE UNIVERSAL — Se distribuye a otros proyectos.
    NO documenta a FORTRESS mismo. Ver docs/ para la doc de FORTRESS. */
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useId } from "react";
 
 const PHASES = [
   { id: "transport", name: "Transporte y Cifrado", icon: "🔐", prompt: `Analiza transporte y cifrado de {D}. Busca en web: "{D}" SSL Labs grade, "{D}" certificate transparency crt.sh, hstspreload.org status "{D}". Visita https://{D} y http://{D} con web_fetch para leer headers reales. Verifica: HTTPS activo, redirección HTTP→HTTPS, HSTS, TLS version, certificado válido/expiración.` },
@@ -66,18 +66,19 @@ function Gauge({ score }) {
 function FindingRow({ f }) {
   const s = SEV_CONFIG[f.severity] || SEV_CONFIG.INFO;
   const [open, setOpen] = useState(false);
+  const detailId = useId();
   return (
-    <div style={{borderBottom:"1px solid #1e293b",cursor:"pointer"}} onClick={()=>setOpen(!open)}>
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px"}}>
+    <div style={{borderBottom:"1px solid #1e293b"}}>
+      <button type="button" onClick={()=>setOpen(!open)} aria-expanded={open} aria-controls={detailId} style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",cursor:"pointer",width:"100%",background:"none",border:"none",color:"inherit",font:"inherit",textAlign:"left"}}>
         <span style={{width:8,height:8,borderRadius:"50%",background:s.dot,flexShrink:0}}/>
         <span style={{fontSize:10,fontWeight:700,color:s.text,minWidth:55}}>{s.label}</span>
         <span style={{fontSize:12,color:"#e2e8f0",flex:1}}>{f.title}</span>
-        <span style={{fontSize:11,color:"#475569",transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
-      </div>
+        <span aria-hidden="true" style={{fontSize:11,color:"#475569",transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+      </button>
       {open && (
-        <div style={{padding:"0 12px 12px 30px"}}>
+        <div id={detailId} style={{padding:"0 12px 12px 30px"}}>
           <p style={{fontSize:11,color:"#94a3b8",margin:"0 0 6px",lineHeight:1.6}}>{f.description}</p>
-          {f.fix && <div style={{padding:"8px 10px",background:"#0c1a2e",border:"1px solid #1e3a5f",borderRadius:6,fontSize:11,color:"#67e8f9",lineHeight:1.6}}>💡 <strong>FIX:</strong> {f.fix}</div>}
+          {f.fix && <div style={{padding:"8px 10px",background:"#0c1a2e",border:"1px solid #1e3a5f",borderRadius:6,fontSize:11,color:"#67e8f9",lineHeight:1.6}}><span aria-hidden="true">💡 </span><strong>FIX:</strong> {f.fix}</div>}
         </div>
       )}
     </div>

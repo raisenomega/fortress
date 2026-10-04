@@ -11,38 +11,37 @@ const abre = <T>(r: { ok: true; value: T } | { ok: false; error: string }): T =>
   if (!r.ok) throw new Error(r.error)
   return r.value
 }
-const textoDe = (args: readonly string[]): string => args[args.indexOf('-p') + 1] ?? ''
-
 /**
  * EL TEST DERIVADO: el prompt dice de Bash lo que dicen los args con los que se
  * lanza, en los dos sentidos. Un texto fijo no puede pasar por aqui: el motor no
  * niega Bash (lo tiene, medido en vivo), el modo `lectura` si lo niega.
+ * ADR-112: el prompt ya no VIAJA en los args — se lee de `.prompt`—, pero sigue
+ * REFLEJANDO los flags: el contrato que este test clava no cambio de sustancia.
  */
 describe('el prompt refleja las capacidades reales del lanzamiento', () => {
   it('el analista se lanza con las flags que le dan Bash, y su prompt lo dice', () => {
-    const args = abre(argsDeLectura((c) => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g', c), '/p', '/grafo/turno')) // prettier-ignore
-    const prompt = textoDe(args)
-    expect(capacidadesDe(args).bash).toBe(true)
-    expect(prompt).toContain('Tienes Bash')
-    expect(prompt).not.toContain('NO tienes Bash')
+    const l = abre(argsDeLectura((c) => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g', c), '/p', '/grafo/turno')) // prettier-ignore
+    expect(capacidadesDe(l.args).bash).toBe(true)
+    expect(l.prompt).toContain('Tienes Bash')
+    expect(l.prompt).not.toContain('NO tienes Bash')
   })
 
   it('las capacidades que recibe el constructor son las de los args que se lanzan', () => {
     for (const lanzar of [argsDeLectura, argsDelGenerador]) {
-      const args = abre(lanzar((c) => JSON.stringify(c), '/p', '/grafo/turno'))
-      expect(JSON.parse(textoDe(args))).toEqual(capacidadesDe(args))
+      const l = abre(lanzar((c) => JSON.stringify(c), '/p', '/grafo/turno'))
+      expect(JSON.parse(l.prompt)).toEqual(capacidadesDe(l.args))
     }
   })
 
   it('el modo lectura del Terminal niega Bash de verdad, y el bloque lo refleja', () => {
-    const args = buildArgs('x', 'lectura', {}, null, 0)
-    expect(capacidadesDe(args).bash).toBe(false)
-    expect(bloqueDeCapacidades(capacidadesDe(args)).join(' ')).toContain('NO tienes Bash')
+    const l = buildArgs('x', 'lectura', {}, null, 0)
+    expect(capacidadesDe(l.args).bash).toBe(false)
+    expect(bloqueDeCapacidades(capacidadesDe(l.args)).join(' ')).toContain('NO tienes Bash')
   })
 
   it('auditoria (el escaner) tiene Bash, y el bloque lo refleja', () => {
-    const args = buildArgs('x', 'auditoria', {}, null, 0)
-    expect(capacidadesDe(args).bash).toBe(true)
-    expect(bloqueDeCapacidades(capacidadesDe(args)).join(' ')).toContain('Tienes Bash')
+    const l = buildArgs('x', 'auditoria', {}, null, 0)
+    expect(capacidadesDe(l.args).bash).toBe(true)
+    expect(bloqueDeCapacidades(capacidadesDe(l.args)).join(' ')).toContain('Tienes Bash')
   })
 })

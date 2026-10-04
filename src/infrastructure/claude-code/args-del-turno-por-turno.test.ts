@@ -14,7 +14,7 @@ describe('el turno del agente (Terminal, escaner, genesis...) lanza su grafo ais
     const args = argsDelTurno(request, {}, null, 3, DIR)
     expect(args.ok).toBe(true)
     if (!args.ok) return
-    const cfg = JSON.parse(args.value[args.value.indexOf('--mcp-config') + 1]) as { mcpServers: Record<string, { env?: Record<string, string> }> } // prettier-ignore
+    const cfg = JSON.parse(args.value.args[args.value.args.indexOf('--mcp-config') + 1]) as { mcpServers: Record<string, { env?: Record<string, string> }> } // prettier-ignore
     expect(cfg.mcpServers[GRAPH_SERVER].env).toEqual({ CBM_CACHE_DIR: DIR })
   })
 })

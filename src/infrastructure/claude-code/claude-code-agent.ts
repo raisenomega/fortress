@@ -6,6 +6,7 @@ import type { Budget } from '@domain/settings/run-budget'
 import { killChildrenOf, trackChild } from './child-registry'
 import { isCancelled } from '../run-control'
 import { buildEnv } from './build-env'
+import { escribirPrompt } from './prompt-por-stdin'
 import { argsDelTurno } from './args-del-turno'
 import { CLAUDE_BIN, isClaudeInstalled } from './claude-cli'
 import { precheckProjectPath } from './precheck-project-path'
@@ -56,7 +57,8 @@ export function createClaudeCodeAgent(
       const lanzar = (): Promise<CodeAgentReply> => {
         // Solo se pasa la key si el operador eligio facturar a la key. Sin
         // ella, `claude` usa su propia sesion y consume del plan.
-        const child = spawn(CLAUDE_BIN, [...args.value], { cwd: request.projectPath, env: buildEnv(useApiKey ? apiKeys.read() : null) }) // prettier-ignore
+        const child = spawn(CLAUDE_BIN, [...args.value.args], { cwd: request.projectPath, env: buildEnv(useApiKey ? apiKeys.read() : null) }) // prettier-ignore
+        escribirPrompt(child.stdin, args.value.prompt) // ADR-112
         trackChild(child, request.projectId ?? null)
         // La parada pudo llegar mientras se armaba el turno: `cancelRun` ya mato
         // a los vivos y no vio a este. Un hijo que nace parado, muere al nacer.

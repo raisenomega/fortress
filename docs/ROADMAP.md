@@ -1202,6 +1202,44 @@ el import es el botón del panel (idempotente, el fichero no se consume).
 llevar: el recibo del lazo, la guía de firma y esta tanda del backlog. El
 próximo rebuild+install en frío los lleva todos.
 
+### ADR-112: EL TRANSPORTE POR STDIN, HECHO Y VERIFICADO (2026-10-03)
+
+**El E2BIG está muerto.** El prompt de los agentes viaja por stdin en los
+cuatro constructores (generador —edición y lectura—, el CLI del
+Terminal/escáner, index-graph, verify-graph) y sus seis spawns; cruza el
+bwrap real (200 KB medidos dentro de la caja) y deja los args en ~858 bytes —
+caben en Windows (32.767) con margen de 37×; **Windows queda medido por el
+límite, no probado en máquina real** (ADR-112 §4). Umbral per-arg real de
+esta máquina: 128 KB exactos. 5 mutantes muertos, incluido el spawner que no
+escribe (cazado por un `claude` falso que ES `cat`).
+
+**§17.3 RESPONDIDO en vivo** sobre `7a3711a7` (el CVE de JS, gate verde): el
+expediente de 765.491 bytes viajó entero — y el revisor con el lock DENTRO
+costó **$8,90 y salió sin veredicto**; con el acotado aplicado en el arnés
+(lock → nota legible), **26 KB, 4 turnos, $1,04, APROBADO** (resuelve SI,
+diff BUENO, riesgo MENOR) citando ADR-111 y reconociendo el ruido del lock
+como «el mismo perfil de ~173 líneas medido». OMEGA juzga el lock con el
+diff. **La lección: §18 (el acotado, (a)) no es estética — es dinero, casi
+tan urgente como el transporte.**
+
+**NOTA REBUILD (se acumula):** ADR-112 NO está en `73b30af0`. El binario
+actual daría E2BIG en el juicio del CVE: **el juicio oficial de `7a3711a7`
+necesita merge + rebuild en frío.**
+
+### §18 CERRADA: EL ACOTADO DEL EXPEDIENTE (2026-10-03, merge `e1da645`)
+
+TOPE 32 KiB por fichero del expediente de OMEGA, los DOS lados (pre y post),
+con la nota legible del arnés convertida en contrato. **El ciclo de
+dependencias queda completo end-to-end: la correa GENERA (ADR-111) → stdin
+TRANSPORTA (ADR-112) → el acotado deja JUZGAR BARATO.** El dato que lo
+ordenó: $8,90 sin veredicto → $1,04 APROBADO.
+
+**EL REBUILD, ya sin excusa:** `73b30af0` NO lleva nada de hoy — el recibo
+del lazo, la guía de firma, el backlog, ADR-112 ni el acotado. El próximo
+rebuild+install en frío los lleva TODOS, y entonces `7a3711a7` (el CVE vivo
+en GATE) recibe su juicio oficial desde la app, sin E2BIG y al precio del
+diff.
+
 ## Cómo se firma cada dirección
 
 Ninguna de estas áreas se ejecuta por figurar aquí. Cada una se firma

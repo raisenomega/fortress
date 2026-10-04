@@ -1,6 +1,7 @@
 import { capacidadesDe, type Capacidades } from '@domain/agent/capacidades-del-agente'
 import { entradaDelGrafo, GRAPH_SERVER } from '@domain/connectors/graph-mcp'
-import type { Result } from '@domain/shared/result'
+import { ok, type Result } from '@domain/shared/result'
+import type { ConPrompt } from '../claude-code/prompt-por-stdin'
 import { conSandbox } from '../sandbox/con-sandbox'
 import { TOOLS_EDICION, TOOLS_LECTURA } from './motor-tools'
 import { MAX_TURNS } from './techo-de-turnos'
@@ -26,11 +27,11 @@ const flagsEdicion = (dir: string | null): readonly string[] => ['--output-forma
 const flagsLectura = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
   '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
 
-const conFlags = (prompt: Prompt, flags: readonly string[]): readonly string[] => [
-  '-p',
-  typeof prompt === 'function' ? prompt(capacidadesDe(flags)) : prompt,
-  ...flags
-]
+// ADR-112: `-p` SIN valor — el prompt viaja por stdin y los args caben en
+// cualquier SO. Las capacidades se siguen leyendo de los flags, no del texto.
+const textoDe = (prompt: Prompt, flags: readonly string[]): string =>
+  typeof prompt === 'function' ? prompt(capacidadesDe(flags)) : prompt
+const conFlags = (flags: readonly string[]): readonly string[] => ['-p', ...flags]
 
 /**
  * Reanudar la sesion de la vuelta anterior (ADR-110): el generador responde a la
@@ -42,16 +43,17 @@ const conFlags = (prompt: Prompt, flags: readonly string[]): readonly string[] =
 const reanudando = (sesion: string | undefined): readonly string[] =>
   sesion === undefined ? [] : ['--resume', sesion, '--fork-session']
 
-/** Con que se lanza C3: lee y edita, dentro del worktree, y con techo.
- *  Y dentro de la caja del CLI (ADR-092, clase A): sin caja, no hay args. */
+/** Con que se lanza C3: lee y edita, dentro del worktree, y con techo. Dentro
+ *  de la caja del CLI (ADR-092, clase A) y con el prompt APARTE (ADR-112). */
 export function argsDelGenerador(
   prompt: Prompt,
   worktreePath: string,
   grafoDir: string | null,
   reanudar?: string
-): Result<readonly string[]> {
-  const args = [...conFlags(prompt, flagsEdicion(grafoDir)), ...reanudando(reanudar)]
-  return conSandbox(args, worktreePath)
+): Result<ConPrompt> {
+  const flags = flagsEdicion(grafoDir)
+  const caja = conSandbox([...conFlags(flags), ...reanudando(reanudar)], worktreePath)
+  return caja.ok ? ok({ args: caja.value, prompt: textoDe(prompt, flags) }) : caja
 }
 
 /** Con que se lanzan los que SOLO LEEN ficheros —analista, critico, OMEGA—: el
@@ -60,6 +62,8 @@ export function argsDeLectura(
   prompt: Prompt,
   cwd: string,
   grafoDir: string | null
-): Result<readonly string[]> {
-  return conSandbox(conFlags(prompt, flagsLectura(grafoDir)), cwd)
+): Result<ConPrompt> {
+  const flags = flagsLectura(grafoDir)
+  const caja = conSandbox(conFlags(flags), cwd)
+  return caja.ok ? ok({ args: caja.value, prompt: textoDe(prompt, flags) }) : caja
 }

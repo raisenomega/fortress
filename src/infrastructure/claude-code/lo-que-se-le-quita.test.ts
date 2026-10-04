@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 import { buildArgs } from './claude-cli'
 
-const args = (mode: ClaudePermissionMode): string[] => buildArgs('hola', mode, {}, null, 3)
+const args = (mode: ClaudePermissionMode): readonly string[] => buildArgs('hola', mode, {}, null, 3).args
 /** El valor que sigue a un flag, o null si el flag no va. */
-const tras = (lista: string[], flag: string): string | null => {
+const tras = (lista: readonly string[], flag: string): string | null => {
   const i = lista.indexOf(flag)
   return i === -1 ? null : (lista[i + 1] ?? null)
 }

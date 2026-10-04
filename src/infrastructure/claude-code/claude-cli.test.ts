@@ -1,11 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { buildArgs } from './claude-cli'
 
-const NO_AGENTS = {}
-
-/** Sin agentes ni despacho: la forma minima. */
-const args = (prompt = 'hola', mode: 'plan' | 'acceptEdits' = 'plan'): string[] =>
-  buildArgs(prompt, mode, NO_AGENTS, null, 3)
+const NO_AGENTS = {} // sin agentes ni despacho: la forma minima
+const args = (prompt = 'hola', mode: 'plan' | 'acceptEdits' = 'plan'): readonly string[] =>
+  buildArgs(prompt, mode, NO_AGENTS, null, 3).args
 
 /**
  * Estos argumentos se verificaron contra `claude --help` de la version 2.1.220.
@@ -22,9 +20,10 @@ describe('buildArgs', () => {
     expect(args().join(' ')).not.toContain('--project')
   })
 
-  it('pasa el prompt justo despues de -p', () => {
-    const built = args('revisa la seguridad')
-    expect(built[built.indexOf('-p') + 1]).toBe('revisa la seguridad')
+  it('ADR-112: -p va SIN valor y el prompt viaja aparte, por stdin', () => {
+    const l = buildArgs('revisa la seguridad', 'plan', NO_AGENTS, null, 3)
+    expect(l.prompt).toBe('revisa la seguridad')
+    expect(l.args[l.args.indexOf('-p') + 1]).toBe('--output-format')
   })
 
   it('pide stream-json con verbose, que es lo que emite los eventos', () => {
@@ -45,7 +44,7 @@ describe('buildArgs', () => {
   })
 
   it('un tope de cero desactiva el limite, si el operador lo decide', () => {
-    expect(buildArgs('hola', 'plan', NO_AGENTS, null, 0)).not.toContain('--max-budget-usd')
+    expect(buildArgs('hola', 'plan', NO_AGENTS, null, 0).args).not.toContain('--max-budget-usd')
   })
 
   it('nunca salta las comprobaciones de permisos', () => {
@@ -57,19 +56,19 @@ describe('buildArgs', () => {
 
 describe('buildArgs · allowlist de autoverificacion (gate de confianza)', () => {
   it('al editar en confianza, el allowlist se arma de los scripts REALES del repo', () => {
-    const e = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true, ['type-check'])
+    const e = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, true, ['type-check']).args
     expect(e).toContain('Bash(npm run type-check)')
     expect(e).not.toContain('Bash(npm run typecheck)')
   })
 
   it('en plan NUNCA pasa la autoverificacion, aunque el repo sea de confianza', () => {
     // Auditar es mirar: el escaneo va en plan y no auto-ejecuta scripts del repo.
-    const p = buildArgs('hola', 'plan', NO_AGENTS, null, 3, null, true)
+    const p = buildArgs('hola', 'plan', NO_AGENTS, null, 3, null, true).args
     expect(p).not.toContain('Bash(npm run test:unit)')
   })
 
   it('en un repo NO confiable no pasa la autoverificacion ni editando', () => {
-    const e = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, false)
+    const e = buildArgs('hola', 'acceptEdits', NO_AGENTS, null, 3, null, false).args
     expect(e).not.toContain('Bash(npm run test:unit)')
   })
 })
