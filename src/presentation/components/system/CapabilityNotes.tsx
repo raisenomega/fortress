@@ -30,6 +30,7 @@ export function CapabilityNotes({ capabilityId }: CapabilityNotesProps): React.J
         <input
           value={text}
           onChange={(event) => setText(event.target.value)}
+          aria-label="Nota de refuerzo de aprendizaje"
           placeholder="Deja una nota que la oriente"
           className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-xs text-foreground"
         />
