@@ -37,6 +37,7 @@ export function ApiKeyForm({ submitLabel, onSaved }: ApiKeyFormProps): React.JSX
           type="password"
           value={draft}
           autoFocus
+          aria-label="API key de Claude"
           placeholder="sk-ant-..."
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => event.key === 'Enter' && void submit()}
