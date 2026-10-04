@@ -2435,3 +2435,15 @@ es dinero.** El expediente del CVE con el lock DENTRO: 765 KB por stdin,
 en el arnes: 26 KB, 4 turnos, **$1,04 y APROBADO** (resuelve SI, diff BUENO)
 — con OMEGA citando ADR-111 y el perfil de ~173 lineas. Casi tan urgente como
 el transporte; el experimento es su test de diseno.
+
+## 19. Dos mejoras de UX de la guia de firma — anotadas, no urgentes (2026-10-04)
+
+Del estreno real (cola de 10): el guard compartido FUNCIONO (la sonda y la
+firma no pueden pisarse el carril), pero (1) el toast del rebote es el texto
+de la firma —«Ya se esta integrando otra propuesta»— cuando lo que corria era
+LA MEDICION: merece su propio texto («la tanda se esta midiendo; espera»); y
+(2) el boton de la guia si se deshabilita al medir, pero LAS FILAS de Firmar
+no saben del carril y dejan pulsar — deshabilitarlas (o avisar) mientras mide
+ahorraria el rebote. Ninguna toca seguridad: el guard ya protege; es que el
+operador no tenga que chocar con el. Dos cambios de una linea cada uno,
+cuando toque UI.

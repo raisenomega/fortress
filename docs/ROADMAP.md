@@ -1226,6 +1226,27 @@ tan urgente como el transporte.**
 actual daría E2BIG en el juicio del CVE: **el juicio oficial de `7a3711a7`
 necesita merge + rebuild en frío.**
 
+### LA PRIMERA SESIÓN DE FIRMA CON LA GUÍA: 8 DE 10 EN MAIN (2026-10-04)
+
+**El HIGH `9f69a37c` completó la cadena entera** —gate, OMEGA, firma, merge
+`2655c77`— y con él **ADR-106 §3.3 queda CUMPLIDO: la puerta de CRITICAL se
+ABRE**. El CRITICAL `351abcd1` (el escáner lanza claude -p sin restringir
+settings) entra al alcance del Motor en el próximo drenaje, por primera vez.
+
+**El CVE `7a3711a7` entró EL ÚLTIMO** (merge `dd3fa73`), como la guía mandaba
+— el lock de 173 líneas en main sin caducar nada detrás. El juicio oficial:
+sin E2BIG, **$1,31 / 55 s, APROBADO** citando ADR-111. **El ciclo de
+dependencias quedó sellado en producción**: correa → stdin → acotado → OMEGA
+→ firma.
+
+**La guía funcionó en su estreno con cola de 10**: «Medir la tanda» (6
+medidas, ~27 min) **nombró el par que chocaba**; la sonda-y-reset dejó su
+prueba en main (`278786e`, la medida del árbol de `58e85051`, que entró
+MEDIDA con typecheck+lint+test:unit). Las 2 caducadas (`0ae5e902`,
+`6b7b679a`) cayeron por **choque TEXTUAL** —cada una la segunda de su pareja
+de fichero compartido—, main jamás se tocó, y ambas **se regeneran sin
+choque** ancladas al main nuevo. Dos mejoras de UX anotadas (DEUDAS §19).
+
 ### §18 CERRADA: EL ACOTADO DEL EXPEDIENTE (2026-10-03, merge `e1da645`)
 
 TOPE 32 KiB por fichero del expediente de OMEGA, los DOS lados (pre y post),
