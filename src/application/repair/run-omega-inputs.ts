@@ -1,3 +1,4 @@
+import { acotarContenido } from '@domain/repair/acotado-del-expediente'
 import type { HallazgoJuzgado } from '@domain/repair/hallazgo-juzgado'
 import type { CorpusDescriptor } from '@domain/project/corpus-descriptor'
 import type { OmegaPromptInput } from '@domain/repair/omega-prompt'
@@ -26,9 +27,11 @@ export async function buildOmegaInput(
 ): Promise<{ input: OmegaPromptInput; files: readonly string[] }> {
   const files = await reads.changedFiles(worktreePath, baseSha)
   const diffText = await reads.diffText(worktreePath)
-  const filesPost = files.map((path) => ({ path, content: reads.readPost(worktreePath, path) }))
+  // El acotado (DEUDAS §18): los dos lados, porque el pre del lock pesa igual
+  // que el post y el revisor juzga con el diff, no con el cuerpo.
+  const filesPost = files.map((path) => ({ path, content: acotarContenido(path, reads.readPost(worktreePath, path)) })) // prettier-ignore
   const filesPre = await Promise.all(
-    files.map(async (path) => ({ path, content: await reads.readPre(worktreePath, baseSha, path) })) // prettier-ignore
+    files.map(async (path) => ({ path, content: acotarContenido(path, await reads.readPre(worktreePath, baseSha, path)) })) // prettier-ignore
   )
   const supo = motorSupo === undefined ? {} : { motorSupo }
   return { input: { analysis, corpus, diffText, filesPost, filesPre, ...supo }, files }
