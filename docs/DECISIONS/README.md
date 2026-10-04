@@ -143,6 +143,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-110](adr-110-el-lazo-del-motor.md) | El lazo del Motor: persiste hasta completo, sin mitades | 2026-10-01 | Aceptada | Motor |
 | [ADR-111](adr-111-la-correa-de-dependencias.md) | La correa de dependencias (pieza A): el Motor regenera el lock, nunca los nativos | 2026-10-03 | Aceptada | Motor |
 | [ADR-112](adr-112-el-prompt-viaja-por-stdin.md) | El prompt viaja por stdin: el transporte de los agentes no depende del SO | 2026-10-03 | Aceptada | Seguridad |
+| [ADR-113](adr-113-el-estreno-del-critical.md) | El estreno del CRITICAL: la primera reparación de la máxima severidad, registrada con su asiento literal | 2026-10-05 | Aceptada | Motor |
 
 ## Referencias
 
