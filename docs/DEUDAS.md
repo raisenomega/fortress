@@ -2401,7 +2401,18 @@ con `cp` antes del `sed`, restaurar con `cp`, y git solo para lo comiteado.
 lock regenerado real. No se simulo a proposito; llega solo en el primer drenaje
 tras este merge, y ahi se mide (¿que dice OMEGA de 173 lineas de lock?).
 
-## 18. El expediente de OMEGA pesa en tokens, no solo en argv (2026-10-03)
+## 18. ~~El expediente de OMEGA pesa en tokens, no solo en argv~~ — CERRADA 2026-10-03
+
+**CERRADA el mismo dia** (merge `e1da645`): `acotado-del-expediente.ts` —
+TOPE 32 KiB por fichero, aplicado en `buildOmegaInput` a los DOS lados (el
+pre del lock pesa igual que el post), con la nota legible EXACTA que el
+arnes probo: «[package-lock.json omitido por tamano (370 KB); el diff
+muestra sus cambios]». El tope deja pasar cualquier fichero de 75 lineas con
+margen y corta la clase lock/minificado/generado. 3 mutantes muertos (tope
+infinito, nota sin KB, solo-post). **Con (b) ADR-112 + (a), el ciclo de
+dependencias funciona end-to-end: la correa GENERA (ADR-111), stdin
+TRANSPORTA (ADR-112), el acotado deja JUZGAR BARATO — $8,90-sin-veredicto
+pasa a $1,04-APROBADO.** Lo que sigue es el expediente con el que nacio:
 
 **(a) EL CONTENIDO, pendiente con firma que lo nombra.** De la firma de
 ADR-112: «Aparte y despues, (a) el CONTENIDO: acotar el lock entero ×2 (~190k

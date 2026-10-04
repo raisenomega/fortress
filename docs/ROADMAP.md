@@ -1226,6 +1226,20 @@ tan urgente como el transporte.**
 actual daría E2BIG en el juicio del CVE: **el juicio oficial de `7a3711a7`
 necesita merge + rebuild en frío.**
 
+### §18 CERRADA: EL ACOTADO DEL EXPEDIENTE (2026-10-03, merge `e1da645`)
+
+TOPE 32 KiB por fichero del expediente de OMEGA, los DOS lados (pre y post),
+con la nota legible del arnés convertida en contrato. **El ciclo de
+dependencias queda completo end-to-end: la correa GENERA (ADR-111) → stdin
+TRANSPORTA (ADR-112) → el acotado deja JUZGAR BARATO.** El dato que lo
+ordenó: $8,90 sin veredicto → $1,04 APROBADO.
+
+**EL REBUILD, ya sin excusa:** `73b30af0` NO lleva nada de hoy — el recibo
+del lazo, la guía de firma, el backlog, ADR-112 ni el acotado. El próximo
+rebuild+install en frío los lleva TODOS, y entonces `7a3711a7` (el CVE vivo
+en GATE) recibe su juicio oficial desde la app, sin E2BIG y al precio del
+diff.
+
 ## Cómo se firma cada dirección
 
 Ninguna de estas áreas se ejecuta por figurar aquí. Cada una se firma
