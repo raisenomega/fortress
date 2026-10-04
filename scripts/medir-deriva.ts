@@ -43,7 +43,10 @@ const registradas = sinMemoria ? [] : registradasDeLaParada(vivas, [carpeta])
 const prompt = buildScanPrompt(proyecto, discoverCorpus(p.path), [carpeta], undefined, registradas)
 console.log(`${proyecto} · carpeta ${carpeta} · ${sinMemoria ? 'SIN memoria (control)' : `CON memoria: ${registradas.length} registradas`} · lanzando la parada en la caja ...`) // prettier-ignore
 
-const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', BUDGET_FLAG, String(DEFAULT_PER_RUN), '--allowedTools', 'Bash,Read,Grep,Glob'], p.path) // prettier-ignore
+// Sin grafo ni servidor propio, el flag estricto cierra el conjunto MCP a VACIO: sin el, el
+// hijo monta los servidores de ~/.claude.json del operador y los que declare el arbol
+// auditado, con Bash pre-aprobado y cwd en ese arbol (SECURITY-MODEL: explicitos, no automaticos).
+const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', BUDGET_FLAG, String(DEFAULT_PER_RUN), '--allowedTools', 'Bash,Read,Grep,Glob', '--strict-mcp-config'], p.path) // prettier-ignore
 if (!args.ok) throw new Error(`sin caja: ${args.error}`)
 const salida = spawnSync('claude', [...args.value], { cwd: p.path, env: buildEnv(null), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
 if (salida.status !== 0)
