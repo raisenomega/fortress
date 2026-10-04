@@ -342,3 +342,35 @@ contexto lleva su origen); no implica importancia.
 Relacionados: `docs/OVERVIEW.md` (qué es FORTRESS), `docs/ARCHITECTURE.md`
 (las reglas duras que varios principios alimentan), `docs/GLOSSARY.md` (los
 términos que estos principios usan).
+
+## 25. El gate no empaqueta: el smoke del artefacto va antes de confiar el binario
+
+El 2026-10-05 un fix FIRMADO de empaquetado (`grantFileProtocolExtraPrivileges:
+false`) pasó gate verde y OMEGA, se integró, se construyó el binario… y la app
+**jamás volvió a pintar ventana**: Vite emite `<script type="module"
+crossorigin>` y la carga de módulos ES por `file://` muere por CORS sin ese
+fuse. El binario `56295230` arrancaba main y zygotes con CERO proceso
+renderer — pantalla negra. El propio analista lo había avisado («puede romper
+el renderer… pide npm run smoke sobre el empaquetado») y nadie corrió el
+smoke antes de instalar.
+
+**La regla, para todo agente y para el operador:**
+
+- El gate corre `npm ci / typecheck / lint / test:unit`. **NO empaqueta.** Su
+  verde NO prueba nada sobre `electron-builder.yml`, fuses, entitlements,
+  `files`/`asarUnpack` ni ningún efecto que solo exista en el artefacto.
+- Todo cambio de empaquetado — aunque venga aprobado y firmado — exige
+  **smoke del artefacto** (build frío + abrir la app + ver ventana y páginas)
+  **ANTES de confiar el binario**. El gate te deja firmar; el smoke te deja
+  confiar. Un analista o revisor que toque esa zona debe DECIRLO en su
+  veredicto, como condición explícita, no como nota al pie.
+- **El relanzamiento de la app es SIEMPRE del operador desde su sesión de
+  escritorio.** Un agente que la lance desde una shell sin sesión gráfica crea
+  una instancia sin renderer que se adueña del single-instance lock y de la
+  base (pasó el mismo día). Los procedimientos de install TERMINAN en
+  install.
+- Si un build frío no pinta: `npx @electron/fuses read --app <binario>` y
+  comparar contra el último binario que sí abría — el diff de fuses canta la
+  causa en un minuto (así se resolvió). El arreglo correcto de quitarle
+  privilegios a `file://` es servir el renderer por protocolo propio
+  (DEUDAS §20), nunca apagar el fuse sin smoke.

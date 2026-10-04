@@ -209,3 +209,25 @@ reproducirlo y tu sistema operativo.
 - [DEV-SETUP](DEV-SETUP.md) — puesta a punto del entorno de desarrollo.
 - [RELEASE](RELEASE.md) — instalación y reconstrucción del binario.
 - [FLOWS/](FLOWS/SELF-REPAIR.md) — los flujos operativos en detalle.
+
+## Pantalla negra al abrir (la app arranca pero no pinta)
+
+**Síntoma:** la app «corre» (hay procesos main y zygote) pero no aparece
+ventana, o el icono no hace nada. Sin crashdumps, sin nada en el journal.
+
+**Diagnóstico en 1 minuto:** `ps` del árbol — si NO hay proceso
+`--type=renderer`, el renderer nunca nació. Entonces:
+`npx @electron/fuses read --app ~/.local/bin/fortress` (extraído del
+AppImage) y comparar con el último binario que abría. Caso real 2026-10-05:
+`GrantFileProtocolExtraPrivileges: Disabled` mataba por CORS los
+`<script type="module" crossorigin>` que Vite emite — renderer muerto,
+pantalla negra (binario `56295230`; arreglo en `dfa7d3dd`, Principio 25).
+
+**Segunda causa del mismo día — instancia fantasma:** si un agente lanzó la
+app desde una shell sin sesión gráfica, queda una instancia SIN ventana dueña
+del single-instance lock y de la base (`fuser fortress.db` la nombra). Cierre:
+`kill <pid>` (SIGTERM, nunca -9) y relanzar DESDE la sesión del operador.
+
+**Lo que NO es:** ni la base, ni el repo, ni las cachés de `~/` (el gesto de
+ADR-108 §6.3 quedó exonerado con dato). No reinstalar a ciegas: primero el
+diff de fuses y el árbol de procesos.
