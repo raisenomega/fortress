@@ -20,3 +20,14 @@ test('el prompt sigue justo despues de -p, en modo plan', () => {
   assert.equal(args[args.indexOf('-p') + 1], 'clasifica el hallazgo')
   assert.equal(args[args.indexOf('--permission-mode') + 1], 'plan')
 })
+
+// El CRITICAL 351abcd1 en esta sede: sin el par, el CLI carga el
+// `.claude/settings.json` del repo auditado y sus hooks corren FUERA de la caja.
+test('sin confianza, SOLO las fuentes del operador: los settings del repo no cargan', () => {
+  const args = argumentosDelAgente('hola')
+  assert.equal(args[args.indexOf('--setting-sources') + 1], 'user')
+})
+
+test('con confianza, las de proyecto cargan A PROPOSITO: el par no viaja', () => {
+  assert.ok(!argumentosDelAgente('hola', DEFAULT_PER_RUN, true).includes('--setting-sources'))
+})
