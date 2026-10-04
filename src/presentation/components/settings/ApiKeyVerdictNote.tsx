@@ -24,8 +24,11 @@ export function ApiKeyVerdictNote({ verdict }: ApiKeyVerdictNoteProps): React.JS
       ? `Key verificada contra la API. Modelo disponible: ${verdict.model}.`
       : verdict.reason
 
+  // `role="status"` sin condicion: a diferencia de Notice, este veredicto no
+  // vive dentro del Toaster, asi que no hay region viva que lo anuncie dos veces.
   return (
     <p
+      role="status"
       className={`mt-3 flex items-start gap-2 rounded-md border px-3 py-2 text-xs ${TONE[verdict.status]}`}
     >
       <Icon name={ICON[verdict.status]} size={13} className="mt-px shrink-0" />
