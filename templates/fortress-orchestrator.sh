@@ -138,6 +138,37 @@ repo_trusted() {
     [ "$(get_repo_field "$1" 5)" = "trusted" ]
 }
 
+# ─── REDACCIÓN DE SECRETOS ──────────────────────────────────
+# Lo que se persiste en ~/.fortress se tacha ANTES de quedarse: el prompt de
+# 'security' ordena buscar secrets hardcodeados y el hijo los cita como
+# evidencia en su log y en su informe. Se tacha el fichero ENTERO y tras morir
+# el proceso, no por trozo: un secreto partido entre dos chunks no casa con
+# ningun patron. Patrones POR VALOR y acotados —cada uno nombra a su emisor—:
+# un comodin ancho borra la evidencia que un auditor necesita (ids de commit,
+# digests) y puede comerse la linea '- CRITICAL: N' que decide el push.
+
+redact_file() {
+    local file="$1"
+    [ -f "$file" ] || return 0
+    local tmp
+    tmp=$(mktemp)
+    if sed -E \
+        -e 's/[sS][kK]-[aA][nN][tT]-[A-Za-z0-9_-]{6,}/***/g' \
+        -e 's/(^|[^A-Za-z0-9_])gh[pousr]_[A-Za-z0-9]{16,}/\1***/g' \
+        -e 's/(^|[^A-Za-z0-9_])github_pat_[A-Za-z0-9_]{20,}/\1***/g' \
+        -e 's/[bB][eE][aA][rR][eE][rR][[:space:]]+[^[:space:]]+/***/g' \
+        -e 's/(^|[^A-Za-z0-9_])A[KS]IA[0-9A-Z]{16}([^A-Za-z0-9_]|$)/\1***\2/g' \
+        -e 's/(^|[^A-Za-z0-9_])xox[abprs]-[A-Za-z0-9-]{10,}/\1***/g' \
+        -e 's/(^|[^A-Za-z0-9_])eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/\1***/g' \
+        -e '/-----BEGIN [A-Z ]*PRIVATE KEY-----/,/-----END [A-Z ]*PRIVATE KEY-----/ s/^[A-Za-z0-9+\/=]+[[:space:]]*$/***/' \
+        "$file" > "$tmp"; then
+        mv "$tmp" "$file"
+    else
+        # Falla cerrado: antes sin artefacto que artefacto sin tachar.
+        rm -f "$tmp" "$file"
+    fi
+}
+
 # ─── VEREDICTO DE PUSH ──────────────────────────────────────
 # El informe y el HEAD escaneado viven en $REPORTS_DIR, fuera del repo:
 # nada con escritura en el repo decide si el push sale. Falla cerrado.
@@ -349,6 +380,7 @@ cmd_scan() {
     local pids=()
     local names=()
     local heads=()
+    local logs=()
     local skipped=()
 
     while IFS= read -r line; do
@@ -371,7 +403,8 @@ cmd_scan() {
         # El informe se escribe fuera del repo; el anterior no sobrevive al scan
         local report=$(report_file "$name")
         rm -f "$report" "$(scanned_head "$name")"
-        local report_rule="Escribe el reporte en $report (fuera del repo, NO en la raíz del proyecto) e incluye en el resumen la línea exacta '- CRITICAL: N'."
+        # La frase sobre secretos es cinturon: la red exigible es redact_file
+        local report_rule="Escribe el reporte en $report (fuera del repo, NO en la raíz del proyecto) e incluye en el resumen la línea exacta '- CRITICAL: N'. Nunca cites un secreto en claro: como evidencia da archivo, línea y el valor tachado (p. ej. 'sk-ant-***')."
 
         local prompt=""
         case "$scan_type" in
@@ -393,11 +426,13 @@ cmd_scan() {
 
         heads+=("$(git -C "$path" rev-parse HEAD 2>/dev/null || true)")
 
+        local logfile="$LOGS_DIR/${name}-$(date +%Y%m%d).log"
         claude --headless --project "$path" "$prompt" \
-            > "$LOGS_DIR/${name}-$(date +%Y%m%d).log" 2>&1 &
+            > "$logfile" 2>&1 &
 
         pids+=($!)
         names+=("$name")
+        logs+=("$logfile")
     done <<< "$(get_repos)"
 
     # Esperar que todos terminen
@@ -407,12 +442,18 @@ cmd_scan() {
 
     local failed=0
     for i in "${!pids[@]}"; do
-        if wait "${pids[$i]}" 2>/dev/null; then
+        local scan_ok=0
+        wait "${pids[$i]}" 2>/dev/null && scan_ok=1
+        # Muerto el hijo se tachan log e informe, en exito Y en fallo: el log
+        # del scan fallido tambien se conserva y se manda revisar al operador.
+        redact_file "${logs[$i]}"
+        redact_file "$(report_file "${names[$i]}")"
+        if [ "$scan_ok" -eq 1 ]; then
             # Solo un scan completado liga el informe al HEAD que vio al empezar
             echo "${heads[$i]}" > "$(scanned_head "${names[$i]}")"
             log_success "${names[$i]}: scan completado"
         else
-            log_error "${names[$i]}: scan falló (ver $LOGS_DIR/${names[$i]}-*.log)"
+            log_error "${names[$i]}: scan falló (ver ${logs[$i]})"
             failed=$((failed + 1))
         fi
     done
