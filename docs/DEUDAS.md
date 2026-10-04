@@ -2417,3 +2417,10 @@ dependencias pagaria ese contexto. La forma barata cuando se ataque: un tope
 por bytes en los ficheros del expediente con nota legible («package-lock.json
 omitido por tamano (362 KB); el diff muestra sus cambios»), la clase
 lock/generados primero. Arco propio, con test rojo y mutante.
+
+**MEDIDO EN VIVO el mismo dia (la verificacion de ADR-112): NO es estetica,
+es dinero.** El expediente del CVE con el lock DENTRO: 765 KB por stdin,
+**$8,90 y EXIT=1 SIN veredicto**. El mismo expediente con el acotado aplicado
+en el arnes: 26 KB, 4 turnos, **$1,04 y APROBADO** (resuelve SI, diff BUENO)
+— con OMEGA citando ADR-111 y el perfil de ~173 lineas. Casi tan urgente como
+el transporte; el experimento es su test de diseno.
