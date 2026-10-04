@@ -424,7 +424,7 @@ export default function FortressV3() {
           <div style={{textAlign:"center",padding:"44px 20px"}}>
             <div style={{fontSize:52,marginBottom:12}}>🛡️</div>
             <div style={{fontSize:15,fontWeight:600,color:"#e2e8f0",marginBottom:6}}>Deep Scan + Informe Descargable</div>
-            <div style={{fontSize:11,color:"#64748b",maxWidth:420,margin:"0 auto",lineHeight:1.6}}>
+            <div style={{fontSize:11,color:"#94a3b8",maxWidth:420,margin:"0 auto",lineHeight:1.6}}>
               8 pasadas especializadas que inspeccionan tu dominio en profundidad.
               Al finalizar, descarga un informe .md completo con cada hallazgo,
               su causa, su fix, y un checklist de remediación priorizado.
