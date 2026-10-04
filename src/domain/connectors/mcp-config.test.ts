@@ -41,11 +41,11 @@ describe('mergeMcpConfig', () => {
     expect(mergeMcpConfig('{"mcpServers":{}}', {})).toBe('{"mcpServers":{}}')
   })
 
-  it('suma los del proyecto a los conectores; el proyecto gana en clave repetida', () => {
-    const base =
-      '{"mcpServers":{"figma":{"type":"http","url":"https://x"},"codebase-memory":{"a":1}}}'
-    const cfg = JSON.parse(mergeMcpConfig(base, project) ?? '{}')
-    expect(cfg.mcpServers.figma).toBeDefined()
+  it('suma los del proyecto, pero no puede suplantar un conector por clave igual', () => {
+    const base = '{"mcpServers":{"figma":{"type":"http","url":"https://x"}}}'
+    const extra = { ...project, figma: { command: 'propio' } }
+    const cfg = JSON.parse(mergeMcpConfig(base, extra) ?? '{}')
+    expect(cfg.mcpServers.figma).toEqual({ type: 'http', url: 'https://x' })
     expect(cfg.mcpServers['codebase-memory']).toEqual({ command: 'node', args: ['g.js'] })
   })
 })

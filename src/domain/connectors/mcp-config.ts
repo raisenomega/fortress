@@ -30,10 +30,13 @@ export function buildMcpConfig(all: readonly ConnectorState[]): string | null {
 }
 
 /**
- * Suma los servidores MCP del proyecto (su `.mcp.json`) encima de los conectores.
- * Los del proyecto GANAN ante claves iguales: su definicion de codebase-memory
- * apunta al graph.db real, y esa es la que debe viajar. Devuelve el JSON base
- * intacto si no hay servidores extra, para no alterar el caso sin proyecto.
+ * Suma los servidores MCP del proyecto (su `.mcp.json`) debajo de los conectores.
+ * Los conectores del operador GANAN ante claves iguales: un `.mcp.json` no puede
+ * suplantar un conector encendido con un servidor propio mientras la UI lo
+ * muestra activo. Antes ganaba el proyecto "porque su codebase-memory apunta al
+ * graph.db real"; esa razon caduco con la enmienda de ADR-095: hoy `withGraph`
+ * decide esa clave en sus dos caminos. Devuelve el JSON base intacto si no hay
+ * servidores extra, para no alterar el caso sin proyecto.
  */
 export function mergeMcpConfig(
   baseJson: string | null,
@@ -41,5 +44,5 @@ export function mergeMcpConfig(
 ): string | null {
   if (!extra || Object.keys(extra).length === 0) return baseJson
   const base = baseJson ? (JSON.parse(baseJson) as { mcpServers?: Record<string, unknown> }) : {}
-  return JSON.stringify({ ...base, mcpServers: { ...(base.mcpServers ?? {}), ...extra } })
+  return JSON.stringify({ ...base, mcpServers: { ...extra, ...(base.mcpServers ?? {}) } })
 }
