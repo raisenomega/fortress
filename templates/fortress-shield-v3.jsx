@@ -369,7 +369,7 @@ export default function FortressV3() {
         {/* Phase results */}
         {completed > 0 && (
           <div>
-            <div style={{fontSize:10,fontWeight:700,color:"#475569",letterSpacing:2,marginBottom:8}}>
+            <div style={{fontSize:10,fontWeight:700,color:"#94a3b8",letterSpacing:2,marginBottom:8}}>
               RESULTADOS POR CAPA · {completed}/{PHASES.length}
             </div>
             {PHASES.map((ph,i) => {
@@ -400,7 +400,7 @@ export default function FortressV3() {
             >
               📥 Descargar Informe Completo (.md)
             </button>
-            <p style={{fontSize:10,color:"#475569",marginTop:8}}>
+            <p style={{fontSize:10,color:"#94a3b8",marginTop:8}}>
               Incluye: todos los hallazgos, fixes propuestos, checklist de remediación y metodología
             </p>
           </div>
