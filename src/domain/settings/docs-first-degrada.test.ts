@@ -50,6 +50,15 @@ describe('cuando no se encontro doctrina de su clase', () => {
 describe('la sintaxis de file_pattern que se le enseña al agente', () => {
   const conDirs = corpus([{ path: 'README.md', category: 'general' }], ['docs/'])
 
+  it('AVISA de que el modo query (BM25) da 0 sobre los .md aunque esten indexados', () => {
+    // Medido en el backlog (3 obs del 2026-10-04): query + file_pattern 'docs/'
+    // devolvio total=0 con 2636 nodos Section indexados. El 0 del BM25 parece
+    // ausencia y empuja a saltarse el grafo; para .md: file_pattern SIN query.
+    const texto = buildDocsFirst('general', conDirs)
+    expect(texto).toContain('sin query')
+    expect(texto.toLowerCase()).toContain('bm25')
+  })
+
   it('enseña la SUBCADENA, no el glob que devuelve cero', () => {
     // Medido contra el grafo vivo: '*.md' -> 0 nodos; '.md' -> 1948.
     const texto = buildDocsFirst('general', conDirs)

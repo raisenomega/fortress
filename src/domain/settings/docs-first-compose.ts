@@ -21,8 +21,9 @@ import { CABECERA, cabeceraSinPropia } from './docs-first-cabeceras'
  */
 const GRAFO =
   "Los .md estan indexados en el grafo: pidelos con file_pattern '.md' (o " +
-  "'docs/' para una carpeta). Es una SUBCADENA de la ruta, no un glob ni una " +
-  "regex: '*.md' devuelve cero y parece que no hay nada indexado."
+  "'docs/' para una carpeta), SIEMPRE sin query: el modo query (BM25) no cubre " +
+  'sus nodos y devuelve 0 aunque esten indexados. Es una SUBCADENA de la ruta, ' +
+  "no un glob ni una regex: '*.md' devuelve cero y parece que no hay nada indexado."
 
 /** El nombre de la carpeta, sin la barra final ni el camino que la precede. */
 const nombreDe = (dir: string): string => dir.replace(/\/$/, '').split('/').pop() ?? dir
