@@ -1226,6 +1226,31 @@ tan urgente como el transporte.**
 actual daría E2BIG en el juicio del CVE: **el juicio oficial de `7a3711a7`
 necesita merge + rebuild en frío.**
 
+### EL CRITICAL 351abcd1 ARREGLADO A MANO (2026-10-04) — la vía diseñada
+
+El único CRITICAL de FORTRESS anclaba en `claude-cli.ts` = defensa del Motor:
+el Motor no toca su jaula, y lo arregló el operador (medir → rig → test rojo →
+mutante → gate). **El vector era multi-cliente y MÁS grave de lo medido**: el
+rig probó en vivo que el hook del `.claude/settings.json` del repo auditado
+disparaba **FUERA de la caja** —leyó `~/.claude/.credentials.json` y salió a
+la red abierta— y que su `apiKeyHelper` se ejecutaba hasta secuestrar la
+autenticación de la corrida.
+
+**El arreglo** (`dd6c25e`): `--setting-sources user` sobre no-trusted, en el
+cuello único (`buildArgs` ← `fuentesDeSettings(trusted)`), así que cubre TODOS
+los caminos: escáner, juez, Terminal/chat, génesis, build, drafts, episodios.
+El grafo **ni lanza** sin confianza (doctrina que ya estaba) y el Motor
+conserva sus settings sobre FORTRESS a propósito (el hook ADR-098 vive ahí).
+La caja `--settings` sobrevive al flag (capa aparte, medido con sonda). La
+palanca nueva vive en `AUTONOMY_RULES_FILES`: el Motor no la toca.
+
+**La lección**: la incógnita de ADR-092 quedó medida — los hooks del repo
+auditado corren FUERA de la caja del CLI; la caja acota las herramientas del
+agente, no lo que el harness ejecuta por settings. **El hallazgo se cierra por
+juicio en el próximo escaneo de FCC.** OJO: el arreglo NO está en el binario
+(`af637f5d`) hasta el próximo rebuild — hasta entonces, escanear o trabajar
+repos de clientes NO confiables corre con el vector abierto.
+
 ### LA ESCALERA COMPLETA: DEBUT SUBE A CRITICAL (2026-10-04, firmado)
 
 **`DEBUT = [LOW, MEDIUM, HIGH, CRITICAL]` — el último escalón.** La condición
