@@ -164,3 +164,39 @@ techo de vueltas, y las 8 defensas que ya bloquean HIGH del repo propio en
 - **ADR-007** — el debut y su escalera (LOW → MEDIUM).
 - **ADR-003** — el otro eje del debut (el repo propio).
 - `docs/ROADMAP.md`, arco del Motor: dimensión 1 y pieza 1 (`15b7fbf`).
+
+## Enmienda firmada (2026-10-04): la condición de §3.3 se CUMPLIÓ — CRITICAL entra
+
+### La firma del operador
+
+> «YO Jojo dueño del proyecto FORTRESS firmo: subo DEBUT a incluir CRITICAL,
+> porque la condición de ADR-106 §3.3 está CUMPLIDA — el HIGH 9f69a37c nació
+> el 3-oct (posterior al sello de ADR-106), pasó la cadena completa (gate
+> verde, OMEGA aprobó, mi firma, merge 2655c77), verificado asiento a
+> asiento. Es el último escalón de la escalera de severidad
+> (LOW→MEDIUM→HIGH→CRITICAL), cada uno pagado con evidencia y firmado por mí.
+> Con esto el Motor puede atacar el CRITICAL 351abcd1 (el escáner que lanza
+> claude -p sin restringir settings) — solo sobre FORTRESS (la cura ADR-107),
+> con gate + OMEGA + mi firma como red (CRITICAL nunca auto-merge, siempre
+> exige mi firma para integrarse). La subida es UNA línea en DEBUT, como cada
+> escalón anterior.»
+
+### La evidencia, asiento a asiento
+
+La puerta pedía tres eventos exactos sobre un HIGH posterior al sello, y el
+libro de `9f69a37c` los tiene: `gate verde` (#13, 5 comandos, 314 s), `omega
+aprobo` (#15, resuelve SI — «el gate de confianza está en el sitio real,
+falla cerrado») e `integracion firmada por el operador` (merge `2655c77`,
+sesión del 2026-10-04, main=origin=copia=`97c25b1`). `created_at` del 3-oct:
+el corte por fecha que §3.3 impuso queda respetado — el HIGH del 19-ago no
+cuenta, y no contó.
+
+### Lo que la subida NO toca
+
+El auto-merge: `DEFAULT_POLICY.severities` sigue en `['LOW','MEDIUM']` — un
+CRITICAL reparado llega a la COLA DE FIRMA y solo la firma del operador lo
+integra, el mismo cerrojo que esta decisión dejó para HIGH. El perímetro: el
+Motor sigue siendo solo de FORTRESS (ADR-107), así que el único CRITICAL
+alcanzable hoy es `351abcd1`; los ~50 CRITICAL de repos de clientes quedan
+donde estaban, para el Terminal. Y el binario: la subida entra al drenaje
+tras el próximo rebuild en frío.
