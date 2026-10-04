@@ -237,12 +237,26 @@ cmd_add() {
 
 cmd_trust() {
     local name="${1:?Uso: fortress-orchestrator.sh trust nombre}"
-    local line=$(get_repos | awk -F'|' -v name="$name" '$1 == name' | head -n 1)
+    local matches=$(get_repos | awk -F'|' -v name="$name" '$1 == name')
 
-    if [ -z "$line" ]; then
+    if [ -z "$matches" ]; then
         log_error "Repo no configurado: $name"
         exit 1
     fi
+
+    # El nombre nace de basename (add) y puede repetirse entre rutas.
+    # La confianza es POR PROYECTO: con homonimos no se concede a
+    # ninguno — ambiguo = falla cerrado, igual que repo_trusted.
+    if [ "$(printf '%s\n' "$matches" | wc -l | tr -d ' ')" -gt 1 ]; then
+        log_error "Nombre ambiguo: '$name' corresponde a varios repos:"
+        printf '%s\n' "$matches" | cut -d'|' -f2 | while IFS= read -r repo_path; do
+            log_error "  - $repo_path"
+        done
+        log_info "Desambiguar renombrando el campo NOMBRE en $REPOS_FILE (la ruta es la clave unica)."
+        exit 1
+    fi
+
+    local line="$matches"
 
     if repo_trusted "$line"; then
         log_info "$name ya tiene confianza declarada."
