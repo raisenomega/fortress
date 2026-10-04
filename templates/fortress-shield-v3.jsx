@@ -113,16 +113,23 @@ function PhaseBlock({ phase, data }) {
   );
 }
 
+// El dominio y los campos de findings/summary vienen de la web escaneada: input hostil
+// (templates/CLAUDE.md, Validacion de Input, punto 7). Escapar toda la puntuacion markdown
+// impide falsificar estructura del informe (headings, links, imagenes, fences, tablas).
+const escapeMd = (v) => String(v ?? "").replace(/[\\`*_{}[\]()#+\-.!<>|~=]/g, "\\$&");
+// Dentro de un fence ``` el backslash no escapa: se neutraliza el backtick del dato.
+const escapeFence = (v) => String(v ?? "").replace(/`/g, "'");
+
 function generateReport(domain, results, globalScore, summary) {
   const now = new Date().toISOString().split("T")[0];
   let md = `# FORTRESS SHIELD v3 — Informe de Seguridad\n`;
-  md += `## Dominio: ${domain}\n`;
+  md += `## Dominio: ${escapeMd(domain)}\n`;
   md += `### Fecha: ${now}\n`;
   md += `### Clasificación: CONFIDENCIAL · INTERNO\n\n`;
   md += `---\n\n`;
   md += `## RESUMEN EJECUTIVO\n\n`;
   md += `**Score Global: ${globalScore}/100**\n\n`;
-  md += `${summary}\n\n`;
+  md += `${escapeMd(summary)}\n\n`;
 
   const all = Object.values(results).flatMap(r => r.findings || []);
   const counts = {};
@@ -139,9 +146,9 @@ function generateReport(domain, results, globalScore, summary) {
   if (critsAndHighs.length > 0) {
     md += `## ⛔ ACCIONES PRIORITARIAS (resolver antes de producción)\n\n`;
     critsAndHighs.forEach((f, i) => {
-      md += `### ${i+1}. [${f.severity}] ${f.title}\n\n`;
-      md += `**Problema:** ${f.description}\n\n`;
-      md += `**Solución:** ${f.fix}\n\n`;
+      md += `### ${i+1}. [${f.severity}] ${escapeMd(f.title)}\n\n`;
+      md += `**Problema:** ${escapeMd(f.description)}\n\n`;
+      md += `**Solución:** ${escapeMd(f.fix)}\n\n`;
       md += `---\n\n`;
     });
   }
@@ -157,9 +164,9 @@ function generateReport(domain, results, globalScore, summary) {
     } else {
       data.findings?.forEach(f => {
         const icon = f.severity === "OK" ? "✅" : f.severity === "CRITICAL" ? "🔴" : f.severity === "HIGH" ? "🟠" : f.severity === "MEDIUM" ? "🟡" : f.severity === "LOW" ? "🟢" : "🔵";
-        md += `#### ${icon} [${f.severity}] ${f.title}\n\n`;
-        md += `${f.description}\n\n`;
-        if (f.fix) md += `> **FIX:** ${f.fix}\n\n`;
+        md += `#### ${icon} [${escapeMd(f.severity)}] ${escapeMd(f.title)}\n\n`;
+        md += `${escapeMd(f.description)}\n\n`;
+        if (f.fix) md += `> **FIX:** ${escapeMd(f.fix)}\n\n`;
       });
     }
     md += `---\n\n`;
@@ -172,7 +179,7 @@ function generateReport(domain, results, globalScore, summary) {
   ["CRITICAL","HIGH","MEDIUM","LOW"].forEach(sev => {
     const items = all.filter(f => f.severity === sev && f.fix);
     items.forEach(f => {
-      md += `- [ ] **${checkNum}.** [${sev}] ${f.title} → ${f.fix.slice(0,120)}${f.fix.length>120?"...":""}\n`;
+      md += `- [ ] **${checkNum}.** [${sev}] ${escapeMd(f.title)} → ${escapeMd(f.fix.slice(0,120))}${f.fix.length>120?"...":""}\n`;
       checkNum++;
     });
   });
@@ -185,7 +192,7 @@ function generateReport(domain, results, globalScore, summary) {
   md += `**Herramientas utilizadas:** web_fetch (inspección directa de headers/HTML), web_search (OSINT pasivo)\n\n`;
   md += `**8 capas analizadas:** Transporte/Cifrado, Cabeceras HTTP, Fingerprinting, Superficie de Ataque, Archivos Expuestos, Email/DNS, CVEs/Brechas, Infraestructura\n\n`;
   md += `---\n\n`;
-  md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${domain}\nScore: ${globalScore}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
+  md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${escapeFence(domain)}\nScore: ${globalScore}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
 
   return md;
 }
