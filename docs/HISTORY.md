@@ -873,6 +873,36 @@ mano, por la vía diseñada**: el rig probó que los hooks de un repo auditado
 corrían fuera de la caja con credenciales y red, y `--setting-sources user`
 sobre no confiables cerró el vector multi-cliente en el cuello único.
 
+### La maratón del Motor (sábado 22:43 → domingo 14:18, hora del operador)
+
+El mismo fin de semana en que se firmó la escalera, el Motor corrió su primera
+jornada completa de producción: **del sábado a las 22:43 al domingo a las
+14:18** (02:43→18:19 UTC), dos tandas de drenaje —la corta de la madrugada y
+la completa de diez horas— **sin una sola interrupción, desviación ni avería
+operativa propia**. Los números, verificados contra la base al cierre:
+
+- **64 ciclos sobre 57 hallazgos distintos** (la baraja anunciaba ~67-69: las
+  fusiones plegaron los duplicados antes de pagarlos dos veces), 155 corridas
+  de agente, **$284.19** — bajo todos los topes, que se consultaron en cada
+  vuelta y nunca hicieron falta.
+- **40 fixes APROBADOS por OMEGA** esperando firma —el **estreno del
+  CRITICAL** entre ellos, aprobado a la primera, $5.73— + 13 rechazos con
+  **ocho causas distintas y las ocho honestas** (el muro del ABI, no-diff,
+  ADR-102 cortando antes de pagar, el veto de OMEGA recomputado por ejes, un
+  blip 403 externo absorbido sin caerse, los topes de turnos, un gate rojo de
+  verdad) + 11 caducadas (9 fusiones y 2 actas de juicio).
+- **Cero alertas de jaula, cero salidas de correa, cero propuestas colgadas**:
+  cada una de las 64 terminó en un estado terminal o en la cola de firma, y el
+  cuadre fila a fila cierra exacto.
+
+La capacidad quedó probada, no prometida: **FORTRESS sostiene una jornada
+entera de reparación autónoma en producción** — cada corrida nace fresca (no
+hay agente que se canse), las redes deterministas cazan lo que un agente
+alucine, y nada toca el árbol vivo sin la firma del operador. El retrato
+ciclo a ciclo vive en el reporte del operador y en el log crudo del vigía;
+lo que este acto deja escrito es la verdad que importa: **el Motor ya no es
+un experimento — es una jornada de trabajo.**
+
 ## Presente
 
 **(Actualizado el 2026-10-04.)** El Motor repara en cualquier severidad —la
