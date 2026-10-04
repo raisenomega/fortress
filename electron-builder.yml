@@ -100,7 +100,11 @@ electronFuses:
   # implementa en Linux (el AppImage queda fuera) y better-sqlite3 vive en
   # asarUnpack, fuera del asar validado.
   enableEmbeddedAsarIntegrityValidation: true
-  # Su default (true) da a file:// privilegios extra (salta CSP y lee
-  # ficheros locales); el renderer empaquetado no los necesita. Si un build
-  # frio falla al pintar, pasar npm run smoke sobre el artefacto.
-  grantFileProtocolExtraPrivileges: false
+  # MEDIDO 2026-10-05 (binario 56295230, pantalla negra): el renderer
+  # empaquetado SI los necesita — Vite emite <script type="module"
+  # crossorigin> y la carga de modulos ES por file:// muere por CORS sin
+  # este fuse; la app arranca main+zygotes y jamas pinta (cero proceso
+  # renderer). Vuelve a true HASTA servir el renderer por protocolo propio
+  # (custom protocol), que es la via correcta de quitarle privilegios a
+  # file:// sin matar la carga — seguimiento en DEUDAS.
+  grantFileProtocolExtraPrivileges: true

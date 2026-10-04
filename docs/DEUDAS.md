@@ -2471,3 +2471,18 @@ cuando toque UI.
 - (b) **manual (humano/CTO)** para un fix malo que mergea limpio. Ejemplo vivo: `3690fadf` (ENV congelado al cargar, §14) salía **VERDE** en la sonda porque no choca; su bug es semántico, invisible a `medir-tanda`. Un solo rojo automático sería «una pared que se cumple casi siempre» (PRINCIPLES §22 / ADR-065): falsa seguridad justo en el peor caso — te empujaría a firmar la única que hay que rechazar.
 
 **Alcance.** Solo presentación: orden de la vista + color de fila. **NO toca `repair:sign` ni el merge**; la firma no se afecta. Es su propia pieza (test rojo→mutante→gate + rebuild).
+
+## 20. El fuse de file:// revertido con dato — pendiente el protocolo propio (2026-10-05)
+
+El fix firmado `4c43f6cd` puso `grantFileProtocolExtraPrivileges: false` y el
+binario `56295230` **jamás pintó ventana** (main+zygotes, cero renderer;
+pantalla negra medida): Vite emite `<script type="module" crossorigin>` y la
+carga de módulos ES por `file://` muere por CORS sin ese fuse. Era EXACTO el
+riesgo que el analista dejó escrito («puede romper el renderer… pide npm run
+smoke sobre el empaquetado») — y el smoke no se corrió antes de instalar: la
+lección es que **tras firmar cambios de empaquetado, el smoke del artefacto va
+ANTES de confiar el binario** (el gate no empaqueta, §16). El fuse vuelve a
+`true`; `enableEmbeddedAsarIntegrityValidation` se queda (inerte en Linux,
+útil en mac/win). **Seguimiento (la vía correcta):** servir el renderer por
+protocolo propio (custom protocol) y entonces sí quitar los privilegios de
+`file://` — pieza propia con smoke obligatorio.
