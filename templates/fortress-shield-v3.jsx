@@ -15,8 +15,18 @@ const PHASES = [
 
 // Cuota de cortesia en cliente (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora).
 // Cada escaneo son 9 llamadas; el control real va en el servidor o proxy de la API.
+// El registro persiste en localStorage para sobrevivir recargas; si el storage esta
+// bloqueado (artefacto, iframe sandboxed) degrada al registro en memoria de la sesion.
 const SCANS_PER_HOUR = 3;
 const HOUR_MS = 60 * 60 * 1000;
+const SCAN_LOG_KEY = "fortress-shield-v3.scan-log";
+const readScanLog = () => {
+  try {
+    const log = JSON.parse(window.localStorage.getItem(SCAN_LOG_KEY) || "[]");
+    return Array.isArray(log) ? log.filter(t => typeof t === "number") : [];
+  } catch { return null; }
+};
+const writeScanLog = (log) => { try { window.localStorage.setItem(SCAN_LOG_KEY, JSON.stringify(log)); } catch {} };
 const PHASE_GAP_MS = 1500;
 const MAX_SEARCHES = 5;
 const MAX_RETRIES = 3;
@@ -244,13 +254,16 @@ export default function FortressV3() {
     const clean = domain.trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
     if (!clean) return;
     const now = Date.now();
-    scanLog.current = scanLog.current.filter(t => now - t < HOUR_MS);
-    if (scanLog.current.length >= SCANS_PER_HOUR) {
-      const mins = Math.ceil((HOUR_MS - (now - scanLog.current[0])) / 60000);
+    const stored = readScanLog();
+    const log = (stored ?? scanLog.current).filter(t => now - t < HOUR_MS);
+    if (log.length >= SCANS_PER_HOUR) {
+      const mins = Math.ceil((HOUR_MS - (now - log[0])) / 60000);
       setError(`Límite de ${SCANS_PER_HOUR} escaneos por hora alcanzado. Reintenta en ${mins} min.`);
       return;
     }
-    scanLog.current.push(now);
+    log.push(now);
+    scanLog.current = log;
+    writeScanLog(log);
     setScanning(true); setResults({}); setPhaseIdx(0); setGlobalScore(null); setSummary(""); setDone(false); setError("");
 
     const all = {};
@@ -374,8 +387,8 @@ export default function FortressV3() {
             </div>
             {PHASES.map((ph,i) => {
               const d = results[ph.id];
-              if (!d) return <div key={ph.id} style={{background:"#0f172a",border:"1px solid #0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,opacity:0.3,display:"flex",alignItems:"center",gap:10}}>
-                <span style={{fontSize:18}}>{ph.icon}</span><span style={{fontSize:12,color:"#334155"}}>{ph.name}</span><span style={{marginLeft:"auto",fontSize:10,color:"#1e293b"}}>pendiente</span>
+              if (!d) return <div key={ph.id} style={{background:"#0f172a",border:"1px solid #0f172a",borderRadius:12,padding:"12px 14px",marginBottom:8,display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:18,opacity:0.3}}>{ph.icon}</span><span style={{fontSize:12,color:"#94a3b8"}}>{ph.name}</span><span style={{marginLeft:"auto",fontSize:10,color:"#94a3b8"}}>pendiente</span>
               </div>;
               return <PhaseBlock key={ph.id} phase={ph} data={d}/>;
             })}
@@ -421,7 +434,7 @@ export default function FortressV3() {
 
         {/* Footer */}
         {done && (
-          <div style={{marginTop:16,padding:12,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,fontSize:9,color:"#334155",textAlign:"center",lineHeight:1.6}}>
+          <div style={{marginTop:16,padding:12,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,fontSize:9,color:"#94a3b8",textAlign:"center",lineHeight:1.6}}>
             FORTRESS SHIELD v3 · EASM · OWASP WSTG + NIST CSF + PTES 1-3 · 100% pasivo y legal<br/>
             Para pentesting activo se requiere contrato de autorización firmado + profesional certificado
           </div>
