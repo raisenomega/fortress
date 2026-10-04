@@ -3,6 +3,8 @@ import { spawnSync } from 'child_process'
 import { writeFileSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
+import type { Project } from '../src/domain/project/project.ts'
+import { ejecutaConConfianza } from '../src/domain/repair/confianza.ts'
 import {
   registradasDeLaParada,
   type FilaRegistrada
@@ -27,8 +29,13 @@ if (!proyecto || !carpeta)
 const sinMemoria = argv.includes('--sin-memoria')
 const base = argv.includes('--base') ? argv[argv.indexOf('--base') + 1] : join(homedir(), '.config/fortress-command-center/fortress.db') // prettier-ignore
 const db = new Database(base, { readonly: true })
-const p = db.prepare('SELECT id, path FROM projects WHERE name = ?').get(proyecto) as { id: string; path: string } | undefined // prettier-ignore
+const p = db.prepare('SELECT id, path, trusted FROM projects WHERE name = ?').get(proyecto) as { id: string; path: string; trusted: number } | undefined // prettier-ignore
 if (p === undefined) throw new Error(`No hay ningun proyecto llamado "${proyecto}" en ${base}`)
+// Gate de confianza (gate-guards): la parada corre `claude` con Bash pre-aprobado
+// y cwd en el arbol del proyecto; sin confianza eso es ejecutar codigo ajeno con
+// el usuario del operador, y la caja no basta — el codigo sigue viendo el disco.
+if (!ejecutaConConfianza({ ...p, trusted: p.trusted === 1 } as Project))
+  throw new Error(`"${proyecto}" no es de confianza: conmuta el TrustToggle antes de medir`)
 const vivas = db.prepare(`SELECT file, line, identity, simbolo, lifecycle, tipo FROM findings WHERE project_id = ? AND lifecycle != 'EXTINCT'`).all(p.id) as (FilaRegistrada & { tipo: string })[] // prettier-ignore
 db.close()
 const registradas = sinMemoria ? [] : registradasDeLaParada(vivas, [carpeta])
