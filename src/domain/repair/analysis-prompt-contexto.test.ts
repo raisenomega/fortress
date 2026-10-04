@@ -9,8 +9,11 @@ const prompt = (): string =>
   buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'home-jojo-repo', CON_BASH)
 
 describe('el analista sabe DESDE CUANDO se ve el hallazgo', () => {
-  it('la fecha de deteccion viaja en la cabecera, en formato corto', () => {
-    expect(prompt()).toContain('Detectado el 2026-01-01.')
+  it('la fecha de deteccion viaja en la cabecera, en corto y DICIENDO que es UTC', () => {
+    // Backlog 2026-10-04 (38b3fcb4): el brief decia «Detectado el 2026-10-04»
+    // con la caja aun en el 2026-10-03 local — una fecha «del futuro» que
+    // sugeria reloj roto. No era bug: era UTC sin etiquetar.
+    expect(prompt()).toContain('Detectado el 2026-01-01 (UTC).')
   })
 
   it('se le dice que la fecha NO prueba nada: el fichero manda', () => {

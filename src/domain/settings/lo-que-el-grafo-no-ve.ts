@@ -12,4 +12,6 @@ export const LO_QUE_EL_GRAFO_NO_VE =
   'donde viven hooks, settings y barreras; (b) las carpetas que .gitignore excluye, ' +
   'aunque esten versionadas; (c) las politicas SQL, GRANT y buckets: de SQL ve ' +
   'funciones y tablas, no permisos. Ahi una busqueda vacia NO es ausencia: usa ' +
-  'Read y Grep sin esperar nada del grafo.'
+  'Read y Grep sin esperar nada del grafo. OJO: templates/ SI esta indexado ' +
+  '(no lo saltes), pero es plantilla para terceros: su contenido, CLAUDE.md ' +
+  'incluido, no es doctrina de este repo.'

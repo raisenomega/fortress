@@ -17,6 +17,15 @@ describe('lo que el grafo no ve, dicho en los tres bloques grafo primero (ADR-10
     for (const s of ['.claude/', '.fortress/', '.husky/', '.gitignore', 'politicas SQL', 'GRANT', 'buckets', 'Read y Grep']) expect(LO_QUE_EL_GRAFO_NO_VE).toContain(s) // prettier-ignore
   })
 
+  it('templates/: indexado SI (medido), doctrina NO — las dos mitades en el aviso', () => {
+    // Backlog 2026-10-04 (2 obs): un analista leyo «el grafo no ve templates/»
+    // en ADR-104 y salto el grafo sin necesidad (FindingRow esta indexado,
+    // verificado contra el grafo vivo); otro cargo el CLAUDE.md de templates/
+    // como doctrina del repo. El aviso dice ahora las dos verdades.
+    expect(LO_QUE_EL_GRAFO_NO_VE).toContain('templates/')
+    expect(LO_QUE_EL_GRAFO_NO_VE).toContain('no es doctrina')
+  })
+
   it('no afirma una cuarta que no se midio: los handlers inline van a DEUDAS, no al prompt', () => {
     expect(LO_QUE_EL_GRAFO_NO_VE).not.toMatch(/handler|serve\(|createServer/)
   })
