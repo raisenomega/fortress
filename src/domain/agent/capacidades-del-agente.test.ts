@@ -39,6 +39,15 @@ describe('el bloque del prompt refleja, no afirma', () => {
     expect(texto).not.toMatch(/NO tienes Bash/)
   })
 
+  it('con Bash NO promete mediciones que la allowlist niega: lo dice el propio bloque', () => {
+    // Backlog 2026-10-04 (395adb2c): el brief prometia «red a los registros»
+    // y la capa de permisos nego npm audit y curl — en headless nadie aprueba
+    // lo no listado. El texto promete solo lo concedido, y a notes lo demas.
+    const texto = bloqueDeCapacidades({ bash: true, edita: false }).join('\n')
+    expect(texto).toMatch(/pre-aprobados|allowlist/)
+    expect(texto).toMatch(/se niega sin preguntar/)
+  })
+
   it('sin Bash: lo dice, y que anote en notes lo que solo daria un comando', () => {
     const texto = bloqueDeCapacidades({ bash: false, edita: false }).join('\n')
     expect(texto).toMatch(/NO tienes Bash/)

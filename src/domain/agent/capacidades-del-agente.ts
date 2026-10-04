@@ -35,8 +35,10 @@ export function capacidadesDe(args: readonly string[]): Capacidades {
 const CON_BASH: readonly string[] = [
   'Tienes Bash: puedes correr git, diffear y medir ejecutando. Corre CONTENIDO en la',
   'caja del proyecto (ADR-092): red solo a los registros de paquetes, sin credenciales',
-  'del operador y sin ver a otro cliente. Lo que midas ejecutando vale mas que lo que',
-  'supongas; si aun asi te falta un dato, dilo en "notes" en vez de suponerlo.',
+  'del operador y sin ver a otro cliente. OJO: solo corren los comandos pre-aprobados',
+  'de este brief; lo demas (npm audit, curl...) se niega sin preguntar, porque en',
+  'headless nadie aprueba. Lo que midas ejecutando vale mas que lo que supongas; si',
+  'un dato exige un comando no concedido, dilo en "notes" en vez de suponerlo.',
   ''
 ]
 
