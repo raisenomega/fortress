@@ -1226,6 +1226,34 @@ tan urgente como el transporte.**
 actual daría E2BIG en el juicio del CVE: **el juicio oficial de `7a3711a7`
 necesita merge + rebuild en frío.**
 
+### LA TANDA DEL BACKLOG DEL 2026-10-04: 17 DE 17, CON DOS DEFENSAS FIRMADAS
+
+**Cuatro arreglos del tipo «mentía en silencio»**, cada uno con test rojo→verde
+y mutante: el **0 del BM25** sobre los .md (DOCS FIRST manda ahora
+`file_pattern` SIN query y avisa del 0 engañoso — cerró 3 obs), **templates/
+con sus dos verdades** (indexado SÍ —verificado contra el grafo vivo—,
+doctrina NO: su CLAUDE.md ya no pasa por doctrina del repo — cerró 2), **el
+brief de Bash que prometía lo negado** (promete solo lo pre-aprobado; lo no
+concedido, a `notes`) y **la fecha UTC** (una detección de madrugada ya no
+parece un reloj roto). Dos de ellos tocan **DEFENSAS_DEL_PROMPT**
+(`capacidades-del-agente.ts`, `lo-que-el-grafo-no-ve.ts`): el flujo funcionó
+como está escrito — PARA, diff completo a Jojo, lectura adversaria, y su
+**firma literal** antes del merge (añaden verdad, endurecen tests, nada
+afloja). El quinto cierre fue gratis: el crash de `repair:drain` era el E2BIG,
+ya muerto por ADR-112.
+
+**Ocho descartes con doctrina**, auditables en el import: audit-en-vivo ×2 y
+escaneo-por-capas quedan **nombradas como candidatas a ADR** (ensanchar una
+allowlist es defensa y exige firma — patrón ADR-111; partir el alcance es
+decisión de producto); reanclaje ×2 (rechazado con dato, DEUDAS §6.5),
+`list_projects` (aislamiento multi-cliente), a11y (doctrina de puertas),
+build-win (no medible en esta caja, criterio ADR-112 §4), y la clase que
+«faltaba» ya existía («artefacto sin firma» es literal en la definición).
+
+**La regla aprendida** (reincidencia confesada): `npm run lint` ANTES del
+primer commit de una tanda — el max-lines cazó un test en 79/75 después de
+cuatro commits.
+
 ### EL CRITICAL 351abcd1 ARREGLADO A MANO (2026-10-04) — la vía diseñada
 
 El único CRITICAL de FORTRESS anclaba en `claude-cli.ts` = defensa del Motor:
