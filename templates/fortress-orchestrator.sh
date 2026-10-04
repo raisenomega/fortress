@@ -211,6 +211,21 @@ cmd_add() {
     local remote=$(cd "$path" && git remote get-url origin 2>/dev/null || echo "local")
     local branch=$(cd "$path" && git branch --show-current 2>/dev/null || echo "main")
 
+    # Fallo cerrado: '|' es el delimitador de repos.conf y name, remote y
+    # branch los elige quien autoro el repo clonado — una rama 'main|trusted'
+    # forjaria el campo 5 TRUSTED y el scan lanzaria claude sobre un repo no
+    # confiable. Rechazar, nunca sanear: sanear escribiria en repos.conf una
+    # identidad que el operador no declaro.
+    local field value
+    for field in name path remote branch; do
+        value="${!field}"
+        if [[ "$value" == *'|'* || "$value" == *[[:cntrl:]]* ]]; then
+            log_error "No se agrega el repo: el campo $field contiene '|' o caracteres de control (valor: $(printf '%q' "$value"))."
+            log_info "'|' es el delimitador de repos.conf: ese valor falsificaria el campo TRUSTED o romperia el parseo. Renombrar carpeta, remote o rama y reintentar."
+            exit 1
+        fi
+    done
+
     # Verificar si ya existe
     if grep -q "|${path}|" "$REPOS_FILE" 2>/dev/null; then
         log_warn "$name ya está configurado."
