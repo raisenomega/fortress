@@ -343,7 +343,10 @@ export default function FortressV3() {
           </div>
         </div>
 
-        {error && <div style={{padding:12,background:"#1a0a0a",border:"1px solid #7f1d1d",borderRadius:10,marginBottom:14,fontSize:12,color:"#fca5a5"}}>⚠️ {error}</div>}
+        {/* Alert montado siempre por la misma razon que la region de progreso: si naciera con el texto, el primer anuncio se perderia */}
+        <div role="alert" style={error?{padding:12,background:"#1a0a0a",border:"1px solid #7f1d1d",borderRadius:10,marginBottom:14,fontSize:12,color:"#fca5a5"}:{}}>
+          {error ? `⚠️ ${error}` : ""}
+        </div>
 
         {/* Global Score */}
         {globalScore !== null && (
