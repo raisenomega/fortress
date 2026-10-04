@@ -31,6 +31,22 @@ general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
 [DECISIONS/](DECISIONS/README.md) contiene las ciento once decisiones
 arquitectónicas.
 
+## 2026-10-04/05 — La maratón del Motor
+
+**[Motor]** **Primera jornada completa de reparación autónoma en producción**
+(sábado 22:43 → domingo 14:18, hora del operador): **64 ciclos sobre 57
+hallazgos, 155 corridas, $284.19**, sin interrupciones ni averías propias.
+**40 fixes aprobados por OMEGA a la cola de firma — el estreno del CRITICAL
+incluido** (`templates/fortress-orchestrator.sh:226`, el separador del
+registro validado fallo-cerrado en los cuatro campos, +15/−0, aprobado a la
+primera). 13 rechazos con ocho causas distintas, todas frenos y no averías
+—entre ellas el **primer veto de OMEGA recomputado por ejes** (el revisor
+dijo APROBADO, sus ejes decían PARCIAL+MAYOR, mandaron los ejes) y el primer
+disparo EN VIVO del guard de ADR-102—; 9 fusiones de duplicados; cero
+alertas de jaula y cero salidas de correa. Cuadre fila a fila contra la base
+al cierre: ninguna propuesta perdida ni colgada. Capacidad de producción
+PROBADA, no prometida.
+
 ## 2026-09-28 a 2026-10-04
 
 **[Motor]** **La cura del perímetro y la escalera completa.** ADR-107 fija que

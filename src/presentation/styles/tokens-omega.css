@@ -17,7 +17,11 @@
   --muted-foreground: 225 8% 55%;
   --accent: 38 40% 20%;
   --accent-foreground: 40 6% 90%;
-  --border: 225 12% 16%;
+  /* Borde a L 42%: como limite de componente pasa 3:1 (WCAG 1.4.11) sobre
+     background (~3.4) y card (~3.2). A L 16% media 1.3:1, y el borde es la
+     unica sena del campo en reposo porque --input apenas contrasta. El
+     --sidebar-border queda a L 16%: separador decorativo, fuera de 1.4.11. */
+  --border: 225 12% 42%;
   --input: 225 12% 14%;
   --ring: 38 85% 55%;
   /* Rojo a L 64%: como texto pequeno pasa 4.5:1 (WCAG 1.4.3) sobre background
