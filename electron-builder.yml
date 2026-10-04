@@ -115,3 +115,15 @@ electronFuses:
   enableNodeCliInspectArguments: false
   onlyLoadAppFromAsar: true
   enableCookieEncryption: true
+  # Pareja de onlyLoadAppFromAsar: sin esta validacion, un app.asar editado
+  # tras instalar se carga sin protesta aunque el build saliera firmado
+  # (docs/SECURITY-MODEL.md, activo "integridad del propio binario").
+  # Fail-closed como la firma: ante un asar alterado la app aborta al
+  # arrancar en vez de cargarlo en silencio. Limites: Electron no la
+  # implementa en Linux (el AppImage queda fuera) y better-sqlite3 vive en
+  # asarUnpack, fuera del asar validado.
+  enableEmbeddedAsarIntegrityValidation: true
+  # Su default (true) da a file:// privilegios extra (salta CSP y lee
+  # ficheros locales); el renderer empaquetado no los necesita. Si un build
+  # frio falla al pintar, pasar npm run smoke sobre el artefacto.
+  grantFileProtocolExtraPrivileges: false
