@@ -35,8 +35,12 @@ export function argumentosDelAgente(
   trusted = false
 ): string[] {
   // Sin confianza, los settings del repo auditado NO cargan (`fuentes-de-settings`).
+  // El clasificador no usa grafo ni servidor propio: el flag estricto sin --mcp-config
+  // cierra el conjunto MCP a VACIO. Sin el, el hijo monta los servidores de
+  // ~/.claude.json del operador con cwd en el arbol auditado (SECURITY-MODEL:
+  // explicitos, no automaticos) — capa distinta de --setting-sources.
   // prettier-ignore
-  const base = ['-p', prompt, '--output-format', 'json', '--permission-mode', 'plan', ...fuentesDeSettings(trusted)]
+  const base = ['-p', prompt, '--output-format', 'json', '--permission-mode', 'plan', '--strict-mcp-config', ...fuentesDeSettings(trusted)]
   if (maxUsd > 0) base.push(BUDGET_FLAG, String(maxUsd))
   return base
 }
