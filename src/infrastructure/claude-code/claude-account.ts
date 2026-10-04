@@ -1,6 +1,7 @@
 import { spawn, spawnSync } from 'child_process'
 import { NO_ACCOUNT, type Account } from '@domain/settings/account'
 import { CLAUDE_BIN } from './claude-cli'
+import { buildEnv } from './build-env'
 import { trackChild } from './child-registry'
 
 // Dos logins a la vez pelean por el mismo navegador y la misma credencial:
@@ -46,7 +47,11 @@ export function startLogin(onOutput: (text: string) => void): Promise<void> {
     }
     isLoginRunning = true
 
-    const child = spawn(CLAUDE_BIN, ['auth', 'login', '--claudeai'], { env: process.env })
+    // `buildEnv(null)` como sus hermanos: recorta la SESION VIVA y fija la
+    // PRIVACIDAD; `null` porque el login es OAuth y no lleva key configurada.
+    // El recorte quita DISPLAY: si el CLI no abre el navegador, la URL llega
+    // igual por la salida reenviada y el operador la pega a mano.
+    const child = spawn(CLAUDE_BIN, ['auth', 'login', '--claudeai'], { env: buildEnv(null) })
     trackChild(child)
 
     child.stdout.on('data', (chunk: Buffer) => onOutput(chunk.toString()))
