@@ -2459,3 +2459,15 @@ no saben del carril y dejan pulsar — deshabilitarlas (o avisar) mientras mide
 ahorraria el rebote. Ninguna toca seguridad: el guard ya protege; es que el
 operador no tenga que chocar con el. Dos cambios de una linea cada uno,
 cuando toque UI.
+
+### FirmaView: ordenar por la guía + aviso de no-firmar en la fila (UX, no urgente)
+
+**Origen:** sesión del estreno del CRITICAL (2026-10-04/05), al firmar una tanda de 41 repartida en 5 páginas.
+
+**Qué.** Hoy `FirmaView` ordena las propuestas por fichero (`FirmaView.tsx:15-23`; `cola-de-firma.ts:37-46`), paginadas. El operador tiene que buscar la primera firma del orden sugerido entre varias páginas, una a una. Mejora: al correr «Medir la tanda» (`repair:medir-tanda`) / la guía (`repair:guia-de-firma`, que ya devuelve orden sugerido + grupos + dependencias al final), **reordenar la vista por ESE orden** — página 1 = firma #1, una detrás de otra. Y **marcar en la propia fila las que NO se firman en esta ronda, sin quitarlas**, para distinguirlas de un vistazo.
+
+**Caveat de diseño (lo que la hace no-trivial): DOS marcas, no una.** «Medir la tanda» solo mide **mergeabilidad de git, no corrección del fix**. Por eso el aviso de no-firmar debe ser doble:
+- (a) **automático** para las que caducarán por choque — la sonda sí las conoce; va con la pieza «deshabilitar filas al medir».
+- (b) **manual (humano/CTO)** para un fix malo que mergea limpio. Ejemplo vivo: `3690fadf` (ENV congelado al cargar, §14) salía **VERDE** en la sonda porque no choca; su bug es semántico, invisible a `medir-tanda`. Un solo rojo automático sería «una pared que se cumple casi siempre» (PRINCIPLES §22 / ADR-065): falsa seguridad justo en el peor caso — te empujaría a firmar la única que hay que rechazar.
+
+**Alcance.** Solo presentación: orden de la vista + color de fila. **NO toca `repair:sign` ni el merge**; la firma no se afecta. Es su propia pieza (test rojo→mutante→gate + rebuild).
