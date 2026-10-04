@@ -1,3 +1,4 @@
+import { redactSecrets } from '../chat/tool-detail'
 import { err, ok, type Result } from '../shared/result'
 import type { DetectedFinding } from './detected-finding'
 import { conSeveridadSegunTipo } from './hallazgo-con-ejes'
@@ -6,11 +7,9 @@ import { aTipoDeDefecto } from './tipo-de-defecto'
 
 const JSON_FENCE = /```json\s*([\s\S]*?)```/g
 
-/**
- * Un informe que no se entiende NO es un proyecto limpio. Devolver una lista
- * vacia aqui pintaria un 100/100 sobre un escaneo que en realidad fallo, que
- * es la peor mentira que podria contar esta app.
- */
+/** Un informe que no se entiende NO es un proyecto limpio: devolver una lista
+ *  vacia aqui pintaria un 100/100 sobre un escaneo que en realidad fallo, que
+ *  es la peor mentira que podria contar esta app. */
 const UNREADABLE =
   'El escaneo termino pero no devolvio un informe legible, asi que no se guarda ' +
   'ningun resultado. Vuelve a intentarlo.'
@@ -23,7 +22,8 @@ export function lastJsonBlock(output: string): string | null {
   return blocks.at(-1) ?? null
 }
 
-/** Descarta entradas incompletas en vez de tumbar el informe entero. */
+/** Descarta entradas incompletas en vez de tumbar el informe entero, y tacha el
+ *  titulo y el simbolo: prosa del modelo (PRINCIPLES 16) que suele citar el secreto. */
 function toFinding(entry: unknown): DetectedFinding | null {
   if (typeof entry !== 'object' || entry === null) return null
   const raw = entry as Record<string, unknown>
@@ -40,11 +40,11 @@ function toFinding(entry: unknown): DetectedFinding | null {
   // para los tipos de auditoria ni se miran (ADR-103): el tipo ya esta resuelto.
   return conSeveridadSegunTipo(raw, {
     severity,
-    title: raw.title.trim(),
+    title: redactSecrets(raw.title.trim()),
     file: typeof raw.file === 'string' ? raw.file : '',
     line: line === null ? null : Math.trunc(line),
     tipo: aTipoDeDefecto(raw.tipo),
-    simbolo: typeof raw.simbolo === 'string' ? raw.simbolo.trim() : ''
+    simbolo: typeof raw.simbolo === 'string' ? redactSecrets(raw.simbolo.trim()) : ''
   })
 }
 
