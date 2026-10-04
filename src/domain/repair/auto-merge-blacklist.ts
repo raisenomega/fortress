@@ -13,6 +13,7 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   ...DEFENSAS_DE_LA_FUSION,
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
+  'src/domain/settings/fuentes-de-settings.ts',
   'src/domain/settings/safe-commands.ts',
   'src/domain/settings/modo-efectivo.ts',
   'src/domain/repair/integracion-sin-firma.ts',

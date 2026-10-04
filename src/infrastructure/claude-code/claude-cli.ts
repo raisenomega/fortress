@@ -5,6 +5,7 @@ import { withGraph } from '@domain/connectors/graph-mcp'
 import { MCP_CONFIG_FLAG } from '@domain/connectors/mcp-config'
 import { BUDGET_FLAG } from '@domain/settings/run-budget'
 import { claudeModeArg, type ClaudePermissionMode } from '@domain/settings/permission-mode'
+import { fuentesDeSettings } from '@domain/settings/fuentes-de-settings'
 import { buildAllowedTools, buildDisallowedTools } from './build-allowed-tools'
 import type { ConPrompt } from './prompt-por-stdin'
 
@@ -30,9 +31,10 @@ export function buildArgs(
   /** El store del grafo de ESTE turno (ADR-095, enmienda); null = la cache real, solo FORTRESS. */
   grafoDir: string | null = null
 ): ConPrompt {
-  // stream-json solo emite el flujo completo de eventos con --verbose.
+  // stream-json solo emite el flujo completo de eventos con --verbose. Y sin
+  // confianza, los settings del repo auditado NO cargan (`fuentes-de-settings`).
   // prettier-ignore
-  const args = ['-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', claudeModeArg(permissionMode)]
+  const args = ['-p', '--output-format', 'stream-json', '--verbose', '--permission-mode', claudeModeArg(permissionMode), ...fuentesDeSettings(trusted)]
 
   // Red de seguridad: sin tope, un agente sobre un repo enorme sigue leyendo
   // hasta agotar la cuota. Cero lo desactiva, si el operador lo decide asi.
