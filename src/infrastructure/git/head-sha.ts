@@ -1,4 +1,5 @@
 import { execFileSync } from 'child_process'
+import { gitEnv } from './git-env'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
 /**
@@ -9,6 +10,7 @@ export function headSha(dir: string): string | null {
   try {
     const sha = execFileSync('git', [...SIN_HOOKS, 'rev-parse', 'HEAD'], {
       cwd: dir,
+      env: gitEnv(),
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore']
     }).trim()
