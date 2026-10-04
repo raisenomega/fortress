@@ -16,15 +16,15 @@ describe('el GRAPH propio del motor lleva la misma palanca (ADR-095 enmienda, ca
     const args = argsDelGenerador('p', carpetaDePrueba('gen-'), DIR)
     expect(args.ok).toBe(true)
     if (args.ok)
-      expect(mcpDe(args.value).mcpServers[GRAPH_SERVER].env).toEqual({ CBM_CACHE_DIR: DIR })
+      expect(mcpDe(args.value.args).mcpServers[GRAPH_SERVER].env).toEqual({ CBM_CACHE_DIR: DIR })
   })
 
   it('los que solo leen (analista, critico, OMEGA) tambien', () => {
     const args = argsDeLectura('p', carpetaDePrueba('lec-'), DIR)
     expect(args.ok).toBe(true)
     if (args.ok) {
-      expect(mcpDe(args.value).mcpServers[GRAPH_SERVER].env).toEqual({ CBM_CACHE_DIR: DIR })
-      expect(args.value).toContain('--strict-mcp-config')
+      expect(mcpDe(args.value.args).mcpServers[GRAPH_SERVER].env).toEqual({ CBM_CACHE_DIR: DIR })
+      expect(args.value.args).toContain('--strict-mcp-config')
     }
   })
 })

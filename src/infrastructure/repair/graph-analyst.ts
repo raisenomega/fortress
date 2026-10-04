@@ -1,6 +1,7 @@
 import { argsDeLectura, type Prompt } from './generator-args'
 import { spawn } from 'child_process'
 import { buildEnv } from '../claude-code/build-env'
+import { escribirPrompt } from '../claude-code/prompt-por-stdin'
 import type { Capacidades } from '@domain/agent/capacidades-del-agente'
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import { graphSlug } from '@domain/graph/graph-slug'
@@ -16,13 +17,13 @@ import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
 
 /** `buildEnv(null)` como sus hermanos: recorta la SESION VIVA del operador (era el unico spawn que no lo hacia). */
 async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<RunOut> {
-  // El prompt DEBE ir pegado a -p (si no, otro flag se lo come). --strict-mcp-config aisla el
-  // grafo (sin los MCP de claude.ai). Solo lectura. Sin caja no arranca, como un binario ausente.
-  const grafo = await prepararGrafoDelTurno(cwd) // el store del turno (ADR-095, enmienda)
+  // Prompt por STDIN (ADR-112). Solo lectura; sin caja no arranca. `grafo`: el store del turno.
+  const grafo = await prepararGrafoDelTurno(cwd)
   const args = argsDeLectura(prompt, cwd, grafo.dir)
   if (!args.ok) return (grafo.liberar(), { result: args.error, noArranco: true })
   return new Promise((resolve) => {
-    const child = spawn(bin, [...args.value], { cwd, env: buildEnv(null) })
+    const child = spawn(bin, [...args.value.args], { cwd, env: buildEnv(null) })
+    escribirPrompt(child.stdin, args.value.prompt)
     trackChild(child, owner)
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
@@ -46,10 +47,8 @@ async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Pro
   })
 }
 
-/** Analista real: corre claude -p GRAFO-PRIMERO (read-only) y arma el Analysis
- *  con su factura. tokensUsed va undefined si el parser no lo saco: no se
- *  inventan numeros. El agentRunId no se sabe aqui todavia: lo pone quien
- *  asienta la corrida, que es quien recibe el id. */
+/** Analista real: claude -p GRAFO-PRIMERO (read-only) con su factura. tokensUsed
+ *  va undefined si el parser no lo saco. El agentRunId lo pone quien asienta. */
 // prettier-ignore
 export function createGraphAnalyst(claudeBin: string, projectPath: string, projectId: string): Analyst {
   return {

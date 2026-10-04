@@ -3,26 +3,29 @@ import { GRAPH_READ_TOOLS, withGraph } from '@domain/connectors/graph-mcp'
 import type { GraphVerify } from '@domain/graph/graph-actions'
 import { parseInitEvent } from '@domain/graph/parse-init'
 import { buildEnv } from '../claude-code/build-env'
+import { escribirPrompt, type ConPrompt } from '../claude-code/prompt-por-stdin'
 import { conSandbox } from '../sandbox/con-sandbox'
 import { CLAUDE_BIN } from '../claude-code/claude-cli'
 
 const FAILED: GraphVerify = { connected: false, tools: [] }
 
 /** Sin directorio de turno a proposito: verifica que el servidor conecta con la cache real. */
-export function verifyArgs(): string[] {
-  return [
-    '-p',
-    'ok',
-    '--output-format',
-    'stream-json',
-    '--verbose',
-    '--permission-mode',
-    'default',
-    '--allowedTools',
-    ...GRAPH_READ_TOOLS,
-    '--mcp-config',
-    withGraph(null)
-  ]
+export function verifyArgs(): ConPrompt {
+  return {
+    prompt: 'ok',
+    args: [
+      '-p',
+      '--output-format',
+      'stream-json',
+      '--verbose',
+      '--permission-mode',
+      'default',
+      '--allowedTools',
+      ...GRAPH_READ_TOOLS,
+      '--mcp-config',
+      withGraph(null)
+    ]
+  }
 }
 
 /**
@@ -33,10 +36,12 @@ export function verifyArgs(): string[] {
 export function verifyGraph(projectPath: string, apiKey: string | null): Promise<GraphVerify> {
   // La caja del CLI (ADR-092, clase A). Sin caja, el grafo cuenta como no
   // verificado: FAILED, que es lo que la UI ya sabe ensenar.
-  const args = conSandbox(verifyArgs(), projectPath)
+  const lanzamiento = verifyArgs()
+  const args = conSandbox(lanzamiento.args, projectPath)
   if (!args.ok) return Promise.resolve(FAILED)
   return new Promise((resolve) => {
     const child = spawn(CLAUDE_BIN, [...args.value], { cwd: projectPath, env: buildEnv(apiKey) })
+    escribirPrompt(child.stdin, lanzamiento.prompt) // ADR-112
     let buffer = ''
     let done = false
     const finish = (result: GraphVerify): void => {

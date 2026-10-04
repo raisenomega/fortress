@@ -6,6 +6,7 @@ import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
 import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
 import { buildEnv } from '../claude-code/build-env'
+import { escribirPrompt } from '../claude-code/prompt-por-stdin'
 
 /** El plazo, sacado del dato: las corridas que TERMINARON tardaron entre 205 y
  *  709 s, asi que 900 deja margen sobre la peor sin premiar a la que divaga. */
@@ -34,7 +35,8 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
         // que la sesion viva del operador no baja. `null` = sin key propia: se
         // sigue facturando por donde ya se facturaba (login OAuth bajo HOME).
         const env = buildEnv(null)
-        const child = spawn(claudeBin, [...args.value], { cwd: worktreePath, env })
+        const child = spawn(claudeBin, [...args.value.args], { cwd: worktreePath, env })
+        escribirPrompt(child.stdin, args.value.prompt) // ADR-112
         trackChild(child, projectId)
         let out = ''
         // SIGKILL sin gracia (OMEGA da tres segundos; este EDITA, y esos tres

@@ -2400,3 +2400,20 @@ con `cp` antes del `sed`, restaurar con `cp`, y git solo para lo comiteado.
 **§17.3 — Pendiente de ver en vivo:** OMEGA y el gate del Motor juzgando un
 lock regenerado real. No se simulo a proposito; llega solo en el primer drenaje
 tras este merge, y ahi se mide (¿que dice OMEGA de 173 lineas de lock?).
+
+## 18. El expediente de OMEGA pesa en tokens, no solo en argv (2026-10-03)
+
+**(a) EL CONTENIDO, pendiente con firma que lo nombra.** De la firma de
+ADR-112: «Aparte y despues, (a) el CONTENIDO: acotar el lock entero ×2 (~190k
+tokens de ruido) en el prompt de OMEGA con nota legible, porque OMEGA juzga
+con el diff — sigue haciendo falta con stdin, por coste, no por el limite.»
+
+El dato: `run-omega-inputs` mete pre+post ENTEROS de cada fichero del diff,
+sin tope. El lock son 370.544 B; ×2 ≈ ~190k tokens que el revisor no lee (la
+doctrina de ADR-111 §5 ya lo dice: nadie lee el lock linea a linea — lo
+contienen lock-only, ignore-scripts, la correa, OMEGA sobre el DIFF y la
+firma). Con ADR-112 el transporte aguanta, pero cada juicio de un fix de
+dependencias pagaria ese contexto. La forma barata cuando se ataque: un tope
+por bytes en los ficheros del expediente con nota legible («package-lock.json
+omitido por tamano (362 KB); el diff muestra sus cambios»), la clase
+lock/generados primero. Arco propio, con test rojo y mutante.

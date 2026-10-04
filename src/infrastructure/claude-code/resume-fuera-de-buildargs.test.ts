@@ -49,7 +49,7 @@ describe('--resume lo pone claude-code-agent, NUNCA buildArgs (ADR-088, Enmienda
   })
 
   it('buildArgs no sabe nada de sesiones: su salida nunca lleva --resume', () => {
-    const args = buildArgs('x', 'acceptEdits', {}, 'productor', 0, null, false, [])
+    const args = buildArgs('x', 'acceptEdits', {}, 'productor', 0, null, false, []).args
     expect(args).not.toContain('--resume')
     expect(args).not.toContain('--fork-session')
   })

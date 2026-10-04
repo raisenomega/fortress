@@ -22,7 +22,7 @@ describe('el techo de turnos', () => {
       '/grafo/turno'
     )
     if (!r.ok) throw new Error(r.error)
-    return r.value
+    return r.value.args
   }
 
   it('el generador se lanza CON el techo puesto', () => {
@@ -47,7 +47,7 @@ describe('el techo de turnos', () => {
 describe('argsDelGenerador: la vuelta del lazo reanuda la sesion (ADR-110)', () => {
   const conSesion = (sesion?: string): readonly string[] => {
     const r = argsDelGenerador('p', '/wt', null, sesion)
-    return r.ok ? r.value : []
+    return r.ok ? r.value.args : []
   }
 
   it('sin sesion no se reanuda nada: la primera vuelta corre limpia', () => {

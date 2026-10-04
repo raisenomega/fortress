@@ -1,6 +1,7 @@
 import { spawn } from 'child_process'
 import type { AnalystRunMeta } from '@domain/repair/analysis'
 import { buildEnv } from '../claude-code/build-env'
+import { escribirPrompt } from '../claude-code/prompt-por-stdin'
 import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { argsDeLectura } from './generator-args'
@@ -20,9 +21,8 @@ export interface GraphCritico {
 /**
  * El critico real: `claude -p` sobre el arbol, con las MISMAS herramientas que
  * OMEGA; la diferencia vive entera en el prompt. REPLICA el ciclo de proceso de
- * `graph-omega` y no lo reusa: quien ataca y quien juzga no comparten codigo,
- * para que un cambio en uno no mueva al otro. Si reusa `processOmegaOut` (abrir
- * el sobre no es juzgar) y el reloj de corrida (un cero de tokens no es «no medi»).
+ * `graph-omega` sin reusarlo (atacante y juez no comparten codigo a proposito).
+ * Si reusa `processOmegaOut` y el reloj (un cero de tokens no es «no medi»).
  * `grafo`: el store del turno (ADR-095, enmienda); sin atar, un dir vacio, nunca la cache real.
  */
 export function createGraphCritico(
@@ -35,13 +35,13 @@ export function createGraphCritico(
   return {
     run: async (arbol, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
-      const store = await grafo.preparar() // el store del turno (ADR-095, enmienda)
-      const args = argsDeLectura(prompt, arbol, store.dir) // sin caja no arranca: como un binario que no existe
+      const store = await grafo.preparar() // sin caja no arranca, como un binario que no existe:
+      const args = argsDeLectura(prompt, arbol, store.dir)
       if (!args.ok) return (store.liberar(), { ok: false, error: args.error, timedOut: false, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
-        const child = spawn(claudeBin, [...args.value], { cwd: arbol, detached: true, env: buildEnv(null) })
-        // Detached y por GRUPO: si no, Detener mata al lider y el MCP sigue vivo.
-        trackChild(child, projectId, 'grupo')
+        const child = spawn(claudeBin, [...args.value.args], { cwd: arbol, detached: true, env: buildEnv(null) })
+        escribirPrompt(child.stdin, args.value.prompt) // ADR-112
+        trackChild(child, projectId, 'grupo') // por GRUPO: o Detener mata al lider y el MCP sigue vivo
         let out = ''
         let timedOut = false
         const timer = setTimeout(() => {
