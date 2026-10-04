@@ -99,7 +99,7 @@ function PhaseBlock({ phase, data }) {
         <span aria-hidden="true" style={{fontSize:20}}>{phase.icon}</span>
         <span style={{display:"block",flex:1}}>
           <span style={{display:"block",fontSize:13,fontWeight:600,color:"#e2e8f0"}}>{phase.name}</span>
-          <span style={{display:"block",fontSize:10,color:"#475569"}}>
+          <span style={{display:"block",fontSize:10,color:"#94a3b8"}}>
             {fs.length} hallazgo{fs.length!==1?"s":""}
             {crits>0&&<span style={{color:"#ef4444",marginLeft:6}}><span aria-hidden="true">⬤ </span>{crits} crítico{crits>1?"s":""}</span>}
             {highs>0&&<span style={{color:"#f97316",marginLeft:6}}><span aria-hidden="true">⬤ </span>{highs} alto{highs>1?"s":""}</span>}
