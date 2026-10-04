@@ -434,7 +434,7 @@ export default function FortressV3() {
 
         {/* Footer */}
         {done && (
-          <div style={{marginTop:16,padding:12,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,fontSize:9,color:"#334155",textAlign:"center",lineHeight:1.6}}>
+          <div style={{marginTop:16,padding:12,background:"#0f172a",border:"1px solid #1e293b",borderRadius:10,fontSize:9,color:"#94a3b8",textAlign:"center",lineHeight:1.6}}>
             FORTRESS SHIELD v3 · EASM · OWASP WSTG + NIST CSF + PTES 1-3 · 100% pasivo y legal<br/>
             Para pentesting activo se requiere contrato de autorización firmado + profesional certificado
           </div>
