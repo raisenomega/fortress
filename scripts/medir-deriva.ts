@@ -12,6 +12,7 @@ import {
 import { parseScanOutput } from '../src/domain/scan/parse-scan-output.ts'
 import { buildScanPrompt } from '../src/domain/scan/scan-prompt.ts'
 import { termometroDeOtro } from '../src/domain/scan/termometro-de-otro.ts'
+import { BUDGET_FLAG, DEFAULT_PER_RUN } from '../src/domain/settings/run-budget.ts'
 import { buildEnv } from '../src/infrastructure/claude-code/build-env.ts'
 import { discoverCorpus } from '../src/infrastructure/project/discover-corpus.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
@@ -42,7 +43,7 @@ const registradas = sinMemoria ? [] : registradasDeLaParada(vivas, [carpeta])
 const prompt = buildScanPrompt(proyecto, discoverCorpus(p.path), [carpeta], undefined, registradas)
 console.log(`${proyecto} · carpeta ${carpeta} · ${sinMemoria ? 'SIN memoria (control)' : `CON memoria: ${registradas.length} registradas`} · lanzando la parada en la caja ...`) // prettier-ignore
 
-const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', '--allowedTools', 'Bash,Read,Grep,Glob'], p.path) // prettier-ignore
+const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', BUDGET_FLAG, String(DEFAULT_PER_RUN), '--allowedTools', 'Bash,Read,Grep,Glob'], p.path) // prettier-ignore
 if (!args.ok) throw new Error(`sin caja: ${args.error}`)
 const salida = spawnSync('claude', [...args.value], { cwd: p.path, env: buildEnv(null), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
 if (salida.status !== 0)
