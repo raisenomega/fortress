@@ -1589,7 +1589,15 @@ Falta la profundidad por capa, en este orden y por esta razón:
 
 ## 10. Lo que la cura del perímetro dejó desalineado (2026-09-30)
 
-### 10.1 P2 — Seis documentos describen el LOOP como si existiera
+### 10.1 ~~P2 — Seis documentos describen el LOOP como si existiera~~ — CERRADA 2026-10-04
+
+**Barrido hecho el 2026-10-04**, fichero por fichero y con las tres categorías
+que esta deuda pedía: FUNCIONAMIENTO-ACTUAL (§2.3 retirada, §5.2 y §5.4
+reescritas sobre ADR-107, debut y selección al día), IPC.md (los tres canales
+y el interruptor marcados RETIRADOS), DATA-MODEL (tabla y columna históricas,
+sin escritor), GLOSSARY (`debut` con la escalera, `loopBlocked` histórico),
+OVERVIEW (el renglón del loop ahora cuenta el Motor con drenaje) y PRINCIPLES
+(el ejemplo en pasado). HISTORY y CHANGELOG lo siguen nombrando, como debía.
 
 ADR-107 (`d5e9945`) retiró el LOOP de raíz. La documentación que cuenta **cómo
 funciona hoy** no se ha tocado, así que describe un subsistema que ya no está.
@@ -2397,9 +2405,13 @@ SIN COMMITEAR que el mutante mutaba, y el mutante siguiente corrio contra el
 fichero equivocado (parecio morir, pero por la razon equivocada). Regla: backup
 con `cp` antes del `sed`, restaurar con `cp`, y git solo para lo comiteado.
 
-**§17.3 — Pendiente de ver en vivo:** OMEGA y el gate del Motor juzgando un
-lock regenerado real. No se simulo a proposito; llega solo en el primer drenaje
-tras este merge, y ahi se mide (¿que dice OMEGA de 173 lineas de lock?).
+**§17.3 — ~~Pendiente de ver en vivo~~ HECHO 2026-10-03:** OMEGA juzgó el
+lock regenerado real del CVE de vitest (`7a3711a7`, +120/−53): primero el
+expediente entero reventó el presupuesto ($8,90 sin veredicto — eso parió el
+acotado de §18 y ADR-112), y con el acotado puesto el juicio oficial costó
+**$1,31 y APROBÓ**; la firma lo integró el último de su tanda, como mandaba
+la guía (merge `dd3fa73`). El ciclo de dependencias quedó cerrado end-to-end
+en producción.
 
 ## 18. ~~El expediente de OMEGA pesa en tokens, no solo en argv~~ — CERRADA 2026-10-03
 

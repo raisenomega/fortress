@@ -28,8 +28,45 @@ misma fecha —como el cierre documental del 2026-08-11— se registran tal cual
 sin distribuir artificialmente. Cada entrada apunta al documento donde el hito
 se narra o su decisión se registra: [HISTORY](HISTORY.md) ofrece la narrativa
 general, [FLOWS/](FLOWS/SELF-REPAIR.md) describe los flujos operativos, y
-[DECISIONS/](DECISIONS/README.md) contiene las ochenta y siete decisiones
+[DECISIONS/](DECISIONS/README.md) contiene las ciento once decisiones
 arquitectónicas.
+
+## 2026-09-28 a 2026-10-04
+
+**[Motor]** **La cura del perímetro y la escalera completa.** ADR-107 fija que
+**el Motor es solo de FORTRESS** (la guarda en los dos nacimientos) y retira el
+LOOP de raíz —62 módulos—; ADR-106 sube el debut a HIGH con la selección por
+severidad, y su **enmienda firmada del 2026-10-04 abre el último escalón**: el
+HIGH `9f69a37c` cruzó la cadena entera (gate verde, OMEGA aprobó, firma, merge
+`2655c77`) y `DEBUT` quedó en **LOW→CRITICAL**, con CRITICAL siempre a firma.
+ADR-110 le da al Motor su **lazo** (responde a la objeción de OMEGA con
+`--resume`, freno en dólares) y su recibo persiste cada parada sin vuelta.
+
+**[Motor]** **El ciclo de dependencias, cerrado end-to-end en producción.**
+ADR-111 (la correa: el Motor regenera el lock con `npm install
+--package-lock-only --ignore-scripts`, nunca los nativos) + ADR-112 (el prompt
+viaja por **stdin**: el E2BIG de Linux y los 32 KB de argv de Windows ya no
+tocan el transporte) + el acotado del expediente (32 KiB por fichero, §18): el
+CVE de vitest `7a3711a7` pasó gate, **OMEGA aprobó su lock real por $1,31** y
+la firma lo integró el último de su tanda (`dd3fa73`), como mandaba la guía.
+
+**[Operador]** **La guía de firma estrenada con una tanda de diez**: orden
+sugerido con las dependencias al final, sonda del árbol combinado con
+bisección, y el par culpable nombrado con medidas; 8 de 10 en main, main nunca
+en rojo.
+
+**[Seguridad]** **El CRITICAL 351abcd1, multi-cliente, arreglado a mano** (la
+vía diseñada: era defensa del Motor). El rig probó en vivo que los hooks del
+`.claude/settings.json` de un repo auditado **disparaban FUERA de la caja**
+—credenciales y red— y que su `apiKeyHelper` secuestraba la autenticación; el
+arreglo (`--setting-sources user` sin confianza, en el cuello único
+`buildArgs`) cierra el vector en todos los caminos y la caja `--settings`
+sobrevive, medido con sonda (`b4bb975`).
+
+**[Docs]** Barrido del «computador perdido» (2026-10-04): los seis documentos
+que describían el LOOP como vivo quedan al día (DEUDAS §10.1 CERRADA), el
+debut dice la escalera completa, e IPC/DATA-MODEL/GLOSSARY/OVERVIEW cuentan lo
+que el código hace hoy.
 
 ## 2026-09-26
 

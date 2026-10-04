@@ -190,9 +190,10 @@ Formato uniforme: **Contexto** (el error que lo parió) / **Regla** /
 - **Ejemplo:** el flujo de auto-reparación describe la doctrina completa de
   la firma Y declara aparte que hoy esa firma es un merge manual del
   operador, con la integración en la app en construcción. La distinción
-  entre bucle diseñado y bucle presente se aplica con más fuerza en
-  `docs/FLOWS/LOOP-VIEJO.md`; su decisión de fondo es
-  `docs/DECISIONS/adr-049-loop-autonomo-pre-motor.md`.
+  entre bucle diseñado y bucle presente tuvo su caso extremo en el LOOP
+  autónomo pre-motor, documentado y después retirado de raíz (historia en
+  `docs/FLOWS/LOOP-VIEJO.md`; su nacimiento en
+  `docs/DECISIONS/adr-049-loop-autonomo-pre-motor.md` y su retiro en ADR-107).
 
 ## 18. Al agente no se le cree por fe
 

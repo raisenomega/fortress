@@ -67,7 +67,6 @@ Gestión del catálogo de proyectos y su confianza.
 | `projects:pick-folder` | R/R | () → NewProject \| null (diálogo nativo) | — |
 | `projects:self` | R/R | () → NewProject \| null (el repo propio) | — |
 | `projects:set-trusted` | R/R | (id, trusted) → Result<null> | decisión explícita del operador |
-| `projects:set-loop-enabled` | R/R | (id, enabled) → Result<null> | bloqueo del loop sobre el self-repo |
 | `projects:focus` | R/R | id → null (dispara reconcilio del grafo) | — |
 | `projects:unblock` | R/R | (id, motivo?) → Result<null> (levanta el circuit breaker) | exige que el proyecto ESTÉ contaminado |
 
@@ -313,20 +312,13 @@ El panel del meta-auditor y el Libro de la Vida.
 | `maintenance:cleanup` | R/R | () → { killed } (limpia procesos colgados) | — |
 | `maintenance:live-jobs` | R/R | () → number | — |
 
-### loop (solo push)
+### loop — RETIRADO (ADR-107, 2026-09-30)
 
-| Canal | Dir | Contrato | Guards |
-|---|---|---|---|
-| `loop:last-session` | R/R | projectId → LoopSession \| null (la última sesión, con su razón de parada) | — |
-| `loop:status` | PUSH | LoopStatus (estado del ciclo autónomo) | — |
-| `loop:chunk` | PUSH | ChatChunk (salida del ciclo en curso) | — |
-
-Este dominio expone SOLO push de estado: no hay invocaciones
-renderer → main del loop autónomo pre-motor (su encendido va por
-`projects:set-loop-enabled`, con su guard). Su comportamiento se documenta
-en `docs/FLOWS/LOOP-VIEJO.md`. El loop autónomo está
-planificado para retiro en un incremento futuro, en favor del motor
-disciplinado.
+Los canales del loop autónomo pre-motor (`loop:last-session`, `loop:status`,
+`loop:chunk`) y su interruptor (`projects:set-loop-enabled`) **ya no se
+registran**: ADR-107 eliminó el subsistema de raíz. Su historia queda en
+`docs/FLOWS/LOOP-VIEJO.md`; su trabajo lo hace el drenaje
+(`repair:drain`, arriba).
 
 ## Contratos de streaming
 
@@ -373,9 +365,10 @@ decisión: cuando miente, el veredicto sale al revés.
 - **guardMerge** — el turno de la RAMA ACTIVA, que es otro recurso: lo
   piden `repair:sign` y `push:run`, las dos operaciones que la escriben o
   la publican. Trae además el circuit breaker de contaminación.
-- **Confianza (Workspace Trust)** — el modo autónomo y el loop exigen
-  proyecto confiable; el flag se cambia solo por decisión explícita del
-  operador.
+- **Confianza (Workspace Trust)** — el modo autónomo exige proyecto
+  confiable; sin confianza, además, los settings del repo auditado no cargan
+  (`--setting-sources user`, el CRITICAL 351abcd1). El flag se cambia solo
+  por decisión explícita del operador.
 - **Bloqueo del self-repo** — los ciclos autónomos no operan sobre el
   código del propio FORTRESS; verificado en dominio y aplicado en capas.
 - **Validación de rutas** — todo canal que recibe paths valida absoluto y

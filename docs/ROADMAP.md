@@ -113,7 +113,7 @@ que hoy más pesa.* **Doctrina del tramo: lo que ya existe no se rehace; se le
 sube el grado y la profundidad.**
 
 El estándar está fijado (ADR-098 §9): cada parte de la aplicación —Terminal,
-motor, LOOP, datos, despliegue— debe ser tan profunda, precisa y robusta como la
+motor, drenaje, datos, despliegue— debe ser tan profunda, precisa y robusta como la
 página de Escaneo cuando corre dentro de la misma disciplina. Este tramo es la
 distancia que falta, y **su orden no es una opinión**: sale de cuatro fuentes que
 coinciden.

@@ -128,27 +128,21 @@ La vista etiquetada **"Terminal"** en la barra lateral es `view='chat'`; la etiq
 - En **supervisado** (el default, `operation-mode.ts:10`) el CLI corre en `plan`: **lee, analiza y propone; no escribe**. Es el caso siempre que el objetivo sea FORTRESS mismo.
 - En **autónomo** sobre un proyecto **de confianza** el CLI corre en `acceptEdits` y **sí edita** el árbol de trabajo del proyecto. Solo entonces recibe una allowlist de comandos exactos `Bash(npm run <script>)` para autoverificarse (`src/domain/settings/safe-commands.ts:49-55`; `run-step.ts:23-31`). En ese camino **no hay checkpoint ni revert automático** (no existe `snapshot`/`revert` en `src/application/chat` ni `src/application/workflow`); la instrucción *"Si algo falla, revierte"* es texto del prompt (`operation-mode.ts:42-45`), no un mecanismo. La red git+verify sí existe, pero en otra superficie: el **Ejecutor** de la vista Construir (`src/application/build/build-feature.ts:6-14,24-38`).
 
-### 2.3 LOOP / Autónomo
+### 2.3 LOOP / Autónomo — RETIRADO (ADR-107, 2026-09-30)
 
-**Disparo:** el toggle del proyecto (`IPC.projectsSetLoopEnabled`) → `startLoop` (`src/infrastructure/loop/loop-controller.ts:44-57`). Al arrancar la app se reanudan los loops que quedaron vivos (`src/main/index.ts:41`; `loop-controller.ts:66-71`).
+El LOOP autónomo pre-motor **ya no existe**: ADR-107 lo eliminó de raíz (62
+módulos fuera, toggle, controller, engine y canales IPC incluidos). Su trabajo
+lo hace hoy el **Drenaje** (§4.4): vueltas `hasta-omega` sobre FORTRESS, con
+gate + revisor y la integración siempre por firma. La historia del subsistema
+queda en `docs/FLOWS/LOOP-VIEJO.md` y la decisión en ADR-107.
 
-**La puerta:** `loopBlocked` (`src/domain/loop/loop-gate.ts:64-69`) exige proyecto **de confianza**, topes **fijados y positivos** (`loop-budget.ts:72-75`: sin `costCapUsd` y `maxCycles` guardados el loop no enciende, *"nadie decide por él cuánto está dispuesto a gastar"*, `:3-9`), y la coherencia repo-propio/modo. Se aplica en el controller y **otra vez** en el engine, *"cinturón y tirantes"* (`loop-engine.ts:32-35`). Revocar la confianza de un proyecto apaga y **detiene** su loop (`src/application/project/set-project-trusted.ts:26-29`).
+**Los tres cortes** siguen existiendo en el código (`src/domain/repair/modo-vuelta.ts`; `src/application/repair/run-motor-chain.ts`):
 
-**El ciclo** (`src/application/loop/run-loop.ts:23-70`): escaneo base → por vuelta: `nextStop` → espera 5 s → `deps.fix()` → contadores → re-escaneo solo cuando se acumulan integraciones (`loop-counters.ts:64-67`) → espera 10 s. `fix()` pasa por `guardRun` como cualquier corrida (`loop-fix.ts:34-41`) y llama a `runMotorChain` con un modo que **se deriva del proyecto, no se configura** (`loop-deps-factory.ts:51`):
-
-```ts
-const modo = params.hastaGate ? 'hasta-gate' : 'completo'
-```
-
-**Los tres cortes** (`src/domain/repair/modo-vuelta.ts:19`; `src/application/repair/run-motor-chain.ts:41-75`):
-
-| modo | hasta dónde llega | quién lo usa |
+| modo | hasta dónde llega | quién lo usa HOY |
 |---|---|---|
-| `hasta-gate` | elegir → entender → generar → gate; **no llama al revisor** (`:60`) | el LOOP sobre el **repo propio** |
-| `hasta-omega` | …→ revisor; **no integra** (`:65`, `integrar=false`) | el **drenaje** (§4.4) |
-| `completo` | …→ integra **si la política lo permite** (`:65,69-74`) | el LOOP sobre **código ajeno** |
-
-**Cuándo para** (`src/domain/loop/loop-decision.ts:56-70`, en este orden de prioridad): intervención humana, tope de gasto de sesión, tope de propuestas, tres escaneos 100/100 seguidos (`resuelto`), baraja agotada, sin avance (fixes generados y descartados seguidos), demasiadas denegaciones seguidas de la política. La razón se persiste por proyecto y sobrevive al reinicio (`loop-session.ts:9-26`).
+| `hasta-gate` | elegir → entender → generar → gate; no llama al revisor | nadie (era del LOOP; queda como corte del dominio) |
+| `hasta-omega` | …→ revisor; **no integra** (`integrar=false`) | el **drenaje** (`drenar-hasta-omega.ts:48`) y el conteo de la cola (`resumen-cerco.ts:40`) |
+| `completo` | …→ integra **si la política lo permite** | el default de `runMotorChain`/`planRepair` (el dirigido); el cerco decide |
 
 ### 2.4 Exportar / Importar auto-mejora
 
@@ -160,7 +154,7 @@ const modo = params.hastaGate ? 'hasta-gate' : 'completo'
 
 ### 2.5 git push
 
-**Disparo:** solo el botón de Escaneo (`ScanActions.tsx:53` → `push-service.ts` → `IPC.pushRun`). **Ni el loop, ni el motor, ni la firma llaman al push**; el único `git push` del repo está en `src/infrastructure/git/git-push.ts:22` y su único llamador es `pushProject`.
+**Disparo:** solo el botón de Escaneo (`ScanActions.tsx:53` → `push-service.ts` → `IPC.pushRun`). **Ni el motor ni la firma llaman al push**; el único `git push` del repo está en `src/infrastructure/git/git-push.ts:22` y su único llamador es `pushProject`.
 
 **Cuándo se bloquea** (`src/infrastructure/ipc/push-handlers.ts:56-74` y `src/application/push/push-project.ts:13-31`):
 
@@ -235,7 +229,7 @@ ELEGIDO → ANALIZADO → GENERADO → GATE → OMEGA → APROBADO → MERGEADO
 
 ### 4.2 Una vuelta entera (`runMotorChain`, `src/application/repair/run-motor-chain.ts:41-75`)
 
-**C1 — Elegir** (`plan-repair.ts:29-44`; `elegir-objetivo.ts:25-42`). Candidatos: ACTIVE y abiertos, menos los obsoletos bajo este HEAD, los que ya tienen propuesta viva, los que fracasaron por una causa que repetir no arregla (`bloqueo-por-rechazo.ts:36-48`), y los fuera del alcance del modo (`alcance.ts:63-72`). Orden **determinista**: menor superficie de cambio, luego el más antiguo, luego la carpeta menos cargada (`select-target.ts:44-55`). Solo **LOW y MEDIUM** son elegibles en estreno (`debut.ts:16`). El HEAD se ancla **antes** de elegir (`plan-repair.ts:38-41`; ADR-008).
+**C1 — Elegir** (`plan-repair.ts:29-44`; `elegir-objetivo.ts:25-42`). Candidatos: ACTIVE y abiertos, menos los obsoletos bajo este HEAD, los que ya tienen propuesta viva, los que fracasaron por una causa que repetir no arregla (`bloqueo-por-rechazo.ts:36-48`), y los fuera del alcance del modo (`alcance.ts`) — las **defensas del Motor se restan primero y en todos los modos** (el Motor no repara su propia jaula). Orden **determinista**: la **severidad primero** (ADR-106, `compareSeverity`), y detrás los desempates de siempre —superficie, antigüedad, carpeta menos cargada— (`select-target.ts`). El estreno cubre **la escalera completa: LOW, MEDIUM, HIGH y CRITICAL** (`debut.ts`; ADR-106 y su enmienda del 2026-10-04, cada escalón firmado). El HEAD se ancla **antes** de elegir (`plan-repair.ts:38-41`; ADR-008).
 
 **C2 — Entender** (`plan-repair.ts:50-65`; `src/infrastructure/repair/graph-analyst.ts:53-70`). Un `claude -p` grafo-primero en **solo lectura** (`--permission-mode default` + `TOOLS_LECTURA`, `:25-26`), sin key propia y sin las llaves de la sesión viva (`buildEnv(null)`, `:28`). Tres veredictos, más un cuarto de entorno: `REAL → ANALIZADO`, `OBSOLETO → CADUCADO`, `ILEGIBLE → RECHAZADO`, `NO_ARRANCO → RECHAZADO` (`veredicto-del-analisis.ts:39-54`; ADR-066). Lo que el analista note de FORTRESS se guarda pase lo que pase (`plan-repair.ts:52-56`, §8).
 
@@ -294,33 +288,42 @@ git merge --abort                      ← si falla: el árbol queda como estaba
 
 En el binario empaquetado, `selfProject()` devuelve `null` porque el código vive dentro del asar (`self-project.ts:49-51`): FORTRESS instalada no puede auto-registrarse como proyecto, pero una carpeta añadida a mano con ese `package.json` sí se reconoce como propia.
 
-### 5.2 Las dos vedas, y por qué son dos
+### 5.2 La veda que sobrevivió al LOOP
 
-`src/domain/loop/loop-gate.ts` declara dos funciones distintas a propósito:
+Con ADR-107 se fue `loop-gate.ts` y con él `esHastaGate` (decidía hasta dónde
+TRABAJAR, y ya no hace falta: el Motor es solo de FORTRESS). La veda que
+importaba **se conservó a propósito**, hoy en
+`src/domain/repair/integracion-sin-firma.ts:17`:
 
 ```ts
-esHastaGate = (selfRepo) => selfRepo                       // :30 — hasta dónde TRABAJAR
-integracionAutomaticaPermitida = (selfRepo) => !selfRepo   // :49 — si el árbol vivo se toca solo
+integracionAutomaticaPermitida = (selfRepo) => !selfRepo   // si el árbol vivo se toca solo
 ```
 
-*"Allí se decide hasta dónde TRABAJAR, que es inocuo porque pasa entero dentro de un worktree; aquí se decide si el árbol vivo se toca solo. Sobre el código propio no se toca solo nunca."* (`:43-47`). La segunda nació de tres integraciones automáticas del 22 de agosto que entraron por el botón de juicio sin que nadie hubiera autorizado la integración (`:33-41`).
+Sobre el código propio no se toca solo **nunca**. La regla nació de tres
+integraciones automáticas del 22 de agosto que entraron por el botón de juicio
+sin que nadie hubiera autorizado la integración, y el fichero está en
+`AUTONOMY_RULES_FILES`: ni el Motor ni una firma por lote lo alcanzan.
 
 ### 5.3 Sobre FORTRESS: la firma es la única vía
 
 | superficie | qué hace sobre el repo propio | dónde |
 |---|---|---|
-| LOOP | corre `hasta-gate`: acumula propuestas y **no llama al revisor** | `loop-deps-factory.ts:51`; `loop-gate.ts:17-20` |
 | Botón de juicio (propuesta en GATE) | **juzga y para**; no arrastra la integración | `judge-and-integrate.ts:37-40,67`; `repair-omega-handler.ts:27-30` |
 | Firma (propuesta en OMEGA) | integra —es la única que puede— | `firma-service.ts:31-35`; `firmar-integracion.ts` |
 | Terminal en autónomo | **degrada a supervisado**, con aviso | `modo-efectivo.ts:36-41`; `operation-mode.ts:26-29` |
 | Ejecutor (Construir) | **bloqueado** | `ConstruirView.tsx:8-10`; `run-build.ts:15-16` |
 | Cualquier fix, también firmado | no puede tocar los ficheros de `AUTONOMY_RULES_FILES` | `firma-limite.ts:24-26`; `alcance.ts:46-48` |
 
-Por qué motor y drenaje van aparte de la firma: los guards *"son archivos como cualquier otro. Un agente autónomo que 'limpia código muerto' sobre ellos puede desmontar su propia jaula sin ninguna mala intención"* (`modo-efectivo.ts:23-28`). La lista de esos ficheros —`loop-gate.ts`, `claude-cli.ts`, `self-project.ts`, `run-guard.ts`, `permission-mode.ts`, `apply-auto-merge.ts`, `judge-and-integrate.ts`…— vive en `auto-merge-blacklist.ts:6-30` y `innegociables-*.ts`, y se aplica como **resta final** que ninguna configuración alcanza (`auto-merge-config.ts:31-33,68`).
+Por qué motor y drenaje van aparte de la firma: los guards *"son archivos como cualquier otro. Un agente autónomo que 'limpia código muerto' sobre ellos puede desmontar su propia jaula sin ninguna mala intención"* (`modo-efectivo.ts:23-28`). La lista de esos ficheros —`integracion-sin-firma.ts`, `claude-cli.ts`, `fuentes-de-settings.ts`, `self-project.ts`, `run-guard.ts`, `permission-mode.ts`, la familia de la selección y del auto-merge…— vive en `auto-merge-blacklist.ts` y `innegociables-*.ts`, y se aplica como **resta final** que ninguna configuración alcanza (`auto-merge-config.ts:31-33,68`).
 
-### 5.4 Sobre código ajeno: modo completo, pero con veda opt-in
+### 5.4 Sobre código ajeno: el Motor ya NI NACE (ADR-107), y la veda opt-in queda detrás
 
-El LOOP corre en `completo` (`loop-deps-factory.ts:51`) y `judgeAndIntegrate` sí puede llamar a `autoMergeProposal` (`judge-and-integrate.ts:66-68`). Lo que decide si integra es la **política del proyecto auditado**, leída de **`.fortress/config`** en su propia carpeta (`src/infrastructure/project/fortress-config.ts:7`; `auto-merge-proposal.ts:28`):
+Desde ADR-107 (2026-09-30) **el Motor es solo de FORTRESS**: la guarda vive en
+los dos nacimientos de una propuesta, así que sobre código ajeno no hay vuelta
+`completo` que discutir —el LOOP que la corría se eliminó de raíz—. El cerco
+que sigue abajo queda como segunda muralla: si algún día una vuelta integrara
+sola, lo que decide es la **política del proyecto auditado**, leída de
+**`.fortress/config`** en su propia carpeta (`src/infrastructure/project/fortress-config.ts:7`; `auto-merge-proposal.ts:28`):
 
 ```ts
 export const DEFAULT_POLICY: AutoMergePolicy = {
@@ -334,11 +337,11 @@ export const DEFAULT_POLICY: AutoMergePolicy = {
 
 **Es diseño, no accidente**, y el código lo dice: *"`enabled` nace en false a propósito. Un proyecto sin `.fortress/config` NUNCA integra solo; encenderlo exige escribirlo en un archivo que la lista de exclusión cubre a sí misma, así que el sistema no puede activarse solo"* (`auto-merge-policy.ts:15-21`). Tres estados y no dos: *no configurado* hereda el default; *configurado e ilegible* retira la integración automática, *"el sesgo seguro es retirar, no adivinar"* (`auto-merge-config.ts:5-14`). Con política encendida, el **cerco** evalúa seis condiciones y la denegación de cualquiera manda el fix a firma humana, nunca lo rechaza (`auto-merge-evaluation.ts:39-70`: interruptor, severidad, líneas del diff, número de ficheros, lista de exclusión, y el fichero resultante bajo 75 líneas, ADR-069).
 
-Resumen honesto: **sobre código ajeno el LOOP no para por doctrina, para por configuración.** La garantía dura (`integracionAutomaticaPermitida`) es solo del repo propio; lo que protege a un proyecto ajeno hoy es que su `.fortress/config` no existe o está apagado.
+Resumen honesto, actualizado el 2026-10-04: **sobre código ajeno hoy protege la doctrina** (ADR-107: el Motor no nace fuera de FORTRESS), y la configuración es la muralla de atrás. La frase vieja —«el LOOP no para por doctrina, para por configuración»— dejó de ser verdad cuando el LOOP se retiró.
 
 ### 5.5 La confianza (`trusted`) es otra línea, y separa leer de ejecutar
 
-`project.trusted` nace en `false` (`project.ts:33-38`; ADR-044). **Leer no la exige** —escanear es justo lo que se hace antes de decidir si confiar—; **ejecutar sí** (`confianza.ts:12-14`). Sin confianza: el gate rechaza (`gate-guards.ts:31-38`), el CLI no recibe allowlist de `npm run` (`safe-commands.ts:43-55`), el `.mcp.json` del proyecto no se carga (`claude-code-agent.ts:50-52`), el loop no enciende (`loop-gate.ts:66`), los probes de calidad no corren (`run-quality-audit.ts:9-12`) y el Terminal degrada a supervisado (`modo-efectivo.ts:38-39`).
+`project.trusted` nace en `false` (`project.ts:33-38`; ADR-044). **Leer no la exige** —escanear es justo lo que se hace antes de decidir si confiar—; **ejecutar sí** (`confianza.ts:12-14`). Sin confianza: el gate rechaza (`gate-guards.ts:31-38`), el CLI no recibe allowlist de `npm run` (`safe-commands.ts:43-55`), el `.mcp.json` del proyecto no se carga (`claude-code-agent.ts:50-52`), **los settings del repo auditado tampoco** (`fuentes-de-settings.ts`, el CRITICAL 351abcd1 arreglado el 2026-10-04), los probes de calidad no corren (`run-quality-audit.ts:9-12`) y el Terminal degrada a supervisado (`modo-efectivo.ts:38-39`).
 
 ---
 
@@ -412,8 +415,7 @@ Es el bucle por el que FORTRESS observa sus propios defectos trabajando en otros
 - Tablero por proyecto con score determinista (`score-from-findings.ts:16-22`) y veto de push por CRITICAL (§2.5).
 - Terminal que conversa o corre workflows de agentes; edita solo en autónomo sobre proyectos de confianza (§2.2).
 - Motor de reparación completo: worktree, gate hermético, revisor, firma con merge `--no-ff` y medida previa del árbol (§4).
-- Loop autónomo con topes duros y razón de parada persistida (§2.3).
-- Drenaje a firma desde la página del Motor (§4.5).
+- Drenaje a firma desde la página del Motor (§4.5); el loop autónomo que ocupaba este renglón se retiró en ADR-107 y sus topes los heredó el drenaje.
 - Auditoría de calidad en seis dimensiones con **circuit breaker**: si el audit no deja el proyecto byte-idéntico, no se persiste el score y el proyecto queda **contaminado** hasta revisión humana (`run-quality-audit.ts:26-32`; `contamination.ts:8-10`).
 - Exposición externa (*Superficie externa*): solo sobre sitios que el operador declara suyos, con filtro anti-SSRF de dos capas (`run-posture.ts:14-24`; `blocked-target.ts:20-27`).
 - Grafo de código por MCP `codebase-memory`, inyectado en **todo** spawn de agente y con solo herramientas de lectura pre-autorizadas (`graph-mcp.ts:1-6,16-40`); reconciliación con HEAD al arrancar (`reconcile-service.ts:26-33`).
@@ -453,7 +455,7 @@ El bundle del main (`out/main/index.js`) contiene solo lo alcanzable desde `src/
 | `createFindingFusion`, `planDeFusion`, `severidadDeLaSuperviviente`, `redDeLaFusion` | **0** | su único consumidor real es `scripts/`; en `src/` solo los importan fixtures y tests |
 | `masUrgente` (`severity.ts`) | **0** | mismo fichero que `SEVERITIES` (6) e `isSeverity` (11), que sí viajan: el podado es por símbolo, no por fichero |
 | `SELF_REPO_EXIGE_FIRMA` (`loop-gate.ts:52`) | **0** | declarada y documentada, sin ningún uso |
-| `runLoop`, `firmarIntegracion`, `applyAutoMerge`, `createGitMergeApplier`, `colaDeFirma` | 2-5 | el flujo LOOP+firma sí está entero |
+| `firmarIntegracion`, `applyAutoMerge`, `createGitMergeApplier`, `colaDeFirma` | 2-5 | el flujo de la firma sí está entero (`runLoop` figuraba en la medición original; se retiró con ADR-107) |
 
 La regla operativa que se deriva: **contar commits no mide la deriva entre `main` y el binario**; lo mide un grep por identificador contra el asar. `docs/` sí se empaqueta —esta misma página viajará—; `internal/`, `templates/`, `scripts/` y los `CLAUDE.md` de la raíz no (`electron-builder.yml`, bloque `files`).
 
@@ -582,7 +584,7 @@ Términos propios de este código, con su significado **real** y dónde está de
 - **Contaminado** — Circuit breaker: el audit de calidad no dejó el proyecto byte-idéntico; bloqueado hasta revisión humana (`contamination.ts:8-10`; `run-guard.ts:47-51`).
 - **Corpus / docs-first** — Los documentos canónicos que el proyecto auditado **realmente tiene**, con su categoría, para que el prompt cite lo firmado y calle si no hay nada (`corpus-descriptor.ts:10-15`; ADR-064).
 - **Correa (allowedFiles)** — Los únicos ficheros que un fix puede tocar: el del hallazgo, sus tests hermanos y vecinos del mismo directorio que la prosa nombre (`allowed-files.ts:33-74`; ADR-012). Desde ADR-102 también se contrasta con el sitio del arreglo que el analista declara: si cae fuera, la propuesta se rechaza antes de generar (§12.3).
-- **Debut / estreno** — Severidades que el motor puede trabajar hoy: LOW y MEDIUM (`debut.ts:16`; ADR-007).
+- **Debut / estreno** — Severidades que el motor puede trabajar hoy: **la escalera completa, LOW a CRITICAL** (`debut.ts`; ADR-007, ADR-106 y la enmienda firmada del 2026-10-04). CRITICAL jamás se auto-integra: siempre firma.
 - **Drenaje** — Recorrer los elegibles dejándolos juzgados y esperando firma, sin escanear ni integrar (`drenar-hasta-omega.ts`).
 - **Expediente** — Lo reportado por el escaneo más los ACTIVE que no nombró; sobre eso puntúa el score (`persist-scan.ts:28-35`).
 - **Firma** — El acto humano que integra una propuesta aprobada al árbol vivo con `git merge --no-ff`; la única vía sobre el repo propio y la vía por defecto sobre cualquier proyecto sin `.fortress/config` (`firmar-integracion.ts`).
@@ -754,8 +756,9 @@ conexiones MCP nuevas desde el repo, huella de la caché idéntica.
 
 ### 12.6 Lo que sigue igual, y el aviso de siempre
 
-- El motor sigue estrenándose en LOW y MEDIUM (§9.2), no hace push por sí mismo y
-  no integra en el repo propio sin firma.
+- El motor estrena ya la escalera completa —LOW a CRITICAL, enmienda de ADR-106
+  firmada el 2026-10-04—, no hace push por sí mismo y no integra en el repo
+  propio sin firma (CRITICAL y HIGH, siempre con firma).
 - Todo lo de arriba vive en `main`, no en el binario instalado, hasta el rebuild
   y la instalación en frío (README): el AppImage no protege hasta entonces.
 - Del camino a grado bancario quedan #5 (toda la aplicación dentro del tribunal

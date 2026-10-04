@@ -121,7 +121,7 @@ del sistema: acumula estado operativo transversal.
 | graph_nodes / graph_edges | INTEGER | stats del índice del grafo |
 | graph_indexed_at | TEXT | — |
 | trusted | INTEGER | NOT NULL DEFAULT 0 (lado seguro) |
-| loop_enabled | INTEGER | NOT NULL DEFAULT 0 |
+| loop_enabled | INTEGER | NOT NULL DEFAULT 0 (histórica: el LOOP se retiró en ADR-107; la columna queda por el esquema aditivo) |
 | config_state | TEXT | NOT NULL DEFAULT 'CONFIGURADO' |
 | contaminated_at / contamination_detail | TEXT | circuit breaker: auditoría que dejó el proyecto sucio |
 | graph_indexed_at_sha | TEXT | SHA que el índice del grafo vio |
@@ -136,7 +136,7 @@ del sistema: acumula estado operativo transversal.
 **Migraciones aditivas aplicadas** (para bases anteriores; una base nueva
 nace con todo), agrupadas por dominio funcional:
 
-- Confianza y ciclo de vida: `trusted`, `loop_enabled`, `config_state`.
+- Confianza y ciclo de vida: `trusted`, `config_state` (y `loop_enabled`, histórica desde ADR-107).
 - Calidad integral: `general_quality`, `quality_partial`, las 6 `dim_*`.
 - Stats del grafo: `graph_nodes`, `graph_edges`, `graph_indexed_at`.
 - Estado del reindex del grafo (5): `graph_indexed_at_sha`,
@@ -540,8 +540,10 @@ capacidad (seed de refuerzo: observa, no ejecuta).
 
 ### loop_sessions
 
-**Propósito:** estado del loop autónomo por proyecto (una sesión por
-proyecto: la PK es el proyecto).
+**Propósito (histórico):** estado del loop autónomo por proyecto (una sesión
+por proyecto: la PK es el proyecto). **El LOOP se retiró en ADR-107
+(2026-09-30)**: la tabla y su repositorio se conservan por los datos y por el
+esquema aditivo, pero ya no tienen escritor en producción.
 
 | Columna | Tipo | Constraints / Default |
 |---|---|---|
@@ -590,8 +592,8 @@ La deduplicación funde por `(kind, area)` y deja la nota aquí.
 **Sin PRIMARY KEY.** `UNIQUE(observation_id, source_project, note)`: lleva la
 nota además del proyecto para que el mismo proyecto que se topa dos veces con el
 mismo límite **por caminos distintos** conserve las dos descripciones; por eso
-las notas derivadas del dato duro (denials, barreras, paradas del loop) son
-deterministas. **Índice:** `idx_sightings_obs (observation_id)`.
+las notas derivadas del dato duro (denials, barreras, paradas — hoy las del
+lazo del Motor, ADR-110; las del loop son historia) son deterministas. **Índice:** `idx_sightings_obs (observation_id)`.
 **Esquema:** `schema-sightings.ts`. **SQL:** `self-observation-sql.ts`.
 
 ### scan_parada_runs

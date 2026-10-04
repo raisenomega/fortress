@@ -39,16 +39,17 @@ sin capas de traducción a otros modelos.
   Code Reviewer, Planner, TDD Guide, etc.); el undécimo es Sentinel OMEGA,
   meta-auditor testigo-no-actor que verifica al resto contra el filesystem.
 - **Workspace Trust:** confianza por proyecto (default: false); sin ella no
-  hay auto-ejecución ni loop.
+  hay auto-ejecución, y los settings del repo auditado ni se cargan.
 - **COGNITION-LOG:** el cerebro por proyecto — patrones, reflexiones y mapa
   de atención que los agentes leen al arrancar y escriben al terminar.
 - **Knowledge Graph:** grafo del código consultado antes de leer archivos
   (grafo primero, archivo después); se realinea solo cuando el HEAD cambia.
 - **Superficie externa (posture):** audita la web propia desde fuera, solo
   lectura y con confirmación de propiedad.
-- **Loop autónomo con debate juez/defensa:** ciclo escaneo → arreglo →
-  verificación → re-escaneo con frenos obligatorios de coste y ciclos; al
-  degradar, prueba alternativas y gana quien sube el score real.
+- **Motor de reparación con drenaje a firma:** elegir → entender → generar →
+  gate hermético → revisor (OMEGA) → firma del operador, en cualquier
+  severidad (la escalera completa, LOW a CRITICAL) y solo sobre FORTRESS
+  (ADR-107). El loop autónomo pre-motor se retiró en su favor.
 - **Backlog de auto-mejora:** lo que un agente descubre de FORTRESS mientras
   trabaja en otro proyecto va a un backlog propio, no al proyecto ajeno.
 - **Ciclo de vida de capacidades auto-propuestas:** episodios reales → fase
@@ -73,7 +74,7 @@ sin capas de traducción a otros modelos.
 1. El operador registra un proyecto y decide cuánta confianza le da.
 2. FORTRESS escanea con sus agentes y persiste hallazgos con evidencia; el
    score es determinista y reproducible.
-3. El chat y el loop ejecutan de verdad — con allowlist, presupuestos y
+3. El chat y el motor ejecutan de verdad — con allowlist, presupuestos y
    frenos; OMEGA atestigua sin actuar.
 4. El motor de auto-reparación propone fixes en worktrees aislados, los pasa
    por un gate hermético y un revisor semántico independiente, y espera la

@@ -165,8 +165,11 @@ presentación y adaptadores dependen del dominio, nunca al revés. Ver
 `docs/ARCHITECTURE.md`.
 
 ### debut
-El terreno que el motor tiene permitido reparar: hallazgos LOW y MEDIUM.
-HIGH y CRITICAL quedan fuera hasta acumular confianza demostrada.
+El terreno que el motor tiene permitido reparar. Hoy, **la escalera
+completa: LOW, MEDIUM, HIGH y CRITICAL** — cada escalón se pagó con
+evidencia y una firma del operador (ADR-007, ADR-106 y su enmienda del
+2026-10-04). Ampliar el estreno no abre el auto-merge: HIGH y CRITICAL
+siempre exigen firma para integrarse.
 
 ### decideReindex
 Decisión pura (dominio) de cuándo realinear el Knowledge Graph: al arrancar, al
@@ -302,9 +305,10 @@ monótona. Asienta quién hizo qué, cuándo, con qué coste y con qué evidenci
 Telemetría paralela a la máquina de estados: registra, no valida.
 
 ### loopBlocked
-Guard de dominio que impide el loop autónomo sobre el propio repo de
-FORTRESS. Doctrina permanente, aplicada por capas independientes y
-verificada en el binario.
+Histórico: guard de dominio que impedía el loop autónomo sobre el propio
+repo de FORTRESS. Se fue con el LOOP (ADR-107); la doctrina que protegía
+sobrevive en `integracionAutomaticaPermitida`
+(`integracion-sin-firma.ts`): el árbol propio no se toca solo, nunca.
 
 ### LO_QUE_EL_GRAFO_NO_VE
 La constante (ADR-104) que va en los tres bloques «grafo primero»: el grafo no
@@ -444,7 +448,8 @@ deja de ser testigo fiable.
 
 ### Trusted
 Flag de confianza por proyecto (default: false). Habilita la
-autoverificación por [allowlist](#allowlist) y el loop. Modelo
+autoverificación por [allowlist](#allowlist), el `.mcp.json` del proyecto y
+la carga de sus settings (sin confianza, `--setting-sources user`). Modelo
 [Workspace Trust](#workspace-trust).
 
 ## V

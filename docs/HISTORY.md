@@ -842,10 +842,45 @@ fortaleza medida, no falta de profundidad.
 
 ---
 
+## Acto 10 — La cura del perímetro y la escalera completa (2026-09-28 a 2026-10-04)
+
+La semana empezó con una amputación: ADR-107 decidió que **el Motor es solo de
+FORTRESS** y eliminó el LOOP de raíz — 62 módulos, el toggle, sus canales. Lo
+que el LOOP prometía lo hace hoy el drenaje, con revisor y firma. Detrás
+vinieron las piezas que el Motor necesitaba para estar a la altura: las
+cabeceras públicas en la caja (ADR-108), el gate que declara lo que absuelve
+(ADR-109), y el **lazo** (ADR-110): cuando OMEGA objeta PARCIAL, el generador
+responde a la objeción con la sesión reanudada, con el freno en dólares porque
+`--resume` relee cada turno.
+
+Luego el Motor aprendió a tocar dependencias sin tocar la máquina: la **correa**
+(ADR-111) le deja regenerar el lock —nunca los nativos—, el E2BIG que mató un
+drenaje enseñó que el prompt no cabe en argv y lo mudó a **stdin** (ADR-112,
+multiplataforma por diseño), y el expediente de OMEGA se acotó a 32 KiB por
+fichero: el mismo juicio que había reventado $8,90 sin veredicto costó $1,31 y
+aprobó. El CVE de vitest entró a main el último de su tanda, como mandaba la
+**guía de firma** recién estrenada —orden sugerido, sonda del árbol combinado,
+bisección que nombró al par culpable—, y con él el ciclo de dependencias quedó
+cerrado de punta a punta en producción.
+
+Y el final que ordena todo lo demás: el HIGH de esa tanda cruzó la cadena
+entera y **cumplió la condición que ADR-106 había dejado escrita**. Jojo firmó
+el último escalón: `DEBUT = [LOW, MEDIUM, HIGH, CRITICAL]` — el Motor repara ya
+en cualquier severidad, como `claude -p`, con el gate, el revisor y la firma
+que `claude -p` no tiene. El único CRITICAL de FORTRESS resultó vivir dentro de
+la propia jaula del Motor (`claude-cli.ts`, defensa), así que se arregló **a
+mano, por la vía diseñada**: el rig probó que los hooks de un repo auditado
+corrían fuera de la caja con credenciales y red, y `--setting-sources user`
+sobre no confiables cerró el vector multi-cliente en el cuello único.
+
 ## Presente
 
-El motor repara, el operador firma, el motor vuelve a mirar y cierra lo que ya
-está arreglado diciendo por qué. La vuelta entera funciona sobre el propio
+**(Actualizado el 2026-10-04.)** El Motor repara en cualquier severidad —la
+escalera completa, cada escalón pagado con evidencia y firmado—, solo sobre
+FORTRESS, y nada entra al árbol vivo sin la firma del operador. El Terminal
+trabaja los repos de clientes con la caja puesta y, desde hoy, sin cargar sus
+settings cuando no hay confianza. El motor repara, el operador firma, el motor
+vuelve a mirar y cierra lo que ya está arreglado diciendo por qué. La vuelta entera funciona sobre el propio
 repositorio, y el registro de lo que hizo dice lo que pasó. La identidad de los
 hallazgos de este repositorio está reconciliada; la de otros proyectos espera a
 que se los vuelva a escanear.
