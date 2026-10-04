@@ -903,6 +903,21 @@ ciclo a ciclo vive en el reporte del operador y en el log crudo del vigía;
 lo que este acto deja escrito es la verdad que importa: **el Motor ya no es
 un experimento — es una jornada de trabajo.**
 
+Y la jornada cerró como debía: **la sesión de firma**. El operador midió antes
+de firmar — mapa de solapes de las 41, matriz de choques textuales par a par
+(merge-tree puro), y el cuaderno de lupa con los diffs que el gate no vio — y
+firmó racimo a racimo: **33 integradas en ~2 horas** (`47e2ae4 → a6a5012`),
+cada una con su merge `--no-ff` y su hallazgo a MITIGATED, **el estreno del
+CRITICAL entre ellas** (`5b28aa5`, ADR-113). Las 8 restantes se retiraron con
+motivo escrito: 7 por choque textual con lo ya integrado —regenerarán sobre el
+main nuevo— y **una por la quinta ceguera re-cazada**: `3690fadf` mergeaba
+limpio y la sonda la daba verde, pero congelaba `gitEnv()` a nivel de módulo —
+el bug semántico que ninguna sonda de mergeabilidad ve. Lo cazó la lectura
+humana, que es exactamente la red que la doctrina reserva para ese caso (y la
+deuda de las DOS marcas quedó registrada para que la vista lo diga sola). Ni
+un choque fuera de lo predicho, ni un merge abortado: la matriz acertó las
+ocho bajas, una a una.
+
 ## Presente
 
 **(Actualizado el 2026-10-04.)** El Motor repara en cualquier severidad —la
