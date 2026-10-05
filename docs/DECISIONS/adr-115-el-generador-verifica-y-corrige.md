@@ -37,7 +37,7 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 | A1 | El gate guarda las líneas del error | `spawn-command-hijo.ts:45-50` guarda solo los últimos `TAIL_CHARS = 2000` (`gate-config.ts:18`); en lint el error queda enterrado bajo los warnings | No | **A** |
 | A2 | Los números en el prompt del generador | `generator-prompt.ts:28` dice solo «limite de lineas»: ni 75 por fichero, ni 50 por función, ni tipos de retorno explícitos | No | **A** |
 | A3 | El desacuerdo de OMEGA, visible en la firma | Se escribe en `run-omega-emit.ts:25-35` (`omega_verdict_mismatch`) y nadie lo lee; su sitio es `OmegaVerdictTable.tsx` | No | **A** |
-| B1 | Triaje que no vuelve a elegir lo irresoluble | `bloqueo-por-rechazo.ts` (`INTENTOS_POR_CAUSA = 2`, cuenta por **causa**) + `elegir-objetivo.ts` | **Sí** | **B** |
+| B1 | Triaje que no vuelve a elegir lo irresoluble | `bloqueo-por-rechazo.ts` (`INTENTOS_POR_CAUSA = 2`, cuenta por **causa**); al medirlo, también `run-omega-judge.ts`, `repair-rejection.ts` y `clasificacion-de-baja.ts`. `elegir-objetivo.ts` no cambia | **Sí** (solo el freno) | **B** |
 | B2 | Gate rojo → reanudar al generador con el error | El corte, en `run-motor-chain.ts:60-61`; la maquinaria de reanudar ya existe en `con-lazo.ts:33-50` | No, pero es doctrina de ADR-110 | **B** (enmienda) |
 | B3 | El generador se verifica a sí mismo en la caja | `motor-tools.ts:39,47` (solo `NPM_SOLO_LOCK`) + `generator-args.ts:26` (`--allowedTools`); la caja de ADR-092 lo contendría | **Sí** | **B**, diferida |
 | C1 | «Depende de»: rescate por dependencia | No existe | — | **C** |
@@ -61,13 +61,25 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 
 ### (B) Con firma del operador
 
-- **B1. El triaje por objetivo y base, no por causa.** El freno de hoy cuenta los
-  rechazos con la **misma causa** sobre la misma base. En `electron-builder` las
-  causas se alternaron (veto, «sin diff», veto) y el tercer intento se coló. La
-  decisión es contar los rechazos del hallazgo sobre la misma base, sea cual sea
-  la causa, y que un veto de OMEGA con `resuelve_el_hallazgo: NO` pause el
-  hallazgo desde el primero. Sigue siendo una **pausa, no una extinción**: si el
-  HEAD avanza, el hallazgo vuelve a la baraja.
+- **B1. El triaje por hallazgo y base, no por causa suelta** (afinado al medirlo a
+  nivel de línea el 2026-10-05). El freno contaba los rechazos de la **misma causa**
+  sobre la misma base, y en `electron-builder` las causas se alternaron (veto, «sin
+  diff», veto) y el tercer intento se coló. Tras el tope del 23-ago hay 3 casos así
+  en la historia. El diseño construido tiene dos piezas:
+  1. **Una sola cuenta para las causas de razonamiento** (`omega_vetado`,
+     `scope_violation`, `no_diff_produced`, `solo_pruebas`) por hallazgo y base, con
+     el mismo tope de 2. Las **averías** (`provider_error`, `analisis_ilegible`)
+     siguen contando cada una por su lado: un 429 no dice nada del arreglo y no
+     debe gastarle el presupuesto. Sin esa separación, un veto seguido de un solo
+     «ilegible» habría quedado en pausa.
+  2. **«Resuelve: NO» va por el motivo, no por el freno.** El eje solo vivía en la
+     evidencia del evento de OMEGA, y el freno solo ve los campos de la propuesta.
+     El juicio escribe ahora `omega_no_resuelve`, que no es reintentable, y el
+     freno ya existente lo pausa desde el primer rechazo. Hay 6 vetos así en la
+     historia, entre ellos el primer intento de `electron-builder`.
+
+  Sigue siendo una **pausa, no una extinción**: si el HEAD avanza, el hallazgo
+  vuelve a la baraja, y la cuenta empieza de cero en la base nueva.
 - **B2. El rojo del gate deja de ser terminal, dentro de los topes que ya existen.**
   Enmienda de ADR-110: un rojo de lint, typecheck o test reanuda la sesión del
   generador con las líneas de A1 como encargo, igual que hoy lo hace un PARCIAL
@@ -92,6 +104,15 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 - **C2. El fichero hermano.** Que la correa admita un módulo nuevo en la carpeta
   del ancla y con su prefijo, para que un arreglo que no cabe en 75 líneas pueda
   partir el fichero. Toca la correa del alcance.
+- **C3. El reintento entre bases (nueva, salida al medir B1).** Como cada avance
+  del HEAD pone la cuenta a cero, un hallazgo puede comprarse indefinidamente:
+  `a2b7c74f` (Genesis) acumuló 17 propuestas en 11 bases, ninguna integrada. Pero
+  el mismo mecanismo es el que dejó entrar Electron: `9e64bb68` lo intentó en 8
+  bases, cayó 6 veces en `npm ci` por la caché y entró a la novena. **No se cierra
+  a ciegas:** un tope de por vida habría matado ese éxito. Tampoco basta la pausa
+  de B1 para los hallazgos que necesitan una decisión del operador (como
+  `electron-builder`), porque se levanta en el siguiente merge. Pide su propio
+  ADR: un tope de gasto por hallazgo, o un estado «necesita decisión humana».
 
 ## 4. Orden de construcción
 
@@ -99,7 +120,7 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 2. **B1, el triaje**, con firma.
 3. **B2, la vuelta tras el rojo**, con firma y enmienda de ADR-110.
 4. **Volver a medir B3** en el drenaje siguiente.
-5. **C1 y C2** van aparte, cada una con su ADR.
+5. **C1, C2 y C3** van aparte, cada una con su ADR.
 
 Cada pieza sigue el método del repo: test rojo, arreglo, mutante que muere, gate.
 
