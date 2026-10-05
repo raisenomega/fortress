@@ -176,7 +176,11 @@ redact_file() {
 report_file()  { echo "$REPORTS_DIR/$1-FORTRESS-REPORT.md"; }
 scanned_head() { echo "$REPORTS_DIR/$1.scanned-head"; }
 
-# Recuento de la linea de resumen "- <ETIQUETA>: N". Vacio si falta o es ambiguo.
+# Recuento declarado en la linea de resumen "- <ETIQUETA>: N". Vacio si falta
+# o es ambiguo. Lo escribe el mismo agente que leyo el repo: por si solo no
+# decide nada, se contrasta con findings_count. No mira la seccion: una linea
+# citada como evidencia cuenta igual que la del resumen (y, si discrepa, el
+# informe sale ambiguo: falla cerrado).
 report_count() {
     local values
     values=$(grep -iE "^[[:space:]]*[-*][[:space:]]*[*_]*($2)[*_]*[[:space:]]*:[*_[:space:]]*[0-9]+" "$1" 2>/dev/null \
@@ -186,7 +190,23 @@ report_count() {
     fi
 }
 
-# Imprime OK, NO_REPORT, STALE, UNPARSEABLE o CRITICAL:N.
+# Hallazgos CRITICAL del cuerpo: lineas "- **Severidad:** CRITICAL" del
+# FORMATO DE REPORTE (CLAUDE.md), con las mismas variantes de markdown que
+# report_count. Un 'CRITICAL/HIGH' sin rellenar cuenta: falla cerrado.
+findings_count() {
+    grep -ciE "^[[:space:]]*[-*][[:space:]]*[*_]*(Severidad|Severity)[*_]*[[:space:]]*:[*_[:space:]]*(CRITICAL|CR(I|Í)TIC[OA]S?)" "$1" 2>/dev/null || true
+}
+
+# Cifra de CRITICALs que respalda el veredicto: la del resumen solo si el
+# cuerpo trae los mismos hallazgos. Vacio si falta, es ambigua o discrepa.
+critical_count() {
+    local summary=$(report_count "$1" 'CRITICAL|CR(I|Í)TICOS?')
+    if [ -n "$summary" ] && [ "$summary" -eq "$(findings_count "$1")" ]; then
+        echo "$summary"
+    fi
+}
+
+# Imprime OK, NO_REPORT, STALE, UNPARSEABLE, MISMATCH:R:C o CRITICAL:N.
 repo_verdict() {
     local name="$1" path="$2"
     local report=$(report_file "$name")
@@ -203,8 +223,11 @@ repo_verdict() {
     fi
 
     local crits=$(report_count "$report" 'CRITICAL|CR(I|Í)TICOS?')
+    local found=$(findings_count "$report")
     if [ -z "$crits" ]; then
         echo "UNPARSEABLE"
+    elif [ "$crits" -ne "${found:-0}" ]; then
+        echo "MISMATCH:$crits:${found:-0}"
     elif [ "$crits" -gt 0 ]; then
         echo "CRITICAL:$crits"
     else
@@ -243,7 +266,9 @@ verdict_reason() {
     case "$1" in
         NO_REPORT)   echo "sin informe de escaneo en $REPORTS_DIR (ejecutar scan)";;
         STALE)       echo "el informe no corresponde al HEAD actual (re-escanear)";;
-        UNPARSEABLE) echo "el informe no trae una linea '- CRITICAL: N' legible";;
+        UNPARSEABLE) echo "el informe no trae una linea de resumen '- CRITICAL: N' legible y unica";;
+        MISMATCH:*)  local m="${1#MISMATCH:}"
+                     echo "el resumen declara ${m%%:*} CRITICAL pero el cuerpo trae ${m#*:} hallazgo(s) con Severidad CRITICAL (corregir el informe o re-escanear)";;
         CRITICAL:*)  echo "tiene ${1#CRITICAL:} hallazgo(s) CRITICAL sin resolver";;
         NO_BRANCH)   echo "la rama registrada ya no existe en el repo (re-registrar o restaurarla)";;
         BRANCH_MISMATCH) echo "la punta de la rama registrada no es el commit escaneado (checkout en otra rama o HEAD desligado; re-escanear sobre esa rama)";;
@@ -660,7 +685,7 @@ HEADER
 
         local changes=$(cd "$path" && git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
         local report=$(report_file "$name")
-        local crits=$(report_count "$report" 'CRITICAL|CR(I|Í)TICOS?')
+        local crits=$(critical_count "$report")
         local highs=$(report_count "$report" 'HIGH|ALTOS?')
         local verdict=$(repo_verdict "$name" "$path")
         local push_status="✅ READY"
