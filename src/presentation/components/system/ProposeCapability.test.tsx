@@ -8,3 +8,11 @@ describe('el campo de nombre de Proponer capacidad tiene nombre accesible', () =
     expect(readFileSync('src/presentation/components/system/ProposeCapability.tsx', 'utf8')).toContain('aria-label="Nombre de la capacidad"') // prettier-ignore
   })
 })
+
+/** Hallazgo 3561099e (accesibilidad, WCAG 1.3.1/3.3.2/4.1.2): el select del tipo
+ *  solo anunciaba el valor elegido, no que se elige. */
+describe('el select de tipo de Proponer capacidad tiene nombre accesible', () => {
+  it('el select lleva aria-label propio', () => {
+    expect(readFileSync('src/presentation/components/system/ProposeCapability.tsx', 'utf8')).toContain('aria-label="Tipo de capacidad"') // prettier-ignore
+  })
+})
