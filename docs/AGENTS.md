@@ -182,6 +182,30 @@ La decisión completa y su porqué, en
 | `sonnet` | Code Reviewer, TDD Guide, Build Error Resolver, E2E Runner | Ejecutan contra algo comprobable: un test pasa o no |
 | `haiku` | Refactor Cleaner, Code Simplifier, Opensource Sanitizer | Barren: pasadas mecánicas sobre criterios ya escritos |
 
+**Fuera del catálogo, también declaran** ([ADR-078, enmienda del 2026-10-05](DECISIONS/adr-078-modelo-por-agente-via-agents.md)).
+Hasta esa fecha estos agentes **no declaraban modelo y heredaban el del CLI**:
+la noche del 05-oct el Motor corrió en Fable (prohibido por doctrina) y a otra
+hora en Opus. Hoy cada uno sale de `src/domain/agent/modelo-por-rol.ts`, la
+única fuente, protegida como defensa:
+
+| Agente o ruta | Modelo | Por qué |
+|---|---|---|
+| Analista del Motor | `opus` | Juzga si el defecto sigue vivo |
+| Crítico del Motor | `opus` | «Un crítico barato aprueba» |
+| OMEGA del Motor | `opus` (`MODELO_DE_OMEGA`) | ADR-088 Enm. 3 §2: el peldaño más alto que la cuenta permite |
+| Generador del Motor | `opus` | **Excepción deliberada** a «ejecuta → sonnet»: es el equivalente del Productor del Terminal (opus por la escalera) y lo que produce lo juzga después OMEGA |
+| Construir (ejecutor, investigar) | `opus` | Edita código del proyecto |
+| Entrevista de configuración, borradores de agente, episodios y génesis | `sonnet` | Ejecutan contra algo comprobable |
+| Grafo (indexar, verificar, A/B) | `sonnet` | Llamada acotada a la herramienta MCP |
+| Chat por API (SDK) | `opus`, resuelto contra el catálogo de la API | La API no acepta el alias pelado: se elige el Opus más nuevo, nunca un id fijo |
+
+Un turno **sin agente y sin modelo no se lanza**. Cada corrida guarda el modelo
+que **de verdad** corrió (`agent_runs.modelo`), y el guardián la falla si fue
+Fable o por debajo del pedido; un Opus más viejo de *fallback* se registra y
+avisa. **La barrera cubre `src/` (lo que la app lanza); `scripts/` son
+herramientas del operador, se corren a mano, heredan por decisión consciente y
+quedan fuera de alcance.**
+
 #### Security Reviewer (`security-reviewer`)
 
 - **Dominio:** secrets hardcodeados, inyecciones, autenticación, headers y

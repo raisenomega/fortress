@@ -129,3 +129,81 @@ y la duda resultó infundada.
 `src/domain/agent/sentinel-omega.ts` ·
 `src/domain/agent/reparto-de-modelos.test.ts` ·
 `src/domain/agent/modelo-en-el-payload.test.ts`
+
+
+## Enmienda (2026-10-05): nadie hereda — el reparto llega al Motor, a las rutas sin agente y al SDK
+
+Decisiones del operador, el 2026-10-05. Construidas en la rama
+`feat/modelo-declarado-y-429`; las piezas que tocan defensas, con su firma.
+
+### Lo medido que la motiva
+
+La regla «sin `model`, el agente hereda el de la sesión» se escribió para los
+once del catálogo y dejó fuera a quien nació después. La noche del 05-oct se
+midió con sondas reales:
+
+- Los cuatro procesos del Motor (analista, crítico, OMEGA, generador) se
+  lanzaban sin `--agents`, sin `--agent` y sin `--model`: **heredaban**.
+- Heredar resultó ser una **lotería**. El CLI resuelve el modelo por defecto a
+  partir de la configuración remota de la cuenta y de cachés locales. Lo
+  resolvió a **Fable** (prohibido por ADR-088 Enm. 3: 30 días de retención)
+  esa noche, y a **Opus** horas después. La propia variable de privacidad de
+  FORTRESS cambia el resultado.
+- `MODELO_DE_OMEGA`, decidido el 15-sep en ADR-088 Enm. 3 §2, **nunca se había
+  construido**. El comentario «nada corre con Fable» de
+  `escalera-de-modelos.ts` era falso.
+
+### La decisión
+
+1. **Ningún agente hereda: todos declaran.** Siempre por **alias**
+   (`opus` / `sonnet` / `haiku`), nunca un id fijo, para que suban solos.
+2. **Una sola fuente para los que no están en el catálogo**:
+   `src/domain/agent/modelo-por-rol.ts`, añadida a `AUTONOMY_RULES_FILES` (el
+   Motor no puede cambiar su propio modelo). El reparto, con su porqué, está en
+   la tabla de [AGENTS.md](../AGENTS.md).
+3. **`MODELO_DE_OMEGA = 'opus'`**, al fin construido, sin derivarse de `CIMA`.
+4. **El generador va en `opus`.** Es una **excepción deliberada** al criterio
+   «ejecuta → sonnet»: es el equivalente del Productor del Terminal (opus por la
+   escalera), y lo que produce lo juzga después OMEGA.
+5. **`--model` por proceso, como excepción anotada a este ADR.** Este ADR
+   prefirió `--agents` porque `--model` da un modelo por spawn y no por agente.
+   En el Motor **cada proceso ES un agente**, así que ahí un `--model` por
+   proceso es exactamente un modelo por agente (`generator-args.ts`, defensa,
+   con firma). Los turnos sin agente siguen la vía de este ADR sin tocar
+   `claude-cli.ts`: la petición lleva `model`, `argsDelTurno` lo pone, y **un
+   turno sin agente y sin modelo no se lanza**.
+6. **El SDK resuelve el alias contra el catálogo de la API**
+   (`modeloDeLaApi`): elige el más nuevo de la familia y **nunca** Fable. El id
+   fijo `claude-opus-5` desaparece.
+7. **El guardián del modelo real** (`guardia-del-modelo.ts`). Cada corrida guarda
+   en `agent_runs.modelo` el modelo que **de verdad** corrió: `modelUsage` del
+   CLI, o `model` de la respuesta de la API. Hay tres desenlaces:
+   - **Falla** si corrió en Fable, o si el modelo principal está por debajo del
+     pedido. En el Motor es la avería `modelo_no_asignado` y para la tanda; en
+     un turno, el turno queda fallido y lo dice; en el SDK, el chat no entrega
+     la respuesta.
+   - **Avisa** si aparece un Opus más viejo de *fallback*: se registra y se
+     sigue, nunca para el Motor.
+   - En otro caso, **ok**.
+8. **La barrera derivada** (`modelo-declarado-barrera.test.ts`), con el molde de
+   `spawn-entorno-acotado`, vigila **dos puertas**:
+   - todo fichero de `src/` que lanza `claude` debe construir sus args con un
+     declarante;
+   - todo cliente del SDK debe resolver el alias y no puede contener un id fijo.
+
+   La lista se deriva: un lanzador nuevo sin modelo pone el gate en rojo. En su
+   primera pasada **cazó `ab-graph.ts`**, que el censo a mano no vio.
+
+### La frontera, literal
+
+**La barrera cubre `src/` (lo que la app lanza); `scripts/` son herramientas del
+operador, se corren a mano, heredan por decisión consciente y quedan fuera de
+alcance.**
+
+### Construido junto, de la misma noche: el 429 es avería
+
+El analista, OMEGA y el crítico leían el `result` del CLI sin mirar `is_error`.
+El aviso de cuota agotada (429) llegó como si fuera su respuesta: la tanda lo
+tomó por «análisis ilegible» y quemó la baraja (16 rechazos en 40 s). Ahora los
+tres lo leen como `provider_error`, que es avería y para la tanda al primero, y
+la corrida se asienta **fallida**, no como «ok $0 1t».
