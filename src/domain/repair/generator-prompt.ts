@@ -25,7 +25,11 @@ const RULES = [
   '- SOLO puedes editar los archivos de PERMITIDOS. Ningun otro.',
   '- NO corras git (ni add, ni commit): el commit lo hace el motor por fuera.',
   '- Sin explicaciones ni sugerencias al final: el fix habla por si mismo.',
-  '- Respeta el estilo del repo: limite de lineas, sin any, cero emojis.'
+  '- Respeta el estilo del repo: sin any, cero emojis.',
+  '- El lint tumba el fix si pasas de 75 lineas por fichero o de 50 por funcion',
+  '  (comentarios y lineas en blanco cuentan), o si una funcion no lleva su',
+  '  tipo de retorno explicito. Si no cabe: compacta, o extrae un helper DENTRO de un fichero',
+  '  de PERMITIDOS. Un fichero nuevo fuera de PERMITIDOS tumba la propuesta.'
 ].join('\n')
 
 /**
