@@ -2,6 +2,7 @@ import { spawn } from 'child_process'
 import { redactSecrets } from '@domain/chat/tool-detail'
 import { TAIL_CHARS } from '@domain/repair/gate-config'
 import type { CommandOutcome } from '@domain/repair/gate-result'
+import { recolectorDeErrores } from '@domain/repair/lineas-de-error'
 import { tail } from '@domain/repair/tail'
 import { trackChild } from '../claude-code/child-registry'
 import { buildGateEnv } from './gate-env'
@@ -33,6 +34,8 @@ export function correrEnCaja(l: Lanzamiento, c: Corrida): Promise<CommandOutcome
     let out = ''
     let errOut = ''
     let timedOut = false
+    const deOut = recolectorDeErrores()
+    const deErr = recolectorDeErrores()
     const timer = armTimeout(child, c.timeoutMs, () => (timedOut = true))
 
     // La autopsia se PERSISTE entera en `evidence_json`, que es append-only, y
@@ -44,11 +47,18 @@ export function correrEnCaja(l: Lanzamiento, c: Corrida): Promise<CommandOutcome
       durationMs: Date.now() - c.startedAt,
       stdoutTail: tail(redactSecrets(out), TAIL_CHARS),
       stderrTail: tail(redactSecrets(errOut + extraErr), TAIL_CHARS),
-      timedOut
+      timedOut,
+      errores: [...deOut.lineas(), ...deErr.lineas()]
     })
 
-    child.stdout?.on('data', (d: Buffer) => (out = (out + d.toString()).slice(-TAIL_CHARS * 2)))
-    child.stderr?.on('data', (d: Buffer) => (errOut = (errOut + d.toString()).slice(-TAIL_CHARS * 2))) // prettier-ignore
+    child.stdout?.on('data', (d: Buffer) => {
+      deOut.anadir(d.toString())
+      out = (out + d.toString()).slice(-TAIL_CHARS * 2)
+    })
+    child.stderr?.on('data', (d: Buffer) => {
+      deErr.anadir(d.toString())
+      errOut = (errOut + d.toString()).slice(-TAIL_CHARS * 2)
+    })
     child.on('close', (code) => {
       clearTimeout(timer)
       resolve(outcome(code ?? 1))

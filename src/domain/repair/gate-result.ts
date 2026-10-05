@@ -6,6 +6,9 @@ export interface CommandOutcome {
   readonly stdoutTail: string
   readonly stderrTail: string
   readonly timedOut: boolean
+  /** ADR-115 A1: las lineas de error de eslint/tsc/vitest, recogidas en vuelo
+   *  (la cola sola las pierde). Opcional: las autopsias viejas no la traen. */
+  readonly errores?: readonly string[]
 }
 
 export type GateFailureReason =
