@@ -4,7 +4,7 @@ import { formatMoment } from '../../format/time'
 import { ExpandableText } from '../common/ExpandableText'
 import { Icon } from '../common/Icon'
 import { iconDe } from './proposal-event-view'
-import { OmegaVerdictTable } from './OmegaVerdictTable'
+import { OmegaVerdictTable, type DesacuerdoDeOmega } from './OmegaVerdictTable'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
 
 /** El verdict de OMEGA embebido en la evidencia, o null si no lo hay. */
@@ -30,14 +30,15 @@ function costeDe(event: ProposalEvent): string {
 
 interface ProposalEventRowProps {
   readonly event: ProposalEvent
+  readonly desacuerdo?: DesacuerdoDeOmega | null
 }
 
 /** Un eslabon del libro: fase, actor, momento, coste y razon. La evidencia
  *  JSON no se pinta por defecto (payload grande): se abre bajo demanda. */
-export function ProposalEventRow({ event }: ProposalEventRowProps): React.JSX.Element {
+export function ProposalEventRow({ event, desacuerdo }: ProposalEventRowProps): React.JSX.Element {
   const [showEvidence, setShowEvidence] = useState(false)
   const coste = costeDe(event)
-
+  const verdict = event.evidenceJson === undefined ? null : verdictDe(event.evidenceJson)
   return (
     <div className="border-border/60 border-l pl-2 text-[11px]">
       <div className="flex items-center gap-1.5">
@@ -61,8 +62,8 @@ export function ProposalEventRow({ event }: ProposalEventRowProps): React.JSX.El
         </button>
       )}
       {showEvidence && event.evidenceJson !== undefined ? (
-        verdictDe(event.evidenceJson) !== null ? (
-          <OmegaVerdictTable verdict={verdictDe(event.evidenceJson) as OmegaVerdict} />
+        verdict !== null ? (
+          <OmegaVerdictTable verdict={verdict} desacuerdo={desacuerdo} />
         ) : (
           <pre className="text-muted-foreground max-h-40 overflow-auto text-[10px]">
             {event.evidenceJson}
