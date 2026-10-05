@@ -32,7 +32,7 @@ const peticion: CodeAgentRequest = {
   projectId: 'p-reloj',
   prompt: 'x',
   permissionMode: 'plan',
-  agentId: null,
+  agentId: null, model: 'sonnet',
   trusted: false
 }
 

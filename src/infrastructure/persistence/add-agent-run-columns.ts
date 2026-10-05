@@ -28,7 +28,7 @@ import type { Db } from './database'
  * nada»—, sin relleno hacia atras porque inventarlo seria mentir, y aqui ademas
  * de en `AGENT_RUNS_COLUMNS` para que toda base llegue igual al recambio.
  */
-const COLUMNS = ['usage_known INTEGER', 'recibo TEXT']
+const COLUMNS = ['usage_known INTEGER', 'recibo TEXT', 'modelo TEXT']
 
 function has(db: Db, column: string): boolean {
   const rows = db.pragma('table_info(agent_runs)') as { name: string }[]

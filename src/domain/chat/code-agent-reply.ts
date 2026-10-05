@@ -27,6 +27,10 @@ export interface CodeAgentReply {
    * Llega SIN tachar: se tacha en la ultima puerta antes del disco.
    */
   readonly recibo?: readonly string[]
+  /** Los modelos que DE VERDAD corrieron (principal primero) y el principal
+   *  juzgado (ADR-078, enmienda): lo que se asienta en la corrida. */
+  readonly modelos?: readonly string[]
+  readonly modelo?: string
   /** Rutas que el agente escribio. Nunca comandos: pueden llevar secretos. */
   readonly edits: readonly string[]
   /** La sesion que el CLI dice haber usado, SOLO si su evento final la trae. */

@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
 import { GRAPH_INDEX_TOOL, withGraph } from '@domain/connectors/graph-mcp'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { buildEnv } from '../claude-code/build-env'
 import { escribirPrompt, type ConPrompt } from '../claude-code/prompt-por-stdin'
 import { conSandbox } from '../sandbox/con-sandbox'
@@ -16,7 +17,7 @@ const PROMPT =
  */
 /** Sin directorio de turno a proposito: este es el que ESCRIBE el indice de verdad, en la cache real. */
 export function argsDeIndexar(): ConPrompt {
-  return { args: ['-p', '--permission-mode', 'default', '--allowedTools', GRAPH_INDEX_TOOL, '--mcp-config', withGraph(null)], prompt: PROMPT } // prettier-ignore
+  return { args: ['-p', '--permission-mode', 'default', '--allowedTools', GRAPH_INDEX_TOOL, '--mcp-config', withGraph(null), '--model', MODELO_POR_ROL.grafo], prompt: PROMPT } // prettier-ignore
 }
 
 export function indexGraph(

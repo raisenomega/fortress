@@ -9,16 +9,20 @@ export const ESCALERA = ['fable', 'opus', 'sonnet', 'haiku'] as const
 export type Peldano = (typeof ESCALERA)[number]
 
 /**
- * La cima de la red: donde ira OMEGA, siempre por encima del que produce
- * (Enmienda 1 §1).
+ * La cima de la escalera: SOLO ancla al productor (ADR-088 Enm. 3 §2). No es el
+ * modelo de nadie: con 'fable' el productor queda en 'opus'. Fable no lo usa
+ * ningun agente (Covered Model, 30 dias de retencion — Enm. 3 §1).
  *
- * PENDIENTE ADR-078: valor real con la pieza 5, cuando se resuelva la deuda
- * `omega-fable-choca-con-adr-078`. Hoy NO se aplica a OMEGA —sigue con el
- * modelo de su catalogo— y nada corre con Fable: solo fija el peldano del
- * productor. El default 'fable' deja al productor en 'opus'; con 'opus' caeria
- * a 'sonnet', una bajada que no se quiere mientras se decide Fable.
+ * CORREGIDO 2026-10-05: aqui se afirmaba «nada corre con Fable». Era falso: los
+ * cuatro del Motor no declaraban modelo, heredaban el del CLI y corrieron en
+ * Fable. Desde la enmienda a ADR-078 todos declaran (`modelo-por-rol.ts`).
  */
 export const CIMA: Peldano = 'fable'
+
+/** El modelo de OMEGA (ADR-088 Enm. 3 §2): el peldano mas alto que la cuenta
+ *  permite bajo la doctrina de retencion. NO se deriva de CIMA: subir a OMEGA
+ *  no debe arrastrar al productor. Decidido el 15-sep, construido el 05-oct. */
+export const MODELO_DE_OMEGA: Peldano = 'opus'
 
 /** El peldano de justo debajo. La base no tiene debajo y se queda en si misma:
  *  por eso la cima nunca puede ser la base (lo fija su test). */

@@ -3,6 +3,7 @@ import type { CodeAgent } from '@domain/chat/code-agent'
 import { buildConfigurationPrompt } from '@domain/chat/configuration-prompt'
 import type { Project } from '@domain/project/project'
 import { textOnly, type ReplyOutcome } from './reply-outcome'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 export interface ConfigReplyOptions {
   readonly codeAgent: CodeAgent
@@ -32,7 +33,7 @@ export async function replyFromConfiguration(options: ConfigReplyOptions): Promi
       projectId: options.project.id,
       prompt: buildConfigurationPrompt(options.history, options.project.name),
       permissionMode: 'lectura',
-      agentId: null,
+      agentId: null, model: MODELO_POR_ROL.configuracion,
       trusted: false
     },
     options.onChunk

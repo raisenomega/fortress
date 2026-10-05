@@ -10,7 +10,7 @@ const DIR = '/datos/grafo-por-turno/turno-terminal'
 
 describe('el turno del agente (Terminal, escaner, genesis...) lanza su grafo aislado', () => {
   it('argsDelTurno pega --mcp-config con env CBM_CACHE_DIR al directorio del turno', () => {
-    const request: CodeAgentRequest = { projectPath: carpetaDePrueba('turno-'), prompt: 'x', permissionMode: 'plan', agentId: null, trusted: false } // prettier-ignore
+    const request: CodeAgentRequest = { projectPath: carpetaDePrueba('turno-'), prompt: 'x', permissionMode: 'plan', agentId: null, model: 'sonnet', trusted: false } // prettier-ignore
     const args = argsDelTurno(request, {}, null, 3, DIR)
     expect(args.ok).toBe(true)
     if (!args.ok) return

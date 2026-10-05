@@ -7,6 +7,8 @@ import { trackChild } from '../claude-code/child-registry'
 import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
 import { buildEnv } from '../claude-code/build-env'
 import { escribirPrompt } from '../claude-code/prompt-por-stdin'
+import { juzgarModelo } from '@domain/agent/guardia-del-modelo'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 /** El plazo, sacado del dato: las corridas que TERMINARON tardaron entre 205 y
  *  709 s, asi que 900 deja margen sobre la peor sin premiar a la que divaga. */
@@ -51,8 +53,11 @@ export function createGraphGenerator(claudeBin: string, projectId: string, timeo
           clearTimeout(timer)
           store.liberar()
           const fin = desenlaceDelGenerador(out, code)
-          if (fin.ok) resolve({ ok: true, runMeta: meta(fin.usage), sesion: fin.sesion })
-          else resolve({ ...fin, error: fin.error, runMeta: meta(fin.usage), sesion: fin.sesion })
+          // Un fix escrito por un modelo que no es el suyo no se entrega (ADR-078, enmienda).
+          const juicio = juzgarModelo(MODELO_POR_ROL.generador, fin.modelos ?? [])
+          if (juicio.veredicto === 'falla') resolve({ ok: false, modeloFuera: true, error: juicio.motivo ?? 'modelo no asignado', runMeta: meta(fin.usage, juicio), sesion: fin.sesion }) // prettier-ignore
+          else if (fin.ok) resolve({ ok: true, runMeta: meta(fin.usage, juicio), sesion: fin.sesion })
+          else resolve({ ...fin, error: fin.error, runMeta: meta(fin.usage, juicio), sesion: fin.sesion })
         })
         child.on('error', (error) => {
           clearTimeout(timer)

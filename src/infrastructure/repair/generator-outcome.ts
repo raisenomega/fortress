@@ -1,6 +1,7 @@
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { MAX_TURNS } from './techo-de-turnos'
 import { parseUsage } from '../claude-code/parse-usage'
+import { modelosUsados } from '../claude-code/modelos-usados'
 
 /** Como marca el CLI la corrida que se quedo sin turnos. */
 const SIN_TURNOS = 'error_max_turns'
@@ -8,8 +9,9 @@ const SIN_TURNOS = 'error_max_turns'
 /** `usage` ausente = el CLI no dejo factura legible. No es una de ceros.
  *  `sesion` ausente = no hay nada que reanudar (ver `sesionDeLaCorrida`). */
 export type Desenlace =
-  | { readonly ok: true; readonly usage?: TokenUsage; readonly sesion?: string }
+  | { readonly ok: true; readonly usage?: TokenUsage; readonly sesion?: string; readonly modelos?: readonly string[] } // prettier-ignore
   | {
+      readonly modelos?: readonly string[]
       readonly ok: false
       readonly error: string
       readonly turnosAgotados?: true
@@ -47,18 +49,20 @@ export function desenlaceDelGenerador(out: string, code: number | null): Desenla
   let usage: TokenUsage | undefined
   let subtype = ''
   let sesion: string | undefined
+  let modelos: readonly string[] = []
   try {
     const j = JSON.parse(out) as Record<string, unknown>
     usage = parseUsage(j)
     subtype = typeof j.subtype === 'string' ? j.subtype : ''
     sesion = sesionDeLaCorrida(j, usage)
+    modelos = modelosUsados(j)
   } catch {
     // Sin JSON no hay factura, y `undefined` lo dice. Ceros diria "gratis".
   }
 
   if (subtype === SIN_TURNOS) {
-    return { ok: false, error: `no completo en ${MAX_TURNS} turnos`, turnosAgotados: true, usage, sesion } // prettier-ignore
+    return { ok: false, error: `no completo en ${MAX_TURNS} turnos`, turnosAgotados: true, usage, sesion, modelos } // prettier-ignore
   }
-  if (code === 0) return { ok: true, usage, sesion }
-  return { ok: false, error: `el generador salio con codigo ${code}`, usage, sesion }
+  if (code === 0) return { ok: true, usage, sesion, modelos }
+  return { ok: false, error: `el generador salio con codigo ${code}`, usage, sesion, modelos }
 }

@@ -58,7 +58,7 @@ export function createRunAccumulator(onChunk: (delta: string) => void): RunAccum
     toReply(exitCode) {
       const { finalText = '', denials = [], deniedTools = [], usage = EMPTY_USAGE } = final
       const text = collected.join('') || finalText
-      const comun = { denials, deniedTools, usage, tools, recibo, edits, ...memoriaDelCli(final) }
+      const comun = { denials, deniedTools, usage, tools, recibo, edits, ...memoriaDelCli(final), ...(final.modelos === undefined ? {} : { modelos: final.modelos }) } // prettier-ignore
       if (exitCode === 0 && final.failed !== true) return { text, failed: false, ...comun }
 
       const detail =

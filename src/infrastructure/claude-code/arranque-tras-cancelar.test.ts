@@ -29,7 +29,7 @@ const peticion = (projectId: string): CodeAgentRequest => ({
   projectId,
   prompt: 'x',
   permissionMode: 'plan',
-  agentId: null,
+  agentId: null, model: 'sonnet',
   trusted: false
 })
 

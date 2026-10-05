@@ -26,7 +26,7 @@ export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs
     run: async (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar() // el store del turno (ADR-095, enmienda)
-      const args = argsDeLectura(prompt, worktreePath, store.dir)
+      const args = argsDeLectura(prompt, worktreePath, store.dir, 'omega')
       // Sin caja no arranca: el mismo camino que un binario que no existe.
       if (!args.ok) return (store.liberar(), { ok: false, error: args.error, timedOut: false, noArranco: true, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {

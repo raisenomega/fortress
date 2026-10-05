@@ -1,7 +1,7 @@
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { CodeAgentRequest } from '@domain/chat/code-agent'
 import { mergeMcpConfig } from '@domain/connectors/mcp-config'
-import { ok, type Result } from '@domain/shared/result'
+import { err, ok, type Result } from '@domain/shared/result'
 import { conSandbox } from '../sandbox/con-sandbox'
 import type { ConPrompt } from './prompt-por-stdin'
 import { agentsForProject } from './agents-for-project'
@@ -38,7 +38,10 @@ export function argsDelTurno(
     readProjectScripts(request.projectPath),
     grafoDir
   )
-  const args = [...lanzamiento.args]
+  // Sin agente, el turno declara SU modelo o no se lanza: heredar el del CLI es
+  // loteria (Fable una noche, Opus a otra hora — ADR-078, enmienda del 05-oct).
+  if (request.agentId === null && request.model === undefined) return err('sin-modelo-declarado: turno sin agente y sin modelo') // prettier-ignore
+  const args = [...lanzamiento.args, ...(request.agentId === null ? ['--model', request.model as string] : [])] // prettier-ignore
   if (request.reanudarSesion) args.push('--resume', request.reanudarSesion, '--fork-session')
   const caja = conSandbox(args, request.projectPath)
   return caja.ok ? ok({ args: caja.value, prompt: lanzamiento.prompt }) : caja

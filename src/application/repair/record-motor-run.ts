@@ -38,13 +38,18 @@ export function recordMotorRun(
   runMeta: AnalystRunMeta,
   failed = false
 ): string | null {
+  const juicio = runMeta.juicioModelo
+  // El AVISO del modelo (un opus mas viejo de fallback) se registra y se sigue.
+  if (juicio?.veredicto === 'aviso') ctx.omegaLog.append({ projectId, agentId, kind: 'nota', verdict: 'discrepancia', summary: `Modelo: ${juicio.motivo ?? ''}` }) // prettier-ignore
   try {
     return ctx.runs.record({
       projectId,
       agentId,
       kind: 'repair',
       durationMs: runMeta.durationMs,
-      failed,
+      // Un juicio de FALLA del modelo falla la corrida aunque quien llama no lo sepa.
+      failed: failed || juicio?.veredicto === 'falla',
+      ...(runMeta.model === undefined ? {} : { modelo: runMeta.model }),
       // `undefined` viaja tal cual hasta la fila: es la señal, no un hueco.
       ...(runMeta.usage === undefined ? {} : { usage: runMeta.usage }),
       tools: []

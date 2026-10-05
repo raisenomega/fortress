@@ -28,7 +28,7 @@ export const PETICION = {
   projectId: 'p1',
   prompt: '?',
   permissionMode: 'plan' as const,
-  agentId: null,
+  agentId: null, model: 'sonnet' as const,
   trusted: false
 }
 
