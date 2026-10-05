@@ -5,6 +5,7 @@ import { ok, type Result } from '@domain/shared/result'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 import { totalTokens } from '@domain/telemetry/token-usage'
 import { agentFor, resolveTarget } from '../build/build-target'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 const NOOP = (): void => {}
 const GRAFO_FIRST =
@@ -23,7 +24,8 @@ async function runSide(
   // proceso —lo que hace que Detener lo alcance— y sin el su corrida no se
   // asienta, porque una fila sin proyecto seria huerfana.
   const reply = await agent.run(
-    { projectPath, projectId, prompt, permissionMode, agentId: null, trusted },
+    // Los dos lados con el MISMO modelo declarado: si no, el A/B compara modelos, no el grafo.
+    { projectPath, projectId, prompt, permissionMode, agentId: null, model: MODELO_POR_ROL.grafo, trusted },
     NOOP
   )
   return { tokens: totalTokens(reply.usage), costUsd: reply.usage.costUsd, answered: !reply.failed }
