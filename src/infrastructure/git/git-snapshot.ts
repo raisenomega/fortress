@@ -1,12 +1,16 @@
 import { execFileSync } from 'child_process'
 import { resolve } from 'path'
+import { gitEnv } from './git-env'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
 
 /** El git del Terminal, sin los hooks del cliente (ADR-092, git opcion B): el
- *  checkpoint comitea en el arbol vivo, y `--no-verify` no apaga `post-commit`. */
+ *  checkpoint comitea en el arbol vivo, y `--no-verify` no apaga `post-commit`.
+ *  Con el entorno acotado (ADR-095 §4.1): los filtros clean/textconv del repo
+ *  auditado no ven el agente ssh, el keyring ni el D-Bus del operador. */
 export function git(cwd: string, args: readonly string[]): string {
   return execFileSync('git', [...SIN_HOOKS, ...args], {
     cwd,
+    env: gitEnv(),
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore']
   })
