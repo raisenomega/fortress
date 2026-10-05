@@ -116,3 +116,35 @@ Medido el 2026-10-05: el commit del arreglo (`a6b8f05`), aplicado sobre `fd44fca
 como el HEAD avanzó, ha vuelto a la baraja. Regenerarlo cuesta alrededor de $1 y
 rescatar el commit costaría cero. Es una decisión menor que puede quedar para el
 próximo drenaje.
+
+## 6. Pieza A4, añadida al construir A3: el gate no corría los tests `.tsx`
+
+Al escribir el test de A3 salió un hueco del propio gate. `vitest.config.ts`
+incluía solo `src/**/*.test.ts`, así que **7 ficheros `.test.tsx`, con 11 tests,
+no corrían nunca**:
+
+- `construir/ConstruirInput`, `graph/GraphAbBox`, `settings/ApiKeyForm`,
+  `settings/ApiKeyVerdictNote`, `system/CapabilityNotes`, `system/AgentDraftEditor`
+  y `system/ProposeCapability`. Los dos últimos entraron con la tanda del
+  2026-10-05 (`80d5d174`, `3561099e`).
+
+**Los 7 los escribió el propio Motor**, uno por cada arreglo de accesibilidad
+(commits `repair(…)` del 02 al 05-oct). La correa de `allowed-files.ts` le permite
+`<ancla>.test.tsx` cuando el ancla es un `.tsx`, el generador escribe ahí su test,
+y el gate del Motor usa esta misma configuración. **Cada arreglo de UI del Motor
+entró sin que su propio test se ejecutara una sola vez.**
+
+Medido antes de tocarlo: `vitest.config.ts` no es defensa, y los 11 pasan verdes
+y estables (cuatro corridas de la suite entera con los `.tsx` dentro: 931 de 931
+ficheros, 6250 de 6250 tests, sin un flake). No necesitan jsdom ni dependencias
+nuevas.
+
+**Decisión (A, sin firma):** el `include` pasa a `src/**/*.test.{ts,tsx}`, con un
+test que deriva del disco todos los ficheros de test de `src/` y exige que cada
+uno case con el `include` real. Tapa a la vez el gate humano y el del Motor,
+porque comparten la configuración.
+
+**Lo que estos tests son, sin adornar:** son tests de **texto**. Leen el fuente
+del componente y comprueban que el atributo está (`aria-label`, `role`…). Desde
+ahora protegen contra que alguien quite ese atributo. **No prueban la
+accesibilidad real** de la UI renderizada. Hacerlos de render es otro alcance.

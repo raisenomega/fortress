@@ -15,7 +15,7 @@ export default defineConfig({
     }
   },
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     environment: 'node',
     /**
      * VEINTE SEGUNDOS, y no los 5.000 ms por defecto de vitest. Es la DEFENSA de
