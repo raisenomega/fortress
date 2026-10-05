@@ -172,6 +172,12 @@ redact_file() {
 # ─── VEREDICTO DE PUSH ──────────────────────────────────────
 # El informe y el HEAD escaneado viven en $REPORTS_DIR, fuera del repo:
 # nada con escritura en el repo decide si el push sale. Falla cerrado.
+# Limite conocido: el informe lo REDACTA el claude del scan, que corre
+# DENTRO del repo auditado con sus hooks, .mcp.json y CLAUDE.md cargados.
+# OK certifica 'el agente afirmo 0 CRITICAL sobre ese HEAD', nunca 'el
+# repo esta limpio': un repo que inyecte a su auditor obtiene el OK. Por
+# eso el push es siempre humano y la confirmacion enseña la evidencia
+# literal (linea casada, informe, HEAD) antes del gesto del operador.
 
 report_file()  { echo "$REPORTS_DIR/$1-FORTRESS-REPORT.md"; }
 scanned_head() { echo "$REPORTS_DIR/$1.scanned-head"; }
@@ -241,6 +247,7 @@ push_verdict() {
 
 verdict_reason() {
     case "$1" in
+        OK)          echo "el agente del scan afirmo 0 CRITICAL sobre el HEAD escaneado (afirmacion del auditor, no verdad verificada)";;
         NO_REPORT)   echo "sin informe de escaneo en $REPORTS_DIR (ejecutar scan)";;
         STALE)       echo "el informe no corresponde al HEAD actual (re-escanear)";;
         UNPARSEABLE) echo "el informe no trae una linea '- CRITICAL: N' legible";;
@@ -248,6 +255,14 @@ verdict_reason() {
         NO_BRANCH)   echo "la rama registrada ya no existe en el repo (re-registrar o restaurarla)";;
         BRANCH_MISMATCH) echo "la punta de la rama registrada no es el commit escaneado (checkout en otra rama o HEAD desligado; re-escanear sobre esa rama)";;
     esac
+}
+
+# Evidencia literal para el operador: la(s) linea(s) de resumen que el
+# veredicto caso en el informe. Solo se muestra junto al gesto de push;
+# no decide nada — quien decide es report_count via repo_verdict.
+report_evidence_lines() {
+    grep -iE "^[[:space:]]*[-*][[:space:]]*[*_]*($2)[*_]*[[:space:]]*:[*_[:space:]]*[0-9]+" "$1" 2>/dev/null \
+        | sort -u || true
 }
 
 # ─── COMANDOS PRINCIPALES ──────────────────────────────────
@@ -568,7 +583,7 @@ cmd_push() {
             log_error "$name: ${RED}BLOQUEADO${NC} — $(verdict_reason "$verdict")"
         else
             ready_repos+=("$name|$path|$remote|$branch")
-            log_success "$name: ${GREEN}LISTO${NC} para push"
+            log_success "$name: ${GREEN}LISTO${NC} — $(verdict_reason "$verdict")"
         fi
     done <<< "$(get_repos)"
 
@@ -591,8 +606,30 @@ cmd_push() {
         return
     fi
 
+    # Molde de cmd_trust: junto al gesto del operador, lo que el gesto
+    # entrega. OK es la afirmacion del agente, no una verdad verificada;
+    # la evidencia literal se enseña ANTES del 's' para que el push
+    # siempre-humano sea un gesto informado.
     echo -e "${YELLOW}¿Ejecutar push en ${#ready_repos[@]} repo(s)?${NC}"
-    echo -e "Repos: $(for r in "${ready_repos[@]}"; do echo -n "$(echo $r | cut -d'|' -f1) "; done)"
+    echo -e "OK = el agente del scan afirmo 0 CRITICAL sobre ese HEAD; este script no verifico el codigo."
+    for repo in "${ready_repos[@]}"; do
+        local ename=$(echo "$repo" | cut -d'|' -f1)
+        local ereport=$(report_file "$ename")
+        local escanned=$(cat "$(scanned_head "$ename")" 2>/dev/null || true)
+        local elines=$(report_evidence_lines "$ereport" 'CRITICAL|CR(I|Í)TICOS?')
+        echo -e "  ${CYAN}${ename}${NC}"
+        echo -e "     Informe:        $ereport"
+        echo -e "     HEAD escaneado: ${escanned:-?}"
+        if [ -n "$elines" ]; then
+            # La linea la redacto el agente: printf sin escapes, que un
+            # informe hostil no repinte la evidencia con secuencias ANSI.
+            printf '%s\n' "$elines" | while IFS= read -r eline; do
+                printf '     Linea casada:   %s\n' "$eline"
+            done
+        else
+            echo -e "     Linea casada:   (ninguna legible)"
+        fi
+    done
     echo ""
     read -p "Confirmar (s/N): " confirm
 
