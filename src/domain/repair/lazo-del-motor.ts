@@ -12,7 +12,8 @@ export interface EstadoDelLazo {
 }
 
 export interface LoQueDejoLaVuelta {
-  readonly resuelve: OmegaAxis
+  /** El eje de OMEGA, o `ROJO`: un rojo de codigo del gate (ADR-115 B2). */
+  readonly resuelve: OmegaAxis | 'ROJO'
   /** sha1 del trabajo, o null si git no se dejo leer. */
   readonly huella: string | null
   /** La sesion del generador, o null si no hay nada que reanudar. */
@@ -45,7 +46,7 @@ export function decidirOtraVuelta(
   vuelta: LoQueDejoLaVuelta,
   estado: EstadoDelLazo
 ): DecisionDelLazo {
-  if (vuelta.resuelve !== 'PARCIAL') return parar('completo')
+  if (vuelta.resuelve !== 'PARCIAL' && vuelta.resuelve !== 'ROJO') return parar('completo')
   if (vuelta.sesion === null) return parar('sin-sesion')
   if (vuelta.huella === null) return parar('sin-huella')
   if (estado.huellasVistas.includes(vuelta.huella)) return parar('convergio')
