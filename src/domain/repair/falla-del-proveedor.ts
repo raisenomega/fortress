@@ -20,3 +20,13 @@ export function sinRespuesta(target: Candidate, causa: string): Analysis {
     doNotTouch: '', risk: `${PROVEEDOR}${causa}`, tokensUsed: 0
   }
 }
+
+/** El analista corrio, pero en un modelo que no es el suyo (Fable, o por debajo
+ *  de opus): su dictamen no vale — ADR-078, enmienda del 2026-10-05. */
+export const MODELO_FUERA = 'modelo no asignado: '
+
+export function modeloFuera(a: Analysis): boolean {
+  return a.risk.startsWith(MODELO_FUERA)
+}
+
+export const sinModeloAsignado = (target: Candidate, motivo: string): Analysis => ({ ...sinRespuesta(target, ''), risk: `${MODELO_FUERA}${motivo}` }) // prettier-ignore

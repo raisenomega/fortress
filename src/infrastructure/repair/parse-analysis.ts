@@ -19,6 +19,7 @@ export interface RunOut {
   /** El proceso jamas existio. Distinto de una salida vacia, que si corrio. */
   readonly noArranco?: true
   readonly proveedor?: string // el proveedor fallo (429, 403): no hubo analisis
+  readonly modelos?: readonly string[] // los que DE VERDAD corrieron, principal primero
 }
 
 /** Cuanto del texto ilegible se guarda: lo justo para reconocer que devolvio. */
@@ -48,8 +49,7 @@ export function toAnalysis(target: Candidate, out: RunOut): Analysis {
   // que sobra esta al final (guardar el prefijo dejo sin diagnosticar el primer
   // caso real, 18-ago); mismo `tail` que la autopsia del gate, cortado en linea.
   const ilegible = tail(out.result.trim(), MUESTRA)
-  // El CLI que no arranco no produjo una respuesta mala: no produjo ninguna.
-  // Su marca gana a la de ilegible, que supondria que hubo algo que leer.
+  // El CLI que no arranco no produjo respuesta: su marca gana a la de ilegible.
   if (out.noArranco === true) return sinProceso(target, out.result)
   const notes = toSelfNotes(j.notes)
   // Lo que no se entiende no viaja a medias: sin evidencia legible el OBSOLETO

@@ -5,6 +5,7 @@ export interface FalloDelGenerador {
   readonly turnosAgotados?: true
   readonly timedOut?: true
   readonly noArranco?: true
+  readonly modeloFuera?: true
 }
 
 /**
@@ -25,6 +26,7 @@ export interface FalloDelGenerador {
  */
 export function motivoDelGenerador(fallo: FalloDelGenerador): RejectionReason {
   if (fallo.noArranco === true) return 'cli_no_arranco'
+  if (fallo.modeloFuera === true) return 'modelo_no_asignado'
   if (fallo.turnosAgotados === true) return 'turnos_agotados'
   if (fallo.timedOut === true) return 'generator_timeout'
   return 'provider_error'

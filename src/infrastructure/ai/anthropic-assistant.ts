@@ -3,6 +3,7 @@ import type { Assistant, AssistantReply, AssistantRequest } from '@domain/chat/a
 import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { modeloDeLaApi } from './modelo-de-la-api'
+import { juzgarModelo } from '@domain/agent/guardia-del-modelo'
 
 // El modelo NO es un id fijo (era 'claude-opus-5', un Opus mas viejo que la
 // cima): es el alias del reparto, resuelto contra el catalogo de la API.
@@ -51,9 +52,14 @@ export function createAnthropicAssistant(apiKey: string): Assistant {
       stream.on('text', onChunk)
       const reply = await stream.finalMessage()
 
+      // El modelo que DE VERDAD contesto, juzgado como el del CLI (ADR-078, enmienda).
+      const juicio = juzgarModelo(MODELO_POR_ROL.chatApi, [reply.model])
+      if (juicio.veredicto === 'falla') throw new Error(`modelo no asignado: ${juicio.motivo ?? ''}`)
+      if (juicio.veredicto === 'aviso') console.warn('[chat] aviso de modelo:', juicio.motivo)
       // Hay que mirar stop_reason antes que el contenido: en un rechazo puede
       // venir vacio o truncado.
       return {
+        modelo: reply.model,
         text: textOf(reply),
         refused: reply.stop_reason === 'refusal',
         usage: usageOf(reply)

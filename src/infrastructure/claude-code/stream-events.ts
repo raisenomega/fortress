@@ -2,6 +2,7 @@ import type { TokenUsage } from '@domain/telemetry/token-usage'
 import { describeDenial, nombreDeHerramienta } from './lectura-del-denial'
 import { parseAssistant, type AssistantEvent } from './parse-assistant'
 import { parseUsage } from './parse-usage'
+import { modelosUsados } from './modelos-usados'
 
 /**
  * Eventos del `--output-format stream-json` de Claude Code, quedandose solo
@@ -17,14 +18,13 @@ export interface ParsedEvent extends AssistantEvent {
    * aparte de `denials` —que es la nota de transparencia para el operador— y no
    * en vez de el: son dos datos con dos usos y dos riesgos distintos.
    *
-   * El nombre es GENERICO por naturaleza (`Bash`, `mcp__codebase-memory__...`) y
-   * por eso es seguro por construccion: no puede llevar codigo del cliente
-   * aunque nadie lo redacte. El comando SI lo lleva —los denials reales de la
-   * base traen `/home/jojo/Escritorio/...`— y por eso no sale de aqui.
+   * El nombre es GENERICO (`Bash`, `mcp__...`): seguro por construccion. El
+   * comando SI lleva codigo del cliente, y por eso no sale de aqui.
    */
   readonly deniedTools?: readonly string[]
   /** Solo lo trae el evento final: tokens y coste de toda la ejecucion. */
   readonly usage?: TokenUsage
+  readonly modelos?: readonly string[] // los que DE VERDAD corrieron (ADR-078, enmienda)
   /** Del evento final, SOLO si lo trae: la sesion y cuantos turnos corrio. */
   readonly sessionId?: string
   readonly turns?: number
@@ -67,6 +67,7 @@ function fromResult(event: Record<string, unknown>): ParsedEvent {
       ? event.permission_denials.map((denial) => nombreDeHerramienta(denial))
       : [],
     usage: parseUsage(event),
+    modelos: modelosUsados(event),
     // Nada inventado: si el evento no los trae, la llave ni aparece.
     ...(typeof event.session_id === 'string' ? { sessionId: event.session_id } : {}),
     ...(typeof event.num_turns === 'number' ? { turns: event.num_turns } : {})

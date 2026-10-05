@@ -13,6 +13,8 @@ export interface AssistantRequest {
 
 export interface AssistantReply {
   readonly text: string
+  /** El modelo que DE VERDAD contesto (ADR-078, enmienda). */
+  readonly modelo?: string
   /** El modelo declino la peticion (stop_reason "refusal"). */
   readonly refused: boolean
   /**

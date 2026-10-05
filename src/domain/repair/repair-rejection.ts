@@ -4,10 +4,8 @@
  * Es el vocabulario de DESENLACES de un intento, no la lista de lo que produce
  * el estado `RECHAZADO`, y la diferencia se ve en `superseded`: no llego a
  * GENERADO —luego pertenece aqui— pero `generate-guards` la deja en `CADUCADO`,
- * porque a esa propuesta no la juzgo nadie, la reemplazo una mas nueva. Sacarla
- * para "arreglar" la asimetria seria peor: se comprobo quitandola y da dos
- * errores de tipo, porque el generador y la tabla de clasificacion la exigen —
- * el remedio consiste en ponerla dos veces donde estaba una.
+ * porque a esa propuesta no la juzgo nadie, la reemplazo una mas nueva (sacarla
+ * da dos errores de tipo: el generador y la tabla de clasificacion la exigen).
  */
 export const REJECTION_REASONS = [
   'scope_violation',
@@ -37,6 +35,8 @@ export const REJECTION_REASONS = [
    * y aqui no se construye defensa para un caso no observado.
    */
   'cli_no_arranco',
+  /** El modelo que CORRIO no es el asignado: Fable o por debajo (ADR-078, enmienda). Corta la tanda. */
+  'modelo_no_asignado',
   /**
    * HISTORICO: ya no lo emite nadie. Cubrio timeout, spawn fallido y transicion
    * invalida; se separaron en `generator_timeout`, `cli_no_arranco` e

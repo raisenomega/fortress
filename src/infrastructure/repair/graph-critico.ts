@@ -6,7 +6,8 @@ import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { argsDeLectura } from './generator-args'
 import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
-import { processOmegaOut } from './omega-out'
+import { salidaDelJuez } from './salida-del-juez'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { relojDeCorrida } from './reloj-de-corrida'
 
 const TIMEOUT_MS = 900_000
@@ -54,14 +55,13 @@ export function createGraphCritico(
         child.on('close', () => {
           clearTimeout(timer)
           store.liberar()
-          // Murio por el plazo: no hay factura que leer, y cero seria mentira.
-          if (timedOut) return resolve({ ok: false, error: 'timeout', timedOut, runMeta: sinFactura() }) // prettier-ignore
-          const { usage, text, proveedor } = processOmegaOut(out)
-          if (proveedor !== undefined) return resolve({ ok: false, error: 'provider_error', timedOut: false, runMeta: meta(usage) }) // prettier-ignore
+          if (timedOut) return resolve({ ok: false, error: 'timeout', timedOut, runMeta: sinFactura() }) // prettier-ignore -- plazo: sin factura, cero seria mentira
+          const { usage, text, juicio, fallo } = salidaDelJuez(out, MODELO_POR_ROL.critico)
+          if (fallo !== undefined) return resolve({ ok: false, error: fallo.error, timedOut: false, runMeta: meta(usage, juicio) }) // prettier-ignore
           const texto = text.trim()
           // Sin texto no hay objecion: el turno sigue, con el tribunal mudo.
-          if (texto === '') return resolve({ ok: false, error: 'sin texto', timedOut: false, runMeta: meta(usage) }) // prettier-ignore
-          resolve({ ok: true, texto, runMeta: meta(usage) })
+          if (texto === '') return resolve({ ok: false, error: 'sin texto', timedOut: false, runMeta: meta(usage, juicio) }) // prettier-ignore
+          resolve({ ok: true, texto, runMeta: meta(usage, juicio) })
         })
         // El critico no llego a existir: no es su objecion la que fallo.
         child.on('error', (e) => {

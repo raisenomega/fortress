@@ -1,7 +1,7 @@
 /** Consultas de la tabla agent_runs. Todas parametrizadas, nunca concatenadas. */
 const COLUMNS = `id, project_id, agent_id, kind, duration_ms, failed, input_tokens,
   output_tokens, cache_read_tokens, cache_creation_tokens, cost_usd, num_turns, tools, at,
-  usage_known, recibo`
+  usage_known, recibo, modelo`
 
 /** COALESCE porque SUM sobre cero filas devuelve NULL, no 0. */
 const SUMS = `COALESCE(SUM(input_tokens), 0)          AS input_tokens,
@@ -16,10 +16,10 @@ const SCOPED = 'agent_id = @agentId AND (@projectId IS NULL OR project_id = @pro
 
 export const INSERT_RUN = `INSERT INTO agent_runs (id, project_id, agent_id, kind,
   duration_ms, failed, input_tokens, output_tokens, cache_read_tokens,
-  cache_creation_tokens, cost_usd, num_turns, edits, tools, at, usage_known, recibo)
+  cache_creation_tokens, cost_usd, num_turns, edits, tools, at, usage_known, recibo, modelo)
   VALUES (@id, @projectId, @agentId, @kind, @durationMs, @failed, @inputTokens,
   @outputTokens, @cacheReadTokens, @cacheCreationTokens, @costUsd, @numTurns,
-  @edits, @tools, @at, @usageKnown, @recibo)`
+  @edits, @tools, @at, @usageKnown, @recibo, @modelo)`
 
 export const SELECT_ONE = `SELECT ${COLUMNS} FROM agent_runs WHERE id = ?`
 

@@ -1,6 +1,7 @@
 import { errorDelProveedor } from '../claude-code/error-del-proveedor'
 import { parseUsage } from '../claude-code/parse-usage'
 import type { RunOut } from './parse-analysis'
+import { modelosUsados } from '../claude-code/modelos-usados'
 
 /**
  * Abre el sobre JSON del CLI del analista: su texto, su factura y —si lo hubo—
@@ -13,7 +14,7 @@ export function salidaDelAnalista(out: string): RunOut {
     const j = JSON.parse(out) as Record<string, unknown>
     const proveedor = errorDelProveedor(j)
     const texto = typeof j.result === 'string' ? j.result : ''
-    return { result: texto, usage: parseUsage(j), ...(proveedor === null ? {} : { proveedor }) }
+    return { result: texto, usage: parseUsage(j), modelos: modelosUsados(j), ...(proveedor === null ? {} : { proveedor }) } // prettier-ignore
   } catch {
     return { result: out }
   }

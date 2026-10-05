@@ -4,7 +4,9 @@ import { notasDeObjeto } from '@domain/system/extraer-notas'
 import type { SelfNoteDraft } from '@domain/system/self-observation'
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
-import { processOmegaOut } from './omega-out'
+import { salidaDelJuez } from './salida-del-juez'
+import { MODELO_DE_OMEGA } from '@domain/agent/escalera-de-modelos'
+import type { JuicioDelModelo } from '@domain/agent/guardia-del-modelo'
 
 /**
  * Lo que sale de una corrida de OMEGA ya cerrada.
@@ -41,21 +43,21 @@ export type OmegaRunResult =
  */
 export function toOmegaOutcome(
   out: string,
-  meta: (usage?: TokenUsage) => AnalystRunMeta
+  meta: (usage?: TokenUsage, juicio?: JuicioDelModelo) => AnalystRunMeta
 ): OmegaRunResult {
-  const { usage, text, proveedor } = processOmegaOut(out)
-  // El 429 no es un veredicto mal escrito: es AVERIA (la noche del 05-oct).
-  if (proveedor !== undefined) return { ok: false, error: 'provider_error', detail: proveedor, timedOut: false, runMeta: meta(usage) } // prettier-ignore
+  // El 429 y el modelo ajeno no son veredictos mal escritos: son AVERIA.
+  const { usage, text, juicio, fallo } = salidaDelJuez(out, MODELO_DE_OMEGA)
+  if (fallo !== undefined) return { ok: false, error: fallo.error, detail: fallo.detalle, timedOut: false, runMeta: meta(usage, juicio) } // prettier-ignore
   const parsed = parseOmegaResponse(text)
   if ('error' in parsed) {
     // prettier-ignore
-    return { ok: false, error: 'omega_response_invalid', detail: parsed.error, raw: text, timedOut: false, runMeta: meta(usage) }
+    return { ok: false, error: 'omega_response_invalid', detail: parsed.error, raw: text, timedOut: false, runMeta: meta(usage, juicio) }
   }
   // Las notas se leen del MISMO bloque pero por la puerta TOLERANTE, nunca por
   // `parseOmegaResponse`: ahi un campo desconocido invalida el veredicto entero
   // —«no se inventan ejes»— y una nota mal escrita tumbaria el juicio que la
   // acompana. Son dos contratos con dureza distinta a proposito (ADR-085).
-  return { ok: true, verdict: parsed.verdict, runMeta: meta(usage), notas: notasDelVerdict(text) }
+  return { ok: true, verdict: parsed.verdict, runMeta: meta(usage, juicio), notas: notasDelVerdict(text) }
 }
 
 /** El objeto del VERDICT, releido solo para sus notas. Si no se entiende, no hay

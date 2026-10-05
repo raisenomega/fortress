@@ -7,7 +7,7 @@ export type GeneratorResult =
   /** `turnosAgotados` y `timedOut` viajan DESDE EL ADAPTADOR porque solo alli se
    *  sabe: quien lee la salida despues no puede distinguir su reloj del ajeno. */
   // prettier-ignore
-  | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; noArranco?: true; runMeta: AnalystRunMeta; sesion?: string }
+  | { ok: false; error: string; turnosAgotados?: true; timedOut?: true; noArranco?: true; modeloFuera?: true; runMeta: AnalystRunMeta; sesion?: string }
 
 export interface GraphGenerator {
   /** `reanudar`: la sesion de la vuelta anterior. Sin ella, sesion nueva. */

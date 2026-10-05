@@ -11,7 +11,9 @@ import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
 import { toAnalysis, type RunOut } from './parse-analysis'
 import { salidaDelAnalista } from './salida-del-analista'
-import { sinRespuesta } from '@domain/repair/falla-del-proveedor'
+import { sinModeloAsignado, sinRespuesta } from '@domain/repair/falla-del-proveedor'
+import { juzgarModelo } from '@domain/agent/guardia-del-modelo'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { trackChild } from '../claude-code/child-registry'
 import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
@@ -56,13 +58,15 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       // el prompt refleja las capacidades reales, no las que alguien creyo.
       const prompt = (c: Capacidades): string => buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, graphSlug(projectPath), c, readCognitionLog(projectPath).patterns) // prettier-ignore
       const out = await run(claudeBin, projectPath, prompt, projectId)
-      const analysis = out.proveedor === undefined ? toAnalysis(target, out) : sinRespuesta(target, out.proveedor) // prettier-ignore
+      // El proveedor y el modelo se miran ANTES de leer el texto como analisis.
+      const juicio = juzgarModelo(MODELO_POR_ROL.analista, out.modelos ?? [])
+      const analysis = out.proveedor !== undefined ? sinRespuesta(target, out.proveedor) : juicio.veredicto === 'falla' ? sinModeloAsignado(target, juicio.motivo ?? '') : toAnalysis(target, out) // prettier-ignore
       return {
         analysis,
         // El crudo ENTERO solo cuando no se dejo leer: es lo unico con lo que
         // se puede reproducir el fallo, y el asiento guarda solo una muestra.
         ...(noSeDejoLeer(analysis) ? { raw: out.result } : {}),
-        runMeta: reloj.meta(out.usage)
+        runMeta: reloj.meta(out.usage, juicio)
       }
     }
   }

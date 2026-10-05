@@ -14,6 +14,7 @@ import { collectRun, TECHO_POR_DEFECTO, sinLanzar } from './run-claude-process'
 import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
 import type { CodeAgentReply } from '@domain/chat/code-agent'
 import { turnoConGrafo } from './turno-con-grafo'
+import { conGuardiaDelModelo } from './guardia-del-turno'
 
 /**
  * Ejecuta Claude Code dentro de la carpeta del proyecto. A diferencia del chat
@@ -63,7 +64,7 @@ export function createClaudeCodeAgent(
         // La parada pudo llegar mientras se armaba el turno: `cancelRun` ya mato
         // a los vivos y no vio a este. Un hijo que nace parado, muere al nacer.
         if (request.projectId !== undefined && isCancelled(request.projectId)) killChildrenOf(request.projectId) // prettier-ignore
-        return collectRun(child, onChunk, techoMs)
+        return collectRun(child, onChunk, techoMs).then((r) => conGuardiaDelModelo(request, r))
       }
 
       // La copia muere con el turno por sus TRES salidas, no solo al cerrar el
