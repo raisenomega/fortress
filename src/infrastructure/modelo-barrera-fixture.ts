@@ -1,31 +1,56 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
-const ES_TEST = /\.test\.ts$|fixture|fake/
 export interface Fuente { readonly ruta: string; readonly fuente: string }
+export interface Llamada { readonly ruta: string; readonly linea: number; readonly bin: string; readonly args: string }
 
-/** Todos los .ts de `src/` que no son tests: la barrera cubre lo que LANZA LA
- *  APP. `scripts/` queda fuera por diseno (ADR-078, enmienda: herramientas del
- *  operador, se corren a mano, heredan por decision consciente). */
+/** TODO `src/` salvo los `*.test.ts` (por sufijo EXACTO: un `fake`/`fixture` en
+ *  la ruta ya no esconde nada). La barrera cubre lo que lanza la app; `scripts/`
+ *  queda fuera por diseno (ADR-078, enmienda). Sin `head` ni limite: un censo
+ *  truncado no es un censo (la leccion del PASO 0). */
 export function fuentes(dir = 'src'): readonly Fuente[] {
   return readdirSync(dir).flatMap((e) => {
     const ruta = join(dir, e)
     if (statSync(ruta).isDirectory()) return fuentes(ruta)
-    return ruta.endsWith('.ts') && !ES_TEST.test(ruta) ? [{ ruta, fuente: readFileSync(ruta, 'utf8') }] : [] // prettier-ignore
+    return ruta.endsWith('.ts') && !ruta.endsWith('.test.ts') ? [{ ruta, fuente: readFileSync(ruta, 'utf8') }] : [] // prettier-ignore
   })
 }
 
-/** Quien lanza un `claude`: importa child_process, spawnea, y su binario es el
- *  del CLI (no el del grafo, no git). */
-export const lanzanClaude = (fs: readonly Fuente[]): readonly Fuente[] =>
-  fs.filter(({ fuente }) => /from '(?:node:)?child_process'/.test(fuente) && /\b(?:spawn|spawnSync|execFile)\(/.test(fuente) && /\b(?:CLAUDE_BIN|claudeBin)\b/.test(fuente)) // prettier-ignore
+/** El codigo sin comentarios (un id CITADO en una nota no es un id en uso),
+ *  conservando los saltos de linea: el fichero:linea que se reporta es exacto. */
+export const sinComentarios = (t: string): string => t.replace(/(^|\s)(\/\*[\s\S]*?\*\/|\/\/.*$)/gm, (_, pre: string, c: string) => pre + c.replace(/[^\n]/g, '')) // prettier-ignore
 
-/** Los constructores de argumentos que DECLARAN modelo (o se niegan sin el), y
- *  las invocaciones que no son de agente. Lo que lance sin uno de estos, hereda. */
-export const DECLARANTES = /\bargsDeLectura\([^)]*'(?:analista|critico|omega)'\)|\bargsDelGenerador\(|\bargsDelTurno\(|\bargsDeIndexar\(|\bverifyArgs\(|\['auth',|\['--version'\]/ // prettier-ignore
+/** Los dos primeros argumentos de una llamada que empieza en `desde`, cortando
+ *  por comas de PRIMER nivel (los corchetes y parentesis anidados no cortan). */
+function argumentos(t: string, desde: number): readonly string[] {
+  const partes: string[] = []
+  let nivel = 0
+  let actual = ''
+  for (let i = desde; i < t.length; i += 1) {
+    const c = t[i]
+    if ('([{'.includes(c)) nivel += 1
+    if (')]}'.includes(c)) nivel -= 1
+    if (nivel < 0 || (nivel === 0 && c === ',')) {
+      partes.push(actual.trim().replace(/\s+/g, ' '))
+      if (nivel < 0 || partes.length === 2) return partes
+      actual = ''
+    } else actual += c
+  }
+  return partes
+}
 
-/** Peticiones de turno SIN agente (`agentId: null` junto a `permissionMode`):
- *  cada una tiene que llevar `model:` en el mismo objeto. */
+/** CADA lanzamiento de proceso (no `re.exec(`: el punto delante lo descarta). */
+export function llamadas(f: Fuente): readonly Llamada[] {
+  if (!/from '(?:node:)?child_process'/.test(f.fuente)) return []
+  const t = sinComentarios(f.fuente)
+  const re = /(?<![.\w])(?:spawn|spawnSync|execFile|execFileSync|fork)\(/g
+  return [...t.matchAll(re)].map((m) => {
+    const [bin = '', args = ''] = argumentos(t, (m.index ?? 0) + m[0].length)
+    return { ruta: f.ruta, linea: t.slice(0, m.index).split('\n').length, bin, args }
+  })
+}
+
+/** Turnos sin agente: `agentId: null` junto a `permissionMode` → `model:` en el objeto. */
 export function rutasSinAgente(f: Fuente): ReadonlyArray<{ readonly linea: number; readonly declara: boolean }> { // prettier-ignore
   const ls = f.fuente.split('\n')
   return ls.flatMap((l, i) => {
@@ -34,9 +59,3 @@ export function rutasSinAgente(f: Fuente): ReadonlyArray<{ readonly linea: numbe
     return /permissionMode/.test(ventana) ? [{ linea: i + 1, declara: /\bmodel:/.test(ventana) }] : []
   })
 }
-
-/** La otra puerta: quien construye un cliente del SDK (`new Anthropic(`). */
-export const usanElSdk = (fs: readonly Fuente[]): readonly Fuente[] => fs.filter(({ fuente }) => /new Anthropic\(/.test(fuente))
-
-/** El codigo sin comentarios: un id CITADO en una nota historica no es un id en uso. */
-export const sinComentarios = (t: string): string => t.replace(/(^|\s)(?:\/\*[\s\S]*?\*\/|\/\/.*$)/gm, '$1')
