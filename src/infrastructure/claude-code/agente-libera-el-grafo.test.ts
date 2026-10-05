@@ -28,7 +28,7 @@ const { fijarRaizDeGrafosDeTurno } = await import('../graph/raiz-de-grafos-de-tu
 const raiz = fijarRaizDeGrafosDeTurno(mkdtempSync(join(tmpdir(), 'agente-grafo-')))
 afterAll(() => rmSync(join(raiz, '..'), { recursive: true, force: true }))
 
-const peticion = (): CodeAgentRequest => ({ projectPath: mkdtempSync(join(tmpdir(), 'proy-')), prompt: 'x', permissionMode: 'plan', agentId: null, trusted: false }) // prettier-ignore
+const peticion = (): CodeAgentRequest => ({ projectPath: mkdtempSync(join(tmpdir(), 'proy-')), prompt: 'x', permissionMode: 'plan', agentId: null, model: 'sonnet', trusted: false }) // prettier-ignore
 const tick = (): Promise<void> => new Promise((r) => process.nextTick(r))
 
 describe('el agente prepara el grafo del turno antes de lanzar y lo libera al cerrar', () => {

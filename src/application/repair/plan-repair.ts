@@ -12,6 +12,7 @@ import { negado, planificada, type PlanResult } from './resultado-del-plan'
 import { asentarNotasDelAnalista } from './asentar-notas-del-analista'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { recordAnalyzed, recordElegido } from './record-plan-events'
+import { fallaDelProveedor } from '@domain/repair/falla-del-proveedor'
 
 /**
  * C1 -> C2 desde la app: ELIGE un hallazgo (determinista), ancla el HEAD del
@@ -53,7 +54,8 @@ export async function planRepair(
   await recordElegido(context.eventLog, proposal, scanId)
 
   const crudo = await estudiar(context, project, selection)
-  const result = conAgentRun(crudo, recordMotorRun(context, projectId, null, crudo.runMeta))
+  // Si el proveedor tumbo al analista, la fila dice FALLO (Principio 24), no «ok $0».
+  const result = conAgentRun(crudo, recordMotorRun(context, projectId, null, crudo.runMeta, fallaDelProveedor(crudo.analysis))) // prettier-ignore
   asentarNotasDelAnalista(context, project, result.analysis)
   const veredicto = veredictoDelAnalisis(result.analysis)
   if (!canTransition(proposal.state, veredicto.state)) return planificada(proposal)

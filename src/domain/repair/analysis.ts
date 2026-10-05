@@ -3,6 +3,7 @@ import type { TokenUsage } from '../telemetry/token-usage'
 import type { Evidencia } from './evidencia-obsolescencia'
 import type { Arreglo } from './leer-arreglo'
 import type { Candidate } from './select-target'
+import type { JuicioDelModelo } from '../agent/guardia-del-modelo'
 
 /**
  * Entendimiento INERTE de un hallazgo: que cambiar, donde, que patron copiar, que NO
@@ -43,15 +44,13 @@ export interface AnalystRunMeta {
   readonly agentRunId?: string
   /** undefined si el parser no pudo extraerlo: no se inventan numeros. */
   readonly tokensUsed?: number
-  /**
-   * La factura entera del CLI, no solo su suma. `tokensUsed` sigue siendo el
-   * total que gobierna el tope por propuesta; esto es lo que hace falta para
-   * asentar la corrida en el libro mayor, que guarda los cuatro contadores
-   * separados porque el cache no cuesta lo mismo que el input normal.
-   */
+  /** La factura entera del CLI (los cuatro contadores: el cache no cuesta lo
+   *  mismo que el input). `tokensUsed` es el total que gobierna el tope. */
   readonly usage?: TokenUsage
   readonly durationMs: number
+  /** El modelo que DE VERDAD corrio, y su juicio (ADR-078, enmienda). */
   readonly model?: string
+  readonly juicioModelo?: JuicioDelModelo
   readonly startedAt: number
   readonly endedAt: number
 }

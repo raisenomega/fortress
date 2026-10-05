@@ -40,7 +40,8 @@ export const AGENT_RUNS_COLUMNS = `
   tools                 TEXT    NOT NULL DEFAULT '',
   at                    TEXT    NOT NULL,
   usage_known           INTEGER,
-  recibo                TEXT
+  recibo                TEXT,
+  modelo                TEXT
 `
 
 export const AGENT_RUNS_INDEXES = `

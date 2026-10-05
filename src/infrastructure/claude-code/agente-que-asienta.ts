@@ -47,7 +47,8 @@ export function agenteQueAsientaCorrida(
             durationMs: Date.now() - desde,
             failed: reply.failed,
             usage: reply.usage,
-            tools: reply.tools
+            tools: reply.tools,
+            ...(reply.modelo === undefined ? {} : { modelo: reply.modelo })
           })
         } catch (error) {
           // Mejor esfuerzo: perder la fila es molesto; perder lo que el agente

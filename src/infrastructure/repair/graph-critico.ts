@@ -6,7 +6,8 @@ import { trackChild } from '../claude-code/child-registry'
 import { senalAl } from '../claude-code/kill-signal'
 import { argsDeLectura } from './generator-args'
 import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
-import { processOmegaOut } from './omega-out'
+import { salidaDelJuez } from './salida-del-juez'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { relojDeCorrida } from './reloj-de-corrida'
 
 const TIMEOUT_MS = 900_000
@@ -20,9 +21,8 @@ export interface GraphCritico {
 
 /**
  * El critico real: `claude -p` sobre el arbol, con las MISMAS herramientas que
- * OMEGA; la diferencia vive entera en el prompt. REPLICA el ciclo de proceso de
- * `graph-omega` sin reusarlo (atacante y juez no comparten codigo a proposito).
- * Si reusa `processOmegaOut` y el reloj (un cero de tokens no es «no medi»).
+ * OMEGA; la diferencia vive entera en el prompt. REPLICA el ciclo de `graph-omega`
+ * sin reusarlo (atacante y juez no comparten codigo); si reusa `processOmegaOut`.
  * `grafo`: el store del turno (ADR-095, enmienda); sin atar, un dir vacio, nunca la cache real.
  */
 export function createGraphCritico(
@@ -36,7 +36,7 @@ export function createGraphCritico(
     run: async (arbol, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar() // sin caja no arranca, como un binario que no existe:
-      const args = argsDeLectura(prompt, arbol, store.dir)
+      const args = argsDeLectura(prompt, arbol, store.dir, 'critico')
       if (!args.ok) return (store.liberar(), { ok: false, error: args.error, timedOut: false, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
         const child = spawn(claudeBin, [...args.value.args], { cwd: arbol, detached: true, env: buildEnv(null) })
@@ -55,13 +55,13 @@ export function createGraphCritico(
         child.on('close', () => {
           clearTimeout(timer)
           store.liberar()
-          // Murio por el plazo: no hay factura que leer, y cero seria mentira.
-          if (timedOut) return resolve({ ok: false, error: 'timeout', timedOut, runMeta: sinFactura() }) // prettier-ignore
-          const { usage, text } = processOmegaOut(out)
+          if (timedOut) return resolve({ ok: false, error: 'timeout', timedOut, runMeta: sinFactura() }) // prettier-ignore -- plazo: sin factura, cero seria mentira
+          const { usage, text, juicio, fallo } = salidaDelJuez(out, MODELO_POR_ROL.critico)
+          if (fallo !== undefined) return resolve({ ok: false, error: fallo.error, timedOut: false, runMeta: meta(usage, juicio) }) // prettier-ignore
           const texto = text.trim()
           // Sin texto no hay objecion: el turno sigue, con el tribunal mudo.
-          if (texto === '') return resolve({ ok: false, error: 'sin texto', timedOut: false, runMeta: meta(usage) }) // prettier-ignore
-          resolve({ ok: true, texto, runMeta: meta(usage) })
+          if (texto === '') return resolve({ ok: false, error: 'sin texto', timedOut: false, runMeta: meta(usage, juicio) }) // prettier-ignore
+          resolve({ ok: true, texto, runMeta: meta(usage, juicio) })
         })
         // El critico no llego a existir: no es su objecion la que fallo.
         child.on('error', (e) => {

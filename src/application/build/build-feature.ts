@@ -4,6 +4,7 @@ import { notasDeBloque, sinBloqueDeNotas } from '@domain/system/extraer-notas'
 import { asentarNotas } from '../system/asentar-notas'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 export interface BuildDeps {
   /** Checkpoint git; devuelve la referencia base, o null si no es un repo. */
@@ -47,7 +48,7 @@ export async function buildFeature(
       projectId: project.id,
       prompt,
       permissionMode: 'acceptEdits',
-      agentId: null,
+      agentId: null, model: MODELO_POR_ROL.construir,
       trusted: true
     },
     onChunk

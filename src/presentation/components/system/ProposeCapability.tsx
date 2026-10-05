@@ -33,6 +33,7 @@ export function ProposeCapability(): React.JSX.Element {
         <select
           value={kind}
           onChange={(event) => setKind(event.target.value as CapabilityKind)}
+          aria-label="Tipo de capacidad"
           className={FIELD}
         >
           {CAPABILITY_KINDS.map((option) => (

@@ -40,6 +40,8 @@ export interface NewAgentRun {
    * se», que no es lo mismo que «no corrio nada».
    */
   readonly recibo?: readonly string[]
+  /** El modelo que DE VERDAD corrio (ADR-078, enmienda): del CLI o de la API. */
+  readonly modelo?: string
 }
 
 /**

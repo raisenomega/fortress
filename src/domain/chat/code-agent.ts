@@ -1,6 +1,7 @@
 import type { AgentId } from '../agent/agent'
 import type { ClaudePermissionMode } from '../settings/permission-mode'
 import type { CodeAgentReply } from './code-agent-reply'
+import type { Peldano } from '../agent/escalera-de-modelos'
 
 /** Quien contesto: el CLI con herramientas reales, o solo la API de texto. */
 export type ChatEngine = 'claude-code' | 'api'
@@ -17,8 +18,10 @@ export interface CodeAgentRequest {
   readonly projectId?: string
   readonly prompt: string
   readonly permissionMode: ClaudePermissionMode
-  /** Agente que se hace cargo. Null deja que Claude Code decida por su cuenta. */
+  /** Agente que se hace cargo; su modelo va en su declaracion (ADR-078). */
   readonly agentId: AgentId | null
+  /** Modelo del turno SIN agente (ADR-078, enmienda): sin uno de los dos, no se lanza. */
+  readonly model?: Peldano
   /**
    * Proyecto de confianza. Solo entonces se pasa el allowlist de
    * autoverificacion, y solo al editar (acceptEdits). Ver selfVerifyRules.

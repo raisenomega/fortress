@@ -3,6 +3,7 @@ import type { StoredAgentDraft } from '@domain/system/agent-draft-repository'
 import { buildDraftPrompt, parseAgentDraft } from '@domain/system/agent-draft-prompt'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 /**
  * Autonomia real, ACOTADA a un disparo: un AGENTE redacta la definicion de la
@@ -22,7 +23,7 @@ export async function draftAgentAuto(
   if (capability.kind !== 'agente') return err('Solo un agente lleva definicion')
   const prompt = buildDraftPrompt(capability.name, capability.originObservation)
   const reply = await agent.run(
-    { projectPath: sandboxPath, prompt, permissionMode: 'lectura', agentId: null, trusted: false },
+    { projectPath: sandboxPath, prompt, permissionMode: 'lectura', agentId: null, model: MODELO_POR_ROL.borrador, trusted: false },
     () => {}
   )
   if (reply.failed) return err(reply.text)

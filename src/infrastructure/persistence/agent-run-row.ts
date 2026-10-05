@@ -14,6 +14,7 @@ export interface AgentRunRow extends UsageColumns {
   readonly at: string
   readonly usage_known: number | null
   readonly recibo: string | null
+  readonly modelo: string | null
 }
 
 /** El CHECK de la tabla ya los acota; esto protege de una base tocada a mano. */
@@ -35,7 +36,8 @@ export function toAgentRun(row: AgentRunRow): AgentRun {
     usageKnown: row.usage_known === null ? null : row.usage_known === 1,
     // `null` se lee como AUSENTE, no como lista vacia: una corrida sin recibo
     // es una de la que no se capturo, no una que no corrio nada.
-    recibo: row.recibo === null ? undefined : row.recibo.split(RECIBO_SEPARATOR)
+    recibo: row.recibo === null ? undefined : row.recibo.split(RECIBO_SEPARATOR),
+    ...(row.modelo === null || row.modelo === undefined ? {} : { modelo: row.modelo })
   }
 }
 

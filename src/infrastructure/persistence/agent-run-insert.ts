@@ -37,6 +37,7 @@ export function toRunInsert(id: string, run: NewAgentRun, at: string): Record<st
     // forma de enhebrar el recibo hasta el disco sin tacharlo. Si estuviera
     // arriba, bastaria un camino nuevo que no llamara al tachador.
     recibo: run.recibo === undefined ? null : tacharRecibo(run.recibo).join(RECIBO_SEPARATOR),
+    modelo: run.modelo ?? null,
     at
   }
 }

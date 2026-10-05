@@ -27,7 +27,7 @@ import type { RejectionReason } from './repair-rejection'
  * `invalid_state`, y sin nadie que lo emita clasificar el valor seria clasificar
  * un fantasma. Sobrevive en el vocabulario para que las filas viejas se lean.
  */
-const AVERIAS = ['provider_error', 'omega_error', 'cli_no_arranco'] as const satisfies readonly RejectionReason[] // prettier-ignore
+const AVERIAS = ['provider_error', 'omega_error', 'cli_no_arranco', 'modelo_no_asignado'] as const satisfies readonly RejectionReason[] // prettier-ignore
 
 /** Los tres de arriba, como tipo: la clasificacion de bajas los excluye. */
 export type MotivoDeAveria = (typeof AVERIAS)[number]
@@ -55,4 +55,14 @@ export function esTimeout(motivo: string): boolean {
  */
 export function esEntorno(motivo: string): boolean {
   return motivo === 'cli_no_arranco' || motivo.startsWith('cli_no_arranco:')
+}
+
+/**
+ * La clave de averia de un motivo con detalle (`provider_error: 429: ...`), o
+ * null si no es averia. Los rechazos del ANALISTA viajan con su detalle pegado:
+ * sin leer la clave, un `provider_error` del analisis no cortaba nada.
+ */
+export function motivoDeAveria(motivo: string): string | null {
+  const clave = motivo.split(':')[0].trim()
+  return esAveria(clave) ? clave : null
 }
