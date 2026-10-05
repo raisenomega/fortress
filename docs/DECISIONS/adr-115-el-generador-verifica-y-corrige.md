@@ -80,12 +80,27 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 
   Sigue siendo una **pausa, no una extinción**: si el HEAD avanza, el hallazgo
   vuelve a la baraja, y la cuenta empieza de cero en la base nueva.
-- **B2. El rojo del gate deja de ser terminal, dentro de los topes que ya existen.**
-  Enmienda de ADR-110: un rojo de lint, typecheck o test reanuda la sesión del
-  generador con las líneas de A1 como encargo, igual que hoy lo hace un PARCIAL
-  con la objeción de OMEGA. Los topes **no cambian**: 2 vueltas, $5 por propuesta,
-  $0,70 de margen. Un timeout o un fallo de `npm ci` siguen siendo terminales:
-  son del entorno, no del arreglo.
+- **B2. El rojo del gate deja de ser terminal, dentro de los topes que ya existen**
+  (construido el 2026-10-05; la enmienda está en ADR-110 §10). Al medirlo salió
+  que no bastaba con cambiar el disparo: el gate ya cerraba la propuesta en
+  RECHAZADO antes de que nadie pudiera reanudarla. El diseño construido:
+  - el gate **aplaza** el rechazo de un rojo de código con líneas (solo cuando lo
+    pide la cadena del Motor; el botón manual no cambia) y la propuesta se queda
+    en GENERADO;
+  - una arista nueva, `GENERADO → GENERADO`, para la vuelta; RECHAZADO sigue sin
+    salida;
+  - el mismo `decidirOtraVuelta`, con los topes compartidos con el PARCIAL;
+  - un encargo propio y honesto, saneado con `sanearCampoDePrompt`;
+  - y si no hay vuelta, el rechazo aplazado se escribe idéntico al de siempre.
+
+  Al construirlo salió un hueco que **ya existía**: el encargo del PARCIAL
+  (`objecion-de-omega.ts:24`) metía la razón de OMEGA dentro de su bloque con
+  `aplanarParaPrompt`, que impide abrir una línea pero no cerrar el bloque desde
+  dentro de la misma. Su test lo fijaba como correcto. **Cerrado el 2026-10-05**:
+  la razón pasa por `sanearCampoDePrompt`, igual que el encargo del rojo, y las
+  dos vías del encargo quedan blindadas por igual. Efecto visible: las comillas
+  invertidas de la razón le llegan al generador como comillas simples, el mismo
+  trato que ya reciben los campos del análisis.
 - **B3. La auto-verificación en la caja queda DIFERIDA, con condición escrita.**
   Su precondición, medida y nunca escrita: cuando corre el generador, el árbol de
   trabajo **no tiene `node_modules`**, porque el `npm ci` solo ocurre dentro del

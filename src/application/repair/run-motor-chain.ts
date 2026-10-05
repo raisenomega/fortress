@@ -3,14 +3,14 @@ import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import type { GenerateDeps } from './generate-types'
 import { generateFix } from './generate-fix'
-import type { JudgeDeps } from './judge-and-integrate'
-import { judgeAndIntegrate } from './judge-and-integrate'
+import { judgeAndIntegrate, type JudgeDeps } from './judge-and-integrate'
 import { esAveria, motivoDeAveria } from '@domain/repair/averia'
 import { desenlaceDelPlan, type ChainOutcome } from './motor-chain-outcome'
 import { cerrarLaCadena } from './cierre-de-la-cadena'
 import { conLazo } from './con-lazo'
 import { planRepair } from './plan-repair'
-import { runGate, type GateDeps } from './run-gate'
+import type { GateDeps } from './run-gate'
+import { gateConVuelta } from './vuelta-tras-el-rojo'
 
 export interface MotorChainDeps {
   readonly generate: GenerateDeps
@@ -57,7 +57,7 @@ export async function runMotorChain(
   const generado = await generateFix(ctx, proposal.id, deps.generate)
   if (!generado.ok) return cortar(proposal.id, generado.reason)
 
-  const gate = await runGate(ctx, proposal.id, deps.gate)
+  const gate = await gateConVuelta(ctx, proposal.id, deps, generado.sesion)
   if (!gate.ok) return cortar(proposal.id, gate.reason)
   // OMEGA no se ha llamado: la propuesta queda en GATE (viva), su hallazgo no
   // vuelve a salir elegido y las siguientes vueltas atacan otros.
@@ -69,7 +69,7 @@ export async function runMotorChain(
   const juicio = await judgeAndIntegrate(ctx, proposal.id, deps.judge, false)
   if (!juicio.omega.ok) return cortar(proposal.id, juicio.omega.reason)
 
-  const lazo = await conLazo(ctx, proposal.id, deps, { juicio, sesion: generado.sesion })
+  const lazo = await conLazo(ctx, proposal.id, deps, { juicio, sesion: gate.sesion ?? generado.sesion }) // prettier-ignore
   if (!lazo.ok) return cortar(proposal.id, lazo.error)
   return cerrarLaCadena(ctx, proposal.id, deps.judge, lazo.value, modo, gate.heredado)
 }

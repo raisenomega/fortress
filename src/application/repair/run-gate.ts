@@ -3,7 +3,8 @@ import type { GateOutcome } from '@domain/repair/gate-result'
 import { canTransition } from '@domain/repair/proposal'
 import type { AppContext } from '../context'
 import { cursorFrom } from './book-cursor'
-import { emitGateCommand, emitGateOutcome, rejectGate } from './run-gate-emit'
+import { emitGateCommand, emitGateOutcome } from './run-gate-emit'
+import { cerrarElRojo, type CierreDelRojo } from './rojo-del-gate'
 import { anotaciones, razonDelVerde } from './cierre-del-gate'
 import { gateBlocked } from './gate-guards'
 
@@ -22,9 +23,7 @@ export interface GateDeps {
 
 /** El verde viaja con lo que se absolvio: el parte del drenaje lo necesita, y
  *  sin el campo tendria que volver a leer el libro para saberlo. */
-export type RunGateResult =
-  | { ok: true; heredado?: readonly string[] }
-  | { ok: false; reason: string }
+export type RunGateResult = { ok: true; heredado?: readonly string[] } | CierreDelRojo
 
 /**
  * I3 — el juicio hermetico del fix DENTRO del worktree. Verde total -> GATE
@@ -34,7 +33,9 @@ export type RunGateResult =
 export async function runGate(
   ctx: AppContext,
   proposalId: string,
-  deps: GateDeps
+  deps: GateDeps,
+  /** ADR-115 B2: SOLO la cadena del Motor lo pide. El boton «Gate» manual no. */
+  opciones: { readonly aplazarRojo?: boolean } = {}
 ): Promise<RunGateResult> {
   const proposal = ctx.repairProposals.findById(proposalId)
   if (!proposal || proposal.state !== 'GENERADO') return { ok: false, reason: 'invalid_state' }
@@ -49,14 +50,7 @@ export async function runGate(
     for (const command of outcome.commands) {
       await emitGateCommand(ctx.eventLog, cursor, proposal.id, command, deps.now())
     }
-    if (!outcome.ok) {
-      const detail = `gate_failed_at=${outcome.failedAt}`
-      const roto = outcome.commands.at(-1)
-      return rejectGate(ctx, cursor, proposal, outcome.reason, detail, {
-        failedAt: outcome.failedAt, reason: outcome.reason,
-        exitCode: roto?.exitCode, timedOut: roto?.timedOut, ...anotaciones(outcome)
-      }, deps.now()) // prettier-ignore
-    }
+    if (!outcome.ok) return cerrarElRojo(ctx, cursor, proposal, outcome, deps.now(), opciones.aplazarRojo === true) // prettier-ignore
     if (!canTransition(proposal.state, 'GATE')) return { ok: false, reason: 'invalid_state' }
     ctx.repairProposals.update(proposal.id, {
       state: 'GATE',

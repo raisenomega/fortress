@@ -7,9 +7,12 @@ import type { ProposalState } from './proposal'
 const NEXT: Readonly<Record<ProposalState, readonly ProposalState[]>> = {
   ELEGIDO: ['ANALIZADO', 'RECHAZADO', 'CADUCADO'],
   ANALIZADO: ['GENERADO', 'RECHAZADO', 'CADUCADO'],
-  GENERADO: ['GATE', 'RECHAZADO', 'CADUCADO'],
+  // GENERADO -> GENERADO es la SEGUNDA arista del lazo (ADR-115 B2, enmienda de
+  // ADR-110 §3): un rojo de codigo con el rechazo aplazado manda otra vuelta al
+  // generador sin salir de GENERADO. RECHAZADO sigue sin salida: no se reabre.
+  GENERADO: ['GATE', 'RECHAZADO', 'CADUCADO', 'GENERADO'],
   GATE: ['OMEGA', 'RECHAZADO', 'CADUCADO'],
-  // OMEGA -> GENERADO es la arista del LAZO (ADR-110 §3) y la UNICA que vuelve
+  // OMEGA -> GENERADO es la arista del LAZO (ADR-110 §3), la primera que vuelve
   // atras: un PARCIAL aprobado manda otra vuelta al generador, que vuelve a
   // dejar la propuesta en GENERADO. Ni al gate ni al analisis se vuelve, y
   // CUANTAS vueltas se dan no lo decide esta tabla —dice lo estructuralmente

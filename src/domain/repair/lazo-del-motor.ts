@@ -1,4 +1,5 @@
 import type { OmegaAxis } from './omega-verdict'
+import type { ProposalState } from './proposal'
 import { MARGEN_DE_VUELTA_USD, TOPE_DE_VUELTAS, TOPE_POR_PROPUESTA_USD } from './topes-del-lazo'
 
 export interface EstadoDelLazo {
@@ -11,7 +12,8 @@ export interface EstadoDelLazo {
 }
 
 export interface LoQueDejoLaVuelta {
-  readonly resuelve: OmegaAxis
+  /** El eje de OMEGA, o `ROJO`: un rojo de codigo del gate (ADR-115 B2). */
+  readonly resuelve: OmegaAxis | 'ROJO'
   /** sha1 del trabajo, o null si git no se dejo leer. */
   readonly huella: string | null
   /** La sesion del generador, o null si no hay nada que reanudar. */
@@ -19,12 +21,7 @@ export interface LoQueDejoLaVuelta {
 }
 
 export type ParadaDelLazo =
-  | 'completo'
-  | 'convergio'
-  | 'tope-de-vueltas'
-  | 'tope-de-dolares'
-  | 'sin-sesion'
-  | 'sin-huella'
+  'completo' | 'convergio' | 'tope-de-vueltas' | 'tope-de-dolares' | 'sin-sesion' | 'sin-huella'
 
 export type DecisionDelLazo =
   /** `sesion` viaja con el SI: la decision ya comprobo que existe, y devolverla
@@ -49,7 +46,7 @@ export function decidirOtraVuelta(
   vuelta: LoQueDejoLaVuelta,
   estado: EstadoDelLazo
 ): DecisionDelLazo {
-  if (vuelta.resuelve !== 'PARCIAL') return parar('completo')
+  if (vuelta.resuelve !== 'PARCIAL' && vuelta.resuelve !== 'ROJO') return parar('completo')
   if (vuelta.sesion === null) return parar('sin-sesion')
   if (vuelta.huella === null) return parar('sin-huella')
   if (estado.huellasVistas.includes(vuelta.huella)) return parar('convergio')
@@ -57,3 +54,9 @@ export function decidirOtraVuelta(
   if (estado.gastadoUsd + MARGEN_DE_VUELTA_USD > TOPE_POR_PROPUESTA_USD) return parar('tope-de-dolares') // prettier-ignore
   return { seguir: true, sesion: vuelta.sesion }
 }
+
+/** ADR-115 B2: la vuelta entra desde OMEGA (el PARCIAL de ADR-110) o desde
+ *  GENERADO (un rojo de codigo con el rechazo aplazado), y solo desde la que se
+ *  pide. Un RECHAZADO no da vueltas: no se reabre. */
+export type Desde = 'OMEGA' | 'GENERADO'
+export const puedeDarLaVuelta = (estado: ProposalState, desde: Desde): boolean => estado === desde

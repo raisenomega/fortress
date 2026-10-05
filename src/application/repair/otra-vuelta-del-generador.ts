@@ -1,4 +1,5 @@
 import { canAffordGenerator, computeSpent } from '@domain/repair/budget'
+import { puedeDarLaVuelta, type Desde } from '@domain/repair/lazo-del-motor'
 import { MOTIVO_HUELLA } from '@domain/repair/motivo-de-la-huella'
 import type { AppContext } from '../context'
 import { makeFail } from './generate-fail'
@@ -12,13 +13,13 @@ import { correaDe, rutaYRama } from './terreno-de-la-propuesta'
 import { verifyAndCommit } from './verify-and-commit'
 
 /** El expediente de la vuelta, reunido del libro. `null` cuando la propuesta no
- *  esta donde el lazo la deja (OMEGA) o le falta con que trabajar. */
-async function expediente(ctx: AppContext, proposalId: string): Promise<Admitted | null> {
-  const proposal = ctx.repairProposals.findById(proposalId)
-  if (!proposal || proposal.state !== 'OMEGA') return null
+ *  esta donde el lazo la deja (`desde`) o le falta con que trabajar. */
+async function expediente(ctx: AppContext, id: string, desde: Desde): Promise<Admitted | null> {
+  const proposal = ctx.repairProposals.findById(id)
+  if (!proposal || !puedeDarLaVuelta(proposal.state, desde)) return null
   const project = ctx.projects.findById(proposal.projectId)
   if (!project) return null
-  const events = await ctx.eventLog.list(proposalId)
+  const events = await ctx.eventLog.list(id)
   const analysis = loadAnalysis(events)
   if (analysis === null) return null
   return { proposal, project, analysis, cursor: cursorFrom(events), spent: computeSpent(events) }
@@ -43,9 +44,10 @@ export async function otraVueltaDelGenerador(
   proposalId: string,
   objecion: string,
   sesion: string,
-  deps: GenerateDeps
+  deps: GenerateDeps,
+  desde: Desde = 'OMEGA'
 ): Promise<GenerateResult> {
-  const a = await expediente(ctx, proposalId)
+  const a = await expediente(ctx, proposalId, desde)
   if (a === null) return { ok: false, reason: 'invalid_state', detail: 'la vuelta no tiene donde' }
 
   const { worktreePath, branch } = rutaYRama(a, deps)

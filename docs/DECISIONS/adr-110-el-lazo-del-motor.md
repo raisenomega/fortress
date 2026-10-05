@@ -184,3 +184,37 @@ vuelta 1 se conserva como desenlace y no se asienta nada falso.
 Para eso hace falta un hallazgo cuya mitad abierta SI sea una edicion dentro de
 la correa, y el unico PARCIAL real disponible no lo era. Coste de las dos
 mediciones: **$0,4005**.
+
+## 10. Enmienda (2026-10-05, ADR-115 B2): la segunda arista, GENERADO → GENERADO
+
+**Pendiente de la firma del operador.** El §3 decía que `OMEGA → GENERADO` era
+«la única que vuelve atrás». Desde esta enmienda hay **una segunda**, con las
+mismas tres razones del §3 para no inventar un estado nuevo:
+
+- **Qué la dispara:** un rojo **de código** del gate. Es decir, `gate_failed` en
+  typecheck, lint o test:unit, que sea **propio** del fix (no el invariante de
+  los heredados) y que traiga **líneas de error** (las que guarda ADR-115 A1).
+  Sin líneas no hay nada que darle al generador, y se queda terminal.
+- **Qué se queda terminal, como siempre:** `gate_timeout`, `npm_ci_failed`,
+  `gate_sin_verificacion`, los bloqueos previos del gate (sin caja, sin
+  confianza) y el invariante de los heredados.
+- **El rechazo se APLAZA, no se deshace.** En ese caso el gate no escribe el
+  RECHAZADO: devuelve el rojo y la propuesta se queda en GENERADO. El lazo da
+  **una** vuelta del generador sobre su sesión, con un encargo propio que dice la
+  verdad («tu fix NO pasa el gate en `<paso>`», más las líneas, saneadas y con
+  las marcas neutralizadas), y el gate se repite **ya sin aplazar**. Si no hay
+  vuelta, o la vuelta no deja un fix, se escribe el rechazo aplazado, **idéntico**
+  al de siempre. **Un RECHAZADO sigue sin salida**: no se reabre nunca.
+- **Los topes son los del §4 y §5, compartidos.** Es el mismo `decidirOtraVuelta`
+  sobre las mismas cuentas del libro: vueltas dadas (contando la primera), huella
+  repetida y dólares. Un rojo no trae presupuesto propio, así que un rojo y un
+  PARCIAL se reparten la única vuelta extra.
+- **Solo lo pide la cadena del Motor.** El botón «Gate» manual de la app sigue
+  rechazando el rojo como siempre.
+
+**Deuda que deja, cosmética:** si la app muere en mitad de esa vuelta, la
+propuesta queda en GENERADO y al arrancar `decideOrphan` la cierra en CADUCADO
+con la etiqueta «worktree ausente», que no es la causa. No deja nada vivo, pero
+la etiqueta engaña. Darle una honesta no es trivial: `decideOrphan` no sabe si un
+GENERADO murió en una vuelta o en otro momento, y cambiarla afectaría a todos los
+huérfanos en GENERADO.

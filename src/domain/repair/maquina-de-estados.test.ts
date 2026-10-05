@@ -12,6 +12,8 @@ const VALIDAS: ReadonlyArray<readonly [ProposalState, ProposalState]> = [
   ['ELEGIDO', 'ANALIZADO'], ['ELEGIDO', 'RECHAZADO'], ['ELEGIDO', 'CADUCADO'],
   ['ANALIZADO', 'GENERADO'], ['ANALIZADO', 'RECHAZADO'], ['ANALIZADO', 'CADUCADO'],
   ['GENERADO', 'GATE'], ['GENERADO', 'RECHAZADO'], ['GENERADO', 'CADUCADO'],
+  // ADR-115 B2: la vuelta tras un rojo de codigo con el rechazo aplazado.
+  ['GENERADO', 'GENERADO'],
   ['GATE', 'OMEGA'], ['GATE', 'RECHAZADO'], ['GATE', 'CADUCADO'],
   ['OMEGA', 'APROBADO'], ['OMEGA', 'RECHAZADO'], ['OMEGA', 'CADUCADO'],
   // La arista del LAZO (ADR-110 §3): un PARCIAL aprobado vuelve al generador.
