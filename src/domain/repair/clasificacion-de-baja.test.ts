@@ -6,6 +6,7 @@ import { REJECTION_REASONS } from './repair-rejection'
 /** El reparto ENTERO, escrito a mano: si la tabla cambia, esto lo dice. */
 const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
   omega_vetado: 'vetadas',
+  omega_no_resuelve: 'vetadas',
   budget_exceeded: 'porPresupuesto',
   generator_timeout: 'porTimeout',
   gate_timeout: 'porTimeout',
@@ -31,7 +32,7 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
 }
 
 describe('cada motivo tiene su casilla, y ninguno cae en un cajon', () => {
-  it('los 22 que llegan al recuento estan mapeados uno a uno', () => {
+  it('los 23 que llegan al recuento estan mapeados uno a uno', () => {
     for (const [motivo, casilla] of Object.entries(ESPERADO)) {
       expect(casillaDeBaja(motivo), motivo).toBe(casilla)
     }

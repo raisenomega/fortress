@@ -60,7 +60,9 @@ export async function judgeProposal(
     return veto('budget_exceeded', 'budget_exceeded', { spent, cost: result.runMeta.tokensUsed })
   }
   if (juicio.computed === 'VETADO') {
-    return veto('omega_vetado', `omega_vetado: ${result.verdict.razon.slice(0, 80)}`, { verdict: result.verdict }) // prettier-ignore
+    const motivo =
+      result.verdict.resuelve_el_hallazgo === 'NO' ? 'omega_no_resuelve' : 'omega_vetado'
+    return veto(motivo, `${motivo}: ${result.verdict.razon.slice(0, 80)}`, { verdict: result.verdict }) // prettier-ignore
   }
   const veredicto = { ...result.verdict, veredicto_global: juicio.computed }
   await closeOmega(ctx, cursor, proposal, 'OMEGA', 'omega aprobo', `omega_aprobado: ${result.verdict.razon.slice(0, 80)}`, { verdict: veredicto }, deps.now()) // prettier-ignore

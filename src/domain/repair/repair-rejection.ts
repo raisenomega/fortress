@@ -55,10 +55,10 @@ export const REJECTION_REASONS = [
   'gate_failed',
   'gate_timeout',
   'npm_ci_failed',
-  /** El proyecto no declara ningun script con el que verificar el fix. */
-  'gate_sin_verificacion',
+  /** El proyecto no declara ningun script con el que verificar el fix. */ 'gate_sin_verificacion',
   'worktree_missing',
   'omega_vetado',
+  /** ADR-115 B1: vetado porque NO resuelve. No reintentable: lo pausa el freno. */ 'omega_no_resuelve',
   'omega_timeout',
   'omega_error',
   'omega_response_invalid',

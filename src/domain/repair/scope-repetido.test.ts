@@ -39,9 +39,14 @@ describe('el hallazgo que no cabe en la correa deja de reintentarse', () => {
     expect(hasBlockingRejection('f1', HEAD, [enOtraBase, intento(2)], 'none')).toBe(false)
   })
 
-  it('dos causas distintas no se suman entre si', () => {
+  it('dos causas de RAZONAMIENTO si se suman: alternarlas no compra un tercero (ADR-115 B1)', () => {
     const vetado = intento(1, { analysisReason: 'omega_vetado: no cubre la fuga' })
-    expect(hasBlockingRejection('f1', HEAD, [vetado, intento(2)], 'none')).toBe(false)
+    expect(hasBlockingRejection('f1', HEAD, [vetado, intento(2)], 'none')).toBe(true)
+  })
+
+  it('una averia y una de razonamiento siguen sin sumarse', () => {
+    const corte = intento(1, { analysisReason: 'provider_error: 429' })
+    expect(hasBlockingRejection('f1', HEAD, [corte, intento(2)], 'none')).toBe(false)
   })
 
   it('la razon con sufijo cuenta igual: es la misma causa', () => {
