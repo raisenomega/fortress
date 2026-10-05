@@ -30,12 +30,12 @@ export type CasillaDeBaja =
  */
 const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   omega_vetado: 'vetadas',
+  omega_no_resuelve: 'vetadas',
   budget_exceeded: 'porPresupuesto',
   generator_timeout: 'porTimeout',
   gate_timeout: 'porTimeout',
   omega_timeout: 'porTimeout',
-  // Las cuatro unicas para las que "mira el diff" es cierto.
-  scope_violation: 'porCorrea',
+  scope_violation: 'porCorrea', // las cuatro unicas para las que "mira el diff" es cierto
   gate_failed: 'porCorrea',
   no_diff_produced: 'porCorrea',
   solo_pruebas: 'porCorrea',
