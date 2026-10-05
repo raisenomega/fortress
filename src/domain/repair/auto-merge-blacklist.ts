@@ -14,6 +14,7 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
   'src/domain/settings/fuentes-de-settings.ts',
+  'src/domain/agent/modelo-por-rol.ts', // con que modelo corre cada agente (ADR-078, enmienda)
   'src/domain/settings/safe-commands.ts',
   'src/domain/settings/modo-efectivo.ts',
   'src/domain/repair/integracion-sin-firma.ts',
@@ -34,9 +35,8 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/newproject/target-path.ts',
   'src/domain/connectors/graph-mcp.ts',
   'src/infrastructure/claude-code/build-allowed-tools.ts',
-  // Las URLs tambien entran de fuera. `connector-url` exige https a un MCP que
-  // viajara con las credenciales del operador; `safe-url` decide que enlaces se
-  // abren fuera de la app; y `create-folder`, que se le cuenta al renderer.
+  // Las URLs tambien entran de fuera: `connector-url` (https a un MCP con credenciales),
+  // `safe-url` (que enlaces se abren fuera) y `create-folder` (que se cuenta al renderer).
   'src/domain/connectors/connector-url.ts',
   'src/domain/shared/safe-url.ts',
   'src/infrastructure/newproject/create-folder.ts',

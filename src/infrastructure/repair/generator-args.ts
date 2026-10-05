@@ -1,4 +1,5 @@
 import { capacidadesDe, type Capacidades } from '@domain/agent/capacidades-del-agente'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { entradaDelGrafo, GRAPH_SERVER } from '@domain/connectors/graph-mcp'
 import { ok, type Result } from '@domain/shared/result'
 import type { ConPrompt } from '../claude-code/prompt-por-stdin'
@@ -9,11 +10,9 @@ import { MAX_TURNS } from './techo-de-turnos'
 // el segundo camino al grafo, y sin esto el aislamiento quedaba medio hecho.
 const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GRAPH_SERVER]: entradaDelGrafo(dir) } }) // prettier-ignore
 
-// Lectura (grafo + Read/Grep/Glob) MAS edicion (Edit/Write) MAS la forma segura
-// de npm (ADR-111). «Bash lo tienen igual» resulto verdad SOLO para los comandos
-// de lectura que el CLI auto-aprueba: en headless todo npm se negaba (medido
-// 2026-10-02, 5 negativas). No se niega a proposito —seria un freno (ADR-090
-// §0)— y la caja lo contiene (ADR-092). El commit y el gate siguen del motor.
+// Lectura (grafo + Read/Grep/Glob) MAS edicion MAS la forma segura de npm (ADR-111):
+// en headless todo npm se negaba (medido 02-oct). Bash no se niega a proposito
+// (ADR-090 §0) y la caja lo contiene (ADR-092). El commit y el gate siguen del motor.
 
 /**
  * El prompt, o quien lo construye a partir de lo que el lanzamiento PUEDE. Un
@@ -22,10 +21,12 @@ const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GR
  */
 export type Prompt = string | ((c: Capacidades) => string)
 
+// `--model` por PROCESO: en el Motor cada proceso es UN agente (ADR-078, enmienda) — sin el, hereda el del CLI.
 const flagsEdicion = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
-  '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION, '--max-turns', String(MAX_TURNS)] // prettier-ignore
-const flagsLectura = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
-  '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA] // prettier-ignore
+  '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION, '--max-turns', String(MAX_TURNS), '--model', MODELO_POR_ROL.generador] // prettier-ignore
+const flagsLectura = (dir: string | null, rol: RolDeLectura): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
+  '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA, '--model', MODELO_POR_ROL[rol]] // prettier-ignore
+export type RolDeLectura = 'analista' | 'critico' | 'omega'
 
 // ADR-112: `-p` SIN valor — el prompt viaja por stdin y los args caben en
 // cualquier SO. Las capacidades se siguen leyendo de los flags, no del texto.
@@ -61,9 +62,10 @@ export function argsDelGenerador(
 export function argsDeLectura(
   prompt: Prompt,
   cwd: string,
-  grafoDir: string | null
+  grafoDir: string | null,
+  rol: RolDeLectura
 ): Result<ConPrompt> {
-  const flags = flagsLectura(grafoDir)
+  const flags = flagsLectura(grafoDir, rol)
   const caja = conSandbox(conFlags(flags), cwd)
   return caja.ok ? ok({ args: caja.value, prompt: textoDe(prompt, flags) }) : caja
 }

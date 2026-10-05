@@ -3,7 +3,7 @@ import { bloqueDeCapacidades, capacidadesDe } from '@domain/agent/capacidades-de
 import { buildAnalysisPrompt } from '@domain/repair/analysis-prompt'
 import { EMPTY_CORPUS } from '@domain/project/corpus-descriptor'
 import { buildArgs } from '../claude-code/claude-cli'
-import { argsDeLectura, argsDelGenerador } from './generator-args'
+import { argsDeLectura, argsDelGenerador, type Prompt } from './generator-args'
 
 // prettier-ignore
 const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts', line: 1, firstSeen: '2026-01-01T00:00:00.000Z', tipo: 'path-traversal', simbolo: 'x' }
@@ -20,14 +20,14 @@ const abre = <T>(r: { ok: true; value: T } | { ok: false; error: string }): T =>
  */
 describe('el prompt refleja las capacidades reales del lanzamiento', () => {
   it('el analista se lanza con las flags que le dan Bash, y su prompt lo dice', () => {
-    const l = abre(argsDeLectura((c) => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g', c), '/p', '/grafo/turno')) // prettier-ignore
+    const l = abre(argsDeLectura((c) => buildAnalysisPrompt(TARGET, EMPTY_CORPUS, [], 'g', c), '/p', '/grafo/turno', 'analista')) // prettier-ignore
     expect(capacidadesDe(l.args).bash).toBe(true)
     expect(l.prompt).toContain('Tienes Bash')
     expect(l.prompt).not.toContain('NO tienes Bash')
   })
 
   it('las capacidades que recibe el constructor son las de los args que se lanzan', () => {
-    for (const lanzar of [argsDeLectura, argsDelGenerador]) {
+    for (const lanzar of [(p: Prompt, d: string, g: string) => argsDeLectura(p, d, g, 'analista'), argsDelGenerador]) {
       const l = abre(lanzar((c) => JSON.stringify(c), '/p', '/grafo/turno'))
       expect(JSON.parse(l.prompt)).toEqual(capacidadesDe(l.args))
     }

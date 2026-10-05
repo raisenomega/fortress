@@ -20,7 +20,7 @@ describe('el GRAPH propio del motor lleva la misma palanca (ADR-095 enmienda, ca
   })
 
   it('los que solo leen (analista, critico, OMEGA) tambien', () => {
-    const args = argsDeLectura('p', carpetaDePrueba('lec-'), DIR)
+    const args = argsDeLectura('p', carpetaDePrueba('lec-'), DIR, 'analista')
     expect(args.ok).toBe(true)
     if (args.ok) {
       expect(mcpDe(args.value.args).mcpServers[GRAPH_SERVER].env).toEqual({ CBM_CACHE_DIR: DIR })

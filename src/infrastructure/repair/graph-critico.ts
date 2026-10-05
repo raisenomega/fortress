@@ -35,7 +35,7 @@ export function createGraphCritico(
     run: async (arbol, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar() // sin caja no arranca, como un binario que no existe:
-      const args = argsDeLectura(prompt, arbol, store.dir)
+      const args = argsDeLectura(prompt, arbol, store.dir, 'critico')
       if (!args.ok) return (store.liberar(), { ok: false, error: args.error, timedOut: false, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
         const child = spawn(claudeBin, [...args.value.args], { cwd: arbol, detached: true, env: buildEnv(null) })

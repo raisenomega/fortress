@@ -20,7 +20,7 @@ import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
 async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<RunOut> {
   // Prompt por STDIN (ADR-112). Solo lectura; sin caja no arranca. `grafo`: el store del turno.
   const grafo = await prepararGrafoDelTurno(cwd)
-  const args = argsDeLectura(prompt, cwd, grafo.dir)
+  const args = argsDeLectura(prompt, cwd, grafo.dir, 'analista')
   if (!args.ok) return (grafo.liberar(), { result: args.error, noArranco: true })
   return new Promise((resolve) => {
     const child = spawn(bin, [...args.value.args], { cwd, env: buildEnv(null) })

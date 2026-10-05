@@ -16,7 +16,7 @@ afterAll(limpiarCarpetasDePrueba)
 
 describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clase A)', () => {
   it('los que solo leen: analista, critico y OMEGA llevan --settings con el sandbox', () => {
-    const args = abre(argsDeLectura('juzga', worktree(), '/grafo/turno')).args
+    const args = abre(argsDeLectura('juzga', worktree(), '/grafo/turno', 'omega')).args
     expect(args[0]).toBe('-p')
     const i = args.indexOf('--settings')
     expect(i).toBeGreaterThan(0)
