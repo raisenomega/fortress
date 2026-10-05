@@ -31,3 +31,11 @@ test('sin confianza, SOLO las fuentes del operador: los settings del repo no car
 test('con confianza, las de proyecto cargan A PROPOSITO: el par no viaja', () => {
   assert.ok(!argumentosDelAgente('hola', DEFAULT_PER_RUN, true).includes('--setting-sources'))
 })
+
+// El cerco MCP (medir-deriva.test.ts): el flag estricto sin --mcp-config cierra
+// el conjunto a vacio, para que el hijo no monte los servidores del operador.
+test('cierra el conjunto MCP: --strict-mcp-config viaja y sin servidor alguno', () => {
+  const args = argumentosDelAgente('hola')
+  assert.ok(args.includes('--strict-mcp-config'))
+  assert.ok(!args.includes('--mcp-config'))
+})
