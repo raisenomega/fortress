@@ -4,6 +4,7 @@ import { notasDeBloque, sinBloqueDeNotas } from '@domain/system/extraer-notas'
 import { investigatePrompt } from '@domain/build/build-prompt'
 import { err, ok, type Result } from '@domain/shared/result'
 import { agentFor, resolveTarget } from './build-target'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 /** Investigacion: el agente responde sobre el proyecto en SOLO LECTURA. */
 export async function runInvestigate(
@@ -21,7 +22,7 @@ export async function runInvestigate(
       // 'lectura', no 'plan': plan bloquea TODO el MCP, asi que el grafo nunca
       // respondia. En 'lectura' (default) el grafo ejecuta y no se puede escribir.
       permissionMode: 'lectura',
-      agentId: null,
+      agentId: null, model: MODELO_POR_ROL.construir,
       trusted: target.value.trusted
     },
     () => {}

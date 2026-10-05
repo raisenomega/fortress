@@ -1,5 +1,6 @@
 import { spawn } from 'child_process'
 import { GRAPH_READ_TOOLS, withGraph } from '@domain/connectors/graph-mcp'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import type { GraphVerify } from '@domain/graph/graph-actions'
 import { parseInitEvent } from '@domain/graph/parse-init'
 import { buildEnv } from '../claude-code/build-env'
@@ -23,7 +24,9 @@ export function verifyArgs(): ConPrompt {
       '--allowedTools',
       ...GRAPH_READ_TOOLS,
       '--mcp-config',
-      withGraph(null)
+      withGraph(null),
+      '--model',
+      MODELO_POR_ROL.grafo
     ]
   }
 }

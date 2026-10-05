@@ -1,9 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { Assistant, AssistantReply, AssistantRequest } from '@domain/chat/assistant'
 import type { TokenUsage } from '@domain/telemetry/token-usage'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
+import { modeloDeLaApi } from './modelo-de-la-api'
 
-/** Claude Opus 5: piensa por defecto, asi que max_tokens cubre razonamiento + texto. */
-export const CHAT_MODEL = 'claude-opus-5'
+// El modelo NO es un id fijo (era 'claude-opus-5', un Opus mas viejo que la
+// cima): es el alias del reparto, resuelto contra el catalogo de la API.
 const MAX_TOKENS = 64000
 
 /**
@@ -35,8 +37,10 @@ export function createAnthropicAssistant(apiKey: string): Assistant {
 
   return {
     async stream(request: AssistantRequest, onChunk): Promise<AssistantReply> {
+      const modelo = await modeloDeLaApi(client.models, MODELO_POR_ROL.chatApi)
+      if (modelo === null) throw new Error(`La API no ofrece ningun modelo ${MODELO_POR_ROL.chatApi} a esta key.`) // prettier-ignore
       const stream = client.beta.messages.stream({
-        model: CHAT_MODEL,
+        model: modelo.id,
         max_tokens: MAX_TOKENS,
         system: request.system,
         messages: request.turns.map((turn) => ({ role: turn.role, content: turn.content })),

@@ -3,6 +3,7 @@ import type { CapabilityEpisode } from '@domain/system/capability-episode'
 import { buildEpisodePrompt, parseEpisode } from '@domain/system/episode-prompt'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
+import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 
 /**
  * Autonomia real (acotada, un disparo): la capacidad se plantea UN escenario y
@@ -22,7 +23,7 @@ export async function runLearningEpisode(
   const definition = context.agentDrafts.get(capabilityId)?.prompt ?? ''
   const prompt = buildEpisodePrompt(capability.name, definition)
   const reply = await agent.run(
-    { projectPath: sandboxPath, prompt, permissionMode: 'lectura', agentId: null, trusted: false },
+    { projectPath: sandboxPath, prompt, permissionMode: 'lectura', agentId: null, model: MODELO_POR_ROL.episodio, trusted: false },
     () => {}
   )
   if (reply.failed) return err(reply.text)

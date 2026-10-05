@@ -32,7 +32,7 @@ describe('el motor y el Terminal lanzan el CLI con la caja puesta (ADR-092, clas
   })
 
   it('el turno del Terminal: --settings al final, tras lo que buildArgs armo', () => {
-    const request = { projectPath: worktree(), prompt: 'hola', permissionMode: 'auditoria', agentId: null, trusted: true } as const // prettier-ignore
+    const request = { projectPath: worktree(), prompt: 'hola', permissionMode: 'auditoria', agentId: null, model: 'sonnet', trusted: true } as const // prettier-ignore
     const args = abre(argsDelTurno(request, {}, null, 0, '/grafo/turno')).args
     expect(args[0]).toBe('-p')
     expect(args.at(-2)).toBe('--settings')
