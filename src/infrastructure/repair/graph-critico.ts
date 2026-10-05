@@ -20,9 +20,8 @@ export interface GraphCritico {
 
 /**
  * El critico real: `claude -p` sobre el arbol, con las MISMAS herramientas que
- * OMEGA; la diferencia vive entera en el prompt. REPLICA el ciclo de proceso de
- * `graph-omega` sin reusarlo (atacante y juez no comparten codigo a proposito).
- * Si reusa `processOmegaOut` y el reloj (un cero de tokens no es «no medi»).
+ * OMEGA; la diferencia vive entera en el prompt. REPLICA el ciclo de `graph-omega`
+ * sin reusarlo (atacante y juez no comparten codigo); si reusa `processOmegaOut`.
  * `grafo`: el store del turno (ADR-095, enmienda); sin atar, un dir vacio, nunca la cache real.
  */
 export function createGraphCritico(
@@ -57,7 +56,8 @@ export function createGraphCritico(
           store.liberar()
           // Murio por el plazo: no hay factura que leer, y cero seria mentira.
           if (timedOut) return resolve({ ok: false, error: 'timeout', timedOut, runMeta: sinFactura() }) // prettier-ignore
-          const { usage, text } = processOmegaOut(out)
+          const { usage, text, proveedor } = processOmegaOut(out)
+          if (proveedor !== undefined) return resolve({ ok: false, error: 'provider_error', timedOut: false, runMeta: meta(usage) }) // prettier-ignore
           const texto = text.trim()
           // Sin texto no hay objecion: el turno sigue, con el tribunal mudo.
           if (texto === '') return resolve({ ok: false, error: 'sin texto', timedOut: false, runMeta: meta(usage) }) // prettier-ignore

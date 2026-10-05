@@ -18,10 +18,10 @@ export interface RunOut {
   readonly usage?: TokenUsage
   /** El proceso jamas existio. Distinto de una salida vacia, que si corrio. */
   readonly noArranco?: true
+  readonly proveedor?: string // el proveedor fallo (429, 403): no hubo analisis
 }
 
-/** Cuanto del texto ilegible se guarda: bastante para reconocer que devolvio
- *  el analista, poco para no llenar el libro con una respuesta entera. */
+/** Cuanto del texto ilegible se guarda: lo justo para reconocer que devolvio. */
 const MUESTRA = 300
 
 /**

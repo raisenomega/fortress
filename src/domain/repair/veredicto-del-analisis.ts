@@ -1,6 +1,7 @@
 import { isActionable, type Analysis } from './analysis'
 import { ILEGIBLE, noSeDejoLeer } from './analysis-ilegible'
 import { NO_ARRANCO, noArranco } from './cli-no-arranco'
+import { PROVEEDOR, fallaDelProveedor } from './falla-del-proveedor'
 import type { AnalysisVerdict, ProposalState } from './proposal'
 
 export interface Veredicto {
@@ -42,6 +43,12 @@ export function veredictoDelAnalisis(analysis: Analysis): Veredicto {
   if (noArranco(analysis)) {
     const causa = analysis.risk.slice(NO_ARRANCO.length)
     return { verdict: 'NO_ARRANCO', state: 'RECHAZADO', reason: `cli_no_arranco: ${causa}` }
+  }
+  // El proveedor fallo (cuota, autenticacion): tampoco hubo respuesta que
+  // juzgar, y es AVERIA — corta la tanda, porque cae igual en todas las que vienen.
+  if (fallaDelProveedor(analysis)) {
+    const causa = analysis.risk.slice(PROVEEDOR.length)
+    return { verdict: 'PROVEEDOR', state: 'RECHAZADO', reason: `provider_error: ${causa}` }
   }
   if (noSeDejoLeer(analysis)) {
     const muestra = analysis.risk.slice(ILEGIBLE.length)

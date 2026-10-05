@@ -24,7 +24,7 @@ export type ProposalState =
  * NO_ARRANCO un PATH roto se registraba como una mala contestacion del modelo,
  * porque ILEGIBLE supone que hubo respuesta y aqui no hubo proceso.
  */
-export type AnalysisVerdict = 'REAL' | 'OBSOLETO' | 'ILEGIBLE' | 'NO_ARRANCO'
+export type AnalysisVerdict = 'REAL' | 'OBSOLETO' | 'ILEGIBLE' | 'NO_ARRANCO' | 'PROVEEDOR'
 
 export interface Proposal {
   readonly id: string

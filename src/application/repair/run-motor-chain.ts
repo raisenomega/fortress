@@ -5,7 +5,7 @@ import type { GenerateDeps } from './generate-types'
 import { generateFix } from './generate-fix'
 import type { JudgeDeps } from './judge-and-integrate'
 import { judgeAndIntegrate } from './judge-and-integrate'
-import { esAveria } from '@domain/repair/averia'
+import { esAveria, motivoDeAveria } from '@domain/repair/averia'
 import { desenlaceDelPlan, type ChainOutcome } from './motor-chain-outcome'
 import { cerrarLaCadena } from './cierre-de-la-cadena'
 import { conLazo } from './con-lazo'
@@ -26,9 +26,7 @@ const cortar = (proposalId: string, motivo: string): Result<ChainOutcome> =>
  * Una vuelta entera del motor sobre un proyecto: elegir, entender, generar,
  * compilar, juzgar y —si la politica lo permite— integrar.
  *
- * La cadena no existia. El operador la conducia a mano, un boton por paso, y
- * cada handler sabia solo del suyo. Aqui esta escrita una vez para que la pueda
- * recorrer tambien quien no tiene dedos.
+ * Escrita una vez para que la recorra tambien quien no tiene dedos.
  *
  * `err` se reserva a la averia del proveedor, lo unico que se arregla esperando.
  * Un veto, un gate rojo o un reloj agotado son desenlaces y salen como resultado:
@@ -50,6 +48,10 @@ export async function runMotorChain(
   const plan = await planRepair(ctx, projectId, undefined, modo)
   if (!plan.ok) return ok(desenlaceDelPlan(plan.reason))
   const { proposal } = plan
+  // Una AVERIA del analista (proveedor, CLI sin arrancar) corta como la del
+  // generador: antes salia como `obsoleto` y la tanda quemaba la baraja (05-oct).
+  const averia = proposal.state === 'ANALIZADO' ? null : motivoDeAveria(proposal.analysisReason ?? '')
+  if (averia !== null) return err(averia)
   if (proposal.state !== 'ANALIZADO') return ok({ kind: 'obsoleto', proposalId: proposal.id })
 
   const generado = await generateFix(ctx, proposal.id, deps.generate)
@@ -57,9 +59,8 @@ export async function runMotorChain(
 
   const gate = await runGate(ctx, proposal.id, deps.gate)
   if (!gate.ok) return cortar(proposal.id, gate.reason)
-  // Hasta aqui nada salio del worktree. OMEGA no se ha llamado: la propuesta
-  // queda en GATE, que no es terminal, asi que cuenta como viva y su hallazgo
-  // no vuelve a salir elegido. Las siguientes vueltas atacan otros y se apilan.
+  // OMEGA no se ha llamado: la propuesta queda en GATE (viva), su hallazgo no
+  // vuelve a salir elegido y las siguientes vueltas atacan otros.
   if (modo === 'hasta-gate') return ok({ kind: 'espera-omega', proposalId: proposal.id, ...(gate.heredado?.length ? { heredado: gate.heredado } : {}) }) // prettier-ignore
 
   // SIEMPRE sin integrar, tambien en `completo`: entre el juicio y el merge vive

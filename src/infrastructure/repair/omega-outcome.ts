@@ -43,7 +43,9 @@ export function toOmegaOutcome(
   out: string,
   meta: (usage?: TokenUsage) => AnalystRunMeta
 ): OmegaRunResult {
-  const { usage, text } = processOmegaOut(out)
+  const { usage, text, proveedor } = processOmegaOut(out)
+  // El 429 no es un veredicto mal escrito: es AVERIA (la noche del 05-oct).
+  if (proveedor !== undefined) return { ok: false, error: 'provider_error', detail: proveedor, timedOut: false, runMeta: meta(usage) } // prettier-ignore
   const parsed = parseOmegaResponse(text)
   if ('error' in parsed) {
     // prettier-ignore

@@ -10,7 +10,8 @@ import { readCognitionLog } from '../cognition/read-cognition-log'
 import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
 import { toAnalysis, type RunOut } from './parse-analysis'
-import { parseUsage } from '../claude-code/parse-usage'
+import { salidaDelAnalista } from './salida-del-analista'
+import { sinRespuesta } from '@domain/repair/falla-del-proveedor'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { trackChild } from '../claude-code/child-registry'
 import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
@@ -29,14 +30,8 @@ async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Pro
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.on('close', () => {
       grafo.liberar()
-      try {
-        const j = JSON.parse(out) as Record<string, unknown>
-        const texto = typeof j.result === 'string' ? j.result : ''
-        resolve({ result: texto, usage: parseUsage(j) })
-      } catch {
-        // Sin JSON no hay factura: ausente, no cero. Cero diria "gratis".
-        resolve({ result: out })
-      }
+      // El 429 se mira ANTES de dar el texto por analisis (la rafaga del 05-oct).
+      resolve(salidaDelAnalista(out))
     })
     // Antes resolvia con una cadena vacia, indistinguible de un CLI que corrio
     // y no dijo nada: el expediente acababa juzgando una respuesta inexistente.
@@ -61,7 +56,7 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       // el prompt refleja las capacidades reales, no las que alguien creyo.
       const prompt = (c: Capacidades): string => buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, graphSlug(projectPath), c, readCognitionLog(projectPath).patterns) // prettier-ignore
       const out = await run(claudeBin, projectPath, prompt, projectId)
-      const analysis = toAnalysis(target, out)
+      const analysis = out.proveedor === undefined ? toAnalysis(target, out) : sinRespuesta(target, out.proveedor) // prettier-ignore
       return {
         analysis,
         // El crudo ENTERO solo cuando no se dejo leer: es lo unico con lo que

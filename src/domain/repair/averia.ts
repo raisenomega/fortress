@@ -56,3 +56,13 @@ export function esTimeout(motivo: string): boolean {
 export function esEntorno(motivo: string): boolean {
   return motivo === 'cli_no_arranco' || motivo.startsWith('cli_no_arranco:')
 }
+
+/**
+ * La clave de averia de un motivo con detalle (`provider_error: 429: ...`), o
+ * null si no es averia. Los rechazos del ANALISTA viajan con su detalle pegado:
+ * sin leer la clave, un `provider_error` del analisis no cortaba nada.
+ */
+export function motivoDeAveria(motivo: string): string | null {
+  const clave = motivo.split(':')[0].trim()
+  return esAveria(clave) ? clave : null
+}

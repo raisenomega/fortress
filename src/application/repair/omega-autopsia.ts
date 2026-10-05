@@ -40,7 +40,7 @@ export function falloDeOmega(fallo: Fallo): {
   // El CLI que no arranco va primero: sin proceso no hubo respuesta que juzgar
   // ni plazo que cumplir, asi que las otras dos preguntas no aplican.
   // prettier-ignore
-  const reason = fallo.noArranco === true ? 'cli_no_arranco' : fallo.error === 'omega_response_invalid' ? 'omega_response_invalid' : fallo.timedOut ? 'omega_timeout' : 'omega_error'
+  const reason = fallo.noArranco === true ? 'cli_no_arranco' : fallo.error === 'provider_error' ? 'provider_error' : fallo.error === 'omega_response_invalid' ? 'omega_response_invalid' : fallo.timedOut ? 'omega_timeout' : 'omega_error'
   const detalle = fallo.detail === undefined ? reason : `${reason}: ${fallo.detail}`
   return { reason, detalle, evidencia: { error: fallo.error, detail: fallo.detail } }
 }

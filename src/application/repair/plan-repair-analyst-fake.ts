@@ -1,6 +1,7 @@
 import type { Analyst } from '@domain/repair/analysis'
 import type { Evidencia } from '@domain/repair/evidencia-obsolescencia'
 import { ILEGIBLE } from '@domain/repair/analysis-ilegible'
+import { PROVEEDOR } from '@domain/repair/falla-del-proveedor'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 import type { FindingMemory } from '@domain/project/finding-memory'
 import type { SelfNoteDraft } from '@domain/system/self-observation'
@@ -23,7 +24,7 @@ export function hallazgo(id: string, file: string): FindingMemory {
  */
 // prettier-ignore
 export function analistaFake(status: string, notes?: readonly SelfNoteDraft[], evidencia?: Evidencia): Analyst {
-  const risk = status === 'ILEGIBLE' ? `${ILEGIBLE}}  ]}` : 'riesgo bajo'
+  const risk = status === 'ILEGIBLE' ? `${ILEGIBLE}}  ]}` : status === 'PROVEEDOR' ? `${PROVEEDOR}429: limite` : 'riesgo bajo' // prettier-ignore
   return {
     study: (target) =>
       Promise.resolve({
