@@ -1,4 +1,7 @@
 import type { OmegaVerdict } from '@domain/repair/omega-verdict'
+import type { DesacuerdoDeOmega } from './desacuerdo-de-omega'
+
+export type { DesacuerdoDeOmega }
 
 const VERDE = 'text-success'
 const ROJO = 'text-critical'
@@ -24,10 +27,14 @@ const FILAS: ReadonlyArray<readonly [string, keyof Omit<OmegaVerdict, 'razon'>]>
 
 /** Q4 — los 6 ejes de OMEGA como tabla densa: se ve de golpe, nada colapsado. */
 export function OmegaVerdictTable({
-  verdict
+  verdict,
+  desacuerdo
 }: {
   readonly verdict: OmegaVerdict
+  /** ADR-115 A3: solo se muestra en la tabla cuyo global es el de las reglas. */
+  readonly desacuerdo?: DesacuerdoDeOmega | null
 }): React.JSX.Element {
+  const declarado = desacuerdo?.rulesSay === verdict.veredicto_global ? desacuerdo.agentSaid : null
   // prettier-ignore
   return (
     <div className="border-border/60 my-1 rounded border px-2 py-1">
@@ -37,6 +44,12 @@ export function OmegaVerdictTable({
           <span className={TONO[verdict[campo]] ?? GRIS}>{verdict[campo]}</span>
         </div>
       ))}
+      {declarado === null ? null : (
+        <div className="flex items-center gap-2 text-[11px]">
+          <span className="text-muted-foreground w-40">el agente declaro</span>
+          <span className={TONO[declarado] ?? GRIS}>{declarado}</span>
+        </div>
+      )}
       <p className="text-foreground mt-1 text-[11px]">{verdict.razon}</p>
     </div>
   )
