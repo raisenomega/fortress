@@ -46,7 +46,7 @@ test('cierra el conjunto MCP: --strict-mcp-config viaja y sin servidor alguno', 
   const bin = join(raiz, 'bin')
   const testigo = join(raiz, 'args-del-cli')
   mkdirSync(bin)
-  writeFileSync(join(bin, 'claude'), `#!/bin/sh\nprintf '%s\\n' "$@" > "${testigo}"\nexit 1\n`)
+  writeFileSync(join(bin, 'claude'), `#!/bin/sh\nprintf '%s\\n' "$@" > "${testigo}"\nprintf 'key=%s\\n' "$ANTHROPIC_API_KEY" > "${testigo}-key"\nexit 1\n`) // prettier-ignore
   writeFileSync(join(bin, 'bwrap'), '#!/bin/sh\necho fortress-caja-ok\n')
   writeFileSync(join(bin, 'socat'), '#!/bin/sh\nexit 0\n')
   writeFileSync(join(bin, 'node'), '#!/bin/sh\nexit 0\n')
@@ -63,7 +63,7 @@ test('cierra el conjunto MCP: --strict-mcp-config viaja y sin servidor alguno', 
   const cargador = join(import.meta.dirname, 'lib/cargar-ts.mjs')
   const argumentos = ['--import', cargador, script, 'propio', 'src', '--base', base]
   const r = spawnSync(process.execPath, argumentos, {
-    env: { ...process.env, PATH: `${bin}:${process.env.PATH ?? ''}` }
+    env: { ...process.env, PATH: `${bin}:${process.env.PATH ?? ''}`, ANTHROPIC_API_KEY: 'sk-sintetica' } // prettier-ignore
   })
 
   assert.match(r.stderr.toString(), /el escaner salio con 1/)
@@ -71,4 +71,5 @@ test('cierra el conjunto MCP: --strict-mcp-config viaja y sin servidor alguno', 
   const args = readFileSync(testigo, 'utf8').split('\n')
   assert.ok(args.includes('--strict-mcp-config'))
   assert.ok(!args.includes('--mcp-config'))
+  assert.equal(readFileSync(`${testigo}-key`, 'utf8'), 'key=\n') // la API key de la shell no viaja
 })
