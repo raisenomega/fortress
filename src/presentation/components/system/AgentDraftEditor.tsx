@@ -25,6 +25,7 @@ export function AgentDraftEditor({ capabilityId }: AgentDraftEditorProps): React
         onChange={(e) => s.setPrompt(e.target.value)}
         rows={4}
         placeholder="Prompt"
+        aria-label="Prompt del agente"
         className={AREA}
       />
       <div className="mt-2 flex flex-wrap items-center gap-2">
