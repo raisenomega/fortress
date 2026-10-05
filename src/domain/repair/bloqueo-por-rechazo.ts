@@ -3,22 +3,26 @@ import { huellaDelMotivo } from './motivo-del-arreglo'
 import { isRetryable } from './retry-eligibility'
 
 /**
- * Intentos con la MISMA causa sobre el MISMO arbol que se toleran. Uno puede
- * ser mala suerte —el generador divago esa vez— y por eso el primero se
- * reintenta. Al segundo ya no es suerte: es que el fix correcto no cabe donde
- * se le pide que quepa, y repetirlo solo cuesta otro analisis y otra
- * generacion. Cuatro intentos del mismo hallazgo, ocho dolares, ningun fix.
+ * Intentos sobre el MISMO arbol que se toleran por cuenta. Uno puede ser mala
+ * suerte —el generador divago esa vez— y por eso el primero se reintenta. Al
+ * segundo ya no es suerte: es que el fix correcto no cabe donde se le pide que
+ * quepa, y repetirlo solo cuesta otro analisis y otra generacion.
  */
 const INTENTOS_POR_CAUSA = 2
 
-/** Cuantas de sus propuestas murieron por lo mismo y sobre la misma base. */
+/** ADR-115 B1: las causas que hablan del ARREGLO comparten una sola cuenta por
+ *  hallazgo y base: alternarlas (veto, sin diff, veto) ya no compra un tercero.
+ *  Las averias (`provider_error`, `analisis_ilegible`) cuentan cada una aparte:
+ *  un 429 no dice nada del fix y no le gasta el presupuesto. */
+const RAZONAMIENTO: readonly string[] = ['omega_vetado', 'scope_violation', 'no_diff_produced', 'solo_pruebas'] // prettier-ignore
+const causaDe = (p: Proposal): string => (p.analysisReason ?? '').split(':')[0]
+
+/** Cuantas de sus propuestas cayeron en la MISMA cuenta y sobre la misma base. */
 function repetidos(suyas: readonly Proposal[], ultima: Proposal): number {
-  const causa = (ultima.analysisReason ?? '').split(':')[0]
+  const causa = causaDe(ultima)
+  const cuenta = (c: string): boolean => (RAZONAMIENTO.includes(causa) ? RAZONAMIENTO.includes(c) : c === causa) // prettier-ignore
   return suyas.filter(
-    (p) =>
-      p.state === 'RECHAZADO' &&
-      p.baseSha === ultima.baseSha &&
-      (p.analysisReason ?? '').startsWith(causa)
+    (p) => p.state === 'RECHAZADO' && p.baseSha === ultima.baseSha && cuenta(causaDe(p))
   ).length
 }
 
