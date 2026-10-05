@@ -94,9 +94,13 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
   - y si no hay vuelta, el rechazo aplazado se escribe idéntico al de siempre.
 
   Al construirlo salió un hueco que **ya existía**: el encargo del PARCIAL
-  (`objecion-de-omega.ts:24`) mete la razón de OMEGA dentro de su bloque con
+  (`objecion-de-omega.ts:24`) metía la razón de OMEGA dentro de su bloque con
   `aplanarParaPrompt`, que impide abrir una línea pero no cerrar el bloque desde
-  dentro de la misma. Queda anotado; no se toca aquí.
+  dentro de la misma. Su test lo fijaba como correcto. **Cerrado el 2026-10-05**:
+  la razón pasa por `sanearCampoDePrompt`, igual que el encargo del rojo, y las
+  dos vías del encargo quedan blindadas por igual. Efecto visible: las comillas
+  invertidas de la razón le llegan al generador como comillas simples, el mismo
+  trato que ya reciben los campos del análisis.
 - **B3. La auto-verificación en la caja queda DIFERIDA, con condición escrita.**
   Su precondición, medida y nunca escrita: cuando corre el generador, el árbol de
   trabajo **no tiene `node_modules`**, porque el `npm ci` solo ocurre dentro del
