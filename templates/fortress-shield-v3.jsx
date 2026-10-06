@@ -133,6 +133,8 @@ function PhaseBlock({ phase, data }) {
 const escapeMd = (v) => String(v ?? "").replace(/[\\`*_{}[\]()#+\-.!<>|~=]/g, "\\$&");
 // Dentro de un fence ``` el backslash no escapa: se neutraliza el backtick del dato.
 const escapeFence = (v) => String(v ?? "").replace(/`/g, "'");
+// El score lo dicta el modelo y puede llegar como texto: se fuerza a entero 0-100 (50 si no es numero).
+const clampScore = (v) => { const n = Number(v); return Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : 50; };
 
 function generateReport(domain, results, globalScore, summary) {
   const now = new Date().toISOString().split("T")[0];
@@ -142,7 +144,7 @@ function generateReport(domain, results, globalScore, summary) {
   md += `### Clasificación: CONFIDENCIAL · INTERNO\n\n`;
   md += `---\n\n`;
   md += `## RESUMEN EJECUTIVO\n\n`;
-  md += `**Score Global: ${globalScore}/100**\n\n`;
+  md += `**Score Global: ${clampScore(globalScore)}/100**\n\n`;
   md += `${escapeMd(summary)}\n\n`;
 
   const all = Object.values(results).flatMap(r => r.findings || []);
@@ -172,7 +174,7 @@ function generateReport(domain, results, globalScore, summary) {
   PHASES.forEach(phase => {
     const data = results[phase.id];
     if (!data) return;
-    md += `### ${phase.icon} ${phase.name} — Score: ${data.score}/100\n\n`;
+    md += `### ${phase.icon} ${phase.name} — Score: ${clampScore(data.score)}/100\n\n`;
     if (data.findings?.length === 0) {
       md += `✅ Sin hallazgos en esta capa.\n\n`;
     } else {
@@ -206,7 +208,7 @@ function generateReport(domain, results, globalScore, summary) {
   md += `**Herramientas utilizadas:** web_fetch (inspección directa de headers/HTML), web_search (OSINT pasivo)\n\n`;
   md += `**8 capas analizadas:** Transporte/Cifrado, Cabeceras HTTP, Fingerprinting, Superficie de Ataque, Archivos Expuestos, Email/DNS, CVEs/Brechas, Infraestructura\n\n`;
   md += `---\n\n`;
-  md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${escapeFence(domain)}\nScore: ${globalScore}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
+  md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${escapeFence(domain)}\nScore: ${clampScore(globalScore)}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
 
   return md;
 }
