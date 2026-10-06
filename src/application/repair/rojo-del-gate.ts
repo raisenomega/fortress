@@ -4,7 +4,7 @@ import { rojoReanudable, type RojoReanudable } from '@domain/repair/rojo-reanuda
 import type { AppContext } from '../context'
 import { type BookCursor, cursorFrom } from './book-cursor'
 import { anotaciones } from './cierre-del-gate'
-import { rejectGate } from './run-gate-emit'
+import { emitGateOutcome, rejectGate } from './run-gate-emit'
 
 type Rojo = Extract<GateOutcome, { ok: false }>
 
@@ -31,9 +31,28 @@ export function cerrarElRojo(
   const detail = `gate_failed_at=${outcome.failedAt}`
   const roto = outcome.commands.at(-1)
   const evidence = { failedAt: outcome.failedAt, reason: outcome.reason, exitCode: roto?.exitCode, timedOut: roto?.timedOut, ...anotaciones(outcome) } // prettier-ignore
+  if (outcome.reason === 'gate_detenido') return caducarDetenido(ctx, cursor, proposal, outcome, evidence, now) // prettier-ignore
   const reanudable = aplazar ? rojoReanudable(outcome) : null
   if (reanudable === null) return rejectGate(ctx, cursor, proposal, outcome.reason, detail, evidence, now) // prettier-ignore
   return Promise.resolve({ ok: false, reason: outcome.reason, aplazado: { ...reanudable, reason: outcome.reason, detail, evidence } }) // prettier-ignore
+}
+
+/** Un comando del gate murio por una senal (Detener): el fix no se juzgo. La
+ *  propuesta CADUCA —ni RECHAZADA por un rojo que no existio, ni en el freno de
+ *  B1—, con el veredicto intacto para que el hallazgo vuelva a la baraja. */
+async function caducarDetenido(
+  ctx: AppContext,
+  cursor: BookCursor,
+  proposal: Proposal,
+  outcome: Rojo,
+  evidence: object,
+  now: number
+): Promise<CierreDelRojo> {
+  const roto = outcome.commands.at(-1)
+  const detail = `gate_detenido: ${outcome.failedAt} por ${roto?.senal ?? 'una senal'}`
+  ctx.repairProposals.update(proposal.id, { state: 'CADUCADO', analysisVerdict: proposal.analysisVerdict ?? 'REAL', analysisReason: detail, updatedAt: now }) // prettier-ignore
+  await emitGateOutcome(ctx.eventLog, cursor, proposal.id, 'CADUCADO', detail, { ...evidence, senal: roto?.senal }, now) // prettier-ignore
+  return { ok: false, reason: outcome.reason }
 }
 
 /** El rechazo aplazado, cuando el lazo no da (o no puede dar) la vuelta. Solo

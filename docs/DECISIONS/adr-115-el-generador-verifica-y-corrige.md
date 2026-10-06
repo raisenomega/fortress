@@ -184,3 +184,43 @@ porque comparten la configuración.
 del componente y comprueban que el atributo está (`aria-label`, `role`…). Desde
 ahora protegen contra que alguien quite ese atributo. **No prueban la
 accesibilidad real** de la UI renderizada. Hacerlos de render es otro alcance.
+
+## 7. El falso rechazo por cancelación (2026-10-06)
+
+En el segundo drenaje con B1 y B2, `36d0061a` (`fase-b-agente.ts:41`) cayó con
+`gate_failed_at=lint`, y el arreglo era bueno: fuera del gate, el mismo worktree
+pasa el lint con 0 errores. El lint del gate murió a los 26 s sin imprimir nada.
+
+**La cadena, medida en el código:** Detener (`repair-drain-handler.ts:55`) →
+`cancelRun` → `killChildrenOf(proyecto)` (`run-control.ts:50-53`, SIGTERM y a los
+3 s SIGKILL) → los comandos del gate van registrados con el proyecto como dueño
+(`gate-runner.ts`, `gate-sequence.ts`) → el cierre llegaba con `code = null` y
+`spawn-command-hijo.ts` apuntaba `code ?? 1`: **la señal se perdía** y un lint
+muerto quedaba como un lint rojo. El drenaje acabó ahí y se relanzó a los 9
+minutos, que es el hueco sin eventos de esa noche.
+
+**Descartado con datos:** un kill por memoria (el kernel no registra ninguno), el
+script `limpia-ram.sh` del cron (no mata procesos y corrió después), el tope del
+bucle y cualquier límite de la caja (no tiene). Veredicto: **solo clasificación y
+evidencia**, sin tope que subir. Ningún fichero tocado es defensa.
+
+**El arreglo (sin firma, 0 defensas):**
+
+- El resultado de cada comando **conserva la señal** que lo mató (`senal`).
+- Un comando muerto por una señal que no es el reloj del gate es
+  **`gate_detenido`**, no `gate_failed`. Se clasifica **antes** de medir si el
+  rojo era heredado, porque esa medición volvía a ejecutar el comando sobre la
+  base. Un `exit` distinto de cero **sin** señal sigue siendo `gate_failed`, y un
+  timeout sigue siendo `gate_timeout`.
+- La propuesta queda **CADUCADA**, no RECHAZADA, con la señal en la evidencia y el
+  veredicto del análisis intacto: el hallazgo vuelve a la baraja y no cuenta en
+  el freno de B1.
+- El libro **guarda** las líneas de error de A1 y la señal de cada comando, solo
+  cuando las hay.
+
+**Deuda que queda, sin arreglar:** `killChildrenOf(proyecto)` mata a **todos** los
+hijos del proyecto, no solo a los del run que se para. Parar un turno del
+Terminal, un build, un escaneo o la verificación de hallazgos sobre el mismo
+proyecto también mata un gate del Motor en curso. Con este arreglo esa muerte ya
+no se toma por un rojo, pero el gate sigue muriendo. Acotar el kill al run
+correcto es otra pieza, con su propio ADR.

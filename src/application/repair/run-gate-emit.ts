@@ -23,7 +23,10 @@ export function emitGateCommand(
     ...base,
     evidenceJson: JSON.stringify({
       command: outcome.command, exitCode: outcome.exitCode,
-      stdoutTail: outcome.stdoutTail, stderrTail: outcome.stderrTail, timedOut: outcome.timedOut
+      stdoutTail: outcome.stdoutTail, stderrTail: outcome.stderrTail, timedOut: outcome.timedOut,
+      // Lo que dice POR QUE cayo (ADR-115 A1) y la senal si lo mataron: solo si lo hay.
+      ...(outcome.errores?.length ? { errores: outcome.errores } : {}),
+      ...(outcome.senal ? { senal: outcome.senal } : {})
     }) // prettier-ignore
   })
 }
@@ -33,7 +36,7 @@ export function emitGateOutcome(
   log: ProposalEventLog,
   cursor: BookCursor,
   proposalId: string,
-  toState: 'GATE' | 'RECHAZADO',
+  toState: 'GATE' | 'RECHAZADO' | 'CADUCADO',
   reason: string,
   evidence: object,
   ts: number

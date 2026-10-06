@@ -28,11 +28,12 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
   analisis_ilegible: 'porDefectoInterno',
   generator_error: 'porDefectoInterno',
   superseded: 'superadas',
-  orphan_before_generate: 'superadas'
+  orphan_before_generate: 'superadas',
+  gate_detenido: 'superadas'
 }
 
 describe('cada motivo tiene su casilla, y ninguno cae en un cajon', () => {
-  it('los 23 que llegan al recuento estan mapeados uno a uno', () => {
+  it('los 24 que llegan al recuento estan mapeados uno a uno', () => {
     for (const [motivo, casilla] of Object.entries(ESPERADO)) {
       expect(casillaDeBaja(motivo), motivo).toBe(casilla)
     }

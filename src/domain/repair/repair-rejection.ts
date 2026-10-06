@@ -55,6 +55,7 @@ export const REJECTION_REASONS = [
   'gate_failed',
   'gate_timeout',
   'npm_ci_failed',
+  /** Un comando del gate murio por una senal (Detener): no es un rojo. Acaba CADUCADA. */ 'gate_detenido',
   /** El proyecto no declara ningun script con el que verificar el fix. */ 'gate_sin_verificacion',
   'worktree_missing',
   'omega_vetado',
@@ -62,8 +63,7 @@ export const REJECTION_REASONS = [
   'omega_timeout',
   'omega_error',
   'omega_response_invalid',
-  /** El proyecto no es de confianza: el gate no ejecuta su codigo. */
-  'proyecto_sin_confianza',
+  /** El proyecto no es de confianza: el gate no ejecuta su codigo. */ 'proyecto_sin_confianza',
   /** Sin caja en esta maquina (ADR-092) no se ejecuta codigo del proyecto. */
   'sin_caja'
 ] as const

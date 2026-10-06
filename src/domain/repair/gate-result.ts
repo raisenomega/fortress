@@ -9,14 +9,15 @@ export interface CommandOutcome {
   /** ADR-115 A1: las lineas de error de eslint/tsc/vitest, recogidas en vuelo
    *  (la cola sola las pierde). Opcional: las autopsias viejas no la traen. */
   readonly errores?: readonly string[]
+  /** La senal que lo mato (Detener, un kill), si murio por una: no es un exit. */ readonly senal?: string
 }
 
 export type GateFailureReason =
   | 'gate_failed'
   | 'gate_timeout'
   | 'npm_ci_failed'
-  /** El proyecto no tiene NINGUN script con el que verificar el fix. */
-  | 'gate_sin_verificacion'
+  | 'gate_sin_verificacion' // el proyecto no tiene NINGUN script con el que verificar el fix
+  | 'gate_detenido' // un comando murio por una senal (Detener, un cancelRun): no se juzgo nada
 
 /**
  * El juicio completo: o todo verde, o donde y por que se rompio la cadena.

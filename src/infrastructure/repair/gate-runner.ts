@@ -42,7 +42,12 @@ export function createGateRunner(
       const ci = await spawnCommand(bin, 'npm ci', ['ci'], worktreePath, npmCiTimeoutMs, owner)
       done.push(ci)
       if (ci.exitCode !== 0 || ci.timedOut) {
-        return { ok: false, commands: done, failedAt: 'npm ci', reason: ci.timedOut ? 'gate_timeout' : 'npm_ci_failed' } // prettier-ignore
+        const reason = ci.timedOut
+          ? 'gate_timeout'
+          : ci.senal !== undefined
+            ? 'gate_detenido'
+            : 'npm_ci_failed'
+        return { ok: false, commands: done, failedAt: 'npm ci', reason }
       }
 
       const scripts = readProjectScripts(worktreePath)

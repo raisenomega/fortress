@@ -39,8 +39,7 @@ const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   gate_failed: 'porCorrea',
   no_diff_produced: 'porCorrea',
   solo_pruebas: 'porCorrea',
-  // Nuestro techo de turnos. No dice NADA del fix: no hubo juicio.
-  turnos_agotados: 'porLimitePropio',
+  turnos_agotados: 'porLimitePropio', // nuestro techo de turnos: no dice NADA del fix, no hubo juicio
   npm_ci_failed: 'porEntornoDelProyecto', // ni el fix ni nosotros: el repositorio o su worktree
   gate_sin_verificacion: 'porEntornoDelProyecto',
   proyecto_sin_confianza: 'porEntornoDelProyecto',
@@ -54,9 +53,10 @@ const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   omega_response_invalid: 'porDefectoInterno',
   analisis_ilegible: 'porDefectoInterno',
   generator_error: 'porDefectoInterno',
-  // No murieron por su culpa: otra las reemplazo, o se reclamaron al arrancar.
+  // No murieron por su culpa: otra las reemplazo, se reclamaron al arrancar o se detuvieron.
   superseded: 'superadas',
-  orphan_before_generate: 'superadas'
+  orphan_before_generate: 'superadas',
+  gate_detenido: 'superadas'
 }
 
 export const MOTIVOS_DE_BAJA = Object.keys(CASILLA) as readonly MotivoDeBaja[]
