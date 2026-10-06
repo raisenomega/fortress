@@ -181,6 +181,17 @@ redact_file() {
 
 report_file()  { echo "$REPORTS_DIR/$1-FORTRESS-REPORT.md"; }
 scanned_head() { echo "$REPORTS_DIR/$1.scanned-head"; }
+scanned_tree() { echo "$REPORTS_DIR/$1.scanned-tree"; }
+
+# Arbol de HEAD solo si el working tree coincide con el: vacio si hay
+# cambios sin commitear o untracked (lo que el auditor veria y el push no
+# publicaria). Los ignorados por .gitignore no cuentan: no viajan nunca.
+clean_tree() {
+    local dirty=$(git -C "$1" status --porcelain --untracked-files=all 2>/dev/null || echo "?")
+    if [ -z "$dirty" ]; then
+        git -C "$1" rev-parse --verify --quiet "HEAD^{tree}" 2>/dev/null || true
+    fi
+}
 
 # Recuento declarado en la linea de resumen "- <ETIQUETA>: N". Vacio si falta
 # o es ambiguo. Lo escribe el mismo agente que leyo el repo: por si solo no
@@ -265,6 +276,14 @@ push_verdict() {
         echo "BRANCH_MISMATCH"; return
     fi
 
+    # El contenido auditado: el arbol limpio visto al empezar y al terminar
+    # el scan debe ser el arbol del commit que se publica
+    local tiptree=$(git -C "$path" rev-parse --verify --quiet "$tip^{tree}" 2>/dev/null || true)
+    local stree=$(cat "$(scanned_tree "$name")" 2>/dev/null || true)
+    if [ -z "$stree" ] || [ "$tiptree" != "$stree" ]; then
+        echo "DIRTY_SCAN"; return
+    fi
+
     echo "OK"
 }
 
@@ -279,6 +298,7 @@ verdict_reason() {
         CRITICAL:*)  echo "tiene ${1#CRITICAL:} hallazgo(s) CRITICAL sin resolver";;
         NO_BRANCH)   echo "la rama registrada ya no existe en el repo (re-registrar o restaurarla)";;
         BRANCH_MISMATCH) echo "la punta de la rama registrada no es el commit escaneado (checkout en otra rama o HEAD desligado; re-escanear sobre esa rama)";;
+        DIRTY_SCAN)  echo "el scan no audito el arbol del commit que se publica (working tree sucio al empezar o al terminar el scan; commitear o descartar y re-escanear)";;
     esac
 }
 
@@ -478,6 +498,8 @@ cmd_scan() {
     local pids=()
     local names=()
     local heads=()
+    local trees=()
+    local paths=()
     local logs=()
     local skipped=()
 
@@ -500,7 +522,7 @@ cmd_scan() {
 
         # El informe se escribe fuera del repo; el anterior no sobrevive al scan
         local report=$(report_file "$name")
-        rm -f "$report" "$(scanned_head "$name")"
+        rm -f "$report" "$(scanned_head "$name")" "$(scanned_tree "$name")"
         # La frase sobre secretos es cinturon: la red exigible es redact_file
         local report_rule="Escribe el reporte en $report (fuera del repo, NO en la raíz del proyecto) e incluye en el resumen la línea exacta '- CRITICAL: N'. Nunca cites un secreto en claro: como evidencia da archivo, línea y el valor tachado (p. ej. 'sk-ant-***')."
 
@@ -523,6 +545,8 @@ cmd_scan() {
         log_info "Lanzando: ${CYAN}$name${NC} ($scan_type)"
 
         heads+=("$(git -C "$path" rev-parse HEAD 2>/dev/null || true)")
+        trees+=("$(clean_tree "$path")")
+        paths+=("$path")
 
         local logfile="$LOGS_DIR/${name}-$(date +%Y%m%d).log"
         claude --headless --project "$path" "$prompt" \
@@ -549,6 +573,14 @@ cmd_scan() {
         if [ "$scan_ok" -eq 1 ]; then
             # Solo un scan completado liga el informe al HEAD que vio al empezar
             echo "${heads[$i]}" > "$(scanned_head "${names[$i]}")"
+            # El arbol se certifica solo si estaba limpio al empezar y sigue
+            # igual al terminar (los fixes del agente lo ensucian: no queda)
+            local endtree=$(clean_tree "${paths[$i]}")
+            if [ -n "${trees[$i]}" ] && [ "${trees[$i]}" = "$endtree" ]; then
+                echo "${trees[$i]}" > "$(scanned_tree "${names[$i]}")"
+            else
+                log_warn "${names[$i]}: working tree sucio al empezar o al terminar el scan; el push quedara bloqueado"
+            fi
             log_success "${names[$i]}: scan completado"
         else
             log_error "${names[$i]}: scan falló (ver ${logs[$i]})"
