@@ -26,16 +26,20 @@ describe('headSha con el entorno en lista blanca', () => {
   })
 
   it('fija el conjunto EXACTO de claves: ni tokens ni GIT_* heredadas', () => {
-    const env = headShaEnv({
+    const sembradas: Record<string, string | undefined> = {
       PATH: '/bin',
       HOME: '/home/x',
       LANG: 'C',
+      TMPDIR: undefined,
+      LC_ALL: undefined,
       GITHUB_TOKEN: 'secreto',
       ANTHROPIC_API_KEY: 'secreto',
       GIT_DIR: '/otro',
       GIT_CONFIG_PARAMETERS: "'core.pager=x'",
       SSH_AUTH_SOCK: '/tmp/agent'
-    })
+    }
+    for (const [clave, valor] of Object.entries(sembradas)) vi.stubEnv(clave, valor)
+    const env = headShaEnv()
     expect(Object.keys(env).sort()).toEqual(['GIT_TERMINAL_PROMPT', 'HOME', 'LANG', 'PATH'])
     expect(env.GIT_TERMINAL_PROMPT).toBe('0')
     expect(env.PATH).toBe('/bin')
@@ -43,6 +47,6 @@ describe('headSha con el entorno en lista blanca', () => {
 
   it('el PATH se lee en la llamada, no al cargar el modulo', () => {
     vi.stubEnv('PATH', `${process.env.PATH ?? ''}:/ruta/de/augment`)
-    expect(headShaEnv(process.env).PATH).toMatch(/:\/ruta\/de\/augment$/)
+    expect(headShaEnv().PATH).toMatch(/:\/ruta\/de\/augment$/)
   })
 })

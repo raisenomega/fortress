@@ -13,10 +13,10 @@ const REENVIADAS: readonly string[] = ['TMPDIR', 'LANG', 'LC_ALL']
  * rev-parse a otro repo. `PATH` se lee EN LA LLAMADA: augmentPath() lo completa
  * al arrancar mutando process.env, y uno fijo dejaria a git sin aparecer.
  */
-export function headShaEnv(source: NodeJS.ProcessEnv): Record<string, string> {
+export function headShaEnv(): Record<string, string> {
   const env: Record<string, string> = { GIT_TERMINAL_PROMPT: '0' }
   for (const clave of [...COPIADAS, ...REENVIADAS]) {
-    const valor = source[clave]
+    const valor = process.env[clave]
     if (valor !== undefined) env[clave] = valor
   }
   return env
@@ -30,7 +30,7 @@ export function headSha(dir: string): string | null {
   try {
     const sha = execFileSync('git', [...SIN_HOOKS, 'rev-parse', 'HEAD'], {
       cwd: dir,
-      env: headShaEnv(process.env),
+      env: headShaEnv(),
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'ignore']
     }).trim()
