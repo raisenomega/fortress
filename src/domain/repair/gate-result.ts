@@ -9,6 +9,7 @@ export interface CommandOutcome {
   /** ADR-115 A1: las lineas de error de eslint/tsc/vitest, recogidas en vuelo
    *  (la cola sola las pierde). Opcional: las autopsias viejas no la traen. */
   readonly errores?: readonly string[]
+  /** La senal que lo mato (Detener, un kill), si murio por una: no es un exit. */ readonly senal?: string
 }
 
 export type GateFailureReason =

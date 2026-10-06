@@ -41,14 +41,15 @@ export function correrEnCaja(l: Lanzamiento, c: Corrida): Promise<CommandOutcome
     // La autopsia se PERSISTE entera en `evidence_json`, que es append-only, y
     // aqui imprime codigo ajeno: se redacta ANTES de recortar, porque `tail`
     // corta por el medio y un secreto partido ya no lo reconoce ninguna regex.
-    const outcome = (exitCode: number, extraErr = ''): CommandOutcome => ({
+    const outcome = (exitCode: number, extraErr = '', senal?: string | null): CommandOutcome => ({
       command: c.key,
       exitCode,
       durationMs: Date.now() - c.startedAt,
       stdoutTail: tail(redactSecrets(out), TAIL_CHARS),
       stderrTail: tail(redactSecrets(errOut + extraErr), TAIL_CHARS),
       timedOut,
-      errores: [...deOut.lineas(), ...deErr.lineas()]
+      errores: [...deOut.lineas(), ...deErr.lineas()],
+      ...(senal ? { senal } : {})
     })
 
     child.stdout?.on('data', (d: Buffer) => {
@@ -59,9 +60,9 @@ export function correrEnCaja(l: Lanzamiento, c: Corrida): Promise<CommandOutcome
       deErr.anadir(d.toString())
       errOut = (errOut + d.toString()).slice(-TAIL_CHARS * 2)
     })
-    child.on('close', (code) => {
+    child.on('close', (code, signal) => {
       clearTimeout(timer)
-      resolve(outcome(code ?? 1))
+      resolve(outcome(code ?? 1, '', signal))
     })
     child.on('error', (error) => {
       clearTimeout(timer)
