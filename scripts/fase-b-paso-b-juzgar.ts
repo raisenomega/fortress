@@ -5,7 +5,7 @@ import { veredictosDelLote } from '../src/domain/project/veredictos-del-lote.ts'
 import { promptDeVerificacionPorLote } from '../src/domain/scan/prompt-de-verificacion-por-lote.ts'
 import { createFsProbe } from '../src/infrastructure/omega/fs-probe.ts'
 import { zombisSinGemela } from '../src/infrastructure/persistence/zombis-sin-gemela.ts'
-import { preguntarAlAgente } from './fase-b-agente.ts'
+import { preguntarAlAgente, topeDelAgente } from './fase-b-agente.ts'
 import { leerArgumentos } from './fase-b-argumentos.ts'
 import { emitirPlan } from './fase-b-paso-b-emitir.ts'
 
@@ -18,6 +18,7 @@ const RUTA = base ?? join(homedir(), '.config/fortress-command-center/fortress.d
 const db = new Database(RUTA, { readonly: true })
 const p = db.prepare('SELECT id, path FROM projects WHERE name = ?').get(proyecto) as { id: string; path: string } | undefined // prettier-ignore
 if (p === undefined) throw new Error(`No hay ningun proyecto llamado "${proyecto}" en ${RUTA}`)
+const tope = topeDelAgente(db)
 const zombis = zombisSinGemela(db, p.id)
 console.log(`${zombis.length} zombis sin gemela en ${proyecto}. Base: ${RUTA}. Preguntando al agente, dentro de la caja, sobre ${p.path} ...`) // prettier-ignore
 
@@ -28,7 +29,7 @@ const items = zombis.map((z) => ({
   title: z.title,
   severity: z.severity
 }))
-const respuesta = preguntarAlAgente(promptDeVerificacionPorLote(items), p.path)
+const respuesta = preguntarAlAgente(promptDeVerificacionPorLote(items), p.path, tope)
 const contenidoDe = (file: string): string | null => createFsProbe().contenido(p.path, file)
 const veredictos = veredictosDelLote(zombis, (respuesta.crudo.juzgados ?? []) as Parameters<typeof veredictosDelLote>[1], contenidoDe) // prettier-ignore
 

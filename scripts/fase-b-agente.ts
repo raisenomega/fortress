@@ -1,6 +1,7 @@
 import { spawnSync } from 'child_process'
 import { fuentesDeSettings } from '../src/domain/settings/fuentes-de-settings.ts'
-import { BUDGET_FLAG, DEFAULT_PER_RUN } from '../src/domain/settings/run-budget.ts'
+import { BUDGET_FLAG, DEFAULT_PER_RUN, dayLimitReached, parseBudget } from '../src/domain/settings/run-budget.ts' // prettier-ignore
+import { windowStart } from '../src/domain/telemetry/time-window.ts'
 import { buildEnv } from '../src/infrastructure/claude-code/build-env.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
 
@@ -45,13 +46,24 @@ export function argumentosDelAgente(
   return base
 }
 
+// El tope del operador (como medir-deriva y topeDiarioAlcanzado); corta si el diario esta
+// agotado. Antes del db.close() del llamador; este gasto NO suma a agent_runs (readonly).
+export function topeDelAgente(db: { prepare(s: string): { get(...p: unknown[]): unknown } }): number {
+  const ajuste = (k: string): string | null => (db.prepare('SELECT value FROM settings WHERE key = ?').get(k) as { value: string } | undefined)?.value ?? null // prettier-ignore
+  const tope = parseBudget(ajuste('budget_per_run_usd'), ajuste('budget_per_day_usd'))
+  const hoy = (db.prepare('SELECT COALESCE(SUM(cost_usd), 0) AS usd FROM agent_runs WHERE at >= ?').get(windowStart(new Date(), 'hoy')) as { usd: number }).usd // prettier-ignore
+  const agotado = dayLimitReached(tope, hoy)
+  if (agotado !== null) throw new Error(agotado)
+  return tope.perRun
+}
+
 /**
  * Una llamada a `claude -p` en modo plan sobre el proyecto auditado, DENTRO de la
  * caja del CLI (ADR-092): lee el repo del cliente para decidir el simbolo y la
- * gemela, y nada mas. Sin caja no se lanza. Devuelve el ultimo bloque JSON.
+ * gemela, y nada mas. Sin caja no se lanza. El tope, obligatorio, sale de topeDelAgente.
  */
-export function preguntarAlAgente(prompt: string, proyectoPath: string): Respuesta {
-  const args = conSandbox(argumentosDelAgente(prompt), proyectoPath)
+export function preguntarAlAgente(prompt: string, proyectoPath: string, maxUsd: number): Respuesta {
+  const args = conSandbox(argumentosDelAgente(prompt, maxUsd), proyectoPath)
   if (!args.ok) throw new Error(`sin caja: ${args.error}`)
   const salida = spawnSync('claude', [...args.value], { cwd: proyectoPath, env: entornoDelAgente(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
   if (salida.status !== 0) throw new Error(`el clasificador salio con ${salida.status}: ${salida.stderr.slice(0, 300)}`) // prettier-ignore
