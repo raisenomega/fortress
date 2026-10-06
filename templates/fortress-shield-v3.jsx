@@ -3,11 +3,11 @@
 import { useState, useCallback, useRef, useId } from "react";
 
 const PHASES = [
-  { id: "transport", name: "Transporte y Cifrado", icon: "🔐", prompt: `Analiza transporte y cifrado de {D}. Busca en web: "{D}" SSL Labs grade, "{D}" certificate transparency crt.sh, hstspreload.org status "{D}". Visita https://{D} y http://{D} con web_fetch para leer headers reales. Verifica: HTTPS activo, redirección HTTP→HTTPS, HSTS, TLS version, certificado válido/expiración.` },
-  { id: "headers", name: "Cabeceras de Seguridad", icon: "🛡️", prompt: `Analiza headers de seguridad de {D}. USA web_fetch para GET https://{D} — lee TODOS los response headers. Busca presencia/ausencia de: Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cache-Control. Detecta headers que filtran info: Server, X-Powered-By. Reporta valor EXACTO de cada header encontrado.` },
+  { id: "transport", name: "Transporte y Cifrado", icon: "🔐", prompt: `Analiza transporte y cifrado de {D}. Busca en web: "{D}" SSL Labs grade, "{D}" certificate transparency crt.sh, hstspreload.org status "{D}", securityheaders.com "{D}". web_fetch NO devuelve headers, redirecciones ni códigos HTTP: tómalos de esas fuentes públicas citándolas, o márcalos INFO "no verificable". Verifica: HTTPS activo, redirección HTTP→HTTPS, HSTS, TLS version, certificado válido/expiración.` },
+  { id: "headers", name: "Cabeceras de Seguridad", icon: "🛡️", prompt: `Analiza headers de seguridad de {D}. web_fetch solo devuelve el contenido de la página, NO los response headers: búscalos en web con securityheaders.com "{D}" y developer.mozilla.org/observatory "{D}", y lee en el HTML los <meta http-equiv>. Busca presencia/ausencia de: Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, Strict-Transport-Security, Cache-Control. Detecta headers que filtran info: Server, X-Powered-By. Reporta el valor citando la fuente de la que sale; sin fuente, INFO "no verificable".` },
   { id: "tech", name: "Fingerprinting Tecnológico", icon: "🔍", prompt: `Detecta tecnología de {D}. USA web_fetch en https://{D} para leer HTML. Busca: meta generator, frameworks JS (React/Vue/Next/Nuxt/Angular), scripts CDN, analytics, chat widgets. Busca en web: "{D}" site:builtwith.com, "{D}" technology stack. Identifica servidor web, CDN, WAF (Cloudflare CF-RAY, AWS).` },
   { id: "surface", name: "Superficie de Ataque", icon: "🗺️", prompt: `Mapea superficie de {D}. Busca subdominios: site:crt.sh "{D}", "*.{D}" certificate transparency. USA web_fetch para probar: https://api.{D}, https://admin.{D}, https://dev.{D}, https://staging.{D}, https://mail.{D}, https://app.{D}. Busca shadow IT y activos olvidados.` },
-  { id: "files", name: "Archivos Expuestos", icon: "📂", prompt: `Busca archivos expuestos en {D}. USA web_fetch para visitar CADA UNA: https://{D}/robots.txt, https://{D}/.git/config, https://{D}/.env, https://{D}/sitemap.xml, https://{D}/.well-known/security.txt, https://{D}/wp-admin/, https://{D}/admin/, https://{D}/api/docs, https://{D}/swagger, https://{D}/graphql, https://{D}/.DS_Store, https://{D}/backup/, https://{D}/config.php, https://{D}/wp-config.php.bak. Reporta código HTTP de cada intento.` },
+  { id: "files", name: "Archivos Expuestos", icon: "📂", prompt: `Busca archivos expuestos en {D}. USA web_fetch para visitar CADA UNA: https://{D}/robots.txt, https://{D}/.git/config, https://{D}/.env, https://{D}/sitemap.xml, https://{D}/.well-known/security.txt, https://{D}/wp-admin/, https://{D}/admin/, https://{D}/api/docs, https://{D}/swagger, https://{D}/graphql, https://{D}/.DS_Store, https://{D}/backup/, https://{D}/config.php, https://{D}/wp-config.php.bak. Reporta qué devolvió cada intento (contenido o error de fetch); web_fetch no da el código HTTP exacto, no lo inventes.` },
   { id: "email", name: "Email y DNS", icon: "📧", prompt: `Analiza seguridad email de {D}. Busca en web: "{D}" SPF record, "{D}" DMARC, "{D}" DKIM, "{D}" MX record, mxtoolbox.com "{D}". Busca: ¿tiene SPF con -all o ~all? ¿DMARC con p=reject/quarantine? ¿está en listas negras? Busca security.txt y bug bounty.` },
   { id: "cve", name: "CVEs y Vulnerabilidades", icon: "⚠️", prompt: `Busca CVEs para {D}. Basándote en tecnologías detectadas, busca: CVE + WordPress 2025, CVE + React, CVE + Next.js, CVE + nginx, o lo que aplique. Busca: "{D}" data breach, "{D}" hack, "{D}" vulnerability. Busca en web: site:{D} filetype:sql OR filetype:env OR filetype:log. Busca "{D}" github.com password OR api_key OR secret.` },
   { id: "infra", name: "Infraestructura", icon: "🔗", prompt: `Analiza infraestructura de {D}. USA web_fetch en https://{D} para ver qué dominios externos carga (scripts src, links, iframes). Busca: hosting provider, DNS provider, CDN. Busca en web: "{D}" site:shodan.io, "{D}" hosting, "{D}" nameservers. ¿Tiene redundancia? ¿Single points of failure?` },
@@ -46,9 +46,9 @@ const SEV_CONFIG = {
 const SYSTEM_PROMPT = `Eres FORTRESS SHIELD v3, analizador EASM enterprise grado gubernamental/CIA.
 REGLAS ABSOLUTAS:
 - Solo análisis PASIVO y legal. NUNCA explotas ni penetras.
-- USA web_fetch para VISITAR URLs reales y leer headers/HTML.
-- USA web_search para buscar info en internet.
-- Sé BRUTALMENTE ESPECÍFICO: reporta datos reales (headers exactos, versiones, valores, códigos HTTP).
+- USA web_fetch para VISITAR URLs reales y leer su contenido (HTML/texto). NO devuelve response headers, redirecciones ni códigos HTTP.
+- USA web_search para buscar info en internet (incluidos headers vistos por escáneres públicos).
+- Sé BRUTALMENTE ESPECÍFICO: reporta datos reales (versiones, valores) y di de qué fuente sale cada uno.
 - Si no puedes verificar algo, marca como INFO con "no verificable" — NUNCA como CRITICAL por suposición.
 - Solo CRITICAL/HIGH para hallazgos REALES confirmados con evidencia.
 - Cada finding DEBE tener fix concreto y accionable.
@@ -200,7 +200,7 @@ function generateReport(domain, results, globalScore, summary) {
   md += `Este análisis fue ejecutado por FORTRESS SHIELD v3 usando metodología EASM (External Attack Surface Management).\n\n`;
   md += `**Frameworks de referencia:** OWASP WSTG · NIST CSF 2.0 · PTES (fases 1-3) · CIS Controls v8\n\n`;
   md += `**Tipo de análisis:** 100% pasivo y legal. No se penetró, explotó ni accedió a sistemas privados.\n\n`;
-  md += `**Herramientas utilizadas:** web_fetch (inspección directa de headers/HTML), web_search (OSINT pasivo)\n\n`;
+  md += `**Herramientas utilizadas:** web_fetch (inspección directa del contenido HTML; no lee cabeceras HTTP), web_search (OSINT pasivo, incluidas cabeceras publicadas por escáneres de terceros)\n\n`;
   md += `**8 capas analizadas:** Transporte/Cifrado, Cabeceras HTTP, Fingerprinting, Superficie de Ataque, Archivos Expuestos, Email/DNS, CVEs/Brechas, Infraestructura\n\n`;
   md += `---\n\n`;
   md += `\`\`\`\nFORTRESS SHIELD v3 · Informe generado: ${now}\nDominio: ${escapeFence(domain)}\nScore: ${globalScore}/100\nClasificación: CONFIDENCIAL · INTERNO\nNO COMPARTIR sin autorización del operador\n\`\`\`\n`;
