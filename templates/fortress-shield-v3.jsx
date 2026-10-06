@@ -116,7 +116,7 @@ function PhaseBlock({ phase, data }) {
           </span>
         </span>
         <span style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${bar}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:bar,fontFamily:"monospace"}}>{sc}</span>
-        <span aria-hidden="true" style={{color:"#475569",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+        <span aria-hidden="true" style={{color:"#94a3b8",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
       </button>
       {open && <div id={`phase-${phase.id}`} style={{borderTop:"1px solid #1e293b"}}>{fs.map((f,i)=><FindingRow key={i} f={f}/>)}</div>}
     </div>
