@@ -12,7 +12,8 @@ import {
 import { parseScanOutput } from '../src/domain/scan/parse-scan-output.ts'
 import { buildScanPrompt } from '../src/domain/scan/scan-prompt.ts'
 import { termometroDeOtro } from '../src/domain/scan/termometro-de-otro.ts'
-import { BUDGET_FLAG, DEFAULT_PER_RUN } from '../src/domain/settings/run-budget.ts'
+import { BUDGET_FLAG, dayLimitReached, parseBudget } from '../src/domain/settings/run-budget.ts'
+import { windowStart } from '../src/domain/telemetry/time-window.ts'
 import { discoverCorpus } from '../src/infrastructure/project/discover-corpus.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
 import { entornoDelAgente } from './fase-b-agente.ts'
@@ -38,7 +39,13 @@ if (p === undefined) throw new Error(`No hay ningun proyecto llamado "${proyecto
 if (!ejecutaConConfianza({ ...p, trusted: p.trusted === 1 } as Project))
   throw new Error(`"${proyecto}" no es de confianza: conmuta el TrustToggle antes de medir`)
 const vivas = db.prepare(`SELECT file, line, identity, simbolo, lifecycle, tipo FROM findings WHERE project_id = ? AND lifecycle != 'EXTINCT'`).all(p.id) as (FilaRegistrada & { tipo: string })[] // prettier-ignore
+// Tope y diario del operador (como topeDiarioAlcanzado); este gasto NO suma al diario (readonly).
+const ajuste = (k: string): string | null => (db.prepare('SELECT value FROM settings WHERE key = ?').get(k) as { value: string } | undefined)?.value ?? null // prettier-ignore
+const tope = parseBudget(ajuste('budget_per_run_usd'), ajuste('budget_per_day_usd'))
+const hoy = (db.prepare('SELECT COALESCE(SUM(cost_usd), 0) AS usd FROM agent_runs WHERE at >= ?').get(windowStart(new Date(), 'hoy')) as { usd: number }).usd // prettier-ignore
 db.close()
+const agotado = dayLimitReached(tope, hoy)
+if (agotado !== null) throw new Error(agotado)
 const registradas = sinMemoria ? [] : registradasDeLaParada(vivas, [carpeta])
 const prompt = buildScanPrompt(proyecto, discoverCorpus(p.path), [carpeta], undefined, registradas)
 console.log(`${proyecto} · carpeta ${carpeta} · ${sinMemoria ? 'SIN memoria (control)' : `CON memoria: ${registradas.length} registradas`} · lanzando la parada en la caja ...`) // prettier-ignore
@@ -46,7 +53,7 @@ console.log(`${proyecto} · carpeta ${carpeta} · ${sinMemoria ? 'SIN memoria (c
 // Sin grafo ni servidor propio, el flag estricto cierra el conjunto MCP a VACIO: sin el, el
 // hijo monta los servidores de ~/.claude.json del operador y los que declare el arbol
 // auditado, con Bash pre-aprobado y cwd en ese arbol (SECURITY-MODEL: explicitos, no automaticos).
-const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', BUDGET_FLAG, String(DEFAULT_PER_RUN), '--allowedTools', 'Bash,Read,Grep,Glob', '--strict-mcp-config'], p.path) // prettier-ignore
+const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', ...(tope.perRun > 0 ? [BUDGET_FLAG, String(tope.perRun)] : []), '--allowedTools', 'Bash,Read,Grep,Glob', '--strict-mcp-config'], p.path) // prettier-ignore
 if (!args.ok) throw new Error(`sin caja: ${args.error}`)
 const salida = spawnSync('claude', [...args.value], { cwd: p.path, env: entornoDelAgente(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
 if (salida.status !== 0)
