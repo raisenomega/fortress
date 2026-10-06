@@ -270,7 +270,7 @@ export default function FortressV3() {
     const log = (stored ?? scanLog.current).filter(t => now - t < HOUR_MS);
     if (log.length >= SCANS_PER_HOUR) {
       const mins = Math.ceil((HOUR_MS - (now - log[0])) / 60000);
-      setError(`Aviso: llevas ${SCANS_PER_HOUR} escaneos en la última hora en este navegador. Reintenta en ${mins} min. (El límite real lo impone el proxy de la API con 429.)`);
+      setError(`Aviso: llevas ${SCANS_PER_HOUR} escaneos en la última hora en este navegador. Reintenta en ${mins} min. (Es solo un aviso: esta plantilla no impone un límite real; debe ponerlo un proxy/backend del despliegue.)`);
       return;
     }
     log.push(now);
