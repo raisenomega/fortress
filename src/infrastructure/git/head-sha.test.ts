@@ -1,18 +1,48 @@
-import { describe, expect, it } from 'vitest'
-import { headSha } from './head-sha'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { headSha, headShaEnv } from './head-sha'
 
 /**
  * El catch devuelve null ante CUALQUIER fallo: un entorno mal compuesto no
  * rompe ruidosamente, deja informes y propuestas sin ancla en silencio. Por
- * eso aqui se fija que con el entorno acotado de gitEnv el sha sigue saliendo
- * de un repo real, y que el null queda para lo que de verdad no es un repo.
+ * eso aqui se fija que con la lista blanca el sha sigue saliendo de un repo
+ * real, y que el null queda para lo que de verdad no es un repo.
  */
-describe('headSha con el entorno acotado', () => {
+describe('headSha con el entorno en lista blanca', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   it('de un repo real sale un sha, no el null del catch', () => {
     expect(headSha(process.cwd())).toMatch(/^[0-9a-f]{40}$/)
   })
 
   it('un directorio que no es repo devuelve null, no lanza', () => {
     expect(headSha('/no/existe/este/repo')).toBeNull()
+  })
+
+  it('un GIT_DIR sembrado en el operador no desvia el rev-parse', () => {
+    vi.stubEnv('GIT_DIR', '/no/existe/otro/repo')
+    expect(headSha(process.cwd())).toMatch(/^[0-9a-f]{40}$/)
+  })
+
+  it('fija el conjunto EXACTO de claves: ni tokens ni GIT_* heredadas', () => {
+    const env = headShaEnv({
+      PATH: '/bin',
+      HOME: '/home/x',
+      LANG: 'C',
+      GITHUB_TOKEN: 'secreto',
+      ANTHROPIC_API_KEY: 'secreto',
+      GIT_DIR: '/otro',
+      GIT_CONFIG_PARAMETERS: "'core.pager=x'",
+      SSH_AUTH_SOCK: '/tmp/agent'
+    })
+    expect(Object.keys(env).sort()).toEqual(['GIT_TERMINAL_PROMPT', 'HOME', 'LANG', 'PATH'])
+    expect(env.GIT_TERMINAL_PROMPT).toBe('0')
+    expect(env.PATH).toBe('/bin')
+  })
+
+  it('el PATH se lee en la llamada, no al cargar el modulo', () => {
+    vi.stubEnv('PATH', `${process.env.PATH ?? ''}:/ruta/de/augment`)
+    expect(headShaEnv(process.env).PATH).toMatch(/:\/ruta\/de\/augment$/)
   })
 })
