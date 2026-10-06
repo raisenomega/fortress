@@ -40,7 +40,10 @@ export function AgentDraftEditor({ capabilityId }: AgentDraftEditorProps): React
             {s.draft.active ? 'Desactivar' : 'Aprobar y activar'}
           </button>
         ) : null}
-        {s.msg ? <span className="text-[11px] text-muted-foreground">{s.msg}</span> : null}
+        {/* Region viva siempre montada: solo cambia su texto, asi el anuncio es fiable. */}
+        <span role="status" className="text-[11px] text-muted-foreground">
+          {s.msg}
+        </span>
       </div>
     </div>
   )

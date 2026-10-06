@@ -18,3 +18,13 @@ describe('el textarea del prompt del agente tiene nombre accesible, no solo plac
     expect(src.slice(start, src.indexOf('/>', start))).toContain('aria-label="Prompt del agente"')
   })
 })
+
+/** Hallazgo 1b54b4b0 (WCAG 4.1.3): el mensaje de resultado no se anunciaba. */
+describe('el mensaje de resultado del editor de agente se anuncia al lector de pantalla', () => {
+  it('vive en una region role="status" siempre montada, sin role="alert"', () => {
+    const src = readFileSync('src/presentation/components/system/AgentDraftEditor.tsx', 'utf8')
+    expect(src).toContain('role="status"')
+    expect(src).not.toContain('role="alert"')
+    expect(src).not.toContain('s.msg ?')
+  })
+})
