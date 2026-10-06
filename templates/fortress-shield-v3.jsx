@@ -13,10 +13,14 @@ const PHASES = [
   { id: "infra", name: "Infraestructura", icon: "🔗", prompt: `Analiza infraestructura de {D}. USA web_fetch en https://{D} para ver qué dominios externos carga (scripts src, links, iframes). Busca: hosting provider, DNS provider, CDN. Busca en web: "{D}" site:shodan.io, "{D}" hosting, "{D}" nameservers. ¿Tiene redundancia? ¿Single points of failure?` },
 ];
 
-// Cuota de cortesia en cliente (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora).
-// Cada escaneo son 9 llamadas; el control real va en el servidor o proxy de la API.
-// El registro persiste en localStorage para sobrevivir recargas; si el storage esta
-// bloqueado (artefacto, iframe sandboxed) degrada al registro en memoria de la sesion.
+// AVISO DE UX, NO UN LIMITE: el usuario lo evade borrando el storage, con una ventana
+// privada, recargando si el storage esta bloqueado o llamando a api() directamente.
+// Esta plantilla no trae backend: fetch va directo a la API. Quien la despliegue DEBE
+// poner delante un proxy/backend que cuente por identidad o IP y responda 429 con
+// retry-after (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora; cada escaneo
+// son 9 llamadas y hasta 4 intentos por 429). El unico freno efectivo aqui es ese 429:
+// api() lo reintenta con backoff y scan() aborta las fases restantes.
+// Si el storage esta bloqueado (artefacto, iframe sandboxed) degrada a memoria de sesion.
 const SCANS_PER_HOUR = 3;
 const HOUR_MS = 60 * 60 * 1000;
 const SCAN_LOG_KEY = "fortress-shield-v3.scan-log";
@@ -67,7 +71,7 @@ function Gauge({ score }) {
       </svg>
       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
         <span style={{fontSize:40,fontWeight:800,color,fontFamily:"monospace"}}>{score}</span>
-        <span style={{fontSize:9,fontWeight:700,color:"#64748b",letterSpacing:2}}>{label}</span>
+        <span style={{fontSize:9,fontWeight:700,color:"#94a3b8",letterSpacing:2}}>{label}</span>
       </div>
     </div>
   );
@@ -83,7 +87,7 @@ function FindingRow({ f }) {
         <span style={{width:8,height:8,borderRadius:"50%",background:s.dot,flexShrink:0}}/>
         <span style={{fontSize:10,fontWeight:700,color:s.text,minWidth:55}}>{s.label}</span>
         <span style={{fontSize:12,color:"#e2e8f0",flex:1}}>{f.title}</span>
-        <span aria-hidden="true" style={{fontSize:11,color:"#475569",transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+        <span aria-hidden="true" style={{fontSize:11,color:"#94a3b8",transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
       </button>
       {open && (
         <div id={detailId} style={{padding:"0 12px 12px 30px"}}>
@@ -116,7 +120,7 @@ function PhaseBlock({ phase, data }) {
           </span>
         </span>
         <span style={{width:44,height:44,borderRadius:"50%",border:`2px solid ${bar}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:800,color:bar,fontFamily:"monospace"}}>{sc}</span>
-        <span aria-hidden="true" style={{color:"#475569",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+        <span aria-hidden="true" style={{color:"#94a3b8",fontSize:12,transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
       </button>
       {open && <div id={`phase-${phase.id}`} style={{borderTop:"1px solid #1e293b"}}>{fs.map((f,i)=><FindingRow key={i} f={f}/>)}</div>}
     </div>
@@ -268,7 +272,7 @@ export default function FortressV3() {
     const log = (stored ?? scanLog.current).filter(t => now - t < HOUR_MS);
     if (log.length >= SCANS_PER_HOUR) {
       const mins = Math.ceil((HOUR_MS - (now - log[0])) / 60000);
-      setError(`Límite de ${SCANS_PER_HOUR} escaneos por hora alcanzado. Reintenta en ${mins} min.`);
+      setError(`Aviso: llevas ${SCANS_PER_HOUR} escaneos en la última hora en este navegador. Reintenta en ${mins} min. (Es solo un aviso: esta plantilla no impone un límite real; debe ponerlo un proxy/backend del despliegue.)`);
       return;
     }
     log.push(now);
@@ -337,7 +341,7 @@ export default function FortressV3() {
           <h1 style={{fontSize:24,fontWeight:800,margin:"0 0 4px",background:"linear-gradient(135deg,#e2e8f0 30%,#ef4444 60%,#f97316)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             FORTRESS SHIELD v3
           </h1>
-          <p style={{fontSize:11,color:"#475569",margin:0}}>8 pasadas · inspección real · OSINT profundo · informe .md descargable</p>
+          <p style={{fontSize:11,color:"#94a3b8",margin:0}}>8 pasadas · inspección real · OSINT profundo · informe .md descargable</p>
         </div>
 
         {/* Input */}
