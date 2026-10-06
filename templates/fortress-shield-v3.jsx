@@ -83,7 +83,7 @@ function FindingRow({ f }) {
         <span style={{width:8,height:8,borderRadius:"50%",background:s.dot,flexShrink:0}}/>
         <span style={{fontSize:10,fontWeight:700,color:s.text,minWidth:55}}>{s.label}</span>
         <span style={{fontSize:12,color:"#e2e8f0",flex:1}}>{f.title}</span>
-        <span aria-hidden="true" style={{fontSize:11,color:"#475569",transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
+        <span aria-hidden="true" style={{fontSize:11,color:"#94a3b8",transform:open?"rotate(180deg)":"",transition:"0.2s"}}>▼</span>
       </button>
       {open && (
         <div id={detailId} style={{padding:"0 12px 12px 30px"}}>
