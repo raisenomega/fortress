@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { llamadas, sinAcotar } from './spawn-acotado-fixture'
+import { llamadas, sinAcotar, SPAWN } from './spawn-acotado-fixture'
 
 /**
  * Ningun proceso hijo hereda la sesion viva del operador — y la lista de quien
@@ -21,7 +21,6 @@ import { llamadas, sinAcotar } from './spawn-acotado-fixture'
  * mas romperia el login, que necesita esa sesion a proposito.
  */
 const RAIZ = 'src'
-const SPAWN = /\b(?:spawn|spawnSync|execFile)\(/g
 const tiene = (t: string): boolean => new RegExp(SPAWN.source).test(t)
 const ES_TEST = /\.test\.ts$|fixture|fake/
 const sinComentarios = (t: string): string => t.replace(/(^|\s)(?:\/\*[\s\S]*?\*\/|\/\/.*$)/gm, '$1')

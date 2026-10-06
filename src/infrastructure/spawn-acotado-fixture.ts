@@ -6,7 +6,8 @@
  * lineas justas. El nombre lleva `fixture` a proposito: `ES_TEST` lo excluye del
  * barrido, asi que las regex de ejemplo de aqui no cuentan como spawns.
  */
-const SPAWN = /\b(?:spawn|spawnSync|execFile)\(/g
+/** UNA sola fuente para el barrido y para `llamadas()`: dos copias divergian en silencio. */
+export const SPAWN = /(?<![.\w])(?:spawn|spawnSync|execFile|execFileSync|exec|execSync|fork)\(/g
 
 /** Las opciones de CADA llamada: las de linea y las de un `const options = {...}` previo, en su sitio. */
 export function llamadas(f: string): readonly string[] {
