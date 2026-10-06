@@ -29,6 +29,7 @@ const readScanLog = () => {
 const writeScanLog = (log) => { try { window.localStorage.setItem(SCAN_LOG_KEY, JSON.stringify(log)); } catch {} };
 const PHASE_GAP_MS = 1500;
 const MAX_SEARCHES = 5;
+const MAX_FETCHES = 5;
 const MAX_RETRIES = 3;
 const BACKOFF_MS = 5000;
 const sleep = (ms) => new Promise(res => setTimeout(res, ms));
@@ -235,9 +236,10 @@ export default function FortressV3() {
   const api = async (sys, usr) => {
     for (let attempt = 0; ; attempt++) {
       const r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json", "anthropic-beta": "web-fetch-2025-09-10" },
         body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 3500, system: sys,
-          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES }],
+          tools: [{ type: "web_search_20250305", name: "web_search", max_uses: MAX_SEARCHES },
+            { type: "web_fetch_20250910", name: "web_fetch", max_uses: MAX_FETCHES }],
           messages: [{ role: "user", content: usr }] })
       });
       if (r.status === 429 && attempt < MAX_RETRIES) {
