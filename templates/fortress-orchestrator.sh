@@ -649,9 +649,11 @@ cmd_push() {
         local ereport=$(report_file "$ename")
         local escanned=$(cat "$(scanned_head "$ename")" 2>/dev/null || true)
         local elines=$(report_evidence_lines "$ereport" 'CRITICAL|CR(I|Í)TICOS?')
-        echo -e "  ${CYAN}${ename}${NC}"
-        echo -e "     Informe:        $ereport"
-        echo -e "     HEAD escaneado: ${escanned:-?}"
+        # Nombre, informe y HEAD salen de repos.conf y REPORTS_DIR: van como
+        # argumento '%s', que no interpreta escapes; el color solo en el formato.
+        printf "  ${CYAN}%s${NC}\n" "$ename"
+        printf '     Informe:        %s\n' "$ereport"
+        printf '     HEAD escaneado: %s\n' "${escanned:-?}"
         if [ -n "$elines" ]; then
             # La linea la redacto el agente: printf sin escapes, que un
             # informe hostil no repinte la evidencia con secuencias ANSI.
