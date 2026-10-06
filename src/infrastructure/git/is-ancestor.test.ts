@@ -19,3 +19,16 @@ describe('isAncestor: sesgo seguro', () => {
     expect(isAncestor(process.cwd(), 'HEAD')).toBe(true)
   })
 })
+
+describe('isAncestor: lista blanca de entorno', () => {
+  it('un GIT_DIR heredado del operador no desvia merge-base a otro repo', () => {
+    const previo = process.env.GIT_DIR
+    process.env.GIT_DIR = '/no/existe/otro/repo/.git'
+    try {
+      expect(isAncestor(process.cwd(), 'HEAD')).toBe(true)
+    } finally {
+      if (previo === undefined) delete process.env.GIT_DIR
+      else process.env.GIT_DIR = previo
+    }
+  })
+})
