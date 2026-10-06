@@ -176,6 +176,25 @@ redact_file() {
     fi
 }
 
+# Red de cmd_scan si se interrumpe (señal o set -e): ve sus arrays locales por
+# ambito dinamico. Mata y espera a los hijos sin tachar ANTES de tachar —un hijo
+# vivo reescribiria en claro—. Nunca escribe scanned_head: interrumpido no es OK.
+scan_abort_redact() {
+    trap - EXIT INT TERM HUP
+    local i
+    for ((i = next_redact; i < ${#pids[@]}; i++)); do
+        kill "${pids[$i]}" 2>/dev/null || true
+    done
+    for ((i = next_redact; i < ${#pids[@]}; i++)); do
+        wait "${pids[$i]}" 2>/dev/null || true
+    done
+    for ((i = next_redact; i < ${#pids[@]}; i++)); do
+        redact_file "${logs[$i]:-}"
+        [ -n "${names[$i]:-}" ] && redact_file "$(report_file "${names[$i]}")"
+    done
+    return 0
+}
+
 # ─── VEREDICTO DE PUSH ──────────────────────────────────────
 # El informe y el HEAD escaneado viven en $REPORTS_DIR, fuera del repo:
 # nada con escritura en el repo decide si el push sale. Falla cerrado.
@@ -509,6 +528,12 @@ cmd_scan() {
     local paths=()
     local logs=()
     local skipped=()
+    # Indice del primer hijo aun sin tachar: el bucle de espera lo avanza
+    local next_redact=0
+    trap 'scan_abort_redact' EXIT
+    trap 'scan_abort_redact; exit 130' INT
+    trap 'scan_abort_redact; exit 143' TERM
+    trap 'scan_abort_redact; exit 129' HUP
 
     while IFS= read -r line; do
         local name=$(get_repo_field "$line" 1)
@@ -577,6 +602,7 @@ cmd_scan() {
         # del scan fallido tambien se conserva y se manda revisar al operador.
         redact_file "${logs[$i]}"
         redact_file "$(report_file "${names[$i]}")"
+        next_redact=$((i + 1))
         if [ "$scan_ok" -eq 1 ]; then
             # Solo un scan completado liga el informe al HEAD que vio al empezar
             echo "${heads[$i]}" > "$(scanned_head "${names[$i]}")"
@@ -594,6 +620,7 @@ cmd_scan() {
             failed=$((failed + 1))
         fi
     done
+    trap - EXIT INT TERM HUP
 
     echo ""
     if [ ${#pids[@]} -eq 0 ]; then
