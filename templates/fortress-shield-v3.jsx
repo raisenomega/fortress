@@ -13,10 +13,14 @@ const PHASES = [
   { id: "infra", name: "Infraestructura", icon: "🔗", prompt: `Analiza infraestructura de {D}. USA web_fetch en https://{D} para ver qué dominios externos carga (scripts src, links, iframes). Busca: hosting provider, DNS provider, CDN. Busca en web: "{D}" site:shodan.io, "{D}" hosting, "{D}" nameservers. ¿Tiene redundancia? ¿Single points of failure?` },
 ];
 
-// Cuota de cortesia en cliente (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora).
-// Cada escaneo son 9 llamadas; el control real va en el servidor o proxy de la API.
-// El registro persiste en localStorage para sobrevivir recargas; si el storage esta
-// bloqueado (artefacto, iframe sandboxed) degrada al registro en memoria de la sesion.
+// AVISO DE UX, NO UN LIMITE: el usuario lo evade borrando el storage, con una ventana
+// privada, recargando si el storage esta bloqueado o llamando a api() directamente.
+// Esta plantilla no trae backend: fetch va directo a la API. Quien la despliegue DEBE
+// poner delante un proxy/backend que cuente por identidad o IP y responda 429 con
+// retry-after (templates/CLAUDE.md, Rate Limiting: IA 10-30 req/hora; cada escaneo
+// son 9 llamadas y hasta 4 intentos por 429). El unico freno efectivo aqui es ese 429:
+// api() lo reintenta con backoff y scan() aborta las fases restantes.
+// Si el storage esta bloqueado (artefacto, iframe sandboxed) degrada a memoria de sesion.
 const SCANS_PER_HOUR = 3;
 const HOUR_MS = 60 * 60 * 1000;
 const SCAN_LOG_KEY = "fortress-shield-v3.scan-log";
@@ -266,7 +270,7 @@ export default function FortressV3() {
     const log = (stored ?? scanLog.current).filter(t => now - t < HOUR_MS);
     if (log.length >= SCANS_PER_HOUR) {
       const mins = Math.ceil((HOUR_MS - (now - log[0])) / 60000);
-      setError(`Límite de ${SCANS_PER_HOUR} escaneos por hora alcanzado. Reintenta en ${mins} min.`);
+      setError(`Aviso: llevas ${SCANS_PER_HOUR} escaneos en la última hora en este navegador. Reintenta en ${mins} min. (El límite real lo impone el proxy de la API con 429.)`);
       return;
     }
     log.push(now);
