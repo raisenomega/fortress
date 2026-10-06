@@ -16,8 +16,8 @@ export type GateFailureReason =
   | 'gate_failed'
   | 'gate_timeout'
   | 'npm_ci_failed'
-  /** El proyecto no tiene NINGUN script con el que verificar el fix. */
-  | 'gate_sin_verificacion'
+  | 'gate_sin_verificacion' // el proyecto no tiene NINGUN script con el que verificar el fix
+  | 'gate_detenido' // un comando murio por una senal (Detener, un cancelRun): no se juzgo nada
 
 /**
  * El juicio completo: o todo verde, o donde y por que se rompio la cadena.

@@ -33,7 +33,7 @@ export function emitGateOutcome(
   log: ProposalEventLog,
   cursor: BookCursor,
   proposalId: string,
-  toState: 'GATE' | 'RECHAZADO',
+  toState: 'GATE' | 'RECHAZADO' | 'CADUCADO',
   reason: string,
   evidence: object,
   ts: number

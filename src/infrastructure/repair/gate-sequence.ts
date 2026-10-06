@@ -56,6 +56,8 @@ export async function correrComandos(
     if (salido.exitCode === 0 && !salido.timedOut) continue
 
     fallos += 1
+    // Matado por una senal que no es el reloj: no se juzgo, y no se mide su herencia.
+    if (salido.senal !== undefined && !salido.timedOut) return { ok: false, commands: s.done, failedAt: key, reason: 'gate_detenido', skipped: s.skipped, heredado } // prettier-ignore
     if (!(await esHeredado(s, key, cmd, salido))) {
       const reason = salido.timedOut ? 'gate_timeout' : 'gate_failed'
       return { ok: false, commands: s.done, failedAt: key, reason, skipped: s.skipped, heredado } // prettier-ignore
