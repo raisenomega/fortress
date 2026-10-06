@@ -1,16 +1,32 @@
 import { execFileSync } from 'child_process'
 import { resolve } from 'path'
-import { gitEnv } from './git-env'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
+
+/** LISTA BLANCA desde `{}`, como `entornoDelMerge`, y no el recorte de `gitEnv`:
+ *  ese deja pasar tokens de terceros y cualquier `GIT_*` heredado (`GIT_DIR`,
+ *  `GIT_CONFIG_*`, `GIT_EXEC_PATH`). HOME va real: el checkpoint corre fuera de
+ *  la caja y su identidad sale de `~/.gitconfig`. Sin `LC_ALL=C`: la salida se
+ *  le ensena al operador. Se compone AL LLAMAR, nunca al cargar (DEUDAS §14). */
+const COPIADAS: readonly string[] = ['PATH', 'HOME', 'TMPDIR', 'LANG', 'LC_ALL', 'EMAIL']
+const IDENTIDAD: readonly string[] = ['GIT_AUTHOR_NAME', 'GIT_AUTHOR_EMAIL', 'GIT_COMMITTER_NAME', 'GIT_COMMITTER_EMAIL'] // prettier-ignore
+
+function entornoDelCheckpoint(): NodeJS.ProcessEnv {
+  const env: Record<string, string> = {}
+  for (const clave of [...COPIADAS, ...IDENTIDAD]) {
+    const valor = process.env[clave]
+    if (valor !== undefined) env[clave] = valor
+  }
+  return { ...env, GIT_TERMINAL_PROMPT: '0' }
+}
 
 /** El git del Terminal, sin los hooks del cliente (ADR-092, git opcion B): el
  *  checkpoint comitea en el arbol vivo, y `--no-verify` no apaga `post-commit`.
  *  Con el entorno acotado (ADR-095 §4.1): los filtros clean/textconv del repo
- *  auditado no ven el agente ssh, el keyring ni el D-Bus del operador. */
+ *  auditado no ven la sesion ni los secretos del operador. */
 export function git(cwd: string, args: readonly string[]): string {
   return execFileSync('git', [...SIN_HOOKS, ...args], {
     cwd,
-    env: gitEnv(),
+    env: entornoDelCheckpoint(),
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore']
   })
