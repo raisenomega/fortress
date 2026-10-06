@@ -44,7 +44,17 @@
     "severidad:aplicar": "node --import ./scripts/lib/cargar-ts.mjs scripts/severidad-aplicar.ts"
   },
   "overrides": {
-    "nanoid": "^3.3.17"
+    "nanoid": "^3.3.17",
+    "@xmldom/xmldom": "^0.8.15",
+    "brace-expansion@1": "^1.1.21",
+    "brace-expansion@2": "^2.1.7",
+    "brace-expansion@5": "^5.0.12",
+    "fast-uri": "^3.1.8",
+    "http-cache-semantics": "^4.3.0",
+    "js-yaml": "^4.3.2",
+    "node-gyp": {
+      "undici": "^6.29.0"
+    }
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
@@ -65,7 +75,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "electron": "^44.5.1",
-    "electron-builder": "^26.0.12",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react": "^7.37.5",
