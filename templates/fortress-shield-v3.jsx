@@ -67,7 +67,7 @@ function Gauge({ score }) {
       </svg>
       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
         <span style={{fontSize:40,fontWeight:800,color,fontFamily:"monospace"}}>{score}</span>
-        <span style={{fontSize:9,fontWeight:700,color:"#64748b",letterSpacing:2}}>{label}</span>
+        <span style={{fontSize:9,fontWeight:700,color:"#94a3b8",letterSpacing:2}}>{label}</span>
       </div>
     </div>
   );
