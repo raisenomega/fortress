@@ -48,7 +48,6 @@ async function caducarDetenido(
   evidence: object,
   now: number
 ): Promise<CierreDelRojo> {
-  // prettier-ignore
   const roto = outcome.commands.at(-1)
   const detail = `gate_detenido: ${outcome.failedAt} por ${roto?.senal ?? 'una senal'}`
   ctx.repairProposals.update(proposal.id, { state: 'CADUCADO', analysisVerdict: proposal.analysisVerdict ?? 'REAL', analysisReason: detail, updatedAt: now }) // prettier-ignore
