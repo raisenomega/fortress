@@ -6,7 +6,7 @@ import { gemelaDe } from '../src/domain/project/gemela-de-la-zombi.ts'
 import { reclasificar } from '../src/domain/project/reclasificacion-de-zombis.ts'
 import { promptDeReclasificacion } from '../src/domain/scan/prompt-de-reclasificacion.ts'
 import { leerVivasDeHoy, leerZombis } from '../src/infrastructure/persistence/filas-con-identidad-vieja.ts' // prettier-ignore
-import { preguntarAlAgente } from './fase-b-agente.ts'
+import { preguntarAlAgente, topeDelAgente } from './fase-b-agente.ts'
 import { leerArgumentos } from './fase-b-argumentos.ts'
 import { planImpreso } from './fase-b-plan.ts'
 
@@ -26,6 +26,7 @@ const conCandidata = zombis.map((z) => ({ ...z, candidata: gemelaDe(z, vivas) })
 const enAlcance = conCandidata.filter((z) => z.candidata !== null)
 const fueraDeAlcance = conCandidata.filter((z) => z.candidata === null).map((z) => z.id)
 console.log(`${zombis.length} zombis en ${proyecto}: ${enAlcance.length} con gemela (paso A), ${fueraDeAlcance.length} sin gemela (paso B, no se tocan). Base: ${RUTA}`) // prettier-ignore
+const tope = topeDelAgente(db)
 db.close()
 
 const items = enAlcance.map((z) => ({
@@ -35,7 +36,7 @@ const items = enAlcance.map((z) => ({
 console.log(
   `Preguntando al agente por ${items.length} hallazgos, dentro de la caja, sobre ${p.path} ...`
 )
-const respuesta = preguntarAlAgente(promptDeReclasificacion(items), p.path)
+const respuesta = preguntarAlAgente(promptDeReclasificacion(items), p.path, tope)
 const decididas = reclasificar(
   enAlcance,
   (respuesta.crudo.clasificados ?? []) as Parameters<typeof reclasificar>[1]

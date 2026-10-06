@@ -5,7 +5,7 @@ import { join } from 'path'
 import { paresCandidatos, type FilaDelPar } from '../src/domain/project/pares-candidatos.ts'
 import { fusionesDelLote, veredictosDePares } from '../src/domain/project/veredictos-de-pares.ts'
 import { promptDePares } from '../src/domain/scan/prompt-de-pares.ts'
-import { preguntarAlAgente } from './fase-b-agente.ts'
+import { preguntarAlAgente, topeDelAgente } from './fase-b-agente.ts'
 import { leerArgumentos } from './fase-b-argumentos.ts'
 import { planDelLote } from './lote-alias-plan.ts'
 
@@ -20,12 +20,13 @@ const p = db.prepare('SELECT id, path FROM projects WHERE name = ?').get(proyect
 if (p === undefined) throw new Error(`No hay ningun proyecto llamado "${proyecto}" en ${RUTA}`)
 const VIVAS = `SELECT id, file, line, tipo, simbolo, title, identity, first_seen AS firstSeen, severity FROM findings WHERE project_id = ? AND lifecycle != 'EXTINCT'` // prettier-ignore
 const vivas = db.prepare(VIVAS).all(p.id) as FilaDelPar[]
+const tope = topeDelAgente(db)
 db.close()
 const pares = paresCandidatos(vivas)
 if (pares.length === 0) throw new Error(`${proyecto}: ningun par candidato; nada que juzgar`)
 console.log(`${pares.length} pares candidatos en ${proyecto} (${vivas.length} vivas). Base: ${RUTA}. Preguntando al agente, dentro de la caja, sobre ${p.path} ...`) // prettier-ignore
 
-const respuesta = preguntarAlAgente(promptDePares(pares), p.path)
+const respuesta = preguntarAlAgente(promptDePares(pares), p.path, tope)
 const veredictos = veredictosDePares(pares, (respuesta.crudo.pares ?? []) as Parameters<typeof veredictosDePares>[1]) // prettier-ignore
 const fusiones = fusionesDelLote(veredictos)
 const SALIDA = join(process.cwd(), 'internal', `lote-alias-${proyecto}.json`)

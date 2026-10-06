@@ -7,7 +7,7 @@ import { retipar } from '../src/domain/project/retipado-de-otros.ts'
 import { promptDeRetipado } from '../src/domain/scan/prompt-de-retipado.ts'
 import { leerVivasDeHoy } from '../src/infrastructure/persistence/filas-con-identidad-vieja.ts'
 import { leerOtros } from '../src/infrastructure/persistence/filas-otro.ts'
-import { preguntarAlAgente } from './fase-b-agente.ts'
+import { preguntarAlAgente, topeDelAgente } from './fase-b-agente.ts'
 import { leerArgumentos } from './fase-b-argumentos.ts'
 import { planDelRetipado, type FilaDelRetipado } from './retipar-plan.ts'
 
@@ -20,12 +20,13 @@ const RUTA = base ?? join(homedir(), '.config/fortress-command-center/fortress.d
 const db = new Database(RUTA, { readonly: true })
 const p = db.prepare('SELECT id, path FROM projects WHERE name = ?').get(proyecto) as { id: string; path: string } | undefined // prettier-ignore
 if (p === undefined) throw new Error(`No hay ningun proyecto llamado "${proyecto}" en ${RUTA}`)
+const tope = topeDelAgente(db)
 const otros = leerOtros(db, p.id)
 if (otros.length === 0) throw new Error(`${proyecto}: ninguna viva en otro; nada que juzgar`)
 console.log(`${otros.length} vivas en otro en ${proyecto}. Base: ${RUTA}. Preguntando al agente, dentro de la caja, sobre ${p.path} ...`) // prettier-ignore
 
 const items = otros.map(({ id, file, line, title, severity }) => ({ id, file, line, title, severity })) // prettier-ignore
-const respuesta = preguntarAlAgente(promptDeRetipado(items), p.path)
+const respuesta = preguntarAlAgente(promptDeRetipado(items), p.path, tope)
 const retipados = retipar(otros, (respuesta.crudo.retipadas ?? []) as Parameters<typeof retipar>[1]) // prettier-ignore
 const vivas = leerVivasDeHoy(db, p.id).map((v) => ({ id: v.id, identidad: v.identity, firstSeen: v.first_seen })) // prettier-ignore
 const fusiones = fusionesDelRetipado(vivas, retipados)

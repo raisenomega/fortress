@@ -1,7 +1,26 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { BUDGET_FLAG, DEFAULT_PER_RUN } from '../src/domain/settings/run-budget.ts'
-import { argumentosDelAgente } from './fase-b-agente.ts'
+import { argumentosDelAgente, topeDelAgente } from './fase-b-agente.ts'
+
+// Una base de mentira: los ajustes del operador y el gasto de hoy en agent_runs.
+type Base = Parameters<typeof topeDelAgente>[0]
+const base = (ajustes: Record<string, string>, hoy: number): Base => ({
+  prepare: (sql) => ({
+    get: (k) => (sql.includes('agent_runs') ? { usd: hoy } : { value: ajustes[String(k)] })
+  })
+})
+
+test('el tope configurado por el operador es el que viaja al flag, no el de por defecto', () => {
+  const tope = topeDelAgente(base({ budget_per_run_usd: '0.5', budget_per_day_usd: '10' }, 0))
+  const args = argumentosDelAgente('hola', tope)
+  assert.equal(args[args.indexOf(BUDGET_FLAG) + 1], '0.5')
+})
+
+test('con el diario agotado no se lanza: corta con el mensaje del tope', () => {
+  const agotada = base({ budget_per_run_usd: '3', budget_per_day_usd: '2' }, 2.5)
+  assert.throws(() => topeDelAgente(agotada), /Tope diario alcanzado/)
+})
 
 // Uso: node --import ./scripts/lib/cargar-ts.mjs --test scripts/fase-b-agente.test.ts
 // El contrato es el de buildArgs (claude-cli.test.ts): el tope viaja con su
