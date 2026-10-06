@@ -39,7 +39,7 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 | A3 | El desacuerdo de OMEGA, visible en la firma | Se escribe en `run-omega-emit.ts:25-35` (`omega_verdict_mismatch`) y nadie lo lee; su sitio es `OmegaVerdictTable.tsx` | No | **A** |
 | B1 | Triaje que no vuelve a elegir lo irresoluble | `bloqueo-por-rechazo.ts` (`INTENTOS_POR_CAUSA = 2`, cuenta por **causa**); al medirlo, también `run-omega-judge.ts`, `repair-rejection.ts` y `clasificacion-de-baja.ts`. `elegir-objetivo.ts` no cambia | **Sí** (solo el freno) | **B** |
 | B2 | Gate rojo → reanudar al generador con el error | El corte, en `run-motor-chain.ts:60-61`; la maquinaria de reanudar ya existe en `con-lazo.ts:33-50` | No, pero es doctrina de ADR-110 | **B** (enmienda) |
-| B3 | El generador se verifica a sí mismo en la caja | `motor-tools.ts:39,47` (solo `NPM_SOLO_LOCK`) + `generator-args.ts:26` (`--allowedTools`); la caja de ADR-092 lo contendría | **Sí** | **B**, diferida |
+| B3 | El generador se verifica a sí mismo en la caja | `motor-tools.ts:39,47` (solo `NPM_SOLO_LOCK`) + `generator-args.ts:26` (`--allowedTools`); la caja de ADR-092 lo contendría | **Sí** | **Descartada** (2026-10-06) |
 | C1 | «Depende de»: rescate por dependencia | No existe | — | **C** |
 | C2 | Permitir un fichero hermano en la correa | `allowed-files.ts` + `scope-check.ts` | **Sí** | **C** |
 
@@ -101,14 +101,32 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
   dos vías del encargo quedan blindadas por igual. Efecto visible: las comillas
   invertidas de la razón le llegan al generador como comillas simples, el mismo
   trato que ya reciben los campos del análisis.
-- **B3. La auto-verificación en la caja queda DIFERIDA, con condición escrita.**
-  Su precondición, medida y nunca escrita: cuando corre el generador, el árbol de
-  trabajo **no tiene `node_modules`**, porque el `npm ci` solo ocurre dentro del
-  gate. Lanzar eslint o vitest exigiría instalar antes, o reaprovechar la
-  instalación. Por eso se construyen primero A1 y B2, y en el drenaje siguiente
-  se **vuelve a medir** cuántos rechazos siguen cayendo por errores que una
-  auto-verificación previa habría cazado. Si la cifra lo justifica, B3 vuelve con
-  su diseño de la instalación.
+- **B3. La auto-verificación en la caja: DESCARTADA el 2026-10-06**, con la medida que
+  pedía esta misma sección. Quedó diferida a la espera de volver a medir, porque su
+  precondición era cara: cuando corre el generador, el árbol de trabajo **no tiene
+  `node_modules`** (el `npm ci` solo ocurre dentro del gate), así que lanzar eslint
+  o vitest antes del gate exigiría instalar en cada generación.
+
+  **La medida, de los vigías de los dos drenajes posteriores a A1 y B2:**
+
+  | Drenaje | Llegaron al gate | Verde a la primera | Rojo de código | Rojo de infraestructura |
+  |---|---|---|---|---|
+  | 2.º (2026-10-05) | 3 | 2 | 0 (el único rojo fue un lint matado por un Detener, §7) | 0 |
+  | 3.º (2026-10-06) | 21 | **19** | **1**, resuelto por B2 | 1 (`npm ci` con ECONNRESET) |
+
+  El único rojo de código (`7ed12397`, `head-sha.ts:13`, `test:unit`) lo resolvió
+  B2 con una vuelta y el error delante, por $1,30 en total. El rojo de
+  infraestructura no lo habría evitado ninguna auto-verificación. **No quedó ningún
+  caso que una verificación antes del gate hubiera evitado y B2 no.** Los 19 verdes
+  a la primera ocurrieron con A2 en vigor; que se deban a A2 es probable, pero no
+  está medido contra un control.
+
+  **Decisión:** A1 (las líneas de error), A2 (los números en el prompt) y B2 (la
+  vuelta con el error real) cubren lo que B3 pretendía, sin pagar una instalación
+  en cada generación. B3 se descarta.
+
+  **Reversible:** se reabre si un drenaje trae un rojo de código que B2 no logra
+  resolver y que una verificación previa sí habría cazado.
 
 ### (C) Aparcadas, cada una con su ADR
 
@@ -134,7 +152,7 @@ Defensa sí/no, medido con `defensasQueToca()` fichero a fichero.
 1. **A1, A2 y A3**, sin firma.
 2. **B1, el triaje**, con firma.
 3. **B2, la vuelta tras el rojo**, con firma y enmienda de ADR-110.
-4. **Volver a medir B3** en el drenaje siguiente.
+4. ~~Volver a medir B3~~: medido en los drenajes 2.º y 3.º y **descartada** (§3, B3).
 5. **C1, C2 y C3** van aparte, cada una con su ADR.
 
 Cada pieza sigue el método del repo: test rojo, arreglo, mutante que muere, gate.
