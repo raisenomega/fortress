@@ -335,7 +335,7 @@ export default function FortressV3() {
           <h1 style={{fontSize:24,fontWeight:800,margin:"0 0 4px",background:"linear-gradient(135deg,#e2e8f0 30%,#ef4444 60%,#f97316)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
             FORTRESS SHIELD v3
           </h1>
-          <p style={{fontSize:11,color:"#475569",margin:0}}>8 pasadas · inspección real · OSINT profundo · informe .md descargable</p>
+          <p style={{fontSize:11,color:"#94a3b8",margin:0}}>8 pasadas · inspección real · OSINT profundo · informe .md descargable</p>
         </div>
 
         {/* Input */}
