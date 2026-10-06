@@ -1,6 +1,20 @@
 import { execFileSync } from 'child_process'
-import { gitEnv } from './git-env'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
+
+/**
+ * Lista BLANCA, construida desde {}, no el recorte de `gitEnv`: un GIT_DIR o
+ * GIT_OBJECT_DIRECTORY heredado haria responder a merge-base sobre OTRO repo, y
+ * un true alli fabrica un MERGEADO. HOME para que el safe.directory del
+ * ~/.gitconfig del operador siga valiendo. Se compone AL LLAMAR (DEUDAS §14).
+ */
+function entornoDelAncestro(): NodeJS.ProcessEnv {
+  const env: Record<string, string> = {}
+  for (const clave of ['PATH', 'HOME', 'TMPDIR']) {
+    const valor = process.env[clave]
+    if (valor !== undefined) env[clave] = valor
+  }
+  return { ...env, GIT_TERMINAL_PROMPT: '0' }
+}
 
 /**
  * true si `commit` ya esta contenido en HEAD del repo en `dir`.
@@ -16,7 +30,7 @@ export function isAncestor(dir: string, commit: string): boolean {
   try {
     execFileSync('git', [...SIN_HOOKS, 'merge-base', '--is-ancestor', commit, 'HEAD'], {
       cwd: dir,
-      env: gitEnv(),
+      env: entornoDelAncestro(),
       stdio: ['ignore', 'ignore', 'ignore']
     })
     return true
