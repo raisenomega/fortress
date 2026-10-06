@@ -1,5 +1,7 @@
 import { ipcMain } from 'electron'
-import { envolverRegistroIpc } from './embudo-de-ipc'
+import { join } from 'path'
+import { is } from '@electron-toolkit/utils'
+import { envolverRegistroIpc, exigirOrigenPropio } from './embudo-de-ipc'
 import { sumideroDeFallos } from '../system/sumidero-de-fallos'
 import { registerAccountHandlers } from './account-handlers'
 import { registerBuildHandlers } from './build-handlers'
@@ -31,15 +33,15 @@ import { registerSystemHandlers } from './system-handlers'
 import { registerTelemetryHandlers } from './telemetry-handlers'
 
 /**
- * Punto unico de registro IPC, invocado desde el composition root.
- *
- * Y por eso el embudo del Nivel 2 se instala AQUI, antes de los 29: los 110
- * handlers cuelgan de esta llamada, asi que envolver el registro los cubre a
- * todos —incluido `settings-handlers`, que es innegociable— sin editar ninguno
- * de los 36 ficheros, y cubre los que se anadan manana sin que nadie se acuerde
- * (ADR-086, embudo 2).
+ * Punto unico de registro IPC: el control de origen y el embudo (ADR-086) se instalan
+ * AQUI, antes de los 29, y cubren los 110 sin editar ninguno de los 36 ficheros. El
+ * origen va primero para quedar por fuera; su URL es la que carga `loadRenderer`.
  */
 export function registerIpcHandlers(): void {
+  exigirOrigenPropio(ipcMain, {
+    indexHtml: join(__dirname, '../renderer/index.html'),
+    devUrl: is.dev ? process.env['ELECTRON_RENDERER_URL'] : undefined
+  })
   envolverRegistroIpc(ipcMain, sumideroDeFallos)
 
   registerProjectHandlers()

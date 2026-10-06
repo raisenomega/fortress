@@ -146,6 +146,9 @@ repo_trusted() {
 # ningun patron. Patrones POR VALOR y acotados —cada uno nombra a su emisor—:
 # un comodin ancho borra la evidencia que un auditor necesita (ids de commit,
 # digests) y puede comerse la linea '- CRITICAL: N' que decide el push.
+# Excepciones ancladas por CONTEXTO, no por forma: el secreto de AWS (40
+# caracteres, como un SHA) solo tras su nombre de clave, y la contrasena de
+# una URL solo entre 'esquema://usuario:' y '@'; esquema, usuario y host quedan.
 
 redact_file() {
     local file="$1"
@@ -158,6 +161,10 @@ redact_file() {
         -e 's/(^|[^A-Za-z0-9_])github_pat_[A-Za-z0-9_]{20,}/\1***/g' \
         -e 's/[bB][eE][aA][rR][eE][rR][[:space:]]+[^[:space:]]+/***/g' \
         -e 's/(^|[^A-Za-z0-9_])A[KS]IA[0-9A-Z]{16}([^A-Za-z0-9_]|$)/\1***\2/g' \
+        -e 's/(^|[^A-Za-z0-9_])[spr]k_(live|test)_[A-Za-z0-9]{10,}/\1***/g' \
+        -e 's/(^|[^A-Za-z0-9_])AIza[0-9A-Za-z_-]{35}/\1***/g' \
+        -e 's/(([aA][wW][sS]_?)?[sS][eE][cC][rR][eE][tT]_?[aA][cC][cC][eE][sS][sS]_?[kK][eE][yY]["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"']?)[A-Za-z0-9\/+]{40}/\1***/g' \
+        -e 's/([A-Za-z][A-Za-z0-9+.-]*:\/\/[^:\/@[:space:]]*):[^@\/[:space:]]+@/\1:***@/g' \
         -e 's/(^|[^A-Za-z0-9_])xox[abprs]-[A-Za-z0-9-]{10,}/\1***/g' \
         -e 's/(^|[^A-Za-z0-9_])eyJ[A-Za-z0-9_-]{8,}\.eyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}/\1***/g' \
         -e '/-----BEGIN [A-Z ]*PRIVATE KEY-----/,/-----END [A-Z ]*PRIVATE KEY-----/ s/^[A-Za-z0-9+\/=]+[[:space:]]*$/***/' \
@@ -674,9 +681,11 @@ cmd_push() {
         local ereport=$(report_file "$ename")
         local escanned=$(cat "$(scanned_head "$ename")" 2>/dev/null || true)
         local elines=$(report_evidence_lines "$ereport" 'CRITICAL|CR(I|Í)TICOS?')
-        echo -e "  ${CYAN}${ename}${NC}"
-        echo -e "     Informe:        $ereport"
-        echo -e "     HEAD escaneado: ${escanned:-?}"
+        # Nombre, informe y HEAD salen de repos.conf y REPORTS_DIR: van como
+        # argumento '%s', que no interpreta escapes; el color solo en el formato.
+        printf "  ${CYAN}%s${NC}\n" "$ename"
+        printf '     Informe:        %s\n' "$ereport"
+        printf '     HEAD escaneado: %s\n' "${escanned:-?}"
         if [ -n "$elines" ]; then
             # La linea la redacto el agente: printf sin escapes, que un
             # informe hostil no repinte la evidencia con secuencias ANSI.
