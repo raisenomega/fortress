@@ -19,8 +19,12 @@ const EN_URL: Regla = [
   '$1***$2'
 ]
 
-/** `-u usuario:clave`, la forma de `curl`. Se conserva el usuario. */
-const BANDERA_U: Regla = [/(-u\s{0,4}[^\s:]{1,64}:)[^\s]{1,256}/g, '$1***']
+/** `-u usuario:clave`, la forma de `curl` (admite el valor PEGADO: `-uapi:x`).
+ *  Se conserva el usuario. El `(?<!\S)` es la frontera que curl tiene de
+ *  verdad: sin ella, el `-u` DE `connector-url.ts` casaba, el `:` era el de
+ *  `"line":` y el valor se desbocaba por el JSON compacto — se comio linea,
+ *  cierre y titulo siguiente en 5 de 13 scan-logs persistidos (PASO 69). */
+const BANDERA_U: Regla = [/((?<!\S)-u\s{0,4}[^\s:]{1,64}:)[^\s]{1,256}/g, '$1***']
 
 /** Las banderas LARGAS que nombran lo que llevan. */
 const BANDERA_LARGA: Regla = [
