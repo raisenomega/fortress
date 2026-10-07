@@ -8,6 +8,7 @@ import { pickFile } from '../system/file-picker'
 import { getAppContext } from '../persistence/app-context'
 import { guardRun } from '../run-guard'
 import { cancelRun, endRun } from '../run-control'
+import { chunkSender } from './chat-send-senders'
 import { IPC } from './channels'
 
 /** Un solo carril por proyecto: no dejar que build pise un scan/chat en curso. */
@@ -27,14 +28,16 @@ async function withGuard<T>(
 
 /** IPC de construccion. El plan de fase 1 lo aprueba el humano antes de fase 2. */
 export function registerBuildHandlers(): void {
-  ipcMain.handle(IPC.buildPlan, (_e, projectId: string, intent: string) =>
-    withGuard(projectId, (ctx) => runBuildPlan(ctx, projectId, intent))
+  // Los trozos van por el canal del chat, tachados por chunkSender; no hay
+  // cruce: withGuard impone un solo carril por proyecto (chat o build, no ambos).
+  ipcMain.handle(IPC.buildPlan, (e, projectId: string, intent: string) =>
+    withGuard(projectId, (ctx) => runBuildPlan(ctx, projectId, intent, chunkSender(e, projectId)))
   )
-  ipcMain.handle(IPC.buildInvestigate, (_e, projectId: string, intent: string) =>
-    withGuard(projectId, (ctx) => runInvestigate(ctx, projectId, intent))
+  ipcMain.handle(IPC.buildInvestigate, (e, projectId: string, intent: string) =>
+    withGuard(projectId, (ctx) => runInvestigate(ctx, projectId, intent, chunkSender(e, projectId)))
   )
-  ipcMain.handle(IPC.buildFeature, (_e, projectId: string, intent: string, plan: string) =>
-    withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan))
+  ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
+    withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))
   )
   // Detener: corta el proceso del agente en marcha (plan o build) y desmarca.
   ipcMain.handle(IPC.buildStop, (_e, projectId: string) => cancelRun(projectId))

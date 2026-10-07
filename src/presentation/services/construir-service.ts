@@ -2,9 +2,12 @@ import { err, type Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useConstruirStore } from '../stores/construir-store'
 import { sendExecute } from './construir-execute'
+import { escucharElPlan } from './escuchar-el-plan'
 
-/** Empuja el turno del usuario, corre la llamada y empuja la respuesta. */
+/** Empuja el turno del usuario, escucha el borrador en vivo y cierra con el
+ *  texto autoritativo (finishDraft: entra UNA vez y el borrador se va). */
 async function ask(
+  projectId: string,
   label: string,
   intent: string,
   call: Promise<Result<string>>
@@ -12,30 +15,31 @@ async function ask(
   const store = useConstruirStore.getState()
   store.push({ role: 'user', text: `${label}: ${intent}` })
   store.setBusy(true)
+  const corte = escucharElPlan(projectId)
   try {
     const result = await call
-    const text = result.ok ? result.value : `No se pudo: ${result.error}`
-    store.push({ role: 'assistant', text })
+    store.finishDraft(result.ok ? result.value : `No se pudo: ${result.error}`)
     return result
   } catch (error) {
     // Sin catch, un fallo del canal dejaria busy:true y el input bloqueado.
     const detail = error instanceof Error ? error.message : 'Se interrumpio'
-    store.push({ role: 'assistant', text: `No se pudo: ${detail}` })
+    store.finishDraft(`No se pudo: ${detail}`)
     return err(detail)
   } finally {
+    corte()
     store.setBusy(false)
   }
 }
 
 /** Modo Plan: el planner devuelve un plan (solo lectura). Se guarda como pendiente. */
 export async function sendPlan(projectId: string, intent: string): Promise<void> {
-  const result = await ask('Plan', intent, api().build.plan(projectId, intent))
+  const result = await ask(projectId, 'Plan', intent, api().build.plan(projectId, intent))
   if (result.ok) useConstruirStore.getState().setPendingPlan({ intent, plan: result.value })
 }
 
 /** Modo Investigacion: el agente responde en solo lectura, sin plan ni edicion. */
 export async function sendInvestigate(projectId: string, intent: string): Promise<void> {
-  await ask('Investigacion', intent, api().build.investigate(projectId, intent))
+  await ask(projectId, 'Investigacion', intent, api().build.investigate(projectId, intent))
 }
 
 /** Envia con el MODO ACTIVO del store: compone la intencion (texto + adjunto),
