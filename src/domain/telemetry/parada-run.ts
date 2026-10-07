@@ -18,6 +18,8 @@ export interface NewParadaRun {
   readonly paradaRotulo: string
   readonly durationMs: number
   readonly usage: TokenUsage
+  /** El modelo que DE VERDAD corrio la parada; ausente si el CLI no lo dijo. */
+  readonly modelo?: string
   readonly at: string
 }
 

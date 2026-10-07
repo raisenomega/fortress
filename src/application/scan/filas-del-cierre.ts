@@ -63,7 +63,7 @@ export function escribirFilasDelCierre(
     // operador paro, o que reventó, no es una corrida que salio bien. Contarlo
     // como exito era la otra mitad de la mentira que dejaba el dia en 0 fallos.
     if (!yaHayFactura(datos.motivo)) {
-      context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs: datos.durationMs, failed: datos.motivo !== 'completo', usage: datos.usage, tools: datos.tools }) // prettier-ignore
+      context.runs.record({ projectId: project.id, agentId: SCANNER_AGENT, kind: 'scan', durationMs: datos.durationMs, failed: datos.motivo !== 'completo', usage: datos.usage, tools: datos.tools, ...(datos.modelo === undefined ? {} : { modelo: datos.modelo }) }) // prettier-ignore
     }
     context.activity.recordMany(scanActivity(project.id, SCANNER_AGENT, datos.reportados, counts, datos.edits)) // prettier-ignore
   })

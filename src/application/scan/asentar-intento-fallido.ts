@@ -34,7 +34,8 @@ export function asentarIntentoFallido(context: AppContext, intento: IntentoFalli
         durationMs: intento.durationMs,
         failed: true,
         usage: intento.usage,
-        tools: intento.tools
+        tools: intento.tools,
+        ...(intento.modelo === undefined ? {} : { modelo: intento.modelo })
       })
     })
   } catch {

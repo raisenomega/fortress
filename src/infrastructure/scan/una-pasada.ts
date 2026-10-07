@@ -54,6 +54,7 @@ export async function escanear(
     usage: reply.usage,
     tools: reply.tools,
     edits: reply.edits,
+    ...(reply.modelo === undefined ? {} : { modelo: reply.modelo }),
     texto: reply.text,
     notas: notasDelInforme(reply.text)
   })

@@ -44,6 +44,8 @@ export interface ScanOutcome {
   readonly tools: readonly string[]
   /** Rutas escritas. Un escaneo en modo plan no deberia traer ninguna. */
   readonly edits: readonly string[]
+  /** El modelo que DE VERDAD corrio (lo inyecta el guardian del turno). */
+  readonly modelo?: string
   /**
    * La salida CRUDA del agente, entera. Viaja para poder quedar en disco: hasta
    * ahora la unica copia iba al renderer para pintarse y moria con la ventana,

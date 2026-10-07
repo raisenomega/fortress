@@ -1,5 +1,6 @@
 import type { Project } from '@domain/project/project'
 import type { CampanaDeclarada } from '@domain/scan/campana-declarada'
+import { paraLaFila } from '@domain/scan/modelo-del-recorrido'
 import type { MotivoCierre } from '@domain/scan/motivo-cierre'
 import { nowIso } from '@domain/shared/id'
 import type { AppContext } from '../context'
@@ -50,6 +51,7 @@ export function crearCierre(
       durationMs: acumulado.durationMs,
       transcurridoMs: transcurrido(totales.startedAt, at),
       usage: acumulado.usage,
+      modelo: paraLaFila(acumulado.modelo),
       tools: acumulado.tools,
       edits: acumulado.edits
     })

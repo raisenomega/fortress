@@ -207,3 +207,29 @@ El aviso de cuota agotada (429) llegó como si fuera su respuesta: la tanda lo
 tomó por «análisis ilegible» y quemó la baraja (16 rechazos en 40 s). Ahora los
 tres lo leen como `provider_error`, que es avería y para la tanda al primero, y
 la corrida se asienta **fallida**, no como «ok $0 1t».
+
+### Enmienda 2026-10-06: el escáner también asienta el modelo real
+
+El guardián del punto 7 ya inyectaba el modelo que corrió en la respuesta de
+todo turno (`guardia-del-turno.ts`), pero el embudo del ESCANEO lo tiraba por
+el camino: las 62 corridas `kind='scan'` de la historia quedaron con
+`modelo = null` y no se podía auditar en qué modelo escaneó FORTRESS.
+
+Desde hoy el escáner persiste **el que corrió, nunca el pedido del catálogo**
+—la noche del 05-oct probó que divergen—, con la misma vara que el Motor
+(`record-motor-run.ts`) y que los seis sin orquestador (`agente-que-asienta.ts`):
+
+- **Cada parada** (ok y fallida) copia `reply.modelo` a su salida, y su fila de
+  `scan_parada_runs` lo lleva en la columna nueva `modelo` (nullable, migración
+  aditiva por `columnas-sueltas.ts`).
+- **La corrida agregada** afirma un modelo solo si puede: con paradas uniformes,
+  ese; con mezcla, el del **peldaño más bajo visto** —leyendo la escalera, que
+  es justo el que esta doctrina quiere cazar—; y si UNA parada no reportó el
+  suyo, la fila queda null, porque afirmar un modelo que no consta sería
+  inferir (`modelo-del-recorrido.ts`).
+- **Sin backfill**: las 62 viejas quedan null. NULL es «anterior a la pieza»;
+  clasificarlas por el modelo declarado mentiría, porque declarado ≠ corrido.
+
+**Hermano pendiente, su propio paso:** el embudo del CHAT tiene el MISMO hueco
+(`record-chat-run.ts:31-52`, ambas ramas): las 74 filas `kind='chat'` de la
+viva están todas a null aunque el turno pasa por el guardián.

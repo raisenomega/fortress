@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS scan_parada_runs (
   cache_creation_tokens INTEGER NOT NULL DEFAULT 0,
   cost_usd              REAL    NOT NULL DEFAULT 0,
   num_turns             INTEGER NOT NULL DEFAULT 0,
+  modelo                TEXT,
   at                    TEXT    NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_parada_runs_scan

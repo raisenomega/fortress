@@ -25,6 +25,8 @@ export type FacturaDeParada = (
 ) => {
   readonly durationMs: number
   readonly usage: TokenUsage
+  /** El modelo que «corrio» esa parada; ausente simula un CLI que no lo dijo. */
+  readonly modelo?: string
 }
 
 const IGUAL_PARA_TODAS: FacturaDeParada = () => ({ durationMs: 1234, usage: SIN_FACTURA })
@@ -53,6 +55,7 @@ export function scannerFalso(
         findings: [hallazgoDe(carpeta)],
         durationMs: suya.durationMs,
         usage: suya.usage,
+        ...(suya.modelo === undefined ? {} : { modelo: suya.modelo }),
         tools: [],
         edits: [],
         texto: `informe de ${carpeta}`, notas: []

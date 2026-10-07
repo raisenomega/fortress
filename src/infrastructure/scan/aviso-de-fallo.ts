@@ -25,6 +25,7 @@ export function avisarDelFallo(
     durationMs,
     usage: reply.usage,
     tools: reply.tools,
+    ...(reply.modelo === undefined ? {} : { modelo: reply.modelo }),
     texto: reply.text,
     notas: notasDelInforme(reply.text)
   })
