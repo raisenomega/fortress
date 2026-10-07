@@ -4,6 +4,7 @@ import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
 import { getHistory } from './chat-history'
 import { persistTurn, type MessageMeta } from './persist-message'
+import { salidaDelTurno } from './salida-del-turno'
 import { replyFromConfiguration } from './reply-from-configuration'
 import type { SendMessageInput, SendMessageOutput } from './send-message-types'
 
@@ -32,5 +33,5 @@ export async function runConfigurationTurn(
   const stored = persistTurn(context, project.id, CONFIG_META, 'assistant', reply.text, null)
   if (!stored.ok) return err(stored.error)
 
-  return ok({ user: user.value, assistant: stored.value, engine: 'claude-code', sinCierre: null, sinVerificar: false })
+  return ok(salidaDelTurno(user.value, stored.value, 'claude-code', reply, null, false))
 }
