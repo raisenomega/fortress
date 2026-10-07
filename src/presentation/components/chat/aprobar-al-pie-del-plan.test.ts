@@ -13,8 +13,10 @@ describe('la firma del lote va AL PIE del plan, dentro del hilo', () => {
     // Dentro del contenedor que scrollea: el pie va tras los mensajes y antes
     // del ancla del fondo. Sobre el input seria una franja fija que tapa.
     expect(lista).toMatch(/\{pie\}\s*<div ref=\{bottomRef\} \/>/)
+    // El pie admite hermanos (PASO 87 sumo el carril de vuelta); lo que se fija
+    // es que la firma del lote siga DENTRO del pie, no el literal exacto.
     expect(fuente('src/presentation/components/chat/ChatWindow.tsx')).toMatch(
-      /pie=\{<BotonDelPlan projectId=\{project\.id\} \/>\}/
+      /pie=\{<>?.*<BotonDelPlan projectId=\{project\.id\} \/>/
     )
   })
 
