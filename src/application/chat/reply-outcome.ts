@@ -12,6 +12,8 @@ export interface StepRun {
   readonly tools: readonly string[]
   /** Su recibo: las mismas herramientas con lo que corrieron (ADR-093). */
   readonly recibo?: readonly string[]
+  /** El modelo que DE VERDAD corrio este run (ADR-078): el del reply, no el pedido. */
+  readonly modelo?: string
 }
 
 /** Lo que produjo una respuesta, con la traza de lo que costo y lo que toco. */
@@ -34,6 +36,9 @@ export interface ReplyOutcome {
   readonly agents: readonly AgentId[]
   /** Un run por agente que participo: cada uno con su consumo real. */
   readonly runs: readonly StepRun[]
+  /** El modelo que corrio cuando NO hay runs (la rama agregada del asiento):
+   *  hoy, el de la API. Con runs, cada fila lleva el suyo y este no se lee. */
+  readonly modelo?: string
   /** Hallazgos consolidados del workflow, ya sin repetir. */
   readonly findings: readonly DetectedFinding[]
   /** True solo tras una auditoria integral (todas las dimensiones): fija la calidad general. */
