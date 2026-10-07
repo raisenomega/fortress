@@ -14,6 +14,7 @@ export type Regla = readonly [RegExp, string]
 
 import { REGLAS_POR_NOMBRE } from './secreto-por-nombre'
 import { REGLAS_POR_CONTEXTO } from './secreto-por-contexto'
+import { REGLAS_EN_JSON } from './secreto-en-json'
 
 /** Una clave PRIVADA en PEM (certificado y clave publica no lo son). ACOTADO y sin
  *  nada perezoso: un `[\s\S]*?` re-escanea hasta el final por cada cabecera sin pie
@@ -41,7 +42,9 @@ const POR_VALOR: readonly Regla[] = [
   [/sk-ant-[\w-]{6,}/gi, '***'],
   [/\bgh[pousr]_[A-Za-z0-9]{16,}/g, '***'],
   [/\bgithub_pat_[A-Za-z0-9_]{20,}/g, '***'],
-  [/Bearer\s+\S+/gi, '***'],
+  // Sin comillas en el valor: dentro de un JSON, `\S+` se comia la comilla de
+  // cierre y dejaba el documento invalido (el primo del PASO 69, medido en 72).
+  [/Bearer\s+[^"\s]+/gi, '***'],
   [/\bA[KS]IA[0-9A-Z]{16}\b/g, '***'],
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}/g, '***'],
   // Los TRES segmentos: con uno o dos se comeria cualquier base64 que empiece igual.
@@ -50,6 +53,9 @@ const POR_VALOR: readonly Regla[] = [
 ]
 
 export const REGLAS_DE_SECRETO: readonly Regla[] = [
+  // Las de JSON primero: acotadas por comilla, dejan el documento valido antes
+  // de que una regla de texto plano pueda morder dentro (PASO 72/73).
+  ...REGLAS_EN_JSON,
   ...REGLAS_POR_NOMBRE,
   ...REGLAS_POR_CONTEXTO,
   ...POR_VALOR

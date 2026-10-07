@@ -17,6 +17,7 @@ export const DEFENSAS_DEL_TACHADO: readonly string[] = [
   'src/domain/chat/reglas-de-secreto.ts',
   'src/domain/chat/secreto-por-nombre.ts',
   'src/domain/chat/secreto-por-contexto.ts',
+  'src/domain/chat/secreto-en-json.ts',
   'src/domain/chat/tool-detail.ts',
   'src/application/chat/en-vivo-tachado.ts',
   'src/domain/repair/innegociables-tachado.ts',
