@@ -16,6 +16,8 @@ interface ConstruirState {
   /** Ruta del archivo adjunto para que el agente lo lea, o null. */
   readonly attached: string | null
   readonly busy: boolean
+  /** Borrador EN VIVO del turno en curso (null = nada corriendo que pintar). */
+  readonly draft: string | null
   /** Ultimo plan producido; es lo que Ejecutor construye (elegirlo = aprobarlo). */
   readonly pendingPlan: { readonly intent: string; readonly plan: string } | null
   setInput: (input: string) => void
@@ -23,6 +25,9 @@ interface ConstruirState {
   setAttached: (attached: string | null) => void
   setBusy: (busy: boolean) => void
   push: (msg: ConstruirMsg) => void
+  appendDraft: (delta: string) => void
+  /** Cierra el turno: el texto autoritativo entra UNA vez y el borrador se va. */
+  finishDraft: (text: string) => void
   setPendingPlan: (p: { intent: string; plan: string } | null) => void
 }
 
@@ -32,11 +37,15 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   mode: 'plan',
   attached: null,
   busy: false,
+  draft: null,
   pendingPlan: null,
   setInput: (input) => set({ input }),
   setMode: (mode) => set({ mode }),
   setAttached: (attached) => set({ attached }),
   setBusy: (busy) => set({ busy }),
   push: (msg) => set((s) => ({ messages: [...s.messages, msg] })),
+  appendDraft: (delta) => set((s) => ({ draft: (s.draft ?? '') + delta })),
+  finishDraft: (text) =>
+    set((s) => ({ messages: [...s.messages, { role: 'assistant', text }], draft: null })),
   setPendingPlan: (pendingPlan) => set({ pendingPlan })
 }))

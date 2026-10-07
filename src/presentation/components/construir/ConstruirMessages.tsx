@@ -1,3 +1,4 @@
+import { antesDeNotas } from '@domain/system/corte-de-notas'
 import { useConstruirStore } from '../../stores/construir-store'
 import { TransferBadge } from '../chat/TransferBadge'
 
@@ -9,6 +10,7 @@ const BOT =
 export function ConstruirMessages(): React.JSX.Element {
   const messages = useConstruirStore((s) => s.messages)
   const busy = useConstruirStore((s) => s.busy)
+  const draft = useConstruirStore((s) => s.draft)
 
   return (
     <div className="flex-1 space-y-3 overflow-y-auto px-1 py-3">
@@ -31,7 +33,11 @@ export function ConstruirMessages(): React.JSX.Element {
           </div>
         )
       )}
-      {busy ? <p className="text-xs text-muted-foreground">Trabajando...</p> : null}
+      {/* El borrador en vivo: el bloque NOTAS se corta en cuanto asoma. */}
+      {draft !== null ? <div className={BOT}>{antesDeNotas(draft)}</div> : null}
+      {busy && draft === null ? (
+        <p className="text-xs text-muted-foreground">Trabajando...</p>
+      ) : null}
     </div>
   )
 }
