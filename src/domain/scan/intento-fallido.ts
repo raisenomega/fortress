@@ -27,6 +27,8 @@ export interface IntentoFallido {
    *  que este arco cierra: nunca mas un token gastado en silencio. */
   readonly usage: TokenUsage
   readonly tools: readonly string[]
+  /** El modelo que DE VERDAD corrio en el intento, si el CLI lo dijo. */
+  readonly modelo?: string
   /** La salida cruda, para que el fallo tambien deje transcripcion. */
   readonly texto: string
   /**
