@@ -36,6 +36,14 @@ export interface ReporteDeTarea {
   readonly hallazgos: number
 }
 
+/** El reporte COMO MENSAJE (PASO 89): cabecera de una linea y debajo el
+ *  resumen ENTERO — lo que la vuelta precarga en el input del CTO, gemelo
+ *  exacto del Transferir. El resumen ya viene tachado y sin NOTAS. */
+export function textoDelReporte(reporte: ReporteDeTarea): string {
+  const cabecera = `[Terminal] ${reporte.estado} · ${reporte.verificacion} · ${reporte.modelo ?? 'modelo no consta'} · $${reporte.usage.costUsd.toFixed(2)} · hallazgos: ${reporte.hallazgos}` // prettier-ignore
+  return `${cabecera}\n\n${reporte.resumen}`
+}
+
 export function reporteDeTarea(r: ResultadoDelTurno): ReporteDeTarea {
   return {
     estado: r.failed ? 'fallido' : 'hecho',
