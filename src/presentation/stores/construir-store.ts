@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 
-/** Los tres modos del chat de construir: la flecha del input los ofrece. */
-export type ConstruirMode = 'plan' | 'investigacion' | 'ejecutor'
+/** Los modos del chat de construir: la flecha del input los ofrece. 'libre'
+ *  (PASO 91) conversa sin repo, powers-off — el unico sin proyecto+confianza. */
+export type ConstruirMode = 'plan' | 'investigacion' | 'ejecutor' | 'libre'
 
 export interface ConstruirMsg {
   readonly role: 'user' | 'assistant'

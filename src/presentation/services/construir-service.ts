@@ -2,10 +2,10 @@ import { err, type Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useConstruirStore } from '../stores/construir-store'
 import { sendExecute } from './construir-execute'
+import { sendLibre } from './construir-libre'
 import { escucharElPlan } from './escuchar-el-plan'
 
-/** Empuja el turno del usuario, escucha el borrador en vivo y cierra con el
- *  texto autoritativo (finishDraft: entra UNA vez y el borrador se va). */
+/** Empuja el turno, escucha el borrador en vivo y cierra con finishDraft. */
 async function ask(
   projectId: string,
   label: string,
@@ -42,8 +42,7 @@ export async function sendInvestigate(projectId: string, intent: string): Promis
   await ask(projectId, 'Investigacion', intent, api().build.investigate(projectId, intent))
 }
 
-/** Envia con el MODO ACTIVO del store: compone la intencion (texto + adjunto),
- *  limpia el input y despacha. Lo usan Enter y el boton de enviar. */
+/** Envia con el MODO ACTIVO: compone intencion, limpia input y despacha. */
 export function submitConstruir(projectId: string): void {
   const store = useConstruirStore.getState()
   if (store.busy) return
@@ -57,6 +56,7 @@ export function submitConstruir(projectId: string): void {
   store.setInput('')
   store.setAttached(null)
   if (store.mode === 'plan') void sendPlan(projectId, intent)
+  else if (store.mode === 'libre') void sendLibre(intent)
   else void sendInvestigate(projectId, intent)
 }
 
