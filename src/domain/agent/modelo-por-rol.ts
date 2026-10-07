@@ -21,7 +21,10 @@ export const MODELO_POR_ROL = {
   borrador: 'sonnet',
   episodio: 'sonnet',
   grafo: 'sonnet',
-  chatApi: 'opus'
+  chatApi: 'opus',
+  /** El chat LIBRE (PASO 91): conversa sin repo, powers-off. Opus como el
+   *  productor y chatApi: es conversacion de primera linea, no un barrido. */
+  libre: 'opus'
 } as const satisfies Record<string, Peldano>
 
 export type RolConModelo = keyof typeof MODELO_POR_ROL
