@@ -4,6 +4,7 @@ import type { ChatEngine } from '@domain/chat/code-agent'
 import type { VeredictoDelPlan } from '@domain/chat/juicio-del-plan'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { OperationMode } from '@domain/settings/operation-mode'
+import type { TokenUsage } from '@domain/telemetry/token-usage'
 
 export interface SendMessageInput {
   readonly projectId: string
@@ -36,6 +37,15 @@ export interface SendMessageOutput {
   /** El turno se conservo SIN que nadie pudiera compilar el proyecto (ADR-091).
    *  Un booleano: cruza el puente sin llevar nada del codigo del cliente. */
   readonly sinVerificar: boolean
+  /** El CIERRE del resultado (PASO 87): lo que el ReporteDeTarea empaqueta.
+   *  Datos PLANOS que ya cruzaban por otras vias — rutas (Actividad), numeros
+   *  (medidor) y el texto solo via `assistant`, ya tachado y sin NOTAS. */
+  readonly failed: boolean
+  readonly edits: readonly string[]
+  readonly usage: TokenUsage
+  /** El modelo que DE VERDAD corrio el turno (ADR-078), si el CLI lo dijo. */
+  readonly modelo?: string
+  readonly hallazgos: number
   /**
    * El veredicto de OMEGA sobre la DIRECCION del plan del lote (ADR-097 §2).
    *

@@ -17,6 +17,7 @@ import { leerFoco } from './foco-del-turno'
 import { modoDelTurno } from './modo-del-turno'
 import { persistTurn } from './persist-message'
 import { runConfigurationTurn } from './run-configuration-turn'
+import { salidaDelTurno } from './salida-del-turno'
 import { trasElTurno } from './tras-el-turno'
 import type { SendMessageInput, SendMessageOutput } from './send-message-types'
 
@@ -68,5 +69,5 @@ export async function sendMessage(
   // Tras guardar la respuesta: la memoria y el cierre del hallazgo (ADR-088).
   const sinCierre = await trasElTurno(context, foco.value?.id ?? null, ciclo.turno, stored.value, ciclo)
   const sinVerificar = seConservoSinCompilar(ciclo.turno)
-  return ok({ user: user.value, assistant: stored.value, engine, sinCierre, sinVerificar }) // prettier-ignore
+  return ok(salidaDelTurno(user.value, stored.value, engine, ciclo.turno.outcome, sinCierre, sinVerificar)) // prettier-ignore
 }
