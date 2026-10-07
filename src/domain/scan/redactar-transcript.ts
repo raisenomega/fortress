@@ -13,7 +13,9 @@ import { redactSecrets } from '../chat/tool-detail'
  * la que alguien escriba manana: lo que una regla muerda queda escapado al
  * re-montar, y los numeros ni se miran.
  */
-const FENCE = /```json\s*([\s\S]*?)```/g
+/** Compartida con `bloques-ilegibles`: dos regex serian dos verdades sobre
+ *  donde esta un bloque. `matchAll` no muta su lastIndex. */
+export const FENCE = /```json\s*([\s\S]*?)```/g
 
 const porCampo = (_k: string, v: unknown): unknown => (typeof v === 'string' ? redactSecrets(v) : v) // prettier-ignore
 

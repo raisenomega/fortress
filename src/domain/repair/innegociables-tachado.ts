@@ -19,5 +19,10 @@ export const DEFENSAS_DEL_TACHADO: readonly string[] = [
   'src/domain/chat/secreto-por-contexto.ts',
   'src/domain/chat/tool-detail.ts',
   'src/application/chat/en-vivo-tachado.ts',
-  'src/domain/repair/innegociables-tachado.ts'
+  'src/domain/repair/innegociables-tachado.ts',
+  // El crudo del escaneo: tachar POR CAMPO, detectar lo ilegible y nombrarlo.
+  // Quitar cualquiera de los tres en silencio reabre el «ilegible sin aviso».
+  'src/domain/scan/redactar-transcript.ts',
+  'src/domain/scan/bloques-ilegibles.ts',
+  'src/infrastructure/scan/write-scan-log.ts'
 ]

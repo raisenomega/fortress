@@ -1,6 +1,7 @@
 import { app } from 'electron'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { bloquesIlegibles } from '@domain/scan/bloques-ilegibles'
 import { redactarTranscript } from '@domain/scan/redactar-transcript'
 import type { ScanLogWriter } from '@domain/scan/scan-log'
 
@@ -37,9 +38,15 @@ function destino(scanId: string): string {
 export const scanLogWriter: ScanLogWriter = {
   write: (scanId, texto) => {
     try {
-      writeFileSync(destino(scanId), redactarTranscript(texto), 'utf8')
+      const tachado = redactarTranscript(texto)
+      // El guard: lo persistido se re-parsea, o se NOMBRA. La evidencia no se
+      // tira —un log a medias vale mas que ninguno— pero nunca pasa en silencio.
+      const rotos = bloquesIlegibles(tachado)
+      const aviso = rotos.length === 0 ? '' : `[FORTRESS] AVISO: bloque(s) JSON ilegibles en este crudo: ${rotos.join(', ')}. Se guarda igual, pero no se re-parsea entero.\n\n` // prettier-ignore
+      if (rotos.length > 0) console.error('[scan-log] crudo con bloques ilegibles', scanId, rotos)
+      writeFileSync(destino(scanId), aviso + tachado, 'utf8')
     } catch {
-      // Silencio deliberado: ver arriba.
+      // Silencio deliberado SOLO para el disco: ver arriba.
     }
   }
 }
