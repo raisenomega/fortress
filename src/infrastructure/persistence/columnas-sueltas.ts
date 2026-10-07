@@ -59,5 +59,8 @@ export const SUELTAS: ReadonlyArray<readonly [string, string, string]> = [
   // La memoria del productor por hallazgo (ADR-088, Enmienda 2): la sesion del
   // CLI que reanuda el siguiente turno con ese foco. Sin DEFAULT: NULL es «sin
   // memoria», que es la verdad de toda fila anterior a esta pieza.
-  ['findings', 'terminal_sesion', 'ALTER TABLE findings ADD COLUMN terminal_sesion TEXT'] // prettier-ignore
+  ['findings', 'terminal_sesion', 'ALTER TABLE findings ADD COLUMN terminal_sesion TEXT'], // prettier-ignore
+  // El modelo que DE VERDAD corrio la parada, misma vara que `agent_runs.modelo`:
+  // nullable, NULL es «anterior a la pieza», y sin backfill (declarado != corrio).
+  ['scan_parada_runs', 'modelo', 'ALTER TABLE scan_parada_runs ADD COLUMN modelo TEXT']
 ]

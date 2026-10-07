@@ -44,6 +44,7 @@ export function asentarCorridaDeParada(
       paradaRotulo: rotuloDe(parada),
       durationMs: salida.durationMs,
       usage: salida.usage,
+      ...(salida.modelo === undefined ? {} : { modelo: salida.modelo }),
       at: sitio.at
     })
   } catch (error) {
