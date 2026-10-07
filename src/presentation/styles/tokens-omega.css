@@ -44,5 +44,19 @@
      riesgo. El oro sigue siendo la identidad; esto solo dice que algo corre. */
   --proceso: 205 85% 58%;
 
+  /* ACTIVIDAD DEL CHAT (PASO 84, orden del operador): el color de la PALABRA
+     de la herramienta en las lineas `· Herramienta: ...` del borrador en vivo.
+     Viven FUERA de la paleta de identidad —como --proceso— y solo para ese
+     uso. AA medido sobre --background: glob 8.10, read 9.35, grep 7.27,
+     bash 9.45, write 8.78, task 7.51, web 10.34, otra 6.98. */
+  --tool-glob: 25 95% 60%;
+  --tool-read: 145 60% 50%;
+  --tool-grep: 270 85% 74%;
+  --tool-bash: 38 85% 55%;
+  --tool-write: 210 90% 70%;
+  --tool-task: 320 85% 70%;
+  --tool-web: 190 85% 55%;
+  --tool-otra: 225 8% 62%;
+
   --radius: 0.625rem;
 }
