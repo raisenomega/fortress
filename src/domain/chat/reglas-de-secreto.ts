@@ -14,6 +14,7 @@ export type Regla = readonly [RegExp, string]
 
 import { REGLAS_POR_NOMBRE } from './secreto-por-nombre'
 import { REGLAS_POR_CONTEXTO } from './secreto-por-contexto'
+import { REGLAS_EN_JSON } from './secreto-en-json'
 
 /** Una clave PRIVADA en PEM (certificado y clave publica no lo son). ACOTADO y sin
  *  nada perezoso: un `[\s\S]*?` re-escanea hasta el final por cada cabecera sin pie
@@ -50,6 +51,9 @@ const POR_VALOR: readonly Regla[] = [
 ]
 
 export const REGLAS_DE_SECRETO: readonly Regla[] = [
+  // Las de JSON primero: acotadas por comilla, dejan el documento valido antes
+  // de que una regla de texto plano pueda morder dentro (PASO 72/73).
+  ...REGLAS_EN_JSON,
   ...REGLAS_POR_NOMBRE,
   ...REGLAS_POR_CONTEXTO,
   ...POR_VALOR
