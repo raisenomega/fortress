@@ -33,7 +33,13 @@ export const CLAVES_LEGITIMAS: readonly string[] = [
   'primaryKey',
   'sortKey',
   'partitionKey',
-  'foreignKey'
+  'foreignKey',
+  // Las mismas cinco en snake_case (PASO 73.1): la rama `[._-]key` las pescaba.
+  'public_key',
+  'primary_key',
+  'sort_key',
+  'partition_key',
+  'foreign_key'
 ]
 
 const CUERPO = [
