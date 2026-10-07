@@ -1,4 +1,4 @@
-import { reporteDeTarea } from '@domain/chat/reporte-de-tarea'
+import { reporteDeTarea, textoDelReporte } from '@domain/chat/reporte-de-tarea'
 import type { SendMessageOutput } from '@application/chat/send-message-types'
 import { useChatStore } from '../stores/chat-store'
 import { useConstruirStore } from '../stores/construir-store'
@@ -12,13 +12,14 @@ export function asentarReporte(projectId: string, salida: SendMessageOutput): vo
 }
 
 /**
- * El carril de vuelta (PASO 87): gemelo del Transferir pero CON CARGA — lleva
- * el ReporteDeTarea a la ranura de la vista del CTO y salta a ella. Sin
- * reporte NO navega: un salto vacio seria el copy-paste de siempre, sin dato.
+ * El carril de vuelta (PASO 89): gemelo EXACTO del Transferir — PRECARGA el
+ * input de la vista del CTO con el reporte COMPLETO (cabecera + resumen entero,
+ * ya tachado) y salta a ella. Asi el reporte entra como MENSAJE enviable a la
+ * conversacion, no como adorno. Sin reporte NO navega ni toca el input.
  */
 export function reportarAlChat(projectId: string): void {
   const reporte = useChatStore.getState().reporteByProject[projectId]
   if (reporte === undefined) return
-  useConstruirStore.getState().setReporteEntrante(reporte)
+  useConstruirStore.getState().setInput(textoDelReporte(reporte))
   useUiStore.getState().setView('construir')
 }
