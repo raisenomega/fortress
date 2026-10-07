@@ -42,7 +42,9 @@ const POR_VALOR: readonly Regla[] = [
   [/sk-ant-[\w-]{6,}/gi, '***'],
   [/\bgh[pousr]_[A-Za-z0-9]{16,}/g, '***'],
   [/\bgithub_pat_[A-Za-z0-9_]{20,}/g, '***'],
-  [/Bearer\s+\S+/gi, '***'],
+  // Sin comillas en el valor: dentro de un JSON, `\S+` se comia la comilla de
+  // cierre y dejaba el documento invalido (el primo del PASO 69, medido en 72).
+  [/Bearer\s+[^"\s]+/gi, '***'],
   [/\bA[KS]IA[0-9A-Z]{16}\b/g, '***'],
   [/\bxox[abprs]-[A-Za-z0-9-]{10,}/g, '***'],
   // Los TRES segmentos: con uno o dos se comeria cualquier base64 que empiece igual.
