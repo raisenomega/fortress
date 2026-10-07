@@ -47,7 +47,8 @@ export function singleAgentOutcome(
         failed: reply.failed,
         durationMs: Date.now() - startedAt,
         tools: reply.tools,
-        recibo: reply.recibo
+        recibo: reply.recibo,
+        ...(reply.modelo === undefined ? {} : { modelo: reply.modelo })
       }
     ],
     findings: [],

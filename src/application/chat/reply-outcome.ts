@@ -54,6 +54,10 @@ export interface ReplyOutcome {
 }
 
 /** Respuesta de solo texto: no hay herramientas ni archivos tocados. */
-export function textOnly(text: string, usage: TokenUsage = EMPTY_USAGE): ReplyOutcome {
-  return { text, failed: false, usage, tools: [], edits: [], agents: [], runs: [], findings: [] }
+export function textOnly(
+  text: string,
+  usage: TokenUsage = EMPTY_USAGE,
+  modelo?: string
+): ReplyOutcome {
+  return { text, failed: false, usage, tools: [], edits: [], agents: [], runs: [], findings: [], ...(modelo === undefined ? {} : { modelo }) } // prettier-ignore
 }

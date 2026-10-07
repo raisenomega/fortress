@@ -42,5 +42,6 @@ export async function replyFromApi(options: ApiReplyOptions): Promise<ReplyOutco
     ? 'La peticion fue declinada por los clasificadores de seguridad del modelo.'
     : reply.text
 
-  return textOnly(text, reply.usage)
+  // El modelo que la API dice haber corrido se asienta, no se descarta (ADR-078).
+  return textOnly(text, reply.usage, reply.modelo)
 }

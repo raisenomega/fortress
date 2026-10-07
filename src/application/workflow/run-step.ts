@@ -45,6 +45,7 @@ export async function runStep(
     usage: reply.usage,
     tools: reply.tools,
     edits: reply.edits,
-    durationMs: Date.now() - startedAt
+    durationMs: Date.now() - startedAt,
+    ...(reply.modelo === undefined ? {} : { modelo: reply.modelo })
   }
 }
