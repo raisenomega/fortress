@@ -37,9 +37,11 @@ describe('los gates, pineados en el fuente (molde de la casa)', () => {
   })
 
   it('los otros tres modos siguen con su gate de proyecto en el runner', () => {
-    expect(fuente('src/infrastructure/build/run-build-plan.ts')).toContain('resolveTarget')
-    expect(fuente('src/infrastructure/build/run-investigate.ts')).toContain('resolveTarget')
-    expect(fuente('src/infrastructure/build/run-build.ts')).toContain('resolveEditTarget')
+    // Se fija la LLAMADA, no la palabra: un import suelto no es un gate (el
+    // primer pin lo dejo vivo un mutante que cambiaba solo la invocacion).
+    expect(fuente('src/infrastructure/build/run-build-plan.ts')).toContain('resolveTarget(context') // prettier-ignore
+    expect(fuente('src/infrastructure/build/run-investigate.ts')).toContain('resolveTarget(context') // prettier-ignore
+    expect(fuente('src/infrastructure/build/run-build.ts')).toContain('resolveEditTarget(context')
   })
 
   it('el menu ofrece el modo libre', () => {
