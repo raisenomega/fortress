@@ -30,6 +30,15 @@
   --color-success: hsl(var(--success));
   --color-proceso: hsl(var(--proceso));
 
+  --color-tool-glob: hsl(var(--tool-glob));
+  --color-tool-read: hsl(var(--tool-read));
+  --color-tool-grep: hsl(var(--tool-grep));
+  --color-tool-bash: hsl(var(--tool-bash));
+  --color-tool-write: hsl(var(--tool-write));
+  --color-tool-task: hsl(var(--tool-task));
+  --color-tool-web: hsl(var(--tool-web));
+  --color-tool-otra: hsl(var(--tool-otra));
+
   --font-display: 'Syne', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 

@@ -5,10 +5,10 @@ import { ConstruirInput } from './ConstruirInput'
 import { ConstruirMessages } from './ConstruirMessages'
 
 /**
- * Construir: chat minimalista, centrado y angosto, con el input abajo. A la
- * izquierda se adjunta un archivo; a la derecha la flecha elige el modo (Plan /
- * Investigacion / Ejecutor). Ejecutor exige un Plan previo y construye con red
- * git+verify. Nunca sobre el propio repo de FORTRESS (bloqueado en el main).
+ * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
+ * abajo. A la izquierda se adjunta un archivo; a la derecha la flecha elige el
+ * modo (Plan / Investigacion / Ejecutor). Ejecutor exige un Plan previo y
+ * construye con red git+verify. Nunca sobre el propio repo de FORTRESS.
  */
 export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
@@ -19,7 +19,7 @@ export function ConstruirView(): React.JSX.Element {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-2xl flex-col px-4 pt-4 pb-6">
+    <div className="flex h-full w-full flex-col px-4 pt-4 pb-6">
       {!project ? (
         <Notice tone="error">Selecciona un proyecto.</Notice>
       ) : !project.trusted ? (

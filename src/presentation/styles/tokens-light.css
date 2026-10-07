@@ -21,4 +21,15 @@
   --low: 225 8% 42%;
   /* Como `--low`: sobre fondo claro necesita bajar para leerse. */
   --proceso: 205 80% 42%;
+  /* ACTIVIDAD DEL CHAT (PASO 84): bajan para leerse sobre claro. AA medido:
+     glob 4.95, read 5.34, grep 7.86, bash 5.13, write 5.79, task 6.02,
+     web 5.22, otra 5.73. */
+  --tool-glob: 25 95% 36%;
+  --tool-read: 145 65% 28%;
+  --tool-grep: 270 70% 42%;
+  --tool-bash: 38 90% 30%;
+  --tool-write: 210 90% 38%;
+  --tool-task: 320 85% 38%;
+  --tool-web: 190 90% 28%;
+  --tool-otra: 225 8% 40%;
 }
