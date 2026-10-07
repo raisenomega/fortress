@@ -14,7 +14,9 @@ export async function runBuild(
   context: AppContext,
   projectId: string,
   intent: string,
-  plan: string
+  plan: string,
+  /** El texto segun llega, para pintarlo en vivo (mismo cable que el Plan). */
+  onChunk: (delta: string) => void = () => {}
 ): Promise<Result<void>> {
   // Ejecutor SI edita: aqui blinda el repo de FORTRESS (Plan/Investigacion no).
   const target = resolveEditTarget(context, projectId)
@@ -24,7 +26,7 @@ export async function runBuild(
   // con la barrera del cliente muerta no arranca, y el recibo queda en el
   // historial como cualquier otro «no aplicada».
   const rota = guardBarrera(context, projectId, true)
-  const result = rota === null ? await construir(context, projectId, intent, plan, project) : err<BuildResult>(rota) // prettier-ignore
+  const result = rota === null ? await construir(context, projectId, intent, plan, project, onChunk) : err<BuildResult>(rota) // prettier-ignore
   const text = result.ok
     ? `Construccion completada:\n\n${result.value.text}`
     : `Construccion no aplicada: ${result.error}`
@@ -44,7 +46,8 @@ function construir(
   projectId: string,
   intent: string,
   plan: string,
-  project: Project
+  project: Project,
+  onChunk: (delta: string) => void
 ): Promise<Result<BuildResult>> {
   return buildFeature(
     context,
@@ -60,6 +63,6 @@ function construir(
       // una fase que no se pudo medir no revierte una construccion (ADR-091).
       verify: async () => !cortaElTurno((await verificarArbol(project.path)).arbol)
     },
-    () => {}
+    onChunk
   )
 }

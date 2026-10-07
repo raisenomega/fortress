@@ -36,8 +36,8 @@ export function registerBuildHandlers(): void {
   ipcMain.handle(IPC.buildInvestigate, (e, projectId: string, intent: string) =>
     withGuard(projectId, (ctx) => runInvestigate(ctx, projectId, intent, chunkSender(e, projectId)))
   )
-  ipcMain.handle(IPC.buildFeature, (_e, projectId: string, intent: string, plan: string) =>
-    withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan))
+  ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
+    withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))
   )
   // Detener: corta el proceso del agente en marcha (plan o build) y desmarca.
   ipcMain.handle(IPC.buildStop, (_e, projectId: string) => cancelRun(projectId))
