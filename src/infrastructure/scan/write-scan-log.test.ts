@@ -43,6 +43,15 @@ describe('la transcripcion queda en disco, tachada', () => {
     expect(guardado).toContain('y sigo.')
   })
 
+  it('un secreto dentro de un campo se tacha sin comerse lo de al lado (re-parsea)', () => {
+    scanLogWriter.write('scan-5', 'Analisis.\n\n```json\n{"findings":[{"severity":"LOW","title":"pide token: abc123","file":"a.ts","line":3}]}\n```') // prettier-ignore
+
+    const guardado = leer('scan-5')
+    const bloque = /```json\s*([\s\S]*?)```/.exec(guardado)?.[1] ?? '(sin bloque)'
+    expect((JSON.parse(bloque) as { findings: { line: number }[] }).findings[0].line).toBe(3)
+    expect(guardado).not.toContain('abc123')
+  })
+
   it('NO escribe en el repo auditado: es prosa de FORTRESS, no memoria del proyecto', () => {
     scanLogWriter.write('scan-3', 'x')
 

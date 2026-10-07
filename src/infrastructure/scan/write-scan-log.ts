@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { redactSecrets } from '@domain/chat/tool-detail'
+import { redactarTranscript } from '@domain/scan/redactar-transcript'
 import type { ScanLogWriter } from '@domain/scan/scan-log'
 
 const CARPETA = 'scan-logs'
@@ -28,13 +28,16 @@ function destino(scanId: string): string {
  * aparte y sobre el texto completo, que es donde el patron si aparece entero.
  * Son dos protecciones distintas a proposito (ver `en-vivo-tachado`).
  *
+ * Y POR CAMPO, no el documento montado: una regla glotona corrio por el JSON
+ * compacto y dejo ilegibles 5 de 13 crudos (PASO 69). Ver `redactar-transcript`.
+ *
  * Mejor esfuerzo: si el disco falla, el escaneo ya esta guardado y perder su
  * transcripcion no lo invalida. Igual que la memoria del proyecto.
  */
 export const scanLogWriter: ScanLogWriter = {
   write: (scanId, texto) => {
     try {
-      writeFileSync(destino(scanId), redactSecrets(texto), 'utf8')
+      writeFileSync(destino(scanId), redactarTranscript(texto), 'utf8')
     } catch {
       // Silencio deliberado: ver arriba.
     }
