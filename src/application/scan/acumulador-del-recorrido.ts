@@ -1,6 +1,7 @@
 import type { ModuloAuditoria } from '@domain/scan/modulo-auditoria'
 import { esDeTema, ficherosDe, type Parada } from '@domain/scan/parada'
 import type { DetectedFinding } from '@domain/scan/detected-finding'
+import { sumarModelo, type ModeloDelRecorrido } from '@domain/scan/modelo-del-recorrido'
 import type { ScanOutcome } from '@domain/scan/scanner'
 import { addUsage, EMPTY_USAGE, type TokenUsage } from '@domain/telemetry/token-usage'
 
@@ -31,6 +32,8 @@ export interface Acumulado {
   readonly temas: readonly ModuloAuditoria[]
   readonly durationMs: number
   readonly usage: TokenUsage
+  /** El modelo que la fila agregada puede afirmar (ver `modelo-del-recorrido`). */
+  readonly modelo: ModeloDelRecorrido
   readonly tools: readonly string[]
   readonly edits: readonly string[]
   /** La transcripcion de todas las paradas, para que quede en disco al cerrar. */
@@ -44,6 +47,7 @@ export const NADA_RECORRIDO: Acumulado = {
   temas: [],
   durationMs: 0,
   usage: EMPTY_USAGE,
+  modelo: undefined,
   tools: [],
   edits: [],
   texto: ''
@@ -58,6 +62,7 @@ export function sumarParada(previo: Acumulado, parada: Parada, salida: ScanOutco
     temas: esDeTema(parada) ? [...previo.temas, parada.modulo] : previo.temas,
     durationMs: previo.durationMs + salida.durationMs,
     usage: addUsage(previo.usage, salida.usage),
+    modelo: sumarModelo(previo.modelo, salida.modelo),
     tools: [...previo.tools, ...salida.tools],
     edits: [...previo.edits, ...salida.edits],
     texto: previo.texto + salida.texto

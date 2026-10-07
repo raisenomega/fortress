@@ -28,7 +28,7 @@ export async function persistScan(
   outcome: ScanOutcome,
   scanLog: ScanLogWriter = SIN_LOG
 ): Promise<ScanSummary> {
-  const { findings, durationMs, usage, tools, edits } = outcome
+  const { findings, durationMs, usage, modelo, tools, edits } = outcome
   const at = nowIso()
 
   // Una parada, y todavia sin manifiesto: los ficheros no se han contado, y
@@ -59,6 +59,7 @@ export async function persistScan(
     // Una pieza: lo auditado y lo transcurrido son la misma pasada.
     transcurridoMs: durationMs,
     usage,
+    modelo,
     tools,
     edits
   })

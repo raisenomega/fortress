@@ -42,6 +42,8 @@ export interface DatosDelCierre {
    */
   readonly transcurridoMs: number
   readonly usage: TokenUsage
+  /** El modelo que la corrida agregada puede afirmar; ausente, la fila va null. */
+  readonly modelo?: string
   readonly tools: readonly string[]
   readonly edits: readonly string[]
 }
