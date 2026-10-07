@@ -41,4 +41,15 @@ describe('el transcript se tacha POR CAMPO, nunca el montado', () => {
     expect(tachado).toContain('{"roto"')
     expect(tachado).not.toContain('token: abc123')
   })
+
+  it('FAIL-CLOSED: el secreto DENTRO del bloque roto sale tachado, nunca crudo', () => {
+    // El agujero al reves: si el camino del catch escribiera el bloque sin
+    // tachar, el tachado por campo habria ABIERTO la fuga que vino a cerrar.
+    const texto = bloque('{"nota": "pide token: abc123" y aqui se rompe')
+
+    const tachado = redactarTranscript(texto)
+
+    expect(tachado).not.toContain('abc123')
+    expect(tachado).toContain('***')
+  })
 })
