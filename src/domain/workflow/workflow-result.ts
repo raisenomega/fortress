@@ -20,6 +20,8 @@ export interface StepResult {
   readonly edits: readonly string[]
   /** Lo que tardo ESTE paso, para atribuir tiempo por agente y no en bloque. */
   readonly durationMs: number
+  /** El modelo que DE VERDAD corrio ESTE paso (ADR-078): viaja hasta su fila. */
+  readonly modelo?: string
 }
 
 export interface WorkflowOutcome {

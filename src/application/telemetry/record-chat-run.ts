@@ -36,7 +36,8 @@ export function recordChatRun(context: AppContext, input: ChatRunInput): void {
             failed: run.failed,
             usage: run.usage,
             tools: run.tools,
-            recibo: run.recibo
+            recibo: run.recibo,
+            ...(run.modelo === undefined ? {} : { modelo: run.modelo })
           })
         }
       } else {
@@ -48,7 +49,8 @@ export function recordChatRun(context: AppContext, input: ChatRunInput): void {
           failed: outcome.failed,
           usage: outcome.usage,
           tools: outcome.tools,
-          recibo: outcome.recibo
+          recibo: outcome.recibo,
+          ...(outcome.modelo === undefined ? {} : { modelo: outcome.modelo })
         })
       }
 

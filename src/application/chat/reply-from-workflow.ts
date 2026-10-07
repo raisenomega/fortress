@@ -50,7 +50,8 @@ export async function replyFromWorkflow(options: WorkflowReplyOptions): Promise<
       usage: r.usage,
       failed: r.failed,
       durationMs: r.durationMs,
-      tools: r.tools
+      tools: r.tools,
+      ...(r.modelo === undefined ? {} : { modelo: r.modelo })
     })),
     findings: consolidate(outcome.results)
   }
