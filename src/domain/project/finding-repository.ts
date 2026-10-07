@@ -22,6 +22,10 @@ export interface FindingRepository
    *  descartados no cuentan para el score ni bloquean un push. */
   countsByProject(): Readonly<Record<string, SeverityCounts>>
 
+  /** Cuantas filas dejo tocadas UN escaneo: lo que de verdad encontro, ya
+   *  fundidos los renombres entre paradas. Es el numero del cierre. */
+  countByScan(scanId: string): number
+
   /**
    * Vuelca lo que vio un escaneo SIN BORRAR nada. Por cada hallazgo reportado:
    * si ya existia (misma clave estable) se refresca y se le pone `lastSeen`;

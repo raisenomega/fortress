@@ -16,6 +16,12 @@ interface CountRow {
   readonly total: number
 }
 
+/** Fuera del constructor por el tope de 50 lineas; prepara UNA vez igualmente. */
+function contarPorScan(db: Db): (scanId: string) => number {
+  const porScan = db.prepare(SQL.COUNT_BY_SCAN)
+  return (scanId) => (porScan.get(scanId) as { n: number }).n
+}
+
 /** Todas las consultas van parametrizadas: nunca se concatena input. */
 export function createSqliteFindingRepository(db: Db): FindingRepository {
   const byProject = db.prepare(SQL.SELECT_BY_PROJECT)
@@ -26,6 +32,7 @@ export function createSqliteFindingRepository(db: Db): FindingRepository {
 
   return {
     listByProject: (projectId) => (byProject.all(projectId) as FindingRow[]).map(toFinding),
+    countByScan: contarPorScan(db),
 
     listMemory: (projectId) => (memoryOf.all(projectId) as MemoryRow[]).map(toMemory),
 
