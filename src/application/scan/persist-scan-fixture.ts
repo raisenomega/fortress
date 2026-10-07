@@ -6,6 +6,8 @@ export interface Guardado {
   extinct?: readonly string[]
   /** Lo que el CIERRE fijo en la fila: antes lo ponia `record` al crearla. */
   fila?: { findingCount: number; dossierCount: number; estado: string; motivoCierre: string }
+  /** Lo que el sync recibio: de ahi lee el contador honesto del cierre. */
+  sincronizados?: number
   /** Cuantas veces se abrio, se cerro y se escribio la memoria: una cada una. */
   abiertos?: number
   cierres?: number
@@ -29,7 +31,8 @@ export function fixture(saved: Guardado): AppContext {
     fileHistory: { changedSince: (_p: string, file: string) => Promise.resolve(file === 'tocado.ts') }, // prettier-ignore
     findings: {
       listMemory: () => memoria(),
-      syncFromScan: (): void => undefined,
+      syncFromScan: (_p: string, _s: string, f: readonly unknown[]): void => void (saved.sincronizados = f.length), // prettier-ignore
+      countByScan: () => saved.sincronizados ?? 0,
       markExtinct: (ids: readonly string[]): void => void (saved.extinct = ids)
     },
     transaction: (fn: () => void): void => fn(),

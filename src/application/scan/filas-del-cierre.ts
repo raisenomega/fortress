@@ -31,7 +31,7 @@ export function escribirFilasDelCierre(
     const cerrada = context.scans.cerrar(datos.scanId, {
       estado: datos.motivo === 'completo' ? 'CERRADO' : 'ABORTADO',
       score: nota ?? SCORE_PROVISIONAL,
-      findingCount: datos.reportados.length,
+      findingCount: context.findings.countByScan(datos.scanId),
       dossierCount: calculado.expediente.length,
       criticalCount: counts.CRITICAL,
       // El reloj de PARED, no la suma de paradas: un escaneo que murio en su

@@ -68,3 +68,6 @@ export const INSERT_DISMISSAL = `INSERT OR REPLACE INTO dismissals
 export const DELETE_DISMISSAL = 'DELETE FROM dismissals WHERE project_id = ? AND fingerprint = ?'
 
 export const SELECT_DISMISSALS = 'SELECT fingerprint FROM dismissals WHERE project_id = ?'
+
+/** Las filas que ESTE escaneo dejo tocadas: el conteo honesto del cierre. */
+export const COUNT_BY_SCAN = 'SELECT COUNT(*) AS n FROM findings WHERE scan_id = ?'
