@@ -38,3 +38,24 @@ describe('el secreto generico en JSON se tacha por su CLAVE, acotado por la comi
     expect(redactSecrets(texto)).toBe(texto)
   })
 })
+
+describe('las claves LEGITIMAS que la joroba pescaria, eximidas ENTERAS', () => {
+  it.each(['publicKey', 'primaryKey', 'sortKey', 'partitionKey', 'foreignKey'])(
+    '{"%s":"abc123"} NO se tacha: nombra estructura, no secreto',
+    (clave) => {
+      const texto = `{"${clave}":"abc123"}`
+      expect(redactSecrets(texto)).toBe(texto)
+    }
+  )
+
+  it('la exencion es por clave EXACTA: secretKey sigue cayendo', () => {
+    expect(redactSecrets('{"secretKey":"abc123"}')).toBe('{"secretKey":"***"}')
+  })
+
+  it('COSTE ACEPTADO Y MEDIDO: el par vercel {"key":...,"value":...} pierde el key', () => {
+    // 8 de 8 usos reales de "key" pelada en el corpus eran headers de vercel;
+    // su info util vive en la hermana "value", que sobrevive. Eximir "key"
+    // pelada abriria {"key":"<secreto generico>"} — se elige este lado.
+    expect(redactSecrets('{"key":"X-Frame-Options","value":"DENY"}')).toBe('{"key":"***","value":"DENY"}') // prettier-ignore
+  })
+})

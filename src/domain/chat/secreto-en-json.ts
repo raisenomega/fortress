@@ -21,9 +21,20 @@ const LARGAS = ['password', 'passwd', 'secret', 'token', 'credential', 'credenti
   .map(caja)
   .join('|')
 
-/** Claves LEGITIMAS que la joroba pescaria: se miden sobre el corpus real y se
- *  eximen ENTERAS (la clave exacta), nunca por trozo. */
-export const CLAVES_LEGITIMAS: readonly string[] = []
+/** Claves LEGITIMAS que la joroba pescaria: nombran ESTRUCTURA (DynamoDB,
+ *  cripto publica, SQL), no secreto, y se eximen ENTERAS — la clave exacta,
+ *  nunca por trozo. Medido 2026-10-07 sobre el corpus persistido completo:
+ *  ninguna aparece hoy (entran como proteccion para repos de clientes), y la
+ *  unica clave real que la regla pesca es `key` pelada (8 usos, todos el par
+ *  de headers de vercel) — esa NO se exime: su info util vive en la hermana
+ *  `value`, y eximirla abriria `{"key":"<secreto generico>"}`. */
+export const CLAVES_LEGITIMAS: readonly string[] = [
+  'publicKey',
+  'primaryKey',
+  'sortKey',
+  'partitionKey',
+  'foreignKey'
+]
 
 const CUERPO = [
   `[\\w.-]*(?:${LARGAS})[\\w.-]*`, // la palabra larga, en cualquier sitio
