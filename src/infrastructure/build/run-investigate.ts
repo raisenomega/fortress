@@ -10,7 +10,9 @@ import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 export async function runInvestigate(
   context: AppContext,
   projectId: string,
-  intent: string
+  intent: string,
+  /** El texto segun llega, para pintarlo en vivo (mismo cable que el Plan). */
+  onChunk: (delta: string) => void = () => {}
 ): Promise<Result<string>> {
   const target = resolveTarget(context, projectId)
   if (!target.ok) return target
@@ -22,10 +24,11 @@ export async function runInvestigate(
       // 'lectura', no 'plan': plan bloquea TODO el MCP, asi que el grafo nunca
       // respondia. En 'lectura' (default) el grafo ejecuta y no se puede escribir.
       permissionMode: 'lectura',
-      agentId: null, model: MODELO_POR_ROL.construir,
+      agentId: null,
+      model: MODELO_POR_ROL.construir,
       trusted: target.value.trusted
     },
-    () => {}
+    onChunk
   )
   // Construir observa (sub-pieza 3 del #5): pase lo que pase con la respuesta.
   asentarNotas(context, target.value, notasDeBloque(reply.text))

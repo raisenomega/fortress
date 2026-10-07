@@ -15,7 +15,10 @@ import { savePlanDoc } from './save-plan-doc'
 export async function runBuildPlan(
   context: AppContext,
   projectId: string,
-  intent: string
+  intent: string,
+  /** El texto segun llega, para pintarlo en vivo: antes se tiraba con `() => {}`
+   *  y el plan caia de golpe tras ~100s de pantalla muda (PASO 79). */
+  onChunk: (delta: string) => void = () => {}
 ): Promise<Result<string>> {
   const target = resolveTarget(context, projectId)
   if (!target.ok) return target
@@ -28,7 +31,7 @@ export async function runBuildPlan(
       agentId: 'planner',
       trusted: target.value.trusted
     },
-    () => {}
+    onChunk
   )
   // Construir observa (sub-pieza 3 del #5): la nota entra pase lo que pase con
   // el plan, y el bloque no llega ni al operador ni al `docs/` del cliente.
