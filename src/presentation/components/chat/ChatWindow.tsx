@@ -7,6 +7,7 @@ import { useChatStore } from '../../stores/chat-store'
 import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
 import { BotonDelPlan } from './BotonDelPlan'
+import { ReportarAlChat } from './ReportarAlChat'
 import { ChatBody } from './ChatBody'
 import { ChatErrorBanner } from './ChatErrorBanner'
 import { ConfigRedirect } from './ConfigRedirect'
@@ -50,9 +51,9 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
         <ChatErrorBanner message={error} onDismiss={() => setError(project.id, null)} />
       ) : null}
 
-      {/* El pie va DENTRO del hilo: la firma del lote, al pie del plan leido. */}
+      {/* El pie va DENTRO del hilo: la firma del lote y el carril de vuelta. */}
       {/* prettier-ignore */}
-      <ChatBody projectName={project.name} messages={messages} terminal pie={<BotonDelPlan projectId={project.id} />} />
+      <ChatBody projectName={project.name} messages={messages} terminal pie={<><BotonDelPlan projectId={project.id} /><ReportarAlChat projectId={project.id} /></>} />
 
       <IndicadorDelLote projectId={project.id} />
 

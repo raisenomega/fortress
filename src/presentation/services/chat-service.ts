@@ -5,7 +5,7 @@ import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
-import { captureConfigDrafts } from './capture-config-drafts'
+import { despuesDelTurno } from './despues-del-turno'
 import { escucharElTurno } from './escuchar-el-turno'
 import { conLoteDelPlan } from './lote-del-plan'
 import { refreshSessionUsage } from './telemetry-service'
@@ -40,8 +40,8 @@ export async function sendMessage(input: SendMessageInput): Promise<DesenlaceDel
     desenlace = desenlaceDelResultado(result)
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
     // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
-    // stream (que puede traer lineas de herramienta o venir vacio).
-    else captureConfigDrafts(input.projectId, result.value.assistant.content)
+    // stream — y asienta el ReporteDeTarea del carril de vuelta (PASO 87).
+    else despuesDelTurno(input.projectId, result.value)
   } catch (error) {
     // Sin catch, un fallo del canal IPC seria un rechazo no manejado y el
     // finally recargaria el historial borrando el mensaje sin ninguna senal.

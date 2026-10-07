@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { ChatMessage } from '@domain/chat/chat-message'
+import type { ReporteDeTarea } from '@domain/chat/reporte-de-tarea'
 
 interface ChatState {
   /** Historial por proyecto: cada proyecto tiene su propia conversacion. */
@@ -10,11 +11,15 @@ interface ChatState {
    * de B aparecia bloqueado y con el error de A. Cada proyecto lleva el suyo.
    */
   readonly streamingByProject: Readonly<Record<string, boolean>>
+  /** El ReporteDeTarea del ULTIMO turno terminado, por proyecto (PASO 87):
+   *  lo que el badge «Reportar al Chat» lleva por el carril de vuelta. */
+  readonly reporteByProject: Readonly<Record<string, ReporteDeTarea>>
   readonly errorByProject: Readonly<Record<string, string | null>>
   setMessages: (projectId: string, messages: readonly ChatMessage[]) => void
   appendMessage: (message: ChatMessage) => void
   replaceMessage: (id: string, message: ChatMessage) => void
   setStreaming: (projectId: string, streaming: boolean) => void
+  setReporte: (projectId: string, reporte: ReporteDeTarea) => void
   setError: (projectId: string, error: string | null) => void
 }
 
@@ -31,6 +36,7 @@ function upsert(
 export const useChatStore = create<ChatState>((set) => ({
   byProject: {},
   streamingByProject: {},
+  reporteByProject: {},
   errorByProject: {},
 
   setMessages: (projectId, messages) =>
@@ -56,6 +62,9 @@ export const useChatStore = create<ChatState>((set) => ({
     set((state) => ({
       streamingByProject: { ...state.streamingByProject, [projectId]: streaming }
     })),
+
+  setReporte: (projectId, reporte) =>
+    set((state) => ({ reporteByProject: { ...state.reporteByProject, [projectId]: reporte } })),
 
   setError: (projectId, error) =>
     set((state) => ({ errorByProject: { ...state.errorByProject, [projectId]: error } }))

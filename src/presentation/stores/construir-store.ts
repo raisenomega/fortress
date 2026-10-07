@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { ReporteDeTarea } from '@domain/chat/reporte-de-tarea'
 
 /** Los tres modos del chat de construir: la flecha del input los ofrece. */
 export type ConstruirMode = 'plan' | 'investigacion' | 'ejecutor'
@@ -18,6 +19,8 @@ interface ConstruirState {
   readonly busy: boolean
   /** Borrador EN VIVO del turno en curso (null = nada corriendo que pintar). */
   readonly draft: string | null
+  /** El ReporteDeTarea que llego del Terminal por el carril de vuelta (PASO 87). */
+  readonly reporteEntrante: ReporteDeTarea | null
   /** Ultimo plan producido; es lo que Ejecutor construye (elegirlo = aprobarlo). */
   readonly pendingPlan: { readonly intent: string; readonly plan: string } | null
   setInput: (input: string) => void
@@ -28,6 +31,7 @@ interface ConstruirState {
   appendDraft: (delta: string) => void
   /** Cierra el turno: el texto autoritativo entra UNA vez y el borrador se va. */
   finishDraft: (text: string) => void
+  setReporteEntrante: (reporte: ReporteDeTarea | null) => void
   setPendingPlan: (p: { intent: string; plan: string } | null) => void
 }
 
@@ -38,6 +42,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   attached: null,
   busy: false,
   draft: null,
+  reporteEntrante: null,
   pendingPlan: null,
   setInput: (input) => set({ input }),
   setMode: (mode) => set({ mode }),
@@ -47,5 +52,6 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   appendDraft: (delta) => set((s) => ({ draft: (s.draft ?? '') + delta })),
   finishDraft: (text) =>
     set((s) => ({ messages: [...s.messages, { role: 'assistant', text }], draft: null })),
+  setReporteEntrante: (reporteEntrante) => set({ reporteEntrante }),
   setPendingPlan: (pendingPlan) => set({ pendingPlan })
 }))
