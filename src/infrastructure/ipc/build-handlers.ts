@@ -1,9 +1,11 @@
 import { BrowserWindow, ipcMain } from 'electron'
 import type { AppContext } from '@application/context'
 import { err, type Result } from '@domain/shared/result'
+import type { TurnoLibre } from '@domain/build/libre-prompt'
 import { runBuild } from '../build/run-build'
 import { runBuildPlan } from '../build/run-build-plan'
 import { runInvestigate } from '../build/run-investigate'
+import { runLibre } from '../build/run-libre'
 import { pickFile } from '../system/file-picker'
 import { getAppContext } from '../persistence/app-context'
 import { guardRun } from '../run-guard'
@@ -35,6 +37,11 @@ export function registerBuildHandlers(): void {
   )
   ipcMain.handle(IPC.buildInvestigate, (e, projectId: string, intent: string) =>
     withGuard(projectId, (ctx) => runInvestigate(ctx, projectId, intent, chunkSender(e, projectId)))
+  )
+  // LIBRE: sin proyecto no hay carril que guardar; el doble-envio lo frena el
+  // busy del renderer. Los trozos van al id centinela que el servicio escucha.
+  ipcMain.handle(IPC.buildLibre, (e, pregunta: string, hilo: TurnoLibre[]) =>
+    runLibre(getAppContext(), pregunta, hilo, chunkSender(e, 'chat-libre'))
   )
   ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
     withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))
