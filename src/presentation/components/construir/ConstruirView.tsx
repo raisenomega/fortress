@@ -3,7 +3,6 @@ import { Notice } from '../common/Notice'
 import { ConfigInterview } from './ConfigInterview'
 import { ConstruirInput } from './ConstruirInput'
 import { ConstruirMessages } from './ConstruirMessages'
-import { ReporteEntrante } from './ReporteEntrante'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
@@ -32,7 +31,6 @@ export function ConstruirView(): React.JSX.Element {
           <p className="pb-2 text-center text-[11px] text-muted-foreground">
             Chat de {project.name}
           </p>
-          <ReporteEntrante />
           <ConstruirMessages />
           <ConstruirInput projectId={project.id} />
         </>
