@@ -35,6 +35,8 @@ interface ConstruirState {
   appendDraft: (delta: string) => void
   /** Cierra el turno: el texto autoritativo entra UNA vez y el borrador se va. */
   finishDraft: (text: string) => void
+  /** El borrador se va SIN pegarse: el turno pertenece a OTRO hilo (121). */
+  descartarDraft: () => void
   setHiloActivo: (hilo: HiloDeChat | null) => void
   setRehidratacionPendiente: (pendiente: boolean) => void
   /** Rehidratacion (B1): reemplaza la memoria entera desde el cajon. */
@@ -60,6 +62,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   appendDraft: (delta) => set((s) => ({ draft: (s.draft ?? '') + delta })),
   finishDraft: (text) =>
     set((s) => ({ messages: [...s.messages, { role: 'assistant', text }], draft: null })),
+  descartarDraft: () => set({ draft: null }),
   setHiloActivo: (hiloActivo) => set({ hiloActivo }),
   setRehidratacionPendiente: (rehidratacionPendiente) => set({ rehidratacionPendiente }),
   replaceMessages: (messages) => set({ messages: [...messages] }),

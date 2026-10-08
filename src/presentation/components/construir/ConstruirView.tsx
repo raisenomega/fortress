@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { barrerVaciosUnaVez } from '../../services/limpiar-vacios'
 import { alMorirElDraft, parDeLaVista, rehidratar } from '../../services/rehidratar-el-hilo'
 import { useActiveProject } from '../../stores/project-store'
 import { useBarraStore } from '../../stores/barra-store'
@@ -7,7 +8,6 @@ import { BarraDelChat } from './BarraDelChat'
 import { BarraToggle } from './BarraToggle'
 import { ConfigInterview } from './ConfigInterview'
 import { CuerpoDelChat } from './CuerpoDelChat'
-import { PaginaDeCarpeta } from './PaginaDeCarpeta'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
@@ -20,13 +20,15 @@ export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
   const mode = useConstruirStore((s) => s.mode)
   const barraAbierta = useBarraStore((s) => s.abierta)
-  const vistaDeCarpeta = useBarraStore((s) => s.vistaDeCarpeta)
   const libre = mode === 'libre'
 
-  // B1: el chat deja de volver a cero — al abrir o cambiar de par, el hilo
-  // mas reciente vuelve del cajon (la guarda del draft vive en rehidratar).
+  // B1 + Revision A: PRIMERO el barrido de vacios (el «cerrar» del contrato
+  // corre al arrancar, una vez) y DESPUES la rehidratacion del par — asi el
+  // par jamas pinta un hilo que el barrido esta por llevarse.
   useEffect(() => {
-    void rehidratar(parDeLaVista(project?.id ?? null, mode))
+    void barrerVaciosUnaVez()
+      .catch(console.error)
+      .then(() => rehidratar(parDeLaVista(project?.id ?? null, mode)))
   }, [project?.id, mode])
 
   // PASO 110: una rehidratacion saltada por la guarda jamas se pierde — al
@@ -54,11 +56,7 @@ export function ConstruirView(): React.JSX.Element {
           </p>
           <span className="w-7 shrink-0" aria-hidden />
         </div>
-        {vistaDeCarpeta !== null ? (
-          <PaginaDeCarpeta carpetaId={vistaDeCarpeta} />
-        ) : (
-          <CuerpoDelChat project={project} libre={libre} />
-        )}
+        <CuerpoDelChat project={project} libre={libre} />
       </div>
     </div>
   )

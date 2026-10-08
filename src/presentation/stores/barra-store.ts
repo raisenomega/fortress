@@ -1,24 +1,5 @@
 import { create } from 'zustand'
-
-const CLAVE = 'fortress-barra-del-chat'
-
-/** Conveniencia por-vista (no estado que importe): si localStorage falla —
- *  previews, datos borrados— la barra simplemente abre por defecto. */
-export const leerAbierta = (): boolean => {
-  try {
-    return globalThis.localStorage?.getItem(CLAVE) !== 'cerrada'
-  } catch {
-    return true
-  }
-}
-
-export const guardarAbierta = (abierta: boolean): void => {
-  try {
-    globalThis.localStorage?.setItem(CLAVE, abierta ? 'abierta' : 'cerrada')
-  } catch {
-    // Sin almacen: la proxima sesion abre por defecto, nada se rompe.
-  }
-}
+import { guardarAbierta, guardarExpandidas, leerAbierta, leerExpandidas } from './almacen-de-la-barra' // prettier-ignore
 
 /** Store PROPIO de la barra del Chat (PASO 116): ni una pizca de estado
  *  compartido con la barra principal (useSidebarStore queda intacto). */
@@ -26,27 +7,35 @@ interface BarraState {
   readonly abierta: boolean
   /** La SELECCION VIVA: el hilo que manda sobre la rehidratacion-por-par. */
   readonly seleccion: string | null
-  /** Donde nace el PROXIMO hilo (Fase 3): null = suelto. El perezoso la lee. */
-  readonly carpetaActiva: string | null
-  /** La pagina de carpeta abierta en el area principal, o null = el chat. */
-  readonly vistaDeCarpeta: string | null
+  /** Revision A, el acordeon: carpetas DESPLEGADAS en el arbol (persistido). */
+  readonly expandidas: readonly string[]
+  /** Revision B: late con cada gesto del ⋯ — las listas lo observan. */
+  readonly refresco: number
   toggle: () => void
   setSeleccion: (seleccion: string | null) => void
-  setCarpetaActiva: (carpetaActiva: string | null) => void
-  setVistaDeCarpeta: (vistaDeCarpeta: string | null) => void
+  refrescar: () => void
+  /** Clic en la fila de una carpeta: despliega/pliega — JAMAS entra al chat. */
+  toggleCarpeta: (carpetaId: string) => void
 }
 
 export const useBarraStore = create<BarraState>((set) => ({
   abierta: leerAbierta(),
   seleccion: null,
-  carpetaActiva: null,
-  vistaDeCarpeta: null,
+  expandidas: leerExpandidas(),
+  refresco: 0,
+  refrescar: () => set((s) => ({ refresco: s.refresco + 1 })),
   toggle: () =>
     set((s) => {
       guardarAbierta(!s.abierta)
       return { abierta: !s.abierta }
     }),
   setSeleccion: (seleccion) => set({ seleccion }),
-  setCarpetaActiva: (carpetaActiva) => set({ carpetaActiva }),
-  setVistaDeCarpeta: (vistaDeCarpeta) => set({ vistaDeCarpeta })
+  toggleCarpeta: (carpetaId) =>
+    set((s) => {
+      const expandidas = s.expandidas.includes(carpetaId)
+        ? s.expandidas.filter((id) => id !== carpetaId)
+        : [...s.expandidas, carpetaId]
+      guardarExpandidas(expandidas)
+      return { expandidas }
+    })
 }))

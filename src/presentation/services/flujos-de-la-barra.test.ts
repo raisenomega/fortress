@@ -2,73 +2,52 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useBarraStore } from '../stores/barra-store'
 import { useConstruirStore } from '../stores/construir-store'
 import { elegirHilo, nuevoHiloSuelto } from './barra-del-chat'
-import { abrirCarpeta, buscarHilos, crearCarpetaYEntrar, hilosDeCarpeta, nuevoHiloEnCarpeta } from './carpetas-de-la-barra' // prettier-ignore
 import { elPuerto, escribirUser } from './hilo-activo'
 import { rigDelHilo } from './hilo-activo-rig'
-import { parDeLaVista, rehidratar } from './rehidratar-el-hilo'
+import { parDeLaVista } from './rehidratar-el-hilo'
 
-/** PASO 118 (Fase 3): la carpeta ACTIVA decide donde nace el proximo hilo. */
+/** Revision A (PASO 120): EAGER — el hilo nace de verdad; el vacio muere. */
 const LIBRE = parDeLaVista(null, 'libre')
+const MSG = { role: 'user', content: 'x', agentId: null, mode: 'supervisado', engine: 'claude-code' } as const // prettier-ignore
 beforeEach(() => {
   rigDelHilo()
-  useBarraStore.setState({ seleccion: null, carpetaActiva: null, vistaDeCarpeta: null })
+  useBarraStore.setState({ seleccion: null, expandidas: [] })
 })
 
-describe('donde nace el proximo hilo', () => {
-  it('NUEVO SUELTO: el perezoso nace con carpeta_id NULL', async () => {
-    nuevoHiloSuelto()
+describe('eager y su limpieza, por los gestos', () => {
+  it('EAGER: Nuevo chat crea un hilo REAL al instante — fila, activo, seleccion', async () => {
+    await nuevoHiloSuelto()
+    const activo = useConstruirStore.getState().hiloActivo
+    expect(activo).not.toBeNull()
+    expect((await elPuerto().listarSueltos()).map((h) => h.id)).toEqual([activo!.id])
+    expect(useBarraStore.getState().seleccion).toBe(activo!.id)
+    expect(useConstruirStore.getState().messages).toEqual([])
+  })
+
+  it('MATERIALIZA: escribir en el eager lo hace permanente — ya no se limpia', async () => {
+    const eager = await nuevoHiloSuelto()
+    useConstruirStore.getState().push({ role: 'user', text: 'hola' })
     await escribirUser(LIBRE, 'hola')
+    await nuevoHiloSuelto() // salir: el que tiene mensajes queda
+    expect((await elPuerto().listarSueltos()).map((h) => h.id)).toContain(eager.id)
+  })
+
+  it('NUEVO SUELTO: el de arriba nace con carpeta NULL; el perezoso-red tambien', async () => {
+    const eager = await nuevoHiloSuelto()
+    expect(eager.carpetaId).toBeNull()
+    useConstruirStore.setState({ hiloActivo: null }) // la red del arranque
+    await escribirUser(LIBRE, 'primera vez')
     expect(useConstruirStore.getState().hiloActivo?.carpetaId).toBeNull()
   })
 
-  it('NUEVO DENTRO: la carpeta activa VIAJA a createChat', async () => {
-    const c = await elPuerto().crearCarpeta('trading')
-    nuevoHiloEnCarpeta(c.id)
-    await escribirUser(LIBRE, 'btc largo plazo')
-    expect(useConstruirStore.getState().hiloActivo?.carpetaId).toBe(c.id)
-    expect((await hilosDeCarpeta(c.id)).map((h) => h.titulo)).toEqual(['btc largo plazo'])
-  })
-
-  it('SE LIMPIA: tras crear dentro, Nuevo chat de arriba nace SUELTO', async () => {
-    const c = await elPuerto().crearCarpeta('trading')
-    nuevoHiloEnCarpeta(c.id)
-    await escribirUser(LIBRE, 'dentro')
-    nuevoHiloSuelto()
-    await escribirUser(LIBRE, 'fuera')
-    expect(useConstruirStore.getState().hiloActivo?.carpetaId).toBeNull()
-  })
-})
-
-describe('carpetas y busqueda', () => {
-  it('CREAR CARPETA: aparece en la lista y navega a su pagina (activa + vista)', async () => {
-    const c = await crearCarpetaYEntrar('salud')
-    expect(useBarraStore.getState().vistaDeCarpeta).toBe(c.id)
-    expect(useBarraStore.getState().carpetaActiva).toBe(c.id)
-  })
-
-  it('PAGINA LISTA LO SUYO: solo los hilos de SU carpeta', async () => {
-    const x = await elPuerto().crearCarpeta('x')
-    const y = await elPuerto().crearCarpeta('y')
-    await elPuerto().createHilo({ projectId: null, titulo: 'de x', modo: 'libre', carpetaId: x.id }) // prettier-ignore
-    await elPuerto().createHilo({ projectId: null, titulo: 'de y', modo: 'libre', carpetaId: y.id }) // prettier-ignore
-    expect((await hilosDeCarpeta(x.id)).map((h) => h.titulo)).toEqual(['de x'])
-  })
-
-  it('BUSCAR: por titulo, carpetas y sueltos de LIBRE; el repo no se cuela', async () => {
-    const c = await elPuerto().crearCarpeta('t')
-    await elPuerto().createHilo({ projectId: null, titulo: 'btc en carpeta', modo: 'libre', carpetaId: c.id }) // prettier-ignore
-    await elPuerto().createHilo({ projectId: null, titulo: 'btc suelto', modo: 'libre' })
-    await elPuerto().createHilo({ projectId: 'p1', titulo: 'btc del repo', modo: 'plan' })
-    const res = await buscarHilos('BTC')
-    expect(res.map((h) => h.titulo).sort()).toEqual(['btc en carpeta', 'btc suelto'])
-  })
-
-  it('la REGLA DEL MANDO sigue intacta tras los flujos', async () => {
-    const a = await elPuerto().createHilo({ projectId: null, titulo: 'A', modo: 'libre' })
-    await abrirCarpeta((await elPuerto().crearCarpeta('z')).id)
-    await elegirHilo(a)
-    await rehidratar(LIBRE)
-    expect(useConstruirStore.getState().hiloActivo?.id).toBe(a.id)
-    expect(useBarraStore.getState().vistaDeCarpeta).toBeNull() // elegir vuelve al chat
+  it('LIMPIA AL SALIR: cambiar a otro hilo mata al vacio; el otro queda', async () => {
+    const otro = await elPuerto().createHilo({ projectId: null, titulo: 'con vida', modo: 'libre' }) // prettier-ignore
+    await elPuerto().addToHilo(otro.id, MSG)
+    const vacio = await nuevoHiloSuelto()
+    await elegirHilo(otro)
+    const ids = (await elPuerto().listarSueltos()).map((h) => h.id)
+    expect(ids).toContain(otro.id)
+    expect(ids).not.toContain(vacio.id)
+    expect(useConstruirStore.getState().hiloActivo?.id).toBe(otro.id)
   })
 })

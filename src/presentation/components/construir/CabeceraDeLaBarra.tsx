@@ -1,18 +1,15 @@
 import { useState } from 'react'
 import { nuevoHiloSuelto } from '../../services/barra-del-chat'
-import { crearCarpetaYEntrar } from '../../services/carpetas-de-la-barra'
+import { crearCarpetaConHilo } from '../../services/carpetas-de-la-barra'
 
-interface CabeceraDeLaBarraProps {
-  readonly onBuscar: (texto: string) => void
-}
-
-/** Cabecera de la barra (Fase 3): Nuevo chat (suelto), Crear carpeta (input
- *  inline: Enter crea y entra, Escape o clic fuera cancela) y Buscar. */
-export function CabeceraDeLaBarra({ onBuscar }: CabeceraDeLaBarraProps): React.JSX.Element {
+/** Cabecera de la barra (Revision A): Nuevo chat EAGER (suelto) y Crear
+ *  carpeta (input inline: Enter crea carpeta + hilo eager anidado; Escape o
+ *  clic fuera cancela). */
+export function CabeceraDeLaBarra(): React.JSX.Element {
   const [nombre, setNombre] = useState<string | null>(null)
   const crear = (): void => {
     const limpio = (nombre ?? '').trim()
-    if (limpio !== '') void crearCarpetaYEntrar(limpio).catch(console.error)
+    if (limpio !== '') void crearCarpetaConHilo(limpio).catch(console.error)
     setNombre(null)
   }
 
@@ -20,7 +17,7 @@ export function CabeceraDeLaBarra({ onBuscar }: CabeceraDeLaBarraProps): React.J
     <div className="flex flex-col gap-1 pb-2">
       <button
         type="button"
-        onClick={() => nuevoHiloSuelto()}
+        onClick={() => void nuevoHiloSuelto()}
         className="rounded px-2 py-1 text-left text-sm text-primary hover:bg-primary/10"
       >
         + Nuevo chat
@@ -47,11 +44,6 @@ export function CabeceraDeLaBarra({ onBuscar }: CabeceraDeLaBarraProps): React.J
           className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
         />
       )}
-      <input
-        onChange={(e) => onBuscar(e.target.value)}
-        placeholder="Buscar"
-        className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
-      />
     </div>
   )
 }

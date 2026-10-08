@@ -43,6 +43,11 @@ export interface ChatApi {
   borrarHilo(hiloId: string): Promise<void>
   crearCarpeta(nombre: string): Promise<Carpeta>
   hilosPorCarpeta(carpetaId: string): Promise<readonly HiloDeChat[]>
+  /** La gestion del ⋯ (PASO 121). borrarCarpeta 'mover' = SET NULL. */
+  renombrarHilo(hiloId: string, titulo: string): Promise<void>
+  moverHilo(hiloId: string, carpetaId: string | null): Promise<void>
+  renombrarCarpeta(id: string, nombre: string): Promise<void>
+  borrarCarpeta(id: string, modo: 'mover' | 'con-hilos'): Promise<void>
 }
 
 export interface SettingsApi {

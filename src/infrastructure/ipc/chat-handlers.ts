@@ -48,4 +48,23 @@ export function registerChatHandlers(): void {
   ipcMain.handle(IPC.chatHilosPorCarpeta, (_e, carpetaId: string) =>
     getAppContext().chat.listarHilosPorCarpeta(carpetaId)
   )
+  registrarGestionDelChat()
+}
+
+/** La gestion del ⋯ (Revision B, PASO 121): renombrar, mover y borrar.
+ *  Sin catch propio: los cuatro caen del lado OBSERVADO del embudo. */
+function registrarGestionDelChat(): void {
+  ipcMain.handle(IPC.chatRenombrarHilo, (_e, hiloId: string, titulo: string) => {
+    getAppContext().chat.renombrarHilo(hiloId, titulo)
+  })
+  ipcMain.handle(IPC.chatMoverHilo, (_e, hiloId: string, carpetaId: string | null) => {
+    getAppContext().chat.moverHilo(hiloId, carpetaId)
+  })
+  ipcMain.handle(IPC.chatRenombrarCarpeta, (_e, id: string, nombre: string) => {
+    getAppContext().chat.renombrarCarpeta(id, nombre)
+  })
+  ipcMain.handle(IPC.chatBorrarCarpeta, (_e, id: string, modo: 'mover' | 'con-hilos') => {
+    if (modo === 'con-hilos') getAppContext().chat.borrarCarpetaConHilos(id)
+    else getAppContext().chat.borrarCarpeta(id)
+  })
 }

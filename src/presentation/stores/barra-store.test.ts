@@ -1,44 +1,16 @@
+import type { HiloDeChat } from '@domain/chat/hilo-de-chat'
 import { afterEach, describe, expect, it } from 'vitest'
-import { guardarAbierta, leerAbierta, useBarraStore } from './barra-store'
+import { conAlmacen } from './almacen-de-la-barra.test'
+import { useBarraStore } from './barra-store'
+import { useConstruirStore } from './construir-store'
 
-/** PASO 116: abrir/cerrar persiste en localStorage; sin almacen NO rompe. */
-
-const conAlmacen = (celdas: Record<string, string>): void => {
-  Object.defineProperty(globalThis, 'localStorage', {
-    configurable: true,
-    value: {
-      getItem: (k: string) => celdas[k] ?? null,
-      setItem: (k: string, v: string) => void (celdas[k] = v)
-    }
-  })
-}
-
-const conAlmacenRoto = (): void => {
-  Object.defineProperty(globalThis, 'localStorage', {
-    configurable: true,
-    value: {
-      getItem: () => {
-        throw new Error('bloqueado')
-      },
-      setItem: () => {
-        throw new Error('bloqueado')
-      }
-    }
-  })
-}
+/** PASO 116/120: el store de la barra — toggle y acordeon persisten. */
 
 afterEach(() => void Reflect.deleteProperty(globalThis, 'localStorage'))
 
-describe('el toggle de la barra', () => {
-  it('recuerda su ultimo estado en localStorage', () => {
-    const celdas: Record<string, string> = {}
-    conAlmacen(celdas)
-    guardarAbierta(false)
-    expect(leerAbierta()).toBe(false)
-    guardarAbierta(true)
-    expect(leerAbierta()).toBe(true)
-  })
+const HILO: HiloDeChat = { id: 'h1', projectId: null, titulo: 'vivo', modo: 'libre', carpetaId: null, createdAt: '2026-10-08', updatedAt: '2026-10-08' } // prettier-ignore
 
+describe('el store de la barra', () => {
   it('toggle voltea el estado y lo persiste', () => {
     const celdas: Record<string, string> = {}
     conAlmacen(celdas)
@@ -48,9 +20,25 @@ describe('el toggle de la barra', () => {
     expect(celdas['fortress-barra-del-chat']).toBe('cerrada')
   })
 
-  it('sin localStorage NO rompe: abre por defecto y guardar calla', () => {
-    conAlmacenRoto()
-    expect(leerAbierta()).toBe(true)
-    expect(() => guardarAbierta(false)).not.toThrow()
+  it('ACORDEON: toggleCarpeta despliega, persiste, y el segundo clic pliega', () => {
+    const celdas: Record<string, string> = {}
+    conAlmacen(celdas)
+    useBarraStore.setState({ expandidas: [] })
+    useBarraStore.getState().toggleCarpeta('c1')
+    expect(useBarraStore.getState().expandidas).toEqual(['c1'])
+    expect(celdas['fortress-carpetas-expandidas']).toBe('["c1"]')
+    useBarraStore.getState().toggleCarpeta('c1')
+    expect(useBarraStore.getState().expandidas).toEqual([])
+    expect(celdas['fortress-carpetas-expandidas']).toBe('[]')
+  })
+
+  it('ACORDEON NO ENTRA AL CHAT: ni el activo ni la seleccion se tocan', () => {
+    conAlmacen({})
+    useBarraStore.setState({ seleccion: 'h1', expandidas: [] })
+    useConstruirStore.setState({ hiloActivo: HILO, messages: [{ role: 'user', text: 'hola' }] })
+    useBarraStore.getState().toggleCarpeta('c9')
+    expect(useConstruirStore.getState().hiloActivo?.id).toBe('h1')
+    expect(useConstruirStore.getState().messages).toHaveLength(1)
+    expect(useBarraStore.getState().seleccion).toBe('h1')
   })
 })
