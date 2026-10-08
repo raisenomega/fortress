@@ -20,6 +20,15 @@ export function agentFor(context: AppContext): CodeAgent {
   return agenteQueAsientaCorrida(base, context, 'sistema')
 }
 
+/** El agente del modo LIBRE (PASO 91): el mismo asiento, pero SIN ningun MCP
+ *  — ni los conectores globales. Powers-off: un chat sin repo no necesita
+ *  herramientas enchufadas, y cada una que no viaja es una que no hay que
+ *  vigilar. */
+export function agentLibre(context: AppContext): CodeAgent {
+  const base = createClaudeCodeAgent(context.apiKeys, readBudget(context), usesApiKey(context), null) // prettier-ignore
+  return agenteQueAsientaCorrida(base, context, 'sistema')
+}
+
 /**
  * Resuelve el proyecto objetivo. Lo usan los modos de SOLO LECTURA (Plan e
  * Investigacion, que corren al agente en permissionMode 'lectura' y NO editan): es

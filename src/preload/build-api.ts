@@ -6,6 +6,9 @@ export interface BuildApi {
   plan(projectId: string, intent: string): Promise<Result<string>>
   /** Investigacion en solo lectura: el agente responde, no toca nada. */
   investigate(projectId: string, intent: string): Promise<Result<string>>
+  /** Chat LIBRE (PASO 91): conversa sin repo, powers-off. El hilo viaja porque
+   *  cada corrida del CLI es una sesion nueva. */
+  libre(pregunta: string, hilo: readonly { role: 'user' | 'assistant'; text: string }[]): Promise<Result<string>> // prettier-ignore
   feature(projectId: string, intent: string, plan: string): Promise<Result<void>>
   /** Corta el agente en marcha (plan o build). Devuelve procesos terminados. */
   stop(projectId: string): Promise<number>
