@@ -4,6 +4,7 @@ import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
 import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
+import { expandChatMessagesHilo } from './expand-chat-messages-hilo'
 import { migrarDatos } from './migraciones-de-datos'
 import { SUELTAS } from './columnas-sueltas'
 import { FINDING_COLUMNS } from './columnas-de-findings'
@@ -55,6 +56,10 @@ export function runMigrations(db: Db): void {
   // Los `kind` que fueron llegando: `repair` para el motor, `sistema` para los
   // agentes auxiliares. Recrea la tabla, asi que ningun ALTER debe ir despues.
   expandAgentRunsKind(db)
+
+  // El multi-chat (B0): chat_id + project_id nullable. Otro recambio; la tabla
+  // `chats` ya existe porque el esquema base corre antes que las migraciones.
+  expandChatMessagesHilo(db)
 
   // El estado de tres valores del backlog de auto-mejora, con su backfill.
   addObservationStatus(db)
