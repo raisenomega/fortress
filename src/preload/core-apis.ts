@@ -1,4 +1,5 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
+import type { Carpeta } from '@domain/chat/carpeta-de-chat'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
 import type { MensajeDeHilo } from '@domain/chat/chat-repository'
 import type { HiloDeChat, NuevoHilo } from '@domain/chat/hilo-de-chat'
@@ -36,7 +37,10 @@ export interface ChatApi {
   listHilos(projectId: string | null): Promise<readonly HiloDeChat[]>
   listByHilo(chatId: string): Promise<readonly ChatMessage[]>
   addToHilo(chatId: string, mensaje: MensajeDeHilo): Promise<ChatMessage>
-  /** La sesion de loop guardada del proyecto: dice por que paro la ultima. */
+  /** La barra de carpetas (PASO 116): listas del organizador y el borrado. */
+  listarCarpetas(): Promise<readonly Carpeta[]>
+  listarSueltos(): Promise<readonly HiloDeChat[]>
+  borrarHilo(hiloId: string): Promise<void>
 }
 
 export interface SettingsApi {

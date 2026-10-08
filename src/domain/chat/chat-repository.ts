@@ -27,6 +27,8 @@ export interface ChatRepository {
   /** El borrado elegido a proposito: hilos + mensajes + carpeta, atomico. */
   borrarCarpetaConHilos(id: string): void
   moverHilo(hiloId: string, carpetaId: string | null): void
+  /** Borra el hilo; sus mensajes se van por el CASCADE de B0. Irreversible. */
+  borrarHilo(hiloId: string): void
   /** RENAME MANDA: el titulo a mano no lo pisa ninguna actividad posterior. */
   renombrarHilo(hiloId: string, titulo: string): void
   listarHilosPorCarpeta(carpetaId: string): readonly HiloDeChat[]

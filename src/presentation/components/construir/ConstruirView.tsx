@@ -1,12 +1,12 @@
 import { useEffect } from 'react'
 import { alMorirElDraft, parDeLaVista, rehidratar } from '../../services/rehidratar-el-hilo'
 import { useActiveProject } from '../../stores/project-store'
+import { useBarraStore } from '../../stores/barra-store'
 import { useConstruirStore } from '../../stores/construir-store'
-import { Notice } from '../common/Notice'
+import { BarraDelChat } from './BarraDelChat'
+import { BarraToggle } from './BarraToggle'
 import { ConfigInterview } from './ConfigInterview'
-import { ConstruirInput } from './ConstruirInput'
-import { ConstruirMessages } from './ConstruirMessages'
-import { ConvertirAPlan } from './ConvertirAPlan'
+import { CuerpoDelChat } from './CuerpoDelChat'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
@@ -18,6 +18,7 @@ import { ConvertirAPlan } from './ConvertirAPlan'
 export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
   const mode = useConstruirStore((s) => s.mode)
+  const barraAbierta = useBarraStore((s) => s.abierta)
   const libre = mode === 'libre'
 
   // B1: el chat deja de volver a cero — al abrir o cambiar de par, el hilo
@@ -38,27 +39,21 @@ export function ConstruirView(): React.JSX.Element {
     return <ConfigInterview projectId={project.id} />
   }
 
-  const bloqueado = !libre && (!project || !project.trusted)
   return (
-    <div className="flex h-full w-full flex-col px-4 pt-4 pb-6">
-      {bloqueado ? (
-        <Notice tone="error">
-          {!project
-            ? 'Selecciona un proyecto (o elige el modo Chat libre con la flecha).'
-            : 'Trabajar aqui exige un proyecto de confianza. Activala primero.'}
-        </Notice>
-      ) : (
-        <>
-          <p className="pb-2 text-center text-[11px] text-muted-foreground">
+    <div className="flex h-full w-full flex-row">
+      {barraAbierta && <BarraDelChat />}
+      <div className="flex h-full min-w-0 flex-1 flex-col px-4 pt-4 pb-6">
+        <div className="flex items-center pb-2">
+          <BarraToggle />
+          <p className="flex-1 text-center text-[11px] text-muted-foreground">
             {libre
               ? 'Chat libre — global, sin proyecto · conversa sin repo'
               : `Chat de ${project?.name ?? ''}`}
           </p>
-          <ConstruirMessages />
-          <ConvertirAPlan />
-          <ConstruirInput projectId={project?.id ?? ''} />
-        </>
-      )}
+          <span className="w-7 shrink-0" aria-hidden />
+        </div>
+        <CuerpoDelChat project={project} libre={libre} />
+      </div>
     </div>
   )
 }

@@ -49,10 +49,20 @@ describe('renombrar y borrar', () => {
     expect(repo.listarHilosSueltos().map((x) => x.titulo)).toEqual(['Mi nombre'])
   })
 
-  it('borrar un hilo arrastra sus mensajes (CASCADE de B0), atomico', () => {
+  it('borrarHilo (puerto, PASO 116) arrastra sus mensajes por CASCADE, atomico', () => {
     const h = repo.createChat({ projectId: null, titulo: 'H', modo: 'libre' })
     repo.addToChat(h.id, { role: 'user', content: 'x', agentId: null, mode: 'supervisado', engine: 'claude-code' }) // prettier-ignore
-    db.prepare('DELETE FROM chats WHERE id = ?').run(h.id)
+    repo.borrarHilo(h.id)
+    expect(repo.listarHilosSueltos()).toEqual([])
     expect(db.prepare('SELECT COUNT(*) c FROM chat_messages').get()).toEqual({ c: 0 })
+  })
+
+  it('borrarHilo jamas toca el legado del Terminal ni otros hilos', () => {
+    db.prepare("INSERT INTO chat_messages (id, project_id, role, content, mode, created_at) VALUES ('m1','p1','user','viejo','supervisado','2026-09-01')").run() // prettier-ignore
+    const h = repo.createChat({ projectId: null, titulo: 'H', modo: 'libre' })
+    const otro = repo.createChat({ projectId: null, titulo: 'Otro', modo: 'libre' })
+    repo.borrarHilo(h.id)
+    expect(repo.listByProject('p1').map((m) => m.content)).toEqual(['viejo'])
+    expect(repo.listarHilosSueltos().map((x) => x.id)).toEqual([otro.id])
   })
 })

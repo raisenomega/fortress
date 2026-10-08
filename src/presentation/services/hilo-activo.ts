@@ -1,3 +1,4 @@
+import type { Carpeta } from '@domain/chat/carpeta-de-chat'
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { MensajeDeHilo } from '@domain/chat/chat-repository'
 import type { HiloDeChat, ModoDeChat, NuevoHilo } from '@domain/chat/hilo-de-chat'
@@ -14,6 +15,9 @@ export interface PuertoDeHilos {
   listHilos(p: string | null): Promise<readonly HiloDeChat[]>
   listByHilo(id: string): Promise<readonly ChatMessage[]>
   addToHilo(id: string, m: MensajeDeHilo): Promise<ChatMessage>
+  listarCarpetas(): Promise<readonly Carpeta[]>
+  listarSueltos(): Promise<readonly HiloDeChat[]>
+  borrarHilo(id: string): Promise<void>
 }
 
 let puerto: PuertoDeHilos | null = null
