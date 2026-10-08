@@ -26,9 +26,10 @@ describe('el candado XSS, pineado sobre TODA presentation', () => {
       for (const f of readdirSync(dir)) {
         const ruta = join(dir, f)
         if (statSync(ruta).isDirectory()) camina(ruta)
-        else if (/\.(ts|tsx)$/.test(f) && fuente(ruta).includes('dangerouslySetInnerHTML')) {
-          // El comentario-doctrina de markdown-inline lo NOMBRA para prohibirlo.
-          if (!fuente(ruta).includes('* dangerouslySetInnerHTML')) sospechosos.push(ruta)
+        else if (/\.(ts|tsx)$/.test(f) && /dangerouslySetInnerHTML\s*[=:]/.test(fuente(ruta))) {
+          // Se caza el USO (`={`/`:`), no la mencion: la doctrina lo nombra
+          // en comentarios justamente para prohibirlo.
+          sospechosos.push(ruta)
         }
       }
     }
