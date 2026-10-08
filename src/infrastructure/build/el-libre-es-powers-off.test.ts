@@ -4,9 +4,10 @@ import type { CodeAgent, CodeAgentRequest } from '@domain/chat/code-agent'
 import type { CodeAgentReply } from '@domain/chat/code-agent-reply'
 import { EMPTY_USAGE } from '@domain/telemetry/token-usage'
 
-/** PASO 91, el LIMITE de seguridad pineado: el modo libre conversa en un
- *  cuarto vacio, en 'lectura' (sin Bash), sin confianza, sin proyecto y sin
- *  MCP — un chat libre jamas debe poder tocar un repo. */
+/** PASO 91, el LIMITE de seguridad pineado (frontera movida por FIRMA en el
+ *  99): el modo libre conversa en un cuarto vacio, en modo 'libre' (solo
+ *  WebSearch del lado servidor; Bash quitado), sin confianza, sin proyecto y
+ *  sin MCP — un chat libre jamas debe poder tocar un repo. */
 
 const reply: CodeAgentReply = { text: 'claro, te cuento', failed: false, denials: [], usage: EMPTY_USAGE, tools: [], edits: [] } // prettier-ignore
 let visto: CodeAgentRequest | null = null
@@ -33,7 +34,7 @@ describe('el modo libre es powers-off de verdad', () => {
     expect(r.ok).toBe(true)
     const req = visto as CodeAgentRequest | null
     expect(req?.projectPath.endsWith('chat-libre')).toBe(true)
-    expect(req?.permissionMode).toBe('lectura')
+    expect(req?.permissionMode).toBe('libre')
     expect(req?.trusted).toBe(false)
     expect(req !== null && 'projectId' in req).toBe(false)
     expect(req?.model).toBe('opus')

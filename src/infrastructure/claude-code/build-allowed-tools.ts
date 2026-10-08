@@ -40,6 +40,11 @@ export function buildAllowedTools(
   trusted: boolean,
   scripts: readonly string[]
 ): readonly string[] {
+  // 'libre' (PASO 99, FRONTERA firmada): SOLO WebSearch — del lado servidor,
+  // por el canal del modelo que la caja ya deja pasar (sonda verde con
+  // allowedDomains:[]). Ni WebFetch (fetch local = SSRF, su propio arco), ni
+  // grafo ni disco: el cuarto esta vacio y cada tool que no viaja no se vigila.
+  if (mode === 'libre') return ['WebSearch']
   if (mode === 'lectura') return [...GRAPH_READ_TOOLS, ...READ_TOOLS]
   if (mode === 'auditoria') return [...GRAPH_READ_TOOLS, ...READ_TOOLS, 'Bash']
   return [...GRAPH_READ_TOOLS, ...selfVerifyRules(mode, trusted, scripts)]
@@ -62,5 +67,5 @@ export function buildAllowedTools(
  * 'auditoria' NO lo lleva: el escaner vive de ejecutar (241 de 353 llamadas).
  */
 export function buildDisallowedTools(mode: ClaudePermissionMode): readonly string[] {
-  return mode === 'lectura' ? ['Bash'] : []
+  return mode === 'lectura' || mode === 'libre' ? ['Bash'] : []
 }
