@@ -1,31 +1,15 @@
-import type { Carpeta } from '@domain/chat/carpeta-de-chat'
-import type { ChatMessage } from '@domain/chat/chat-message'
-import type { MensajeDeHilo } from '@domain/chat/chat-repository'
-import type { HiloDeChat, ModoDeChat, NuevoHilo } from '@domain/chat/hilo-de-chat'
-import { api } from '../adapters/fortress-api'
+import type { HiloDeChat, ModoDeChat } from '@domain/chat/hilo-de-chat'
 import { useConstruirStore } from '../stores/construir-store'
+import { elPuerto } from './puerto-de-hilos'
+
+// El puerto vive en `puerto-de-hilos.ts` desde el PASO 121 (techo de lineas);
+// se re-exporta para que las costuras existentes no se muevan.
+export { elPuerto, _inyectarPuerto, type PuertoDeHilos } from './puerto-de-hilos'
 
 export interface ParDelHilo {
   readonly projectId: string | null
   readonly modo: ModoDeChat
 }
-
-export interface PuertoDeHilos {
-  createHilo(n: NuevoHilo): Promise<HiloDeChat>
-  listHilos(p: string | null): Promise<readonly HiloDeChat[]>
-  listByHilo(id: string): Promise<readonly ChatMessage[]>
-  addToHilo(id: string, m: MensajeDeHilo): Promise<ChatMessage>
-  listarCarpetas(): Promise<readonly Carpeta[]>
-  listarSueltos(): Promise<readonly HiloDeChat[]>
-  borrarHilo(id: string): Promise<void>
-  crearCarpeta(nombre: string): Promise<Carpeta>
-  hilosPorCarpeta(carpetaId: string): Promise<readonly HiloDeChat[]>
-}
-
-let puerto: PuertoDeHilos | null = null
-export const elPuerto = (): PuertoDeHilos => puerto ?? api().chat
-/** SOLO tests: inyectar un puerto real en memoria (sqlite :memory:). */
-export const _inyectarPuerto = (p: PuertoDeHilos | null): void => void (puerto = p)
 
 const titulo = (intent: string): string => intent.trim().slice(0, 40) || 'Nuevo chat'
 const BASE = { agentId: null, mode: 'supervisado', engine: 'claude-code' } as const
