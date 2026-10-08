@@ -2,6 +2,7 @@ import type { Carpeta } from '@domain/chat/carpeta-de-chat'
 import type { HiloDeChat } from '@domain/chat/hilo-de-chat'
 import { useBarraStore } from '../stores/barra-store'
 import { useConstruirStore } from '../stores/construir-store'
+import { CENTINELA } from './auto-titulo'
 import { elPuerto } from './hilo-activo'
 import { limpiarAlSalir } from './limpiar-vacios'
 import { pintarHilo } from './rehidratar-el-hilo'
@@ -24,7 +25,7 @@ export async function elegirHilo(hilo: HiloDeChat): Promise<void> {
  *  activo, seleccionado y pantalla limpia. carpetaId null = suelto. */
 export async function nuevoHiloEager(carpetaId: string | null): Promise<HiloDeChat> {
   await limpiarAlSalir()
-  const hilo = await elPuerto().createHilo({ projectId: null, titulo: 'Nuevo chat', modo: 'libre', carpetaId }) // prettier-ignore
+  const hilo = await elPuerto().createHilo({ projectId: null, titulo: CENTINELA, modo: 'libre', carpetaId }) // prettier-ignore
   useBarraStore.getState().setSeleccion(hilo.id)
   useConstruirStore.getState().setMode('libre')
   pintarHilo(hilo, [])

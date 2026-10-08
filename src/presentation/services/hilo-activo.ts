@@ -1,5 +1,6 @@
 import type { HiloDeChat, ModoDeChat } from '@domain/chat/hilo-de-chat'
 import { useConstruirStore } from '../stores/construir-store'
+import { autoTitular, tituloDe } from './auto-titulo'
 import { elPuerto } from './puerto-de-hilos'
 
 // El puerto vive en `puerto-de-hilos.ts` desde el PASO 121 (techo de lineas);
@@ -11,7 +12,6 @@ export interface ParDelHilo {
   readonly modo: ModoDeChat
 }
 
-const titulo = (intent: string): string => intent.trim().slice(0, 40) || 'Nuevo chat'
 const BASE = { agentId: null, mode: 'supervisado', engine: 'claude-code' } as const
 const casa = (h: HiloDeChat | null, par: ParDelHilo): h is HiloDeChat =>
   h !== null && h.projectId === par.projectId && h.modo === par.modo
@@ -22,8 +22,9 @@ const casa = (h: HiloDeChat | null, par: ParDelHilo): h is HiloDeChat =>
  *  un hilo SUELTO con su par EXACTO. El texto llega YA tachado. */
 export async function escribirUser(par: ParDelHilo, texto: string): Promise<void> {
   const activo = useConstruirStore.getState().hiloActivo
-  const hilo = casa(activo, par) ? activo : await elPuerto().createHilo({ ...par, titulo: titulo(texto), carpetaId: null }) // prettier-ignore
+  const hilo = casa(activo, par) ? activo : await elPuerto().createHilo({ ...par, titulo: tituloDe(texto), carpetaId: null }) // prettier-ignore
   if (!casa(activo, par)) useConstruirStore.getState().setHiloActivo(hilo)
+  await autoTitular(hilo, texto) // el eager sale de la cuna ANTES de la fila
   await elPuerto().addToHilo(hilo.id, { ...BASE, role: 'user', content: texto })
 }
 
