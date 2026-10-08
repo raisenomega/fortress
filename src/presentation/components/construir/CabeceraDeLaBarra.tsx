@@ -16,7 +16,7 @@ export function CabeceraDeLaBarra(): React.JSX.Element {
     <div className="flex flex-col gap-1 pb-2">
       <button
         type="button"
-        onClick={() => nuevoHiloSuelto()}
+        onClick={() => void nuevoHiloSuelto()}
         className="rounded px-2 py-1 text-left text-sm text-primary hover:bg-primary/10"
       >
         + Nuevo chat

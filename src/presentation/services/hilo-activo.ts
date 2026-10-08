@@ -3,7 +3,6 @@ import type { ChatMessage } from '@domain/chat/chat-message'
 import type { MensajeDeHilo } from '@domain/chat/chat-repository'
 import type { HiloDeChat, ModoDeChat, NuevoHilo } from '@domain/chat/hilo-de-chat'
 import { api } from '../adapters/fortress-api'
-import { useBarraStore } from '../stores/barra-store'
 import { useConstruirStore } from '../stores/construir-store'
 
 export interface ParDelHilo {
@@ -33,14 +32,13 @@ const BASE = { agentId: null, mode: 'supervisado', engine: 'claude-code' } as co
 const casa = (h: HiloDeChat | null, par: ParDelHilo): h is HiloDeChat =>
   h !== null && h.projectId === par.projectId && h.modo === par.modo
 
-/** PEREZOSO (106): el hilo nace con el PRIMER mensaje, con su par EXACTO
- *  (proyecto Y modo — ignorar uno fue mutante muerto). El texto llega YA
- *  tachado: esta costura vive aguas abajo de la redaccion, y asi se guarda. */
+/** PEREZOSO (106), hoy la RED del arranque: desde la Revision A (120) el
+ *  nacimiento normal en libre es EAGER desde la barra (nace con su carpeta);
+ *  sin activo que case (primera vez, todo borrado), el primer mensaje pare
+ *  un hilo SUELTO con su par EXACTO. El texto llega YA tachado. */
 export async function escribirUser(par: ParDelHilo, texto: string): Promise<void> {
   const activo = useConstruirStore.getState().hiloActivo
-  // Fase 3: en libre, la carpeta ACTIVA de la barra decide donde nace.
-  const carpetaId = par.modo === 'libre' ? useBarraStore.getState().carpetaActiva : null
-  const hilo = casa(activo, par) ? activo : await elPuerto().createHilo({ ...par, titulo: titulo(texto), carpetaId }) // prettier-ignore
+  const hilo = casa(activo, par) ? activo : await elPuerto().createHilo({ ...par, titulo: titulo(texto), carpetaId: null }) // prettier-ignore
   if (!casa(activo, par)) useConstruirStore.getState().setHiloActivo(hilo)
   await elPuerto().addToHilo(hilo.id, { ...BASE, role: 'user', content: texto })
 }

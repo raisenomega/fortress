@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useBarraStore } from '../stores/barra-store'
 import { useConstruirStore } from '../stores/construir-store'
 import { borrarHiloYLimpiar, cargarListas, elegirHilo, nuevoHiloSuelto } from './barra-del-chat'
-import { elPuerto, escribirUser } from './hilo-activo'
+import { elPuerto } from './hilo-activo'
 import { rigDelHilo } from './hilo-activo-rig'
 import { parDeLaVista, rehidratar, alMorirElDraft } from './rehidratar-el-hilo'
 
@@ -41,14 +41,13 @@ describe('la seleccion de la barra gana', () => {
     expect(useConstruirStore.getState().hiloActivo?.id).toBe(a.id)
   })
 
-  it('NUEVO = ACTIVO: pantalla limpia y el primer mensaje crea el hilo que manda', async () => {
-    await dosHilos()
-    nuevoHiloSuelto()
+  it('NUEVO = ACTIVO Y MANDA: el eager fija la seleccion; el reciente no lo destrona', async () => {
+    const { b } = await dosHilos()
+    const nuevo = await nuevoHiloSuelto()
     expect(useConstruirStore.getState().messages).toEqual([])
-    await escribirUser(LIBRE, 'primero del nuevo')
-    const nuevo = useConstruirStore.getState().hiloActivo
-    await rehidratar(LIBRE)
-    expect(useConstruirStore.getState().hiloActivo?.id).toBe(nuevo?.id)
+    await elPuerto().addToHilo(b.id, { role: 'user', content: 'b vuelve a ser el reciente', agentId: null, mode: 'supervisado', engine: 'claude-code' }) // prettier-ignore
+    await rehidratar(LIBRE) // sin seleccion, el par pintaria a b
+    expect(useConstruirStore.getState().hiloActivo?.id).toBe(nuevo.id)
   })
 
   it('BORRAR ACTIVO = LIMPIA: sin seleccion, sin activo, pantalla limpia', async () => {

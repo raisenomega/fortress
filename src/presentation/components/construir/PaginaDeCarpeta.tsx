@@ -24,7 +24,7 @@ export function PaginaDeCarpeta({ carpetaId }: PaginaDeCarpetaProps): React.JSX.
       <h2 className="font-display text-lg text-foreground">{nombre}</h2>
       <button
         type="button"
-        onClick={() => nuevoHiloEnCarpeta(carpetaId)}
+        onClick={() => void nuevoHiloEnCarpeta(carpetaId)}
         className="self-start rounded px-2 py-1 text-sm text-primary hover:bg-primary/10"
       >
         + Nuevo chat en esta carpeta
