@@ -20,20 +20,5 @@ export async function crearCarpetaConHilo(nombre: string): Promise<Carpeta> {
   return carpeta
 }
 
-/** Clic en la fila de una carpeta: su pagina, con la carpeta como activa.
- *  (Muere en la costura del arbol: el acordeon lo reemplaza.) */
-export async function abrirCarpeta(carpetaId: string): Promise<void> {
-  const barra = useBarraStore.getState()
-  barra.setCarpetaActiva(carpetaId)
-  barra.setVistaDeCarpeta(carpetaId)
-}
-
-/** Crear y entrar a la pagina. (Muere en la costura del arbol.) */
-export async function crearCarpetaYEntrar(nombre: string): Promise<Carpeta> {
-  const carpeta = await elPuerto().crearCarpeta(nombre)
-  await abrirCarpeta(carpeta.id)
-  return carpeta
-}
-
 export const hilosDeCarpeta = (carpetaId: string): Promise<readonly HiloDeChat[]> =>
   elPuerto().hilosPorCarpeta(carpetaId)

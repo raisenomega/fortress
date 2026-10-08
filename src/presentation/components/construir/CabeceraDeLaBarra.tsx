@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { nuevoHiloSuelto } from '../../services/barra-del-chat'
-import { crearCarpetaYEntrar } from '../../services/carpetas-de-la-barra'
+import { crearCarpetaConHilo } from '../../services/carpetas-de-la-barra'
 
-/** Cabecera de la barra (Fase 3): Nuevo chat (suelto) y Crear carpeta (input
- *  inline: Enter crea y entra, Escape o clic fuera cancela). */
+/** Cabecera de la barra (Revision A): Nuevo chat EAGER (suelto) y Crear
+ *  carpeta (input inline: Enter crea carpeta + hilo eager anidado; Escape o
+ *  clic fuera cancela). */
 export function CabeceraDeLaBarra(): React.JSX.Element {
   const [nombre, setNombre] = useState<string | null>(null)
   const crear = (): void => {
     const limpio = (nombre ?? '').trim()
-    if (limpio !== '') void crearCarpetaYEntrar(limpio).catch(console.error)
+    if (limpio !== '') void crearCarpetaConHilo(limpio).catch(console.error)
     setNombre(null)
   }
 
