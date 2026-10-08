@@ -39,7 +39,11 @@ export function MenuDeCarpeta({ carpeta, onCerrar }: MenuDeCarpetaProps): React.
         )}
         {vista === 'borrar' && (
           <>
-            <button type="button" onClick={() => corre(borrarCarpetaMoviendo(carpeta.id, carpeta.nombre))} className={ITEM}> {/* prettier-ignore */}
+            <button
+              type="button"
+              onClick={() => corre(borrarCarpetaMoviendo(carpeta.id, carpeta.nombre))}
+              className={ITEM}
+            >
               Mover sus chats a Sin carpeta
             </button>
             <button
