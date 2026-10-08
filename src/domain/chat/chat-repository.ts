@@ -1,3 +1,4 @@
+import type { Carpeta } from './carpeta-de-chat'
 import type { ChatMessage, NewChatMessage } from './chat-message'
 import type { HiloDeChat, NuevoHilo } from './hilo-de-chat'
 
@@ -18,4 +19,17 @@ export interface ChatRepository {
   listChats(projectId: string | null): readonly HiloDeChat[]
   listByChat(chatId: string): readonly ChatMessage[]
   addToChat(chatId: string, mensaje: MensajeDeHilo): ChatMessage
+  crearCarpeta(nombre: string): Carpeta
+  listarCarpetas(): readonly Carpeta[]
+  renombrarCarpeta(id: string, nombre: string): void
+  /** Por defecto NO pierde hilos: el esquema (SET NULL) los deja sueltos. */
+  borrarCarpeta(id: string): void
+  /** El borrado elegido a proposito: hilos + mensajes + carpeta, atomico. */
+  borrarCarpetaConHilos(id: string): void
+  moverHilo(hiloId: string, carpetaId: string | null): void
+  /** RENAME MANDA: el titulo a mano no lo pisa ninguna actividad posterior. */
+  renombrarHilo(hiloId: string, titulo: string): void
+  listarHilosPorCarpeta(carpetaId: string): readonly HiloDeChat[]
+  /** Los libres SIN carpeta: jamas mezcla repo-proyectos ni legado. */
+  listarHilosSueltos(): readonly HiloDeChat[]
 }

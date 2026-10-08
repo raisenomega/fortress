@@ -3,6 +3,7 @@ import type { ChatRepository } from '@domain/chat/chat-repository'
 import { newId, nowIso } from '@domain/shared/id'
 import { toChatMessage, type ChatRow } from './chat-row'
 import type { Db } from './database'
+import { carpetasDeChat } from './sqlite-carpetas'
 import { hilosDeChat } from './sqlite-chats-hilos'
 
 const COLUMNS = 'id, project_id, chat_id, role, content, agent_id, mode, engine, created_at'
@@ -41,6 +42,7 @@ export function createSqliteChatRepository(db: Db): ChatRepository {
       deleteByProject.run(projectId)
     },
 
-    ...hilosDeChat(db)
+    ...hilosDeChat(db),
+    ...carpetasDeChat(db)
   }
 }

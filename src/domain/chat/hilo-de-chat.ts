@@ -10,6 +10,8 @@ export interface HiloDeChat {
   readonly projectId: string | null
   readonly titulo: string
   readonly modo: ModoDeChat
+  /** Carpeta del organizador de libre (PASO 114); NULL = hilo suelto. */
+  readonly carpetaId: string | null
   readonly createdAt: string
   readonly updatedAt: string
 }
@@ -18,4 +20,6 @@ export interface NuevoHilo {
   readonly projectId: string | null
   readonly titulo: string
   readonly modo: ModoDeChat
+  /** Opcional: nacer DENTRO de una carpeta (la activa en la barra). */
+  readonly carpetaId?: string | null
 }
