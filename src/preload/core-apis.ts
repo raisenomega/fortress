@@ -41,6 +41,8 @@ export interface ChatApi {
   listarCarpetas(): Promise<readonly Carpeta[]>
   listarSueltos(): Promise<readonly HiloDeChat[]>
   borrarHilo(hiloId: string): Promise<void>
+  crearCarpeta(nombre: string): Promise<Carpeta>
+  hilosPorCarpeta(carpetaId: string): Promise<readonly HiloDeChat[]>
 }
 
 export interface SettingsApi {

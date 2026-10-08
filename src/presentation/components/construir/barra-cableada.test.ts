@@ -17,12 +17,31 @@ describe('la barra del Chat, cableada', () => {
   it('la barra carga las listas del organizador y el clic elige el hilo', () => {
     const barra = fuente('BarraDelChat.tsx')
     expect(barra).toContain('cargarListas(')
-    expect(barra).toContain('elegirHilo(')
+    expect(barra).toContain('<FilaDeHilo') // la fila es quien invoca elegirHilo
+    expect(fuente('FilaDeHilo.tsx')).toContain('elegirHilo(')
   })
 
   it('el toggle vive del store PROPIO de la barra', () => {
     const toggle = fuente('BarraToggle.tsx')
     expect(toggle).toContain('useBarraStore')
     expect(toggle).toContain('toggle')
+  })
+
+  it('Fase 3: cabecera con nuevo/crear/buscar, carpetas abren su pagina', () => {
+    const cabecera = fuente('CabeceraDeLaBarra.tsx')
+    expect(cabecera).toContain('nuevoHiloSuelto(')
+    expect(cabecera).toContain('crearCarpetaYEntrar(')
+    const barra = fuente('BarraDelChat.tsx')
+    expect(barra).toContain('<CabeceraDeLaBarra')
+    expect(barra).toContain('abrirCarpeta(')
+    expect(barra).toContain('buscarHilos(')
+  })
+
+  it('Fase 3: la pagina de carpeta lista lo suyo y pare dentro', () => {
+    const pagina = fuente('PaginaDeCarpeta.tsx')
+    expect(pagina).toContain('hilosDeCarpeta(')
+    expect(pagina).toContain('nuevoHiloEnCarpeta(')
+    expect(pagina).toContain('elegirHilo(')
+    expect(fuente('ConstruirView.tsx')).toContain('<PaginaDeCarpeta')
   })
 })

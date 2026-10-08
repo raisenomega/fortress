@@ -20,5 +20,7 @@ export const chatApi: ChatApi = {
   addToHilo: (chatId, mensaje) => ipcRenderer.invoke(IPC.chatAddToHilo, chatId, mensaje),
   listarCarpetas: () => ipcRenderer.invoke(IPC.chatListarCarpetas),
   listarSueltos: () => ipcRenderer.invoke(IPC.chatListarSueltos),
-  borrarHilo: (hiloId) => ipcRenderer.invoke(IPC.chatBorrarHilo, hiloId)
+  borrarHilo: (hiloId) => ipcRenderer.invoke(IPC.chatBorrarHilo, hiloId),
+  crearCarpeta: (nombre) => ipcRenderer.invoke(IPC.chatCrearCarpeta, nombre),
+  hilosPorCarpeta: (carpetaId) => ipcRenderer.invoke(IPC.chatHilosPorCarpeta, carpetaId)
 }

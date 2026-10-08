@@ -7,6 +7,7 @@ import { BarraDelChat } from './BarraDelChat'
 import { BarraToggle } from './BarraToggle'
 import { ConfigInterview } from './ConfigInterview'
 import { CuerpoDelChat } from './CuerpoDelChat'
+import { PaginaDeCarpeta } from './PaginaDeCarpeta'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
@@ -19,6 +20,7 @@ export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
   const mode = useConstruirStore((s) => s.mode)
   const barraAbierta = useBarraStore((s) => s.abierta)
+  const vistaDeCarpeta = useBarraStore((s) => s.vistaDeCarpeta)
   const libre = mode === 'libre'
 
   // B1: el chat deja de volver a cero — al abrir o cambiar de par, el hilo
@@ -52,7 +54,11 @@ export function ConstruirView(): React.JSX.Element {
           </p>
           <span className="w-7 shrink-0" aria-hidden />
         </div>
-        <CuerpoDelChat project={project} libre={libre} />
+        {vistaDeCarpeta !== null ? (
+          <PaginaDeCarpeta carpetaId={vistaDeCarpeta} />
+        ) : (
+          <CuerpoDelChat project={project} libre={libre} />
+        )}
       </div>
     </div>
   )

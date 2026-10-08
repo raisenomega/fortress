@@ -12,17 +12,25 @@ import { pintarHilo } from './rehidratar-el-hilo'
  */
 export async function elegirHilo(hilo: HiloDeChat): Promise<void> {
   const mensajes = await elPuerto().listByHilo(hilo.id)
-  useBarraStore.getState().setSeleccion(hilo.id)
+  const barra = useBarraStore.getState()
+  barra.setSeleccion(hilo.id)
+  barra.setVistaDeCarpeta(null) // elegir un hilo SIEMPRE vuelve al chat
   useConstruirStore.getState().setMode('libre') // el clic te deja EN libre
   pintarHilo(hilo, mensajes)
 }
 
 /** Pantalla limpia: el proximo mensaje nace hilo nuevo SUELTO (perezoso B1). */
 export function nuevoHiloSuelto(): void {
-  useBarraStore.getState().setSeleccion(null)
+  const barra = useBarraStore.getState()
+  barra.setSeleccion(null)
+  barra.setCarpetaActiva(null) // Fase 3: el de arriba SIEMPRE nace suelto
+  barra.setVistaDeCarpeta(null)
   useConstruirStore.getState().setMode('libre')
   pintarHilo(null, [])
 }
+
+// Los flujos de carpeta (crear-y-entrar, abrir, nuevo-dentro, buscar) viven
+// en `carpetas-de-la-barra.ts` desde la Fase 3: este fichero toco su techo.
 
 /** Borra el hilo (cascade de B0); si era el elegido, la vista queda limpia. */
 export async function borrarHiloYLimpiar(hiloId: string): Promise<void> {

@@ -23,7 +23,9 @@ export function rigDelHilo(): Database.Database {
     addToHilo: async (id, m) => r.addToChat(id, m),
     listarCarpetas: async () => r.listarCarpetas(),
     listarSueltos: async () => r.listarHilosSueltos(),
-    borrarHilo: async (id) => r.borrarHilo(id)
+    borrarHilo: async (id) => r.borrarHilo(id),
+    crearCarpeta: async (nombre) => r.crearCarpeta(nombre),
+    hilosPorCarpeta: async (id) => r.listarHilosPorCarpeta(id)
   })
   useConstruirStore.setState({ messages: [], draft: null, hiloActivo: null, rehidratacionPendiente: false }) // prettier-ignore
   return db

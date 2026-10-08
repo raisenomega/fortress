@@ -2,6 +2,7 @@ import { FINDING_LIFECYCLE_CHANNELS } from './finding-lifecycle-channels'
 import { SYSTEM_CHANNELS } from './system-channels'
 import { TELEMETRY_CHANNELS } from './telemetry-channels'
 import { BUILD_CHANNELS } from './build-channels'
+import { CHAT_CHANNELS } from './chat-channels'
 import { GRAPH_CHANNELS } from './graph-channels'
 import { NEWPROJECT_CHANNELS } from './newproject-channels'
 import { OMEGA_CHANNELS } from './omega-channels'
@@ -47,20 +48,7 @@ export const IPC = {
   activityProject: 'activity:project',
   activityAgent: 'activity:agent',
   agentStats: 'agent:stats',
-  chatHistory: 'chat:history',
-  chatAppend: 'chat:append',
-  chatClear: 'chat:clear',
-  chatCreateHilo: 'chat:create-hilo',
-  chatListHilos: 'chat:list-hilos',
-  chatListByHilo: 'chat:list-by-hilo',
-  chatAddToHilo: 'chat:add-to-hilo',
-  chatListarCarpetas: 'chat:listar-carpetas',
-  chatListarSueltos: 'chat:listar-sueltos',
-  chatBorrarHilo: 'chat:borrar-hilo',
-  chatSend: 'chat:send',
-  chatStop: 'chat:stop',
-  chatChunk: 'chat:chunk',
-  chatProgress: 'chat:progress',
+  ...CHAT_CHANNELS,
   connectorsList: 'connectors:list',
   connectorsSetEnabled: 'connectors:set-enabled',
   connectorsAdd: 'connectors:add',

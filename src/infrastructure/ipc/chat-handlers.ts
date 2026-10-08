@@ -40,4 +40,12 @@ export function registerChatHandlers(): void {
   ipcMain.handle(IPC.chatBorrarHilo, (_e, hiloId: string) => {
     getAppContext().chat.borrarHilo(hiloId)
   })
+
+  // Los flujos de la Fase 3: crear carpeta y la pagina que lista lo suyo.
+  ipcMain.handle(IPC.chatCrearCarpeta, (_e, nombre: string) =>
+    getAppContext().chat.crearCarpeta(nombre)
+  )
+  ipcMain.handle(IPC.chatHilosPorCarpeta, (_e, carpetaId: string) =>
+    getAppContext().chat.listarHilosPorCarpeta(carpetaId)
+  )
 }
