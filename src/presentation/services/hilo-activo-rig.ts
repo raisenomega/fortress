@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import { SCHEMA } from '../../infrastructure/persistence/schema'
 import { createSqliteChatRepository } from '../../infrastructure/persistence/sqlite-chat-repository'
 import { useConstruirStore } from '../stores/construir-store'
-import { _inyectarPuerto } from './hilo-activo'
+import { _inyectarPuerto, _resetTurno } from './hilo-activo'
 
 /** Rig de B1: el cajon REAL (sqlite :memory: + repo de B0) inyectado como
  *  puerto, y el store a cero. Solo para tests — fidelidad hasta el CHECK. */
@@ -32,6 +32,7 @@ export function rigDelHilo(): Database.Database {
     borrarCarpeta: async (id, m) => (m === 'con-hilos' ? r.borrarCarpetaConHilos(id) : r.borrarCarpeta(id)) // prettier-ignore
   })
   useConstruirStore.setState({ messages: [], draft: null, hiloActivo: null, rehidratacionPendiente: false }) // prettier-ignore
+  _resetTurno()
   return db
 }
 
