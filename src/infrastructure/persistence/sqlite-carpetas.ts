@@ -23,7 +23,7 @@ const aCarpeta = (r: CarpetaRow): Carpeta => ({
 type OpsDeCarpetas = Pick<
   ChatRepository,
   | 'crearCarpeta' | 'listarCarpetas' | 'renombrarCarpeta' | 'borrarCarpeta'
-  | 'borrarCarpetaConHilos' | 'moverHilo' | 'renombrarHilo'
+  | 'borrarCarpetaConHilos' | 'moverHilo' | 'renombrarHilo' | 'borrarHilo'
   | 'listarHilosPorCarpeta' | 'listarHilosSueltos'
 > // prettier-ignore
 
@@ -38,6 +38,7 @@ export function carpetasDeChat(db: Db): OpsDeCarpetas {
   const borrar = db.prepare('DELETE FROM carpetas WHERE id = ?')
   const borrarHilos = db.prepare('DELETE FROM chats WHERE carpeta_id = ?')
   const mover = db.prepare('UPDATE chats SET carpeta_id = ? WHERE id = ?')
+  const borrarUnHilo = db.prepare('DELETE FROM chats WHERE id = ?')
   const titular = db.prepare('UPDATE chats SET titulo = ? WHERE id = ?')
   const porCarpeta = db.prepare('SELECT * FROM chats WHERE carpeta_id = ? ORDER BY updated_at DESC') // prettier-ignore
   const sueltos = db.prepare('SELECT * FROM chats WHERE project_id IS NULL AND carpeta_id IS NULL ORDER BY updated_at DESC') // prettier-ignore
@@ -57,6 +58,7 @@ export function carpetasDeChat(db: Db): OpsDeCarpetas {
       borrar.run(id)
     }),
     moverHilo: (hiloId, carpetaId) => void mover.run(carpetaId, hiloId),
+    borrarHilo: (hiloId) => void borrarUnHilo.run(hiloId),
     renombrarHilo: (hiloId, titulo) => void titular.run(titulo, hiloId),
     listarHilosPorCarpeta: (carpetaId) => (porCarpeta.all(carpetaId) as HiloRow[]).map(aHilo),
     listarHilosSueltos: () => (sueltos.all() as HiloRow[]).map(aHilo)
