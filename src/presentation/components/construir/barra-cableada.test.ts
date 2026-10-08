@@ -27,14 +27,15 @@ describe('la barra del Chat, cableada', () => {
     expect(toggle).toContain('toggle')
   })
 
-  it('Fase 3: cabecera con nuevo/crear/buscar, carpetas abren su pagina', () => {
+  it('Fase 3: cabecera con nuevo/crear, carpetas abren su pagina; la busqueda FUERA', () => {
     const cabecera = fuente('CabeceraDeLaBarra.tsx')
     expect(cabecera).toContain('nuevoHiloSuelto(')
     expect(cabecera).toContain('crearCarpetaYEntrar(')
     const barra = fuente('BarraDelChat.tsx')
     expect(barra).toContain('<CabeceraDeLaBarra')
     expect(barra).toContain('abrirCarpeta(')
-    expect(barra).toContain('buscarHilos(')
+    expect(barra).not.toContain('buscarHilos')
+    expect(cabecera).not.toContain('Buscar')
   })
 
   it('Fase 3: la pagina de carpeta lista lo suyo y pare dentro', () => {

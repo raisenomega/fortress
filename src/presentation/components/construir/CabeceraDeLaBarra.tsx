@@ -2,13 +2,9 @@ import { useState } from 'react'
 import { nuevoHiloSuelto } from '../../services/barra-del-chat'
 import { crearCarpetaYEntrar } from '../../services/carpetas-de-la-barra'
 
-interface CabeceraDeLaBarraProps {
-  readonly onBuscar: (texto: string) => void
-}
-
-/** Cabecera de la barra (Fase 3): Nuevo chat (suelto), Crear carpeta (input
- *  inline: Enter crea y entra, Escape o clic fuera cancela) y Buscar. */
-export function CabeceraDeLaBarra({ onBuscar }: CabeceraDeLaBarraProps): React.JSX.Element {
+/** Cabecera de la barra (Fase 3): Nuevo chat (suelto) y Crear carpeta (input
+ *  inline: Enter crea y entra, Escape o clic fuera cancela). */
+export function CabeceraDeLaBarra(): React.JSX.Element {
   const [nombre, setNombre] = useState<string | null>(null)
   const crear = (): void => {
     const limpio = (nombre ?? '').trim()
@@ -47,11 +43,6 @@ export function CabeceraDeLaBarra({ onBuscar }: CabeceraDeLaBarraProps): React.J
           className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
         />
       )}
-      <input
-        onChange={(e) => onBuscar(e.target.value)}
-        placeholder="Buscar"
-        className="rounded border border-border bg-background px-2 py-1 text-sm text-foreground"
-      />
     </div>
   )
 }

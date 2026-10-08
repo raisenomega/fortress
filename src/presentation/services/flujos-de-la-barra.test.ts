@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { useBarraStore } from '../stores/barra-store'
 import { useConstruirStore } from '../stores/construir-store'
 import { elegirHilo, nuevoHiloSuelto } from './barra-del-chat'
-import { abrirCarpeta, buscarHilos, crearCarpetaYEntrar, hilosDeCarpeta, nuevoHiloEnCarpeta } from './carpetas-de-la-barra' // prettier-ignore
+import { abrirCarpeta, crearCarpetaYEntrar, hilosDeCarpeta, nuevoHiloEnCarpeta } from './carpetas-de-la-barra' // prettier-ignore
 import { elPuerto, escribirUser } from './hilo-activo'
 import { rigDelHilo } from './hilo-activo-rig'
 import { parDeLaVista, rehidratar } from './rehidratar-el-hilo'
@@ -52,15 +52,6 @@ describe('carpetas y busqueda', () => {
     await elPuerto().createHilo({ projectId: null, titulo: 'de x', modo: 'libre', carpetaId: x.id }) // prettier-ignore
     await elPuerto().createHilo({ projectId: null, titulo: 'de y', modo: 'libre', carpetaId: y.id }) // prettier-ignore
     expect((await hilosDeCarpeta(x.id)).map((h) => h.titulo)).toEqual(['de x'])
-  })
-
-  it('BUSCAR: por titulo, carpetas y sueltos de LIBRE; el repo no se cuela', async () => {
-    const c = await elPuerto().crearCarpeta('t')
-    await elPuerto().createHilo({ projectId: null, titulo: 'btc en carpeta', modo: 'libre', carpetaId: c.id }) // prettier-ignore
-    await elPuerto().createHilo({ projectId: null, titulo: 'btc suelto', modo: 'libre' })
-    await elPuerto().createHilo({ projectId: 'p1', titulo: 'btc del repo', modo: 'plan' })
-    const res = await buscarHilos('BTC')
-    expect(res.map((h) => h.titulo).sort()).toEqual(['btc en carpeta', 'btc suelto'])
   })
 
   it('la REGLA DEL MANDO sigue intacta tras los flujos', async () => {
