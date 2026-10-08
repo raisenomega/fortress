@@ -1,5 +1,7 @@
 import type { SendMessageInput, SendMessageOutput } from '@application/chat/send-message-types'
 import type { ChatMessage, NewChatMessage } from '@domain/chat/chat-message'
+import type { MensajeDeHilo } from '@domain/chat/chat-repository'
+import type { HiloDeChat, NuevoHilo } from '@domain/chat/hilo-de-chat'
 import type { ChatChunk, ChatProgress } from '@domain/chat/chat-stream'
 import type { EnvioNegado } from '@domain/chat/envio-negado'
 import type { NewProject, Project } from '@domain/project/project'
@@ -29,6 +31,11 @@ export interface ChatApi {
   stop(projectId: string): Promise<number>
   onChunk(listener: (chunk: ChatChunk) => void): Unsubscribe
   onProgress(listener: (p: ChatProgress) => void): Unsubscribe
+  /** Los HILOS del multi-chat (B1): el puente al cajon de B0. */
+  createHilo(nuevo: NuevoHilo): Promise<HiloDeChat>
+  listHilos(projectId: string | null): Promise<readonly HiloDeChat[]>
+  listByHilo(chatId: string): Promise<readonly ChatMessage[]>
+  addToHilo(chatId: string, mensaje: MensajeDeHilo): Promise<ChatMessage>
   /** La sesion de loop guardada del proyecto: dice por que paro la ultima. */
 }
 

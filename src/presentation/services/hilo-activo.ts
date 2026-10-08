@@ -1,0 +1,73 @@
+import type { ChatMessage } from '@domain/chat/chat-message'
+import type { MensajeDeHilo } from '@domain/chat/chat-repository'
+import type { HiloDeChat, ModoDeChat, NuevoHilo } from '@domain/chat/hilo-de-chat'
+import { api } from '../adapters/fortress-api'
+import { useConstruirStore } from '../stores/construir-store'
+
+export interface ParDelHilo {
+  readonly projectId: string | null
+  readonly modo: ModoDeChat
+}
+
+export interface PuertoDeHilos {
+  createHilo(n: NuevoHilo): Promise<HiloDeChat>
+  listHilos(p: string | null): Promise<readonly HiloDeChat[]>
+  listByHilo(id: string): Promise<readonly ChatMessage[]>
+  addToHilo(id: string, m: MensajeDeHilo): Promise<ChatMessage>
+}
+
+let puerto: PuertoDeHilos | null = null
+const elPuerto = (): PuertoDeHilos => puerto ?? api().chat
+/** SOLO tests: inyectar un puerto real en memoria (sqlite :memory:). */
+export const _inyectarPuerto = (p: PuertoDeHilos | null): void => void (puerto = p)
+
+const titulo = (intent: string): string => intent.trim().slice(0, 40) || 'Nuevo chat'
+const BASE = { agentId: null, mode: 'supervisado', engine: 'claude-code' } as const
+const casa = (h: HiloDeChat | null, par: ParDelHilo): h is HiloDeChat =>
+  h !== null && h.projectId === par.projectId && h.modo === par.modo
+
+/** PEREZOSO (106): el hilo nace con el PRIMER mensaje, con su par EXACTO
+ *  (proyecto Y modo — ignorar uno fue mutante muerto). El texto llega YA
+ *  tachado: esta costura vive aguas abajo de la redaccion, y asi se guarda. */
+export async function escribirUser(par: ParDelHilo, texto: string): Promise<void> {
+  const activo = useConstruirStore.getState().hiloActivo
+  const hilo = casa(activo, par) ? activo : await elPuerto().createHilo({ ...par, titulo: titulo(texto) }) // prettier-ignore
+  if (!casa(activo, par)) useConstruirStore.getState().setHiloActivo(hilo)
+  await elPuerto().addToHilo(hilo.id, { ...BASE, role: 'user', content: texto })
+}
+
+export async function escribirAssistant(texto: string): Promise<void> {
+  const activo = useConstruirStore.getState().hiloActivo
+  if (activo === null) return
+  await elPuerto().addToHilo(activo.id, { ...BASE, role: 'assistant', content: texto })
+}
+
+/** Las DOS bocas con persistencia: memoria primero, cajon detras (perder la
+ *  fila se avisa, no bloquea la UI). Los servicios de envio usan SOLO estas. */
+export function pushUserPersistido(par: ParDelHilo, texto: string): void {
+  useConstruirStore.getState().push({ role: 'user', text: texto })
+  void escribirUser(par, texto).catch((e) => console.error('[hilo] user sin persistir', e))
+}
+
+export function finishDraftPersistido(texto: string): void {
+  useConstruirStore.getState().finishDraft(texto)
+  void escribirAssistant(texto).catch((e) => console.error('[hilo] assistant sin persistir', e))
+}
+
+/** El par que la vista tiene delante: libre SIEMPRE sin proyecto. */
+export const parDeLaVista = (projectId: string | null, mode: ModoDeChat | 'libre'): ParDelHilo =>
+  mode === 'libre' ? { projectId: null, modo: 'libre' } : { projectId, modo: mode }
+
+/** Al abrir o cambiar de par: el hilo MAS RECIENTE del par, o vacio a la
+ *  espera. GUARDA: con un draft en vuelo no se rehidrata — un re-render no
+ *  pisa un turno que esta llegando. El legado (chat_id NULL) no entra: solo
+ *  se leen hilos reales de la tabla chats. */
+export async function rehidratar(par: ParDelHilo): Promise<void> {
+  if (useConstruirStore.getState().draft !== null) return
+  const hilos = await elPuerto().listHilos(par.projectId)
+  const hilo = hilos.find((h) => h.modo === par.modo) ?? null
+  const mensajes = hilo === null ? [] : await elPuerto().listByHilo(hilo.id)
+  const store = useConstruirStore.getState()
+  store.setHiloActivo(hilo)
+  store.replaceMessages(mensajes.map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.content }))) // prettier-ignore
+}

@@ -53,7 +53,11 @@ const api: FortressApi = {
     send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
     stop: (projectId) => ipcRenderer.invoke(IPC.chatStop, projectId),
     onChunk: (listener) => subscribe(IPC.chatChunk, listener),
-    onProgress: (listener) => subscribe(IPC.chatProgress, listener)
+    onProgress: (listener) => subscribe(IPC.chatProgress, listener),
+    createHilo: (nuevo) => ipcRenderer.invoke(IPC.chatCreateHilo, nuevo),
+    listHilos: (projectId) => ipcRenderer.invoke(IPC.chatListHilos, projectId),
+    listByHilo: (chatId) => ipcRenderer.invoke(IPC.chatListByHilo, chatId),
+    addToHilo: (chatId, mensaje) => ipcRenderer.invoke(IPC.chatAddToHilo, chatId, mensaje)
   },
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),

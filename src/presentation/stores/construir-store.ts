@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import type { HiloDeChat } from '@domain/chat/hilo-de-chat'
 
 /** Los modos del chat de construir: la flecha del input los ofrece. 'libre'
  *  (PASO 91) conversa sin repo, powers-off — el unico sin proyecto+confianza. */
@@ -19,8 +20,9 @@ interface ConstruirState {
   readonly busy: boolean
   /** Borrador EN VIVO del turno en curso (null = nada corriendo que pintar). */
   readonly draft: string | null
-  /** El hilo ACTIVO del multi-chat (B0, gancho para B1): null = sin hilo aun. */
-  readonly activeChatId: string | null
+  /** El hilo ACTIVO del multi-chat (B1): entero, con su par (proyecto, modo)
+   *  para comparar al escribir. null = perezoso a la espera del primer mensaje. */
+  readonly hiloActivo: HiloDeChat | null
   /** Ultimo plan producido; es lo que Ejecutor construye (elegirlo = aprobarlo). */
   readonly pendingPlan: { readonly intent: string; readonly plan: string } | null
   setInput: (input: string) => void
@@ -31,7 +33,9 @@ interface ConstruirState {
   appendDraft: (delta: string) => void
   /** Cierra el turno: el texto autoritativo entra UNA vez y el borrador se va. */
   finishDraft: (text: string) => void
-  setActiveChatId: (activeChatId: string | null) => void
+  setHiloActivo: (hilo: HiloDeChat | null) => void
+  /** Rehidratacion (B1): reemplaza la memoria entera desde el cajon. */
+  replaceMessages: (messages: readonly ConstruirMsg[]) => void
   setPendingPlan: (p: { intent: string; plan: string } | null) => void
 }
 
@@ -42,7 +46,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   attached: null,
   busy: false,
   draft: null,
-  activeChatId: null,
+  hiloActivo: null,
   pendingPlan: null,
   setInput: (input) => set({ input }),
   setMode: (mode) => set({ mode }),
@@ -52,6 +56,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   appendDraft: (delta) => set((s) => ({ draft: (s.draft ?? '') + delta })),
   finishDraft: (text) =>
     set((s) => ({ messages: [...s.messages, { role: 'assistant', text }], draft: null })),
-  setActiveChatId: (activeChatId) => set({ activeChatId }),
+  setHiloActivo: (hiloActivo) => set({ hiloActivo }),
+  replaceMessages: (messages) => set({ messages: [...messages] }),
   setPendingPlan: (pendingPlan) => set({ pendingPlan })
 }))

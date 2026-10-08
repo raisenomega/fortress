@@ -1,6 +1,7 @@
 import type { TurnoLibre } from '@domain/build/libre-prompt'
 import { api } from '../adapters/fortress-api'
 import { escucharElPlan } from './escuchar-el-plan'
+import { finishDraftPersistido, pushUserPersistido } from './hilo-activo'
 import { useConstruirStore } from '../stores/construir-store'
 
 /** El id centinela de los trozos del libre: no hay proyecto, pero el canal del
@@ -12,15 +13,15 @@ const LIBRE = 'chat-libre'
 export async function sendLibre(intent: string): Promise<void> {
   const store = useConstruirStore.getState()
   const hilo = store.messages as readonly TurnoLibre[]
-  store.push({ role: 'user', text: `Libre: ${intent}` })
+  pushUserPersistido({ projectId: null, modo: 'libre' }, `Libre: ${intent}`)
   store.setBusy(true)
   const corte = escucharElPlan(LIBRE)
   try {
     const result = await api().build.libre(intent, hilo)
-    store.finishDraft(result.ok ? result.value : `No se pudo: ${result.error}`)
+    finishDraftPersistido(result.ok ? result.value : `No se pudo: ${result.error}`)
   } catch (error) {
     const detail = error instanceof Error ? error.message : 'Se interrumpio'
-    store.finishDraft(`No se pudo: ${detail}`)
+    finishDraftPersistido(`No se pudo: ${detail}`)
   } finally {
     corte()
     store.setBusy(false)
