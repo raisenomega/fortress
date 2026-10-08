@@ -18,6 +18,8 @@ export interface PuertoDeHilos {
   listarCarpetas(): Promise<readonly Carpeta[]>
   listarSueltos(): Promise<readonly HiloDeChat[]>
   borrarHilo(id: string): Promise<void>
+  crearCarpeta(nombre: string): Promise<Carpeta>
+  hilosPorCarpeta(carpetaId: string): Promise<readonly HiloDeChat[]>
 }
 
 let puerto: PuertoDeHilos | null = null

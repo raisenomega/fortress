@@ -57,6 +57,8 @@ export const IPC = {
   chatListarCarpetas: 'chat:listar-carpetas',
   chatListarSueltos: 'chat:listar-sueltos',
   chatBorrarHilo: 'chat:borrar-hilo',
+  chatCrearCarpeta: 'chat:crear-carpeta',
+  chatHilosPorCarpeta: 'chat:hilos-por-carpeta',
   chatSend: 'chat:send',
   chatStop: 'chat:stop',
   chatChunk: 'chat:chunk',
