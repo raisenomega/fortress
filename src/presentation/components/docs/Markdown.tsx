@@ -1,5 +1,6 @@
-import { splitBlocks, type MdBlock } from './markdown-blocks'
+import { sinFenceExterior, splitBlocks, type MdBlock } from './markdown-blocks'
 import { renderInline } from './markdown-inline'
+import { MarkdownTable } from './MarkdownTable'
 
 const HEADING = [
   'text-base font-semibold',
@@ -17,11 +18,16 @@ function renderBlock(block: MdBlock, key: number): React.JSX.Element {
     )
   }
   if (block.type === 'heading') {
+    // Nivel 4+ (la dieta del chat) cae al estilo mas chico: nunca crudo.
+    const estilo = HEADING[Math.min(block.level ?? 1, 3) - 1]
     return (
-      <p key={key} className={`mt-3 text-foreground ${HEADING[(block.level ?? 1) - 1]}`}>
+      <p key={key} className={`mt-3 text-foreground ${estilo}`}>
         {renderInline(block.lines[0])}
       </p>
     )
+  }
+  if (block.type === 'table') {
+    return <MarkdownTable key={key} filas={block.lines} />
   }
   if (block.type === 'list') {
     return (
@@ -49,7 +55,7 @@ interface MarkdownProps {
 export function Markdown({ text, className }: MarkdownProps): React.JSX.Element {
   return (
     <div className={className ?? 'space-y-1 text-xs text-muted-foreground'}>
-      {splitBlocks(text).map(renderBlock)}
+      {splitBlocks(sinFenceExterior(text)).map(renderBlock)}
     </div>
   )
 }
