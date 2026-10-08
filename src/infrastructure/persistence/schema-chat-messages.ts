@@ -6,6 +6,19 @@
  * Las constantes viven aqui para que el esquema base y el RECAMBIO de la
  * migracion construyan EXACTAMENTE la misma tabla (molde agent_runs).
  */
+/** Carpetas del organizador de LIBRE (PASO 114). SIN columna de repo, A
+ *  PROPOSITO: la regla de hierro (web nunca toca repo) hecha esquema. Va
+ *  ANTES de chats en el esquema base: chats la referencia. */
+export const CARPETAS_SCHEMA = `
+CREATE TABLE IF NOT EXISTS carpetas (
+  id            TEXT PRIMARY KEY,
+  nombre        TEXT NOT NULL,
+  instrucciones TEXT NOT NULL DEFAULT '',
+  created_at    TEXT NOT NULL,
+  updated_at    TEXT NOT NULL
+);
+`
+
 export const CHATS_SCHEMA = `
 CREATE TABLE IF NOT EXISTS chats (
   id         TEXT PRIMARY KEY,
@@ -13,7 +26,8 @@ CREATE TABLE IF NOT EXISTS chats (
   titulo     TEXT NOT NULL,
   modo       TEXT NOT NULL CHECK (modo IN ('terminal','libre','plan','investigacion','ejecutor')),
   created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
+  updated_at TEXT NOT NULL,
+  carpeta_id TEXT REFERENCES carpetas(id) ON DELETE SET NULL
 );
 CREATE INDEX IF NOT EXISTS idx_chats_project ON chats (project_id, updated_at);
 `

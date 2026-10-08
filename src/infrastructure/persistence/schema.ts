@@ -1,4 +1,4 @@
-import { CHATS_SCHEMA, CHAT_MESSAGES_COLUMNS } from './schema-chat-messages'
+import { CARPETAS_SCHEMA, CHATS_SCHEMA, CHAT_MESSAGES_COLUMNS } from './schema-chat-messages'
 
 /**
  * Esquema de la base local. Idempotente: se ejecuta en cada arranque.
@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS projects (
   config_state   TEXT NOT NULL DEFAULT 'CONFIGURADO',
   created_at     TEXT NOT NULL
 );
+${CARPETAS_SCHEMA}
 ${CHATS_SCHEMA}
 
 CREATE TABLE IF NOT EXISTS chat_messages (${CHAT_MESSAGES_COLUMNS}
