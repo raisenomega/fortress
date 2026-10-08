@@ -1,7 +1,8 @@
 import type Database from 'better-sqlite3'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useConstruirStore } from '../stores/construir-store'
-import { escribirAssistant, escribirUser, rehidratar } from './hilo-activo'
+import { escribirAssistant, escribirUser } from './hilo-activo'
+import { rehidratar } from './rehidratar-el-hilo'
 import { filasDe, rigDelHilo } from './hilo-activo-rig'
 
 /** B1 con el cajon REAL: un turno = 2 filas, reabrir devuelve lo mismo. */
