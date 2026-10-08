@@ -13,11 +13,12 @@ const SECCION = 'text-[11px] font-semibold tracking-wide text-muted-foreground'
  *  sueltos abajo — SOLO el plano de libre. El clic en un hilo MANDA. */
 export function BarraDelChat(): React.JSX.Element {
   const seleccion = useBarraStore((s) => s.seleccion)
+  const refresco = useBarraStore((s) => s.refresco)
   const busy = useConstruirStore((s) => s.busy)
   const [listas, setListas] = useState(VACIAS)
   useEffect(() => {
     void cargarListas().then(setListas).catch(console.error)
-  }, [seleccion, busy])
+  }, [seleccion, busy, refresco])
 
   return (
     <aside className="flex h-full w-[260px] shrink-0 flex-col gap-1 overflow-y-auto border-r border-border p-3">

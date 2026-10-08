@@ -52,3 +52,22 @@ describe('la barra del Chat, cableada como ARBOL', () => {
     expect(toggle).toContain('toggle')
   })
 })
+
+describe('la gestion del ⋯, cableada (Revision B)', () => {
+  it('el ⋯ del hilo gestiona de verdad (renombrar, mover, eliminar)', () => {
+    expect(fuente('FilaDeHilo.tsx')).toContain('<MenuDeHilo')
+    const menu = fuente('MenuDeHilo.tsx')
+    expect(menu).toContain('renombrarHilo(')
+    expect(menu).toContain('eliminarHilo(')
+    expect(menu).toContain('<MoverHiloMenu')
+    expect(fuente('MoverHiloMenu.tsx')).toContain('moverHilo(')
+  })
+
+  it('el ⋯ de la carpeta renombra y borra con ELECCION', () => {
+    expect(fuente('FilaDeCarpeta.tsx')).toContain('<MenuDeCarpeta')
+    const menu = fuente('MenuDeCarpeta.tsx')
+    expect(menu).toContain('renombrarCarpeta(')
+    expect(menu).toContain('borrarCarpetaMoviendo(')
+    expect(menu).toContain('borrarCarpetaConTodo(')
+  })
+})
