@@ -1,6 +1,8 @@
 import { ipcMain } from 'electron'
 import { appendMessage, clearHistory, getHistory } from '@application/chat/chat-history'
 import type { NewChatMessage } from '@domain/chat/chat-message'
+import type { MensajeDeHilo } from '@domain/chat/chat-repository'
+import type { NuevoHilo } from '@domain/chat/hilo-de-chat'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
@@ -16,4 +18,19 @@ export function registerChatHandlers(): void {
   ipcMain.handle(IPC.chatClear, (_event, projectId: string) => {
     clearHistory(getAppContext(), projectId)
   })
+
+  // Los HILOS del multi-chat (B1): el puente que B0 dejo pendiente. El repo
+  // vive en main; sin estos cuatro el renderer no alcanza el cajon.
+  ipcMain.handle(IPC.chatCreateHilo, (_e, nuevo: NuevoHilo) =>
+    getAppContext().chat.createChat(nuevo)
+  )
+  ipcMain.handle(IPC.chatListHilos, (_e, projectId: string | null) =>
+    getAppContext().chat.listChats(projectId)
+  )
+  ipcMain.handle(IPC.chatListByHilo, (_e, chatId: string) =>
+    getAppContext().chat.listByChat(chatId)
+  )
+  ipcMain.handle(IPC.chatAddToHilo, (_e, chatId: string, mensaje: MensajeDeHilo) =>
+    getAppContext().chat.addToChat(chatId, mensaje)
+  )
 }
