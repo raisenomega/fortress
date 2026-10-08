@@ -15,7 +15,8 @@ describe('el chat pinta markdown con el renderizador de la casa', () => {
   })
 
   it('el borrador EN VIVO del construir conserva la actividad coloreada (84)', () => {
-    expect(fuente('src/presentation/components/construir/ConstruirMessages.tsx')).toContain('LineaDelBorrador') // prettier-ignore
+    // La INVOCACION, no la palabra: un import suelto no pinta (leccion del 91).
+    expect(fuente('src/presentation/components/construir/ConstruirMessages.tsx')).toContain('<LineaDelBorrador') // prettier-ignore
   })
 })
 
