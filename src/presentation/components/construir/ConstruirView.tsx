@@ -50,7 +50,9 @@ export function ConstruirView(): React.JSX.Element {
       ) : (
         <>
           <p className="pb-2 text-center text-[11px] text-muted-foreground">
-            {libre ? 'Chat libre — sin repo, no toca nada' : `Chat de ${project?.name ?? ''}`}
+            {libre
+              ? 'Chat libre — global, sin proyecto · conversa sin repo'
+              : `Chat de ${project?.name ?? ''}`}
           </p>
           <ConstruirMessages />
           <ConvertirAPlan />
