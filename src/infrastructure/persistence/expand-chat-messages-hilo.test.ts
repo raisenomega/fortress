@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { readFileSync } from 'node:fs'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CHATS_SCHEMA } from './schema-chat-messages'
+import { CARPETAS_SCHEMA, CHATS_SCHEMA } from './schema-chat-messages'
 import { expandChatMessagesHilo } from './expand-chat-messages-hilo'
 
 /** La forma VIEJA real (schema pre-B0): project_id NOT NULL, sin chat_id. */
@@ -24,6 +24,7 @@ beforeEach(() => {
   db = new Database(':memory:')
   db.pragma('foreign_keys = ON')
   db.exec(VIEJO)
+  db.exec(CARPETAS_SCHEMA) // chats la referencia: mismo orden que el esquema base
   db.exec(CHATS_SCHEMA)
 })
 
@@ -40,7 +41,7 @@ describe('expandChatMessagesHilo: NO-PERDIDA sobre el historial real', () => {
 
   it('la forma nueva admite project_id NULL (el hilo libre) y chats tambien', () => {
     expandChatMessagesHilo(db)
-    db.prepare("INSERT INTO chats VALUES ('c1', NULL, 'Libre', 'libre', '2026-10-08', '2026-10-08')").run() // prettier-ignore
+    db.prepare("INSERT INTO chats (id, project_id, titulo, modo, created_at, updated_at) VALUES ('c1', NULL, 'Libre', 'libre', '2026-10-08', '2026-10-08')").run() // prettier-ignore
     expect(() => db.prepare("INSERT INTO chat_messages (id, project_id, chat_id, role, content, mode, created_at) VALUES ('m4', NULL, 'c1', 'user', 'sin repo', 'supervisado', '2026-10-08')").run()).not.toThrow() // prettier-ignore
   })
 

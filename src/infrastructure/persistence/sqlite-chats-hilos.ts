@@ -5,20 +5,22 @@ import { newId, nowIso } from '@domain/shared/id'
 import { toChatMessage, type ChatRow } from './chat-row'
 import type { Db } from './database'
 
-interface HiloRow {
+export interface HiloRow {
   readonly id: string
   readonly project_id: string | null
   readonly titulo: string
   readonly modo: string
+  readonly carpeta_id: string | null
   readonly created_at: string
   readonly updated_at: string
 }
 
-const aHilo = (r: HiloRow): HiloDeChat => ({
+export const aHilo = (r: HiloRow): HiloDeChat => ({
   id: r.id,
   projectId: r.project_id,
   titulo: r.titulo,
   modo: r.modo as ModoDeChat,
+  carpetaId: r.carpeta_id,
   createdAt: r.created_at,
   updatedAt: r.updated_at
 })
@@ -32,7 +34,7 @@ export function hilosDeChat(
   'createChat' | 'listChats' | 'listByChat' | 'addToChat'
 > {
   // prettier-ignore
-  const insertar = db.prepare('INSERT INTO chats (id, project_id, titulo, modo, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)') // prettier-ignore
+  const insertar = db.prepare('INSERT INTO chats (id, project_id, titulo, modo, carpeta_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)') // prettier-ignore
   const porProyecto = db.prepare('SELECT * FROM chats WHERE project_id = ? ORDER BY updated_at DESC') // prettier-ignore
   const libres = db.prepare('SELECT * FROM chats WHERE project_id IS NULL ORDER BY updated_at DESC')
   const unHilo = db.prepare('SELECT * FROM chats WHERE id = ?')
@@ -43,8 +45,9 @@ export function hilosDeChat(
   return {
     createChat: (nuevo: NuevoHilo): HiloDeChat => {
       const ahora = nowIso()
-      const hilo = { ...nuevo, id: newId(), createdAt: ahora, updatedAt: ahora }
-      insertar.run(hilo.id, hilo.projectId, hilo.titulo, hilo.modo, ahora, ahora)
+      const carpetaId = nuevo.carpetaId ?? null
+      const hilo = { ...nuevo, carpetaId, id: newId(), createdAt: ahora, updatedAt: ahora }
+      insertar.run(hilo.id, hilo.projectId, hilo.titulo, hilo.modo, carpetaId, ahora, ahora)
       return hilo
     },
     listChats: (projectId) =>

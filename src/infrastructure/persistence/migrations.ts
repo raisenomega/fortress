@@ -1,4 +1,5 @@
 import { addAgentRunColumns } from './add-agent-run-columns'
+import { addCarpetas } from './add-carpetas'
 import { addFindingMemory } from './add-finding-memory'
 import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
@@ -9,16 +10,8 @@ import { CHAT_MESSAGES_INDEXES } from './schema-chat-messages'
 import { migrarDatos } from './migraciones-de-datos'
 import { SUELTAS } from './columnas-sueltas'
 import { FINDING_COLUMNS } from './columnas-de-findings'
+import { hasColumn } from './has-column'
 import type { Db } from './database'
-
-interface ColumnRow {
-  readonly name: string
-}
-
-function hasColumn(db: Db, table: string, column: string): boolean {
-  const columns = db.pragma(`table_info(${table})`) as ColumnRow[]
-  return columns.some((entry) => entry.name === column)
-}
 
 /**
  * Migraciones para bases que ya existen: el esquema base (CREATE IF NOT
@@ -60,6 +53,8 @@ export function runMigrations(db: Db): void {
   expandChatMessagesHilo(db)
   // Indices del hilo AQUI, no en el esquema: sobre tabla vieja explotaban.
   db.exec(CHAT_MESSAGES_INDEXES)
+  // Carpetas del organizador de libre (PASO 114): columna aditiva + indice.
+  addCarpetas(db)
 
   // El estado de tres valores del backlog de auto-mejora, con su backfill.
   addObservationStatus(db)
