@@ -1,4 +1,5 @@
 import type { ChatMessage } from '@domain/chat/chat-message'
+import { Markdown } from '../docs/Markdown'
 import { TerminalMeta } from './TerminalMeta'
 
 /** Prompt por rol: el usuario "escribe" tras el cursor; la salida no lleva prompt. */
@@ -27,12 +28,16 @@ export function TerminalMessage({ message }: TerminalMessageProps): React.JSX.El
         <span className="w-3 shrink-0 text-right text-primary select-none">
           {PROMPT[message.role]}
         </span>
-        <p className={`min-w-0 flex-1 break-words whitespace-pre-wrap ${TONE[message.role]}`}>
-          {message.content}
+        <div className={`min-w-0 flex-1 break-words ${TONE[message.role]}`}>
+          {message.role === 'assistant' ? (
+            <Markdown text={message.content} className="space-y-1" />
+          ) : (
+            <span className="whitespace-pre-wrap">{message.content}</span>
+          )}
           {message.pending ? (
             <span className="ml-0.5 inline-block h-3.5 w-2 animate-pulse bg-primary align-text-bottom" />
           ) : null}
-        </p>
+        </div>
       </div>
     </div>
   )
