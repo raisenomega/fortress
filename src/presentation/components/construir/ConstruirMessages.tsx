@@ -1,16 +1,11 @@
 import { antesDeNotas } from '@domain/system/corte-de-notas'
 import { useConstruirStore } from '../../stores/construir-store'
-import { TransferBadge } from '../chat/TransferBadge'
 import { LineaDelBorrador } from './LineaDelBorrador'
-
-const TONO: Record<'user' | 'assistant', string> = {
-  user: 'text-foreground',
-  assistant: 'text-muted-foreground'
-}
+import { MensajeDelConstruir } from './MensajeDelConstruir'
 
 /** Historial de construir pintado como lineas de terminal (PASO 84): prompt
- *  dorado para el operador, salida abierta sin recuadro, borrador en vivo con
- *  la palabra de la herramienta coloreada. */
+ *  dorado para el operador, respuesta en markdown (PASO 94), y el borrador en
+ *  vivo con la palabra de la herramienta coloreada. */
 export function ConstruirMessages(): React.JSX.Element {
   const messages = useConstruirStore((s) => s.messages)
   const busy = useConstruirStore((s) => s.busy)
@@ -24,19 +19,7 @@ export function ConstruirMessages(): React.JSX.Element {
         </p>
       ) : null}
       {messages.map((msg, i) => (
-        <div key={i} className="flex gap-2">
-          <span className="w-3 shrink-0 text-right text-primary select-none">
-            {msg.role === 'user' ? '❯' : ''}
-          </span>
-          <div className={`min-w-0 flex-1 break-words whitespace-pre-wrap ${TONO[msg.role]}`}>
-            {msg.text}
-            {msg.role === 'assistant' ? (
-              <div className="mt-2 flex justify-end">
-                <TransferBadge text={msg.text} />
-              </div>
-            ) : null}
-          </div>
-        </div>
+        <MensajeDelConstruir key={i} msg={msg} />
       ))}
       {/* El borrador en vivo: el bloque NOTAS se corta en cuanto asoma. */}
       {draft !== null ? (

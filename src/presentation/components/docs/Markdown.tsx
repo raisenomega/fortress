@@ -39,10 +39,16 @@ function renderBlock(block: MdBlock, key: number): React.JSX.Element {
   )
 }
 
+interface MarkdownProps {
+  readonly text: string
+  /** El tono lo pone quien pinta: docs usa el suyo; el chat, el de su vista. */
+  readonly className?: string
+}
+
 /** Render minimo y SEGURO de Markdown (sin libs, sin HTML). */
-export function Markdown({ text }: { readonly text: string }): React.JSX.Element {
+export function Markdown({ text, className }: MarkdownProps): React.JSX.Element {
   return (
-    <div className="space-y-1 text-xs text-muted-foreground">
+    <div className={className ?? 'space-y-1 text-xs text-muted-foreground'}>
       {splitBlocks(text).map(renderBlock)}
     </div>
   )
