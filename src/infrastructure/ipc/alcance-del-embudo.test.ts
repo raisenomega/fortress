@@ -44,8 +44,7 @@ describe('el embudo de IPC cubre 112 de 129, y se dice en voz alta', () => {
     const todos = registros()
     const total = todos.reduce((n, r) => n + r.handlers, 0)
     const tapados = todos.filter((r) => r.manejaSuError).reduce((n, r) => n + r.handlers, 0)
-    // +4 hilos B1, +3 barra (116), +2 flujos (118), +4 gestion ⋯ (121): todos
-    // OBSERVADOS, sin catch propio.
+    // +4 B1, +3 barra 116, +2 flujos 118, +4 gestion 121: observados, sin catch.
     expect(total).toBe(129)
     expect(tapados).toBe(17)
     expect(total - tapados).toBe(112)
