@@ -1,3 +1,5 @@
+import { CHATS_SCHEMA, CHAT_MESSAGES_COLUMNS } from './schema-chat-messages'
+
 /**
  * Esquema de la base local. Idempotente: se ejecuta en cada arranque.
  * ON DELETE CASCADE garantiza que borrar un proyecto se lleva su historial.
@@ -23,15 +25,9 @@ CREATE TABLE IF NOT EXISTS projects (
   config_state   TEXT NOT NULL DEFAULT 'CONFIGURADO',
   created_at     TEXT NOT NULL
 );
-CREATE TABLE IF NOT EXISTS chat_messages (
-  id         TEXT PRIMARY KEY,
-  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
-  role       TEXT NOT NULL,
-  content    TEXT NOT NULL,
-  agent_id   TEXT,
-  mode       TEXT NOT NULL,
-  engine     TEXT NOT NULL DEFAULT 'api',
-  created_at TEXT NOT NULL
+${CHATS_SCHEMA}
+
+CREATE TABLE IF NOT EXISTS chat_messages (${CHAT_MESSAGES_COLUMNS}
 );
 
 CREATE INDEX IF NOT EXISTS idx_chat_project

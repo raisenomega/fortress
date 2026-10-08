@@ -11,7 +11,7 @@ export const HEAD = 'abc123def4567'
 
 /** La respuesta ya guardada del turno: la que la nota cita. */
 // prettier-ignore
-export const RESPUESTA: ChatMessage = { id: 'm-1', projectId: 'p1', role: 'assistant', content: 'hecho', agentId: null, mode: 'autonomo', engine: 'claude-code', createdAt: '2026', pending: false }
+export const RESPUESTA: ChatMessage = { id: 'm-1', projectId: 'p1', chatId: null, role: 'assistant', content: 'hecho', agentId: null, mode: 'autonomo', engine: 'claude-code', createdAt: '2026', pending: false }
 
 /** Un turno que la red conservo, con las ediciones que se le pidan. */
 export const turnoVerde = (

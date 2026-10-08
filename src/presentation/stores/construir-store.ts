@@ -19,6 +19,8 @@ interface ConstruirState {
   readonly busy: boolean
   /** Borrador EN VIVO del turno en curso (null = nada corriendo que pintar). */
   readonly draft: string | null
+  /** El hilo ACTIVO del multi-chat (B0, gancho para B1): null = sin hilo aun. */
+  readonly activeChatId: string | null
   /** Ultimo plan producido; es lo que Ejecutor construye (elegirlo = aprobarlo). */
   readonly pendingPlan: { readonly intent: string; readonly plan: string } | null
   setInput: (input: string) => void
@@ -29,6 +31,7 @@ interface ConstruirState {
   appendDraft: (delta: string) => void
   /** Cierra el turno: el texto autoritativo entra UNA vez y el borrador se va. */
   finishDraft: (text: string) => void
+  setActiveChatId: (activeChatId: string | null) => void
   setPendingPlan: (p: { intent: string; plan: string } | null) => void
 }
 
@@ -39,6 +42,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   attached: null,
   busy: false,
   draft: null,
+  activeChatId: null,
   pendingPlan: null,
   setInput: (input) => set({ input }),
   setMode: (mode) => set({ mode }),
@@ -48,5 +52,6 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   appendDraft: (delta) => set((s) => ({ draft: (s.draft ?? '') + delta })),
   finishDraft: (text) =>
     set((s) => ({ messages: [...s.messages, { role: 'assistant', text }], draft: null })),
+  setActiveChatId: (activeChatId) => set({ activeChatId }),
   setPendingPlan: (pendingPlan) => set({ pendingPlan })
 }))

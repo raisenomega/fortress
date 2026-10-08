@@ -7,6 +7,7 @@ function msg(role: ChatMessage['role'], content: string): ChatMessage {
   return {
     id: 'm',
     projectId: 'p1',
+    chatId: null,
     role,
     content,
     agentId: null,

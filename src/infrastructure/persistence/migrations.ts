@@ -4,6 +4,8 @@ import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
 import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
+import { expandChatMessagesHilo } from './expand-chat-messages-hilo'
+import { CHAT_MESSAGES_INDEXES } from './schema-chat-messages'
 import { migrarDatos } from './migraciones-de-datos'
 import { SUELTAS } from './columnas-sueltas'
 import { FINDING_COLUMNS } from './columnas-de-findings'
@@ -19,11 +21,8 @@ function hasColumn(db: Db, table: string, column: string): boolean {
 }
 
 /**
- * Migraciones aditivas para bases que ya existen en el equipo del operador.
- * El esquema base es idempotente (CREATE IF NOT EXISTS), pero eso no anade
- * columnas nuevas a una tabla creada por una version anterior.
- *
- * Los nombres de tabla y columna son literales del codigo, nunca input.
+ * Migraciones para bases que ya existen: el esquema base (CREATE IF NOT
+ * EXISTS) no anade columnas a tablas viejas. Nombres literales, nunca input.
  */
 export function runMigrations(db: Db): void {
   if (!hasColumn(db, 'chat_messages', 'engine')) {
@@ -55,6 +54,12 @@ export function runMigrations(db: Db): void {
   // Los `kind` que fueron llegando: `repair` para el motor, `sistema` para los
   // agentes auxiliares. Recrea la tabla, asi que ningun ALTER debe ir despues.
   expandAgentRunsKind(db)
+
+  // El multi-chat (B0): chat_id + project_id nullable. Otro recambio; la tabla
+  // `chats` ya existe porque el esquema base corre antes que las migraciones.
+  expandChatMessagesHilo(db)
+  // Indices del hilo AQUI, no en el esquema: sobre tabla vieja explotaban.
+  db.exec(CHAT_MESSAGES_INDEXES)
 
   // El estado de tres valores del backlog de auto-mejora, con su backfill.
   addObservationStatus(db)
