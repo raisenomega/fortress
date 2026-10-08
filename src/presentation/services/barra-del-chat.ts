@@ -1,6 +1,7 @@
 import type { Carpeta } from '@domain/chat/carpeta-de-chat'
 import type { HiloDeChat } from '@domain/chat/hilo-de-chat'
 import { useBarraStore } from '../stores/barra-store'
+import { useConstruirStore } from '../stores/construir-store'
 import { elPuerto } from './hilo-activo'
 import { pintarHilo } from './rehidratar-el-hilo'
 
@@ -12,12 +13,14 @@ import { pintarHilo } from './rehidratar-el-hilo'
 export async function elegirHilo(hilo: HiloDeChat): Promise<void> {
   const mensajes = await elPuerto().listByHilo(hilo.id)
   useBarraStore.getState().setSeleccion(hilo.id)
+  useConstruirStore.getState().setMode('libre') // el clic te deja EN libre
   pintarHilo(hilo, mensajes)
 }
 
 /** Pantalla limpia: el proximo mensaje nace hilo nuevo SUELTO (perezoso B1). */
 export function nuevoHiloSuelto(): void {
   useBarraStore.getState().setSeleccion(null)
+  useConstruirStore.getState().setMode('libre')
   pintarHilo(null, [])
 }
 

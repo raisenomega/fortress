@@ -31,9 +31,12 @@ describe('los gates, pineados en el fuente (molde de la casa)', () => {
   const fuente = (r: string): string => readFileSync(r, 'utf8')
 
   it('el carve-out de la vista vale SOLO para libre; la confianza sigue exigida', () => {
-    const vista = fuente('src/presentation/components/construir/ConstruirView.tsx')
-    expect(vista).toContain("'libre'")
-    expect(vista).toContain('!project.trusted')
+    // La guarda vive en CuerpoDelChat desde el PASO 116 (ConstruirView se
+    // partio por el techo de lineas); la vista lo compone.
+    const cuerpo = fuente('src/presentation/components/construir/CuerpoDelChat.tsx')
+    expect(cuerpo).toContain('!libre')
+    expect(cuerpo).toContain('!project.trusted')
+    expect(fuente('src/presentation/components/construir/ConstruirView.tsx')).toContain('<CuerpoDelChat') // prettier-ignore
   })
 
   it('los otros tres modos siguen con su gate de proyecto en el runner', () => {
