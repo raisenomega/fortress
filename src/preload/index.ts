@@ -57,7 +57,10 @@ const api: FortressApi = {
     createHilo: (nuevo) => ipcRenderer.invoke(IPC.chatCreateHilo, nuevo),
     listHilos: (projectId) => ipcRenderer.invoke(IPC.chatListHilos, projectId),
     listByHilo: (chatId) => ipcRenderer.invoke(IPC.chatListByHilo, chatId),
-    addToHilo: (chatId, mensaje) => ipcRenderer.invoke(IPC.chatAddToHilo, chatId, mensaje)
+    addToHilo: (chatId, mensaje) => ipcRenderer.invoke(IPC.chatAddToHilo, chatId, mensaje),
+    listarCarpetas: () => ipcRenderer.invoke(IPC.chatListarCarpetas),
+    listarSueltos: () => ipcRenderer.invoke(IPC.chatListarSueltos),
+    borrarHilo: (hiloId) => ipcRenderer.invoke(IPC.chatBorrarHilo, hiloId)
   },
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),

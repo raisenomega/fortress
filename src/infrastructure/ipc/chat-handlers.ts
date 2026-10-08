@@ -33,4 +33,11 @@ export function registerChatHandlers(): void {
   ipcMain.handle(IPC.chatAddToHilo, (_e, chatId: string, mensaje: MensajeDeHilo) =>
     getAppContext().chat.addToChat(chatId, mensaje)
   )
+
+  // La barra de carpetas (PASO 116): listas del organizador y el borrado.
+  ipcMain.handle(IPC.chatListarCarpetas, () => getAppContext().chat.listarCarpetas())
+  ipcMain.handle(IPC.chatListarSueltos, () => getAppContext().chat.listarHilosSueltos())
+  ipcMain.handle(IPC.chatBorrarHilo, (_e, hiloId: string) => {
+    getAppContext().chat.borrarHilo(hiloId)
+  })
 }
