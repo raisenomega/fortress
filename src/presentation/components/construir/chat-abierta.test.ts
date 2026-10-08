@@ -29,4 +29,9 @@ describe('la Chat abierta, sin cuadro y a lo ancho', () => {
     expect(fuente('LineaDelBorrador.tsx')).toContain('colorDe')
     expect(fuente('ConstruirMessages.tsx')).toContain('LineaDelBorrador')
   })
+
+  it('libre se anuncia GLOBAL en los dos letreros (PASO 112: no es bug, es diseno)', () => {
+    expect(fuente('ConstruirView.tsx')).toContain('global, sin proyecto · conversa sin repo')
+    expect(fuente('ConstruirModeMenu.tsx')).toContain('global, sin proyecto · conversa sin repo')
+  })
 })
