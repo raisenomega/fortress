@@ -7,7 +7,7 @@ import type { OperationMode } from './operation-mode'
  * el grafo nunca respondia. 'lectura' corre en 'default' con solo las tools de
  * lectura permitidas — el grafo contesta, y escribir sigue denegado (sin allowlist).
  */
-export type ClaudePermissionMode = 'plan' | 'acceptEdits' | 'lectura' | 'auditoria'
+export type ClaudePermissionMode = 'plan' | 'acceptEdits' | 'lectura' | 'auditoria' | 'libre'
 
 /**
  * El valor real de `--permission-mode`. Los DOS modos de lectura corren en
@@ -19,7 +19,9 @@ export type ClaudePermissionMode = 'plan' | 'acceptEdits' | 'lectura' | 'auditor
  * 18-sep fueron Bash—.
  */
 export function claudeModeArg(mode: ClaudePermissionMode): string {
-  return mode === 'lectura' || mode === 'auditoria' ? 'default' : mode
+  // 'libre' tambien corre en default (PASO 99): su unica concesion viaja por
+  // la allowlist (WebSearch, lado servidor), no por el modo del CLI.
+  return mode === 'lectura' || mode === 'auditoria' || mode === 'libre' ? 'default' : mode
 }
 
 /**
@@ -48,6 +50,7 @@ export function permissionModeFor(mode: OperationMode): ClaudePermissionMode {
 
 /** Lo que se le explica al operador sobre lo que el agente puede hacer. */
 export const PERMISSION_SUMMARY: Record<ClaudePermissionMode, string> = {
+  libre: 'Conversa y busca en la web (lado servidor); no toca disco ni ejecuta nada',
   plan: 'Lee y analiza el proyecto, pero no modifica archivos',
   auditoria: 'Lee, consulta el grafo y ejecuta comandos, pero no modifica archivos',
   lectura: 'Lee y consulta el grafo, pero no modifica archivos',

@@ -10,8 +10,8 @@ import { agentLibre } from './build-target'
 
 /**
  * El modo LIBRE (PASO 91): conversacion sin repo, POWERS-OFF. El CLI corre en
- * un cuarto VACIO de userData (la caja no ve nada mas), en 'lectura' (que
- * QUITA Bash — la unica forma real, medida el 20-sep), sin confianza (ningun
+ * un cuarto VACIO de userData (la caja no ve nada mas), en modo 'libre' (solo
+ * WebSearch del lado servidor; Bash QUITADO — PASO 99), sin confianza (ningun
  * MCP de proyecto), con el agente SIN MCP global, y SIN projectId a proposito:
  * la corrida no es de ningun proyecto (el precedente documentado del episodio
  * de aprendizaje) y por eso no se asienta fila — coste conocido y anotado.
@@ -28,7 +28,7 @@ export async function runLibre(
     {
       projectPath: cuarto,
       prompt: promptLibre(hilo, pregunta),
-      permissionMode: 'lectura',
+      permissionMode: 'libre',
       agentId: null,
       model: MODELO_POR_ROL.libre,
       trusted: false
