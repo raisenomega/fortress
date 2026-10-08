@@ -13,6 +13,9 @@ interface FilaDeCarpetaProps {
   readonly seleccion: string | null
 }
 
+const flecha = (expandida: boolean): React.JSX.Element =>
+  expandida ? <ChevronDown size={13} aria-hidden /> : <ChevronRight size={13} aria-hidden />
+
 /** Una carpeta del ARBOL (Revision A): el clic DESPLIEGA o pliega — JAMAS
  *  entra al area de chat. Sus hilos cuelgan anidados; el ⋯ la gestiona. */
 export function FilaDeCarpeta({ carpeta, seleccion }: FilaDeCarpetaProps): React.JSX.Element {
@@ -33,7 +36,7 @@ export function FilaDeCarpeta({ carpeta, seleccion }: FilaDeCarpetaProps): React
           onClick={() => useBarraStore.getState().toggleCarpeta(carpeta.id)}
           className="flex min-w-0 flex-1 items-center gap-1 truncate rounded px-2 py-1 text-left text-sm text-foreground hover:bg-primary/10"
         >
-          {expandida ? <ChevronDown size={13} aria-hidden /> : <ChevronRight size={13} aria-hidden />} {/* prettier-ignore */}
+          {flecha(expandida)}
           {carpeta.nombre}
         </button>
         <button

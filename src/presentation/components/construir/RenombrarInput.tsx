@@ -8,7 +8,8 @@ interface RenombrarInputProps {
 
 /** Input inline de renombrar (hilo o carpeta): Enter acepta, Escape o clic
  *  fuera cancela — el mismo molde del crear-carpeta de la cabecera. */
-export function RenombrarInput({ inicial, onAceptar, onCancelar }: RenombrarInputProps): React.JSX.Element { // prettier-ignore
+export function RenombrarInput(props: RenombrarInputProps): React.JSX.Element {
+  const { inicial, onAceptar, onCancelar } = props
   const [valor, setValor] = useState(inicial)
   const aceptar = (): void => {
     if (valor.trim() !== '') onAceptar(valor)

@@ -3,6 +3,7 @@ import type { HiloDeChat } from '@domain/chat/hilo-de-chat'
 import { eliminarHilo, renombrarHilo } from '../../services/gestionar-hilos'
 import { MoverHiloMenu } from './MoverHiloMenu'
 import { RenombrarInput } from './RenombrarInput'
+import { Telon } from './Telon'
 
 interface MenuDeHiloProps {
   readonly hilo: HiloDeChat
@@ -17,7 +18,7 @@ export function MenuDeHilo({ hilo, onCerrar }: MenuDeHiloProps): React.JSX.Eleme
   const [vista, setVista] = useState<'raiz' | 'renombrar' | 'mover'>('raiz')
   return (
     <>
-      <button type="button" aria-label="Cerrar menu" onClick={onCerrar} className="fixed inset-0 z-10 cursor-default" /> {/* prettier-ignore */}
+      <Telon onCerrar={onCerrar} />
       <div className="absolute top-7 right-0 z-20 w-52 rounded-md border border-border bg-background p-1 shadow-lg">
         {vista === 'raiz' && (
           <>

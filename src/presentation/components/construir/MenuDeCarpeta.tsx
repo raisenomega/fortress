@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Carpeta } from '@domain/chat/carpeta-de-chat'
 import { borrarCarpetaConTodo, borrarCarpetaMoviendo, renombrarCarpeta } from '../../services/gestionar-carpetas' // prettier-ignore
 import { RenombrarInput } from './RenombrarInput'
+import { Telon } from './Telon'
 
 interface MenuDeCarpetaProps {
   readonly carpeta: Carpeta
@@ -17,7 +18,7 @@ export function MenuDeCarpeta({ carpeta, onCerrar }: MenuDeCarpetaProps): React.
   const corre = (op: Promise<unknown>): void => void op.catch(console.error).finally(onCerrar)
   return (
     <>
-      <button type="button" aria-label="Cerrar menu" onClick={onCerrar} className="fixed inset-0 z-10 cursor-default" /> {/* prettier-ignore */}
+      <Telon onCerrar={onCerrar} />
       <div className="absolute top-7 right-0 z-20 w-56 rounded-md border border-border bg-background p-1 shadow-lg">
         {vista === 'raiz' && (
           <>
