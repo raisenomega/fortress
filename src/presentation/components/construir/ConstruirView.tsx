@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { parDeLaVista, rehidratar } from '../../services/hilo-activo'
+import { alMorirElDraft, parDeLaVista, rehidratar } from '../../services/rehidratar-el-hilo'
 import { useActiveProject } from '../../stores/project-store'
 import { useConstruirStore } from '../../stores/construir-store'
 import { Notice } from '../common/Notice'
@@ -25,6 +25,13 @@ export function ConstruirView(): React.JSX.Element {
   useEffect(() => {
     void rehidratar(parDeLaVista(project?.id ?? null, mode))
   }, [project?.id, mode])
+
+  // PASO 110: una rehidratacion saltada por la guarda jamas se pierde — al
+  // morir el draft se rehace con el par ACTUAL (la senal decide; feliz = noop).
+  const draft = useConstruirStore((s) => s.draft)
+  useEffect(() => {
+    if (draft === null) void alMorirElDraft(parDeLaVista(project?.id ?? null, mode))
+  }, [draft, project?.id, mode])
 
   // Un proyecto sin marco aprobado: aqui ocurre su entrevista de configuracion.
   if (project?.configState === 'PENDIENTE_CONFIGURACION') {
