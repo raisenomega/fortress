@@ -1,4 +1,4 @@
-import { CHATS_SCHEMA, CHAT_MESSAGES_COLUMNS, CHAT_MESSAGES_INDEXES } from './schema-chat-messages'
+import { CHATS_SCHEMA, CHAT_MESSAGES_COLUMNS } from './schema-chat-messages'
 
 /**
  * Esquema de la base local. Idempotente: se ejecuta en cada arranque.
@@ -30,7 +30,8 @@ ${CHATS_SCHEMA}
 CREATE TABLE IF NOT EXISTS chat_messages (${CHAT_MESSAGES_COLUMNS}
 );
 
-${CHAT_MESSAGES_INDEXES}
+CREATE INDEX IF NOT EXISTS idx_chat_project
+  ON chat_messages (project_id, created_at);
 
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,

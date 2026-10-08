@@ -29,6 +29,11 @@ export const CHAT_MESSAGES_COLUMNS = `
   engine     TEXT NOT NULL DEFAULT 'api',
   created_at TEXT NOT NULL`
 
+/** OJO (lo cazo la suite de migracion): estos indices NO van en el esquema
+ *  base — sobre una tabla VIEJA sin chat_id, el CREATE INDEX explota en el
+ *  arranque ANTES de migrar (IF NOT EXISTS salva la tabla, no el indice).
+ *  Se aplican idempotentes DESPUES del recambio, cuando toda base ya tiene la
+ *  columna; el esquema base solo lleva idx_chat_project, que existe en ambas. */
 export const CHAT_MESSAGES_INDEXES = `
 CREATE INDEX IF NOT EXISTS idx_chat_project ON chat_messages (project_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_chat_hilo ON chat_messages (chat_id, created_at);
