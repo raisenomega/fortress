@@ -27,4 +27,12 @@ describe('el prompt del modo libre', () => {
   it('el rol libre existe en la escalera por alias: opus', () => {
     expect(MODELO_POR_ROL.libre).toBe('opus')
   })
+
+  it('la consigna ANUNCIA WebSearch y ORDENA buscar lo actual (PASO 101)', () => {
+    // El bug del smoke 100: el grant llegaba pero la consigna del 91 nunca le
+    // dijo al modelo que tenia busqueda — respondia de memoria con su cutoff.
+    const prompt = promptLibre([], 'que paso hoy?')
+    expect(prompt).toContain('WebSearch')
+    expect(prompt).toMatch(/[Bb]usca/)
+  })
 })

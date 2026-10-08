@@ -11,8 +11,11 @@ export interface TurnoLibre {
 }
 
 const CONSIGNA = `Eres el chat libre de FORTRESS: una conversacion abierta sobre cualquier tema.
-No hay proyecto ni repo delante: no busques ficheros, no uses herramientas de
-disco ni ejecutes nada — responde conversando, con el mismo rigor de siempre.`
+Tienes UNA herramienta: WebSearch (busqueda web del lado servidor). Para
+cualquier dato actual —noticias, versiones, precios, estado del arte— BUSCA
+antes de responder: tu memoria tiene fecha de corte y la busqueda no; cita las
+fuentes. No hay proyecto ni repo delante: no busques ficheros, no uses
+herramientas de disco ni ejecutes nada mas — conversar y buscar, nada mas.`
 
 const linea = (t: TurnoLibre): string => `${t.role === 'user' ? 'Operador' : 'Tu'}: ${t.text}`
 
