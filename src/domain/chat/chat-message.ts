@@ -16,6 +16,8 @@ export interface ChatMessage {
   readonly mode: OperationMode
   /** Si contesto el CLI con herramientas reales o solo la API de texto. */
   readonly engine: ChatEngine
+  /** El hilo al que pertenece (B0). NULL = el hilo LEGADO, uno por proyecto. */
+  readonly chatId: string | null
   readonly createdAt: string
   /** Marca los mensajes que aun se estan recibiendo por streaming. */
   readonly pending: boolean

@@ -17,6 +17,7 @@ export function draftUserMessage(
   return {
     id: newId(),
     projectId,
+    chatId: null,
     role: 'user',
     content,
     agentId: null,
@@ -31,6 +32,7 @@ export function draftAssistantMessage(projectId: string, mode: OperationMode): C
   return {
     id: newId(),
     projectId,
+    chatId: null,
     role: 'assistant',
     content: '',
     agentId: null,

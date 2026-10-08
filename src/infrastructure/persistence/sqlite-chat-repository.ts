@@ -3,12 +3,14 @@ import type { ChatRepository } from '@domain/chat/chat-repository'
 import { newId, nowIso } from '@domain/shared/id'
 import { toChatMessage, type ChatRow } from './chat-row'
 import type { Db } from './database'
+import { hilosDeChat } from './sqlite-chats-hilos'
 
-const COLUMNS = 'id, project_id, role, content, agent_id, mode, engine, created_at'
+const COLUMNS = 'id, project_id, chat_id, role, content, agent_id, mode, engine, created_at'
 
 export function createSqliteChatRepository(db: Db): ChatRepository {
+  // SOLO el hilo LEGADO (chat_id NULL): los hilos nuevos van por listByChat.
   const selectByProject = db.prepare(
-    `SELECT ${COLUMNS} FROM chat_messages WHERE project_id = ? ORDER BY created_at ASC, rowid ASC`
+    `SELECT ${COLUMNS} FROM chat_messages WHERE project_id = ? AND chat_id IS NULL ORDER BY created_at ASC, rowid ASC`
   )
   const selectById = db.prepare(`SELECT ${COLUMNS} FROM chat_messages WHERE id = ?`)
   const deleteByProject = db.prepare('DELETE FROM chat_messages WHERE project_id = ?')
@@ -37,6 +39,8 @@ export function createSqliteChatRepository(db: Db): ChatRepository {
 
     clearProject: (projectId) => {
       deleteByProject.run(projectId)
-    }
+    },
+
+    ...hilosDeChat(db)
   }
 }

@@ -20,7 +20,7 @@ export function fakeContext(project: Project | null = PROJECT): {
     chat: {
       add: (m: NewChatMessage): ChatMessage => {
         added.push(m)
-        return { ...m, id: `id${added.length}`, createdAt: '2026', pending: false }
+        return { ...m, id: `id${added.length}`, chatId: null, createdAt: '2026', pending: false }
       },
       listByProject: () => []
     },
