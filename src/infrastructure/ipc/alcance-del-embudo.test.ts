@@ -44,10 +44,7 @@ describe('el embudo de IPC cubre 106 de 123, y se dice en voz alta', () => {
     const todos = registros()
     const total = todos.reduce((n, r) => n + r.handlers, 0)
     const tapados = todos.filter((r) => r.manejaSuError).reduce((n, r) => n + r.handlers, 0)
-
-    // +4: hilos del multi-chat (B1); +3: la barra de carpetas (PASO 116) —
-    // listar-carpetas/listar-sueltos/borrar-hilo—, todos lado OBSERVADO
-    // (chat-handlers sigue sin catch propio).
+    // +4 hilos B1 y +3 barra de carpetas (116), lado OBSERVADO (sin catch).
     expect(total).toBe(123)
     expect(tapados).toBe(17)
     expect(total - tapados).toBe(106)
