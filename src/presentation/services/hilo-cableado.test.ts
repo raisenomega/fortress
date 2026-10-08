@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useConstruirStore } from '../stores/construir-store'
-import { escribirUser, rehidratar } from './hilo-activo'
+import { escribirUser } from './hilo-activo'
+import { rehidratar } from './rehidratar-el-hilo'
 import { rigDelHilo } from './hilo-activo-rig'
 
 /** B1, el cableado: la guarda del draft y los pins de INVOCACION (la clase
@@ -32,5 +33,11 @@ describe('las bocas estan cableadas (pins a la invocacion)', () => {
     const vista = fuente('src/presentation/components/construir/ConstruirView.tsx')
     expect(vista).toContain('rehidratar(parDeLaVista(')
     expect(vista).toContain('useEffect(')
+  })
+
+  it('el re-disparo del 110 observa el draft y llama con el par ACTUAL', () => {
+    const vista = fuente('src/presentation/components/construir/ConstruirView.tsx')
+    expect(vista).toContain('alMorirElDraft(parDeLaVista(')
+    expect(vista).toContain('[draft, project?.id, mode]')
   })
 })

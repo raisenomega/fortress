@@ -17,7 +17,7 @@ export interface PuertoDeHilos {
 }
 
 let puerto: PuertoDeHilos | null = null
-const elPuerto = (): PuertoDeHilos => puerto ?? api().chat
+export const elPuerto = (): PuertoDeHilos => puerto ?? api().chat
 /** SOLO tests: inyectar un puerto real en memoria (sqlite :memory:). */
 export const _inyectarPuerto = (p: PuertoDeHilos | null): void => void (puerto = p)
 
@@ -54,20 +54,5 @@ export function finishDraftPersistido(texto: string): void {
   void escribirAssistant(texto).catch((e) => console.error('[hilo] assistant sin persistir', e))
 }
 
-/** El par que la vista tiene delante: libre SIEMPRE sin proyecto. */
-export const parDeLaVista = (projectId: string | null, mode: ModoDeChat | 'libre'): ParDelHilo =>
-  mode === 'libre' ? { projectId: null, modo: 'libre' } : { projectId, modo: mode }
-
-/** Al abrir o cambiar de par: el hilo MAS RECIENTE del par, o vacio a la
- *  espera. GUARDA: con un draft en vuelo no se rehidrata — un re-render no
- *  pisa un turno que esta llegando. El legado (chat_id NULL) no entra: solo
- *  se leen hilos reales de la tabla chats. */
-export async function rehidratar(par: ParDelHilo): Promise<void> {
-  if (useConstruirStore.getState().draft !== null) return
-  const hilos = await elPuerto().listHilos(par.projectId)
-  const hilo = hilos.find((h) => h.modo === par.modo) ?? null
-  const mensajes = hilo === null ? [] : await elPuerto().listByHilo(hilo.id)
-  const store = useConstruirStore.getState()
-  store.setHiloActivo(hilo)
-  store.replaceMessages(mensajes.map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', text: m.content }))) // prettier-ignore
-}
+// La rehidratacion (y su senal de «saltada») vive en `rehidratar-el-hilo.ts`
+// desde el PASO 110: este fichero toco su techo de lineas.

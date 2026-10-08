@@ -12,15 +12,23 @@ export function rigDelHilo(): Database.Database {
   db.exec(SCHEMA)
   db.prepare("INSERT INTO projects (id, name, path, created_at) VALUES ('p1','Uno','/tmp/p1','2026-10-08'),('p2','Dos','/tmp/p2','2026-10-08')").run() // prettier-ignore
   const r = createSqliteChatRepository(db as never)
+  listas = 0
   _inyectarPuerto({
     createHilo: async (n) => r.createChat(n),
-    listHilos: async (p) => r.listChats(p),
+    listHilos: async (p) => {
+      listas += 1
+      return r.listChats(p)
+    },
     listByHilo: async (id) => r.listByChat(id),
     addToHilo: async (id, m) => r.addToChat(id, m)
   })
-  useConstruirStore.setState({ messages: [], draft: null, hiloActivo: null })
+  useConstruirStore.setState({ messages: [], draft: null, hiloActivo: null, rehidratacionPendiente: false }) // prettier-ignore
   return db
 }
+
+let listas = 0
+/** Cuantas cargas (listHilos) corrieron: pin del camino feliz sin recargas. */
+export const contadorDeListas = (): number => listas
 
 export const filasDe = (
   db: Database.Database

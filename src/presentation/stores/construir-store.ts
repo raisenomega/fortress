@@ -23,6 +23,8 @@ interface ConstruirState {
   /** El hilo ACTIVO del multi-chat (B1): entero, con su par (proyecto, modo)
    *  para comparar al escribir. null = perezoso a la espera del primer mensaje. */
   readonly hiloActivo: HiloDeChat | null
+  /** Quedo una rehidratacion SALTADA por la guarda del draft (PASO 110). */
+  readonly rehidratacionPendiente: boolean
   /** Ultimo plan producido; es lo que Ejecutor construye (elegirlo = aprobarlo). */
   readonly pendingPlan: { readonly intent: string; readonly plan: string } | null
   setInput: (input: string) => void
@@ -34,6 +36,7 @@ interface ConstruirState {
   /** Cierra el turno: el texto autoritativo entra UNA vez y el borrador se va. */
   finishDraft: (text: string) => void
   setHiloActivo: (hilo: HiloDeChat | null) => void
+  setRehidratacionPendiente: (pendiente: boolean) => void
   /** Rehidratacion (B1): reemplaza la memoria entera desde el cajon. */
   replaceMessages: (messages: readonly ConstruirMsg[]) => void
   setPendingPlan: (p: { intent: string; plan: string } | null) => void
@@ -47,6 +50,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   busy: false,
   draft: null,
   hiloActivo: null,
+  rehidratacionPendiente: false,
   pendingPlan: null,
   setInput: (input) => set({ input }),
   setMode: (mode) => set({ mode }),
@@ -57,6 +61,7 @@ export const useConstruirStore = create<ConstruirState>((set) => ({
   finishDraft: (text) =>
     set((s) => ({ messages: [...s.messages, { role: 'assistant', text }], draft: null })),
   setHiloActivo: (hiloActivo) => set({ hiloActivo }),
+  setRehidratacionPendiente: (rehidratacionPendiente) => set({ rehidratacionPendiente }),
   replaceMessages: (messages) => set({ messages: [...messages] }),
   setPendingPlan: (pendingPlan) => set({ pendingPlan })
 }))
