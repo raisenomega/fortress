@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '@infrastructure/ipc/channels'
 import type { FortressApi } from './api-types'
-import { subscribe } from './subscribe'
+import { chatApi } from './chat-impl'
 import { connectorsApi } from './connectors-impl'
 import { systemApi } from './system-impl'
 import { buildApi } from './build-impl'
@@ -46,22 +46,7 @@ const api: FortressApi = {
     agentRuns: (agentId) => ipcRenderer.invoke(IPC.omegaAgentRuns, agentId),
     snippet: (projectId, file, line) => ipcRenderer.invoke(IPC.omegaSnippet, projectId, file, line)
   },
-  chat: {
-    history: (projectId) => ipcRenderer.invoke(IPC.chatHistory, projectId),
-    append: (message) => ipcRenderer.invoke(IPC.chatAppend, message),
-    clear: (projectId) => ipcRenderer.invoke(IPC.chatClear, projectId),
-    send: (input) => ipcRenderer.invoke(IPC.chatSend, input),
-    stop: (projectId) => ipcRenderer.invoke(IPC.chatStop, projectId),
-    onChunk: (listener) => subscribe(IPC.chatChunk, listener),
-    onProgress: (listener) => subscribe(IPC.chatProgress, listener),
-    createHilo: (nuevo) => ipcRenderer.invoke(IPC.chatCreateHilo, nuevo),
-    listHilos: (projectId) => ipcRenderer.invoke(IPC.chatListHilos, projectId),
-    listByHilo: (chatId) => ipcRenderer.invoke(IPC.chatListByHilo, chatId),
-    addToHilo: (chatId, mensaje) => ipcRenderer.invoke(IPC.chatAddToHilo, chatId, mensaje),
-    listarCarpetas: () => ipcRenderer.invoke(IPC.chatListarCarpetas),
-    listarSueltos: () => ipcRenderer.invoke(IPC.chatListarSueltos),
-    borrarHilo: (hiloId) => ipcRenderer.invoke(IPC.chatBorrarHilo, hiloId)
-  },
+  chat: chatApi,
   settings: {
     get: (key) => ipcRenderer.invoke(IPC.settingsGet, key),
     set: (key, value) => ipcRenderer.invoke(IPC.settingsSet, key, value),
