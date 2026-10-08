@@ -1,6 +1,7 @@
 import { api } from '../adapters/fortress-api'
 import { loadProjects } from './project-service'
 import { escucharElPlan } from './escuchar-el-plan'
+import { finishDraftPersistido, pushUserPersistido } from './hilo-activo'
 import { useConstruirStore } from '../stores/construir-store'
 
 /**
@@ -17,12 +18,12 @@ export async function sendExecute(projectId: string): Promise<void> {
     })
     return
   }
-  store.push({ role: 'user', text: 'Ejecutor: construir el plan revisado' })
+  pushUserPersistido({ projectId, modo: 'ejecutor' }, 'Ejecutor: construir el plan revisado')
   store.setBusy(true)
   const corte = escucharElPlan(projectId)
   try {
     const result = await api().build.feature(projectId, pending.intent, pending.plan)
-    store.finishDraft(
+    finishDraftPersistido(
       result.ok
         ? 'Construccion completada. Revisa los cambios en el proyecto.'
         : `No se aplico: ${result.error}`
@@ -31,7 +32,7 @@ export async function sendExecute(projectId: string): Promise<void> {
   } catch (error) {
     // Sin catch, un fallo del canal dejaria busy:true y el input bloqueado.
     const detail = error instanceof Error ? error.message : 'Se interrumpio'
-    store.finishDraft(`No se aplico: ${detail}`)
+    finishDraftPersistido(`No se aplico: ${detail}`)
   } finally {
     corte()
     store.setBusy(false)

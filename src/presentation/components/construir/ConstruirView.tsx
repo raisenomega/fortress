@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { parDeLaVista, rehidratar } from '../../services/hilo-activo'
 import { useActiveProject } from '../../stores/project-store'
 import { useConstruirStore } from '../../stores/construir-store'
 import { Notice } from '../common/Notice'
@@ -15,7 +17,14 @@ import { ConvertirAPlan } from './ConvertirAPlan'
  */
 export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
-  const libre = useConstruirStore((s) => s.mode) === 'libre'
+  const mode = useConstruirStore((s) => s.mode)
+  const libre = mode === 'libre'
+
+  // B1: el chat deja de volver a cero — al abrir o cambiar de par, el hilo
+  // mas reciente vuelve del cajon (la guarda del draft vive en rehidratar).
+  useEffect(() => {
+    void rehidratar(parDeLaVista(project?.id ?? null, mode))
+  }, [project?.id, mode])
 
   // Un proyecto sin marco aprobado: aqui ocurre su entrevista de configuracion.
   if (project?.configState === 'PENDIENTE_CONFIGURACION') {

@@ -42,6 +42,22 @@ export async function escribirAssistant(texto: string): Promise<void> {
   await elPuerto().addToHilo(activo.id, { ...BASE, role: 'assistant', content: texto })
 }
 
+/** Las DOS bocas con persistencia: memoria primero, cajon detras (perder la
+ *  fila se avisa, no bloquea la UI). Los servicios de envio usan SOLO estas. */
+export function pushUserPersistido(par: ParDelHilo, texto: string): void {
+  useConstruirStore.getState().push({ role: 'user', text: texto })
+  void escribirUser(par, texto).catch((e) => console.error('[hilo] user sin persistir', e))
+}
+
+export function finishDraftPersistido(texto: string): void {
+  useConstruirStore.getState().finishDraft(texto)
+  void escribirAssistant(texto).catch((e) => console.error('[hilo] assistant sin persistir', e))
+}
+
+/** El par que la vista tiene delante: libre SIEMPRE sin proyecto. */
+export const parDeLaVista = (projectId: string | null, mode: ModoDeChat | 'libre'): ParDelHilo =>
+  mode === 'libre' ? { projectId: null, modo: 'libre' } : { projectId, modo: mode }
+
 /** Al abrir o cambiar de par: el hilo MAS RECIENTE del par, o vacio a la
  *  espera. GUARDA: con un draft en vuelo no se rehidrata — un re-render no
  *  pisa un turno que esta llegando. El legado (chat_id NULL) no entra: solo
