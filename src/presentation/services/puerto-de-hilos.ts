@@ -16,6 +16,12 @@ export interface PuertoDeHilos {
   borrarHilo(id: string): Promise<void>
   crearCarpeta(nombre: string): Promise<Carpeta>
   hilosPorCarpeta(carpetaId: string): Promise<readonly HiloDeChat[]>
+  // La gestion del ⋯ (Revision B, PASO 121):
+  renombrarHilo(id: string, titulo: string): Promise<void>
+  moverHilo(id: string, carpetaId: string | null): Promise<void>
+  renombrarCarpeta(id: string, nombre: string): Promise<void>
+  /** 'mover' = SET NULL, no pierde hilos; 'con-hilos' = transaccion atomica. */
+  borrarCarpeta(id: string, modo: 'mover' | 'con-hilos'): Promise<void>
 }
 
 let puerto: PuertoDeHilos | null = null

@@ -25,7 +25,11 @@ export function rigDelHilo(): Database.Database {
     listarSueltos: async () => r.listarHilosSueltos(),
     borrarHilo: async (id) => r.borrarHilo(id),
     crearCarpeta: async (nombre) => r.crearCarpeta(nombre),
-    hilosPorCarpeta: async (id) => r.listarHilosPorCarpeta(id)
+    hilosPorCarpeta: async (id) => r.listarHilosPorCarpeta(id),
+    renombrarHilo: async (id, t) => r.renombrarHilo(id, t),
+    moverHilo: async (id, c) => r.moverHilo(id, c),
+    renombrarCarpeta: async (id, n) => r.renombrarCarpeta(id, n),
+    borrarCarpeta: async (id, m) => (m === 'con-hilos' ? r.borrarCarpetaConHilos(id) : r.borrarCarpeta(id)) // prettier-ignore
   })
   useConstruirStore.setState({ messages: [], draft: null, hiloActivo: null, rehidratacionPendiente: false }) // prettier-ignore
   return db
