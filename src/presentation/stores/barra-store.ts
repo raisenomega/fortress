@@ -9,8 +9,11 @@ interface BarraState {
   readonly seleccion: string | null
   /** Revision A, el acordeon: carpetas DESPLEGADAS en el arbol (persistido). */
   readonly expandidas: readonly string[]
+  /** Revision B: late con cada gesto del ⋯ — las listas lo observan. */
+  readonly refresco: number
   toggle: () => void
   setSeleccion: (seleccion: string | null) => void
+  refrescar: () => void
   /** Clic en la fila de una carpeta: despliega/pliega — JAMAS entra al chat. */
   toggleCarpeta: (carpetaId: string) => void
 }
@@ -19,6 +22,8 @@ export const useBarraStore = create<BarraState>((set) => ({
   abierta: leerAbierta(),
   seleccion: null,
   expandidas: leerExpandidas(),
+  refresco: 0,
+  refrescar: () => set((s) => ({ refresco: s.refresco + 1 })),
   toggle: () =>
     set((s) => {
       guardarAbierta(!s.abierta)
