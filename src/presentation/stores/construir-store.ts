@@ -2,8 +2,9 @@ import { create } from 'zustand'
 import type { HiloDeChat } from '@domain/chat/hilo-de-chat'
 
 /** Los modos del chat de construir: la flecha del input los ofrece. 'libre'
- *  (PASO 91) conversa sin repo, powers-off — el unico sin proyecto+confianza. */
-export type ConstruirMode = 'plan' | 'investigacion' | 'ejecutor' | 'libre'
+ *  (PASO 91) y 'cto' (PASO 126) conversan sin repo, powers-off — los dos
+ *  sin proyecto+confianza; el cto ademas planifica y NUNCA firma. */
+export type ConstruirMode = 'plan' | 'investigacion' | 'ejecutor' | 'libre' | 'cto'
 
 export interface ConstruirMsg {
   readonly role: 'user' | 'assistant'

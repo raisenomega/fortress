@@ -3,7 +3,7 @@
  * `projectId` NULL es el chat LIBRE — conversa sin repo. El `modo` es del
  * hilo, no del mensaje: un hilo nace en una vista y vive en ella.
  */
-export type ModoDeChat = 'terminal' | 'libre' | 'plan' | 'investigacion' | 'ejecutor'
+export type ModoDeChat = 'terminal' | 'libre' | 'plan' | 'investigacion' | 'ejecutor' | 'cto'
 
 export interface HiloDeChat {
   readonly id: string
