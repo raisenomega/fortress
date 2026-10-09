@@ -7,6 +7,7 @@
 const { app } = require('electron')
 const { join } = require('path')
 const Database = require('better-sqlite3')
+const { writeLegacyChats } = require('./legacy-chats.cjs')
 const { writeLegacyRepair } = require('./legacy-repair.cjs')
 const { writeLegacyRuns } = require('./legacy-runs.cjs')
 const { LEGACY_SCHEMA } = require('./legacy-schema.cjs')
@@ -41,6 +42,9 @@ function writeLegacyDatabase() {
       `INSERT INTO chat_messages (id, project_id, role, content, agent_id, mode, created_at)
        VALUES ('m1', 'viejo', 'user', 'hola', NULL, 'supervisado', ?)`
     ).run(AT)
+
+    // Los hilos del 104, con el CHECK de cinco modos: ejercitan el recambio.
+    writeLegacyChats(db)
 
     // Los duplicados que el backfill de ADR-084 tiene que fundir al arrancar.
     writeLegacyIdentidades(db)

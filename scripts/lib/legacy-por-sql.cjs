@@ -5,11 +5,12 @@
  * el bridge; van juntos porque los tres responden a la misma pregunta —¿corrio
  * de verdad al abrir la base, o se salto en silencio?
  */
+const { checkChatsMigration } = require('./legacy-chats.cjs')
 const { checkRepairMigration } = require('./legacy-repair.cjs')
 const { checkRunsMigration } = require('./legacy-runs.cjs')
 const { checkIdentidadesMigration } = require('./legacy-identidades.cjs')
 
 const checkMigracionesPorSql = (check) =>
-  [checkRepairMigration, checkRunsMigration, checkIdentidadesMigration].forEach((c) => c(check))
+  [checkRepairMigration, checkRunsMigration, checkIdentidadesMigration, checkChatsMigration].forEach((c) => c(check)) // prettier-ignore
 
 module.exports = { checkMigracionesPorSql }
