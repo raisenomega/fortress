@@ -26,7 +26,10 @@ REPORTA / CIERRE. Fuera del bloque, conversa normal: mide, pregunta, corrige.`
 
 const linea = (t: TurnoLibre): string => `${t.role === 'user' ? 'Operador' : 'Tu'}: ${t.text}`
 
-export function promptCto(hilo: readonly TurnoLibre[], pregunta: string): string {
+/** El kit entra ENTRE la consigna y la conversacion (PASO 130), ya compuesto
+ *  como TEXTO por el dominio; vacio = no se inserta ni cabecera huerfana. */
+export function promptCto(hilo: readonly TurnoLibre[], pregunta: string, bloqueKit = ''): string {
+  const kit = bloqueKit === '' ? '' : `\n\n${bloqueKit}`
   const conversacion = hilo.length === 0 ? '' : `\n\nLa conversacion hasta ahora:\n${hilo.map(linea).join('\n')}` // prettier-ignore
-  return `${CONSIGNA_CTO}${conversacion}\n\nOperador: ${pregunta}`
+  return `${CONSIGNA_CTO}${kit}${conversacion}\n\nOperador: ${pregunta}`
 }
