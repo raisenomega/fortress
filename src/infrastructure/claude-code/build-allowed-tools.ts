@@ -56,16 +56,18 @@ export function buildAllowedTools(
  * contesta «NO_PUDE_BASH» y `permission_denials` sale VACIO — no es que se
  * deniegue la llamada, es que la herramienta no se le ofrece.
  *
- * Solo en 'lectura', y es lo que hace que ese nombre sea cierto: `Read`, `Grep`,
- * `Glob` y `LS` no pueden modificar nada, `Write`/`Edit` los para el permiso, y
- * Bash era el unico agujero —una redireccion suya escribio en /tmp el 12-sep—.
- *
- * Lo pedia el contrato del clasificador de alcance desde el 10-sep: «No edites
- * ni ejecutes nada». Sus CUATRO corridas posteriores usaron Bash entre 30 y 63
- * veces. Un prompt no impone nada; esto si.
- *
+ * Bash solo en 'lectura' (el clasificador tiene prohibido ejecutar; una
+ * redireccion suya escribio en /tmp el 12-sep) y en 'libre' (powers-off).
  * 'auditoria' NO lo lleva: el escaner vive de ejecutar (241 de 353 llamadas).
+ *
+ * FRONTERA 137 (firma de Jojo): trusted ahora DEGRADA — un modo de TRABAJO
+ * sobre proyecto SIN confianza pierde la web (WebSearch y WebFetch, que hasta
+ * hoy viajaban por el defecto del CLI, iguales se confiara o no). 'libre'
+ * queda FUERA de la negacion a proposito: libre y cto son globales sin repo y
+ * su WebSearch es sagrado — el candado se ensancha, jamas se afloja.
  */
-export function buildDisallowedTools(mode: ClaudePermissionMode): readonly string[] {
-  return mode === 'lectura' || mode === 'libre' ? ['Bash'] : []
+export function buildDisallowedTools(mode: ClaudePermissionMode, trusted: boolean): readonly string[] { // prettier-ignore
+  const base = mode === 'lectura' || mode === 'libre' ? ['Bash'] : []
+  const sinWeb = !trusted && mode !== 'libre' ? ['WebSearch', 'WebFetch'] : []
+  return [...base, ...sinWeb]
 }

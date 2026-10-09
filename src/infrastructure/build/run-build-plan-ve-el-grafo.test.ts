@@ -42,7 +42,7 @@ describe('el Plan de Construir ve el grafo', () => {
     expect(buildAllowedTools('lectura', false, []).some((t) => t.includes('codebase-memory'))).toBe(
       true
     )
-    expect(buildDisallowedTools('lectura')).toEqual(['Bash'])
-    expect(buildDisallowedTools('plan')).toEqual([])
+    expect(buildDisallowedTools('lectura', true)).toEqual(['Bash'])
+    expect(buildDisallowedTools('plan', true)).toEqual([])
   })
 })

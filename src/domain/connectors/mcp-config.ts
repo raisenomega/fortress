@@ -38,6 +38,13 @@ export function buildMcpConfig(all: readonly ConnectorState[]): string | null {
  * decide esa clave en sus dos caminos. Devuelve el JSON base intacto si no hay
  * servidores extra, para no alterar el caso sin proyecto.
  */
+/** FRONTERA 137 (firma de Jojo): los conectores GLOBALES solo viajan con
+ *  confianza — un repo cliente no confiable no recibe Figma/Canva/etc. El
+ *  grafo NO pasa por aqui (viaja por grafoDir en buildArgs) y no se pierde. */
+export function mcpGlobalSegunConfianza(cfg: string | null, trusted: boolean): string | null {
+  return trusted ? cfg : null
+}
+
 export function mergeMcpConfig(
   baseJson: string | null,
   extra: Record<string, unknown> | null

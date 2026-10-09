@@ -40,8 +40,8 @@ describe('y NO gana nada que no tuviera', () => {
   it('conserva Bash: no se le quita, como si se le quita a lectura', () => {
     // El chat investiga ejecutando. `lectura` es otra cosa: alli el contrato
     // dice «no ejecutes» y por eso ese modo SI lo quita.
-    expect(buildDisallowedTools(MODO)).toEqual([])
-    expect(buildDisallowedTools('lectura')).toContain('Bash')
+    expect(buildDisallowedTools(MODO, true)).toEqual([])
+    expect(buildDisallowedTools('lectura', true)).toContain('Bash')
   })
 })
 

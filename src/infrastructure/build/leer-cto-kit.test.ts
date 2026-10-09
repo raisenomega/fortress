@@ -51,7 +51,7 @@ describe('las capas y el candado, pineados (molde de la casa)', () => {
 
   it("CANDADO INTACTO: la corrida sigue con EXACTAMENTE ['WebSearch']", () => {
     expect(buildAllowedTools('libre', false, [])).toEqual(['WebSearch'])
-    expect(buildDisallowedTools('libre')).toEqual(['Bash'])
+    expect(buildDisallowedTools('libre', true)).toEqual(['Bash'])
     expect(fuente('src/infrastructure/build/run-cto.ts')).toContain("permissionMode: 'libre'")
   })
 })

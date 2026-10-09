@@ -1,6 +1,6 @@
 import type { AgentDefinition } from '@domain/agent/agent-prompt'
 import type { CodeAgentRequest } from '@domain/chat/code-agent'
-import { mergeMcpConfig } from '@domain/connectors/mcp-config'
+import { mcpGlobalSegunConfianza, mergeMcpConfig } from '@domain/connectors/mcp-config'
 import { err, ok, type Result } from '@domain/shared/result'
 import { conSandbox } from '../sandbox/con-sandbox'
 import type { ConPrompt } from './prompt-por-stdin'
@@ -33,7 +33,8 @@ export function argsDelTurno(
     agents,
     request.agentId,
     maxUsd,
-    mergeMcpConfig(mcpConfig, projectMcp),
+    // FRONTERA 137: los conectores globales tambien se gatean por confianza.
+    mergeMcpConfig(mcpGlobalSegunConfianza(mcpConfig, request.trusted), projectMcp),
     request.trusted,
     readProjectScripts(request.projectPath),
     grafoDir

@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { ClaudePermissionMode } from '@domain/settings/permission-mode'
 import { buildArgs } from './claude-cli'
 
-const args = (mode: ClaudePermissionMode): readonly string[] => buildArgs('hola', mode, {}, null, 3).args
+const args = (mode: ClaudePermissionMode, trusted = true): readonly string[] =>
+  buildArgs('hola', mode, {}, null, 3, null, trusted).args
 /** El valor que sigue a un flag, o null si el flag no va. */
 const tras = (lista: readonly string[], flag: string): string | null => {
   const i = lista.indexOf(flag)
@@ -24,13 +25,20 @@ describe('lo que de verdad se le quita al agente', () => {
     expect(tras(args('lectura'), '--disallowedTools')).toBe('Bash')
   })
 
-  it('auditoria NO lo lleva: el escaner vive de ejecutar', () => {
+  it('auditoria CONFIABLE no lo lleva: el escaner vive de ejecutar', () => {
     expect(args('auditoria')).not.toContain('--disallowedTools')
   })
 
-  it('ni plan ni acceptEdits: el flag solo aparece donde hace falta', () => {
+  it('ni plan ni acceptEdits confiables: el flag solo aparece donde hace falta', () => {
     for (const modo of ['plan', 'acceptEdits'] as const) {
       expect(args(modo)).not.toContain('--disallowedTools')
+    }
+  })
+
+  it('FRONTERA 137: el trabajo SIN confianza pierde la web en los args reales', () => {
+    for (const modo of ['auditoria', 'acceptEdits', 'lectura'] as const) {
+      expect(args(modo, false)).toContain('WebSearch')
+      expect(args(modo, false)).toContain('WebFetch')
     }
   })
 })

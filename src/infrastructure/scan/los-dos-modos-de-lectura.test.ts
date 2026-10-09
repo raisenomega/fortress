@@ -13,11 +13,11 @@ describe('los dos modos de lectura NO se fundieron', () => {
     // El nombre viejo de este test decia «sigue SIN Bash» y solo miraba el
     // allowlist — donde Bash nunca estuvo y aun asi corria. Lo que lo impide es
     // `--disallowedTools`, medido el 2026-09-20: «NO_PUDE_BASH».
-    expect(buildDisallowedTools('lectura')).toContain('Bash')
+    expect(buildDisallowedTools('lectura', true)).toContain('Bash')
   })
 
   it('y auditoria NO lo lleva: el escaner vive de ejecutar', () => {
-    expect(buildDisallowedTools('auditoria')).toEqual([])
+    expect(buildDisallowedTools('auditoria', true)).toEqual([])
   })
 
   it('no estar en el allowlist NO basta: los dos lo omiten y solo uno lo impide', () => {

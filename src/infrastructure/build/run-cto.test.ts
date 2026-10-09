@@ -10,7 +10,7 @@ const fuente = (r: string): string => readFileSync(r, 'utf8')
 describe('PERFIL A1: el candado libre, reutilizado sin tocarlo', () => {
   it("resuelve EXACTAMENTE ['WebSearch'] y Bash sigue QUITADO", () => {
     expect(buildAllowedTools('libre', false, [])).toEqual(['WebSearch'])
-    expect(buildDisallowedTools('libre')).toEqual(['Bash'])
+    expect(buildDisallowedTools('libre', true)).toEqual(['Bash'])
   })
 
   it("run-cto corre con permissionMode 'libre' y NO nace un 6o modo", () => {

@@ -46,7 +46,7 @@ export function buildArgs(
 
   // Y lo que se QUITA. `--allowedTools` solo pre-aprueba, asi que impedir una
   // herramienta pide esta otra lista: aqui no se ofrece, no es que se deniegue.
-  const fuera = buildDisallowedTools(permissionMode)
+  const fuera = buildDisallowedTools(permissionMode, trusted)
   if (fuera.length > 0) args.push('--disallowedTools', ...fuera)
 
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))
