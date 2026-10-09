@@ -7,6 +7,7 @@ export const buildApi: BuildApi = {
   plan: (projectId, intent) => ipcRenderer.invoke(IPC.buildPlan, projectId, intent),
   investigate: (projectId, intent) => ipcRenderer.invoke(IPC.buildInvestigate, projectId, intent),
   libre: (pregunta, hilo) => ipcRenderer.invoke(IPC.buildLibre, pregunta, hilo),
+  cto: (pregunta, hilo) => ipcRenderer.invoke(IPC.buildCto, pregunta, hilo),
   feature: (projectId, intent, plan) =>
     ipcRenderer.invoke(IPC.buildFeature, projectId, intent, plan),
   stop: (projectId) => ipcRenderer.invoke(IPC.buildStop, projectId),

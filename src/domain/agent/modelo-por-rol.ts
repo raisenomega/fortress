@@ -24,7 +24,10 @@ export const MODELO_POR_ROL = {
   chatApi: 'opus',
   /** El chat LIBRE (PASO 91): conversa sin repo, powers-off. Opus como el
    *  productor y chatApi: es conversacion de primera linea, no un barrido. */
-  libre: 'opus'
+  libre: 'opus',
+  /** El Modo CTO (PASO 126): ingeniero senior que guia los PASOS — juzgar y
+   *  planificar es el criterio de ADR-078 para el tope de la escalera. */
+  cto: 'opus'
 } as const satisfies Record<string, Peldano>
 
 export type RolConModelo = keyof typeof MODELO_POR_ROL

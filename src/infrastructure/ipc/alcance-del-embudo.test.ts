@@ -25,8 +25,8 @@ function registros(): Array<{ handlers: number; manejaSuError: boolean }> {
  * de adorno: vender «los 110 observan» cuando son 94 es lo mismo que el juez que
  * decia haber auditado sin correr, y este proyecto ya pago ese error una vez.
  */
-describe('el embudo de IPC cubre 112 de 129, y se dice en voz alta', () => {
-  it('hay 129 handlers, y 17 viven en ficheros que manejan su propio error', () => {
+describe('el embudo de IPC cubre 113 de 130, y se dice en voz alta', () => {
+  it('hay 130 handlers, y 17 viven en ficheros que manejan su propio error', () => {
     // Empezo en 110 y 16. Los dos de ADR-087 —`finding:verify` y
     // `scan:historia`— cayeron del lado tapado y dejaron la cobertura quieta en
     // 94; los dos del barrido de mitigados caen del lado OBSERVADO —su handler
@@ -44,10 +44,10 @@ describe('el embudo de IPC cubre 112 de 129, y se dice en voz alta', () => {
     const todos = registros()
     const total = todos.reduce((n, r) => n + r.handlers, 0)
     const tapados = todos.filter((r) => r.manejaSuError).reduce((n, r) => n + r.handlers, 0)
-    // +4 B1, +3 barra 116, +2 flujos 118, +4 gestion 121: observados, sin catch.
-    expect(total).toBe(129)
+    // +4 B1, +3 barra 116, +2 flujos 118, +4 gestion 121, +1 cto 126: observados.
+    expect(total).toBe(130)
     expect(tapados).toBe(17)
-    expect(total - tapados).toBe(112)
+    expect(total - tapados).toBe(113)
   })
 
   it('y un handler que convierte su throw en err() NO genera observacion', () => {

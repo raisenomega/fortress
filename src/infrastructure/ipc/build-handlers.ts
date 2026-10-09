@@ -5,6 +5,7 @@ import type { TurnoLibre } from '@domain/build/libre-prompt'
 import { runBuild } from '../build/run-build'
 import { runBuildPlan } from '../build/run-build-plan'
 import { runInvestigate } from '../build/run-investigate'
+import { runCto } from '../build/run-cto'
 import { runLibre } from '../build/run-libre'
 import { pickFile } from '../system/file-picker'
 import { getAppContext } from '../persistence/app-context'
@@ -42,6 +43,10 @@ export function registerBuildHandlers(): void {
   // busy del renderer. Los trozos van al id centinela que el servicio escucha.
   ipcMain.handle(IPC.buildLibre, (e, pregunta: string, hilo: TurnoLibre[]) =>
     runLibre(getAppContext(), pregunta, hilo, chunkSender(e, 'chat-libre'))
+  )
+  // CTO (126): mismo trato que libre — sin proyecto, su propio id centinela.
+  ipcMain.handle(IPC.buildCto, (e, pregunta: string, hilo: TurnoLibre[]) =>
+    runCto(getAppContext(), pregunta, hilo, chunkSender(e, 'chat-cto'))
   )
   ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
     withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))

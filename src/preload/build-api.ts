@@ -9,6 +9,8 @@ export interface BuildApi {
   /** Chat LIBRE (PASO 91): conversa sin repo, powers-off. El hilo viaja porque
    *  cada corrida del CLI es una sesion nueva. */
   libre(pregunta: string, hilo: readonly { role: 'user' | 'assistant'; text: string }[]): Promise<Result<string>> // prettier-ignore
+  /** Modo CTO (PASO 126): planifica sin repo con el candado del libre. */
+  cto(pregunta: string, hilo: readonly { role: 'user' | 'assistant'; text: string }[]): Promise<Result<string>> // prettier-ignore
   feature(projectId: string, intent: string, plan: string): Promise<Result<void>>
   /** Corta el agente en marcha (plan o build). Devuelve procesos terminados. */
   stop(projectId: string): Promise<number>

@@ -6,6 +6,7 @@ export const BUILD_CHANNELS = {
   buildPlan: 'build:plan',
   buildInvestigate: 'build:investigate',
   buildLibre: 'build:libre',
+  buildCto: 'build:cto',
   buildFeature: 'build:feature',
   buildStop: 'build:stop',
   buildPickFile: 'build:pick-file'
