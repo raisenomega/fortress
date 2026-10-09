@@ -3,11 +3,13 @@ import { mkdirSync } from 'fs'
 import { join } from 'path'
 import type { AppContext } from '@application/context'
 import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
+import { bloqueCtoKit } from '@domain/build/bloque-cto-kit'
 import { promptCto } from '@domain/build/cto-prompt'
 import type { TurnoLibre } from '@domain/build/libre-prompt'
 import { sinBloqueDeNotas } from '@domain/system/extraer-notas'
 import { err, ok, type Result } from '@domain/shared/result'
 import { agentLibre } from './build-target'
+import { leerCtoKit } from './leer-cto-kit'
 
 /**
  * El Modo CTO (PASO 126), corte A: espejo de `run-libre` que REUTILIZA el
@@ -27,7 +29,8 @@ export async function runCto(
   const reply = await agentLibre(context).run(
     {
       projectPath: cuarto,
-      prompt: promptCto(hilo, pregunta),
+      // El kit entra como DATO (PASO 130): el I/O aqui, la composicion en dominio.
+      prompt: promptCto(hilo, pregunta, bloqueCtoKit(leerCtoKit())),
       permissionMode: 'libre',
       agentId: null,
       model: MODELO_POR_ROL.cto,
