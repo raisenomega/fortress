@@ -19,15 +19,27 @@ CREATE TABLE IF NOT EXISTS carpetas (
 );
 `
 
-export const CHATS_SCHEMA = `
-CREATE TABLE IF NOT EXISTS chats (
+/** Columnas de `chats` aparte (molde agent_runs): el recambio que ensancho el
+ *  CHECK con 'cto' (PASO 124) recrea la tabla desde ESTA definicion. */
+export const CHATS_COLUMNS = `
   id         TEXT PRIMARY KEY,
   project_id TEXT REFERENCES projects(id) ON DELETE CASCADE,
   titulo     TEXT NOT NULL,
-  modo       TEXT NOT NULL CHECK (modo IN ('terminal','libre','plan','investigacion','ejecutor')),
+  modo       TEXT NOT NULL CHECK (modo IN ('terminal','libre','plan','investigacion','ejecutor','cto')),
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
-  carpeta_id TEXT REFERENCES carpetas(id) ON DELETE SET NULL
+  carpeta_id TEXT REFERENCES carpetas(id) ON DELETE SET NULL`
+
+/** Solo DESPUES del recambio: el de carpeta, sobre una base vieja sin la
+ *  columna, explota en el arranque (la misma leccion que los indices de abajo).
+ *  El esquema base lleva solo idx_chats_project, que existe en ambas formas. */
+export const CHATS_INDEXES = `
+CREATE INDEX IF NOT EXISTS idx_chats_project ON chats (project_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_chats_carpeta ON chats (carpeta_id, updated_at);
+`
+
+export const CHATS_SCHEMA = `
+CREATE TABLE IF NOT EXISTS chats (${CHATS_COLUMNS}
 );
 CREATE INDEX IF NOT EXISTS idx_chats_project ON chats (project_id, updated_at);
 `

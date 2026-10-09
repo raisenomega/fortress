@@ -1,12 +1,10 @@
 import { addAgentRunColumns } from './add-agent-run-columns'
-import { addCarpetas } from './add-carpetas'
 import { addFindingMemory } from './add-finding-memory'
 import { addObservationStatus } from './add-observation-status'
 import { addProjectColumns } from './add-project-columns'
 import { addRepairProjectFk } from './add-repair-project-fk'
 import { expandAgentRunsKind } from './expand-agent-runs-kind'
-import { expandChatMessagesHilo } from './expand-chat-messages-hilo'
-import { CHAT_MESSAGES_INDEXES } from './schema-chat-messages'
+import { migrarElChat } from './migrar-el-chat'
 import { migrarDatos } from './migraciones-de-datos'
 import { SUELTAS } from './columnas-sueltas'
 import { FINDING_COLUMNS } from './columnas-de-findings'
@@ -48,13 +46,9 @@ export function runMigrations(db: Db): void {
   // agentes auxiliares. Recrea la tabla, asi que ningun ALTER debe ir despues.
   expandAgentRunsKind(db)
 
-  // El multi-chat (B0): chat_id + project_id nullable. Otro recambio; la tabla
-  // `chats` ya existe porque el esquema base corre antes que las migraciones.
-  expandChatMessagesHilo(db)
-  // Indices del hilo AQUI, no en el esquema: sobre tabla vieja explotaban.
-  db.exec(CHAT_MESSAGES_INDEXES)
-  // Carpetas del organizador de libre (PASO 114): columna aditiva + indice.
-  addCarpetas(db)
+  // La familia del chat (B0 + indices + carpetas + el CHECK con 'cto'), en su
+  // modulo y en su orden: `chats` ya existe porque el esquema base corre antes.
+  migrarElChat(db)
 
   // El estado de tres valores del backlog de auto-mejora, con su backfill.
   addObservationStatus(db)
