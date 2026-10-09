@@ -21,8 +21,9 @@ describe('la guarda del draft en vuelo', () => {
 describe('las bocas estan cableadas (pins a la invocacion)', () => {
   const fuente = (r: string): string => readFileSync(r, 'utf8')
 
-  it('los tres servicios de envio escriben por las bocas PERSISTIDAS', () => {
-    for (const f of ['construir-service', 'construir-libre', 'construir-execute']) {
+  it('los cuatro emisores escriben por las bocas PERSISTIDAS', () => {
+    // El 126 partio construir-service: los envios viven en construir-envios.
+    for (const f of ['construir-envios', 'construir-libre', 'construir-cto', 'construir-execute']) {
       const src = fuente(`src/presentation/services/${f}.ts`)
       expect(src).toContain('pushUserPersistido(')
       expect(src).toContain('finishDraftPersistido(')

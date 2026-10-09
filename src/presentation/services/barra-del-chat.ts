@@ -17,7 +17,9 @@ export async function elegirHilo(hilo: HiloDeChat): Promise<void> {
   if (useConstruirStore.getState().hiloActivo?.id !== hilo.id) await limpiarAlSalir()
   const mensajes = await elPuerto().listByHilo(hilo.id)
   useBarraStore.getState().setSeleccion(hilo.id)
-  useConstruirStore.getState().setMode('libre') // el clic te deja EN libre
+  // El clic te deja EN el modo del hilo (Decision X del 124): un hilo CTO
+  // reabre COMO CTO; todo lo demas de la barra sigue siendo libre.
+  useConstruirStore.getState().setMode(hilo.modo === 'cto' ? 'cto' : 'libre')
   pintarHilo(hilo, mensajes)
 }
 
