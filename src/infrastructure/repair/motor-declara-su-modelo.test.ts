@@ -15,19 +15,19 @@ const modeloDe = (args: readonly string[]): string | undefined => args[args.inde
 describe('los cuatro del Motor declaran su modelo', () => {
   it('OMEGA corre con MODELO_DE_OMEGA, que es opus (ADR-088 Enm. 3, al fin construido)', () => {
     expect(MODELO_DE_OMEGA).toBe('opus')
-    const r = argsDeLectura('p', '/tmp', null, 'omega')
+    const r = argsDeLectura('p', '/tmp', null, 'omega', true)
     expect(r.ok && modeloDe(r.value.args)).toBe(MODELO_DE_OMEGA)
   })
 
   it('analista y critico declaran opus', () => {
     for (const rol of ['analista', 'critico'] as const) {
-      const r = argsDeLectura('p', '/tmp', null, rol)
+      const r = argsDeLectura('p', '/tmp', null, rol, true)
       expect(r.ok && modeloDe(r.value.args)).toBe('opus')
     }
   })
 
   it('el generador declara opus (excepcion deliberada a «ejecuta→sonnet»)', () => {
-    const r = argsDelGenerador('p', '/tmp', null)
+    const r = argsDelGenerador('p', '/tmp', null, true)
     expect(r.ok && modeloDe(r.value.args)).toBe(MODELO_POR_ROL.generador)
     expect(MODELO_POR_ROL.generador).toBe('opus')
   })

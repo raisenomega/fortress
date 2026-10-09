@@ -47,5 +47,5 @@ export function estudiar(
     // alcanza el disco del proyecto por su cuenta, y hay dos caminos (ADR-104).
     barreras: bloqueDeBarreras(ctx.barrerasDeclaradas(project.path))
   }
-  return analyzeTarget(ctx.analystFor(project.path, project.id), { ...selection, target }, loYaAtendido(ctx)) // prettier-ignore
+  return analyzeTarget(ctx.analystFor(project.path, project.id, project.trusted), { ...selection, target }, loYaAtendido(ctx)) // prettier-ignore
 }

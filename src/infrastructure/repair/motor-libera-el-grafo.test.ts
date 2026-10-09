@@ -36,17 +36,17 @@ function puerto(): { port: GrafoDelTurnoPort; preparados: number; liberados: num
 describe('los corredores del motor preparan el store del turno y lo liberan al cerrar', () => {
   it('generador, OMEGA y critico: un preparar y un liberar por corrida', async () => {
     const g = puerto()
-    await createGraphGenerator(fakeBin(), 'p1', 10_000, g.port).generate(raiz, 'p') // prettier-ignore
+    await createGraphGenerator(fakeBin(), 'p1', true, 10_000, g.port).generate(raiz, 'p') // prettier-ignore
     const o = puerto()
-    await createGraphOmega(fakeBin(), 'p1', 10_000, o.port).run(raiz, 'p') // prettier-ignore
+    await createGraphOmega(fakeBin(), 'p1', true, 10_000, o.port).run(raiz, 'p') // prettier-ignore
     const c = puerto()
-    await createGraphCritico(fakeBin(), 'p1', 10_000, c.port).run(raiz, 'p') // prettier-ignore
+    await createGraphCritico(fakeBin(), 'p1', true, 10_000, c.port).run(raiz, 'p') // prettier-ignore
     for (const p of [g, o, c]) expect([p.preparados, p.liberados]).toEqual([1, 1])
   })
 
   it('un binario que no existe tambien libera: el store no sobrevive a un fallo de arranque', async () => {
     const o = puerto()
-    await createGraphOmega('/no/existe/claude', 'p1', 10_000, o.port).run(raiz, 'p')
+    await createGraphOmega('/no/existe/claude', 'p1', true, 10_000, o.port).run(raiz, 'p')
     expect([o.preparados, o.liberados]).toEqual([1, 1])
   })
 })

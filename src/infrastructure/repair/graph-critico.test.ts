@@ -23,7 +23,7 @@ describe('createGraphCritico (binario fake)', () => {
   it('prosa con factura: la objecion entera y los tokens', async () => {
     const bin = fakeBin(`echo '{"result":"${OBJECION}","usage":{"input_tokens":90,"output_tokens":10}}'`) // prettier-ignore
 
-    const r = await createGraphCritico(bin, 'p1').run(tmpdir(), 'prompt')
+    const r = await createGraphCritico(bin, 'p1', true).run(tmpdir(), 'prompt')
 
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.texto).toBe(OBJECION)
@@ -33,27 +33,27 @@ describe('createGraphCritico (binario fake)', () => {
   it('prosa SIN sobre JSON: se queda con el crudo, que es la objecion igual', async () => {
     // El critico no devuelve un formato: devuelve texto. Si el CLI no envuelve,
     // lo que dijo sigue valiendo — al reves que OMEGA, que sin VERDICT no juzga.
-    const r = await createGraphCritico(fakeBin('echo "el fix aguanta, comprobe api.ts"'), 'p1').run(tmpdir(), 'p') // prettier-ignore
+    const r = await createGraphCritico(fakeBin('echo "el fix aguanta, comprobe api.ts"'), 'p1', true).run(tmpdir(), 'p') // prettier-ignore
 
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.texto).toContain('el fix aguanta')
   })
 
   it('sin decir nada: NO es una objecion, y el turno sigue', async () => {
-    const r = await createGraphCritico(fakeBin('echo ""'), 'p1').run(tmpdir(), 'p')
+    const r = await createGraphCritico(fakeBin('echo ""'), 'p1', true).run(tmpdir(), 'p')
 
     expect(r).toMatchObject({ ok: false, error: 'sin texto' })
   })
 
   it('colgado: el plazo lo mata y lo dice', async () => {
-    const r = await createGraphCritico(fakeBin('sleep 30'), 'p1', 150).run(tmpdir(), 'p')
+    const r = await createGraphCritico(fakeBin('sleep 30'), 'p1', true, 150).run(tmpdir(), 'p')
 
     expect(r).toMatchObject({ ok: false, timedOut: true })
   })
 
   it('muerto a mitad: resuelve con lo que haya, sin colgar el turno', async () => {
     // Un critico que revienta no puede dejar el turno esperando para siempre.
-    const r = await createGraphCritico(fakeBin('echo "medio jui"; kill -9 $$'), 'p1').run(tmpdir(), 'p') // prettier-ignore
+    const r = await createGraphCritico(fakeBin('echo "medio jui"; kill -9 $$'), 'p1', true).run(tmpdir(), 'p') // prettier-ignore
 
     // Resolvio: eso es lo que se prueba. Que traiga o no texto depende de si el
     // `echo` llego antes que el `kill`, y esa carrera no es el objeto del test.
@@ -61,7 +61,7 @@ describe('createGraphCritico (binario fake)', () => {
   })
 
   it('el binario no existe: error con mensaje, sin lanzar', async () => {
-    const r = await createGraphCritico('/no/existe', 'p1').run(tmpdir(), 'p')
+    const r = await createGraphCritico('/no/existe', 'p1', true).run(tmpdir(), 'p')
 
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.timedOut).toBe(false)

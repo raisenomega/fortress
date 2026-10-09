@@ -12,9 +12,11 @@
  * normal, y la caja `--settings` (ADR-092) siguio aplicando: es capa aparte
  * de las fuentes, verificado con la sonda del centinela en el HOME.
  *
- * Con confianza se conservan las fuentes de proyecto A PROPOSITO: el hook de
- * ADR-098 (el que bloquea Edit sobre `.claude/`) vive en los settings de
- * proyecto de FORTRESS, y quitarselo al Motor seria desarmarlo.
+ * Con confianza se conservan las fuentes de proyecto A PROPOSITO, por si el
+ * operador las siembra. OJO, MEDIDO el 2026-10-09 (PASO 136): HOY no hay nada
+ * que conservar — FORTRESS no tiene `.claude/settings.json` trackeado y el
+ * hook de ADR-098 NO esta persistido en ninguna capa (el ADR se firmo; el
+ * hook fue de la medicion). Reponerlo es su propia costura firmada.
  */
 export function fuentesDeSettings(trusted: boolean): readonly string[] {
   return trusted ? [] : ['--setting-sources', 'user']

@@ -10,5 +10,7 @@ import type { TribunalDeps } from '@application/chat/tribunal-con-critico'
  * razon — el adaptador solo decide DONDE corre, nunca QUE hace.
  */
 export function criticoDelTerminal(projectId: string): TribunalDeps['critico'] {
-  return createGraphCritico(CLAUDE_BIN, projectId, undefined, grafoDelTurnoDe(getAppContext().projects.findById(projectId)?.path ?? null)) // prettier-ignore
+  const proyecto = getAppContext().projects.findById(projectId)
+  // Fail-closed (137): sin fila, el critico corre SIN confianza (solo fuentes user).
+  return createGraphCritico(CLAUDE_BIN, projectId, proyecto?.trusted ?? false, undefined, grafoDelTurnoDe(proyecto?.path ?? null)) // prettier-ignore
 }

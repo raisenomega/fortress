@@ -1,5 +1,6 @@
 import { capacidadesDe, type Capacidades } from '@domain/agent/capacidades-del-agente'
 import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
+import { fuentesDeSettings } from '@domain/settings/fuentes-de-settings'
 import { entradaDelGrafo, GRAPH_SERVER } from '@domain/connectors/graph-mcp'
 import { ok, type Result } from '@domain/shared/result'
 import type { ConPrompt } from '../claude-code/prompt-por-stdin'
@@ -21,15 +22,13 @@ const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GR
  */
 export type Prompt = string | ((c: Capacidades) => string)
 
-// SIN `--setting-sources` A PROPOSITO: el Motor corre SOLO sobre FORTRESS (ADR-107),
-// y las fuentes de proyecto son DELIBERADAS — el hook de ADR-098 (bloquea Edit sobre
-// .claude/) vive en ellas y quitarlas lo desarmaria. En repo ajeno ese flag seria
-// obligatorio (fuentes-de-settings, el CRITICAL 351abcd1); aqui el repo es el propio.
+// EL CINTURON (137, frontera firmada): sin confianza SOLO fuentes user. HOY no cambia
+// nada —.claude/ no trackeado, el worktree nace limpio (medido 136)— pero ADR-107 no es eterno.
 // `--model` por PROCESO: en el Motor cada proceso es UN agente (ADR-078, enmienda) — sin el, hereda el del CLI.
-const flagsEdicion = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
-  '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION, '--max-turns', String(MAX_TURNS), '--model', MODELO_POR_ROL.generador] // prettier-ignore
-const flagsLectura = (dir: string | null, rol: RolDeLectura): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
-  '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA, '--model', MODELO_POR_ROL[rol]] // prettier-ignore
+const flagsEdicion = (dir: string | null, trusted: boolean): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
+  '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION, '--max-turns', String(MAX_TURNS), '--model', MODELO_POR_ROL.generador, ...fuentesDeSettings(trusted)] // prettier-ignore
+const flagsLectura = (dir: string | null, rol: RolDeLectura, trusted: boolean): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
+  '--permission-mode', 'default', '--allowedTools', TOOLS_LECTURA, '--model', MODELO_POR_ROL[rol], ...fuentesDeSettings(trusted)] // prettier-ignore
 export type RolDeLectura = 'analista' | 'critico' | 'omega'
 
 // ADR-112: `-p` SIN valor — el prompt viaja por stdin y los args caben en
@@ -38,13 +37,9 @@ const textoDe = (prompt: Prompt, flags: readonly string[]): string =>
   typeof prompt === 'function' ? prompt(capacidadesDe(flags)) : prompt
 const conFlags = (flags: readonly string[]): readonly string[] => ['-p', ...flags]
 
-/**
- * Reanudar la sesion de la vuelta anterior (ADR-110): el generador responde a la
- * objecion en vez de empezar de cero. `--fork-session` deja intacta la sesion
- * original y abre una NUEVA desde ese punto, asi que el id cambia en cada vuelta
- * y hay que recapturarlo — medido el 2026-10-01, junto con que `--resume`
- * funciona con estos mismos flags y la caja clase A puesta.
- */
+/** Reanudar la vuelta anterior (ADR-110): responde a la objecion en vez de empezar
+ *  de cero. `--fork-session` abre sesion NUEVA desde ese punto (el id cambia en cada
+ *  vuelta y se recaptura — medido 2026-10-01 con estos flags y la caja clase A). */
 const reanudando = (sesion: string | undefined): readonly string[] =>
   sesion === undefined ? [] : ['--resume', sesion, '--fork-session']
 
@@ -54,9 +49,10 @@ export function argsDelGenerador(
   prompt: Prompt,
   worktreePath: string,
   grafoDir: string | null,
+  trusted: boolean,
   reanudar?: string
 ): Result<ConPrompt> {
-  const flags = flagsEdicion(grafoDir)
+  const flags = flagsEdicion(grafoDir, trusted)
   const caja = conSandbox([...conFlags(flags), ...reanudando(reanudar)], worktreePath)
   return caja.ok ? ok({ args: caja.value, prompt: textoDe(prompt, flags) }) : caja
 }
@@ -67,9 +63,10 @@ export function argsDeLectura(
   prompt: Prompt,
   cwd: string,
   grafoDir: string | null,
-  rol: RolDeLectura
+  rol: RolDeLectura,
+  trusted: boolean
 ): Result<ConPrompt> {
-  const flags = flagsLectura(grafoDir, rol)
+  const flags = flagsLectura(grafoDir, rol, trusted)
   const caja = conSandbox(conFlags(flags), cwd)
   return caja.ok ? ok({ args: caja.value, prompt: textoDe(prompt, flags) }) : caja
 }

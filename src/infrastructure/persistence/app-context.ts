@@ -52,7 +52,7 @@ export function getAppContext(): AppContext {
     qualityHistory: createSqliteQualityHistoryRepository(db),
     repairProposals: propuestas,
     eventLog: createProposalEventLog(createSqliteProposalEventRepository(db), createRepairNotifier(propuestas)), // prettier-ignore
-    analystFor: (projectPath, projectId) => createGraphAnalyst(CLAUDE_BIN, projectPath, projectId),
+    analystFor: (projectPath, projectId, trusted) => createGraphAnalyst(CLAUDE_BIN, projectPath, projectId, trusted), // prettier-ignore
     headSha,
     graphState: createSqliteGraphStateRepository(db),
     chat: createSqliteChatRepository(db),

@@ -36,7 +36,7 @@ describe('el guardian del modelo, aplicado a los cuatro del Motor', () => {
 
   it('ANALISTA que corrio en Fable → modelo_no_asignado, AVERIA', async () => {
     const bin = claudeQueDevuelve(salida('{"status":"REAL","risk":"r"}', 'claude-fable-5'))
-    const { analysis, runMeta } = await createGraphAnalyst(bin, carpetaDePrueba('.fortress-mod-'), 'p').study(TARGET, []) // prettier-ignore
+    const { analysis, runMeta } = await createGraphAnalyst(bin, carpetaDePrueba('.fortress-mod-'), 'p', true).study(TARGET, []) // prettier-ignore
     const v = veredictoDelAnalisis(analysis)
     expect(v.reason).toMatch(/^modelo_no_asignado: claude-fable-5/)
     expect(esAveria('modelo_no_asignado')).toBe(true)
@@ -53,12 +53,12 @@ describe('el guardian del modelo, aplicado a los cuatro del Motor', () => {
   })
 
   it('CRITICO en haiku → falla con modelo_no_asignado, no objeta', async () => {
-    const r = await createGraphCritico(claudeQueDevuelve(salida('el fix esta mal', 'claude-haiku-4-5')), 'p').run(mkdtempSync(join(tmpdir(), 'fcc-arb-')), 'x') // prettier-ignore
+    const r = await createGraphCritico(claudeQueDevuelve(salida('el fix esta mal', 'claude-haiku-4-5')), 'p', true).run(mkdtempSync(join(tmpdir(), 'fcc-arb-')), 'x') // prettier-ignore
     expect(r).toMatchObject({ ok: false, error: 'modelo_no_asignado' })
   })
 
   it('GENERADOR en Fable → falla, y su motivo es modelo_no_asignado', async () => {
-    const r = await createGraphGenerator(claudeQueDevuelve(salida('hecho', 'claude-fable-5')), 'p').generate(carpetaDePrueba('.fortress-gen-'), 'x') // prettier-ignore
+    const r = await createGraphGenerator(claudeQueDevuelve(salida('hecho', 'claude-fable-5')), 'p', true).generate(carpetaDePrueba('.fortress-gen-'), 'x') // prettier-ignore
     expect(r.ok).toBe(false)
     if (!r.ok) expect(motivoDelGenerador(r)).toBe('modelo_no_asignado')
   })

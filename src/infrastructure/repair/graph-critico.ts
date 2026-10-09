@@ -19,15 +19,14 @@ export interface GraphCritico {
   run(arbol: string, prompt: string): Promise<CriticoRunResult>
 }
 
-/**
- * El critico real: `claude -p` sobre el arbol, con las MISMAS herramientas que
- * OMEGA; la diferencia vive entera en el prompt. REPLICA el ciclo de `graph-omega`
- * sin reusarlo (atacante y juez no comparten codigo); si reusa `processOmegaOut`.
- * `grafo`: el store del turno (ADR-095, enmienda); sin atar, un dir vacio, nunca la cache real.
- */
+/** El critico real: `claude -p` sobre el arbol, MISMAS herramientas que OMEGA;
+ *  la diferencia vive entera en el prompt. REPLICA el ciclo de `graph-omega` sin
+ *  reusarlo (atacante y juez no comparten codigo); si reusa `processOmegaOut`.
+ *  `grafo`: store del turno (ADR-095, enmienda); sin atar, dir vacio, nunca la cache. */
 export function createGraphCritico(
   claudeBin: string,
   projectId: string,
+  trusted: boolean,
   timeoutMs = TIMEOUT_MS,
   grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)
 ): GraphCritico {
@@ -36,7 +35,7 @@ export function createGraphCritico(
     run: async (arbol, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar() // sin caja no arranca, como un binario que no existe:
-      const args = argsDeLectura(prompt, arbol, store.dir, 'critico')
+      const args = argsDeLectura(prompt, arbol, store.dir, 'critico', trusted)
       if (!args.ok) return (store.liberar(), { ok: false, error: args.error, timedOut: false, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {
         const child = spawn(claudeBin, [...args.value.args], { cwd: arbol, detached: true, env: buildEnv(null) })

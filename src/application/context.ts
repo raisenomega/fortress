@@ -48,7 +48,7 @@ export interface AppContext extends EscritoresDeFichero, Telemetria, LecturasDel
   /** Libro de vida: un evento por eslabon de cada propuesta. Telemetria, no gate. */
   readonly eventLog: ProposalEventLog
   /** Analista C2 (grafo-primero, solo lectura) anclado al proyecto; el id, a nombre de quien corre. */
-  readonly analystFor: (projectPath: string, projectId: string) => Analyst
+  readonly analystFor: (projectPath: string, projectId: string, trusted: boolean) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */
   readonly headSha: (projectPath: string) => string | null
   /** Estado del indice del grafo por proyecto (reindexado automatico). */

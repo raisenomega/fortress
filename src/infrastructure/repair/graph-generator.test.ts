@@ -16,21 +16,21 @@ function fakeBin(script: string): string {
 describe('createGraphGenerator', () => {
   it('exit 0 con usage devuelve ok y la factura', async () => {
     const bin = fakeBin(`echo '{"result":"listo","usage":{"input_tokens":100,"output_tokens":50}}'`)
-    const result = await createGraphGenerator(bin, 'p1').generate(tmpdir(), 'prompt')
+    const result = await createGraphGenerator(bin, 'p1', true).generate(tmpdir(), 'prompt')
     expect(result.ok).toBe(true)
     expect(result.runMeta.tokensUsed).toBe(150)
     expect(result.runMeta.durationMs).toBeGreaterThanOrEqual(0)
   })
 
   it('exit != 0 devuelve error con codigo, y la duracion igual', async () => {
-    const result = await createGraphGenerator(fakeBin('exit 7'), 'p1').generate(tmpdir(), 'p')
+    const result = await createGraphGenerator(fakeBin('exit 7'), 'p1', true).generate(tmpdir(), 'p')
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toMatch(/codigo 7/)
     expect(result.runMeta.tokensUsed).toBeUndefined()
   })
 
   it('el timeout mata el proceso y reporta', async () => {
-    const result = await createGraphGenerator(fakeBin('sleep 30'), 'p1', 150).generate(
+    const result = await createGraphGenerator(fakeBin('sleep 30'), 'p1', true, 150).generate(
       tmpdir(),
       'p'
     )
@@ -39,7 +39,7 @@ describe('createGraphGenerator', () => {
   })
 
   it('sin JSON en stdout no se inventa factura: undefined', async () => {
-    const result = await createGraphGenerator(fakeBin('echo hola'), 'p1').generate(tmpdir(), 'p')
+    const result = await createGraphGenerator(fakeBin('echo hola'), 'p1', true).generate(tmpdir(), 'p')
     expect(result.ok).toBe(true)
     expect(result.runMeta.tokensUsed).toBeUndefined()
   })
@@ -59,12 +59,12 @@ describe('el agente que EDITA arranca con el entorno recortado', () => {
     process.env.SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
     const bin = fakeBin(`test -n "$SSH_AUTH_SOCK" && exit 3\necho '{"result":"listo"}'`)
 
-    expect((await createGraphGenerator(bin, 'p1').generate(tmpdir(), 'p')).ok).toBe(true)
+    expect((await createGraphGenerator(bin, 'p1', true).generate(tmpdir(), 'p')).ok).toBe(true)
   })
 
   it('HOME sigue viajando: de ahi salen las credenciales con las que se factura', async () => {
     const bin = fakeBin(`test -z "$HOME" && exit 3\necho '{"result":"listo"}'`)
 
-    expect((await createGraphGenerator(bin, 'p1').generate(tmpdir(), 'p')).ok).toBe(true)
+    expect((await createGraphGenerator(bin, 'p1', true).generate(tmpdir(), 'p')).ok).toBe(true)
   })
 })

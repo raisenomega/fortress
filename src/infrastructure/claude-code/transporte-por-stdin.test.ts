@@ -28,7 +28,7 @@ describe('ADR-112: el prompt viaja por stdin en los CUATRO constructores', () =>
 
   it('el generador — edicion y lectura — con la caja puesta', () => {
     const wt = carpetaDePrueba('.fortress-stdin-gen-')
-    for (const construir of [argsDelGenerador, (p: string, d: string, g: string) => argsDeLectura(p, d, g, 'analista')]) {
+    for (const construir of [(p: string, d: string, g: string) => argsDelGenerador(p, d, g, true), (p: string, d: string, g: string) => argsDeLectura(p, d, g, 'analista', true)]) { // prettier-ignore
       const r = construir(GORDO, wt, '/grafo/turno')
       if (!r.ok) throw new Error(r.error)
       expect(r.value.prompt).toBe(GORDO)

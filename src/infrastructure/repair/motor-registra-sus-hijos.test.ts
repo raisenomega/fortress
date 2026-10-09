@@ -29,7 +29,7 @@ afterEach(() => {
 
 describe('Detener alcanza a los agentes del motor en vuelo', () => {
   it('el generador queda registrado a nombre de su proyecto', async () => {
-    const corriendo = createGraphGenerator(dormilon(), 'A', 60_000).generate(tmpdir(), 'p')
+    const corriendo = createGraphGenerator(dormilon(), 'A', true, 60_000).generate(tmpdir(), 'p')
     await new Promise((r) => setTimeout(r, 150))
 
     expect(liveChildCount()).toBe(1)
@@ -41,7 +41,7 @@ describe('Detener alcanza a los agentes del motor en vuelo', () => {
   }, 20_000)
 
   it('parar OTRO proyecto no lo toca, y el suyo no queda cancelado', async () => {
-    const corriendo = createGraphGenerator(dormilon(), 'A', 3_000).generate(tmpdir(), 'p')
+    const corriendo = createGraphGenerator(dormilon(), 'A', true, 3_000).generate(tmpdir(), 'p')
     await new Promise((r) => setTimeout(r, 150))
 
     expect(cancelRun('B')).toBe(0)
@@ -56,7 +56,7 @@ describe('Detener alcanza a los agentes del motor en vuelo', () => {
     writeFileSync(bin, '#!/bin/sh\necho "{}"\n')
     chmodSync(bin, 0o755)
 
-    await createGraphGenerator(bin, 'A', 10_000).generate(tmpdir(), 'p')
+    await createGraphGenerator(bin, 'A', true, 10_000).generate(tmpdir(), 'p')
     expect(liveChildCount()).toBe(0)
   }, 20_000)
 })

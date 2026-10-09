@@ -22,14 +22,14 @@ describe('createGraphOmega (binario fake)', () => {
     const bin = fakeBin(
       `echo '{"result":"${VERDICT.replace(/"/g, '\\"')}","usage":{"input_tokens":90,"output_tokens":10}}'` // prettier-ignore
     )
-    const result = await createGraphOmega(bin, 'p1').run(tmpdir(), 'prompt')
+    const result = await createGraphOmega(bin, 'p1', true).run(tmpdir(), 'prompt')
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.verdict.veredicto_global).toBe('APROBADO')
     expect(result.runMeta.tokensUsed).toBe(100)
   })
 
   it('respuesta sin bloque VERDICT: la constante clasifica y la autopsia viaja', async () => {
-    const result = await createGraphOmega(fakeBin('echo "se ve bien"'), 'p1').run(tmpdir(), 'p')
+    const result = await createGraphOmega(fakeBin('echo "se ve bien"'), 'p1', true).run(tmpdir(), 'p')
     // Extremo a extremo por el sobre real del CLI: el diagnostico del parser y
     // el crudo sobreviven al camino, no solo dentro de toOmegaOutcome.
     expect(result).toMatchObject({ ok: false, error: 'omega_response_invalid' })
@@ -39,12 +39,12 @@ describe('createGraphOmega (binario fake)', () => {
   })
 
   it('timeout: lo mata y reporta timedOut', async () => {
-    const result = await createGraphOmega(fakeBin('sleep 30'), 'p1', 150).run(tmpdir(), 'p')
+    const result = await createGraphOmega(fakeBin('sleep 30'), 'p1', true, 150).run(tmpdir(), 'p')
     expect(result).toMatchObject({ ok: false, timedOut: true })
   })
 
   it('spawn roto: error con mensaje, sin lanzar', async () => {
-    const result = await createGraphOmega('/no/existe', 'p1').run(tmpdir(), 'p')
+    const result = await createGraphOmega('/no/existe', 'p1', true).run(tmpdir(), 'p')
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.timedOut).toBe(false)
   })
@@ -58,7 +58,7 @@ describe('createGraphOmega — lo que el revisor ya no hereda', () => {
     // El binario fake declara lo que VE: es la unica forma de medir el entorno
     // real del hijo y no la opcion que le pasamos.
     const bin = fakeBin('echo "sock:[$SSH_AUTH_SOCK]"')
-    const result = await createGraphOmega(bin, 'p1').run(tmpdir(), 'p')
+    const result = await createGraphOmega(bin, 'p1', true).run(tmpdir(), 'p')
     if (result.ok) return expect.fail('la salida fake no es un VERDICT')
     expect(result.raw).toContain('sock:[]')
   })

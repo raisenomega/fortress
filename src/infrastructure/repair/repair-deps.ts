@@ -28,10 +28,12 @@ export function worktreeRoot(): string {
 /** Deps reales de generateFix: git, generador claude y sandbox del plan. */
 export function buildGenerateDeps(projectId: string): GenerateDeps {
   const root = worktreeRoot()
+  // Fail-closed (137): sin fila de proyecto, el generador corre SIN confianza.
+  const confiado = getAppContext().projects.findById(projectId)?.trusted ?? false
   return {
     worktreeRoot: root,
     worktrees: createWorktreeManager(),
-    generator: createGraphGenerator(CLAUDE_BIN, projectId, undefined, grafoDelProyecto(projectId)),
+    generator: createGraphGenerator(CLAUDE_BIN, projectId, confiado, undefined, grafoDelProyecto(projectId)), // prettier-ignore
     scopeGroups: readScopeGroups,
     huellaDeConfig,
     sandbox: (worktreePath, proposalId, liveRepoPath) =>
@@ -65,7 +67,8 @@ export function buildOmegaDeps(projectId: string): OmegaDeps {
     diffText: (worktreePath) => showHead(worktreePath),
     readPost: (worktreePath, relPath) => readAtHead(worktreePath, relPath),
     readPre: (worktreePath, baseSha, relPath) => readAtSha(worktreePath, baseSha, relPath),
-    omega: createGraphOmega(CLAUDE_BIN, projectId, undefined, grafoDelProyecto(projectId)),
+    // Fail-closed (137): sin fila de proyecto, OMEGA corre SIN confianza.
+    omega: createGraphOmega(CLAUDE_BIN, projectId, getAppContext().projects.findById(projectId)?.trusted ?? false, undefined, grafoDelProyecto(projectId)), // prettier-ignore
     enqueue: (job) => gateQueue.enqueue(job),
     now: Date.now
   }

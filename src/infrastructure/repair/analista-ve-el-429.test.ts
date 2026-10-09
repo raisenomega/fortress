@@ -26,7 +26,7 @@ const TARGET = { id: 'f1', severity: 'LOW' as const, title: 't', file: 'src/a.ts
 
 describe('el analista VE el 429: no lo confunde con su analisis', () => {
   it('cuota agotada → analisis marcado del proveedor, veredicto provider_error (averia)', async () => {
-    const analista = createGraphAnalyst(claudeSinCuota(), carpetaDePrueba('.fortress-429-'), 'p-429')
+    const analista = createGraphAnalyst(claudeSinCuota(), carpetaDePrueba('.fortress-429-'), 'p-429', true)
     const { analysis } = await analista.study(TARGET, [])
     expect(fallaDelProveedor(analysis)).toBe(true)
     expect(veredictoDelAnalisis(analysis).reason).toMatch(/^provider_error: 429: You've reached/)

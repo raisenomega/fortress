@@ -19,7 +19,8 @@ describe('el techo de turnos', () => {
     const r = argsDelGenerador(
       'arregla esto',
       carpetaDePrueba('.fortress-gen-test-'),
-      '/grafo/turno'
+      '/grafo/turno',
+      true
     )
     if (!r.ok) throw new Error(r.error)
     return r.value.args
@@ -46,7 +47,7 @@ describe('el techo de turnos', () => {
 
 describe('argsDelGenerador: la vuelta del lazo reanuda la sesion (ADR-110)', () => {
   const conSesion = (sesion?: string): readonly string[] => {
-    const r = argsDelGenerador('p', '/wt', null, sesion)
+    const r = argsDelGenerador('p', '/wt', null, true, sesion)
     return r.ok ? r.value.args : []
   }
 

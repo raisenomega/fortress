@@ -37,7 +37,7 @@ describe('el critico tampoco toma el aviso de cuota por una objecion', () => {
     const bin = join(mkdtempSync(join(tmpdir(), 'fcc-critico-429-')), 'claude')
     writeFileSync(bin, `#!/bin/sh\ncat >/dev/null\ncat <<'JSON'\n${CUOTA}\nJSON\nexit 1\n`)
     chmodSync(bin, 0o755)
-    const r = await createGraphCritico(bin, 'p-429').run(mkdtempSync(join(tmpdir(), 'fcc-arbol-')), 'ataca el fix')
+    const r = await createGraphCritico(bin, 'p-429', true).run(mkdtempSync(join(tmpdir(), 'fcc-arbol-')), 'ataca el fix')
     expect(r).toMatchObject({ ok: false, error: 'provider_error' })
   })
 })

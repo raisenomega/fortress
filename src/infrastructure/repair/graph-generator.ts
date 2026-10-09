@@ -23,12 +23,12 @@ const TIMEOUT_MS = 15 * 60 * 1000
 // prettier-ignore
 // `grafo` es el store del turno (ADR-095, enmienda), atado al proyecto por quien crea
 // el generador; sin atar, un directorio vacio: nunca la cache real.
-export function createGraphGenerator(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS, grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)): GraphGenerator { // prettier-ignore
+export function createGraphGenerator(claudeBin: string, projectId: string, trusted: boolean, timeoutMs = TIMEOUT_MS, grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)): GraphGenerator { // prettier-ignore
   return {
     generate: async (worktreePath, prompt, reanudar) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar()
-      const args = argsDelGenerador(prompt, worktreePath, store.dir, reanudar)
+      const args = argsDelGenerador(prompt, worktreePath, store.dir, trusted, reanudar)
       // Sin caja no arranca: el mismo camino que un binario que no existe.
       if (!args.ok) return (store.liberar(), { ok: false, noArranco: true, error: args.error, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {

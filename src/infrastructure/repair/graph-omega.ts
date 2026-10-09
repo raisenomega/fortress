@@ -21,12 +21,12 @@ export interface GraphOmega {
 /** OMEGA real: claude -p en modo lectura, cwd anclado al worktree. Replica el
  *  patron del generador a proposito — juez y ejecutor no comparten codigo. */
 // prettier-ignore
-export function createGraphOmega(claudeBin: string, projectId: string, timeoutMs = TIMEOUT_MS, grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)): GraphOmega { // prettier-ignore
+export function createGraphOmega(claudeBin: string, projectId: string, trusted: boolean, timeoutMs = TIMEOUT_MS, grafo: GrafoDelTurnoPort = grafoDelTurnoDe(null)): GraphOmega { // prettier-ignore
   return {
     run: async (worktreePath, prompt) => {
       const { sinFactura, meta } = relojDeCorrida(Date.now())
       const store = await grafo.preparar() // el store del turno (ADR-095, enmienda)
-      const args = argsDeLectura(prompt, worktreePath, store.dir, 'omega')
+      const args = argsDeLectura(prompt, worktreePath, store.dir, 'omega', trusted)
       // Sin caja no arranca: el mismo camino que un binario que no existe.
       if (!args.ok) return (store.liberar(), { ok: false, error: args.error, timedOut: false, noArranco: true, runMeta: sinFactura() }) // prettier-ignore
       return new Promise((resolve) => {

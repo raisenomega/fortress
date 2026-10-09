@@ -5,7 +5,8 @@ import { sinComentarios } from './modelo-barrera-fixture'
 export const EXENTAS: readonly string[] = ["['--version']", "['auth', 'status']", "['auth', 'login', '--claudeai']"] // prettier-ignore
 const CLAUDE = new Set(['CLAUDE_BIN', 'claudeBin', "'claude'", '"claude"'])
 const OTROS = new Set(["'git'", "'npm'", "'which'", 'bwrap', 'GRAPH_BIN', 'caja.value.bin', 'l.bin', 'l.value.bin']) // prettier-ignore
-const DECLARANTE = /\bargsDeLectura\([^)]*'(?:analista|critico|omega)'\)|\bargsDelGenerador\(|\bargsDelTurno\(|\bargsDeIndexar\(|\bverifyArgs\(/ // prettier-ignore
+// El rol ya no cierra el parentesis: desde el 137 viaja `trusted` detras.
+const DECLARANTE = /\bargsDeLectura\([^)]*'(?:analista|critico|omega)'|\bargsDelGenerador\(|\bargsDelTurno\(|\bargsDeIndexar\(|\bverifyArgs\(/ // prettier-ignore
 const NOMBRA_CLAUDE = /\b(?:CLAUDE_BIN|claudeBin)\b|['"]claude['"]/
 
 export type Clase = 'exenta' | 'claude' | 'otro' | 'desconocida'

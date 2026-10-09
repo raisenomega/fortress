@@ -23,7 +23,7 @@ describe('createGraphCritico — lo que el critico NO hereda', () => {
   it('las llaves de la sesion viva del operador no bajan al hijo', async () => {
     process.env.SSH_AUTH_SOCK = '/run/user/1000/keyring/ssh'
     // El fake declara lo que VE: la unica forma de medir el entorno del hijo.
-    const r = await createGraphCritico(fakeBin('echo "sock:[$SSH_AUTH_SOCK]"'), 'p1').run(tmpdir(), 'p') // prettier-ignore
+    const r = await createGraphCritico(fakeBin('echo "sock:[$SSH_AUTH_SOCK]"'), 'p1', true).run(tmpdir(), 'p') // prettier-ignore
 
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.texto).toContain('sock:[]')

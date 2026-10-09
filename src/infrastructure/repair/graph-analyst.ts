@@ -19,10 +19,11 @@ import { trackChild } from '../claude-code/child-registry'
 import { prepararGrafoDelTurno } from '../graph/grafo-del-turno'
 
 /** `buildEnv(null)` como sus hermanos: recorta la SESION VIVA del operador (era el unico spawn que no lo hacia). */
-async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Promise<RunOut> {
+// prettier-ignore
+async function run(bin: string, cwd: string, prompt: Prompt, owner: string, trusted: boolean): Promise<RunOut> {
   // Prompt por STDIN (ADR-112). Solo lectura; sin caja no arranca. `grafo`: el store del turno.
   const grafo = await prepararGrafoDelTurno(cwd)
-  const args = argsDeLectura(prompt, cwd, grafo.dir, 'analista')
+  const args = argsDeLectura(prompt, cwd, grafo.dir, 'analista', trusted)
   if (!args.ok) return (grafo.liberar(), { result: args.error, noArranco: true })
   return new Promise((resolve) => {
     const child = spawn(bin, [...args.value.args], { cwd, env: buildEnv(null) })
@@ -47,7 +48,7 @@ async function run(bin: string, cwd: string, prompt: Prompt, owner: string): Pro
 /** Analista real: claude -p GRAFO-PRIMERO (read-only) con su factura. tokensUsed
  *  va undefined si el parser no lo saco. El agentRunId lo pone quien asienta. */
 // prettier-ignore
-export function createGraphAnalyst(claudeBin: string, projectPath: string, projectId: string): Analyst {
+export function createGraphAnalyst(claudeBin: string, projectPath: string, projectId: string, trusted: boolean): Analyst {
   return {
     study: async (target, atendidas) => {
       const reloj = relojDeCorrida(Date.now())
@@ -57,7 +58,7 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       // Recibe lo que el lanzamiento PUEDE (Bash, edicion) leido de sus flags:
       // el prompt refleja las capacidades reales, no las que alguien creyo.
       const prompt = (c: Capacidades): string => buildAnalysisPrompt(target, discoverCorpus(projectPath), atendidas, graphSlug(projectPath), c, readCognitionLog(projectPath).patterns) // prettier-ignore
-      const out = await run(claudeBin, projectPath, prompt, projectId)
+      const out = await run(claudeBin, projectPath, prompt, projectId, trusted)
       // El proveedor y el modelo se miran ANTES de leer el texto como analisis.
       const juicio = juzgarModelo(MODELO_POR_ROL.analista, out.modelos ?? [])
       const analysis = out.proveedor !== undefined ? sinRespuesta(target, out.proveedor) : juicio.veredicto === 'falla' ? sinModeloAsignado(target, juicio.motivo ?? '') : toAnalysis(target, out) // prettier-ignore

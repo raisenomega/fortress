@@ -11,5 +11,7 @@ import type { OmegaDelTurno } from '@application/chat/omega-del-turno'
  * entonces «lo revisa OMEGA» dejaria de querer decir una sola cosa.
  */
 export function omegaDelTerminal(projectId: string): OmegaDelTurno {
-  return createGraphOmega(CLAUDE_BIN, projectId, undefined, grafoDelTurnoDe(getAppContext().projects.findById(projectId)?.path ?? null)) // prettier-ignore
+  const proyecto = getAppContext().projects.findById(projectId)
+  // Fail-closed (137): sin fila, el juez corre SIN confianza (solo fuentes user).
+  return createGraphOmega(CLAUDE_BIN, projectId, proyecto?.trusted ?? false, undefined, grafoDelTurnoDe(proyecto?.path ?? null)) // prettier-ignore
 }
