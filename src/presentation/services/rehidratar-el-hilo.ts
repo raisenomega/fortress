@@ -1,12 +1,13 @@
 import type { ChatMessage } from '@domain/chat/chat-message'
-import type { HiloDeChat, ModoDeChat } from '@domain/chat/hilo-de-chat'
+import { esModoSinRepo, type HiloDeChat, type ModoDeChat } from '@domain/chat/hilo-de-chat'
 import { useBarraStore } from '../stores/barra-store'
 import { useConstruirStore } from '../stores/construir-store'
 import { elPuerto, type ParDelHilo } from './hilo-activo'
 
-/** El par que la vista tiene delante: libre SIEMPRE sin proyecto. */
+/** El par que la vista tiene delante: los modos sin repo (libre/cto, 133)
+ *  SIEMPRE sin proyecto — el CTO es global aunque haya un proyecto elegido. */
 export const parDeLaVista = (projectId: string | null, mode: ModoDeChat | 'libre'): ParDelHilo =>
-  mode === 'libre' ? { projectId: null, modo: 'libre' } : { projectId, modo: mode }
+  esModoSinRepo(mode) ? { projectId: null, modo: mode } : { projectId, modo: mode }
 
 /**
  * Al abrir o cambiar de par: el hilo MAS RECIENTE del par, o vacio a la

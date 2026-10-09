@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { esModoSinRepo } from '@domain/chat/hilo-de-chat'
 import { barrerVaciosUnaVez } from '../../services/limpiar-vacios'
 import { alMorirElDraft, parDeLaVista, rehidratar } from '../../services/rehidratar-el-hilo'
 import { useActiveProject } from '../../stores/project-store'
@@ -11,16 +12,16 @@ import { CuerpoDelChat } from './CuerpoDelChat'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
- * abajo. La flecha elige el modo (Plan / Investigacion / Ejecutor / Libre).
- * El CARVE-OUT de proyecto+confianza vale SOLO para 'libre' (PASO 91): un chat
- * powers-off sin repo no tiene nada que proteger. Los otros tres modos siguen
- * exigiendo proyecto de confianza EXACTAMENTE como siempre.
+ * abajo. La flecha elige el modo (Plan / Investigacion / Ejecutor / Libre / CTO).
+ * El CARVE-OUT de proyecto+confianza vale para los modos SIN repo —'libre'
+ * (PASO 91) y 'cto' (PASO 133)—: powers-off, su seguridad es el candado de la
+ * corrida. Los modos de TRABAJO siguen exigiendo proyecto de confianza.
  */
 export function ConstruirView(): React.JSX.Element {
   const project = useActiveProject()
   const mode = useConstruirStore((s) => s.mode)
   const barraAbierta = useBarraStore((s) => s.abierta)
-  const libre = mode === 'libre'
+  const sinRepo = esModoSinRepo(mode)
 
   // B1 + Revision A: PRIMERO el barrido de vacios (el «cerrar» del contrato
   // corre al arrancar, una vez) y DESPUES la rehidratacion del par — asi el
@@ -50,13 +51,15 @@ export function ConstruirView(): React.JSX.Element {
         <div className="flex items-center pb-2">
           <BarraToggle />
           <p className="flex-1 text-center text-[11px] text-muted-foreground">
-            {libre
-              ? 'Chat libre — global, sin proyecto · conversa sin repo'
-              : `Chat de ${project?.name ?? ''}`}
+            {mode === 'cto'
+              ? 'CTO — piensa y mide, nunca firma · sin repo'
+              : sinRepo
+                ? 'Chat libre — global, sin proyecto · conversa sin repo'
+                : `Chat de ${project?.name ?? ''}`}
           </p>
           <span className="w-7 shrink-0" aria-hidden />
         </div>
-        <CuerpoDelChat project={project} libre={libre} />
+        <CuerpoDelChat project={project} libre={sinRepo} />
       </div>
     </div>
   )

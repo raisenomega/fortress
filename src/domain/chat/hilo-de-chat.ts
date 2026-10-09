@@ -23,3 +23,8 @@ export interface NuevoHilo {
   /** Opcional: nacer DENTRO de una carpeta (la activa en la barra). */
   readonly carpetaId?: string | null
 }
+
+/** Los modos SIN repo (libre y cto, PASO 133): globales, powers-off — su
+ *  seguridad es el candado de la corrida, no el gate de proyecto+confianza
+ *  de la vista; y su par es SIEMPRE global (proyecto NULL). */
+export const esModoSinRepo = (modo: ModoDeChat): boolean => modo === 'libre' || modo === 'cto'
