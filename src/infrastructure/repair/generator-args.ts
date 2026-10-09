@@ -21,6 +21,10 @@ const grafo = (dir: string | null): string => JSON.stringify({ mcpServers: { [GR
  */
 export type Prompt = string | ((c: Capacidades) => string)
 
+// SIN `--setting-sources` A PROPOSITO: el Motor corre SOLO sobre FORTRESS (ADR-107),
+// y las fuentes de proyecto son DELIBERADAS — el hook de ADR-098 (bloquea Edit sobre
+// .claude/) vive en ellas y quitarlas lo desarmaria. En repo ajeno ese flag seria
+// obligatorio (fuentes-de-settings, el CRITICAL 351abcd1); aqui el repo es el propio.
 // `--model` por PROCESO: en el Motor cada proceso es UN agente (ADR-078, enmienda) — sin el, hereda el del CLI.
 const flagsEdicion = (dir: string | null): readonly string[] => ['--output-format', 'json', '--mcp-config', grafo(dir), '--strict-mcp-config',
   '--permission-mode', 'acceptEdits', '--allowedTools', TOOLS_EDICION, '--max-turns', String(MAX_TURNS), '--model', MODELO_POR_ROL.generador] // prettier-ignore
