@@ -21,11 +21,12 @@ describe('PERFIL A1: el candado libre, reutilizado sin tocarlo', () => {
 })
 
 describe('AISLAMIENTO y modelo: cuarto vacio, sin MCP, sin confianza', () => {
-  it('trusted:false, agente sin MCP (agentLibre) y cuarto propio chat-cto', () => {
+  it('trusted:false, agente sin MCP (agentLibre) y cuarto propio CTO_OWNER', () => {
     const src = fuente('src/infrastructure/build/run-cto.ts')
     expect(src).toContain('trusted: false')
     expect(src).toContain('agentLibre(')
-    expect(src).toContain("'chat-cto'")
+    // PASO 149: el sentinel del cuarto se nombro CTO_OWNER (= 'chat-cto').
+    expect(src).toContain('CTO_OWNER')
     expect(src).not.toContain('readProjectMcpServers')
   })
 

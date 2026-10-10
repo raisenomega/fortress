@@ -45,10 +45,10 @@ describe('las capas y el candado, pineados (molde de la casa)', () => {
     const lector = fuente('src/infrastructure/build/leer-cto-kit.ts')
     expect(lector).not.toContain('mkdir')
     expect(lector).not.toContain('writeFile')
-    // El unico mkdir de la corrida es el del CUARTO vacio (chat-cto), no el kit.
+    // El unico mkdir de la corrida es el del CUARTO vacio (CTO_OWNER), no el kit.
     const corrida = fuente('src/infrastructure/build/run-cto.ts')
     expect(corrida.match(/mkdirSync\(/g)).toHaveLength(1)
-    expect(corrida).toContain("'chat-cto'")
+    expect(corrida).toContain('CTO_OWNER')
   })
 
   it("CANDADO INTACTO: allow EXACTAMENTE ['WebSearch'], WebFetch denegado (PASO 142)", () => {

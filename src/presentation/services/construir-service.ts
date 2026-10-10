@@ -1,3 +1,4 @@
+import { CTO_OWNER } from '@domain/build/cto-owner'
 import { api } from '../adapters/fortress-api'
 import { useConstruirStore } from '../stores/construir-store'
 import { sendCto } from './construir-cto'
@@ -34,10 +35,14 @@ export async function attachFile(): Promise<void> {
   if (path) useConstruirStore.getState().setAttached(path)
 }
 
-/** Detener: corta el agente en marcha sin cerrar la app. */
+/** Detener: corta el agente en marcha sin cerrar la app. En modo CTO el agente
+ *  corre bajo el owner CTO_OWNER (su cuarto), no bajo el projectId anclado;
+ *  parar debe apuntar a ESE owner o no mata nada (Sello 1, PASO 149). Los demas
+ *  modos (plan/investigacion/ejecutor) siguen por projectId. */
 export async function stopBuild(projectId: string): Promise<void> {
-  await api().build.stop(projectId)
   const store = useConstruirStore.getState()
+  const owner = store.mode === 'cto' ? CTO_OWNER : projectId
+  await api().build.stop(owner)
   store.setBusy(false)
   store.push({ role: 'assistant', text: 'Detenido por ti.' })
 }
