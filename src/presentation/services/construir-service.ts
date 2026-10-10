@@ -23,7 +23,8 @@ export function submitConstruir(projectId: string): void {
   store.setAttached(null)
   if (store.mode === 'plan') void sendPlan(projectId, intent)
   else if (store.mode === 'libre') void sendLibre(intent)
-  else if (store.mode === 'cto') void sendCto(intent)
+  // El ancla del CTO (Sello B.1): el proyecto activo de la vista, o nada ('').
+  else if (store.mode === 'cto') void sendCto(intent, projectId === '' ? null : projectId)
   else void sendInvestigate(projectId, intent)
 }
 

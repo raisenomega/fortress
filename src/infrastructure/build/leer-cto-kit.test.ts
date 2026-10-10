@@ -35,8 +35,10 @@ describe('las capas y el candado, pineados (molde de la casa)', () => {
     expect(dominio).not.toContain('readFileSync')
     expect(dominio).not.toContain("from 'fs'")
     expect(dominio).not.toContain('electron')
+    // Sello B.1 ENSANCHO el pin: el kit sigue entrando igual y la rebanada
+    // entra POR EL MISMO bloque — la composicion sigue siendo del dominio.
     const corrida = fuente('src/infrastructure/build/run-cto.ts')
-    expect(corrida).toContain('bloqueCtoKit(leerCtoKit())')
+    expect(corrida).toContain('bloqueCtoKit([...leerCtoKit(), ...marcos])')
   })
 
   it('NADIE crea la carpeta por codigo: nace a mano, como el audit-kit', () => {

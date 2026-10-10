@@ -21,7 +21,7 @@ afterEach(() => {
 })
 
 describe('DESPACHA A CTO: submitConstruir en modo cto llama a SU canal', () => {
-  it('va a build.cto y NI libre NI plan se enteran', async () => {
+  it('va a build.cto CON el ancla del proyecto activo (Sello B.1)', async () => {
     rigDelHilo()
     const cto = vi.fn().mockResolvedValue({ ok: true, value: 'PASO armado' })
     const libre = vi.fn()
@@ -29,9 +29,18 @@ describe('DESPACHA A CTO: submitConstruir en modo cto llama a SU canal', () => {
     conApi({ cto, libre, plan })
     useConstruirStore.setState({ mode: 'cto', input: 'mide la web', busy: false })
     submitConstruir('p1')
-    await vi.waitFor(() => expect(cto).toHaveBeenCalledWith('mide la web', []))
+    await vi.waitFor(() => expect(cto).toHaveBeenCalledWith('mide la web', [], 'p1'))
     expect(libre).not.toHaveBeenCalled()
     expect(plan).not.toHaveBeenCalled()
+  })
+
+  it('sin proyecto activo el ancla viaja null: el CTO global de siempre', async () => {
+    rigDelHilo()
+    const cto = vi.fn().mockResolvedValue({ ok: true, value: 'PASO armado' })
+    conApi({ cto })
+    useConstruirStore.setState({ mode: 'cto', input: 'piensa libre', busy: false })
+    submitConstruir('')
+    await vi.waitFor(() => expect(cto).toHaveBeenCalledWith('piensa libre', [], null))
   })
 })
 
@@ -39,7 +48,7 @@ describe('PERSISTENCIA CTO: la puerta de Fase 1, usada por el EMISOR real', () =
   it('sendCto persiste el hilo modo=cto, la barra lo lista y reabre COMO CTO', async () => {
     const db = rigDelHilo()
     conApi({ cto: vi.fn().mockResolvedValue({ ok: true, value: 'PASO armado' }) })
-    await sendCto('Mide el selector')
+    await sendCto('Mide el selector', null)
     await vi.waitFor(() =>
       expect(db.prepare('SELECT modo FROM chats').get()).toEqual({ modo: 'cto' })
     )

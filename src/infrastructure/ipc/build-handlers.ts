@@ -44,9 +44,12 @@ export function registerBuildHandlers(): void {
   ipcMain.handle(IPC.buildLibre, (e, pregunta: string, hilo: TurnoLibre[]) =>
     runLibre(getAppContext(), pregunta, hilo, chunkSender(e, 'chat-libre'))
   )
-  // CTO (126): mismo trato que libre — sin proyecto, su propio id centinela.
-  ipcMain.handle(IPC.buildCto, (e, pregunta: string, hilo: TurnoLibre[]) =>
-    runCto(getAppContext(), pregunta, hilo, chunkSender(e, 'chat-cto'))
+  // CTO (126): el carril sigue siendo su id centinela; el ancla (Sello B.1) es
+  // SOLO de lectura — parametriza la rebanada del libro, no un guard ni un repo.
+  ipcMain.handle(
+    IPC.buildCto,
+    (e, pregunta: string, hilo: TurnoLibre[], ancla: string | null = null) =>
+      runCto(getAppContext(), pregunta, hilo, ancla ?? null, chunkSender(e, 'chat-cto'))
   )
   ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
     withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))
