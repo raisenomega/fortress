@@ -29,6 +29,7 @@
     "icons": "electron --no-sandbox scripts/make-icons.cjs",
     "verify:scan": "npm run build && electron --no-sandbox scripts/scan-verification.cjs",
     "verify:cabecera": "node --import ./scripts/lib/cargar-ts.mjs scripts/verify-cabecera-cto.ts",
+    "verify:grafo-aislamiento": "node --import ./scripts/lib/cargar-ts.mjs scripts/verify-grafo-aislamiento.ts",
     "backfill:proposal-events": "node scripts/backfill-events-i1.5.ts",
     "fase-b:clasificar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-clasificar.ts",
     "fase-b:ejecutar": "node --import ./scripts/lib/cargar-ts.mjs scripts/fase-b-ejecutar.ts",

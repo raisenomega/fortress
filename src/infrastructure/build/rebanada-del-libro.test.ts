@@ -39,4 +39,9 @@ describe('LA CUSTODIA: la rebanada de B jamas ve a A', () => {
   it('proyecto ausente: rebanada VACIA, nunca la de otro', async () => {
     expect(await rebanadaDelLibro(fx.ctx, 'nadie')).toEqual([])
   })
+
+  it('sin grafo (fixture hasGraph=0): el 7o marco sale VACIO, no spawnea el binario', async () => {
+    const marcos = await rebanadaDelLibro(fx.ctx, 'b1')
+    expect(marcos.find((m) => m.nombre === 'grafo-arquitectura')?.texto).toBe('')
+  })
 })

@@ -13,6 +13,11 @@
  * TODOS los marcos y lleva sus tres clausulas. Es la defensa de comportamiento
  * que aguanto 10/10; sin su guardian en el registro, un turno podria aflojarla
  * en silencio (quitar el bucle «precede a TODOS», borrar una clausula).
+ *
+ * PASO 145 (Sello B.2): entran el adaptador del grafo y su runner cli. Son
+ * pared de aislamiento: leen de una COPIA fenced (nunca el indice real) y
+ * descartan el stderr donde el binario enumera `available_projects`. Aflojar
+ * cualquiera —apuntar al cache real, fusionar stderr— abriria el leak del 144.
  */
 export const DEFENSAS_DEL_AISLAMIENTO: readonly string[] = [
   // El ensamblador: la pared.
@@ -23,6 +28,9 @@ export const DEFENSAS_DEL_AISLAMIENTO: readonly string[] = [
   'src/infrastructure/build/rebanada-fixture.ts',
   // El guardian de la cabecera de subordinacion (PASO 142).
   'src/infrastructure/build/run-cto-rebanada.test.ts',
+  // El grafo del proyecto anclado (Sello B.2): el adaptador fenced + su runner.
+  'src/infrastructure/graph/leer-overview-del-grafo.ts',
+  'src/infrastructure/graph/correr-cli-grafo.ts',
   // Auto-cobertura.
   'src/domain/repair/innegociables-aislamiento.ts'
 ]
