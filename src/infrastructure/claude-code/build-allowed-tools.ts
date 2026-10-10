@@ -42,8 +42,8 @@ export function buildAllowedTools(
 ): readonly string[] {
   // 'libre' (PASO 99, FRONTERA firmada): SOLO WebSearch — del lado servidor,
   // por el canal del modelo que la caja ya deja pasar (sonda verde con
-  // allowedDomains:[]). Ni WebFetch (fetch local = SSRF, su propio arco), ni
-  // grafo ni disco: el cuarto esta vacio y cada tool que no viaja no se vigila.
+  // allowedDomains:[]). WebFetch va DENEGADO abajo en la lista (PASO 142), no
+  // diferido; grafo y disco fuera: el cuarto esta vacio.
   if (mode === 'libre') return ['WebSearch']
   if (mode === 'lectura') return [...GRAPH_READ_TOOLS, ...READ_TOOLS]
   if (mode === 'auditoria') return [...GRAPH_READ_TOOLS, ...READ_TOOLS, 'Bash']
@@ -60,14 +60,15 @@ export function buildAllowedTools(
  * redireccion suya escribio en /tmp el 12-sep) y en 'libre' (powers-off).
  * 'auditoria' NO lo lleva: el escaner vive de ejecutar (241 de 353 llamadas).
  *
- * FRONTERA 137 (firma de Jojo): trusted ahora DEGRADA — un modo de TRABAJO
- * sobre proyecto SIN confianza pierde la web (WebSearch y WebFetch, que hasta
- * hoy viajaban por el defecto del CLI, iguales se confiara o no). 'libre'
- * queda FUERA de la negacion a proposito: libre y cto son globales sin repo y
- * su WebSearch es sagrado — el candado se ensancha, jamas se afloja.
+ * FRONTERA 137 (firma de Jojo): trusted DEGRADA al trabajo SIN confianza
+ * (pierde WebSearch+WebFetch); 'libre'/cto quedan FUERA, su WebSearch es
+ * sagrado. PASO 142 (firma de Jojo): y ademas 'libre' DENIEGA WebFetch en la
+ * LISTA (fetch local = SSRF) — estructural, no por el muro de permiso; el
+ * «diferido» del PASO 99 queda cerrado. El candado se ensancha, jamas afloja.
  */
 export function buildDisallowedTools(mode: ClaudePermissionMode, trusted: boolean): readonly string[] { // prettier-ignore
   const base = mode === 'lectura' || mode === 'libre' ? ['Bash'] : []
+  const sinFetchLibre = mode === 'libre' ? ['WebFetch'] : []
   const sinWeb = !trusted && mode !== 'libre' ? ['WebSearch', 'WebFetch'] : []
-  return [...base, ...sinWeb]
+  return [...base, ...sinFetchLibre, ...sinWeb]
 }

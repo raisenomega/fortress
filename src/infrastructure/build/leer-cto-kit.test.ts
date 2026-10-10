@@ -51,9 +51,9 @@ describe('las capas y el candado, pineados (molde de la casa)', () => {
     expect(corrida).toContain("'chat-cto'")
   })
 
-  it("CANDADO INTACTO: la corrida sigue con EXACTAMENTE ['WebSearch']", () => {
+  it("CANDADO INTACTO: allow EXACTAMENTE ['WebSearch'], WebFetch denegado (PASO 142)", () => {
     expect(buildAllowedTools('libre', false, [])).toEqual(['WebSearch'])
-    expect(buildDisallowedTools('libre', true)).toEqual(['Bash'])
+    expect(buildDisallowedTools('libre', true)).toEqual(['Bash', 'WebFetch'])
     expect(fuente('src/infrastructure/build/run-cto.ts')).toContain("permissionMode: 'libre'")
   })
 })
