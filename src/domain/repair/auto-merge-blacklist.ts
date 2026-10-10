@@ -1,16 +1,18 @@
+import { DEFENSAS_DEL_AISLAMIENTO } from './innegociables-aislamiento'
 import { DEFENSAS_INNEGOCIABLES } from './innegociables-defensa'
 import { DEFENSAS_DEL_PROMPT } from './innegociables-prompt'
 import { DEFENSAS_DE_LA_FUSION } from './innegociables-fusion'
 import { DEFENSAS_DE_SECRETOS } from './innegociables-secretos'
 import { DEFENSAS_DEL_TACHADO } from './innegociables-tachado'
 
-/** Ver `criterio-innegociable.ts`. Familias aparte: `-defensa`, `-disco`, `-secretos`, `-prompt`, `-tachado`. */
+/** Ver `criterio-innegociable.ts` y las familias `innegociables-*` importadas arriba. */
 export const AUTONOMY_RULES_FILES: readonly string[] = [
   ...DEFENSAS_INNEGOCIABLES,
   ...DEFENSAS_DE_SECRETOS,
   ...DEFENSAS_DEL_TACHADO,
   ...DEFENSAS_DEL_PROMPT,
   ...DEFENSAS_DE_LA_FUSION,
+  ...DEFENSAS_DEL_AISLAMIENTO,
   // Que puede hacer el agente, y donde.
   'src/domain/settings/permission-mode.ts',
   'src/domain/settings/fuentes-de-settings.ts',
@@ -41,10 +43,8 @@ export const AUTONOMY_RULES_FILES: readonly string[] = [
   'src/domain/shared/safe-url.ts',
   'src/infrastructure/newproject/create-folder.ts',
   // POR CARPETA: posture ENTERA es la defensa anti-SSRF. Enumerar sus mitades
-  // fallo cuatro veces —la lista solo cubre lo que alguien recuerda escribir— y
-  // un glob cubre tambien lo que aun no existe: `ipv4-formas`, nacido el 05 de
-  // septiembre, quedo protegido sin que nadie se acordara. Ese es el precio
-  // correcto para este subsistema.
+  // fallo cuatro veces; el glob cubre tambien lo que aun no existe (`ipv4-formas`,
+  // nacido el 05-sep, quedo protegido sin que nadie se acordara).
   'src/domain/posture/**',
   'src/infrastructure/posture/**',
   // Quien deja pasar una integracion. `auto-merge-policy` declara la politica;
