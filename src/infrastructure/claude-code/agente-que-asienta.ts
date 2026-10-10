@@ -1,4 +1,5 @@
 import type { AppContext } from '@application/context'
+import { CTO_OWNER } from '@domain/build/cto-owner'
 import type { CodeAgent } from '@domain/chat/code-agent'
 import type { RunKind } from '@domain/telemetry/agent-run'
 
@@ -38,7 +39,9 @@ export function agenteQueAsientaCorrida(
       // Sin `projectId` la corrida no es de nadie —un sandbox de aprendizaje, un
       // borrador— y `agent_runs.project_id` es NOT NULL con clave foranea: su
       // fila seria huerfana o no entraria. Se salta, y consta aqui por que.
-      if (request.projectId !== undefined) {
+      // CTO_OWNER es ese mismo caso: un CARRIL (el del Detener del CTO), no un
+      // proyecto real; asentarlo intentaria un INSERT que la FK rechaza (149b).
+      if (request.projectId !== undefined && request.projectId !== CTO_OWNER) {
         try {
           context.runs.record({
             projectId: request.projectId,
