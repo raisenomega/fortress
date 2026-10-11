@@ -18,6 +18,10 @@ export interface CodeAgentRequest {
   readonly projectId?: string
   readonly prompt: string
   readonly permissionMode: ClaudePermissionMode
+  /** Herramientas a QUITAR en ESTE run (candado POR-RUN; se suma al disallow del
+   *  modo). El CTO (PASO 155) va con ['WebSearch'] -> cero herramientas. Ausente
+   *  = nada extra: chat-libre comparte el modo 'libre' y CONSERVA su web. */
+  readonly disallow?: readonly string[]
   /** Agente que se hace cargo; su modelo va en su declaracion (ADR-078). */
   readonly agentId: AgentId | null
   /** Modelo del turno SIN agente (ADR-078, enmienda): sin uno de los dos, no se lanza. */

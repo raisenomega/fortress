@@ -33,13 +33,16 @@ describe('PROMPT DEL CONTRATO: las tres leyes y el bloque PASO', () => {
   })
 })
 
-describe('PASO 152 (Sello 3a): el prompt no autodescribe modo; web opcional', () => {
-  it('PROHIBE autodescribir el modo: lo pinta la app, no la prosa', () => {
+describe('PASO 155 (FRONTERA): el CTO razonador puro — sin tools, via MEDIR', () => {
+  it('PROHIBE autodescribir el modo (3a, se conserva)', () => {
     expect(CONSIGNA_CTO).toContain('NO describas tu modo')
   })
 
-  it('la web es complemento OPCIONAL, no el imperativo incondicional de antes', () => {
-    expect(CONSIGNA_CTO).toContain('complemento, no paso obligatorio')
-    expect(CONSIGNA_CTO).not.toContain('BUSCA antes de responder')
+  it('T3: identidad senior, sin busquedas, SIN web; dato externo -> MEDIR al Terminal', () => {
+    expect(CONSIGNA_CTO).toContain('ingeniero senior, doctorado')
+    expect(CONSIGNA_CTO).toContain('No tienes herramientas')
+    expect(CONSIGNA_CTO).toContain('MEDIR para el Terminal')
+    expect(CONSIGNA_CTO).not.toContain('WebSearch')
+    expect(CONSIGNA_CTO).not.toContain('chat-libre')
   })
 })

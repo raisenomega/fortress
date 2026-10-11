@@ -29,7 +29,11 @@ export function buildArgs(
   trusted = false,
   scripts: readonly string[] = [],
   /** El store del grafo de ESTE turno (ADR-095, enmienda); null = la cache real, solo FORTRESS. */
-  grafoDir: string | null = null
+  grafoDir: string | null = null,
+  /** Candado POR-RUN: herramientas que ESTE run quita, encima del disallow del
+   *  modo (PASO 155: el CTO pasa ['WebSearch'] y queda sin tools). Default vacio
+   *  = el carril de siempre; chat-libre no lo pasa y conserva su web. */
+  disallowExtra: readonly string[] = []
 ): ConPrompt {
   // stream-json solo emite el flujo completo de eventos con --verbose. Y sin
   // confianza, los settings del repo auditado NO cargan (`fuentes-de-settings`).
@@ -46,7 +50,7 @@ export function buildArgs(
 
   // Y lo que se QUITA. `--allowedTools` solo pre-aprueba, asi que impedir una
   // herramienta pide esta otra lista: aqui no se ofrece, no es que se deniegue.
-  const fuera = buildDisallowedTools(permissionMode, trusted)
+  const fuera = [...new Set([...buildDisallowedTools(permissionMode, trusted), ...disallowExtra])]
   if (fuera.length > 0) args.push('--disallowedTools', ...fuera)
 
   if (Object.keys(agents).length > 0) args.push('--agents', JSON.stringify(agents))

@@ -37,7 +37,8 @@ export function argsDelTurno(
     mergeMcpConfig(mcpGlobalSegunConfianza(mcpConfig, request.trusted), projectMcp),
     request.trusted,
     readProjectScripts(request.projectPath),
-    grafoDir
+    grafoDir,
+    request.disallow ?? []
   )
   // Sin agente, el turno declara SU modelo o no se lanza: heredar el del CLI es
   // loteria (Fable una noche, Opus a otra hora — ADR-078, enmienda del 05-oct).

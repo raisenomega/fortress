@@ -50,6 +50,10 @@ export async function runCto(
         // El kit y la rebanada entran como DATO (PASO 130): I/O aqui, composicion en dominio.
         prompt: promptCto(hilo, pregunta, bloqueCtoKit([...leerCtoKit(), ...marcos])),
         permissionMode: 'libre',
+        // PASO 155 (FRONTERA): el CTO es un razonador PURO — WebSearch fuera,
+        // cero herramientas. chat-libre comparte 'libre' pero NO pasa esto y
+        // conserva su web. El merge vive en buildArgs (candado por-run).
+        disallow: ['WebSearch'],
         agentId: null,
         model: MODELO_POR_ROL.cto,
         trusted: false
