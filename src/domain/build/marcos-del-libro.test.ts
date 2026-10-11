@@ -17,14 +17,15 @@ const asiento = (summary: string): OmegaEntry =>
 describe('los marcos resumen una linea por hecho, con tope', () => {
   it('hallazgos: severidad · ancla · titulo, y el total delante', () => {
     const m = marcoDeHallazgos([vivo('clave expuesta')])
-    expect(m.texto).toContain('1 vivos (muestra de 1):')
+    expect(m.texto).toContain('1 sin extinguir (muestra 1):')
     expect(m.texto).toContain('HIGH · a.ts:3 · clave expuesta')
   })
 
-  it('hallazgos: con 25 vivos la muestra se corta en 20', () => {
-    const m = marcoDeHallazgos(Array.from({ length: 25 }, (_, i) => vivo(`t${i}`)))
-    expect(m.texto).toContain('25 vivos (muestra de 20):')
-    expect(m.texto).not.toContain('t20')
+  it('hallazgos: el resto (no grave) se topa en 40; el total va delante', () => {
+    const leve = (title: string): Finding => ({ ...vivo(title), severity: 'LOW' }) as Finding
+    const m = marcoDeHallazgos(Array.from({ length: 45 }, (_, i) => leve(`t${i}`)))
+    expect(m.texto).toContain('45 sin extinguir (muestra 40):')
+    expect(m.texto).not.toContain('t40')
   })
 
   it('omega: fecha · kind · verdict · summary', () => {
