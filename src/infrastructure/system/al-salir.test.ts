@@ -8,7 +8,7 @@ const { liveChildCount, trackChild } = await import('../claude-code/child-regist
 const { alSalir } = await import('./al-salir')
 
 describe('al salir la app no queda ningun hijo vivo (el juez huerfano del 2026-09-24)', () => {
-  it('mata a TODOS los hijos registrados, con dueño o sin el, y luego cierra la base', () => {
+  it('mata a TODOS los hijos YA —SIGKILL sincrono, sin esperar el timer— y cierra la base', () => {
     const conDueno = hijoFalso()
     const sinDueno = hijoFalso()
     trackChild(conDueno, 'p-quit')
@@ -16,8 +16,9 @@ describe('al salir la app no queda ningun hijo vivo (el juez huerfano del 2026-0
 
     alSalir()
 
-    expect(conDueno.killed).toEqual(['SIGTERM'])
-    expect(sinDueno.killed).toEqual(['SIGTERM'])
+    // El apagado fuerza: SIGKILL YA (PASO 153), no el SIGTERM+gracia del Detener.
+    expect(conDueno.killed).toEqual(['SIGKILL'])
+    expect(sinDueno.killed).toEqual(['SIGKILL'])
     expect(liveChildCount()).toBe(0)
     expect(closeDatabase).toHaveBeenCalledTimes(1)
   })

@@ -1,5 +1,6 @@
 import type { ChildProcess } from 'child_process'
 import { senalAl, type ModoDeMuerte } from './kill-signal'
+import { terminarConGracia } from './escalada-de-kill'
 
 /**
  * Procesos `claude` vivos, CON el proyecto al que pertenecen. Existe porque un
@@ -35,41 +36,38 @@ export function liveChildCount(): number {
   return alive.size
 }
 
-/** SIGTERM y, a los 3s, SIGKILL. SIGTERM es una PETICION y claude puede
- *  ignorarla — paso en vivo (2026-08-09): Detener "no funcionaba" porque el run
- *  seguia streameando tras recibirla. */
-const GRACE_MS = 3000
+type Ejecutar = (child: ChildProcess, modo: ModoDeMuerte) => void
 
-function terminar(child: ChildProcess, modo: ModoDeMuerte): void {
-  senalAl(child, 'SIGTERM', modo)
-  const escalation = setTimeout(() => senalAl(child, 'SIGKILL', modo), GRACE_MS)
-  escalation.unref()
-  child.once('close', () => clearTimeout(escalation))
-}
-
-/** Termina los que cumplen el criterio y devuelve cuantos eran. Se borran del
- *  registro AQUI y no solo al cerrarse: un proceso que no responde nunca emite
- *  close y se quedaria contado para siempre. */
-function matar(cumple: (owner: string | null) => boolean): number {
+/** Mata los que cumplen el criterio con el ejecutor dado y devuelve cuantos. Se
+ *  borran del registro AQUI y no solo al cerrarse: un proceso que no responde
+ *  nunca emite close y se quedaria contado para siempre. */
+function matar(cumple: (owner: string | null) => boolean, ejecutar: Ejecutar): number {
   let total = 0
   for (const [child, ficha] of [...alive]) {
     if (!cumple(ficha.owner)) continue
     total += 1
     alive.delete(child)
-    terminar(child, ficha.modo)
+    ejecutar(child, ficha.modo)
   }
   return total
 }
 
-/** Los hijos de UN proyecto. Parar es una decision sobre el trabajo propio, y
- *  antes se llevaba por delante el de todos: parar el drenaje de uno mataba el
- *  escaneo de otro, que ademas lo anotaba como averia del proveedor porque su
- *  proyecto no constaba como cancelado. */
+/** Los hijos de UN proyecto, con la gracia del Detener. Parar es una decision
+ *  sobre el trabajo propio; antes se llevaba por delante el de todos. */
 export function killChildrenOf(projectId: string): number {
-  return matar((owner) => owner === projectId)
+  return matar((owner) => owner === projectId, terminarConGracia)
 }
 
-/** TODOS, sin dueno que valga. Solo para el boton de mantenimiento. */
+/** TODOS, con gracia. El boton de mantenimiento. */
 export function killAllChildren(): number {
-  return matar(() => true)
+  return matar(() => true, terminarConGracia)
+}
+
+/** El APAGADO: SIGKILL YA a todos, SIN la gracia —su timer unref no dispara en
+ *  un loop que se muere y el hijo (reindex, pipes abiertos) retiene el main. */
+export function matarYaATodos(): number {
+  return matar(
+    () => true,
+    (child, modo) => senalAl(child, 'SIGKILL', modo)
+  )
 }

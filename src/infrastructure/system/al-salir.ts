@@ -1,13 +1,13 @@
-import { killAllChildren } from '../claude-code/child-registry'
+import { matarYaATodos } from '../claude-code/child-registry'
 import { closeDatabase } from '../persistence/database'
 
 /**
- * Lo que la app hace al salir: matar a TODOS sus hijos y cerrar la base. Antes
- * solo cerraba la base, y un `claude -p` en vuelo sobrevivia a la app: medido
- * el 2026-09-24, el juez del alcance de un loop quedo huerfano dos minutos,
- * gastando, con el servidor del grafo vigilando el repo y reindexandolo.
+ * Lo que la app hace al salir: matar a TODOS sus hijos YA —SIGKILL sincrono, sin
+ * la gracia del Detener (PASO 153): el reindex del arranque cuelga del main con
+ * pipes abiertos y la escalada `unref` no dispara en el apagado, asi que el main
+ * "no moria" (la X no mataba todo)— y luego cerrar la base (checkpoint del WAL).
  */
 export function alSalir(): void {
-  killAllChildren()
+  matarYaATodos()
   closeDatabase()
 }

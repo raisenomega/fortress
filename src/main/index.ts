@@ -66,5 +66,10 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-// Sin hijos vivos (ninguno sobrevive a la app) y con la base cerrada (WAL checkpoint).
-app.on('will-quit', alSalir)
+// Tras alSalir —sincrono: mata los hijos YA y cierra la base (WAL checkpoint)—
+// se FUERZA la salida: si un pipe de hijo quedara vivo, el proceso termina igual
+// y el WAL ya esta consistente (PASO 153, "la X no mataba todo").
+app.on('will-quit', () => {
+  alSalir()
+  app.exit(0)
+})
