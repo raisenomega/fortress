@@ -1,16 +1,18 @@
 import type { AppContext } from '@application/context'
 import type { MarcoDelKit } from '@domain/build/bloque-cto-kit'
 import { marcoDeGrafo } from '@domain/build/marco-de-grafo'
+import { marcoDeImpacto, topCriticosYAltos } from '@domain/build/marco-de-impacto'
 import { marcoDeHallazgos, marcoDeHistoria, marcoDelLibroDeVida } from '@domain/build/marcos-del-libro' // prettier-ignore
 import { marcoDeCognicion, marcoDeDocs, marcoDeReparaciones } from '@domain/build/marcos-del-motor'
 import { readCognitionLog } from '../cognition/read-cognition-log'
-import { leerOverviewDelGrafo } from '../graph/leer-overview-del-grafo'
+import { leerGrafoDelTurno } from '../graph/leer-grafo-del-turno'
 import { listProjectDocs } from '../newproject/docs-reader'
 import { resolveTarget } from './build-target'
 
-/** Asientos de OMEGA y propuestas del motor que entran en la rebanada. */
+/** Asientos de OMEGA, propuestas del motor y hallazgos trazados (B.4). */
 const ASIENTOS = 10
 const PROPUESTAS = 5
+const TOP_IMPACTO = 5
 
 /**
  * La REBANADA del libro de vida para el turno de CTO (Sello B.1): TODAS las
@@ -33,18 +35,20 @@ export async function rebanadaDelLibro(
 ): Promise<readonly MarcoDelKit[]> {
   const target = resolveTarget(context, projectId)
   if (!target.ok) return []
+  const vivos = context.findings.listByProject(projectId)
   const propuestas = context.repairProposals.listByProject(projectId).slice(0, PROPUESTAS)
-  const [conEventos, overview] = await Promise.all([
+  const [conEventos, grafo] = await Promise.all([
     Promise.all(propuestas.map(async (p) => ({ propuesta: p, eventos: await context.eventLog.list(p.id) }))), // prettier-ignore
-    leerOverviewDelGrafo(target.value)
+    leerGrafoDelTurno(target.value, topCriticosYAltos(vivos, TOP_IMPACTO))
   ])
   return [
-    marcoDeHallazgos(context.findings.listByProject(projectId)),
+    marcoDeHallazgos(vivos),
     marcoDeHistoria(context.findings.listHistoria(projectId)),
     marcoDelLibroDeVida(context.omegaLog.listByProject(projectId, ASIENTOS)),
     marcoDeReparaciones(conEventos),
     marcoDeCognicion(readCognitionLog(target.value.path)),
     marcoDeDocs(listProjectDocs(target.value.path)),
-    marcoDeGrafo(overview)
+    marcoDeGrafo(grafo.overview),
+    marcoDeImpacto(grafo.impactos)
   ]
 }

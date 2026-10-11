@@ -1,9 +1,6 @@
 import { GRAPH_BIN } from '@domain/connectors/graph-mcp'
 import type { GrafoOverview } from '@domain/build/marco-de-grafo'
-import { graphSlug } from '@domain/graph/graph-slug'
-import type { Project } from '@domain/project/project'
 import { correrCliGrafo } from './correr-cli-grafo'
-import { prepararGrafoDelTurno } from './grafo-del-turno'
 
 interface OverviewCrudo {
   total_nodes?: number
@@ -13,23 +10,21 @@ interface OverviewCrudo {
 }
 
 /**
- * Lee el OVERVIEW del grafo del proyecto anclado (Sello B.2), pieza de
- * AISLAMIENTO. Las dos leyes del PASO 144: la lectura abre el .db en WAL -> se
- * lee una COPIA (el fence del turno, ADR-095), nunca el indice real; y el error
- * del binario enumera `available_projects` -> el fence de UN solo .db lo cierra
- * por construccion. Sin grafo (hasGraph=0) o ante cualquier fallo: null
- * (fail-safe). Determinista, $0, sin red, sin mutar el indice real.
+ * Lee el OVERVIEW del grafo DENTRO del fence ya preparado del turno (`dir`),
+ * pieza de AISLAMIENTO (Sello B.2). NO abre su propio fence: lo comparte con el
+ * resto de lecturas del turno (ADR-095) —`leerGrafoDelTurno` prepara UNA sola
+ * copia .db—. Las dos leyes del PASO 144 siguen: se lee de la COPIA, nunca el
+ * indice real (el runner solo ve `dir`), y el error que enumera
+ * `available_projects` lo cierra el fence de UN solo .db. Fallo -> null.
  */
-export async function leerOverviewDelGrafo(project: Project): Promise<GrafoOverview | null> {
-  if (!project.hasGraph) return null
-  const turno = await prepararGrafoDelTurno(project.path)
-  try {
-    const args = { project: graphSlug(project.path), aspects: ['overview'] }
-    const salida = await correrCliGrafo(GRAPH_BIN, turno.dir, 'get_architecture', args, project.id)
-    return salida === null ? null : parseOverview(salida)
-  } finally {
-    turno.liberar()
-  }
+export async function overviewSobreFence(
+  dir: string,
+  slug: string,
+  owner: string
+): Promise<GrafoOverview | null> {
+  const args = { project: slug, aspects: ['overview'] }
+  const salida = await correrCliGrafo(GRAPH_BIN, dir, 'get_architecture', args, owner)
+  return salida === null ? null : parseOverview(salida)
 }
 
 /** El JSON crudo del binario -> el tipo del dominio. Sin `total_nodes` (p.ej. un

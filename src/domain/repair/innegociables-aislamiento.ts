@@ -18,6 +18,12 @@
  * pared de aislamiento: leen de una COPIA fenced (nunca el indice real) y
  * descartan el stderr donde el binario enumera `available_projects`. Aflojar
  * cualquiera —apuntar al cache real, fusionar stderr— abriria el leak del 144.
+ *
+ * PASO 160 (Sello B.4): el radio de impacto (trace_path) sobre el MISMO fence.
+ * El orquestador abre UN solo .db por turno (overview + impacto lo comparten);
+ * el adaptador de impacto corre dentro de `dir`, nunca el cache real; y su
+ * parser rechaza el `{"error":...}` que enumera `available_projects`. Abrir un
+ * 2o .db, apuntar al cache real o armar impacto del error reabriria el leak.
  */
 export const DEFENSAS_DEL_AISLAMIENTO: readonly string[] = [
   // El ensamblador: la pared.
@@ -25,12 +31,17 @@ export const DEFENSAS_DEL_AISLAMIENTO: readonly string[] = [
   // Los guardianes: la custodia A/B, los pines del camino y la siembra de A.
   'src/infrastructure/build/rebanada-del-libro.test.ts',
   'src/infrastructure/build/rebanada-anclada.test.ts',
+  'src/infrastructure/build/grafo-anclado.test.ts',
   'src/infrastructure/build/rebanada-fixture.ts',
   // El guardian de la cabecera de subordinacion (PASO 142).
   'src/infrastructure/build/run-cto-rebanada.test.ts',
   // El grafo del proyecto anclado (Sello B.2): el adaptador fenced + su runner.
   'src/infrastructure/graph/leer-overview-del-grafo.ts',
   'src/infrastructure/graph/correr-cli-grafo.ts',
+  // El radio de impacto (Sello B.4): el fence unico, el adaptador y su parser.
+  'src/infrastructure/graph/leer-grafo-del-turno.ts',
+  'src/infrastructure/graph/leer-impacto-del-grafo.ts',
+  'src/infrastructure/graph/impacto-crudo.ts',
   // Auto-cobertura.
   'src/domain/repair/innegociables-aislamiento.ts'
 ]
