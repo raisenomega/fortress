@@ -4,7 +4,10 @@ import { proyectosEnVista } from '@application/project/proyectos-en-vista'
 import { removeProject } from '@application/project/remove-project'
 import { desbloquearContaminacion } from '@application/project/desbloquear-contaminacion'
 import { setProjectTrusted } from '@application/project/set-project-trusted'
+import { setProjectIdentity, setProjectRemote } from '@application/project/set-git-config'
 import { declararModulos } from '@application/project/declarar-modulos'
+import { createGitIdentitySetter } from '../git/git-identity'
+import { createGitRemoteSetter } from '../git/git-remote'
 import { aDeclaracion } from '@domain/scan/declaracion-de-modulos'
 import { exportProjectRecord } from '../project/export-record'
 import type { NewProject } from '@domain/project/project'
@@ -54,5 +57,15 @@ export function registerProjectHandlers(): void {
   // El dialogo se ancla a la ventana que lo pidio para que sea modal.
   ipcMain.handle(IPC.projectsPickFolder, (event) =>
     pickProjectFolder(BrowserWindow.fromWebContents(event.sender))
+  )
+
+  // Fijar el git del proyecto DESDE FORTRESS (PASO 163): identidad LOCAL y
+  // remoto. Acto del operador; la guarda (raiz del repo, URL valida) vive en el
+  // adaptador. Cambiar el remoto es local; publicar es otro acto (el push).
+  ipcMain.handle(IPC.projectsSetIdentity, (_event, id: string, name: string, email: string) =>
+    setProjectIdentity(getAppContext(), createGitIdentitySetter(), String(id), name, email)
+  )
+  ipcMain.handle(IPC.projectsSetRemote, (_event, id: string, url: string) =>
+    setProjectRemote(getAppContext(), createGitRemoteSetter(), String(id), url)
   )
 }

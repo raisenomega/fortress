@@ -36,6 +36,8 @@ export const IPC = {
   scanStop: 'scan:stop',
   qualityRun: 'quality:run',
   pushRun: 'push:run',
+  projectsSetIdentity: 'projects:set-identity',
+  projectsSetRemote: 'projects:set-remote',
   postureRun: 'posture:run',
   accountStatus: 'account:status',
   accountLogin: 'account:login',

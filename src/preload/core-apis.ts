@@ -20,6 +20,9 @@ export interface ProjectsApi {
   self(): Promise<NewProject | null>
   setTrusted(id: string, trusted: boolean): Promise<Result<null>>
   unblock(id: string): Promise<Result<null>>
+  /** Fijar el git del proyecto DESDE FORTRESS (PASO 163): identidad LOCAL y remoto. */
+  setIdentity(id: string, name: string, email: string): Promise<Result<string>>
+  setRemote(id: string, url: string): Promise<Result<string>>
 }
 
 export interface ChatApi {

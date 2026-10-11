@@ -3,6 +3,7 @@ import { ApiKeySection } from './ApiKeySection'
 import { BudgetSection } from './BudgetSection'
 import { TopesDelMotorSection } from './TopesDelMotorSection'
 import { GenesisBudgetSection } from './GenesisBudgetSection'
+import { GitConfigSection } from './GitConfigSection'
 import { OperationModeSection } from './OperationModeSection'
 
 /** Pantalla de configuracion, accesible desde la barra lateral. */
@@ -23,6 +24,7 @@ export function SettingsView(): React.JSX.Element {
         <TopesDelMotorSection />
         <GenesisBudgetSection />
         <OperationModeSection />
+        <GitConfigSection />
       </div>
     </div>
   )

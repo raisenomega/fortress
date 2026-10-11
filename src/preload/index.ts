@@ -24,7 +24,9 @@ const api: FortressApi = {
     pickFolder: () => ipcRenderer.invoke(IPC.projectsPickFolder),
     self: () => ipcRenderer.invoke(IPC.projectsSelf),
     setTrusted: (id, trusted) => ipcRenderer.invoke(IPC.projectsSetTrusted, id, trusted),
-    unblock: (id) => ipcRenderer.invoke(IPC.projectsUnblock, id)
+    unblock: (id) => ipcRenderer.invoke(IPC.projectsUnblock, id),
+    setIdentity: (id, name, email) => ipcRenderer.invoke(IPC.projectsSetIdentity, id, name, email),
+    setRemote: (id, url) => ipcRenderer.invoke(IPC.projectsSetRemote, id, url)
   },
   health: {
     run: () => ipcRenderer.invoke(IPC.healthRun)
