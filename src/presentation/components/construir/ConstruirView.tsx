@@ -8,6 +8,7 @@ import { useConstruirStore } from '../../stores/construir-store'
 import { BarraDelChat } from './BarraDelChat'
 import { BarraToggle } from './BarraToggle'
 import { ConfigInterview } from './ConfigInterview'
+import { ChipsDeFase } from './ChipsDeFase'
 import { CuerpoDelChat } from './CuerpoDelChat'
 import { EtiquetaDelEfecto } from './EtiquetaDelEfecto'
 
@@ -59,7 +60,7 @@ export function ConstruirView(): React.JSX.Element {
                 ? 'Chat libre — global, sin proyecto · conversa sin repo'
                 : `Chat de ${project?.name ?? ''}`}
           </p>
-          <span className="w-7 shrink-0" aria-hidden />
+          {mode === 'cto' ? <ChipsDeFase /> : <span className="w-7 shrink-0" aria-hidden />}
         </div>
         <CuerpoDelChat project={project} libre={sinRepo} />
       </div>

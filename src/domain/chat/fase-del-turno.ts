@@ -9,7 +9,7 @@
  * —el color lo decide la presentacion, y un dominio que dice «naranja» no puede
  * cambiar de tema sin mentir—.
  */
-export type FaseDelTurno = 'debate' | 'juicio' | 'plan'
+export type FaseDelTurno = 'debate' | 'juicio' | 'plan' | 'contexto' | 'bloque'
 
 /**
  * Lo que se lee en la barra. Un mapa y no un `switch` para que una fase nueva
@@ -28,7 +28,11 @@ const ETIQUETA: Record<FaseDelTurno, (agentes: number) => string> = {
   // no el diff porque es lo que tiene delante —el diff aun no existe—, y la
   // palabra «verificacion» es deliberada: dice que alguien lo esta mirando, sin
   // prometer la dureza del juicio del fix (ADR-097 §2.3).
-  plan: () => 'Plan en verificacion por OMEGA'
+  plan: () => 'Plan en verificacion por OMEGA',
+  // El CTO (PASO 158): dos fases SIN agentes — reune su contexto (grafo+libro) y
+  // escribe el PASO. El numero no aplica; su progreso lo pintan los chips.
+  contexto: () => 'Reuniendo contexto',
+  bloque: () => 'Escribiendo el PASO'
 }
 
 export function etiquetaDeFase(fase: FaseDelTurno, agentes: number): string {

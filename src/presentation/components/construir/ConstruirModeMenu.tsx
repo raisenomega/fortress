@@ -10,7 +10,7 @@ const MODES: ReadonlyArray<{ mode: ConstruirMode; label: string; hint: string }>
   { mode: 'investigacion', label: 'Investigacion', hint: 'responde, no toca nada' },
   { mode: 'ejecutor', label: 'Ejecutor', hint: 'construye el plan revisado' },
   { mode: 'libre', label: 'Chat libre', hint: 'global, sin proyecto · conversa sin repo' },
-  { mode: 'cto', label: 'CTO', hint: 'piensa y mide, nunca firma · sin repo' }
+  { mode: 'cto', label: 'CTO', hint: 'piensa y mide, nunca firma' }
 ]
 
 /** Menu que abre la flecha: elige el modo activo (no envia; el envio es aparte). */

@@ -11,7 +11,7 @@ import { pickFile } from '../system/file-picker'
 import { getAppContext } from '../persistence/app-context'
 import { guardRun } from '../run-guard'
 import { cancelRun, endRun } from '../run-control'
-import { chunkSender } from './chat-send-senders'
+import { chunkSender, progressSender } from './chat-send-senders'
 import { IPC } from './channels'
 
 /** Un solo carril por proyecto: no dejar que build pise un scan/chat en curso. */
@@ -48,8 +48,19 @@ export function registerBuildHandlers(): void {
   // SOLO de lectura — parametriza la rebanada del libro, no un guard ni un repo.
   ipcMain.handle(
     IPC.buildCto,
-    (e, pregunta: string, hilo: TurnoLibre[], ancla: string | null = null) =>
-      runCto(getAppContext(), pregunta, hilo, ancla ?? null, chunkSender(e, 'chat-cto'))
+    (e, pregunta: string, hilo: TurnoLibre[], ancla: string | null = null) => {
+      // Las fases (contexto·bloque) viajan por el progreso del MISMO carril
+      // centinela, aislado del medidor del Terminal (PASO 158).
+      const prog = progressSender(e, 'chat-cto')
+      return runCto(
+        getAppContext(),
+        pregunta,
+        hilo,
+        ancla ?? null,
+        chunkSender(e, 'chat-cto'),
+        (fase) => prog({ index: 0, total: 0, tokens: 0, costUsd: 0, fase })
+      )
+    }
   )
   ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
     withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))

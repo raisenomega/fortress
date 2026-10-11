@@ -3,6 +3,7 @@ import { api } from '../adapters/fortress-api'
 import { escucharElPlan } from './escuchar-el-plan'
 import { finishDraftPersistido, pushUserPersistido } from './hilo-activo'
 import { useConstruirStore } from '../stores/construir-store'
+import { useCtoFaseStore } from '../stores/cto-fase-store'
 
 /** El id centinela de los trozos del CTO: sin proyecto, su propio carril —
  *  el mismo que emite el handler de build:cto. */
@@ -18,6 +19,7 @@ export async function sendCto(intent: string, ancla: string | null): Promise<voi
   const hilo = store.messages as readonly TurnoLibre[]
   pushUserPersistido({ projectId: null, modo: 'cto' }, `CTO: ${intent}`)
   store.setBusy(true)
+  useCtoFaseStore.getState().reiniciarFases() // chips a gris cada turno (PASO 158)
   const corte = escucharElPlan(CTO)
   try {
     const result = await api().build.cto(intent, hilo, ancla)

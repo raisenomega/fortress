@@ -11,7 +11,7 @@ import { submitConstruir } from './construir-service'
 const conApi = (build: Record<string, unknown>): void => {
   Object.defineProperty(globalThis, 'window', {
     configurable: true,
-    value: { api: { build, chat: { onChunk: () => () => {} } } }
+    value: { api: { build, chat: { onChunk: () => () => {}, onProgress: () => () => {} } } }
   })
 }
 

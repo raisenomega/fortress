@@ -13,5 +13,9 @@ import type { FaseDelTurno } from '@domain/chat/fase-del-turno'
 export const TONO: Record<FaseDelTurno, string> = {
   debate: 'text-high',
   juicio: 'text-proceso',
-  plan: 'text-proceso'
+  plan: 'text-proceso',
+  // El CTO (PASO 158) pinta su progreso con sus propios chips (chips-del-cto);
+  // aqui el Record solo se cierra — verde cuando la fase ya llego.
+  contexto: 'text-success',
+  bloque: 'text-success'
 }

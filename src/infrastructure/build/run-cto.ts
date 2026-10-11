@@ -6,12 +6,14 @@ import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { bloqueCtoKit } from '@domain/build/bloque-cto-kit'
 import { promptCto } from '@domain/build/cto-prompt'
 import { CTO_OWNER } from '@domain/build/cto-owner'
+import type { FaseDelTurno } from '@domain/chat/fase-del-turno'
 import type { TurnoLibre } from '@domain/build/libre-prompt'
 import { sinBloqueDeNotas } from '@domain/system/extraer-notas'
 import { err, ok, type Result } from '@domain/shared/result'
 import { endRun, tryBeginRun } from '../run-control'
 import { agentLibre } from './build-target'
 import { leerCtoKit } from './leer-cto-kit'
+import { tejerFasesDelCto } from './progreso-del-cto'
 import { rebanadaDelLibro } from './rebanada-del-libro'
 
 /**
@@ -36,13 +38,16 @@ export async function runCto(
   pregunta: string,
   hilo: readonly TurnoLibre[],
   proyectoAncla: string | null,
-  onChunk: (delta: string) => void
+  onChunk: (delta: string) => void,
+  progreso: (fase: FaseDelTurno) => void = () => {}
 ): Promise<Result<string>> {
   const cuarto = join(app.getPath('userData'), CTO_OWNER)
   mkdirSync(cuarto, { recursive: true })
   if (!tryBeginRun(CTO_OWNER)) return err('Ya hay un turno del CTO en marcha.')
+  const fases = tejerFasesDelCto(progreso, onChunk)
   try {
     const marcos = proyectoAncla === null ? [] : await rebanadaDelLibro(context, proyectoAncla)
+    fases.contexto() // los marcos ya estan reunidos: contexto -> verde
     const reply = await agentLibre(context).run(
       {
         projectPath: cuarto,
@@ -58,7 +63,7 @@ export async function runCto(
         model: MODELO_POR_ROL.cto,
         trusted: false
       },
-      onChunk
+      fases.onChunk
     )
     const texto = sinBloqueDeNotas(reply.text)
     return reply.failed ? err(texto) : ok(texto)
