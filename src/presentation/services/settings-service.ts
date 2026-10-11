@@ -5,6 +5,7 @@ import type { Result } from '@domain/shared/result'
 import { api } from '../adapters/fortress-api'
 import { useSettingsStore } from '../stores/settings-store'
 import { useUiStore } from '../stores/ui-store'
+import { loadProjects } from './project-service'
 
 /** Consulta si hay API key utilizable (guardada cifrada o via ANTHROPIC_API_KEY). */
 export async function refreshApiKeyStatus(): Promise<void> {
@@ -41,4 +42,8 @@ export async function changeOperationMode(mode: OperationMode): Promise<void> {
 
   useSettingsStore.getState().setMode(mode)
   await api().settings.set(SETTINGS_KEYS.operationMode, mode)
+  // El efecto por proyecto (encabezado del Chat) se hornea en `projects:list`
+  // leyendo el modo persistido: sin recargar, el toggle no refrescaria la
+  // izquierda hasta la siguiente mutacion de proyecto (PASO 152).
+  await loadProjects()
 }

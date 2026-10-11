@@ -1,3 +1,4 @@
+import type { EfectoDelModo } from '@domain/settings/causa-de-degradacion'
 import type { Project } from './project'
 
 /**
@@ -18,4 +19,10 @@ export interface ProyectoEnVista extends Project {
    * es el Terminal en vez de ensenarle un boton que su guarda va a negar.
    */
   readonly esRepoPropio: boolean
+  /**
+   * El EFECTO del toggle app-wide sobre ESTE proyecto (PASO 152): modo efectivo
+   * + causa de degradacion por categoria. Lo pinta el encabezado del Chat; el
+   * renderer no puede calcularlo porque el modo efectivo degrada mirando git.
+   */
+  readonly efecto: EfectoDelModo
 }

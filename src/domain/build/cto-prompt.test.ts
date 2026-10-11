@@ -32,3 +32,14 @@ describe('PROMPT DEL CONTRATO: las tres leyes y el bloque PASO', () => {
     expect(p).not.toContain('La conversacion hasta ahora')
   })
 })
+
+describe('PASO 152 (Sello 3a): el prompt no autodescribe modo; web opcional', () => {
+  it('PROHIBE autodescribir el modo: lo pinta la app, no la prosa', () => {
+    expect(CONSIGNA_CTO).toContain('NO describas tu modo')
+  })
+
+  it('la web es complemento OPCIONAL, no el imperativo incondicional de antes', () => {
+    expect(CONSIGNA_CTO).toContain('complemento, no paso obligatorio')
+    expect(CONSIGNA_CTO).not.toContain('BUSCA antes de responder')
+  })
+})

@@ -1,4 +1,7 @@
 import type { ProyectoEnVista } from '@domain/project/proyecto-en-vista'
+import { efectoDelModo } from '@domain/settings/causa-de-degradacion'
+import { parseOperationMode } from '@domain/settings/operation-mode'
+import { SETTINGS_KEYS } from '@domain/settings/settings-repository'
 import { terminalPuedeResolver } from '@domain/settings/terminal-puede-resolver'
 import type { AppContext } from '../context'
 import { listProjects } from './list-projects'
@@ -21,12 +24,15 @@ export function proyectosEnVista(
   context: AppContext,
   sondas: SondasDelProyecto
 ): readonly ProyectoEnVista[] {
+  const mode = parseOperationMode(context.settings.get(SETTINGS_KEYS.operationMode))
   return listProjects(context).map((project) => {
     const selfRepo = sondas.esRepoPropio(project.path)
+    const redGit = sondas.redGit(project.path)
     return {
       ...project,
-      resoluble: terminalPuedeResolver({ project, selfRepo, redGit: sondas.redGit(project.path) }),
-      esRepoPropio: selfRepo
+      resoluble: terminalPuedeResolver({ project, selfRepo, redGit }),
+      esRepoPropio: selfRepo,
+      efecto: efectoDelModo({ mode, selfRepo, project, redGit })
     }
   })
 }

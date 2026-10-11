@@ -9,6 +9,7 @@ import { BarraDelChat } from './BarraDelChat'
 import { BarraToggle } from './BarraToggle'
 import { ConfigInterview } from './ConfigInterview'
 import { CuerpoDelChat } from './CuerpoDelChat'
+import { EtiquetaDelEfecto } from './EtiquetaDelEfecto'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
@@ -48,11 +49,12 @@ export function ConstruirView(): React.JSX.Element {
     <div className="flex h-full w-full flex-row">
       {barraAbierta && <BarraDelChat />}
       <div className="flex h-full min-w-0 flex-1 flex-col px-4 pt-4 pb-6">
-        <div className="flex items-center pb-2">
+        <div className="flex items-center gap-2 pb-2">
           <BarraToggle />
+          {project && <EtiquetaDelEfecto efecto={project.efecto} />}
           <p className="flex-1 text-center text-[11px] text-muted-foreground">
             {mode === 'cto'
-              ? 'CTO — piensa y mide, nunca firma · sin repo'
+              ? 'CTO — piensa y mide, nunca firma'
               : sinRepo
                 ? 'Chat libre — global, sin proyecto · conversa sin repo'
                 : `Chat de ${project?.name ?? ''}`}
