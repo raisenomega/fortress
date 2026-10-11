@@ -34,6 +34,7 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
     'UPDATE projects SET fortress_score = ?, last_scan = ? WHERE id = ?'
   )
   const updateTrusted = db.prepare('UPDATE projects SET trusted = ? WHERE id = ?')
+  const updateRemote = db.prepare('UPDATE projects SET git_remote = ? WHERE id = ?')
   const updateLoop = db.prepare('UPDATE projects SET loop_enabled = ? WHERE id = ?')
   const updateQuality = db.prepare('UPDATE projects SET general_quality = ? WHERE id = ?')
   const updateConfig = db.prepare('UPDATE projects SET config_state = ? WHERE id = ?')
@@ -61,6 +62,7 @@ export function createSqliteProjectRepository(db: Db): ProjectRepository {
     remove: (id) => deleteById.run(id),
     updateScan: (id, score, scannedAt) => updateScan.run(normalizeScore(score), scannedAt, id),
     setTrusted: (id, trusted) => updateTrusted.run(trusted ? 1 : 0, id),
+    setGitRemote: (id, url) => updateRemote.run(url, id),
     setLoopEnabled: (id, enabled) => updateLoop.run(enabled ? 1 : 0, id),
     setGeneralQuality: (id, score) => updateQuality.run(normalizeScore(score), id),
     setConfigState: (id, state) => updateConfig.run(state, id),

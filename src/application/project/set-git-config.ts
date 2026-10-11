@@ -28,5 +28,9 @@ export function setProjectRemote(
 ): Result<string> {
   const project = context.projects.findById(projectId)
   if (!project) return err('El proyecto ya no existe')
-  return setter.setRemote(project.path, url)
+  const r = setter.setRemote(project.path, url)
+  // La cache sigue a la verdad: solo tras escribir `.git/config` con exito. El
+  // mismo puerto que fija git_remote al anadir (PASO 165, cierre de 2a).
+  if (r.ok) context.projects.setGitRemote(projectId, url.trim())
+  return r
 }

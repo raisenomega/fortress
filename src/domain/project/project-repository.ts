@@ -14,6 +14,8 @@ export interface ProjectRepository {
   updateScan(id: string, score: number, scannedAt: string): void
   /** Marca un proyecto de confianza: habilita la autoverificacion del agente. */
   setTrusted(id: string, trusted: boolean): void
+  /** Sincroniza la cache del remoto con `.git/config` cuando set-remote lo cambia (PASO 165). */
+  setGitRemote(id: string, url: string): void
   /** Enciende o apaga el loop autonomo para este proyecto. */
   setLoopEnabled(id: string, enabled: boolean): void
   /** Nota de CALIDAD GENERAL, de una auditoria integral. Distinta del score de seguridad. */
