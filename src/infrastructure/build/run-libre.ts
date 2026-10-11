@@ -2,6 +2,7 @@ import { app } from 'electron'
 import { mkdirSync } from 'fs'
 import { join } from 'path'
 import type { AppContext } from '@application/context'
+import { asentarNotasDeCarril } from '@application/system/asentar-notas'
 import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { promptLibre, type TurnoLibre } from '@domain/build/libre-prompt'
 import { sinBloqueDeNotas } from '@domain/system/extraer-notas'
@@ -35,6 +36,9 @@ export async function runLibre(
     },
     onChunk
   )
+  // El chat-libre observa (PASO 161b): su señal entra al backlog global bajo
+  // ESTA_INSTALACION, jamas el id de un cliente (no hay proyecto en este carril).
+  asentarNotasDeCarril(context, reply.text)
   const texto = sinBloqueDeNotas(reply.text)
   return reply.failed ? err(texto) : ok(texto)
 }

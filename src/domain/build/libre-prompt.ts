@@ -1,3 +1,5 @@
+import { NOTAS_COMO_BLOQUE } from '../system/peticion-de-notas'
+
 /**
  * El prompt del modo LIBRE (PASO 91): conversacion sin repo, como el chat del
  * navegador. El CLI corre en un cuarto VACIO, en 'lectura' y sin MCP — y el
@@ -21,5 +23,5 @@ const linea = (t: TurnoLibre): string => `${t.role === 'user' ? 'Operador' : 'Tu
 
 export function promptLibre(hilo: readonly TurnoLibre[], pregunta: string): string {
   const conversacion = hilo.length === 0 ? '' : `\n\nLa conversacion hasta ahora:\n${hilo.map(linea).join('\n')}` // prettier-ignore
-  return `${CONSIGNA}${conversacion}\n\nOperador: ${pregunta}`
+  return `${CONSIGNA}\n\n${NOTAS_COMO_BLOQUE}${conversacion}\n\nOperador: ${pregunta}` // prettier-ignore
 }

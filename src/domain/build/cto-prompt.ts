@@ -1,3 +1,4 @@
+import { NOTAS_COMO_BLOQUE } from '../system/peticion-de-notas'
 import type { TurnoLibre } from './libre-prompt'
 
 /**
@@ -34,5 +35,5 @@ const linea = (t: TurnoLibre): string => `${t.role === 'user' ? 'Operador' : 'Tu
 export function promptCto(hilo: readonly TurnoLibre[], pregunta: string, bloqueKit = ''): string {
   const kit = bloqueKit === '' ? '' : `\n\n${bloqueKit}`
   const conversacion = hilo.length === 0 ? '' : `\n\nLa conversacion hasta ahora:\n${hilo.map(linea).join('\n')}` // prettier-ignore
-  return `${CONSIGNA_CTO}${kit}${conversacion}\n\nOperador: ${pregunta}`
+  return `${CONSIGNA_CTO}\n\n${NOTAS_COMO_BLOQUE}${kit}${conversacion}\n\nOperador: ${pregunta}` // prettier-ignore
 }

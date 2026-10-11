@@ -2,6 +2,7 @@ import { app } from 'electron'
 import { mkdirSync } from 'fs'
 import { join } from 'path'
 import type { AppContext } from '@application/context'
+import { asentarNotasDeCarril } from '@application/system/asentar-notas'
 import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { bloqueCtoKit } from '@domain/build/bloque-cto-kit'
 import { promptCto } from '@domain/build/cto-prompt'
@@ -65,6 +66,7 @@ export async function runCto(
       },
       fases.onChunk
     )
+    asentarNotasDeCarril(context, reply.text) // observa (161b): ESTA_INSTALACION, nunca el cliente
     const texto = sinBloqueDeNotas(reply.text)
     return reply.failed ? err(texto) : ok(texto)
   } finally {

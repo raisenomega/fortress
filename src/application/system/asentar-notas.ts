@@ -1,4 +1,5 @@
-import { sinRepetidas } from '@domain/system/extraer-notas'
+import { notasDeBloque, sinRepetidas } from '@domain/system/extraer-notas'
+import { ESTA_INSTALACION } from '@domain/system/observacion-de-fallo'
 import type { Project } from '@domain/project/project'
 import type { SelfNoteDraft } from '@domain/system/self-observation'
 import type { AppContext } from '../context'
@@ -38,6 +39,22 @@ export function asentarNotas(
     return unicas.length
   } catch (error) {
     console.error('[ADR-085] no se pudieron asentar las observaciones', error)
+    return 0
+  }
+}
+
+/**
+ * La puerta para los carriles SIN proyecto de cliente (CTO y chat-libre, PASO
+ * 161b): asienta el bloque NOTAS con el MISMO origen que `conOrigen` da sin
+ * proyecto —ESTA_INSTALACION—, nunca un cliente. `add` directo; cerco y dedup.
+ */
+export function asentarNotasDeCarril(context: AppContext, texto: string): number {
+  const unicas = sinRepetidas(notasDeBloque(texto))
+  try {
+    for (const nota of unicas) context.selfObservations.add({ ...nota, sourceProject: ESTA_INSTALACION }) // prettier-ignore
+    return unicas.length
+  } catch (error) {
+    console.error('[ADR-085] no se pudieron asentar las notas del carril', error)
     return 0
   }
 }
