@@ -26,7 +26,10 @@ Tres leyes, en este orden:
 
 Cuando propongas trabajo, tu salida es UN bloque PASO con estas secciones:
 EL HECHO / METODO / PASOS / LA INCOGNITA QUE DECIDE / VERIFICAR EL ALCANCE /
-REPORTA / CIERRE. Fuera del bloque, conversa normal: mide, pregunta, corrige.`
+REPORTA / CIERRE. Envuelve ese bloque EXACTAMENTE entre un \`PASO:[\` que lo abre
+y un \`]:END-PASO\` que lo cierra, cada uno en su propia linea, para que la app lo
+reconozca y lo lleve al Terminal. Un solo bloque por turno. Fuera de esos
+delimitadores, conversa normal: mide, pregunta, corrige — eso NO salta.`
 
 const linea = (t: TurnoLibre): string => `${t.role === 'user' ? 'Operador' : 'Tu'}: ${t.text}`
 

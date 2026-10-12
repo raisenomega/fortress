@@ -11,6 +11,7 @@ import { ConfigInterview } from './ConfigInterview'
 import { ChipsDeFase } from './ChipsDeFase'
 import { CuerpoDelChat } from './CuerpoDelChat'
 import { EtiquetaDelEfecto } from './EtiquetaDelEfecto'
+import { VentanaDelSalto } from './VentanaDelSalto'
 
 /**
  * Construir: chat abierto A LO ANCHO como el Terminal (PASO 84), con el input
@@ -63,6 +64,7 @@ export function ConstruirView(): React.JSX.Element {
           {mode === 'cto' ? <ChipsDeFase /> : <span className="w-7 shrink-0" aria-hidden />}
         </div>
         <CuerpoDelChat project={project} libre={sinRepo} />
+        <VentanaDelSalto />
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { CTO_OWNER } from '@domain/build/cto-owner'
 import { api } from '../adapters/fortress-api'
 import { useConstruirStore } from '../stores/construir-store'
+import { useSaltoStore } from '../stores/salto-store'
 import { sendCto } from './construir-cto'
 import { sendInvestigate, sendPlan } from './construir-envios'
 import { sendExecute } from './construir-execute'
@@ -41,6 +42,7 @@ export async function attachFile(): Promise<void> {
  *  modos (plan/investigacion/ejecutor) siguen por projectId. */
 export async function stopBuild(projectId: string): Promise<void> {
   const store = useConstruirStore.getState()
+  useSaltoStore.getState().cancelar() // Detener corta tambien un salto en ventana
   const owner = store.mode === 'cto' ? CTO_OWNER : projectId
   await api().build.stop(owner)
   store.setBusy(false)
