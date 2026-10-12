@@ -8,6 +8,7 @@ import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
 import { useBootstrap } from './hooks/useBootstrap'
 import { useCargarColaDelLazo } from './hooks/useCargarColaDelLazo'
+import { useArbolDelLazo } from './hooks/useArbolDelLazo'
 import { useExcludedAgents } from './stores/agent-store'
 import { useHealthStore } from './stores/health-store'
 import { useProjectStore } from './stores/project-store'
@@ -30,9 +31,9 @@ export function App(): React.JSX.Element {
   const setOpenCapability = useUiStore((state) => state.setOpenCapability)
 
   const gate = useWorkflowGate(activeProjectId, mode, excludedAgents)
-
   useBootstrap()
   useCargarColaDelLazo() // congela la cola del lazo al encenderlo (ATERRIZAJE-1)
+  useArbolDelLazo() // stash del WIP al arrancar / restaura al parar (ATERRIZAJE-4)
 
   // Se espera a saber si hay key para no parpadear el onboarding al arrancar.
   if (apiKeyChecked && !hasApiKey && !onboardingDismissed) {

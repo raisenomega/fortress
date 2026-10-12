@@ -19,6 +19,10 @@ export const REPAIR_CHANNELS = {
   repairCerco: 'repair:cerco',
   /** La cola del LAZO: ids elegibles en orden severidad-primero (ATERRIZAJE-1). */
   repairCola: 'repair:cola',
+  /** ATERRIZAJE-4: commit durable del trabajo del agente + stash/pop del WIP. */
+  repairLazoCommit: 'repair:lazo-commit',
+  repairLazoStash: 'repair:lazo-stash',
+  repairLazoPop: 'repair:lazo-pop',
   /** La guia ESTATICA del orden de firma: barata, sin correr nada. */
   repairGuiaDeFirma: 'repair:guia-de-firma',
   /** La sonda del conjunto + biseccion si sale roja. Nada caduca: no hay firma. */

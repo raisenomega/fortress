@@ -5,6 +5,7 @@ import type { RunGateResult } from '@application/repair/run-gate'
 import type { AutoMergeResult } from '@application/repair/auto-merge-types'
 import type { DrenajeResultado } from '@application/repair/drenar-hasta-omega'
 import type { ResumenCerco } from '@application/repair/resumen-cerco'
+import type { RepairLazoApi } from './repair-lazo-api'
 import type { JuicioConIntegracion } from '@application/repair/juicio-con-integracion'
 import type { Proposal } from '@domain/repair/proposal'
 import type { ProposalEvent } from '@domain/repair/proposal-event'
@@ -13,7 +14,7 @@ import type { Unsubscribe } from './api-types'
 import type { VerificacionApi } from './repair-verificacion-api'
 
 /** Motor de reparacion disciplinado: C1 elegir, C2 entender, C3 generar. */
-export interface RepairApi extends VerificacionApi {
+export interface RepairApi extends VerificacionApi, RepairLazoApi {
   /**
    * C1 elige el hallazgo mas contenido y C2 lo analiza con un agente real
    * (solo lectura, puede tardar). null si no hay candidato elegible. NO
@@ -29,8 +30,6 @@ export interface RepairApi extends VerificacionApi {
   list(projectId: string): Promise<readonly Proposal[]>
   /** Cuantos hallazgos vivos quedan fuera del cerco: la cola no los elige sola. */
   cerco(projectId: string): Promise<ResumenCerco>
-  /** La cola del LAZO: ids elegibles en orden severidad-primero (ATERRIZAJE-1). */
-  cola(projectId: string): Promise<readonly string[]>
   get(id: string): Promise<Proposal | null>
   /** El libro de vida de una propuesta, en orden de seq. */
   events(proposalId: string): Promise<readonly ProposalEvent[]>
