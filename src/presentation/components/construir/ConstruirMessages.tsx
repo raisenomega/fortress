@@ -1,4 +1,5 @@
 import { antesDeNotas } from '@domain/system/corte-de-notas'
+import { usePegadoAlFondo } from '../../hooks/usePegadoAlFondo'
 import { useConstruirStore } from '../../stores/construir-store'
 import { LineaDelBorrador } from './LineaDelBorrador'
 import { MensajeDelConstruir } from './MensajeDelConstruir'
@@ -10,6 +11,9 @@ export function ConstruirMessages(): React.JSX.Element {
   const messages = useConstruirStore((s) => s.messages)
   const busy = useConstruirStore((s) => s.busy)
   const draft = useConstruirStore((s) => s.draft)
+  // Mismo pegado al fondo que el Terminal: la senal sigue el hilo Y el borrador
+  // en vivo (el streaming de construir viaja por `draft`, no por `messages`).
+  const bottomRef = usePegadoAlFondo(draft ?? messages)
 
   return (
     <div className="flex-1 space-y-3 overflow-y-auto px-1 py-3 font-mono text-[13px] leading-relaxed">
@@ -38,6 +42,7 @@ export function ConstruirMessages(): React.JSX.Element {
       {busy && draft === null ? (
         <p className="text-xs text-muted-foreground">Trabajando...</p>
       ) : null}
+      <div ref={bottomRef} />
     </div>
   )
 }

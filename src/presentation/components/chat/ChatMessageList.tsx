@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import type { ChatMessage } from '@domain/chat/chat-message'
+import { usePegadoAlFondo } from '../../hooks/usePegadoAlFondo'
 import { ChatMessageItem } from './ChatMessageItem'
 import { TerminalMessage } from './TerminalMessage'
 
@@ -21,12 +21,8 @@ export function ChatMessageList({
   transfer,
   pie
 }: ChatMessageListProps): React.JSX.Element {
-  const bottomRef = useRef<HTMLDivElement>(null)
-
-  // Mantener la vista pegada al ultimo mensaje mientras llega el streaming.
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: 'end' })
-  }, [messages])
+  // Pegado al ultimo mensaje mientras llega el streaming (hook compartido).
+  const bottomRef = usePegadoAlFondo(messages)
 
   const cls = terminal ? 'gap-1.5 px-4 py-3' : 'gap-3 px-4 py-4'
 
