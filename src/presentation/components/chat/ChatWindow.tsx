@@ -15,6 +15,7 @@ import { stopWorkflow } from '../../services/chat-service'
 import { ChatHeader } from './ChatHeader'
 import { ChatInput } from './ChatInput'
 import { IndicadorDelLote } from './IndicadorDelLote'
+import { VentanaDelSalto } from '../construir/VentanaDelSalto'
 
 interface ChatWindowProps {
   readonly onSend: (text: string) => void
@@ -54,6 +55,8 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
       {/* El pie va DENTRO del hilo: la firma del lote y el carril de vuelta. */}
       {/* prettier-ignore */}
       <ChatBody projectName={project.name} messages={messages} terminal pie={<><BotonDelPlan projectId={project.id} /><ReportarAlChat projectId={project.id} /></>} />
+
+      <VentanaDelSalto />
 
       <IndicadorDelLote projectId={project.id} />
 

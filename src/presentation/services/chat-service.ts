@@ -4,7 +4,9 @@ import { desenlaceDelResultado } from '@domain/chat/desenlace-del-resultado'
 import { api } from '../adapters/fortress-api'
 import { useChatStore } from '../stores/chat-store'
 import { useColaDelLoteStore } from '../stores/cola-del-lote-store'
+import { useLazoStore } from '../stores/lazo-store'
 import { useRunMeterStore } from '../stores/run-meter-store'
+import { useSaltoStore } from '../stores/salto-store'
 import { despuesDelTurno } from './despues-del-turno'
 import { escucharElTurno } from './escuchar-el-turno'
 import { conLoteDelPlan } from './lote-del-plan'
@@ -39,12 +41,10 @@ export async function sendMessage(input: SendMessageInput): Promise<DesenlaceDel
     // Corrio, lo NEGO una puerta o revento: los tres caminos, en el dominio.
     desenlace = desenlaceDelResultado(result)
     if (!result.ok) useChatStore.getState().setError(input.projectId, result.error)
-    // Captura desde el texto PERSISTIDO (autoritativo), no el buffer efimero del
-    // stream — y asienta el ReporteDeTarea del carril de vuelta (PASO 87).
+    // Del texto PERSISTIDO (no el buffer efimero): asienta el reporte y, en lazo, vuelve (PASO 87).
     else despuesDelTurno(input.projectId, result.value)
   } catch (error) {
-    // Sin catch, un fallo del canal IPC seria un rechazo no manejado y el
-    // finally recargaria el historial borrando el mensaje sin ninguna senal.
+    // Sin catch, un fallo IPC seria un rechazo no manejado: el finally borraria el mensaje.
     const detail = error instanceof Error ? error.message : 'El chat se interrumpio'
     useChatStore.getState().setError(input.projectId, detail)
   } finally {
@@ -67,6 +67,8 @@ export async function clearHistory(projectId: string): Promise<void> {
  * cola ya lo lea—. El input se libera YA; el finally del envio lo re-confirma.
  */
 export async function stopWorkflow(projectId: string): Promise<void> {
+  useSaltoStore.getState().cancelar() // corta una ventana del lazo en vuelo...
+  useLazoStore.getState().parar() // ...y apaga el lazo autonomo (Sello 2b)
   useColaDelLoteStore.getState().cortar(projectId)
   await api().chat.stop(projectId)
   useChatStore.getState().setStreaming(projectId, false)

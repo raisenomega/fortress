@@ -1,14 +1,11 @@
 import { extraerPaso } from '@domain/build/extraer-paso'
 import { useAgentStore } from '../stores/agent-store'
+import { useLazoStore } from '../stores/lazo-store'
 import { useProjectStore } from '../stores/project-store'
-import { useSaltoStore } from '../stores/salto-store'
+import { ESPERA_DEL_SALTO_MS, useSaltoStore } from '../stores/salto-store'
 import { useSettingsStore } from '../stores/settings-store'
 import { useUiStore } from '../stores/ui-store'
 import { enviar } from './puerta-del-envio'
-
-/** La ventana entre el fin del CTO y el salto: tiempo para leer el PASO y, si
- *  hace falta, cancelarlo antes de que vaya solo al Terminal. */
-export const ESPERA_DEL_SALTO_MS = 5000
 
 /**
  * Primer medio del lazo autonomo (Sello 2b-a): cuando el CTO termina su turno y
@@ -25,7 +22,7 @@ export function autoSaltoDelCto(textoDelCto: string): void {
   const paso = extraerPaso(textoDelCto)
   if (paso === null) return
 
-  useSaltoStore.getState().programar(paso, ESPERA_DEL_SALTO_MS, () => {
+  useSaltoStore.getState().programar('al-terminal', ESPERA_DEL_SALTO_MS, () => {
     useUiStore.getState().setView('chat')
     const envio = {
       projectId: useProjectStore.getState().activeProjectId,
@@ -33,5 +30,6 @@ export function autoSaltoDelCto(textoDelCto: string): void {
       excludedAgents: useAgentStore.getState().excluded
     }
     enviar(envio, paso, false)
+    useLazoStore.getState().activar() // el salto enciende el lazo (Sello 2b)
   })
 }

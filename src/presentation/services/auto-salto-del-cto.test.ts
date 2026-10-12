@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useProjectStore } from '../stores/project-store'
 import { useSaltoStore } from '../stores/salto-store'
+import { ESPERA_DEL_SALTO_MS } from '../stores/salto-store'
 import { useSettingsStore } from '../stores/settings-store'
-import { autoSaltoDelCto, ESPERA_DEL_SALTO_MS } from './auto-salto-del-cto'
+import { autoSaltoDelCto } from './auto-salto-del-cto'
 import { enviar } from './puerta-del-envio'
 
 vi.mock('./puerta-del-envio', () => ({ enviar: vi.fn() }))
