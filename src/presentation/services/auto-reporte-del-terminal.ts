@@ -3,6 +3,7 @@ import { useLazoStore } from '../stores/lazo-store'
 import { ESPERA_DEL_SALTO_MS, useSaltoStore } from '../stores/salto-store'
 import { useSettingsStore } from '../stores/settings-store'
 import { submitConstruir } from './construir-service'
+import { dirigirAlCto } from './dirigir-al-cto'
 import { MAX_VUELTAS_DEFECTO, nadaQueHacerAhora } from './lazo-trabajo'
 import { reportarAlChat } from './reporte-del-turno'
 
@@ -30,6 +31,7 @@ export function autoReporteDelTerminal(projectId: string): void {
 
   useSaltoStore.getState().programar('al-cto', ESPERA_DEL_SALTO_MS, () => {
     reportarAlChat(projectId) // precarga el reporte en el CTO + navega
+    dirigirAlCto(projectId) // antepone la cabeza de la cola: su PASO la ataca (ATERRIZAJE-3)
     submitConstruir(projectId) // y lo envia: el CTO produce el siguiente PASO
     useLazoStore.getState().vuelta()
   })

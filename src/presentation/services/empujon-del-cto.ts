@@ -4,6 +4,7 @@ import { useLazoStore } from '../stores/lazo-store'
 import { useProjectStore } from '../stores/project-store'
 import { ESPERA_DEL_SALTO_MS, useSaltoStore } from '../stores/salto-store'
 import { submitConstruir } from './construir-service'
+import { dirigirAlCto } from './dirigir-al-cto'
 import { MAX_VUELTAS_DEFECTO, nadaQueHacerAhora } from './lazo-trabajo'
 
 const EMPUJON = 'Continua con el siguiente hallazgo vivo del proyecto.'
@@ -32,6 +33,7 @@ export function empujonAlCto(): void {
   }
   useSaltoStore.getState().programar('al-cto', ESPERA_DEL_SALTO_MS, () => {
     useConstruirStore.getState().setInput(EMPUJON)
+    if (projectId !== null) dirigirAlCto(projectId) // antepone la cabeza (ATERRIZAJE-3)
     submitConstruir(projectId ?? '')
     useLazoStore.getState().estancar()
   })
