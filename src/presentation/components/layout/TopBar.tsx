@@ -4,6 +4,7 @@ import { useUiStore } from '../../stores/ui-store'
 import { APP_NAME } from '../common/Logo'
 import { ModeSelector } from '../settings/ModeSelector'
 import { KeepAwakeToggle } from './KeepAwakeToggle'
+import { AvisoChip } from './AvisoChip'
 import { FirmaChip } from './FirmaChip'
 import { MotorChip } from './MotorChip'
 import { OmegaChip } from './OmegaChip'
@@ -45,7 +46,7 @@ export function TopBar(): React.JSX.Element {
       </button>
 
       <MotorChip />
-
+      <AvisoChip />
       <FirmaChip />
 
       <OmegaChip />
