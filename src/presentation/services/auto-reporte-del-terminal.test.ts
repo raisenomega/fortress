@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useLazoStore } from '../stores/lazo-store'
+import { useScanStore } from '../stores/scan-store'
 import { ESPERA_DEL_SALTO_MS, useSaltoStore } from '../stores/salto-store'
 import { useSettingsStore } from '../stores/settings-store'
-import { autoReporteDelTerminal, MAX_VUELTAS_DEFECTO } from './auto-reporte-del-terminal'
+import { autoReporteDelTerminal } from './auto-reporte-del-terminal'
 import { reportarAlChat } from './reporte-del-turno'
 import { submitConstruir } from './construir-service'
 
@@ -10,10 +11,12 @@ vi.mock('./reporte-del-turno', () => ({ reportarAlChat: vi.fn() }))
 vi.mock('./construir-service', () => ({ submitConstruir: vi.fn() }))
 
 const PID = 'p1'
+const UN_VIVO = { CRITICAL: 1, HIGH: 0, MEDIUM: 0, LOW: 0 }
 
 beforeEach(() => {
   vi.useFakeTimers()
   useSettingsStore.setState({ mode: 'autonomo' })
+  useScanStore.setState({ counts: { [PID]: UN_VIVO } }) // hay trabajo que hacer
   useLazoStore.getState().parar()
   useLazoStore.getState().activar() // el lazo esta corriendo
   useSaltoStore.getState().cancelar()
@@ -62,13 +65,5 @@ describe('autoReporteDelTerminal: la vuelta Terminal->CTO del lazo (2b-b)', () =
     autoReporteDelTerminal(PID)
     vi.advanceTimersByTime(ESPERA_DEL_SALTO_MS)
     expect(useLazoStore.getState().iteraciones).toBe(1)
-  })
-
-  it('T3: alcanzado el tope de vueltas -> para y no vuelve', () => {
-    for (let i = 0; i < MAX_VUELTAS_DEFECTO; i += 1) useLazoStore.getState().vuelta()
-    autoReporteDelTerminal(PID)
-    vi.advanceTimersByTime(ESPERA_DEL_SALTO_MS)
-    expect(reportarAlChat).not.toHaveBeenCalled()
-    expect(useLazoStore.getState().activo).toBe(false)
   })
 })

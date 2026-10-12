@@ -5,6 +5,7 @@ import { useProjectStore } from '../stores/project-store'
 import { ESPERA_DEL_SALTO_MS, useSaltoStore } from '../stores/salto-store'
 import { useSettingsStore } from '../stores/settings-store'
 import { useUiStore } from '../stores/ui-store'
+import { empujonAlCto } from './empujon-del-cto'
 import { enviar } from './puerta-del-envio'
 
 /**
@@ -20,7 +21,10 @@ import { enviar } from './puerta-del-envio'
 export function autoSaltoDelCto(textoDelCto: string): void {
   if (useSettingsStore.getState().mode !== 'autonomo') return
   const paso = extraerPaso(textoDelCto)
-  if (paso === null) return
+  if (paso === null) {
+    empujonAlCto() // no-PASO: pasa al siguiente (o para) en vez de morir callado
+    return
+  }
 
   useSaltoStore.getState().programar('al-terminal', ESPERA_DEL_SALTO_MS, () => {
     useUiStore.getState().setView('chat')

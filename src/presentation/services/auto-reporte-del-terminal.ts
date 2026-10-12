@@ -3,10 +3,8 @@ import { useLazoStore } from '../stores/lazo-store'
 import { ESPERA_DEL_SALTO_MS, useSaltoStore } from '../stores/salto-store'
 import { useSettingsStore } from '../stores/settings-store'
 import { submitConstruir } from './construir-service'
+import { MAX_VUELTAS_DEFECTO, nadaQueHacerAhora } from './lazo-trabajo'
 import { reportarAlChat } from './reporte-del-turno'
-
-/** Tope de vueltas por defecto del lazo (2b-c lo lleva a Configuracion). */
-export const MAX_VUELTAS_DEFECTO = 8
 
 /**
  * El carril de VUELTA del lazo autonomo (Sello 2b-b): cuando el Terminal termina
@@ -23,7 +21,7 @@ export function autoReporteDelTerminal(projectId: string): void {
     topeDiario: false, // lo cobra el gate del envio: un turno negado no llega aqui
     iteraciones: lazo.iteraciones,
     maxIteraciones: MAX_VUELTAS_DEFECTO,
-    nadaQueHacer: false // 2b-c cablea el conteo de hallazgos vivos
+    nadaQueHacer: nadaQueHacerAhora(projectId) // sin vivos (o estancado) -> para
   })
   if (stop !== null) {
     lazo.parar()

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useLazoStore } from '../stores/lazo-store'
 import { useProjectStore } from '../stores/project-store'
 import { useSaltoStore } from '../stores/salto-store'
 import { ESPERA_DEL_SALTO_MS } from '../stores/salto-store'
@@ -14,6 +15,7 @@ beforeEach(() => {
   vi.useFakeTimers()
   useSettingsStore.setState({ mode: 'autonomo' })
   useProjectStore.setState({ activeProjectId: 'p1' })
+  useLazoStore.getState().parar() // lazo inactivo: un no-PASO no empuja en estos tests
   useSaltoStore.getState().cancelar()
   vi.mocked(enviar).mockClear()
 })

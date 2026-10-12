@@ -5,11 +5,15 @@ interface LazoStore {
   readonly activo: boolean
   /** Vueltas completas (Terminal->CTO) dadas en esta sesion del lazo. */
   readonly iteraciones: number
-  /** Enciende el lazo; si ya estaba encendido NO reinicia el contador. */
+  /** Turnos del CTO sin PASO (estancamiento): el "idle" determinista. */
+  readonly sinAvanzar: number
+  /** Enciende el lazo; si ya estaba encendido solo marca AVANCE (sinAvanzar=0). */
   readonly activar: () => void
-  /** Cierra una vuelta (Terminal->CTO): +1 iteracion. */
+  /** Cierra una vuelta (Terminal->CTO): +1 iteracion y AVANCE (sinAvanzar=0). */
   readonly vuelta: () => void
-  /** Apaga el lazo y pone el contador a cero (Detener o una parada). */
+  /** Un empujon sin PASO: +1 sinAvanzar (acerca al estancamiento). */
+  readonly estancar: () => void
+  /** Apaga el lazo y pone los contadores a cero (Detener o una parada). */
   readonly parar: () => void
 }
 
@@ -22,7 +26,10 @@ interface LazoStore {
 export const useLazoStore = create<LazoStore>((set) => ({
   activo: false,
   iteraciones: 0,
-  activar: () => set((s) => (s.activo ? s : { activo: true, iteraciones: 0 })),
-  vuelta: () => set((s) => ({ iteraciones: s.iteraciones + 1 })),
-  parar: () => set({ activo: false, iteraciones: 0 })
+  sinAvanzar: 0,
+  activar: () =>
+    set((s) => (s.activo ? { sinAvanzar: 0 } : { activo: true, iteraciones: 0, sinAvanzar: 0 })),
+  vuelta: () => set((s) => ({ iteraciones: s.iteraciones + 1, sinAvanzar: 0 })),
+  estancar: () => set((s) => ({ sinAvanzar: s.sinAvanzar + 1 })),
+  parar: () => set({ activo: false, iteraciones: 0, sinAvanzar: 0 })
 }))
