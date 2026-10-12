@@ -28,6 +28,11 @@ describe('cuando no hay nada que reconciliar', () => {
     expect(b.marks).toEqual([])
   })
 
+  it('PASO 172a: un CLIENTE contaminado SI reindexa (la marca es solo de FORTRESS)', async () => {
+    const b = bench({ contaminado: true, esRepoPropio: false })
+    expect(await reconcileGraph(b.context, 'p1', b.deps)).toBe('STARTED')
+  })
+
   it('y no condena: desbloqueado (markClean) vuelve a reindexar', async () => {
     // El reproche que hundio el intento anterior de este freno era que dejaria
     // un proyecto sin indexar para siempre. Ya no: la marca se relee.

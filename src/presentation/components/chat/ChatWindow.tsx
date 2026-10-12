@@ -8,6 +8,7 @@ import { useActiveProject } from '../../stores/project-store'
 import { EmptyState } from '../common/EmptyState'
 import { BotonDelPlan } from './BotonDelPlan'
 import { ReportarAlChat } from './ReportarAlChat'
+import { AvisoClienteContaminado } from './AvisoClienteContaminado'
 import { ChatBody } from './ChatBody'
 import { ChatErrorBanner } from './ChatErrorBanner'
 import { ConfigRedirect } from './ConfigRedirect'
@@ -47,6 +48,7 @@ export function ChatWindow({ onSend }: ChatWindowProps): React.JSX.Element {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <ChatHeader project={project} />
+      <AvisoClienteContaminado project={project} />
       {error ? (
         <ChatErrorBanner message={error} onDismiss={() => setError(project.id, null)} />
       ) : null}

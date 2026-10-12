@@ -40,7 +40,9 @@ export function loQueHayQueReconciliar(
   const project = context.projects.findById(projectId)
   if (project === null) return null
 
-  if (project.contaminated) {
+  // PASO 172a: la contaminacion congela solo el mundo FORTRESS; un cliente no
+  // deja de reindexar por esa marca (su freno vive en el self-repair).
+  if (project.contaminated && context.esRepoPropio(project.path)) {
     console.info('[graph-reindex]', project.name, 'SKIP: proyecto CONTAMINADO')
     return null
   }

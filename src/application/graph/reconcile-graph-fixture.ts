@@ -20,6 +20,8 @@ interface Opciones {
   readonly runnerResult?: RunnerResult
   readonly now?: number
   readonly contaminado?: boolean
+  /** PASO 172a: por defecto FORTRESS; un cliente (`false`) reindexa aunque esté marcado. */
+  readonly esRepoPropio?: boolean
   /** Hay un turno corriendo en ese proyecto: su checkpoint se deshara (BUG 4). */
   readonly turnoVivo?: boolean
   /** El indice en disco al mirar (por defecto existe, como en un proyecto sano). */
@@ -37,10 +39,7 @@ export function bench(opts: Opciones = {}): Bench {
   const grafo: string[] = []
   let corrido = false
   let queued: (() => Promise<void>) | null = null
-  const state: GraphState = {
-    indexedSha: null, indexedAt: null, status: 'IDLE', startedAt: null, error: null,
-    ...opts.state
-  } // prettier-ignore
+  const state: GraphState = { indexedSha: null, indexedAt: null, status: 'IDLE', startedAt: null, error: null, ...opts.state } // prettier-ignore
 
   const context = {
     projects: {
@@ -48,6 +47,7 @@ export function bench(opts: Opciones = {}): Bench {
       setGraph: (_id: string, n: number, e: number, at: string): void => void grafo.push(`set:${n}/${e}@${at}`), // prettier-ignore
       clearGraph: (): void => void grafo.push('clear')
     },
+    esRepoPropio: () => opts.esRepoPropio !== false,
     headSha: () => (opts.sha === undefined ? 'a'.repeat(40) : opts.sha),
     graphState: {
       getGraphState: () => state,

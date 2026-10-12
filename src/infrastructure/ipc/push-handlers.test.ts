@@ -5,10 +5,7 @@ import { ok, type Result } from '@domain/shared/result'
 type Handler = (event: unknown, projectId: string) => Promise<Result<string>>
 
 const handlers = new Map<string, Handler>()
-let contaminado = false
-let existe = true
-let empujes = 0
-let raiz = '/tmp/p' // lo que responde `git rev-parse --show-toplevel` en la carpeta
+let contaminado = false, existe = true, empujes = 0, raiz = '/tmp/p' // prettier-ignore
 /** Listo para pushear: con remoto, escaneado y sin CRITICAL en el conteo. */
 const listo = { id: 'p', path: '/tmp/p', gitRemote: 'g:p.git', lastScan: '2026-08-01' }
 const proyecto = (): object | null => (existe ? { ...listo, contaminated: contaminado } : null)
@@ -19,6 +16,8 @@ const context = {
   omegaLog: { append: (): void => undefined }
 } as unknown as AppContext
 
+// PASO 172a: el proyecto ES FORTRESS (el breaker solo congela el repo propio).
+vi.mock('../system/self-project', () => ({ isFortressRepo: () => true, selfProject: () => null }))
 vi.mock('electron', () => ({
   ipcMain: { handle: (canal: string, fn: Handler): void => void handlers.set(canal, fn) }
 }))

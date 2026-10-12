@@ -1,7 +1,11 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { AppContext } from '@application/context'
 import { cancelRun, endMerge, endRun, isCancelled, tryBeginRun } from './run-control'
 import { guardMerge, guardRun } from './run-guard'
+
+// PASO 172a: el breaker solo congela el repo PROPIO. Aqui el proyecto ES FORTRESS
+// (self-repair), asi que la contaminacion lo frena como siempre.
+vi.mock('./system/self-project', () => ({ isFortressRepo: () => true, selfProject: () => null }))
 
 /** Contexto con el tope diario ya reventado, para probar que a la firma no le importa. */
 function context(contaminated = false, gastado = 9999): AppContext {

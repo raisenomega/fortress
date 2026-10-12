@@ -27,7 +27,9 @@ export function MotorChip(): React.JSX.Element | null {
 
   if (project === null || cargado !== project.id) return null
 
-  const parado = detenido(reduceMotorStatus(proposals, project.contaminated))
+  // PASO 172a: "Motor detenido" por contaminacion es del mundo FORTRESS; un
+  // cliente contaminado trabaja libre y nunca se pinta "detenido".
+  const parado = detenido(reduceMotorStatus(proposals, project.contaminated && project.esRepoPropio)) // prettier-ignore
   if (parado === null) return null
 
   return (

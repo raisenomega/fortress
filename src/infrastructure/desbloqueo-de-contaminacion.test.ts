@@ -1,10 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AppContext } from '@application/context'
 import type { ProjectRepository } from '@domain/project/project-repository'
 import { createMemoryDb, seedProject } from './persistence/memory-db'
 import { createSqliteProjectRepository } from './persistence/sqlite-project-repository'
 import { endMerge, endRun } from './run-control'
 import { guardMerge, guardRun } from './run-guard'
+
+// PASO 172a: el proyecto sembrado se trata como FORTRESS (el breaker solo congela
+// el repo propio) para probar que markClean reabre la puerta.
+vi.mock('./system/self-project', () => ({ isFortressRepo: () => true, selfProject: () => null }))
 
 let projects: ProjectRepository
 

@@ -2,6 +2,7 @@ import type { AppContext } from '@application/context'
 import { readBudget, sinMedirHoy, spentToday } from '@application/settings/read-budget'
 import { CONTAMINATED_BLOCK } from '@domain/probe/contamination'
 import { dayLimitReached } from '@domain/settings/run-budget'
+import { isFortressRepo } from './system/self-project'
 import { tryBeginMerge, tryBeginRun } from './run-control'
 
 const BUSY =
@@ -45,9 +46,13 @@ export function topeDiarioAlcanzado(context: AppContext, ahora: Date): string | 
 }
 
 /** Circuit breaker (Capa 4): un proyecto contaminado se bloquea hasta revision
- *  humana. Vale para cualquier accion, gaste tokens o no. */
+ *  humana. PASO 172a: la contaminacion es CUARENTENA del mundo FORTRESS (self-
+ *  repair), nunca del cliente —trabaja libre y solo VE un aviso—. Solo el repo
+ *  PROPIO (`isFortressRepo`); fuera de FORTRESS, null siempre. */
 function contaminado(context: AppContext, projectId: string): string | null {
-  return context.projects.findById(projectId)?.contaminated === true ? CONTAMINATED_BLOCK : null
+  const project = context.projects.findById(projectId)
+  if (project === null || !isFortressRepo(project.path)) return null
+  return project.contaminated === true ? CONTAMINATED_BLOCK : null
 }
 
 /**

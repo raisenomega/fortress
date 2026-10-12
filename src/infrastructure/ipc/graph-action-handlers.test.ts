@@ -8,6 +8,7 @@ const avisos: string[] = []
 let spawns = 0
 const proyecto = { path: '/tmp/p', contaminated: false, trusted: true }
 
+vi.mock('../system/self-project', () => ({ isFortressRepo: () => true, selfProject: () => null })) // PASO 172a: es FORTRESS
 vi.mock('electron', () => ({
   ipcMain: { handle: (canal: string, fn: Handler): void => void handlers.set(canal, fn) }
 }))
@@ -34,8 +35,7 @@ const { endRun, isRunning, tryBeginRun } = await import('../run-control')
 registerGraphActionHandlers()
 const NADA: GraphVerify = { connected: false, tools: [] }
 const falta: Handler = () => Promise.reject(new Error('graph:verify sin registrar'))
-const send = (_canal: string, chunk: { delta: string }): void => void avisos.push(chunk.delta)
-const event = { sender: { isDestroyed: () => false, send } }
+const event = { sender: { isDestroyed: () => false, send: (_c: string, chunk: { delta: string }) => void avisos.push(chunk.delta) } } // prettier-ignore
 const verify = (): Promise<GraphVerify> => (handlers.get('graph:verify') ?? falta)(event, 'p')
 
 describe('graph:verify pide confianza y pasa por guardRun', () => {
