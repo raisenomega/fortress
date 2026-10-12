@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { planRepair } from '@application/repair/plan-repair'
 import type { PlanResult } from '@application/repair/resultado-del-plan'
 import { resumenCerco } from '@application/repair/resumen-cerco'
+import { colaDelLazo } from '@application/chat/cola-del-lazo'
 import { err, ok, type Result } from '@domain/shared/result'
 import { getAppContext } from '../persistence/app-context'
 import { endRun } from '../run-control'
@@ -50,6 +51,8 @@ export function registerRepairHandlers(): void {
   ipcMain.handle(IPC.repairCerco, (_event, projectId: string) =>
     resumenCerco(getAppContext(), String(projectId))
   )
+
+  ipcMain.handle(IPC.repairCola, (_e, id: string) => colaDelLazo(getAppContext(), String(id)))
 
   ipcMain.handle(IPC.repairGet, (_event, id: string) =>
     getAppContext().repairProposals.findById(String(id))

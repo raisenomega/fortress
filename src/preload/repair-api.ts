@@ -29,6 +29,8 @@ export interface RepairApi extends VerificacionApi {
   list(projectId: string): Promise<readonly Proposal[]>
   /** Cuantos hallazgos vivos quedan fuera del cerco: la cola no los elige sola. */
   cerco(projectId: string): Promise<ResumenCerco>
+  /** La cola del LAZO: ids elegibles en orden severidad-primero (ATERRIZAJE-1). */
+  cola(projectId: string): Promise<readonly string[]>
   get(id: string): Promise<Proposal | null>
   /** El libro de vida de una propuesta, en orden de seq. */
   events(proposalId: string): Promise<readonly ProposalEvent[]>

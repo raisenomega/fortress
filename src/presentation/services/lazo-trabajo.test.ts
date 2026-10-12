@@ -36,3 +36,18 @@ describe('nadaQueHacerAhora: alimenta el nadaQueHacer del lazo (2b-c)', () => {
     expect(nadaQueHacerAhora(PID)).toBe(true)
   })
 })
+
+describe('nadaQueHacerAhora: la cola congelada es el candado (ATERRIZAJE-1)', () => {
+  it('MUTANTE: la cola congelada MANDA sobre el escaneo (estable, no recomputa)', () => {
+    useLazoStore.getState().congelarCola(['crit']) // hay trabajo congelado
+    useScanStore.setState({ counts: { [PID]: SIN_VIVOS } }) // re-auditoria dice 0
+    expect(useLazoStore.getState().cola).toEqual(['crit']) // no se recomputa
+    expect(nadaQueHacerAhora(PID)).toBe(false) // la cola manda: HAY trabajo
+  })
+
+  it('cola congelada VACIA -> nada que hacer aunque el escaneo tenga vivos', () => {
+    useLazoStore.getState().congelarCola([])
+    useScanStore.setState({ counts: { [PID]: VIVO } })
+    expect(nadaQueHacerAhora(PID)).toBe(true)
+  })
+})

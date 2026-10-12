@@ -18,8 +18,12 @@ export const MAX_SIN_AVANZAR = 1
  * (un turno largo legitimo no es idle; un CTO que no propone, si).
  */
 export function nadaQueHacerAhora(projectId: string | null): boolean {
+  const lazo = useLazoStore.getState()
+  // La cola CONGELADA manda: es el candado del lazo. Vacia => nada que hacer.
+  if (lazo.cola !== null) return lazo.cola.length === 0 || lazo.sinAvanzar >= MAX_SIN_AVANZAR
+  // Sin cola cargada: el fallback de siempre (conteo del escaneo vigente).
   if (projectId === null) return true
   const counts = useScanStore.getState().counts[projectId]
   if (counts === undefined || totalFindings(counts) === 0) return true
-  return useLazoStore.getState().sinAvanzar >= MAX_SIN_AVANZAR
+  return lazo.sinAvanzar >= MAX_SIN_AVANZAR
 }

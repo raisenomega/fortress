@@ -12,6 +12,7 @@ export const repairApi: FortressApi['repair'] = {
   verifyAllStop: (projectId) => ipcRenderer.invoke(IPC.findingVerifyAllStop, projectId),
   list: (projectId) => ipcRenderer.invoke(IPC.repairList, projectId),
   cerco: (projectId) => ipcRenderer.invoke(IPC.repairCerco, projectId),
+  cola: (projectId) => ipcRenderer.invoke(IPC.repairCola, projectId),
   get: (id) => ipcRenderer.invoke(IPC.repairGet, id),
   events: (proposalId) => ipcRenderer.invoke(IPC.repairEvents, proposalId),
   onChanged: (listener) => subscribe(IPC.repairChanged, listener),

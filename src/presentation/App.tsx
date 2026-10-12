@@ -7,6 +7,7 @@ import { Toaster } from './components/common/Toaster'
 import { AppShell } from './components/layout/AppShell'
 import { OnboardingScreen } from './components/onboarding/OnboardingScreen'
 import { useBootstrap } from './hooks/useBootstrap'
+import { useCargarColaDelLazo } from './hooks/useCargarColaDelLazo'
 import { useExcludedAgents } from './stores/agent-store'
 import { useHealthStore } from './stores/health-store'
 import { useProjectStore } from './stores/project-store'
@@ -31,6 +32,7 @@ export function App(): React.JSX.Element {
   const gate = useWorkflowGate(activeProjectId, mode, excludedAgents)
 
   useBootstrap()
+  useCargarColaDelLazo() // congela la cola del lazo al encenderlo (ATERRIZAJE-1)
 
   // Se espera a saber si hay key para no parpadear el onboarding al arrancar.
   if (apiKeyChecked && !hasApiKey && !onboardingDismissed) {

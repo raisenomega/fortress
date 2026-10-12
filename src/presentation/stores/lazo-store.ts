@@ -7,6 +7,12 @@ interface LazoStore {
   readonly iteraciones: number
   /** Turnos del CTO sin PASO (estancamiento): el "idle" determinista. */
   readonly sinAvanzar: number
+  /** La cola CONGELADA al arrancar (ids, severidad-primero), o null si aun no se
+   *  cargo. El candado estable: no se recomputa hasta `activar`/`parar`. */
+  readonly cola: readonly string[] | null
+  /** Congela la cola del lazo (snapshot al arrancar). Idempotente por diseño:
+   *  quien la carga lo hace una vez por encendido. */
+  readonly congelarCola: (ids: readonly string[]) => void
   /** Enciende el lazo; si ya estaba encendido solo marca AVANCE (sinAvanzar=0). */
   readonly activar: () => void
   /** Cierra una vuelta (Terminal->CTO): +1 iteracion y AVANCE (sinAvanzar=0). */
@@ -27,9 +33,12 @@ export const useLazoStore = create<LazoStore>((set) => ({
   activo: false,
   iteraciones: 0,
   sinAvanzar: 0,
+  cola: null,
+  congelarCola: (ids) => set({ cola: ids }),
+  // Arrancar/parar descongelan: la proxima sesion del lazo toma su propio snapshot.
   activar: () =>
-    set((s) => (s.activo ? { sinAvanzar: 0 } : { activo: true, iteraciones: 0, sinAvanzar: 0 })),
+    set((s) => (s.activo ? { sinAvanzar: 0 } : { activo: true, iteraciones: 0, sinAvanzar: 0, cola: null })), // prettier-ignore
   vuelta: () => set((s) => ({ iteraciones: s.iteraciones + 1, sinAvanzar: 0 })),
   estancar: () => set((s) => ({ sinAvanzar: s.sinAvanzar + 1 })),
-  parar: () => set({ activo: false, iteraciones: 0, sinAvanzar: 0 })
+  parar: () => set({ activo: false, iteraciones: 0, sinAvanzar: 0, cola: null })
 }))
