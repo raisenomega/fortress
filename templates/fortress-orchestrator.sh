@@ -45,6 +45,12 @@ UNIFIED_REPORT="$REPORTS_DIR/unified-$(date +%Y%m%d-%H%M%S).md"
 # (anularlos cambiaria el destino que el operador configuro).
 GIT_SIN_HOOKS=(-c core.hooksPath=/dev/null -c core.fsmonitor=)
 
+# CHOKEPOINT UNICO: todo `git` contra un repo cliente pasa por aqui, nunca a
+# pelo. Asi ni una lectura (status, rev-parse) ni el push ejecuta los hooks ni
+# el core.fsmonitor que el repo auditado declare: una sola puerta, imposible que
+# un `git` nuevo se escape sin la neutralizacion. `command git` evita recursion.
+git() { command git "${GIT_SIN_HOOKS[@]}" "$@"; }
+
 # Colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -103,7 +109,7 @@ check_dependencies() {
         missing=1
     fi
 
-    if ! command -v git &> /dev/null; then
+    if ! type -P git &> /dev/null; then
         log_error "Git no está instalado."
         missing=1
     fi
@@ -775,7 +781,7 @@ cmd_push() {
         printf "${BLUE}[INFO]${NC} Pushing %s → %s/%s...\n" \
             "$pname" "$(redact_remote "$premote")" "$pbranch"
 
-        if (cd "$ppath" && git "${GIT_SIN_HOOKS[@]}" push "$premote" "$pbranch" 2>&1); then
+        if (cd "$ppath" && git push "$premote" "$pbranch" 2>&1); then
             log_success "$pname: push exitoso ✓"
         else
             log_error "$pname: push falló"
