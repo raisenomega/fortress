@@ -54,7 +54,7 @@ describe('el prompt le dice al modelo la regla que antes solo sabia el codigo', 
   it('dice que argumentar el riesgo de tocar NO es evidencia', () => {
     // Es literalmente lo que hicieron los dos dudosos, y el motor lo guardaba
     // como razon de la extincion porque la razon sale del campo `risk`.
-    expect(prompt()).toContain('Argumentar que tocarlo es arriesgado NO es')
+    expect(prompt()).toContain('arriesgado no prueba nada')
   })
 })
 
