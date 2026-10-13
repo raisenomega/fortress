@@ -14,6 +14,10 @@ export type CierreDelCiclo =
   | { readonly desenlace: DesenlaceDeVerificacion | 'no_vivo' }
   | { readonly desenlace: 'pendiente'; readonly motivo: string }
 
+/** El desenlace del cierre, o `null` si una guarda lo cortó (no se cerró el
+ *  ciclo). Viaja al parte: solo los tres de verificación son un DICTAMEN real. */
+export type DesenlaceDelCierre = CierreDelCiclo['desenlace'] | null
+
 const relativa = (ruta: string, raiz: string): string =>
   raiz !== '' && ruta.startsWith(`${raiz}/`) ? ruta.slice(raiz.length + 1) : ruta
 

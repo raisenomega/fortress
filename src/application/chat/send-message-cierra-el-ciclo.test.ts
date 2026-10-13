@@ -8,7 +8,9 @@ const NEUTRO = 'Resuelve este hallazgo'
 
 describe('sendMessage cierra el ciclo DESPUES de guardar la respuesta (ADR-088, pieza 3)', () => {
   it('con foco: el hallazgo, el turno conservado y la respuesta YA guardada', async () => {
-    const espia = vi.spyOn(cierre, 'cerrarYContar').mockResolvedValue(null)
+    const espia = vi
+      .spyOn(cierre, 'cerrarYContar')
+      .mockResolvedValue({ sinCierre: null, desenlace: null })
     const { r } = await turno({ prompt: NEUTRO, findingId: 'f-neutro' })
 
     expect(r.ok).toBe(true)
@@ -21,7 +23,9 @@ describe('sendMessage cierra el ciclo DESPUES de guardar la respuesta (ADR-088, 
   })
 
   it('sin foco: le llega null, que es la primera guarda del cierre', async () => {
-    const espia = vi.spyOn(cierre, 'cerrarYContar').mockResolvedValue(null)
+    const espia = vi
+      .spyOn(cierre, 'cerrarYContar')
+      .mockResolvedValue({ sinCierre: null, desenlace: null })
     await turno({ prompt: NEUTRO })
 
     expect(espia.mock.calls[0][1]).toBeNull()
@@ -31,7 +35,9 @@ describe('sendMessage cierra el ciclo DESPUES de guardar la respuesta (ADR-088, 
     // Antes se forzaba con `src/auth/…`, que degradaba por la palabra (ADR-089:
     // ya no). Lo que se prueba es lo mismo: sin modo de edicion no hay
     // checkpoint, y sin checkpoint nada garantiza lo que quedo en el arbol.
-    const espia = vi.spyOn(cierre, 'cerrarYContar').mockResolvedValue(null)
+    const espia = vi
+      .spyOn(cierre, 'cerrarYContar')
+      .mockResolvedValue({ sinCierre: null, desenlace: null })
     await turno({ prompt: NEUTRO, findingId: 'f-neutro', mode: 'supervisado' })
 
     expect(espia.mock.calls[0][2].conservado).toBe(false)

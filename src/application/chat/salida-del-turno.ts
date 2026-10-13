@@ -1,5 +1,6 @@
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { ChatEngine } from '@domain/chat/code-agent'
+import type { DesenlaceDelCierre } from '@domain/chat/cierre-del-ciclo'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { ReplyOutcome } from './reply-outcome'
 import type { SendMessageOutput } from './send-message-types'
@@ -23,7 +24,8 @@ export function salidaDelTurno(
   engine: ChatEngine,
   outcome: ReplyOutcome,
   sinCierre: SinCierre | null,
-  sinVerificar: boolean
+  sinVerificar: boolean,
+  desenlace: DesenlaceDelCierre = null
 ): SendMessageOutput {
   const modelo = modeloDelTurno(outcome)
   return {
@@ -32,6 +34,7 @@ export function salidaDelTurno(
     engine,
     sinCierre,
     sinVerificar,
+    desenlace,
     failed: outcome.failed,
     edits: outcome.edits,
     usage: outcome.usage,

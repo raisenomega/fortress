@@ -12,6 +12,7 @@ const base: ResultadoDelTurno = {
   edits: ['src/a.ts', 'src/b.ts'],
   sinCierre: null,
   sinVerificar: false,
+  desenlace: 'extinguido',
   usage,
   modelo: 'claude-opus-5-5',
   hallazgos: 2
@@ -24,6 +25,7 @@ describe('el reporte de tarea empaqueta el turno terminado', () => {
       resumen: base.assistant.content,
       edits: ['src/a.ts', 'src/b.ts'],
       verificacion: 'verificado',
+      desenlace: 'extinguido',
       cierre: null,
       usage,
       modelo: 'claude-opus-5-5',

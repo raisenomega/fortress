@@ -1,11 +1,12 @@
 import { notaDelCierre, parteDelCierre, pendienteDeVerificar, type CierreDelCiclo } from '@domain/chat/cierre-del-ciclo' // prettier-ignore
-import { cerro, noCerro, type ResultadoDelCierre, type SinCierre } from '@domain/chat/motivo-sin-cierre' // prettier-ignore
+import { cerro, noCerro, type ResultadoDelCierre } from '@domain/chat/motivo-sin-cierre' // prettier-ignore
 import { countEdits } from '@domain/telemetry/edit-tools'
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { AppContext } from '../context'
 import { verificarMitigado } from '../repair/verificar-mitigado'
 import { markMitigatedFinding } from '../scan/dismiss-finding'
 import { appendMessage } from './chat-history'
+import type { CierreDelTurno } from './cierre-del-turno'
 import type { TurnoProtegido } from './con-red-de-reversion'
 
 const SIN_LANZAR = 'no se lanzo: una propuesta viva del motor lo trabaja, o ya no es verificable'
@@ -57,19 +58,18 @@ function pendiente(context: AppContext, findingId: string, motivo: string): Cier
   return { desenlace: 'pendiente', motivo }
 }
 
-/** Cierra y lo CUENTA en el Terminal, como aviso del sistema: el turno no puede
- *  dejar creer que se cerro lo que no. `system` no entra en ningun prompt.
- *  Devuelve la guarda que corto, si corto: de ahi sale el parte del lote. */
+/** Cierra y lo CUENTA (aviso `system`, fuera de todo prompt): el turno no puede
+ *  dejar creer que cerro lo que no. Devuelve guarda + desenlace para el parte. */
 export async function cerrarYContar(
   context: AppContext,
   findingId: string | null,
   turno: TurnoProtegido,
   respuesta: ChatMessage
-): Promise<SinCierre | null> {
+): Promise<CierreDelTurno> {
   const { id, projectId, mode, engine } = respuesta
   const { cierre, sinCierre } = await cerrarCicloTerminal(context, projectId, findingId, turno, id)
-  if (cierre === null) return sinCierre
+  if (cierre === null) return { sinCierre, desenlace: null }
   const content = parteDelCierre(cierre)
   appendMessage(context, { projectId, role: 'system', content, agentId: null, mode, engine })
-  return null
+  return { sinCierre: null, desenlace: cierre.desenlace }
 }

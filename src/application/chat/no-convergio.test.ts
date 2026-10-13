@@ -35,7 +35,8 @@ describe('el tercer desenlace: no convergio', () => {
 
     const sin = await trasElTurno(ctx, 'f1', REVERTIDO, RESPUESTA, { convergio: false, razon: 'r', intentos: 2 }) // prettier-ignore
 
-    expect(sin?.motivo).toBe('no-convergio')
+    expect(sin.sinCierre?.motivo).toBe('no-convergio')
+    expect(sin.desenlace).toBeNull()
   })
 
   it('un turno que SI convergio no pasa por aqui: cierra como siempre', async () => {

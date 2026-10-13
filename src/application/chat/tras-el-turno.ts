@@ -1,7 +1,7 @@
 import type { ChatMessage } from '@domain/chat/chat-message'
-import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { AppContext } from '../context'
 import { cerrarYContar } from './cerrar-ciclo-terminal'
+import type { CierreDelTurno } from './cierre-del-turno'
 import type { TurnoProtegido } from './con-red-de-reversion'
 import { recordarSesion } from './memoria-por-hallazgo'
 import { registrarNoConvergio } from './registrar-no-convergio'
@@ -36,10 +36,12 @@ export async function trasElTurno(
   turno: TurnoProtegido,
   respuesta: ChatMessage,
   ciclo: DesenlaceDelCiclo = CONVERGIO
-): Promise<SinCierre | null> {
+): Promise<CierreDelTurno> {
   recordarSesion(context, findingId, turno)
   if (!ciclo.convergio && findingId !== null && ciclo.razon !== null) {
-    return registrarNoConvergio(context, findingId, turno, respuesta, ciclo.razon, ciclo.intentos)
+    // No convergió: no se cerró el ciclo → sin desenlace (no es un dictamen).
+    const sinCierre = await registrarNoConvergio(context, findingId, turno, respuesta, ciclo.razon, ciclo.intentos) // prettier-ignore
+    return { sinCierre, desenlace: null }
   }
   return cerrarYContar(context, findingId, turno, respuesta)
 }

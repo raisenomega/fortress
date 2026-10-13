@@ -1,4 +1,5 @@
 import type { TokenUsage } from '../telemetry/token-usage'
+import type { DesenlaceDelCierre } from './cierre-del-ciclo'
 import type { SinCierre } from './motivo-sin-cierre'
 
 /**
@@ -14,6 +15,9 @@ export interface ResultadoDelTurno {
   readonly edits: readonly string[]
   readonly sinCierre: SinCierre | null
   readonly sinVerificar: boolean
+  /** Señal POSITIVA del cierre (familia INC-D): solo los tres de verificación
+   *  son dictamen. De aquí derivan 'hecho'/'verificado', NO de !failed/!sinVerificar. */
+  readonly desenlace: DesenlaceDelCierre
   readonly usage: TokenUsage
   readonly modelo?: string
   readonly hallazgos: number
@@ -25,11 +29,16 @@ export interface ResultadoDelTurno {
  * un campo que el turno no dijo queda null, nunca supuesto (ADR-078).
  */
 export interface ReporteDeTarea {
-  readonly estado: 'hecho' | 'fallido'
+  /** 'hecho' SOLO con trabajo real (ediciones o dictamen); un turno que no hizo
+   *  nada es 'sin-cambios', nunca 'hecho' (parte honesto, INC-D). */
+  readonly estado: 'hecho' | 'fallido' | 'sin-cambios'
   /** El texto del asistente tal cual se persistio: tachado y sin NOTAS. */
   readonly resumen: string
   readonly edits: readonly string[]
   readonly verificacion: 'verificado' | 'sin_verificar'
+  /** El desenlace del cierre, VISIBLE en el parte: 'verificado' nunca se lee
+   *  solo como éxito —'verificado · sigue_vivo' dice "verifiqué, y sigue". */
+  readonly desenlace: DesenlaceDelCierre
   readonly cierre: SinCierre | null
   readonly usage: TokenUsage
   readonly modelo: string | null
@@ -40,16 +49,24 @@ export interface ReporteDeTarea {
  *  resumen ENTERO — lo que la vuelta precarga en el input del CTO, gemelo
  *  exacto del Transferir. El resumen ya viene tachado y sin NOTAS. */
 export function textoDelReporte(reporte: ReporteDeTarea): string {
-  const cabecera = `[Terminal] ${reporte.estado} · ${reporte.verificacion} · ${reporte.modelo ?? 'modelo no consta'} · $${reporte.usage.costUsd.toFixed(2)} · hallazgos: ${reporte.hallazgos}` // prettier-ignore
+  const cabecera = `[Terminal] ${reporte.estado} · ${reporte.verificacion}${reporte.desenlace ? ' · ' + reporte.desenlace : ''} · ${reporte.modelo ?? 'modelo no consta'} · $${reporte.usage.costUsd.toFixed(2)} · hallazgos: ${reporte.hallazgos}` // prettier-ignore
   return `${cabecera}\n\n${reporte.resumen}`
 }
 
+/** Hubo DICTAMEN ⟺ uno de los tres de verificación (ADR-087); no_vivo/pendiente/null NO. */
+function huboDictamen(d: DesenlaceDelCierre): boolean {
+  return d === 'extinguido' || d === 'sin_prueba' || d === 'sigue_vivo'
+}
+
 export function reporteDeTarea(r: ResultadoDelTurno): ReporteDeTarea {
+  const dictamen = huboDictamen(r.desenlace)
+  const trabajo = r.edits.length > 0 || dictamen
   return {
-    estado: r.failed ? 'fallido' : 'hecho',
+    estado: r.failed ? 'fallido' : trabajo ? 'hecho' : 'sin-cambios',
     resumen: r.assistant.content,
     edits: r.edits,
-    verificacion: r.sinVerificar ? 'sin_verificar' : 'verificado',
+    verificacion: dictamen && !r.sinVerificar ? 'verificado' : 'sin_verificar',
+    desenlace: r.desenlace,
     cierre: r.sinCierre,
     usage: r.usage,
     modelo: r.modelo ?? null,

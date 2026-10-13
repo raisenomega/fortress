@@ -1,6 +1,7 @@
 import type { AgentId } from '@domain/agent/agent'
 import type { ChatMessage } from '@domain/chat/chat-message'
 import type { ChatEngine } from '@domain/chat/code-agent'
+import type { DesenlaceDelCierre } from '@domain/chat/cierre-del-ciclo'
 import type { VeredictoDelPlan } from '@domain/chat/juicio-del-plan'
 import type { SinCierre } from '@domain/chat/motivo-sin-cierre'
 import type { OperationMode } from '@domain/settings/operation-mode'
@@ -37,6 +38,10 @@ export interface SendMessageOutput {
   /** El turno se conservo SIN que nadie pudiera compilar el proyecto (ADR-091).
    *  Un booleano: cruza el puente sin llevar nada del codigo del cliente. */
   readonly sinVerificar: boolean
+  /** El DESENLACE del cierre (señal POSITIVA, no ausencia): los tres de
+   *  verificación son dictamen; `no_vivo`/`pendiente`/`null` NO lo son. Es de
+   *  donde el parte deriva un 'verificado' honesto (familia INC-D). */
+  readonly desenlace: DesenlaceDelCierre
   /** El CIERRE del resultado (PASO 87): lo que el ReporteDeTarea empaqueta.
    *  Datos PLANOS que ya cruzaban por otras vias — rutas (Actividad), numeros
    *  (medidor) y el texto solo via `assistant`, ya tachado y sin NOTAS. */
