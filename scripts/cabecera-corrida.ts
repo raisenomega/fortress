@@ -1,6 +1,8 @@
-import { spawnSync } from 'node:child_process'
+import { spawnSync, type SpawnSyncOptionsWithStringEncoding } from 'node:child_process'
 import { buildAllowedTools, buildDisallowedTools } from '../src/infrastructure/claude-code/build-allowed-tools.ts' // prettier-ignore
 import { MODELO_POR_ROL } from '../src/domain/agent/modelo-por-rol.ts'
+import { BUDGET_FLAG } from '../src/domain/settings/run-budget.ts'
+import { entornoDelAgente } from './fase-b-agente.ts'
 
 export interface Corrida {
   readonly searches: readonly string[]
@@ -13,16 +15,27 @@ interface Evento {
   readonly result?: string
 }
 
-/** Lanza el CTO por el CLI con los flags REALES de 'libre' (allow/disallow
- *  leidos de la FUENTE, no hardcodeados: si cambian, el arnes los sigue). El
- *  prompt viaja por stdin (ADR-112). */
-export function correrCto(prompt: string): Corrida {
+/** Los flags REALES de 'libre' (allow/disallow de la FUENTE: si cambian, el arnes
+ *  los sigue), con el tope por corrida del operador (patron de buildArgs). */
+export function argumentosDelCto(maxUsd: number): string[] {
   const args = ['-p', '--output-format', 'stream-json', '--verbose',
     '--permission-mode', 'default', '--setting-sources', 'user',
     '--allowedTools', ...buildAllowedTools('libre', false, []),
     '--disallowedTools', ...buildDisallowedTools('libre', false),
     '--strict-mcp-config', '--mcp-config', '{"mcpServers":{}}', '--model', MODELO_POR_ROL.cto] // prettier-ignore
-  const r = spawnSync('claude', args, { input: prompt, encoding: 'utf8', timeout: 240_000, maxBuffer: 67_108_864 }) // prettier-ignore
+  if (maxUsd > 0) args.push(BUDGET_FLAG, String(maxUsd))
+  return args
+}
+
+/** Prompt por stdin (ADR-112); el entorno de los hermanos, sin la API key de la shell. */
+export function opcionesDelCto(prompt: string): SpawnSyncOptionsWithStringEncoding {
+  return { input: prompt, env: entornoDelAgente(), encoding: 'utf8', timeout: 240_000, maxBuffer: 67_108_864 } // prettier-ignore
+}
+
+/** Lanza el CTO por el CLI; el tope por corrida sale de topeDelAgente. */
+export function correrCto(prompt: string, maxUsd: number): Corrida {
+  const r = spawnSync('claude', argumentosDelCto(maxUsd), opcionesDelCto(prompt))
+  if (r.error || r.status !== 0) throw new Error(`claude salio con ${r.status}: ${r.error?.message ?? r.stderr.slice(0, 300)}`) // prettier-ignore
   return parse(r.stdout ?? '')
 }
 
