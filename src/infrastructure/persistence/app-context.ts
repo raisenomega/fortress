@@ -8,6 +8,7 @@ import { getDatabase } from './database'
 import { writeScan } from '../cognition/write-cognition-log'
 import { createGitFileHistory } from '../git/file-history'
 import { headSha } from '../git/head-sha'
+import { isAncestor } from '../git/is-ancestor'
 import { createFsProbe } from '../omega/fs-probe'
 import { discoverCorpus } from '../project/discover-corpus'
 import { barrerasDeclaradasDelProyecto } from '../project/barreras-declaradas-del-proyecto'
@@ -53,14 +54,13 @@ export function getAppContext(): AppContext {
     repairProposals: propuestas,
     eventLog: createProposalEventLog(createSqliteProposalEventRepository(db), createRepairNotifier(propuestas)), // prettier-ignore
     analystFor: (projectPath, projectId, trusted) => createGraphAnalyst(CLAUDE_BIN, projectPath, projectId, trusted), // prettier-ignore
-    headSha,
+    headSha, esAncestro: isAncestor, // prettier-ignore
     graphState: createSqliteGraphStateRepository(db),
     chat: createSqliteChatRepository(db),
     runs: createSqliteAgentRunRepository(db),
     paradaRuns: createSqliteParadaRunRepository(db),
     activity: createSqliteActivityRepository(db),
-    cognitionWriter: { writeScan },
-    informeWriter,
+    cognitionWriter: { writeScan }, informeWriter, // prettier-ignore
     omegaLog: createSqliteOmegaLog(db),
     filesystemProbe: createFsProbe(),
     connectors: createSqliteConnectorRepository(db),

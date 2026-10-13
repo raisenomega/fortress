@@ -8,6 +8,7 @@ import { intentosPrevios } from '@domain/repair/intentos-previos'
 import { tipoDeLaIdentidad } from '@domain/project/finding-identity'
 import { loYaAtendido } from '../system/lo-ya-atendido'
 import { analyzeTarget } from './analyze-target'
+import { mergeadasIntegradas } from './mergeadas-integradas'
 
 /**
  * El analista MAS lo que FORTRESS ya trato. Existe para que la memoria no sea
@@ -21,7 +22,7 @@ import { analyzeTarget } from './analyze-target'
  * en infraestructura y no alcanza el repositorio: no es un descuido de cableado,
  * es la capa haciendo su trabajo.
  */
-export function estudiar(
+export async function estudiar(
   ctx: AppContext,
   project: Project,
   selection: Selection
@@ -38,9 +39,11 @@ export function estudiar(
     .listMemory(project.id)
     .filter((f) => f.status === 'open' && f.lifecycle === 'ACTIVE')
     .map((f) => ({ id: f.id, file: f.file, line: f.line, title: f.title, tipo: tipoDeLaIdentidad(f.identity), simbolo: f.simbolo, firstSeen: f.firstSeen })) // prettier-ignore
+  // Cuantos MERGEADO confirma GIT (no el estado): la git-verdad del integrado.
+  const integradas = await mergeadasIntegradas(ctx, project.path, suyas)
   const target = {
     ...selection.target,
-    intentos: intentosPrevios(suyas),
+    intentos: intentosPrevios(suyas.length, integradas),
     hermanos: hermanosDelHallazgo(selection.target, abiertos),
     hermanosCitados: hermanosCitados(selection.target, abiertos),
     // Lo que el proyecto declara se lee AQUI por lo mismo: el analista no

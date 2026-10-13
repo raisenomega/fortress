@@ -57,7 +57,7 @@ export function bench(opts: Opciones): Bench {
         events.push(event)
         return Promise.resolve()
       },
-      list: () => Promise.resolve(events)
+      list: () => Promise.resolve(opts.mergeConfirmado ? [{ evidenceJson: JSON.stringify({ commitSha: 'merged-sha' }) } as ProposalEvent, ...events] : events) // prettier-ignore
     },
     // Como el repositorio real: devuelve la fila con su id, que es lo que el
     // asiento del analista cita para poder cruzarse con el libro mayor.
@@ -65,7 +65,7 @@ export function bench(opts: Opciones): Bench {
     analystFor: () => ({
       study: (t: unknown, atendidas: readonly string[]) => (memoria.push(atendidas), analyst.study(t as never, atendidas)) // prettier-ignore
     }),
-    headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha),
+    headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha), esAncestro: () => opts.mergeConfirmado ?? false, // prettier-ignore
     fileHistory: { tocadoPorElArreglo: () => Promise.resolve(opts.tocado ?? false), baseDelFoco: () => Promise.resolve(opts.baseFoco ?? null), ficherosConMarcadorNacido: () => Promise.resolve(opts.nacidos ?? []) }, // prettier-ignore
     fortressConfig: () => opts.cerco ?? { kind: 'not-present' }, huellaDeConfig: () => 'none', esRepoPropio: () => opts.esRepoPropio ?? true, // prettier-ignore
     barrerasDeclaradas: () => SIN_BARRERAS

@@ -51,6 +51,9 @@ export interface AppContext extends EscritoresDeFichero, Telemetria, LecturasDel
   readonly analystFor: (projectPath: string, projectId: string, trusted: boolean) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */
   readonly headSha: (projectPath: string) => string | null
+  /** git: si el commit (p.ej. el GENERATE de un fix) ya esta contenido en HEAD
+   *  del repo — la prueba de que un MERGEADO de verdad entro, no un contador. */
+  readonly esAncestro: (projectPath: string, commitSha: string) => boolean
   /** Estado del indice del grafo por proyecto (reindexado automatico). */
   readonly graphState: GraphStateRepository
   readonly chat: ChatRepository

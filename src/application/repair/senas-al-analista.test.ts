@@ -39,21 +39,23 @@ describe('el objetivo llega al analista CON sus dos senas', () => {
 })
 
 describe('el analista sabe si este hallazgo ya se intento reparar', () => {
-  it('con una propuesta MERGEADA se lo dice, y manda comprobar el fichero', async () => {
-    const b = bench({
-      findings: [NUEVA],
-      proposals: [{ findingId: 'f1', state: 'MERGEADO' } as Proposal]
-    })
+  it('MERGEADO que GIT confirma: lo dice y manda comprobar el fichero', async () => {
+    const b = bench({ findings: [NUEVA], proposals: [{ findingId: 'f1', state: 'MERGEADO' } as Proposal], mergeConfirmado: true }) // prettier-ignore
     await planRepair(b.context, 'p1')
 
-    expect(objetivo(b).intentos).toContain('1 llegaron a MERGEADO')
+    expect(objetivo(b).intentos).toContain('1 confirmado(s) en git')
+    expect(objetivo(b).intentos).toContain('comprueba si el defecto sigue ahi')
+  })
+
+  it('MERGEADO que git NO confirma (commit huerfano): NO se da por integrado', async () => {
+    const b = bench({ findings: [NUEVA], proposals: [{ findingId: 'f1', state: 'MERGEADO' } as Proposal] }) // prettier-ignore
+    await planRepair(b.context, 'p1')
+
+    expect(objetivo(b).intentos).toContain('git no confirma ninguno integrado')
   })
 
   it('las propuestas de OTRO hallazgo no cuentan como suyas', async () => {
-    const b = bench({
-      findings: [NUEVA],
-      proposals: [{ findingId: 'otro', state: 'MERGEADO' } as Proposal]
-    })
+    const b = bench({ findings: [NUEVA], proposals: [{ findingId: 'otro', state: 'MERGEADO' } as Proposal] }) // prettier-ignore
     await planRepair(b.context, 'p1')
 
     expect(objetivo(b).intentos).toBeNull()

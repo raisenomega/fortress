@@ -65,4 +65,7 @@ export interface Opciones {
   /** Lo que `fileHistory.ficherosConMarcadorNacido` devuelve: los ficheros del
    *  foco cuyas adiciones traen el marcador. Por defecto [] (INC-B). */
   readonly nacidos?: readonly string[]
+  /** true: una propuesta MERGEADO cuyo commit GIT confirma integrado (evento con
+   *  commit + `esAncestro` verdadero). Por defecto false: MERGEADO sin prueba. */
+  readonly mergeConfirmado?: boolean
 }
