@@ -2,18 +2,18 @@ import { spawnSync } from 'child_process'
 import { fuentesDeSettings } from '../src/domain/settings/fuentes-de-settings.ts'
 import { BUDGET_FLAG, DEFAULT_PER_RUN, dayLimitReached, parseBudget } from '../src/domain/settings/run-budget.ts' // prettier-ignore
 import { windowStart } from '../src/domain/telemetry/time-window.ts'
-import { buildEnv } from '../src/infrastructure/claude-code/build-env.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
 
-/**
- * El entorno del hijo: el mismo paso que los spawns de la app (`buildEnv`, sin la
- * sesion viva y con la privacidad del ADR-088), y sin la API key de la shell del
- * operador: el clasificador factura con el login OAuth, y la caja no limpia env.
- */
+// LISTA BLANCA desde {} (`entornoDelMerge`), no el recorte de `buildEnv`: deja pasar GH_TOKEN,
+// AWS_*, ANTHROPIC_API_KEY/AUTH_TOKEN/BASE_URL... y la caja no limpia env. HOME lleva el login
+// OAuth; CLAUDE_CODE_OAUTH_TOKEN viaja A PROPOSITO: es la facturacion del operador, si la usa.
+// prettier-ignore
+const REENVIADAS: readonly string[] = ['PATH', 'HOME', 'TMPDIR', 'LANG', 'LC_ALL', 'HTTPS_PROXY', 'HTTP_PROXY', 'NO_PROXY', 'https_proxy', 'http_proxy', 'no_proxy', 'CLAUDE_CODE_OAUTH_TOKEN']
+/** AL LLAMAR (augmentPath muta PATH tras los imports); la privacidad del ADR-088, encima. */
 export function entornoDelAgente(): NodeJS.ProcessEnv {
-  const env = buildEnv(null)
-  delete env.ANTHROPIC_API_KEY
-  return env
+  const env: NodeJS.ProcessEnv = {}
+  for (const clave of REENVIADAS) if (process.env[clave] !== undefined) env[clave] = process.env[clave] // prettier-ignore
+  return { ...env, CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1', DISABLE_FEEDBACK_COMMAND: '1' }
 }
 
 export interface Respuesta {
