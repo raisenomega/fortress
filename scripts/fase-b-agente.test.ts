@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { BUDGET_FLAG, DEFAULT_PER_RUN } from '../src/domain/settings/run-budget.ts'
-import { argumentosDelAgente, topeDelAgente } from './fase-b-agente.ts'
+import { argumentosDelAgente, entornoDelAgente, topeDelAgente } from './fase-b-agente.ts'
 
 // Una base de mentira: los ajustes del operador y el gasto de hoy en agent_runs.
 type Base = Parameters<typeof topeDelAgente>[0]
@@ -57,4 +57,17 @@ test('cierra el conjunto MCP: --strict-mcp-config viaja y sin servidor alguno', 
   const args = argumentosDelAgente('hola')
   assert.ok(args.includes('--strict-mcp-config'))
   assert.ok(!args.includes('--mcp-config'))
+})
+
+// Lista blanca, no recorte: lo que no se nombra no llega al hijo (git-env.test.ts).
+test('el hijo no hereda credenciales del operador, y si PATH, HOME y la privacidad', () => {
+  const centinelas = ['GH_TOKEN', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'ANTHROPIC_BASE_URL']
+  const previo = { ...process.env }
+  for (const c of centinelas) process.env[c] = 'centinela'
+  const env = entornoDelAgente()
+  for (const c of centinelas) if (previo[c] === undefined) delete process.env[c]; else process.env[c] = previo[c] // prettier-ignore
+  for (const c of centinelas) assert.equal(env[c], undefined, c)
+  assert.deepEqual([env.PATH, env.HOME], [process.env.PATH, process.env.HOME])
+  assert.equal(env.DISABLE_FEEDBACK_COMMAND, '1')
+  assert.equal(env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC, '1')
 })
