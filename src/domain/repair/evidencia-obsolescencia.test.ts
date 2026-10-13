@@ -45,4 +45,16 @@ describe('la prueba de un OBSOLETO se comprueba, no se cree', () => {
     expect(prueba.probado).toBe(false)
     expect(prueba.motivo).toContain('no se pudo leer')
   })
+
+  it('INC-2: estaProbado IGNORA `file` — el contenido ya viene elegido (lo hace extinguirSiObsoleto)', () => {
+    // El campo `file` del contrato dice de que fichero sale el contenido, pero
+    // quien lo lee es extinguirSiObsoleto; aqui el resultado depende SOLO del
+    // marcador contra el contenido dado. Mutar estaProbado para que mire `file`
+    // rompe esta igualdad.
+    const conFile: Evidencia = { marcador: 'execFile(', forma: 'ausente', file: 'otra/cosa.ts' }
+    const sinFile: Evidencia = { marcador: 'execFile(', forma: 'ausente' }
+    const texto = 'const salida = await runCommand(...)'
+    expect(estaProbado(conFile, texto)).toEqual(estaProbado(sinFile, texto))
+    expect(estaProbado(conFile, 'sigue execFile( aqui')).toEqual(estaProbado(sinFile, 'sigue execFile( aqui')) // prettier-ignore
+  })
 })

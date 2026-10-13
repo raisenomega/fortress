@@ -260,3 +260,46 @@ propio o reuso sin ensuciar propuestas) y el detalle del carril y el progreso.
   por fusión, que no son resoluciones y la historia no debe pintar como tales.
 - [ADR-085](adr-085-todo-agente-observa-y-nada-filtra.md) — el molde de cierre
   (`status` · `reason` · `attended_by` · `attended_at`) del que sale el «quién».
+
+## Enmienda (2026-10-12): la prueba puede vivir en el fichero del arreglo
+
+### El flanco que destapó el re-demo de un cliente
+
+Un hallazgo de policy (`facade-images`, subida anónima sin scoping) estaba
+anclado a la migración donde se **detectó**. El arreglo correcto para un
+esquema **append-only** no edita esa línea —no se puede, la migración ya
+corrió—: añade **otra** migración que hace `DROP POLICY`. La prueba de
+extinción, sin embargo, solo miraba el fichero del ancla: la policy mala
+seguía textualmente ahí (append-only), y el `DROP` vivía en el fichero nuevo.
+Resultado: `estaProbado` nunca cuadraba, el hallazgo quedaba **MITIGADO** aunque
+el cierre en el repo fuera completo. No es fallo del juicio ni exige runtime —el
+gate es un `includes` de string puro—: es que la prueba estaba **confinada al
+ancla**, mientras que el ARREGLO (y la libertad de `where`) ya podían vivir en
+otro fichero desde [ADR-102](adr-102-el-arreglo-fuera-de-la-correa.md). La
+asimetría era el defecto.
+
+### La decisión
+
+La `Evidencia` de un OBSOLETO puede nombrar un `file` opcional donde vive el
+marcador. Ausente = el fichero del ancla (`target.file`) = comportamiento
+anterior, byte a byte. Extiende a la PRUEBA DE EXTINCIÓN la lección de ADR-102
+(el arreglo vive donde el juicio diga, no en el ancla).
+
+### La mitigación (no negociable) y el trade
+
+El `file` citado SOLO se honra si **el arreglo de ese turno lo tocó**, verificado
+por git (`fileHistory.tocadoPorElArreglo`: aparece en el diff desde el sha del
+turno, committeado o no). Un `presente` trivial en un fichero **ajeno** —que el
+fix no tocó— no cierra nada. El trade es honesto: ensancha el límite ya anotado
+aquí (un marcador lo elige el agente), pero NO en su naturaleza —sigue siendo una
+cadena literal comprobada contra un fichero, ahora acotada además por «lo tocó el
+arreglo»—. El cierre pleno de ese límite (exigir que el marcador naciera con el
+fix) sigue siendo su propia pieza futura. Ante cualquier duda de git: `false`,
+se conserva (ADR-065).
+
+### Alcance
+
+`estaProbado` **no cambia**: sigue recibiendo el contenido ya elegido y no mira
+`file`. Quien elige el fichero y aplica la mitigación es `extinguirSiObsoleto`.
+El contrato `Evidencia` (`+ file?`) es la única pieza firmada que toca; el resto
+(puerto git, cableado, prompt del analista) es libre.

@@ -6,12 +6,10 @@
  * de un agente en el mismo turno. Un juicio equivocado cerro un hallazgo que
  * seguia vivo y otros dos casi.
  *
- * Pedir que CITE EL COMMIT que lo arreglo no vale: los dos casos dudosos citaron
- * uno real y exacto —titulo, fichero y numero de lineas— que solo habia anadido
- * un comentario mientras el agujero seguia en su sitio. Una cita puede ser
- * verdadera y no probar nada; y de donde saca el sha no le consta a nadie. Lo
- * que SI se comprueba es una cadena literal
- * contra el fichero de hoy: ahi no hay prosa que interpretar, o esta o no esta.
+ * Pedir que CITE EL COMMIT no vale: los dos casos dudosos citaron uno real que
+ * solo anadia un comentario con el agujero en pie —una cita puede ser cierta y no
+ * probar nada, y de donde saca el sha no le consta a nadie—. Lo que SI se
+ * comprueba es una cadena literal contra el fichero de hoy: o esta o no esta.
  */
 
 /**
@@ -28,13 +26,15 @@
 export type FormaDeEvidencia = 'ausente' | 'presente'
 
 export interface Evidencia {
-  /** Cadena LITERAL que se busca en el fichero del hallazgo. Sin regex: lo que
-   *  se compara tiene que poder leerlo un humano en el Libro y repetirlo a mano. */
+  /** Cadena LITERAL que se busca en el fichero; sin regex, legible y repetible a mano. */
   readonly marcador: string
   readonly forma: FormaDeEvidencia
-  /** Adorno del Libro: NO gobierna. Existe para que quien audite tenga por donde
-   *  empezar, no para autorizar nada. La llave es el marcador. */
+  /** Adorno del Libro: NO gobierna; la llave es el marcador. */
   readonly commit?: string
+  /** Fichero del marcador; ausente = `target.file` (hoy). Para append-only (el fix
+   *  cierra en OTRA migracion); solo vale si el arreglo lo toco (git, en
+   *  `extinguirSiObsoleto`, ADR-087). `estaProbado` NO mira este campo. */
+  readonly file?: string
 }
 
 /** Si la prueba se sostiene, y por que. El motivo viaja al motivo de la
