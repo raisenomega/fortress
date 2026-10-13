@@ -1,6 +1,4 @@
 import Database from 'better-sqlite3'
-import { homedir } from 'os'
-import { join } from 'path'
 import { appCerrada } from './app-cerrada.ts'
 
 // One-shot idempotente: caduca las propuestas VIVAS cuyo libro es entero
@@ -10,10 +8,17 @@ import { appCerrada } from './app-cerrada.ts'
 // reintentar con una cadena completa.
 //
 // Autocontenido a proposito, como el backfill: Node corre .ts sueltos sin
-// resolver los alias del src. Corre SOLO desde CLI y con la app cerrada.
+// resolver los alias del src. Corre SOLO desde CLI y exige --base explicita y la
+// app cerrada. Antes de nombrar la viva: ensaya sobre una copia y haz backup a
+// mano (CLAUDE.md §4).
+//   node scripts/caduca-cadena-sintetica.ts --base <ruta>
+const argv = process.argv.slice(2)
+const i = argv.indexOf('--base')
+const base = i === -1 ? null : (argv[i + 1] ?? null)
+if (base === null || base.startsWith('--')) throw new Error('fail-closed: --base es obligatoria; ensaya sobre una copia antes de nombrar la viva') // prettier-ignore
 if (!appCerrada())
   throw new Error('fail-closed: la app esta abierta; cierrala antes de escribir su base')
-const db = new Database(join(homedir(), '.config/fortress-command-center/fortress.db'))
+const db = new Database(base, { fileMustExist: true })
 
 const RAZON = 'cadena_sintetica'
 const VIVOS = "state NOT IN ('CADUCADO', 'MERGEADO', 'RECHAZADO')"
