@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import { readFileSync, statSync } from 'fs'
+import { rutaContenida } from '../fs/ruta-contenida'
 import { EMPTY_SNAPSHOT, type CognitionSnapshot } from '@domain/cognition/cognition-log'
 import { parseCognitionLog } from '@domain/cognition/parse-cognition-log'
 
@@ -14,7 +14,12 @@ const FILE = 'COGNITION-LOG.md'
  */
 export function readCognitionLog(projectPath: string): CognitionSnapshot {
   try {
-    return parseCognitionLog(readFileSync(join(projectPath, FILE), 'utf8'))
+    // Lo que sale de aqui entra en el prompt del analista. Un COGNITION-LOG.md
+    // commiteado como enlace fuera del proyecto seria un canal de exfiltracion:
+    // null (fuga, colgante o no se pudo saber) se trata como si no existiera.
+    const real = rutaContenida(projectPath, FILE)
+    if (real === null || !statSync(real).isFile()) return EMPTY_SNAPSHOT
+    return parseCognitionLog(readFileSync(real, 'utf8'))
   } catch {
     return EMPTY_SNAPSHOT
   }
