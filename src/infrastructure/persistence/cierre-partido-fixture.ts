@@ -58,7 +58,7 @@ export function crearBench(): Bench {
     activity: createSqliteActivityRepository(db),
     runs: createSqliteAgentRunRepository(db),
     paradaRuns: createSqliteParadaRunRepository(db),
-    fileHistory: { changedSince: () => Promise.resolve(false) },
+    fileHistory: { changedSince: () => Promise.resolve(false), tocadoPorElArreglo: () => Promise.resolve(false) }, // prettier-ignore
     cognitionWriter: { writeScan: (): void => void (escrituras += 1) },
     informeWriter: { write: (): void => undefined },
     // El banco no tiene repo git: null es la verdad, y el informe la dice.

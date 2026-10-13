@@ -33,6 +33,21 @@ function lastTouch(cwd: string, file: string): Promise<string> {
   })
 }
 
+/**
+ * Nombres de los ficheros que cambiaron entre `desdeSha` y el arbol de hoy
+ * (staged y sin stagear), o `null` si git falla. `diff <sha>` —sin `..`— compara
+ * la revision contra el arbol de trabajo, asi que ve el arreglo este committeado
+ * o no. `--` separa la ruta de las revisiones.
+ */
+function diffDesde(cwd: string, file: string, desdeSha: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const args = ['diff', '--name-only', desdeSha, '--', file]
+    execFile('git', [...SIN_HOOKS, ...args], { cwd, env: ENV, timeout: TIMEOUT_MS }, (error, out) => {
+      resolve(error ? null : out.trim())
+    })
+  })
+}
+
 /** Adaptador de git para la segunda prueba de la extincion. */
 export function createGitFileHistory(): FileHistory {
   return {
@@ -47,6 +62,12 @@ export function createGitFileHistory(): FileHistory {
       // Cualquier NaN (sin commits, fecha ilegible) cae a false por la
       // comparacion: ante la duda, el hallazgo se conserva.
       return tocado > desde
+    },
+    tocadoPorElArreglo: async (projectPath, file, desdeSha) => {
+      if (file.trim() === '' || desdeSha.trim() === '') return false
+      const salida = await diffDesde(projectPath, file, desdeSha)
+      // null (git fallo / no es repo) → false; salida vacia (no lo toco) → false.
+      return salida !== null && salida !== ''
     }
   }
 }
