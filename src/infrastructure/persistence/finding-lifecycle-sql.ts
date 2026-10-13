@@ -19,9 +19,17 @@
  *
  * Quien entra aqui SI cambio: ya no lo decide el escaneo por ausencia, lo
  * decide un agente que miro el hallazgo.
+ *
+ * BORRA las notas de la fase mitigada (`verificacion_note`, `mitigated_note`,
+ * `mitigated_at`) — simetrico con `MARK_ACTIVE` (INC-D): una fila EXTINCT no debe
+ * arrastrar un motivo que CONTRADIGA su lifecycle. Pasaba que una fila cerrada por
+ * `juicio_obsoleto` mostraba la vieja nota «no se cierra» de cuando estaba
+ * mitigada, y se leyo un exito como un fracaso. El motivo de un extinto es
+ * `extinct_reason`/`extinguido_por`/`resolved_at`; el historial, el Libro de Vida.
  */
 export const MARK_EXTINCT = `UPDATE findings SET lifecycle = 'EXTINCT', resolved_at = @at,
-  extinct_reason = @motivo, extinguido_por = @extinguidoPor
+  extinct_reason = @motivo, extinguido_por = @extinguidoPor,
+  verificacion_note = NULL, mitigated_note = NULL, mitigated_at = NULL
   WHERE id = @id AND lifecycle IN ('ACTIVE', 'MITIGATED')`
 
 /**

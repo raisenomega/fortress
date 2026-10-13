@@ -46,3 +46,30 @@ describe('markExtinct (la transicion, ya con la evidencia reunida)', () => {
     expect(memoria?.firstSeen).toBe('2026-08-08T10:00:00Z')
   })
 })
+
+const notas = (id: string): { v: string | null; m: string | null; a: string | null; e: string | null } =>
+  bench.db.prepare('SELECT verificacion_note v, mitigated_note m, mitigated_at a, extinct_reason e FROM findings WHERE id = ?').get(id) as never // prettier-ignore
+
+describe('INC-D: el Libro no muestra un motivo que contradiga el lifecycle', () => {
+  it('al extinguir BORRA las notas de la fase mitigada', () => {
+    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z', new Set())
+    const id = bench.memoryOf(SSRF.title)?.id ?? ''
+    bench.repo.markMitigated(id, 'arreglado; SIN VERIFICAR', '2026-08-08T11:00:00Z')
+    bench.repo.anotarVerificacion(id, 'el analista no pudo probarlo, NO se cierra')
+    bench.repo.markExtinct([id], '2026-08-09T10:00:00Z', 'juicio_obsoleto', 'agente')
+
+    const n = notas(id)
+    expect(n.v).toBeNull() // ya NO arrastra la vieja "no se cierra"
+    expect(n.m).toBeNull()
+    expect(n.a).toBeNull()
+    expect(n.e).toBe('juicio_obsoleto') // el motivo verdadero manda
+  })
+
+  it('un mitigado que SIGUE mitigado conserva su nota (no regresion)', () => {
+    bench.repo.syncFromScan(PROJECT, 's1', [SSRF], '2026-08-08T10:00:00Z', new Set())
+    const id = bench.memoryOf(SSRF.title)?.id ?? ''
+    bench.repo.markMitigated(id, 'arreglado por el operador', '2026-08-08T11:00:00Z')
+
+    expect(notas(id).m).toBe('arreglado por el operador')
+  })
+})
