@@ -28,6 +28,7 @@ export function Paginador({ pagina, onPagina }: PaginadorProps): React.JSX.Eleme
         disabled={pagina.pagina === 1}
         onClick={() => onPagina(pagina.pagina - 1)}
         className={BOTON}
+        aria-label="Pagina anterior"
       >
         <Icon name="chevron-left" size={11} />
       </button>
@@ -39,6 +40,7 @@ export function Paginador({ pagina, onPagina }: PaginadorProps): React.JSX.Eleme
         disabled={pagina.pagina === pagina.paginas}
         onClick={() => onPagina(pagina.pagina + 1)}
         className={BOTON}
+        aria-label="Pagina siguiente"
       >
         <Icon name="chevron-right" size={11} />
       </button>
