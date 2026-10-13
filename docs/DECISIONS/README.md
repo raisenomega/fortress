@@ -146,6 +146,7 @@ temporal. A partir del ADR-058 la fecha del documento es la de la decisión.
 | [ADR-113](adr-113-el-estreno-del-critical.md) | El estreno del CRITICAL: la primera reparación de la máxima severidad, registrada con su asiento literal | 2026-10-05 | Aceptada | Motor |
 | [ADR-114](adr-114-electron-44-fuera-del-39-sin-soporte.md) | Electron 44: salir del 39 sin soporte, por margen y no por obligación | 2026-10-05 | Aceptada | Seguridad |
 | [ADR-115](adr-115-el-generador-verifica-y-corrige.md) | El generador verifica y corrige: el reparto A/B/C antes de construir (enmienda ADR-110 en B2; A4: el gate corre los .tsx) | 2026-10-05 | Propuesta | Motor |
+| [ADR-116](adr-116-lazo-autonomo-cto-terminal-sello-2b.md) | El lazo autónomo CTO↔Terminal (Sello 2b): CTO propone PASO → salto → Terminal repara → vuelta; paradas y empújon; el lazo nunca cruza la frontera (push/candado = firma humana) | 2026-10-13 | Aceptada | Lazo autónomo |
 
 ## Referencias
 
