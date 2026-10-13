@@ -176,6 +176,16 @@ redact_file() {
     fi
 }
 
+# Tachado de un remoto para IMPRIMIRLO (no para usarlo): la contrasena entre
+# 'esquema://usuario:' y '@', y el token de GitHub que va solo en el hueco del
+# usuario ('https://ghp_xxx@host'). Esquema, usuario y host quedan a la vista.
+redact_remote() {
+    printf '%s\n' "$1" | sed -E \
+        -e 's/([A-Za-z][A-Za-z0-9+.-]*:\/\/[^:\/@[:space:]]*):[^@\/[:space:]]+@/\1:***@/g' \
+        -e 's/(:\/\/)gh[pousr]_[A-Za-z0-9]{16,}/\1***/g' \
+        -e 's/(:\/\/)github_pat_[A-Za-z0-9_]{20,}/\1***/g'
+}
+
 # Red de cmd_scan si se interrumpe (señal o set -e): ve sus arrays locales por
 # ambito dinamico. Mata y espera a los hijos sin tachar ANTES de tachar —un hijo
 # vivo reescribiria en claro—. Nunca escribe scanned_head: interrumpido no es OK.
@@ -745,7 +755,10 @@ cmd_push() {
             continue
         fi
 
-        log_info "Pushing $pname → $premote/$pbranch..."
+        # El remoto es la URL de origin (cmd_add): puede llevar credenciales.
+        # Se imprime tachado y como '%s'; a 'git push' va el valor real.
+        printf "${BLUE}[INFO]${NC} Pushing %s → %s/%s...\n" \
+            "$pname" "$(redact_remote "$premote")" "$pbranch"
 
         if (cd "$ppath" && git push "$premote" "$pbranch" 2>&1); then
             log_success "$pname: push exitoso ✓"
