@@ -44,4 +44,12 @@ export interface FileHistory {
    * Quien lee cae entonces a la base del turno (HEAD) — cero regresion.
    */
   baseDelFoco(projectPath: string, findingId: string): Promise<string | null>
+
+  /**
+   * Ficheros del fix de `findingId` (ventana del foco) cuyas ADICIONES contienen
+   * `marcador` —nacio CON el arreglo, no preexistia—. Sirve para inferir el
+   * fichero de la evidencia cuando el analista lo omitio (P2). Vacio si no hay
+   * base del foco, el marcador es vacio o git falla.
+   */
+  ficherosConMarcadorNacido(projectPath: string, findingId: string, marcador: string): Promise<readonly string[]>
 }

@@ -1,6 +1,6 @@
 import { execFile } from 'child_process'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
-import { baseDelFocoGit } from './base-del-foco-git'
+import { baseDelFocoGit, ficherosConMarcadorNacidoGit } from './base-del-foco-git'
 import { gitEnv } from './git-env'
 import type { FileHistory } from '@domain/project/file-history'
 
@@ -35,10 +35,9 @@ function lastTouch(cwd: string, file: string): Promise<string> {
 }
 
 /**
- * Nombres de los ficheros que cambiaron entre `desdeSha` y el arbol de hoy
- * (staged y sin stagear), o `null` si git falla. `diff <sha>` —sin `..`— compara
- * la revision contra el arbol de trabajo, asi que ve el arreglo este committeado
- * o no. `--` separa la ruta de las revisiones.
+ * Ficheros que cambiaron entre `desdeSha` y el arbol de hoy (staged y sin
+ * stagear), o `null` si git falla. `diff <sha>` —sin `..`— compara la revision
+ * contra el arbol, asi que ve el arreglo este committeado o no. `--` separa ruta.
  */
 function diffDesde(cwd: string, file: string, desdeSha: string): Promise<string | null> {
   return new Promise((resolve) => {
@@ -70,6 +69,7 @@ export function createGitFileHistory(): FileHistory {
       // null (git fallo / no es repo) → false; salida vacia (no lo toco) → false.
       return salida !== null && salida !== ''
     },
-    baseDelFoco: (projectPath, findingId) => baseDelFocoGit(projectPath, findingId)
+    baseDelFoco: (projectPath, findingId) => baseDelFocoGit(projectPath, findingId),
+    ficherosConMarcadorNacido: (p, f, m) => ficherosConMarcadorNacidoGit(p, f, m)
   }
 }

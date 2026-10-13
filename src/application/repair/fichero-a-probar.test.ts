@@ -7,55 +7,51 @@ import type { Veredicto } from '@domain/repair/veredicto-del-analisis'
 
 const project = { id: 'p1', path: '/repo', name: 'N' } as unknown as Project
 const OBSOLETO = { verdict: 'OBSOLETO' } as Veredicto
-const REAL = { verdict: 'REAL' } as Veredicto
 
-/** `tocado` = lo que la puerta git responde; `sha` = HEAD; `baseFoco` = la base
- *  del trabajo enfocado (INC-A), null = caer a HEAD. */
-function ctx(tocado: boolean, sha: string | null = 'base1', baseFoco: string | null = null): AppContext {
+interface Opts { tocado?: boolean; sha?: string | null; baseFoco?: string | null; nacidos?: readonly string[]; ancla?: string } // prettier-ignore
+function ctx(o: Opts = {}): AppContext {
   return {
-    headSha: () => sha,
+    headSha: () => o.sha ?? 'base1',
+    filesystemProbe: { contenido: () => o.ancla ?? '' },
     fileHistory: {
-      tocadoPorElArreglo: () => Promise.resolve(tocado),
-      baseDelFoco: () => Promise.resolve(baseFoco)
+      tocadoPorElArreglo: () => Promise.resolve(o.tocado ?? false),
+      baseDelFoco: () => Promise.resolve(o.baseFoco ?? null),
+      ficherosConMarcadorNacido: () => Promise.resolve(o.nacidos ?? [])
     }
   } as unknown as AppContext
 }
-
-function analisis(ancla: string, file?: string): Analysis {
-  const evidencia = file === undefined ? undefined : { marcador: 'm', forma: 'presente' as const, file }
+function an(ancla: string, forma?: 'presente' | 'ausente', file?: string): Analysis {
+  const evidencia = forma === undefined ? undefined : { marcador: 'DROP', forma, ...(file ? { file } : {}) }
   return { target: { id: 'f1', file: ancla }, evidencia } as unknown as Analysis
 }
+const r = (c: AppContext, a: Analysis): Promise<unknown> => ficheroAProbar(c, project, a, OBSOLETO)
 
-describe('ficheroAProbar: la puerta touched-by-fix (ADR-087 enmienda)', () => {
-  it('(c) sin file citado → el ancla (conducta de hoy)', async () => {
-    expect(await ficheroAProbar(ctx(false), project, analisis('ancla.sql'), OBSOLETO)).toBe('ancla.sql')
+describe('ficheroAProbar: la resolucion del cierre (P1 + P2)', () => {
+  it('cita tocada por el foco → probar esa cita', async () => {
+    expect(await r(ctx({ tocado: true }), an('a.sql', 'presente', 'nueva.sql'))).toEqual({ probar: 'nueva.sql' })
   })
 
-  it('(d) cita === ancla → el ancla (no pasa por la puerta)', async () => {
-    expect(await ficheroAProbar(ctx(false), project, analisis('ancla.sql', 'ancla.sql'), OBSOLETO)).toBe('ancla.sql') // prettier-ignore
+  it('cita AJENA (el fix no la toco) → conservar; la inferencia NO la rescata', async () => {
+    expect(await r(ctx({ tocado: false }), an('a.sql', 'presente', 'ajeno.sql'))).toHaveProperty('conservar')
   })
 
-  it('(a) cita distinta que el fix SI toco → la cita', async () => {
-    expect(await ficheroAProbar(ctx(true), project, analisis('ancla.sql', 'nueva.sql'), OBSOLETO)).toBe('nueva.sql') // prettier-ignore
+  it('INC-A: cita + baseDelFoco (sin HEAD) + tocado → probar la cita', async () => {
+    expect(await r(ctx({ tocado: true, sha: null, baseFoco: 'bf' }), an('a.sql', 'presente', 'n.sql'))).toEqual({ probar: 'n.sql' }) // prettier-ignore
   })
 
-  it('(b) CLAVE: cita distinta AJENA (el fix no la toco) → null, no cierra', async () => {
-    expect(await ficheroAProbar(ctx(false), project, analisis('ancla.sql', 'ajeno.sql'), OBSOLETO)).toBeNull()
+  it('file omitido + marcador EN el ancla → probar el ancla (como hoy)', async () => {
+    expect(await r(ctx({ ancla: 'tiene DROP aqui' }), an('a.sql', 'presente'))).toEqual({ probar: 'a.sql' })
   })
 
-  it('veredicto no OBSOLETO → el ancla (la puerta solo abre para OBSOLETO)', async () => {
-    expect(await ficheroAProbar(ctx(true), project, analisis('ancla.sql', 'nueva.sql'), REAL)).toBe('ancla.sql')
+  it('P2: file omitido + no en ancla + nacido en UN fichero del foco → probar ese', async () => {
+    expect(await r(ctx({ ancla: 'sin marca', nacidos: ['nueva.sql'] }), an('a.sql', 'presente'))).toEqual({ probar: 'nueva.sql' }) // prettier-ignore
   })
 
-  it('sin HEAD (repo sin git) + cita distinta → null (conserva, ADR-065)', async () => {
-    expect(await ficheroAProbar(ctx(true, null), project, analisis('ancla.sql', 'nueva.sql'), OBSOLETO)).toBeNull() // prettier-ignore
+  it('P2: file omitido + no nacio en ninguno → conservar (incompleta), NO ancla mudo', async () => {
+    expect(await r(ctx({ ancla: 'sin marca', nacidos: [] }), an('a.sql', 'presente'))).toEqual({ conservar: expect.stringContaining('no nacio') }) // prettier-ignore
   })
 
-  it('INC-A: usa baseDelFoco cuando existe (precede a HEAD) — la ventana es del foco', async () => {
-    // HEAD null (el turno de verify no veria nada), pero hay baseDelFoco: la
-    // puerta mira desde el foco, no desde el turno. Mutar "ignorar baseDelFoco"
-    // (volver a HEAD) daria null → este test muere.
-    const conFoco = ctx(true, null, 'base-del-foco')
-    expect(await ficheroAProbar(conFoco, project, analisis('ancla.sql', 'nueva.sql'), OBSOLETO)).toBe('nueva.sql')
+  it('P2: file omitido + nacio en VARIOS → conservar (ambigua)', async () => {
+    expect(await r(ctx({ ancla: 'sin marca', nacidos: ['x.sql', 'y.sql'] }), an('a.sql', 'presente'))).toEqual({ conservar: expect.stringContaining('ambigua') }) // prettier-ignore
   })
 })

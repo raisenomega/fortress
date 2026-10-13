@@ -4,7 +4,7 @@ import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mensajeDurable } from '@domain/build/commit-durable'
-import { baseDelFocoGit } from './base-del-foco-git'
+import { baseDelFocoGit, ficherosConMarcadorNacidoGit } from './base-del-foco-git'
 
 const ID = 'b3b09a0f-2a73-4108-b103-d79f836e47be'
 let repo = ''
@@ -55,5 +55,21 @@ describe('baseDelFocoGit (la ventana por foco, INC-A)', () => {
     const suelto = mkdtempSync(join(tmpdir(), 'fcc-nogit-'))
     expect(await baseDelFocoGit(suelto, ID)).toBeNull()
     rmSync(suelto, { recursive: true, force: true })
+  })
+})
+
+describe('ficherosConMarcadorNacido (inferencia P2)', () => {
+  it('el fichero cuyas ADICIONES traen el marcador (nacio con el fix)', async () => {
+    commit('drop.sql', 'DROP POLICY anon', mensajeDurable(ID, 'cierra'))
+    expect(await ficherosConMarcadorNacidoGit(repo, ID, 'DROP POLICY')).toEqual(['drop.sql'])
+  })
+
+  it('NO si el marcador solo esta en CONTEXTO del diff (preexistia), no en adiciones', async () => {
+    // 'DROP POLICY' ya estaba: sale como contexto (' '), no como adicion ('+').
+    commit('ff.sql', 'DROP POLICY anon\nold', mensajeDurable('previo', 'base'))
+    commit('ff.sql', 'DROP POLICY anon\nnew', mensajeDurable(ID, 'cierra'))
+    expect(await ficherosConMarcadorNacidoGit(repo, ID, 'DROP POLICY')).toEqual([])
+    expect(await ficherosConMarcadorNacidoGit(repo, ID, '')).toEqual([]) // marcador vacio
+    expect(await ficherosConMarcadorNacidoGit(repo, 'otro-id', 'DROP')).toEqual([]) // sin fix de ese id
   })
 })

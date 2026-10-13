@@ -21,7 +21,8 @@ const hallazgo = (extra: Partial<FindingMemory> = {}): FindingMemory =>
 const git = (cambio: boolean): FileHistory => ({
   changedSince: () => Promise.resolve(cambio),
   tocadoPorElArreglo: () => Promise.resolve(false),
-  baseDelFoco: () => Promise.resolve(null)
+  baseDelFoco: () => Promise.resolve(null),
+  ficherosConMarcadorNacido: () => Promise.resolve([])
 })
 
 const decidir = (f: FindingMemory, cambio: boolean): Promise<ReadonlySet<string>> =>

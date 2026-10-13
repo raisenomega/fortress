@@ -9,9 +9,6 @@ import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
 import type { AppContext } from '../context'
 
-/** Motivo del mitigado cuando el analista cito un fichero que el arreglo NO toco. */
-const SIN_PRUEBA_AJENO = 'obsoleto segun el agente, pero cito un fichero ajeno al arreglo'
-
 /**
  * El operador pide confirmar que su arreglo cerro el hallazgo (ADR-087).
  *
@@ -54,13 +51,14 @@ export async function verificarMitigado(
   }
 
   const veredicto = veredictoDelAnalisis(result.analysis)
-  // La puerta touched-by-fix (ADR-087 enm.): un fichero citado ajeno al arreglo
-  // (`null`) no extingue; el ancla o una cita tocada por el fix, si.
-  const fichero = await ficheroAProbar(context, project, result.analysis, veredicto)
-  if (fichero !== null && extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso(), quien, fichero)) { // prettier-ignore
+  // La puerta (ADR-087 enm., P1+P2): `probar` un fichero (ancla, cita tocada por
+  // el foco, o inferido de sus adiciones) → estaProbado; `conservar` con MOTIVO
+  // visible (ajeno / reclamacion incompleta / ambigua) → nunca el ancla mudo.
+  const r = await ficheroAProbar(context, project, result.analysis, veredicto)
+  if ('probar' in r && extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso(), quien, r.probar)) { // prettier-ignore
     return { desenlace: 'extinguido', razon: veredicto.reason }
   }
-  if (fichero === null) context.findings.markMitigated(findingId, `${SIN_PRUEBA_AJENO}: ${result.analysis.evidencia?.file ?? ''}`, nowIso()) // prettier-ignore
+  if ('conservar' in r) context.findings.markMitigated(findingId, r.conservar, nowIso())
 
   const desenlace = veredicto.verdict === 'OBSOLETO' ? 'sin_prueba' : 'sigue_vivo'
   const nota = notaDeVerificacion(desenlace, veredicto.reason, quien)

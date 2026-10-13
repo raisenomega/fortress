@@ -62,4 +62,7 @@ export interface Opciones {
   /** Lo que `fileHistory.baseDelFoco` devuelve: la base del trabajo enfocado, o
    *  `null` para caer a la base del turno (HEAD). Por defecto null (INC-A). */
   readonly baseFoco?: string | null
+  /** Lo que `fileHistory.ficherosConMarcadorNacido` devuelve: los ficheros del
+   *  foco cuyas adiciones traen el marcador. Por defecto [] (INC-B). */
+  readonly nacidos?: readonly string[]
 }
