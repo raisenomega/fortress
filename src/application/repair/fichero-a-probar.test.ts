@@ -9,11 +9,15 @@ const project = { id: 'p1', path: '/repo', name: 'N' } as unknown as Project
 const OBSOLETO = { verdict: 'OBSOLETO' } as Veredicto
 const REAL = { verdict: 'REAL' } as Veredicto
 
-/** `tocado` = lo que la puerta git responde; `sha` = HEAD (null simula sin git). */
-function ctx(tocado: boolean, sha: string | null = 'base1'): AppContext {
+/** `tocado` = lo que la puerta git responde; `sha` = HEAD; `baseFoco` = la base
+ *  del trabajo enfocado (INC-A), null = caer a HEAD. */
+function ctx(tocado: boolean, sha: string | null = 'base1', baseFoco: string | null = null): AppContext {
   return {
     headSha: () => sha,
-    fileHistory: { tocadoPorElArreglo: () => Promise.resolve(tocado) }
+    fileHistory: {
+      tocadoPorElArreglo: () => Promise.resolve(tocado),
+      baseDelFoco: () => Promise.resolve(baseFoco)
+    }
   } as unknown as AppContext
 }
 
@@ -45,5 +49,13 @@ describe('ficheroAProbar: la puerta touched-by-fix (ADR-087 enmienda)', () => {
 
   it('sin HEAD (repo sin git) + cita distinta → null (conserva, ADR-065)', async () => {
     expect(await ficheroAProbar(ctx(true, null), project, analisis('ancla.sql', 'nueva.sql'), OBSOLETO)).toBeNull() // prettier-ignore
+  })
+
+  it('INC-A: usa baseDelFoco cuando existe (precede a HEAD) — la ventana es del foco', async () => {
+    // HEAD null (el turno de verify no veria nada), pero hay baseDelFoco: la
+    // puerta mira desde el foco, no desde el turno. Mutar "ignorar baseDelFoco"
+    // (volver a HEAD) daria null → este test muere.
+    const conFoco = ctx(true, null, 'base-del-foco')
+    expect(await ficheroAProbar(conFoco, project, analisis('ancla.sql', 'nueva.sql'), OBSOLETO)).toBe('nueva.sql')
   })
 })

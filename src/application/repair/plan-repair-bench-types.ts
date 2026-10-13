@@ -59,4 +59,7 @@ export interface Opciones {
   /** Lo que `fileHistory.tocadoPorElArreglo` devuelve: si el arreglo del turno
    *  toco el fichero citado en `evidencia.file`. Por defecto false (ADR-087 enm.). */
   readonly tocado?: boolean
+  /** Lo que `fileHistory.baseDelFoco` devuelve: la base del trabajo enfocado, o
+   *  `null` para caer a la base del turno (HEAD). Por defecto null (INC-A). */
+  readonly baseFoco?: string | null
 }

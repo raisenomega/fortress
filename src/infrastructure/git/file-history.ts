@@ -1,5 +1,6 @@
 import { execFile } from 'child_process'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
+import { baseDelFocoGit } from './base-del-foco-git'
 import { gitEnv } from './git-env'
 import type { FileHistory } from '@domain/project/file-history'
 
@@ -68,6 +69,7 @@ export function createGitFileHistory(): FileHistory {
       const salida = await diffDesde(projectPath, file, desdeSha)
       // null (git fallo / no es repo) → false; salida vacia (no lo toco) → false.
       return salida !== null && salida !== ''
-    }
+    },
+    baseDelFoco: (projectPath, findingId) => baseDelFocoGit(projectPath, findingId)
   }
 }

@@ -46,8 +46,7 @@ describe('verificar un mitigado no pasa por la lista de propuestas', () => {
     expect(banco.observadas).toHaveLength(1)
   })
 
-  /** INC-3: el fix de un append-only cierra en OTRO fichero. La evidencia lo nombra
-   *  en `file`, y la puerta touched-by-fix decide si vale (ADR-087 enmienda). */
+  /** INC-3/A: el fix de un append-only cierra en OTRO fichero; la puerta decide. */
   const CITA = {
     ...base,
     verdictStatus: 'OBSOLETO' as const,
@@ -66,5 +65,11 @@ describe('verificar un mitigado no pasa por la lista de propuestas', () => {
     const { banco } = await corrida({ ...CITA, tocado: false })
     expect(banco.extinguidos).toEqual([])
     expect(banco.mitigados.length).toBeGreaterThan(0)
+  })
+
+  it('INC-A: fix committeado en un turno ANTERIOR (baseDelFoco) + tocado → EXTINCT', async () => {
+    // DROP committeado turnos atras; sha:null = el turno no lo veria → solo cierra con baseDelFoco.
+    const { banco } = await corrida({ ...CITA, baseFoco: 'base-del-foco', tocado: true, sha: null })
+    expect(banco.extinguidos.map((e) => e.ids)).toEqual([['f1']])
   })
 })

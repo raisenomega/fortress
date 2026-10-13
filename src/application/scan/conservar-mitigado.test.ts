@@ -20,7 +20,8 @@ const hallazgo = (extra: Partial<FindingMemory> = {}): FindingMemory =>
  *  false impide cerrar. Lados opuestos, los dos conservadores. */
 const git = (cambio: boolean): FileHistory => ({
   changedSince: () => Promise.resolve(cambio),
-  tocadoPorElArreglo: () => Promise.resolve(false)
+  tocadoPorElArreglo: () => Promise.resolve(false),
+  baseDelFoco: () => Promise.resolve(null)
 })
 
 const decidir = (f: FindingMemory, cambio: boolean): Promise<ReadonlySet<string>> =>

@@ -31,4 +31,17 @@ export interface FileHistory {
    * "si lo toco" seria permiso para cerrar citando cualquier fichero.
    */
   tocadoPorElArreglo(projectPath: string, file: string, desdeSha: string): Promise<boolean>
+
+  /**
+   * El sha BASE del trabajo enfocado en `findingId`: el PADRE del commit durable
+   * mas antiguo cuyo asunto empieza por `fix(<findingId>)` —los que escribe la
+   * correa del lazo (A-4)—. Asi la ventana de la puerta abarca TODOS los turnos
+   * del fix de ese hallazgo, no solo el del verify: un DROP committeado dos
+   * turnos antes sigue contando como "tocado por el arreglo".
+   *
+   * `null` si aun no hay commit del fix (el arreglo del turno sigue sin commitear
+   * y la base del turno ya lo ve), si el commit es raiz sin padre, o si git falla.
+   * Quien lee cae entonces a la base del turno (HEAD) — cero regresion.
+   */
+  baseDelFoco(projectPath: string, findingId: string): Promise<string | null>
 }

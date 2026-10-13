@@ -26,7 +26,10 @@ export async function ficheroAProbar(
   const citado = analysis.evidencia?.file
   if (veredicto.verdict !== 'OBSOLETO' || citado === undefined || citado === ancla) return ancla
 
-  const desde = context.headSha(project.path)
+  // INC-A (P1): la base es el inicio del trabajo ENFOCADO en este hallazgo (padre
+  // del primer `fix(<id>)` durable), no el HEAD del turno de verify — asi un fix
+  // committeado en un turno anterior sigue contando. Fallback a HEAD (mono-turno).
+  const desde = (await context.fileHistory.baseDelFoco(project.path, analysis.target.id)) ?? context.headSha(project.path) // prettier-ignore
   const tocado = desde !== null && (await context.fileHistory.tocadoPorElArreglo(project.path, citado, desde))
   return tocado ? citado : null
 }
