@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron'
 import { medirLaTanda, type ResultadoDeTanda } from '@application/repair/medir-la-tanda'
 import { propuestasDeTanda, type PropuestaEnCola } from '@application/repair/tanda-de-firma'
+import { ejecutaConConfianza } from '@domain/repair/confianza'
 import { ordenDeFirma, type GuiaDeOrden } from '@domain/repair/orden-de-firma'
 import { err, ok, type Result } from '@domain/shared/result'
 import { getAppContext } from '../persistence/app-context'
@@ -42,6 +43,8 @@ export function registerTandaHandlers(): void {
       const id = String(projectId)
       const project = context.projects.findById(id)
       if (project === null) return err('project-not-found')
+      // La sonda corre el gate (codigo del repo): sin confianza no se mide (ADR-044).
+      if (!ejecutaConConfianza(project)) return err('proyecto_sin_confianza')
       const busy = guardMerge(context, id)
       if (busy !== null) return err(busy)
       try {
