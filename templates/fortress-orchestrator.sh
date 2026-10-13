@@ -363,7 +363,13 @@ cmd_add() {
     fi
 
     local name=$(basename "$path")
-    local remote=$(cd "$path" && git remote get-url origin 2>/dev/null || echo "local")
+    # GIT_REMOTE guarda el NOMBRE del remoto, no su URL (ver cabecera de init):
+    # una URL clonada con credenciales (https://usuario:token@host) acabaria en
+    # claro en repos.conf y en stdout. git resuelve la URL al empujar.
+    local remote="local"
+    if (cd "$path" && git remote get-url origin >/dev/null 2>&1); then
+        remote="origin"
+    fi
     local branch=$(cd "$path" && git branch --show-current 2>/dev/null || echo "main")
 
     # Fallo cerrado: '|' es el delimitador de repos.conf y name, remote y
