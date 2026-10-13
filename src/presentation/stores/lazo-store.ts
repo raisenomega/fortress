@@ -13,6 +13,10 @@ interface LazoStore {
   /** Congela la cola del lazo (snapshot al arrancar). Idempotente por diseño:
    *  quien la carga lo hace una vez por encendido. */
   readonly congelarCola: (ids: readonly string[]) => void
+  /** Avanza la cabeza (ATERRIZAJE-5): se cayo el primero por EXTINCION real. Es
+   *  la UNICA mutacion de la cola congelada ademas de congelar/parar; un re-escaneo
+   *  nunca la toca (el candado estable se conserva). */
+  readonly popCola: () => void
   /** Enciende el lazo; si ya estaba encendido solo marca AVANCE (sinAvanzar=0). */
   readonly activar: () => void
   /** Cierra una vuelta (Terminal->CTO): +1 iteracion y AVANCE (sinAvanzar=0). */
@@ -35,6 +39,7 @@ export const useLazoStore = create<LazoStore>((set) => ({
   sinAvanzar: 0,
   cola: null,
   congelarCola: (ids) => set({ cola: ids }),
+  popCola: () => set((s) => ({ cola: s.cola === null ? null : s.cola.slice(1) })),
   // Arrancar/parar descongelan: la proxima sesion del lazo toma su propio snapshot.
   activar: () =>
     set((s) => (s.activo ? { sinAvanzar: 0 } : { activo: true, iteraciones: 0, sinAvanzar: 0, cola: null })), // prettier-ignore

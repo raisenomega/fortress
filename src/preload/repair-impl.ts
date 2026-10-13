@@ -26,5 +26,6 @@ export const repairApi: FortressApi['repair'] = {
   withdraw: (proposalId, motivo) => ipcRenderer.invoke(IPC.repairWithdraw, proposalId, motivo),
   lazoCommit: (projectId, findingId) => ipcRenderer.invoke(IPC.repairLazoCommit, projectId, findingId), // prettier-ignore
   lazoStash: (projectId) => ipcRenderer.invoke(IPC.repairLazoStash, projectId),
-  lazoPop: (projectId) => ipcRenderer.invoke(IPC.repairLazoPop, projectId)
+  lazoPop: (projectId) => ipcRenderer.invoke(IPC.repairLazoPop, projectId),
+  lazoExtinto: (projectId, findingId) => ipcRenderer.invoke(IPC.repairLazoExtinto, projectId, findingId) // prettier-ignore
 }

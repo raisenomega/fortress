@@ -1,3 +1,5 @@
+import type { FindingMemory } from '@domain/project/finding-memory'
+import { seExtinguio } from '@domain/project/se-extinguio'
 import { ipcMain } from 'electron'
 import { commitDurableDelLazo } from '../git/commit-durable-del-lazo'
 import { popDelLazo, stashDelLazo } from '../git/stash-del-lazo'
@@ -7,11 +9,14 @@ import { IPC } from './channels'
 const pathDe = (projectId: string): string =>
   getAppContext().projects.findById(projectId)?.path ?? ''
 
-/** El titulo del hallazgo, de la BASE: el main no se fia del renderer (ADR-088). */
-const tituloDe = (projectId: string, findingId: string): string =>
+const hallazgo = (projectId: string, findingId: string): FindingMemory | undefined =>
   getAppContext()
     .findings.listMemory(projectId)
-    .find((f) => f.id === findingId)?.title ?? ''
+    .find((f) => f.id === findingId)
+
+/** El titulo del hallazgo, de la BASE: el main no se fia del renderer (ADR-088). */
+const tituloDe = (projectId: string, findingId: string): string =>
+  hallazgo(projectId, findingId)?.title ?? ''
 
 /**
  * Los canales git del LAZO autonomo (ATERRIZAJE-4): COMMIT DURABLE del trabajo
@@ -33,5 +38,8 @@ export function registerLazoHandlers(): void {
   )
   ipcMain.handle(IPC.repairLazoPop, (_e, projectId: string) =>
     popDelLazo(pathDe(String(projectId)))
+  )
+  ipcMain.handle(IPC.repairLazoExtinto, (_e, projectId: string, findingId: string) =>
+    seExtinguio(hallazgo(String(projectId), String(findingId))?.lifecycle ?? null)
   )
 }

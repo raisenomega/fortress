@@ -16,4 +16,6 @@ export interface RepairLazoApi {
   lazoStash(projectId: string): Promise<boolean>
   /** Restaura el WIP al parar; 'conflicto' = no se forzo, el stash queda. */
   lazoPop(projectId: string): Promise<'restaurado' | 'vacio' | 'conflicto'>
+  /** ATERRIZAJE-5: ¿el hallazgo se extinguio DE VERDAD (EXTINCT)? -> pop de la cola. */
+  lazoExtinto(projectId: string, findingId: string): Promise<boolean>
 }
