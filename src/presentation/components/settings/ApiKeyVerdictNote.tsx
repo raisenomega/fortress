@@ -16,23 +16,36 @@ const ICON: Record<ApiKeyVerdict['status'], IconName> = {
 
 interface ApiKeyVerdictNoteProps {
   readonly verdict: ApiKeyVerdict
+  /** Sin rol propio: para cuando ya vive DENTRO de ApiKeyVerdictRegion, como
+   *  la prop homonima de Notice. Dos regiones anidadas anuncian dos veces. */
+  readonly callado?: boolean
 }
 
-export function ApiKeyVerdictNote({ verdict }: ApiKeyVerdictNoteProps): React.JSX.Element {
+export function ApiKeyVerdictNote({ verdict, callado }: ApiKeyVerdictNoteProps): React.JSX.Element {
   const message =
     verdict.status === 'valida'
       ? `Key verificada contra la API. Modelo disponible: ${verdict.model}.`
       : verdict.reason
 
-  // `role="status"` sin condicion: a diferencia de Notice, este veredicto no
-  // vive dentro del Toaster, asi que no hay region viva que lo anuncie dos veces.
   return (
     <p
-      role="status"
+      role={callado ? undefined : 'status'}
       className={`mt-3 flex items-start gap-2 rounded-md border px-3 py-2 text-xs ${TONE[verdict.status]}`}
     >
       <Icon name={ICON[verdict.status]} size={13} className="mt-px shrink-0" />
       {message}
     </p>
+  )
+}
+
+/** Region viva siempre montada: solo cambia su contenido (veredicto o nada),
+ *  asi el anuncio es fiable. Vacia no ocupa sitio: el margen va en la nota. */
+export function ApiKeyVerdictRegion({
+  verdict
+}: {
+  readonly verdict: ApiKeyVerdict | null
+}): React.JSX.Element {
+  return (
+    <div role="status">{verdict ? <ApiKeyVerdictNote verdict={verdict} callado /> : null}</div>
   )
 }

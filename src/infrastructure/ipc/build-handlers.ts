@@ -9,7 +9,7 @@ import { runCto } from '../build/run-cto'
 import { runLibre } from '../build/run-libre'
 import { pickFile } from '../system/file-picker'
 import { getAppContext } from '../persistence/app-context'
-import { guardRun } from '../run-guard'
+import { guardRun, topeDiarioAlcanzado } from '../run-guard'
 import { cancelRun, endRun } from '../run-control'
 import { chunkSender, progressSender } from './chat-send-senders'
 import { IPC } from './channels'
@@ -46,22 +46,17 @@ export function registerBuildHandlers(): void {
   )
   // CTO (126): el carril sigue siendo su id centinela; el ancla (Sello B.1) es
   // SOLO de lectura — parametriza la rebanada del libro, no un guard ni un repo.
-  ipcMain.handle(
-    IPC.buildCto,
-    (e, pregunta: string, hilo: TurnoLibre[], ancla: string | null = null) => {
-      // Las fases (contexto·bloque) viajan por el progreso del MISMO carril
-      // centinela, aislado del medidor del Terminal (PASO 158).
-      const prog = progressSender(e, 'chat-cto')
-      return runCto(
-        getAppContext(),
-        pregunta,
-        hilo,
-        ancla ?? null,
-        chunkSender(e, 'chat-cto'),
-        (fase) => prog({ index: 0, total: 0, tokens: 0, costUsd: 0, fase })
-      )
-    }
-  )
+  // Sin guardRun (runCto ya reserva CTO_OWNER), pero el tope del dia SI se cobra.
+  ipcMain.handle(IPC.buildCto, (e, pregunta: string, hilo: TurnoLibre[], ancla: string | null) => {
+    const context = getAppContext()
+    const limite = topeDiarioAlcanzado(context, new Date())
+    if (limite !== null) return err(limite)
+    // Fases (contexto·bloque) por el progreso del carril centinela (PASO 158).
+    const prog = progressSender(e, 'chat-cto')
+    return runCto(context, pregunta, hilo, ancla ?? null, chunkSender(e, 'chat-cto'), (fase) =>
+      prog({ index: 0, total: 0, tokens: 0, costUsd: 0, fase })
+    )
+  })
   ipcMain.handle(IPC.buildFeature, (e, projectId: string, intent: string, plan: string) =>
     withGuard(projectId, (ctx) => runBuild(ctx, projectId, intent, plan, chunkSender(e, projectId)))
   )

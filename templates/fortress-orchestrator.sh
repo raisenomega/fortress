@@ -36,6 +36,15 @@ REPORTS_DIR="$FORTRESS_DIR/reports"
 LOGS_DIR="$FORTRESS_DIR/logs"
 UNIFIED_REPORT="$REPORTS_DIR/unified-$(date +%Y%m%d-%H%M%S).md"
 
+# Anula la config del repo que ejecuta codigo de su autor con la identidad del
+# operador (replica SIN_HOOKS de git-sin-hooks.ts, ADR-092). hooksPath=/dev/null
+# apaga pre-push y tambien reference-transaction, que --no-verify no toca; un
+# pre-push propio del operador deja de correr al empujar desde aqui.
+# Fuera a proposito: core.sshCommand y credential.helper (anularlos rompe pushes
+# que dependen de la config local del repo) y pushurl/pushInsteadOf/receivepack
+# (anularlos cambiaria el destino que el operador configuro).
+GIT_SIN_HOOKS=(-c core.hooksPath=/dev/null -c core.fsmonitor=)
+
 # Colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -753,7 +762,7 @@ cmd_push() {
 
         log_info "Pushing $pname → $premote/$pbranch..."
 
-        if (cd "$ppath" && git push "$premote" "$pbranch" 2>&1); then
+        if (cd "$ppath" && git "${GIT_SIN_HOOKS[@]}" push "$premote" "$pbranch" 2>&1); then
             log_success "$pname: push exitoso ✓"
         else
             log_error "$pname: push falló"
