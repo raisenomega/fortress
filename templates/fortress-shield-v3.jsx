@@ -236,6 +236,7 @@ export default function FortressV3() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
   const [focused, setFocused] = useState(false);
+  const domainId = useId();
 
   const scanLog = useRef([]);
 
@@ -347,10 +348,11 @@ export default function FortressV3() {
         </div>
 
         {/* Input */}
+        <label htmlFor={domainId} style={{display:"block",fontSize:12,color:"#94a3b8",marginBottom:6}}>Dominio a escanear</label>
         <div style={{display:"flex",gap:8,marginBottom:6,flexWrap:"wrap"}}>
-          <input value={domain} onChange={e=>setDomain(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!scanning&&scan()}
+          <input id={domainId} value={domain} onChange={e=>setDomain(e.target.value)} onKeyDown={e=>e.key==="Enter"&&!scanning&&scan()}
             onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)}
-            placeholder="tu-dominio.com" disabled={scanning} aria-label="Dominio a escanear"
+            placeholder="tu-dominio.com" disabled={scanning}
             style={{flex:1,minWidth:200,padding:"11px 14px",fontSize:14,fontWeight:500,background:"#0f172a",border:focused&&!scanning?"1px solid #3b82f6":"1px solid #1e293b",borderRadius:10,color:"#e2e8f0",outline:"none",boxShadow:focused&&!scanning?"0 0 0 2px rgba(59,130,246,0.5)":"none",fontFamily:"monospace"}}/>
           <button onClick={scan} disabled={scanning||!domain.trim()}
             style={{padding:"11px 22px",fontSize:13,fontWeight:700,background:scanning?"#1e293b":"linear-gradient(135deg,#dc2626,#c2410c)",border:"none",borderRadius:10,color:"#fff",cursor:scanning?"not-allowed":"pointer",opacity:!domain.trim()?0.4:1,letterSpacing:0.5}}>

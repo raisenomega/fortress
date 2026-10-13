@@ -36,6 +36,15 @@ REPORTS_DIR="$FORTRESS_DIR/reports"
 LOGS_DIR="$FORTRESS_DIR/logs"
 UNIFIED_REPORT="$REPORTS_DIR/unified-$(date +%Y%m%d-%H%M%S).md"
 
+# Anula la config del repo que ejecuta codigo de su autor con la identidad del
+# operador (replica SIN_HOOKS de git-sin-hooks.ts, ADR-092). hooksPath=/dev/null
+# apaga pre-push y tambien reference-transaction, que --no-verify no toca; un
+# pre-push propio del operador deja de correr al empujar desde aqui.
+# Fuera a proposito: core.sshCommand y credential.helper (anularlos rompe pushes
+# que dependen de la config local del repo) y pushurl/pushInsteadOf/receivepack
+# (anularlos cambiaria el destino que el operador configuro).
+GIT_SIN_HOOKS=(-c core.hooksPath=/dev/null -c core.fsmonitor=)
+
 # Colores
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -364,7 +373,13 @@ cmd_add() {
     fi
 
     local name=$(basename "$path")
-    local remote=$(cd "$path" && git remote get-url origin 2>/dev/null || echo "local")
+    # GIT_REMOTE guarda el NOMBRE del remoto, no su URL (ver cabecera de init):
+    # una URL clonada con credenciales (https://usuario:token@host) acabaria en
+    # claro en repos.conf y en stdout. git resuelve la URL al empujar.
+    local remote="local"
+    if (cd "$path" && git remote get-url origin >/dev/null 2>&1); then
+        remote="origin"
+    fi
     local branch=$(cd "$path" && git branch --show-current 2>/dev/null || echo "main")
 
     # Fallo cerrado: '|' es el delimitador de repos.conf y name, remote y
@@ -760,7 +775,7 @@ cmd_push() {
         printf "${BLUE}[INFO]${NC} Pushing %s → %s/%s...\n" \
             "$pname" "$(redact_remote "$premote")" "$pbranch"
 
-        if (cd "$ppath" && git push "$premote" "$pbranch" 2>&1); then
+        if (cd "$ppath" && git "${GIT_SIN_HOOKS[@]}" push "$premote" "$pbranch" 2>&1); then
             log_success "$pname: push exitoso ✓"
         else
             log_error "$pname: push falló"

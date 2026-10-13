@@ -17,12 +17,13 @@ interface OmegaTabsProps {
 /** Barra de pestañas del superdashboard (spec §header). Cambia el contexto activo. */
 export function OmegaTabs({ active, onSelect }: OmegaTabsProps): React.JSX.Element {
   return (
-    <nav className="flex flex-wrap gap-1">
+    <nav aria-label="Contexto del superdashboard" className="flex flex-wrap gap-1">
       {TABS.map((tab) => (
         <button
           key={tab.mode}
           type="button"
           data-omega-tab={tab.mode}
+          aria-pressed={active === tab.mode}
           onClick={() => onSelect(tab.mode)}
           className={`tap flex items-center gap-1.5 rounded border px-2 py-1 text-xs ${
             active === tab.mode

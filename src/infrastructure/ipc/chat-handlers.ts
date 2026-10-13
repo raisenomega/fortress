@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { appendMessage, clearHistory, getHistory } from '@application/chat/chat-history'
 import type { NewChatMessage } from '@domain/chat/chat-message'
 import type { MensajeDeHilo } from '@domain/chat/chat-repository'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import type { NuevoHilo } from '@domain/chat/hilo-de-chat'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
@@ -30,8 +31,9 @@ export function registerChatHandlers(): void {
   ipcMain.handle(IPC.chatListByHilo, (_e, chatId: string) =>
     getAppContext().chat.listByChat(chatId)
   )
+  // El tachado vive en main (el renderer no es de confianza): ningun secreto a la fila.
   ipcMain.handle(IPC.chatAddToHilo, (_e, chatId: string, mensaje: MensajeDeHilo) =>
-    getAppContext().chat.addToChat(chatId, mensaje)
+    getAppContext().chat.addToChat(chatId, { ...mensaje, content: redactSecrets(mensaje.content) })
   )
 
   // La barra de carpetas (PASO 116): listas del organizador y el borrado.

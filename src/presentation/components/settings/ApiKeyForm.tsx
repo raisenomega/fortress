@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ApiKeyVerdict } from '@domain/settings/api-key-check'
 import { saveApiKey } from '../../services/settings-service'
 import { FIELD_CLASS } from '../common/LabeledField'
-import { ApiKeyVerdictNote } from './ApiKeyVerdictNote'
+import { ApiKeyVerdictRegion } from './ApiKeyVerdictNote'
 
 interface ApiKeyFormProps {
   readonly submitLabel: string
@@ -53,7 +53,7 @@ export function ApiKeyForm({ submitLabel, onSaved }: ApiKeyFormProps): React.JSX
         </button>
       </div>
 
-      {verdict ? <ApiKeyVerdictNote verdict={verdict} /> : null}
+      <ApiKeyVerdictRegion verdict={verdict} />
     </div>
   )
 }
