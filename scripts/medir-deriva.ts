@@ -16,7 +16,7 @@ import { BUDGET_FLAG, dayLimitReached, parseBudget } from '../src/domain/setting
 import { windowStart } from '../src/domain/telemetry/time-window.ts'
 import { discoverCorpus } from '../src/infrastructure/project/discover-corpus.ts'
 import { conSandbox } from '../src/infrastructure/sandbox/con-sandbox.ts'
-import { entornoDelAgente } from './fase-b-agente.ts'
+import { buildGateEnv } from '../src/infrastructure/repair/gate-env.ts'
 import { cruzar, reencontradas } from './medir-deriva-cruce.ts'
 
 // Mide la deriva del tipo de UNA parada de carpeta, con o sin la memoria de
@@ -55,7 +55,8 @@ console.log(`${proyecto} · carpeta ${carpeta} · ${sinMemoria ? 'SIN memoria (c
 // auditado, con Bash pre-aprobado y cwd en ese arbol (SECURITY-MODEL: explicitos, no automaticos).
 const args = conSandbox(['-p', prompt, '--output-format', 'json', '--permission-mode', 'default', ...(tope.perRun > 0 ? [BUDGET_FLAG, String(tope.perRun)] : []), '--allowedTools', 'Bash,Read,Grep,Glob', '--strict-mcp-config'], p.path) // prettier-ignore
 if (!args.ok) throw new Error(`sin caja: ${args.error}`)
-const salida = spawnSync('claude', [...args.value], { cwd: p.path, env: entornoDelAgente(), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
+// Entorno en LISTA BLANCA (la de buildGateEnv + config del CLI + privacidad ADR-088): sin MCP que alimentar, ningun token de la shell viaja.
+const salida = spawnSync('claude', [...args.value], { cwd: p.path, env: { ...buildGateEnv(process.env), ...Object.fromEntries(['CLAUDE_CONFIG_DIR', 'XDG_CONFIG_HOME'].flatMap((k): [string, string][] => { const v = process.env[k]; return v === undefined ? [] : [[k, v]] })), CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1', DISABLE_FEEDBACK_COMMAND: '1' }, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }) // prettier-ignore
 if (salida.status !== 0)
   throw new Error(`el escaner salio con ${salida.status}: ${salida.stderr.slice(0, 300)}`)
 const res = JSON.parse(salida.stdout) as { result?: string; total_cost_usd?: number }
