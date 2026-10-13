@@ -42,3 +42,22 @@ describe('un hallazgo solo muere si un agente lo ha mirado Y pudo probarlo', () 
     expect(b.extinguidos).toEqual([])
   })
 })
+
+describe('INC-3: el Motor NO pasa por la puerta touched-by-fix', () => {
+  it('REGRESION byte-identica: ignora evidencia.file y lee el ANCLA, sin puerta', async () => {
+    // El Motor planifica ANTES de que exista el fix: la puerta touched-by-fix NO
+    // aplica (vive en verificarMitigado). Aunque el analista cite OTRO fichero, se
+    // cierra leyendo el ancla, como antes del feature. Si alguien mete la puerta
+    // aqui, el bench responde tocado=false por defecto y dejaria de extinguir →
+    // este test moriria.
+    const b = bench({
+      findings: [hallazgo('f1', 'a.ts')],
+      verdictStatus: 'OBSOLETO',
+      evidencia: { marcador: 'execFile(', forma: 'ausente', file: 'otra/migracion.sql' },
+      contenido: 'await runCommand(...)'
+    })
+    await planRepair(b.context, 'p1')
+
+    expect(b.extinguidos.map((e) => e.ids)).toEqual([['f1']])
+  })
+})

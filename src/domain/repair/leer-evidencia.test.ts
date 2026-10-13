@@ -27,4 +27,9 @@ describe('la evidencia que no se entiende no cuenta como media prueba', () => {
     expect(leerEvidencia(null)).toBeUndefined()
     expect(leerEvidencia('el commit d9e3194 lo arreglo')).toBeUndefined()
   })
+
+  it('INC-3: arrastra `file` cuando viene (y lo omite si no), para la puerta touched-by-fix', () => {
+    expect(leerEvidencia({ marcador: 'x', forma: 'presente', file: 'nueva.sql' })?.file).toBe('nueva.sql') // prettier-ignore
+    expect(leerEvidencia({ marcador: 'x', forma: 'presente' })).not.toHaveProperty('file')
+  })
 })

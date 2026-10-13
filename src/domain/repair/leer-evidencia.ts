@@ -26,9 +26,11 @@ export function leerEvidencia(bruto: unknown): Evidencia | undefined {
   if (marcador === '' || !FORMAS.includes(forma)) return undefined
 
   const commit = texto(campos.commit)
+  const file = texto(campos.file)
   return {
     marcador,
     forma: forma as FormaDeEvidencia,
-    ...(commit === '' ? {} : { commit })
+    ...(commit === '' ? {} : { commit }),
+    ...(file === '' ? {} : { file })
   }
 }

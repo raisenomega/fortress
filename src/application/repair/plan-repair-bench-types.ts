@@ -56,4 +56,7 @@ export interface Opciones {
   /** El texto del fichero del hallazgo tal como lo lee la sonda. `null` imita el
    *  fichero que no se pudo leer, que NO es prueba de que el defecto se fuera. */
   readonly contenido?: string | null
+  /** Lo que `fileHistory.tocadoPorElArreglo` devuelve: si el arreglo del turno
+   *  toco el fichero citado en `evidencia.file`. Por defecto false (ADR-087 enm.). */
+  readonly tocado?: boolean
 }

@@ -300,6 +300,19 @@ se conserva (ADR-065).
 ### Alcance
 
 `estaProbado` **no cambia**: sigue recibiendo el contenido ya elegido y no mira
-`file`. Quien elige el fichero y aplica la mitigación es `extinguirSiObsoleto`.
-El contrato `Evidencia` (`+ file?`) es la única pieza firmada que toca; el resto
-(puerto git, cableado, prompt del analista) es libre.
+`file`. El contrato `Evidencia` (`+ file?`) es la única pieza firmada que toca; el
+resto (puerto git, cableado, prompt del analista) es libre.
+
+### Dónde vive la puerta (y por qué NO en `extinguirSiObsoleto`)
+
+La puerta touched-by-fix vive en el **camino de VERIFY** —`verificarMitigado` →
+`ficheroAProbar`—, NO en `extinguirSiObsoleto`. La razón es dura: `tocadoPorElArreglo`
+compara contra el **HEAD del repo principal** (tras `conservar()`, el inicio del
+turno), y esa base de turno **solo existe en el camino de verify**. El MOTOR
+(`plan-repair`/`retry-repair`) llama a `extinguirSiObsoleto` **durante la
+planificación, antes de que exista el fix** —el fix irá luego a un worktree—, así
+que ahí no hay nada que «tocó el arreglo» y el HEAD del repo no significa eso.
+Meter la puerta en `extinguirSiObsoleto` habría cambiado la conducta del Motor
+(mitigando un citado que hoy lee el ancla). Por eso `extinguirSiObsoleto` queda
+**síncrona**, con un `ficheroDePrueba?` opcional (por defecto el ancla) que resuelve
+el camino de verify; el Motor llama sin él y conserva su conducta byte a byte.

@@ -66,8 +66,8 @@ export function bench(opts: Opciones): Bench {
       study: (t: unknown, atendidas: readonly string[]) => (memoria.push(atendidas), analyst.study(t as never, atendidas)) // prettier-ignore
     }),
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha),
-    fortressConfig: () => opts.cerco ?? { kind: 'not-present' },
-    huellaDeConfig: () => 'none', esRepoPropio: () => opts.esRepoPropio ?? true,
+    fileHistory: { tocadoPorElArreglo: () => Promise.resolve(opts.tocado ?? false) },
+    fortressConfig: () => opts.cerco ?? { kind: 'not-present' }, huellaDeConfig: () => 'none', esRepoPropio: () => opts.esRepoPropio ?? true, // prettier-ignore
     barrerasDeclaradas: () => SIN_BARRERAS
   } as unknown as AppContext
   // prettier-ignore

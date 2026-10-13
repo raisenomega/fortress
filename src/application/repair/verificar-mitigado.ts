@@ -3,31 +3,29 @@ import { notaDeVerificacion } from '@domain/repair/dictamen-de-verificacion'
 import { elegirParaVerificar } from './elegir-para-verificar'
 import { estudiar } from './estudiar-con-memoria'
 import { extinguirSiObsoleto } from './extinguir-con-juicio'
+import { ficheroAProbar } from './fichero-a-probar'
 import { nowIso } from '@domain/shared/id'
 import { conAgentRun, recordMotorRun } from './record-motor-run'
 import { veredictoDelAnalisis } from '@domain/repair/veredicto-del-analisis'
 import type { AppContext } from '../context'
 
+/** Motivo del mitigado cuando el analista cito un fichero que el arreglo NO toco. */
+const SIN_PRUEBA_AJENO = 'obsoleto segun el agente, pero cito un fichero ajeno al arreglo'
+
 /**
  * El operador pide confirmar que su arreglo cerro el hallazgo (ADR-087).
  *
- * SIN PROPUESTA, y esa es la decision de forma. `planRepair` abre una `Proposal`
- * porque va camino de proponer un fix; aqui no se propone nada, y una propuesta
- * que nunca quiso reparar miente sobre la intencion y ensucia la lista donde el
- * operador mira lo que tiene pendiente de firmar. Se comprobo pieza por pieza
- * que ninguna de las cuatro la necesita: `estudiar` recibe la `Selection`,
- * `recordMotorRun` el `projectId`, y el veredicto y la extincion, el `Analysis`.
+ * SIN PROPUESTA, y es decision de forma: `planRepair` abre una `Proposal` porque
+ * va a proponer un fix; aqui no se propone nada, y una propuesta que nunca quiso
+ * reparar miente sobre la intencion y ensucia la lista de lo pendiente de firmar.
+ * Ninguna de las cuatro piezas la necesita (reciben Selection/projectId/Analysis).
  *
- * El rastro no se pierde por eso: la corrida del agente queda en `agent_runs`
- * con su coste, lo que el analista noto de FORTRESS va al backlog, y el
- * desenlace queda escrito en la propia fila —en `extinct_reason` y
- * `extinguido_por` si murio, en `mitigated_note` si no—.
+ * El rastro no se pierde: la corrida queda en `agent_runs` con su coste, las notas
+ * van al backlog, y el desenlace a la propia fila (`extinct_reason`/`mitigated_note`).
  *
- * EL DESENLACE QUE JUSTIFICA TODO ESTO es que el hallazgo NO muere cuando la
- * ausencia no se prueba: el sistema protege al operador de su propio error, que
- * es lo que falto el dia que dos hallazgos de la CSP murieron porque alguien
- * anadio un comentario. Y proteger no es solo avisar — si el analista dice que
- * el problema SIGUE, la etiqueta de mitigado se retira y el motor lo recupera.
+ * EL DESENLACE QUE JUSTIFICA ESTO: el hallazgo NO muere cuando la ausencia no se
+ * prueba —protege al operador de su error, como el dia que dos CSP murieron por un
+ * comentario—. Y si el analista dice que SIGUE, se retira el mitigado y vuelve.
  *
  * `quien` lo pide: el operador por defecto, o el Terminal al cerrar su turno
  * (ADR-088). Va a `extinguido_por` y al aviso, que nombran al autor real.
@@ -56,19 +54,21 @@ export async function verificarMitigado(
   }
 
   const veredicto = veredictoDelAnalisis(result.analysis)
-  if (extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso(), quien)) {
+  // La puerta touched-by-fix (ADR-087 enm.): un fichero citado ajeno al arreglo
+  // (`null`) no extingue; el ancla o una cita tocada por el fix, si.
+  const fichero = await ficheroAProbar(context, project, result.analysis, veredicto)
+  if (fichero !== null && extinguirSiObsoleto(context, project, result.analysis, veredicto, nowIso(), quien, fichero)) { // prettier-ignore
     return { desenlace: 'extinguido', razon: veredicto.reason }
   }
+  if (fichero === null) context.findings.markMitigated(findingId, `${SIN_PRUEBA_AJENO}: ${result.analysis.evidencia?.file ?? ''}`, nowIso()) // prettier-ignore
 
   const desenlace = veredicto.verdict === 'OBSOLETO' ? 'sin_prueba' : 'sigue_vivo'
   const nota = notaDeVerificacion(desenlace, veredicto.reason, quien)
-  // LA ASIMETRIA, y es de certeza contra duda. `sigue_vivo` es una AFIRMACION:
-  // el analista leyo el fichero y el problema esta ahi, asi que la marca del
-  // operador era falsa y el hallazgo vuelve a la cola —sin eso seguiria
-  // contando para el score y bloqueando el push mientras el motor no lo puede
-  // tocar, porque `vivo` exige ACTIVE: castigado y escondido a la vez—.
-  // `sin_prueba` es una DUDA: dijo obsoleto y no pudo probarlo, y ante la duda
-  // se conserva (ADR-065). Ahi la marca se queda y solo se anota el porque.
+  // LA ASIMETRIA, de certeza contra duda. `sigue_vivo` es una AFIRMACION: el
+  // analista leyo el fichero y el problema esta ahi, la marca del operador era
+  // falsa y el hallazgo vuelve a la cola (si no, seguiria contando y bloqueando
+  // el push mientras el motor no lo puede tocar). `sin_prueba` es DUDA: dijo
+  // obsoleto y no lo probo, se conserva (ADR-065) y solo se anota el porque.
   if (desenlace === 'sigue_vivo') context.findings.devolverALaCola(findingId, nota)
   else context.findings.anotarVerificacion(findingId, nota)
   return { desenlace, razon: nota }
