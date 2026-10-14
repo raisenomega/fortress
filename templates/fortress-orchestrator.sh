@@ -64,7 +64,10 @@ BOLD='\033[1m'
 # ─── INICIALIZACIÓN ─────────────────────────────────────────
 
 init() {
+    # Logs e informes citan secretos hasta que se tachan: solo el dueno los lee
+    umask 077
     mkdir -p "$FORTRESS_DIR" "$REPORTS_DIR" "$LOGS_DIR"
+    chmod 700 "$FORTRESS_DIR" "$REPORTS_DIR" "$LOGS_DIR"
     if [ ! -f "$REPOS_FILE" ]; then
         echo "# FORTRESS ORCHESTRATOR — Repos configurados" > "$REPOS_FILE"
         echo "# Formato: NOMBRE|RUTA|GIT_REMOTE|GIT_BRANCH|TRUSTED" >> "$REPOS_FILE"
@@ -218,6 +221,28 @@ scan_abort_redact() {
         [ -n "${names[$i]:-}" ] && redact_file "$(report_file "${names[$i]}")"
     done
     return 0
+}
+
+# Red de recuperacion: un SIGKILL u OOM del orquestador salta todo trap y deja
+# log e informe en claro. Al arrancar el scan se tachan los restos (redact_file
+# es idempotente), pero solo con el escritor COMPROBADO muerto: el lock vive en
+# un fd que heredan los hijos, asi que un huerfano de un scan anterior lo sigue
+# reteniendo. Lock ocupado o sin flock = no se barre. Nunca escribe scanned_head.
+scan_lock_and_sweep() {
+    if ! command -v flock >/dev/null 2>&1; then
+        log_warn "Sin flock: no se puede comprobar que no quede un escritor vivo; restos sin barrer"
+        return 0
+    fi
+    exec 9>"$FORTRESS_DIR/scan.lock"
+    if ! flock -n 9; then
+        log_error "Otro scan (o un hijo huerfano de uno anterior) sigue escribiendo; espera a que termine"
+        return 1
+    fi
+    local f
+    for f in "$LOGS_DIR"/*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9].log \
+             "$REPORTS_DIR"/*-FORTRESS-REPORT.md; do
+        redact_file "$f"
+    done
 }
 
 # ─── VEREDICTO DE PUSH ──────────────────────────────────────
@@ -561,6 +586,7 @@ cmd_scan() {
     local skipped=()
     # Indice del primer hijo aun sin tachar: el bucle de espera lo avanza
     local next_redact=0
+    scan_lock_and_sweep || return 1
     trap 'scan_abort_redact' EXIT
     trap 'scan_abort_redact; exit 130' INT
     trap 'scan_abort_redact; exit 143' TERM
