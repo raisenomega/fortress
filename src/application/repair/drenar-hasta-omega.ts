@@ -2,6 +2,7 @@ import { esEntorno } from '@domain/repair/averia'
 import { casillaDeBaja } from '@domain/repair/clasificacion-de-baja'
 import type { AppContext } from '../context'
 import { runMotorChain } from './run-motor-chain'
+import { registroDeColisiones } from './colisiones-de-la-corrida'
 import type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
 
 export type { DrenajeDeps, DrenajeResultado, FinDelDrenaje } from './drenaje-types'
@@ -23,8 +24,11 @@ export async function drenarHastaOmega(
   deps: DrenajeDeps
 ): Promise<DrenajeResultado> {
   const cuenta = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0, porDefectoInterno: 0, superadas: 0, sinClasificar: 0 } // prettier-ignore
+  // Senal pura: `colisiones` se puebla sola al anotar y NO altera `cuenta` ni el
+  // destino de nadie. El drenaje deja de ser mudo; la adjudicacion sigue fuera.
+  const { colisiones, anotar } = registroDeColisiones(ctx)
   const fin = (f: FinDelDrenaje, detalle?: string): DrenajeResultado =>
-    detalle === undefined ? { fin: f, ...cuenta } : { fin: f, ...cuenta, detalle }
+    detalle === undefined ? { fin: f, ...cuenta, colisiones } : { fin: f, ...cuenta, colisiones, detalle } // prettier-ignore
 
   /**
    * Una baja, en la casilla que su motivo manda. El reparto vive en el dominio
@@ -57,7 +61,8 @@ export async function drenarHastaOmega(
     if (salida.value.kind === 'negado') return fin('negado')
 
     cuenta.trabajadas += 1
-    if (salida.value.kind === 'espera-firma') cuenta.acumuladas += 1
+    // Solo las que aterrizan espera-firma dejan huella: las bajas no tocan el arbol.
+    if (salida.value.kind === 'espera-firma') { cuenta.acumuladas += 1; await anotar(salida.value.proposalId) } // prettier-ignore
     else if (salida.value.kind === 'descartada') anotarBaja(salida.value.motivo)
   }
   return fin('tope-vueltas')

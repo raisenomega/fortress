@@ -16,7 +16,7 @@ describe('el drenaje cuenta lo que hizo, no solo lo que dejo', () => {
     expect(await drenarHastaOmega(CTX, 'p1', deps())).toEqual({
       fin: 'sin-candidato', trabajadas: 4, acumuladas: 2, vetadas: 1, porPresupuesto: 1,
       porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0,
-      porDefectoInterno: 0, superadas: 0, sinClasificar: 0
+      porDefectoInterno: 0, superadas: 0, sinClasificar: 0, colisiones: []
     }) // prettier-ignore
   })
 

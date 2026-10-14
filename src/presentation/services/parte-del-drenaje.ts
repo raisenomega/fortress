@@ -41,6 +41,14 @@ function bajas(r: DrenajeResultado): string {
   return partes.length === 0 ? '' : ` Se perdieron ${partes.join(', ')}.`
 }
 
+/** Las colisiones de fichero de la corrida: AVISO, no bloqueo — el drenaje deja
+ *  de ser mudo, pero quien adjudica sigue siendo `medirLaTanda`/la firma. */
+function choques(r: DrenajeResultado): string {
+  const n = r.colisiones.length
+  // prettier-ignore
+  return n === 0 ? '' : ` ${n} colision${n > 1 ? 'es' : ''} de fichero en la corrida (aviso, no bloquea).`
+}
+
 /**
  * El parte de una corrida: que HIZO, no solo que quedo.
  *
@@ -55,5 +63,5 @@ export function parteDelDrenaje(r: DrenajeResultado): { texto: string; tono: Not
   if (r.trabajadas === 0) return { texto: `Drenaje sin trabajo: ${cierre}.`, tono }
 
   const cabeza = `Drenaje: ${r.trabajadas} trabajada${r.trabajadas > 1 ? 's' : ''}, ${r.acumuladas} esperando firma.` // prettier-ignore
-  return { texto: `${cabeza}${bajas(r)} Fin: ${cierre}.`, tono }
+  return { texto: `${cabeza}${bajas(r)}${choques(r)} Fin: ${cierre}.`, tono }
 }
