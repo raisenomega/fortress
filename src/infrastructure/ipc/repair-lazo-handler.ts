@@ -1,13 +1,21 @@
 import type { FindingMemory } from '@domain/project/finding-memory'
 import { seExtinguio } from '@domain/project/se-extinguio'
+import { ejecutaConConfianza } from '@domain/repair/confianza'
 import { ipcMain } from 'electron'
 import { commitDurableDelLazo } from '../git/commit-durable-del-lazo'
-import { popDelLazo, stashDelLazo } from '../git/stash-del-lazo'
+import { type DesenlacePop, popDelLazo, stashDelLazo } from '../git/stash-del-lazo'
 import { getAppContext } from '../persistence/app-context'
 import { IPC } from './channels'
 
-const pathDe = (projectId: string): string =>
-  getAppContext().projects.findById(projectId)?.path ?? ''
+/** add -A, stash -u y pop corren filtros del repo fuera de la caja: es ejecutar y pide
+ *  confianza (ADR-044). Sin proyecto o sin confianza: ruta vacia, el canal no toca git. */
+function pathEjecutable(projectId: string): string {
+  const project = getAppContext().projects.findById(projectId)
+  if (project === null) return ''
+  if (ejecutaConConfianza(project)) return project.path
+  console.warn(`[lazo] proyecto sin confianza: no se toca git en ${projectId}`)
+  return ''
+}
 
 const hallazgo = (projectId: string, findingId: string): FindingMemory | undefined =>
   getAppContext()
@@ -25,7 +33,7 @@ const tituloDe = (projectId: string, findingId: string): string =>
  */
 export function registerLazoHandlers(): void {
   ipcMain.handle(IPC.repairLazoCommit, (_e, projectId: string, findingId: string) => {
-    const path = pathDe(String(projectId))
+    const path = pathEjecutable(String(projectId))
     if (path === '') return 'error'
     return commitDurableDelLazo(
       path,
@@ -33,12 +41,15 @@ export function registerLazoHandlers(): void {
       tituloDe(String(projectId), String(findingId))
     )
   })
-  ipcMain.handle(IPC.repairLazoStash, (_e, projectId: string) =>
-    stashDelLazo(pathDe(String(projectId)))
-  )
-  ipcMain.handle(IPC.repairLazoPop, (_e, projectId: string) =>
-    popDelLazo(pathDe(String(projectId)))
-  )
+  ipcMain.handle(IPC.repairLazoStash, (_e, projectId: string) => {
+    const path = pathEjecutable(String(projectId))
+    return path === '' ? false : stashDelLazo(path)
+  })
+  // Rechazado sale 'conflicto', no 'vacio': el WIP sigue en el stash y se reporta.
+  ipcMain.handle(IPC.repairLazoPop, (_e, projectId: string): DesenlacePop => {
+    const path = pathEjecutable(String(projectId))
+    return path === '' ? 'conflicto' : popDelLazo(path)
+  })
   ipcMain.handle(IPC.repairLazoExtinto, (_e, projectId: string, findingId: string) =>
     seExtinguio(hallazgo(String(projectId), String(findingId))?.lifecycle ?? null)
   )
