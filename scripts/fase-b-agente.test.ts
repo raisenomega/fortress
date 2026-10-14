@@ -23,8 +23,7 @@ test('con el diario agotado no se lanza: corta con el mensaje del tope', () => {
 })
 
 // Uso: node --import ./scripts/lib/cargar-ts.mjs --test scripts/fase-b-agente.test.ts
-// El contrato es el de buildArgs (claude-cli.test.ts): el tope viaja con su
-// valor y cero lo desactiva. Sin el, un lote de N hallazgos gasta sin techo.
+// El contrato de buildArgs: el tope viaja y cero lo desactiva; sin el, N hallazgos sin techo.
 test('el tope de gasto viaja por defecto con el valor medido', () => {
   const args = argumentosDelAgente('hola')
   assert.equal(args[args.indexOf(BUDGET_FLAG) + 1], String(DEFAULT_PER_RUN))
@@ -40,19 +39,22 @@ test('el prompt sigue justo despues de -p, en modo plan', () => {
   assert.equal(args[args.indexOf('--permission-mode') + 1], 'plan')
 })
 
-// El CRITICAL 351abcd1 en esta sede: sin el par, el CLI carga el
-// `.claude/settings.json` del repo auditado y sus hooks corren FUERA de la caja.
-test('sin confianza, SOLO las fuentes del operador: los settings del repo no cargan', () => {
+// CRITICAL 351abcd1: sin el par, los hooks del repo auditado corren FUERA de la caja.
+// 'plan' no quita Bash: solo --disallowedTools lo impide (lo-que-se-le-quita.test.ts).
+const denegadas = (a: string[]): string[] => a.slice(a.indexOf('--disallowedTools') + 1, a.indexOf('--strict-mcp-config')) // prettier-ignore
+test('sin confianza, SOLO las fuentes del operador, y sin Bash ni red', () => {
   const args = argumentosDelAgente('hola')
   assert.equal(args[args.indexOf('--setting-sources') + 1], 'user')
+  assert.deepEqual(denegadas(args), ['Bash', 'WebSearch', 'WebFetch'])
 })
 
-test('con confianza, las de proyecto cargan A PROPOSITO: el par no viaja', () => {
-  assert.ok(!argumentosDelAgente('hola', DEFAULT_PER_RUN, true).includes('--setting-sources'))
+test('con confianza, las de proyecto cargan A PROPOSITO, y Bash sigue denegado', () => {
+  const args = argumentosDelAgente('hola', DEFAULT_PER_RUN, true)
+  assert.ok(!args.includes('--setting-sources'))
+  assert.deepEqual(denegadas(args), ['Bash'])
 })
 
-// El cerco MCP (medir-deriva.test.ts): el flag estricto sin --mcp-config cierra
-// el conjunto a vacio, para que el hijo no monte los servidores del operador.
+// El cerco MCP (medir-deriva.test.ts): el flag estricto sin --mcp-config cierra el conjunto a vacio.
 test('cierra el conjunto MCP: --strict-mcp-config viaja y sin servidor alguno', () => {
   const args = argumentosDelAgente('hola')
   assert.ok(args.includes('--strict-mcp-config'))
