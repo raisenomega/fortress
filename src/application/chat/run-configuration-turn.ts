@@ -1,4 +1,5 @@
 import type { CodeAgent } from '@domain/chat/code-agent'
+import { redactSecrets } from '@domain/chat/tool-detail'
 import type { Project } from '@domain/project/project'
 import { err, ok, type Result } from '@domain/shared/result'
 import type { AppContext } from '../context'
@@ -30,7 +31,10 @@ export async function runConfigurationTurn(
   const history = getHistory(context, project.id)
   const reply = await replyFromConfiguration({ codeAgent, project, history, onChunk })
 
-  const stored = persistTurn(context, project.id, CONFIG_META, 'assistant', reply.text, null)
+  // Esta rama no pasa por finishTurn: el texto ENTERO se tacha aqui, que es el
+  // unico sitio donde un secreto partido entre trozos vuelve a estar junto.
+  const texto = redactSecrets(reply.text)
+  const stored = persistTurn(context, project.id, CONFIG_META, 'assistant', texto, null)
   if (!stored.ok) return err(stored.error)
 
   return ok(salidaDelTurno(user.value, stored.value, 'claude-code', reply, null, false))
