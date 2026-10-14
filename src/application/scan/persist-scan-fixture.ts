@@ -28,7 +28,12 @@ export function memoria(): FindingMemory[] {
 /** Contexto falso: git dice que SOLO tocado.ts cambio — dato que ya no extingue. */
 export function fixture(saved: Guardado): AppContext {
   return {
-    fileHistory: { changedSince: (_p: string, file: string) => Promise.resolve(file === 'tocado.ts'), tocadoPorElArreglo: () => Promise.resolve(false), baseDelFoco: () => Promise.resolve(null), ficherosConMarcadorNacido: () => Promise.resolve([]) }, // prettier-ignore
+    fileHistory: { changedSince: (_p: string, file: string) => Promise.resolve(file === 'tocado.ts') }, // prettier-ignore
+    rutaDelControl: {
+      controlesEnHead: () => Promise.resolve([]),
+      enRuta: () => false,
+      olvidar: () => undefined
+    },
     findings: {
       listMemory: () => memoria(),
       syncFromScan: (_p: string, _s: string, f: readonly unknown[]): void => void (saved.sincronizados = f.length), // prettier-ignore

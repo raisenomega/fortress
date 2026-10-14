@@ -7,6 +7,7 @@ import { createSafeStorageApiKeyStore } from '../security/api-key-store'
 import { getDatabase } from './database'
 import { writeScan } from '../cognition/write-cognition-log'
 import { createGitFileHistory } from '../git/file-history'
+import { createRutaDelControl } from '../project/ruta-del-control-git'
 import { headSha } from '../git/head-sha'
 import { isAncestor } from '../git/is-ancestor'
 import { createFsProbe } from '../omega/fs-probe'
@@ -48,9 +49,8 @@ export function getAppContext(): AppContext {
     esRepoPropio: isFortressRepo, // ADR-107
     barrerasDeclaradas: barrerasDeclaradasDelProyecto,
     findings: createSqliteFindingRepository(db),
-    fileHistory: createGitFileHistory(),
-    scans: createSqliteScanHistoryRepository(db),
-    qualityHistory: createSqliteQualityHistoryRepository(db),
+    fileHistory: createGitFileHistory(), rutaDelControl: createRutaDelControl(), // prettier-ignore
+    scans: createSqliteScanHistoryRepository(db), qualityHistory: createSqliteQualityHistoryRepository(db), // prettier-ignore
     repairProposals: propuestas,
     eventLog: createProposalEventLog(createSqliteProposalEventRepository(db), createRepairNotifier(propuestas)), // prettier-ignore
     analystFor: (projectPath, projectId, trusted) => createGraphAnalyst(CLAUDE_BIN, projectPath, projectId, trusted), // prettier-ignore

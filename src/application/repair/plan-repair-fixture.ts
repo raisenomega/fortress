@@ -66,7 +66,7 @@ export function bench(opts: Opciones): Bench {
       study: (t: unknown, atendidas: readonly string[]) => (memoria.push(atendidas), analyst.study(t as never, atendidas)) // prettier-ignore
     }),
     headSha: () => (opts.sha === undefined ? 'abc1234' : opts.sha), esAncestro: () => opts.mergeConfirmado ?? false, // prettier-ignore
-    fileHistory: { tocadoPorElArreglo: () => Promise.resolve(opts.tocado ?? false), baseDelFoco: () => Promise.resolve(opts.baseFoco ?? null), ficherosConMarcadorNacido: () => Promise.resolve(opts.nacidos ?? []) }, // prettier-ignore
+    rutaDelControl: { controlesEnHead: () => Promise.resolve(opts.controles ?? []), enRuta: (_p: string, _a: string, f: string) => (opts.enRuta ? opts.enRuta(f) : true), olvidar: () => undefined }, // prettier-ignore
     fortressConfig: () => opts.cerco ?? { kind: 'not-present' }, huellaDeConfig: () => 'none', esRepoPropio: () => opts.esRepoPropio ?? true, // prettier-ignore
     barrerasDeclaradas: () => SIN_BARRERAS
   } as unknown as AppContext
