@@ -17,12 +17,14 @@ describe('la cura conserva lo que el Drenaje usa (ADR-107)', () => {
     expect(main).not.toContain('bindLoopWindow')
   })
 
-  it('el Drenaje sigue leyendo sus DOS frenos duros', () => {
-    const handler = fuente('src/infrastructure/ipc/repair-drain-handler.ts')
-
-    expect(handler).toContain('readLoopBudget')
-    expect(handler).toContain('budget.maxCycles')
-    expect(handler).toContain('budget.costCapUsd')
+  it('el Drenaje sigue leyendo sus DOS frenos duros (en el helper compartido)', () => {
+    // Los frenos viven en UN solo sitio (`drenaje-deps`) que el handler Y el runner
+    // headless llaman: una sola fuente para que ningun disparador se salte uno.
+    const deps = fuente('src/infrastructure/repair/drenaje-deps.ts')
+    expect(deps).toContain('readLoopBudget')
+    expect(deps).toContain('budget.maxCycles')
+    expect(deps).toContain('budget.costCapUsd')
+    expect(fuente('src/infrastructure/ipc/repair-drain-handler.ts')).toContain('construirDepsDelDrenaje') // prettier-ignore
   })
 
   /**
