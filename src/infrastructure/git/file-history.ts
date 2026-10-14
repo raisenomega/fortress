@@ -1,6 +1,5 @@
 import { execFile } from 'child_process'
 import { SIN_HOOKS } from '../sandbox/git-sin-hooks'
-import { baseDelFocoGit, ficherosConMarcadorNacidoGit } from './base-del-foco-git'
 import { gitEnv } from './git-env'
 import type { FileHistory } from '@domain/project/file-history'
 
@@ -34,21 +33,7 @@ function lastTouch(cwd: string, file: string): Promise<string> {
   })
 }
 
-/**
- * Ficheros que cambiaron entre `desdeSha` y el arbol de hoy (staged y sin
- * stagear), o `null` si git falla. `diff <sha>` —sin `..`— compara la revision
- * contra el arbol, asi que ve el arreglo este committeado o no. `--` separa ruta.
- */
-function diffDesde(cwd: string, file: string, desdeSha: string): Promise<string | null> {
-  return new Promise((resolve) => {
-    const args = ['diff', '--name-only', desdeSha, '--', file]
-    execFile('git', [...SIN_HOOKS, ...args], { cwd, env: ENV, timeout: TIMEOUT_MS }, (error, out) => {
-      resolve(error ? null : out.trim())
-    })
-  })
-}
-
-/** Adaptador de git para la segunda prueba de la extincion. */
+/** Adaptador de git para la marca de MITIGADO (`conservar-mitigado`). */
 export function createGitFileHistory(): FileHistory {
   return {
     changedSince: async (projectPath, file, since) => {
@@ -62,14 +47,6 @@ export function createGitFileHistory(): FileHistory {
       // Cualquier NaN (sin commits, fecha ilegible) cae a false por la
       // comparacion: ante la duda, el hallazgo se conserva.
       return tocado > desde
-    },
-    tocadoPorElArreglo: async (projectPath, file, desdeSha) => {
-      if (file.trim() === '' || desdeSha.trim() === '') return false
-      const salida = await diffDesde(projectPath, file, desdeSha)
-      // null (git fallo / no es repo) → false; salida vacia (no lo toco) → false.
-      return salida !== null && salida !== ''
-    },
-    baseDelFoco: (projectPath, findingId) => baseDelFocoGit(projectPath, findingId),
-    ficherosConMarcadorNacido: (p, f, m) => ficherosConMarcadorNacidoGit(p, f, m)
+    }
   }
 }

@@ -56,15 +56,15 @@ export interface Opciones {
   /** El texto del fichero del hallazgo tal como lo lee la sonda. `null` imita el
    *  fichero que no se pudo leer, que NO es prueba de que el defecto se fuera. */
   readonly contenido?: string | null
-  /** Lo que `fileHistory.tocadoPorElArreglo` devuelve: si el arreglo del turno
-   *  toco el fichero citado en `evidencia.file`. Por defecto false (ADR-087 enm.). */
-  readonly tocado?: boolean
-  /** Lo que `fileHistory.baseDelFoco` devuelve: la base del trabajo enfocado, o
-   *  `null` para caer a la base del turno (HEAD). Por defecto null (INC-A). */
-  readonly baseFoco?: string | null
-  /** Lo que `fileHistory.ficherosConMarcadorNacido` devuelve: los ficheros del
-   *  foco cuyas adiciones traen el marcador. Por defecto [] (INC-B). */
-  readonly nacidos?: readonly string[]
+  /** Contenido POR FICHERO que lee la sonda: para probar que el cierre mira el
+   *  CONTROL (un hermano), no el ancla. Tiene prioridad sobre `contenido`. */
+  readonly contenidoDe?: (file: string) => string | null
+  /** Lo que `rutaDelControl.controlesEnHead` devuelve: los controles presentes en
+   *  HEAD y atribuidos (pickaxe) que casan el marcador. Por defecto []. */
+  readonly controles?: readonly string[]
+  /** Que ficheros considera `rutaDelControl.enRuta` conectados al ancla por
+   *  imports. Por defecto TODOS (true): quien no prueba la ruta no la ejercita. */
+  readonly enRuta?: (file: string) => boolean
   /** true: una propuesta MERGEADO cuyo commit GIT confirma integrado (evento con
    *  commit + `esAncestro` verdadero). Por defecto false: MERGEADO sin prueba. */
   readonly mergeConfirmado?: boolean

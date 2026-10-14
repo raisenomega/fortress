@@ -1,24 +1,27 @@
-import type { Analysis } from '@domain/repair/analysis'
 import type { AppContext } from '../context'
-import type { Project } from '@domain/project/project'
 import type { Resolucion } from './fichero-a-probar'
 
 /**
- * Inferencia determinista (P2): el analista OMITIO `evidencia.file` y el marcador
- * 'presente' no esta en el ancla. Se busca en las ADICIONES del set del foco
- * —lo que NACIO con el arreglo—, no mera presencia, para no cerrar por un marcador
- * que ya estaba. Quita la dependencia de que el LLM rellene el campo, y hace
- * VISIBLE el miss: nunca cae al ancla en silencio.
+ * De los controles presentes+atribuidos (`controlesEnHead`), los que estan EN LA
+ * RUTA del hallazgo —conectados por imports al ancla—. La conectividad es
+ * OBLIGATORIA, no decorativa: el mismo marcador puede aparecer en un fichero de
+ * otra capa (p. ej. `install-graph` lleva el mismo `if (!ejecutaConConfianza)`
+ * que `gate-guards`) y ese NO cuenta porque no esta en el grafo del ancla.
  *
- *   UNO    → ese fichero (verificarMitigado lo prueba y cierra).
- *   NINGUNO → conserva: el marcador no nacio con el arreglo (no se puede probar).
- *   VARIOS  → conserva: ubicacion ambigua (no se adivina cual).
+ *   UNO en ruta → ese fichero (verificarMitigado lo prueba y cierra).
+ *   NINGUNO       → conserva: el control no esta en la ruta (no se puede atribuir).
+ *   VARIOS        → conserva: ubicacion ambigua (no se adivina cual es el de la ruta).
  */
-export async function inferirDelFoco(context: AppContext, project: Project, analysis: Analysis): Promise<Resolucion> {
-  const marcador = analysis.evidencia?.marcador ?? ''
-  const candidatos = await context.fileHistory.ficherosConMarcadorNacido(project.path, analysis.target.id, marcador)
-  const uno = candidatos[0]
-  if (candidatos.length === 1 && uno !== undefined) return { probar: uno }
-  if (candidatos.length === 0) return { conservar: 'reclamacion incompleta: el marcador no nacio con el arreglo' }
-  return { conservar: 'reclamacion incompleta: ubicacion ambigua del marcador' }
+export async function elegirControlEnRuta(
+  context: AppContext,
+  projectPath: string,
+  ancla: string,
+  controles: readonly string[]
+): Promise<Resolucion> {
+  const enRuta = controles.filter((c) => context.rutaDelControl.enRuta(projectPath, ancla, c))
+  const uno = enRuta[0]
+  if (enRuta.length === 1 && uno !== undefined) return { probar: uno }
+  if (enRuta.length === 0)
+    return { conservar: 'reclamacion incompleta: el control no esta en la ruta del hallazgo' }
+  return { conservar: 'reclamacion incompleta: ubicacion ambigua del control en la ruta' }
 }

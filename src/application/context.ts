@@ -10,6 +10,7 @@ import type { CapabilityEpisodeRepository } from '@domain/system/capability-epis
 import type { SelfObservationRepository } from '@domain/system/self-observation-repository'
 import type { BarrerasDeclaradas } from '@domain/project/barreras-declaradas'
 import type { FileHistory } from '@domain/project/file-history'
+import type { RutaDelControl } from '@domain/project/ruta-del-control'
 import type { FindingRepository } from '@domain/project/finding-repository'
 import type { CorpusReader } from '@domain/project/corpus-reader'
 import type { LecturasDelDisco } from './lecturas-del-disco'
@@ -41,6 +42,7 @@ export interface AppContext extends EscritoresDeFichero, Telemetria, LecturasDel
   readonly findings: FindingRepository
   /** git: si el archivo de un hallazgo cambio desde que se detecto. */
   readonly fileHistory: FileHistory
+  readonly rutaDelControl: RutaDelControl // donde vive el control de un hallazgo, por conectividad de imports (verify P1/P2); `estaProbado` sigue juzgando
   readonly scans: ScanHistoryRepository
   readonly qualityHistory: QualityHistoryRepository
   /** Expediente del motor de reparacion disciplinado (propuestas C1->C2->C3). */
@@ -51,9 +53,7 @@ export interface AppContext extends EscritoresDeFichero, Telemetria, LecturasDel
   readonly analystFor: (projectPath: string, projectId: string, trusted: boolean) => Analyst
   /** SHA de HEAD del repo del proyecto, o null si no hay git. */
   readonly headSha: (projectPath: string) => string | null
-  /** git: si el commit (p.ej. el GENERATE de un fix) ya esta contenido en HEAD
-   *  del repo — la prueba de que un MERGEADO de verdad entro, no un contador. */
-  readonly esAncestro: (projectPath: string, commitSha: string) => boolean
+  readonly esAncestro: (projectPath: string, commitSha: string) => boolean // ¿el commit (p.ej. GENERATE del fix) ya esta en HEAD? la prueba de un MERGEADO real, no un contador
   /** Estado del indice del grafo por proyecto (reindexado automatico). */
   readonly graphState: GraphStateRepository
   readonly chat: ChatRepository

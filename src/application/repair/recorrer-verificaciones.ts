@@ -36,6 +36,9 @@ export async function recorrerVerificaciones(
   ids: readonly string[],
   deps: VerificacionMasivaDeps
 ): Promise<ResultadoVerificacionMasiva> {
+  // El grafo de imports se cachea POR CORRIDA: se vacia aqui, una vez, para no
+  // arrastrar un arbol viejo entre corridas ni reconstruirlo por hallazgo.
+  context.rutaDelControl.olvidar()
   let reparto: RepartoDeVerificacion = NADA_VERIFICADO
   const fin = (f: FinDeVerificacion, detalle?: string): ResultadoVerificacionMasiva =>
     detalle === undefined

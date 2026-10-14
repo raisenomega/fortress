@@ -17,8 +17,9 @@ export type Db = Database.Database
 
 let instance: Db | null = null
 
-/** La base vive en userData: fuera del bundle y del repositorio. */
-function databasePath(): string {
+/** La base vive en userData: fuera del bundle y del repositorio. Exportada para
+ *  que la traza del apagado sepa a que `-wal` mirar (`traza-apagado`). */
+export function databasePath(): string {
   return join(app.getPath('userData'), 'fortress.db')
 }
 

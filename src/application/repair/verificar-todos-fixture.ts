@@ -22,6 +22,8 @@ export function banco(
 ): AppContext {
   return {
     findings: { listMemory: () => [...findings] },
+    // `recorrerVerificaciones` vacia el grafo de imports al arrancar la corrida.
+    rutaDelControl: { olvidar: () => undefined },
     // Lo lee `motivoDeLaOmision` para repartir los que no se verificaron: sin
     // esto, un `null` en el barrido no sabria a que casilla va.
     repairProposals: { findLiveFindingIds: () => [...conPropuestaViva] }

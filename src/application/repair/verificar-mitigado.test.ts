@@ -45,31 +45,4 @@ describe('verificar un mitigado no pasa por la lista de propuestas', () => {
 
     expect(banco.observadas).toHaveLength(1)
   })
-
-  /** INC-3/A: el fix de un append-only cierra en OTRO fichero; la puerta decide. */
-  const CITA = {
-    ...base,
-    verdictStatus: 'OBSOLETO' as const,
-    evidencia: { marcador: 'drop policy', forma: 'presente' as const, file: 'supabase/migrations/nueva.sql' },
-    contenido: 'drop policy "anon upload" on storage.objects'
-  }
-
-  it('(a) cita un fichero que el arreglo SI toco + presente → EXTINCT', async () => {
-    const { banco } = await corrida({ ...CITA, tocado: true })
-    expect(banco.extinguidos.map((e) => e.ids)).toEqual([['f1']])
-  })
-
-  it('(b) CLAVE: cita un fichero AJENO (el fix NO lo toco) → MITIGATED, no EXTINCT', async () => {
-    // Mutar "quitar la puerta" (pasar evidencia.file directo a extinguir) cerraria
-    // este ajeno —el marcador cuadra en el contenido— y este test moriria.
-    const { banco } = await corrida({ ...CITA, tocado: false })
-    expect(banco.extinguidos).toEqual([])
-    expect(banco.mitigados.length).toBeGreaterThan(0)
-  })
-
-  it('INC-A: fix committeado en un turno ANTERIOR (baseDelFoco) + tocado → EXTINCT', async () => {
-    // DROP committeado turnos atras; sha:null = el turno no lo veria → solo cierra con baseDelFoco.
-    const { banco } = await corrida({ ...CITA, baseFoco: 'base-del-foco', tocado: true, sha: null })
-    expect(banco.extinguidos.map((e) => e.ids)).toEqual([['f1']])
-  })
 })

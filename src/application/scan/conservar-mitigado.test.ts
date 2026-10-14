@@ -19,10 +19,7 @@ const hallazgo = (extra: Partial<FindingMemory> = {}): FindingMemory =>
  *  responde false. Aqui ese false CONSERVA la marca; en la extincion, el mismo
  *  false impide cerrar. Lados opuestos, los dos conservadores. */
 const git = (cambio: boolean): FileHistory => ({
-  changedSince: () => Promise.resolve(cambio),
-  tocadoPorElArreglo: () => Promise.resolve(false),
-  baseDelFoco: () => Promise.resolve(null),
-  ficherosConMarcadorNacido: () => Promise.resolve([])
+  changedSince: () => Promise.resolve(cambio)
 })
 
 const decidir = (f: FindingMemory, cambio: boolean): Promise<ReadonlySet<string>> =>

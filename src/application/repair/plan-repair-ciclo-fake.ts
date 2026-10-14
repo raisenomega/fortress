@@ -27,6 +27,6 @@ export function cicloDeVida(
       anotarVerificacion: (id: string, note: string): boolean => (anotados.push({ id, note }), true), // prettier-ignore
       devolverALaCola: (id: string, note: string): boolean => (devueltos.push({ id, note }), true)
     },
-    filesystemProbe: { contenido: () => (opts.contenido === undefined ? '' : opts.contenido) }
+    filesystemProbe: { contenido: (_p: string, file: string) => (opts.contenidoDe ? opts.contenidoDe(file) : (opts.contenido ?? '')) } // prettier-ignore
   }
 }
