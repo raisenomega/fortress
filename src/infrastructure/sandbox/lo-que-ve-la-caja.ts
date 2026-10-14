@@ -54,3 +54,20 @@ export function gitComunDe(cwd: string): readonly string[] {
     return []
   }
 }
+
+/**
+ * El `.git` de CARPETA de un repo DIRECTO (no un worktree): vive DENTRO del
+ * proyecto, que la caja monta escribible, asi que sus superficies de ejecucion
+ * (hooks/, config) son plantables igual que las del comun. `gitComunDe` solo
+ * cubre el worktree (su `.git` es un fichero); esto cubre el repo a secas que
+ * la sonda o el gate auditan en su propia carpeta. Vacio si no hay `.git` de
+ * carpeta —un worktree da un `.git` FICHERO, que `isDirectory()` descarta—.
+ */
+export function gitDirectoDe(proyecto: string): readonly string[] {
+  const dir = join(proyecto, '.git')
+  try {
+    return statSync(dir).isDirectory() ? [dir] : []
+  } catch {
+    return []
+  }
+}

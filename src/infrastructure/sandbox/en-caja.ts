@@ -2,8 +2,9 @@ import { homedir } from 'node:os'
 import { err, ok, type Result } from '@domain/shared/result'
 import { flagsDeBwrap } from '@domain/sandbox/flags-de-bwrap'
 import { dentroDe } from '@domain/sandbox/ruta-de-la-caja'
+import { sinEjecucionGit } from '@domain/sandbox/sin-ejecucion-git'
 import { ARTEFACTOS_PUBLICOS } from './artefactos-publicos'
-import { directorioDeNode, gitComunDe, raicesDelSistema } from './lo-que-ve-la-caja'
+import { directorioDeNode, gitComunDe, gitDirectoDe, raicesDelSistema } from './lo-que-ve-la-caja'
 import { conPuente } from './puente-del-proxy'
 import { BWRAP, cajaDisponible } from './sonda-de-bwrap'
 
@@ -48,17 +49,21 @@ export function enCaja(
   // instalacion, o el binario de un test— entra el solo, en solo lectura.
   const propio =
     bin.startsWith('/') && ![node, proyecto, '/usr'].some((r) => dentroDe(r, bin)) ? [bin] : []
+  const comun = gitComunDe(cwd)
   const flags = flagsDeBwrap({
     proyecto,
     cwd,
     home: homedir(),
     sistema: raicesDelSistema(),
     soloLectura: [node, ...propio, ...ARTEFACTOS_PUBLICOS].filter((r) => !dentroDe(proyecto, r)),
-    escritura: [...gitComunDe(cwd), ...escritura].filter((r) => r !== proyecto),
+    escritura: [...comun, ...escritura].filter((r) => r !== proyecto),
     socketDelProxy
   })
+  // El `.git` escribible queda abierto por `escritura`/`proyecto`; ENCIMA se le
+  // recapan hooks/ config info/ en solo lectura (tras `--chdir`, antes de `--`).
+  const sinEjec = sinEjecucionGit([...comun, ...gitDirectoDe(proyecto)])
   const comando = socketDelProxy === null ? [bin, ...args] : conPuente(bin, args)
   return flags.ok
-    ? ok({ bin: BWRAP, args: [...flags.value, '--', ...comando] })
+    ? ok({ bin: BWRAP, args: [...flags.value, ...sinEjec, '--', ...comando] })
     : err(`sin-caja:${flags.error}`)
 }
