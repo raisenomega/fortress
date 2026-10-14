@@ -52,3 +52,18 @@ describe('retryRepair (I4.2) — guardas', () => {
     expect(b.inserted).toHaveLength(0)
   })
 })
+
+describe('retryRepair end-to-end: un run-vacío NO queda como ilegible', () => {
+  it('el reintento cuyo analisis es run-vacío cierra con el motivo HONESTO', async () => {
+    const b = retryBench({ verdictStatus: 'RUN_VACIO' })
+    const r = await retryRepair(b.context, OLD.id)
+    expect(r.ok).toBe(true)
+    // El veredicto se persiste por `update` (el bench lo guarda en patches).
+    const patch = b.patches.at(-1)
+    expect(patch?.analysisVerdict).toBe('RUN_VACIO')
+    expect(patch?.state).toBe('RECHAZADO')
+    // La verdad en el parte: "el modelo no corrio", NUNCA "ilegible".
+    expect(patch?.analysisReason).toContain('run_vacio')
+    expect(patch?.analysisReason).not.toContain('ilegible')
+  })
+})

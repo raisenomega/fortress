@@ -23,10 +23,9 @@ export type CasillaDeBaja =
   | 'sinClasificar'
 
 /**
- * La tabla, EXHAUSTIVA sobre `MotivoDeBaja`. Anadir un rechazo al vocabulario
- * sin darle casilla no compila, que es la unica forma de que uno nuevo no se
- * cuele: el `else` que esto sustituye se lo habria tragado en silencio, y por eso
- * `turnos_agotados` llevaba meses anunciandose como gate rojo.
+ * La tabla, EXHAUSTIVA sobre `MotivoDeBaja`. Anadir un rechazo sin casilla no
+ * compila — la unica forma de que uno nuevo no se cuele (el `else` que esto
+ * sustituye se lo tragaba: `turnos_agotados` salio meses como gate rojo).
  */
 const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   omega_vetado: 'vetadas',
@@ -52,6 +51,7 @@ const CASILLA: Readonly<Record<MotivoDeBaja, CasillaDeBaja>> = {
   invalid_state: 'porDefectoInterno',
   omega_response_invalid: 'porDefectoInterno',
   analisis_ilegible: 'porDefectoInterno',
+  run_vacio: 'porDefectoInterno', // el modelo no corrio; no llega al recuento, casilla por exhaustividad
   generator_error: 'porDefectoInterno',
   // No murieron por su culpa: otra las reemplazo, se reclamaron al arrancar o se detuvieron.
   superseded: 'superadas',

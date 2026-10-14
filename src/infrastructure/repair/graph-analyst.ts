@@ -10,8 +10,9 @@ import { readCognitionLog } from '../cognition/read-cognition-log'
 import type { Analyst } from '@domain/repair/analysis'
 import { noSeDejoLeer } from '@domain/repair/analysis-ilegible'
 import { toAnalysis, type RunOut } from './parse-analysis'
-import { salidaDelAnalista } from './salida-del-analista'
+import { esRunVacio, salidaDelAnalista } from './salida-del-analista'
 import { sinModeloAsignado, sinRespuesta } from '@domain/repair/falla-del-proveedor'
+import { sinSalida } from '@domain/repair/run-vacio'
 import { juzgarModelo } from '@domain/agent/guardia-del-modelo'
 import { MODELO_POR_ROL } from '@domain/agent/modelo-por-rol'
 import { relojDeCorrida } from './reloj-de-corrida'
@@ -61,7 +62,7 @@ export function createGraphAnalyst(claudeBin: string, projectPath: string, proje
       const out = await run(claudeBin, projectPath, prompt, projectId, trusted)
       // El proveedor y el modelo se miran ANTES de leer el texto como analisis.
       const juicio = juzgarModelo(MODELO_POR_ROL.analista, out.modelos ?? [])
-      const analysis = out.proveedor !== undefined ? sinRespuesta(target, out.proveedor) : juicio.veredicto === 'falla' ? sinModeloAsignado(target, juicio.motivo ?? '') : toAnalysis(target, out) // prettier-ignore
+      const analysis = out.proveedor !== undefined ? sinRespuesta(target, out.proveedor) : juicio.veredicto === 'falla' ? sinModeloAsignado(target, juicio.motivo ?? '') : esRunVacio(out) ? sinSalida(target) : toAnalysis(target, out) // prettier-ignore
       return {
         analysis,
         // El crudo ENTERO solo cuando no se dejo leer: es lo unico con lo que

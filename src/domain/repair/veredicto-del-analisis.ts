@@ -2,6 +2,7 @@ import { isActionable, type Analysis } from './analysis'
 import { ILEGIBLE, noSeDejoLeer } from './analysis-ilegible'
 import { NO_ARRANCO, noArranco } from './cli-no-arranco'
 import { MODELO_FUERA, PROVEEDOR, fallaDelProveedor, modeloFuera } from './falla-del-proveedor'
+import { runVacio } from './run-vacio'
 import type { AnalysisVerdict, ProposalState } from './proposal'
 
 export interface Veredicto {
@@ -52,6 +53,12 @@ export function veredictoDelAnalisis(analysis: Analysis): Veredicto {
   }
   if (modeloFuera(analysis)) {
     return { verdict: 'MODELO', state: 'RECHAZADO', reason: `modelo_no_asignado: ${analysis.risk.slice(MODELO_FUERA.length)}` } // prettier-ignore
+  }
+  // El modelo no corrio: transitorio y reintentable, como el ilegible, pero con
+  // el motivo HONESTO — "ilegible" supone respuesta, y aqui no la hubo. Antes de
+  // `noSeDejoLeer` porque "" tambien parece ilegible a quien solo mira el texto.
+  if (runVacio(analysis)) {
+    return { verdict: 'RUN_VACIO', state: 'RECHAZADO', reason: 'run_vacio: el modelo no corrio' }
   }
   if (noSeDejoLeer(analysis)) {
     const muestra = analysis.risk.slice(ILEGIBLE.length)

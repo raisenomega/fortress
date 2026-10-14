@@ -19,3 +19,13 @@ export function salidaDelAnalista(out: string): RunOut {
     return { result: out }
   }
 }
+
+/**
+ * El modelo NO corrio: salida vacia, sin factura y sin modelo — y el proceso SI
+ * existio (eso es `noArranco`, que gana). No es ILEGIBLE: ILEGIBLE supone una
+ * respuesta que no se dejo leer; aqui no hubo respuesta. El dato ya viaja en el
+ * RunOut (usage ausente, modelos vacio); solo faltaba mirarlo antes de leer "".
+ */
+export function esRunVacio(out: RunOut): boolean {
+  return out.result === '' && out.usage === undefined && (out.modelos?.length ?? 0) === 0 && out.noArranco !== true // prettier-ignore
+}

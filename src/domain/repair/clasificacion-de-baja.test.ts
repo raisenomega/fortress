@@ -26,6 +26,7 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
   invalid_state: 'porDefectoInterno',
   omega_response_invalid: 'porDefectoInterno',
   analisis_ilegible: 'porDefectoInterno',
+  run_vacio: 'porDefectoInterno',
   generator_error: 'porDefectoInterno',
   superseded: 'superadas',
   orphan_before_generate: 'superadas',
@@ -33,7 +34,7 @@ const ESPERADO: Readonly<Record<string, CasillaDeBaja>> = {
 }
 
 describe('cada motivo tiene su casilla, y ninguno cae en un cajon', () => {
-  it('los 24 que llegan al recuento estan mapeados uno a uno', () => {
+  it('los 25 del vocabulario de bajas estan mapeados uno a uno', () => {
     for (const [motivo, casilla] of Object.entries(ESPERADO)) {
       expect(casillaDeBaja(motivo), motivo).toBe(casilla)
     }
