@@ -15,6 +15,7 @@ const r = (over: Partial<DrenajeResultado> = {}): DrenajeResultado => ({
   porDefectoInterno: 0,
   superadas: 0,
   sinClasificar: 0,
+  colisiones: [],
   ...over
 })
 

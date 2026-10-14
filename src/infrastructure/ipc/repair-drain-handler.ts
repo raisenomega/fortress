@@ -19,7 +19,7 @@ import { IPC } from './channels'
  */
 /** Ni una vuelta: el drenaje ni llego a arrancar. */
 // prettier-ignore
-const NADA_HECHO = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0, porDefectoInterno: 0, superadas: 0, sinClasificar: 0 }
+const NADA_HECHO = { trabajadas: 0, acumuladas: 0, vetadas: 0, porPresupuesto: 0, porTimeout: 0, porCorrea: 0, porLimitePropio: 0, porEntornoDelProyecto: 0, porDefectoInterno: 0, superadas: 0, sinClasificar: 0, colisiones: [] }
 
 export function registerDrainHandlers(): void {
   ipcMain.handle(IPC.repairDrain, async (_event, projectId: string): Promise<DrenajeResultado> => {

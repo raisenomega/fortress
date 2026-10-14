@@ -1,3 +1,4 @@
+import type { ColisionEnLaCorrida } from '@domain/repair/orden-de-firma'
 import type { MotorChainDeps } from './run-motor-chain'
 
 /**
@@ -44,6 +45,9 @@ export interface DrenajeResultado {
   /** Motivo fuera del vocabulario. Se anuncia a proposito: un desenlace que no
    *  sabemos nombrar tiene que verse, no diluirse en la casilla de al lado. */
   readonly sinClasificar: number
+  /** Propuestas que pisaron un fichero ya tocado en la corrida: senal pura — no
+   *  cambia destino ni contadores. Vacia cuando nadie choco. */
+  readonly colisiones: readonly ColisionEnLaCorrida[]
   readonly detalle?: string
 }
 

@@ -46,3 +46,29 @@ export function ordenDeFirma(tanda: readonly PropuestaDeTanda[]): GuiaDeOrden {
   const orden = [...todos.flat().filter((id) => !fuera.has(id)), ...dependencias]
   return { orden, grupos: todos.filter((g) => g.length > 1), dependencias }
 }
+
+/**
+ * Una propuesta de una corrida del drenaje que piso un fichero que otra de la
+ * MISMA corrida ya habia tocado. Senal pura para el parte: no cambia el destino
+ * de nadie ni los contadores. `hallazgo` es opcional porque el drenaje solo
+ * tiene a mano el id de la propuesta.
+ */
+export interface ColisionEnLaCorrida {
+  readonly proposalId: string
+  readonly hallazgo?: string
+  readonly ficheros: readonly string[]
+  readonly yaTocadosPor: readonly string[]
+}
+
+/**
+ * Los ficheros que esta propuesta comparte con lo ya tocado en la corrida —
+ * vacio = no pisa a nadie. La MISMA regla que agrupa la tanda (`ficherosEnComun`)
+ * a nombre propio, para que el drenaje deje de ser mudo. Es una SENAL, no un
+ * juicio: quien adjudica el choque sigue siendo `medirLaTanda`/la firma.
+ */
+export function chocaEnLaCorrida(
+  ficherosDeLaPropuesta: readonly string[],
+  ficherosYaTocados: readonly string[]
+): readonly string[] {
+  return ficherosEnComun(ficherosDeLaPropuesta, ficherosYaTocados)
+}
