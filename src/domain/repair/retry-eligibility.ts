@@ -29,7 +29,8 @@ export const RETRYABLE_REJECTION_REASONS = [
   // un fix de verdad. El tope de dos intentos por causa pone el limite.
   'solo_pruebas',
   'provider_error',
-  'analisis_ilegible'
+  'analisis_ilegible',
+  'run_vacio'
 ] as const
 
 /**

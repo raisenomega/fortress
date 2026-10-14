@@ -37,14 +37,12 @@ export const REJECTION_REASONS = [
   'cli_no_arranco',
   /** El modelo que CORRIO no es el asignado: Fable o por debajo (ADR-078, enmienda). Corta la tanda. */
   'modelo_no_asignado',
-  /**
-   * HISTORICO: ya no lo emite nadie. Cubrio timeout, spawn fallido y transicion
-   * invalida; se separaron en `generator_timeout`, `cli_no_arranco` e
-   * `invalid_state`. Se conserva para que las filas ya escritas se lean.
-   */
+  /** HISTORICO: ya no lo emite nadie; cubrio timeout/spawn/transicion, hoy en
+   *  `generator_timeout`/`cli_no_arranco`/`invalid_state`. Vive para leer filas viejas. */
   'generator_error',
   /** El generador agoto su techo de turnos sin terminar. No es presupuesto. */ 'turnos_agotados',
   /** El analista corrio pero su salida no se dejo leer. No es obsolescencia. */ 'analisis_ilegible',
+  /** El modelo NO corrio: salida vacia, sin factura. Transitorio, no ilegible. */ 'run_vacio',
   'no_diff_produced',
   /** ADR-102: el arreglo declarado no cabe en la correa; no se reintenta, la pausa la levanta el terreno. */
   'arreglo_fuera_de_correa',
