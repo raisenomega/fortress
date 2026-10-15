@@ -8,6 +8,7 @@ import { restoreKeepAwake } from '@infrastructure/system/restore-keep-awake'
 import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
 import { registerIpcHandlers } from '@infrastructure/ipc/register-handlers'
 import { alSalir } from '@infrastructure/system/al-salir'
+import { arranqueHeadlessSiPedido } from './arranque-headless'
 import { augmentPath } from '@infrastructure/system/augment-path'
 import { capturarFallo, instalarEmbudoDeArranque } from '@infrastructure/system/embudo-de-arranque'
 import { sumideroDeFallos } from '@infrastructure/system/sumidero-de-fallos'
@@ -38,8 +39,10 @@ app
   .whenReady()
   .then(() => {
     electronApp.setAppUserModelId(APP_USER_MODEL_ID)
-    app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
+    // --headless sobre la FUENTE (ver `arranque-headless`): drena sin montar ventana.
+    if (arranqueHeadlessSiPedido(process.argv)) return
 
+    app.on('browser-window-created', (_, window) => optimizer.watchWindowShortcuts(window))
     registerIpcHandlers()
     const mainWindow = createMainWindow()
     bindGenesisWindow(mainWindow)
@@ -56,19 +59,16 @@ app
       if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
     })
   })
-  // ENCADENADO a ese mismo `.then`, no en una cadena nueva: si registerIpcHandlers
-  // o las migraciones lanzan, la promesa se rechazaba y la app quedaba a medio
-  // arrancar sin decirlo. Colgarlo de una llamada APARTE compila igual y no
-  // serviria: seria otra promesa, y esa no se rechaza nunca.
+  // ENCADENADO a ese `.then` (no una cadena nueva): si registerIpcHandlers o las
+  // migraciones lanzan, colgar el catch aparte seria otra promesa que no se rechaza.
   .catch((error) => capturarFallo(sumideroDeFallos, 'el ensamblado de la app', error))
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-// Tras alSalir —sincrono: mata los hijos YA y cierra la base (WAL checkpoint)—
-// se FUERZA la salida: si un pipe de hijo quedara vivo, el proceso termina igual
-// y el WAL ya esta consistente (PASO 153, "la X no mataba todo").
+// Tras alSalir —mata los hijos YA y cierra la base con WAL checkpoint— se FUERZA
+// la salida: aunque un pipe de hijo quede vivo, el WAL ya esta consistente (PASO 153).
 app.on('will-quit', () => {
   alSalir()
   app.exit(0)
