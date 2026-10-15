@@ -4,6 +4,7 @@ import type { GraphGenerator } from './graph-generator-types'
 import { relojDeCorrida } from './reloj-de-corrida'
 import { desenlaceDelGenerador } from './generator-outcome'
 import { trackChild } from '../claude-code/child-registry'
+import { senalAl } from '../claude-code/kill-signal'
 import { grafoDelTurnoDe, type GrafoDelTurnoPort } from '../graph/grafo-del-turno'
 import { buildEnv } from '../claude-code/build-env'
 import { escribirPrompt } from '../claude-code/prompt-por-stdin'
@@ -37,15 +38,15 @@ export function createGraphGenerator(claudeBin: string, projectId: string, trust
         // que la sesion viva del operador no baja. `null` = sin key propia: se
         // sigue facturando por donde ya se facturaba (login OAuth bajo HOME).
         const env = buildEnv(null)
-        const child = spawn(claudeBin, [...args.value.args], { cwd: worktreePath, env })
+        const child = spawn(claudeBin, [...args.value.args], { cwd: worktreePath, detached: true, env })
         escribirPrompt(child.stdin, args.value.prompt) // ADR-112
-        trackChild(child, projectId)
+        trackChild(child, projectId, 'grupo') // como critico/omega: el claude CLI deja un socat nieto que un kill por PID no alcanza
         let out = ''
         // SIGKILL sin gracia (OMEGA da tres segundos; este EDITA, y esos tres
         // segundos son ediciones). Y sin factura, no con una de ceros: el libro
         // mayor distingue "no la pude leer" de "salio gratis" por ese undefined.
         const timer = setTimeout(() => {
-          child.kill('SIGKILL')
+          senalAl(child, 'SIGKILL', 'grupo') // por grupo: el timeout tambien debe llevarse al nieto socat
           resolve({ ok: false, timedOut: true, error: `timeout tras ${Math.round(timeoutMs / 60000)} min`, runMeta: sinFactura() }) // prettier-ignore
         }, timeoutMs)
         child.stdout.on('data', (d: Buffer) => (out += d.toString()))
