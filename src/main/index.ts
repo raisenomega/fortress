@@ -8,6 +8,7 @@ import { restoreKeepAwake } from '@infrastructure/system/restore-keep-awake'
 import { bindGenesisWindow } from '@infrastructure/genesis/genesis-registry'
 import { registerIpcHandlers } from '@infrastructure/ipc/register-handlers'
 import { alSalir } from '@infrastructure/system/al-salir'
+import { armarWatchdog } from './watchdog-de-salida'
 import { arranqueHeadlessSiPedido } from './arranque-headless'
 import { augmentPath } from '@infrastructure/system/augment-path'
 import { capturarFallo, instalarEmbudoDeArranque } from '@infrastructure/system/embudo-de-arranque'
@@ -59,17 +60,16 @@ app
       if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
     })
   })
-  // ENCADENADO a ese `.then` (no una cadena nueva): si registerIpcHandlers o las
-  // migraciones lanzan, colgar el catch aparte seria otra promesa que no se rechaza.
+  // ENCADENADO al `.then` (no cadena nueva): un catch aparte seria otra promesa sin rechazar.
   .catch((error) => capturarFallo(sumideroDeFallos, 'el ensamblado de la app', error))
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
-
-// Tras alSalir —mata los hijos YA y cierra la base con WAL checkpoint— se FUERZA
-// la salida: aunque un pipe de hijo quede vivo, el WAL ya esta consistente (PASO 153).
+// Tras alSalir (mata hijos + cierra la base con checkpoint WAL, PASO 153) se fuerza la
+// salida; el watchdog NETEA que `app.exit` se estanque (la X) sin tocar el checkpoint.
 app.on('will-quit', () => {
   alSalir()
+  armarWatchdog(0)
   app.exit(0)
 })
