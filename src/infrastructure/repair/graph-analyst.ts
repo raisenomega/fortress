@@ -27,9 +27,9 @@ async function run(bin: string, cwd: string, prompt: Prompt, owner: string, trus
   const args = argsDeLectura(prompt, cwd, grafo.dir, 'analista', trusted)
   if (!args.ok) return (grafo.liberar(), { result: args.error, noArranco: true })
   return new Promise((resolve) => {
-    const child = spawn(bin, [...args.value.args], { cwd, env: buildEnv(null) })
+    const child = spawn(bin, [...args.value.args], { cwd, detached: true, env: buildEnv(null) })
     escribirPrompt(child.stdin, args.value.prompt)
-    trackChild(child, owner)
+    trackChild(child, owner, 'grupo') // como critico/omega: el claude CLI deja un socat nieto que un kill por PID no alcanza
     let out = ''
     child.stdout.on('data', (d: Buffer) => (out += d.toString()))
     child.on('close', () => {
